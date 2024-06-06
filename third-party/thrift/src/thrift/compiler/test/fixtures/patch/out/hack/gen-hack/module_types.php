@@ -3593,6 +3593,11 @@ class MyDataPatchStructInternalDoNotUse implements \IThriftSyncStruct, \IThriftS
             "name" => "MyDataPatchStructInternalDoNotUse",
           )
         ),
+        '\facebook\thrift\annotation\rust\Name' => \facebook\thrift\annotation\rust\Name::fromShape(
+          shape(
+            "name" => "MyDataPatchStructInternalDoNotUse",
+          )
+        ),
         '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>",
@@ -4445,6 +4450,11 @@ class MyDataWithCustomDefaultPatchStructInternalDoNotUse implements \IThriftSync
           )
         ),
         '\facebook\thrift\annotation\python\Name' => \facebook\thrift\annotation\python\Name::fromShape(
+          shape(
+            "name" => "MyDataWithCustomDefaultPatchStructInternalDoNotUse",
+          )
+        ),
+        '\facebook\thrift\annotation\rust\Name' => \facebook\thrift\annotation\rust\Name::fromShape(
           shape(
             "name" => "MyDataWithCustomDefaultPatchStructInternalDoNotUse",
           )
@@ -6576,6 +6586,11 @@ class MyStructPatchStructInternalDoNotUse implements \IThriftSyncStruct, \IThrif
           )
         ),
         '\facebook\thrift\annotation\python\Name' => \facebook\thrift\annotation\python\Name::fromShape(
+          shape(
+            "name" => "MyStructPatchStructInternalDoNotUse",
+          )
+        ),
+        '\facebook\thrift\annotation\rust\Name' => \facebook\thrift\annotation\rust\Name::fromShape(
           shape(
             "name" => "MyStructPatchStructInternalDoNotUse",
           )
@@ -10581,6 +10596,11 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, 
                 "name" => "MyDataWithCustomDefaultPatchStructInternalDoNotUse",
               )
             ),
+            '\facebook\thrift\annotation\rust\Name' => \facebook\thrift\annotation\rust\Name::fromShape(
+              shape(
+                "name" => "MyDataWithCustomDefaultPatchStructInternalDoNotUse",
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>",
@@ -10709,6 +10729,11 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, 
                 "name" => "LateDefStructPatchStructInternalDoNotUse",
               )
             ),
+            '\facebook\thrift\annotation\rust\Name' => \facebook\thrift\annotation\rust\Name::fromShape(
+              shape(
+                "name" => "LateDefStructPatchStructInternalDoNotUse",
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>",
@@ -10732,6 +10757,11 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, 
               )
             ),
             '\facebook\thrift\annotation\python\Name' => \facebook\thrift\annotation\python\Name::fromShape(
+              shape(
+                "name" => "MyDataPatchStructInternalDoNotUse",
+              )
+            ),
+            '\facebook\thrift\annotation\rust\Name' => \facebook\thrift\annotation\rust\Name::fromShape(
               shape(
                 "name" => "MyDataPatchStructInternalDoNotUse",
               )
@@ -10924,6 +10954,11 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, 
                 "name" => "LateDefStructPatchStructInternalDoNotUse",
               )
             ),
+            '\facebook\thrift\annotation\rust\Name' => \facebook\thrift\annotation\rust\Name::fromShape(
+              shape(
+                "name" => "LateDefStructPatchStructInternalDoNotUse",
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>",
@@ -10964,6 +10999,11 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, 
               )
             ),
             '\facebook\thrift\annotation\python\Name' => \facebook\thrift\annotation\python\Name::fromShape(
+              shape(
+                "name" => "MyDataPatchStructInternalDoNotUse",
+              )
+            ),
+            '\facebook\thrift\annotation\rust\Name' => \facebook\thrift\annotation\rust\Name::fromShape(
               shape(
                 "name" => "MyDataPatchStructInternalDoNotUse",
               )
@@ -11152,6 +11192,11 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, 
               )
             ),
             '\facebook\thrift\annotation\python\Name' => \facebook\thrift\annotation\python\Name::fromShape(
+              shape(
+                "name" => "MyDataPatchStructInternalDoNotUse",
+              )
+            ),
+            '\facebook\thrift\annotation\rust\Name' => \facebook\thrift\annotation\rust\Name::fromShape(
               shape(
                 "name" => "MyDataPatchStructInternalDoNotUse",
               )
@@ -13151,6 +13196,11 @@ class LateDefStructPatchStructInternalDoNotUse implements \IThriftSyncStruct, \I
             "name" => "LateDefStructPatchStructInternalDoNotUse",
           )
         ),
+        '\facebook\thrift\annotation\rust\Name' => \facebook\thrift\annotation\rust\Name::fromShape(
+          shape(
+            "name" => "LateDefStructPatchStructInternalDoNotUse",
+          )
+        ),
         '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>",
@@ -13829,6 +13879,11 @@ class RecursivePatchStructInternalDoNotUse implements \IThriftSyncStruct, \IThri
           )
         ),
         '\facebook\thrift\annotation\python\Name' => \facebook\thrift\annotation\python\Name::fromShape(
+          shape(
+            "name" => "RecursivePatchStructInternalDoNotUse",
+          )
+        ),
+        '\facebook\thrift\annotation\rust\Name' => \facebook\thrift\annotation\rust\Name::fromShape(
           shape(
             "name" => "RecursivePatchStructInternalDoNotUse",
           )
@@ -14823,6 +14878,11 @@ class BarPatchStructInternalDoNotUse implements \IThriftSyncStruct, \IThriftStru
             "name" => "BarPatchStructInternalDoNotUse",
           )
         ),
+        '\facebook\thrift\annotation\rust\Name' => \facebook\thrift\annotation\rust\Name::fromShape(
+          shape(
+            "name" => "BarPatchStructInternalDoNotUse",
+          )
+        ),
         '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::BarPatchStruct>",
@@ -15050,6 +15110,11 @@ class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
               )
             ),
             '\facebook\thrift\annotation\python\Name' => \facebook\thrift\annotation\python\Name::fromShape(
+              shape(
+                "name" => "LoopPatchStructInternalDoNotUse",
+              )
+            ),
+            '\facebook\thrift\annotation\rust\Name' => \facebook\thrift\annotation\rust\Name::fromShape(
               shape(
                 "name" => "LoopPatchStructInternalDoNotUse",
               )
@@ -15473,6 +15538,11 @@ class LoopPatchStructInternalDoNotUse implements \IThriftSyncStruct, \IThriftStr
           )
         ),
         '\facebook\thrift\annotation\python\Name' => \facebook\thrift\annotation\python\Name::fromShape(
+          shape(
+            "name" => "LoopPatchStructInternalDoNotUse",
+          )
+        ),
+        '\facebook\thrift\annotation\rust\Name' => \facebook\thrift\annotation\rust\Name::fromShape(
           shape(
             "name" => "LoopPatchStructInternalDoNotUse",
           )
@@ -15939,6 +16009,11 @@ class RefFieldsPatchStructInternalDoNotUse implements \IThriftSyncStruct, \IThri
           )
         ),
         '\facebook\thrift\annotation\python\Name' => \facebook\thrift\annotation\python\Name::fromShape(
+          shape(
+            "name" => "RefFieldsPatchStructInternalDoNotUse",
+          )
+        ),
+        '\facebook\thrift\annotation\rust\Name' => \facebook\thrift\annotation\rust\Name::fromShape(
           shape(
             "name" => "RefFieldsPatchStructInternalDoNotUse",
           )

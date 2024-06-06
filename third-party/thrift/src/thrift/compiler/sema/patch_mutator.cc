@@ -23,6 +23,7 @@
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/gen/cpp/namespace_resolver.h>
 #include <thrift/compiler/lib/cpp2/util.h>
+#include <thrift/compiler/lib/rust/uri.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/diagnostic_context.h>
 #include <thrift/compiler/sema/standard_mutator_stage.h>
@@ -467,11 +468,12 @@ t_struct& patch_generator::add_struct_patch(
     const t_const& annot, t_structured& value_type) {
   PatchGen gen{
       {annot, gen_suffix_struct(annot, value_type, "Patch"), program_}};
-  // Rename it for Hack and Python to caution developers against accidental
-  // usage
+  // Rename it for Hack, Python and Rust to caution developers against
+  // accidental usage
   const auto patch_name = value_type.name() + "PatchStructInternalDoNotUse";
   gen.add_name_annotation(patch_name, kHackNameUri);
   gen.add_name_annotation(patch_name, kPythonNameUri);
+  gen.add_name_annotation(patch_name, rust::kRustNameUri);
   gen.assign(value_type);
   gen.clear();
   if (get_assign_only_annotation_or_null(value_type)) {

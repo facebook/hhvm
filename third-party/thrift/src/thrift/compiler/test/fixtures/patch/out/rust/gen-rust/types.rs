@@ -150,7 +150,7 @@ pub struct RefFields {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct MyDataPatch {
+pub struct MyDataPatchStructInternalDoNotUse {
     #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::MyData>>,
     #[doc = "Clears a value. Applies first."]
@@ -208,7 +208,7 @@ pub struct MyDataSafePatch {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct MyDataWithCustomDefaultPatch {
+pub struct MyDataWithCustomDefaultPatchStructInternalDoNotUse {
     #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::MyDataWithCustomDefault>>,
     #[doc = "Clears a value. Applies first."]
@@ -354,7 +354,7 @@ pub struct MyUnionSafePatch {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct MyStructPatch {
+pub struct MyStructPatchStructInternalDoNotUse {
     #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::MyStruct>>,
     #[doc = "Clears a value. Applies first."]
@@ -531,15 +531,15 @@ pub struct MyStructField30Patch1 {
 
 #[derive(Clone, PartialEq)]
 pub struct MyStructFieldPatch {
-    pub structWithCustomDefault: crate::types::MyDataWithCustomDefaultPatch,
+    pub structWithCustomDefault: crate::types::MyDataWithCustomDefaultPatchStructInternalDoNotUse,
     pub i32WithCustomDefault: patch__types::I32Patch,
     pub mapMap: crate::types::MyStructField30Patch,
     pub listMap: crate::types::MyStructField29Patch,
     pub optMapVal: crate::types::MyStructField28Patch,
     pub optSetVal: crate::types::MyStructField27Patch,
     pub optListVal: crate::types::MyStructField26Patch,
-    pub optLateStructVal: crate::types::LateDefStructPatch,
-    pub optStructVal: crate::types::MyDataPatch,
+    pub optLateStructVal: crate::types::LateDefStructPatchStructInternalDoNotUse,
+    pub optStructVal: crate::types::MyDataPatchStructInternalDoNotUse,
     pub optEnumVal: crate::types::MyStructField23Patch,
     pub optBinaryVal: patch__types::BinaryPatch,
     pub optStringVal: patch__types::StringPatch,
@@ -550,9 +550,9 @@ pub struct MyStructFieldPatch {
     pub optI16Val: patch__types::I16Patch,
     pub optByteVal: patch__types::BytePatch,
     pub optBoolVal: patch__types::BoolPatch,
-    pub lateStructVal: crate::types::LateDefStructPatch,
+    pub lateStructVal: crate::types::LateDefStructPatchStructInternalDoNotUse,
     pub unionVal: crate::types::MyUnionPatch,
-    pub structVal: crate::types::MyDataPatch,
+    pub structVal: crate::types::MyDataPatchStructInternalDoNotUse,
     pub enumVal: crate::types::MyStructField10Patch,
     pub binaryVal: patch__types::BinaryPatch,
     pub stringVal: patch__types::StringPatch,
@@ -563,7 +563,7 @@ pub struct MyStructFieldPatch {
     pub i16Val: patch__types::I16Patch,
     pub byteVal: patch__types::BytePatch,
     pub boolVal: patch__types::BoolPatch,
-    pub structWithFieldCustomDefault: crate::types::MyDataPatch,
+    pub structWithFieldCustomDefault: crate::types::MyDataPatchStructInternalDoNotUse,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -628,7 +628,7 @@ pub struct MyStructSafePatch {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct LateDefStructPatch {
+pub struct LateDefStructPatchStructInternalDoNotUse {
     #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::LateDefStruct>>,
     #[doc = "Clears a value. Applies first."]
@@ -682,7 +682,7 @@ pub struct LateDefStructSafePatch {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct RecursivePatch {
+pub struct RecursivePatchStructInternalDoNotUse {
     #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::Recursive>>,
     #[doc = "Clears a value. Applies first."]
@@ -752,7 +752,7 @@ pub struct RecursiveSafePatch {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct BarPatch {
+pub struct BarPatchStructInternalDoNotUse {
     #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::Bar>>,
     #[doc = "Clears a value. Applies first."]
@@ -775,7 +775,7 @@ pub struct BarPatch {
 
 #[derive(Clone, PartialEq)]
 pub struct BarFieldPatch {
-    pub r#loop: crate::types::LoopPatch,
+    pub r#loop: crate::types::LoopPatchStructInternalDoNotUse,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -808,7 +808,7 @@ pub struct BarSafePatch {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct LoopPatch {
+pub struct LoopPatchStructInternalDoNotUse {
     #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::Loop>>,
     #[doc = "Clears a value. Applies first."]
@@ -834,7 +834,7 @@ pub struct LoopSafePatch {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct RefFieldsPatch {
+pub struct RefFieldsPatchStructInternalDoNotUse {
     #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::RefFields>>,
     #[doc = "Clears a value. Applies first."]
@@ -2736,7 +2736,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for RefFields {
 
 
 #[allow(clippy::derivable_impls)]
-impl ::std::default::Default for self::MyDataPatch {
+impl ::std::default::Default for self::MyDataPatchStructInternalDoNotUse {
     fn default() -> Self {
         Self {
             assign: ::std::option::Option::None,
@@ -2750,10 +2750,10 @@ impl ::std::default::Default for self::MyDataPatch {
     }
 }
 
-impl ::std::fmt::Debug for self::MyDataPatch {
+impl ::std::fmt::Debug for self::MyDataPatchStructInternalDoNotUse {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
-            .debug_struct("MyDataPatch")
+            .debug_struct("MyDataPatchStructInternalDoNotUse")
             .field("assign", &self.assign)
             .field("clear", &self.clear)
             .field("patchPrior", &self.patchPrior)
@@ -2764,23 +2764,23 @@ impl ::std::fmt::Debug for self::MyDataPatch {
     }
 }
 
-unsafe impl ::std::marker::Send for self::MyDataPatch {}
-unsafe impl ::std::marker::Sync for self::MyDataPatch {}
-impl ::std::marker::Unpin for self::MyDataPatch {}
-impl ::std::panic::RefUnwindSafe for self::MyDataPatch {}
-impl ::std::panic::UnwindSafe for self::MyDataPatch {}
+unsafe impl ::std::marker::Send for self::MyDataPatchStructInternalDoNotUse {}
+unsafe impl ::std::marker::Sync for self::MyDataPatchStructInternalDoNotUse {}
+impl ::std::marker::Unpin for self::MyDataPatchStructInternalDoNotUse {}
+impl ::std::panic::RefUnwindSafe for self::MyDataPatchStructInternalDoNotUse {}
+impl ::std::panic::UnwindSafe for self::MyDataPatchStructInternalDoNotUse {}
 
-impl ::fbthrift::GetTType for self::MyDataPatch {
+impl ::fbthrift::GetTType for self::MyDataPatchStructInternalDoNotUse {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
-impl ::fbthrift::GetUri for self::MyDataPatch {
+impl ::fbthrift::GetUri for self::MyDataPatchStructInternalDoNotUse {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyDataPatch"
     }
 }
 
-impl<P> ::fbthrift::Serialize<P> for self::MyDataPatch
+impl<P> ::fbthrift::Serialize<P> for self::MyDataPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolWriter,
 {
@@ -2812,7 +2812,7 @@ where
     }
 }
 
-impl<P> ::fbthrift::Deserialize<P> for self::MyDataPatch
+impl<P> ::fbthrift::Deserialize<P> for self::MyDataPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolReader,
 {
@@ -3138,7 +3138,7 @@ where
 
 
 #[allow(clippy::derivable_impls)]
-impl ::std::default::Default for self::MyDataWithCustomDefaultPatch {
+impl ::std::default::Default for self::MyDataWithCustomDefaultPatchStructInternalDoNotUse {
     fn default() -> Self {
         Self {
             assign: ::std::option::Option::None,
@@ -3152,10 +3152,10 @@ impl ::std::default::Default for self::MyDataWithCustomDefaultPatch {
     }
 }
 
-impl ::std::fmt::Debug for self::MyDataWithCustomDefaultPatch {
+impl ::std::fmt::Debug for self::MyDataWithCustomDefaultPatchStructInternalDoNotUse {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
-            .debug_struct("MyDataWithCustomDefaultPatch")
+            .debug_struct("MyDataWithCustomDefaultPatchStructInternalDoNotUse")
             .field("assign", &self.assign)
             .field("clear", &self.clear)
             .field("patchPrior", &self.patchPrior)
@@ -3166,23 +3166,23 @@ impl ::std::fmt::Debug for self::MyDataWithCustomDefaultPatch {
     }
 }
 
-unsafe impl ::std::marker::Send for self::MyDataWithCustomDefaultPatch {}
-unsafe impl ::std::marker::Sync for self::MyDataWithCustomDefaultPatch {}
-impl ::std::marker::Unpin for self::MyDataWithCustomDefaultPatch {}
-impl ::std::panic::RefUnwindSafe for self::MyDataWithCustomDefaultPatch {}
-impl ::std::panic::UnwindSafe for self::MyDataWithCustomDefaultPatch {}
+unsafe impl ::std::marker::Send for self::MyDataWithCustomDefaultPatchStructInternalDoNotUse {}
+unsafe impl ::std::marker::Sync for self::MyDataWithCustomDefaultPatchStructInternalDoNotUse {}
+impl ::std::marker::Unpin for self::MyDataWithCustomDefaultPatchStructInternalDoNotUse {}
+impl ::std::panic::RefUnwindSafe for self::MyDataWithCustomDefaultPatchStructInternalDoNotUse {}
+impl ::std::panic::UnwindSafe for self::MyDataWithCustomDefaultPatchStructInternalDoNotUse {}
 
-impl ::fbthrift::GetTType for self::MyDataWithCustomDefaultPatch {
+impl ::fbthrift::GetTType for self::MyDataWithCustomDefaultPatchStructInternalDoNotUse {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
-impl ::fbthrift::GetUri for self::MyDataWithCustomDefaultPatch {
+impl ::fbthrift::GetUri for self::MyDataWithCustomDefaultPatchStructInternalDoNotUse {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyDataWithCustomDefaultPatch"
     }
 }
 
-impl<P> ::fbthrift::Serialize<P> for self::MyDataWithCustomDefaultPatch
+impl<P> ::fbthrift::Serialize<P> for self::MyDataWithCustomDefaultPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolWriter,
 {
@@ -3214,7 +3214,7 @@ where
     }
 }
 
-impl<P> ::fbthrift::Deserialize<P> for self::MyDataWithCustomDefaultPatch
+impl<P> ::fbthrift::Deserialize<P> for self::MyDataWithCustomDefaultPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolReader,
 {
@@ -4138,7 +4138,7 @@ where
 
 
 #[allow(clippy::derivable_impls)]
-impl ::std::default::Default for self::MyStructPatch {
+impl ::std::default::Default for self::MyStructPatchStructInternalDoNotUse {
     fn default() -> Self {
         Self {
             assign: ::std::option::Option::None,
@@ -4152,10 +4152,10 @@ impl ::std::default::Default for self::MyStructPatch {
     }
 }
 
-impl ::std::fmt::Debug for self::MyStructPatch {
+impl ::std::fmt::Debug for self::MyStructPatchStructInternalDoNotUse {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
-            .debug_struct("MyStructPatch")
+            .debug_struct("MyStructPatchStructInternalDoNotUse")
             .field("assign", &self.assign)
             .field("clear", &self.clear)
             .field("patchPrior", &self.patchPrior)
@@ -4166,23 +4166,23 @@ impl ::std::fmt::Debug for self::MyStructPatch {
     }
 }
 
-unsafe impl ::std::marker::Send for self::MyStructPatch {}
-unsafe impl ::std::marker::Sync for self::MyStructPatch {}
-impl ::std::marker::Unpin for self::MyStructPatch {}
-impl ::std::panic::RefUnwindSafe for self::MyStructPatch {}
-impl ::std::panic::UnwindSafe for self::MyStructPatch {}
+unsafe impl ::std::marker::Send for self::MyStructPatchStructInternalDoNotUse {}
+unsafe impl ::std::marker::Sync for self::MyStructPatchStructInternalDoNotUse {}
+impl ::std::marker::Unpin for self::MyStructPatchStructInternalDoNotUse {}
+impl ::std::panic::RefUnwindSafe for self::MyStructPatchStructInternalDoNotUse {}
+impl ::std::panic::UnwindSafe for self::MyStructPatchStructInternalDoNotUse {}
 
-impl ::fbthrift::GetTType for self::MyStructPatch {
+impl ::fbthrift::GetTType for self::MyStructPatchStructInternalDoNotUse {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
-impl ::fbthrift::GetUri for self::MyStructPatch {
+impl ::fbthrift::GetUri for self::MyStructPatchStructInternalDoNotUse {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyStructPatch"
     }
 }
 
-impl<P> ::fbthrift::Serialize<P> for self::MyStructPatch
+impl<P> ::fbthrift::Serialize<P> for self::MyStructPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolWriter,
 {
@@ -4214,7 +4214,7 @@ where
     }
 }
 
-impl<P> ::fbthrift::Deserialize<P> for self::MyStructPatch
+impl<P> ::fbthrift::Deserialize<P> for self::MyStructPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolReader,
 {
@@ -6085,7 +6085,7 @@ where
 
 
 #[allow(clippy::derivable_impls)]
-impl ::std::default::Default for self::LateDefStructPatch {
+impl ::std::default::Default for self::LateDefStructPatchStructInternalDoNotUse {
     fn default() -> Self {
         Self {
             assign: ::std::option::Option::None,
@@ -6099,10 +6099,10 @@ impl ::std::default::Default for self::LateDefStructPatch {
     }
 }
 
-impl ::std::fmt::Debug for self::LateDefStructPatch {
+impl ::std::fmt::Debug for self::LateDefStructPatchStructInternalDoNotUse {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
-            .debug_struct("LateDefStructPatch")
+            .debug_struct("LateDefStructPatchStructInternalDoNotUse")
             .field("assign", &self.assign)
             .field("clear", &self.clear)
             .field("patchPrior", &self.patchPrior)
@@ -6113,23 +6113,23 @@ impl ::std::fmt::Debug for self::LateDefStructPatch {
     }
 }
 
-unsafe impl ::std::marker::Send for self::LateDefStructPatch {}
-unsafe impl ::std::marker::Sync for self::LateDefStructPatch {}
-impl ::std::marker::Unpin for self::LateDefStructPatch {}
-impl ::std::panic::RefUnwindSafe for self::LateDefStructPatch {}
-impl ::std::panic::UnwindSafe for self::LateDefStructPatch {}
+unsafe impl ::std::marker::Send for self::LateDefStructPatchStructInternalDoNotUse {}
+unsafe impl ::std::marker::Sync for self::LateDefStructPatchStructInternalDoNotUse {}
+impl ::std::marker::Unpin for self::LateDefStructPatchStructInternalDoNotUse {}
+impl ::std::panic::RefUnwindSafe for self::LateDefStructPatchStructInternalDoNotUse {}
+impl ::std::panic::UnwindSafe for self::LateDefStructPatchStructInternalDoNotUse {}
 
-impl ::fbthrift::GetTType for self::LateDefStructPatch {
+impl ::fbthrift::GetTType for self::LateDefStructPatchStructInternalDoNotUse {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
-impl ::fbthrift::GetUri for self::LateDefStructPatch {
+impl ::fbthrift::GetUri for self::LateDefStructPatchStructInternalDoNotUse {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/LateDefStructPatch"
     }
 }
 
-impl<P> ::fbthrift::Serialize<P> for self::LateDefStructPatch
+impl<P> ::fbthrift::Serialize<P> for self::LateDefStructPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolWriter,
 {
@@ -6161,7 +6161,7 @@ where
     }
 }
 
-impl<P> ::fbthrift::Deserialize<P> for self::LateDefStructPatch
+impl<P> ::fbthrift::Deserialize<P> for self::LateDefStructPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolReader,
 {
@@ -6447,7 +6447,7 @@ where
 
 
 #[allow(clippy::derivable_impls)]
-impl ::std::default::Default for self::RecursivePatch {
+impl ::std::default::Default for self::RecursivePatchStructInternalDoNotUse {
     fn default() -> Self {
         Self {
             assign: ::std::option::Option::None,
@@ -6461,10 +6461,10 @@ impl ::std::default::Default for self::RecursivePatch {
     }
 }
 
-impl ::std::fmt::Debug for self::RecursivePatch {
+impl ::std::fmt::Debug for self::RecursivePatchStructInternalDoNotUse {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
-            .debug_struct("RecursivePatch")
+            .debug_struct("RecursivePatchStructInternalDoNotUse")
             .field("assign", &self.assign)
             .field("clear", &self.clear)
             .field("patchPrior", &self.patchPrior)
@@ -6475,23 +6475,23 @@ impl ::std::fmt::Debug for self::RecursivePatch {
     }
 }
 
-unsafe impl ::std::marker::Send for self::RecursivePatch {}
-unsafe impl ::std::marker::Sync for self::RecursivePatch {}
-impl ::std::marker::Unpin for self::RecursivePatch {}
-impl ::std::panic::RefUnwindSafe for self::RecursivePatch {}
-impl ::std::panic::UnwindSafe for self::RecursivePatch {}
+unsafe impl ::std::marker::Send for self::RecursivePatchStructInternalDoNotUse {}
+unsafe impl ::std::marker::Sync for self::RecursivePatchStructInternalDoNotUse {}
+impl ::std::marker::Unpin for self::RecursivePatchStructInternalDoNotUse {}
+impl ::std::panic::RefUnwindSafe for self::RecursivePatchStructInternalDoNotUse {}
+impl ::std::panic::UnwindSafe for self::RecursivePatchStructInternalDoNotUse {}
 
-impl ::fbthrift::GetTType for self::RecursivePatch {
+impl ::fbthrift::GetTType for self::RecursivePatchStructInternalDoNotUse {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
-impl ::fbthrift::GetUri for self::RecursivePatch {
+impl ::fbthrift::GetUri for self::RecursivePatchStructInternalDoNotUse {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/RecursivePatch"
     }
 }
 
-impl<P> ::fbthrift::Serialize<P> for self::RecursivePatch
+impl<P> ::fbthrift::Serialize<P> for self::RecursivePatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolWriter,
 {
@@ -6523,7 +6523,7 @@ where
     }
 }
 
-impl<P> ::fbthrift::Deserialize<P> for self::RecursivePatch
+impl<P> ::fbthrift::Deserialize<P> for self::RecursivePatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolReader,
 {
@@ -6921,7 +6921,7 @@ where
 
 
 #[allow(clippy::derivable_impls)]
-impl ::std::default::Default for self::BarPatch {
+impl ::std::default::Default for self::BarPatchStructInternalDoNotUse {
     fn default() -> Self {
         Self {
             assign: ::std::option::Option::None,
@@ -6935,10 +6935,10 @@ impl ::std::default::Default for self::BarPatch {
     }
 }
 
-impl ::std::fmt::Debug for self::BarPatch {
+impl ::std::fmt::Debug for self::BarPatchStructInternalDoNotUse {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
-            .debug_struct("BarPatch")
+            .debug_struct("BarPatchStructInternalDoNotUse")
             .field("assign", &self.assign)
             .field("clear", &self.clear)
             .field("patchPrior", &self.patchPrior)
@@ -6949,23 +6949,23 @@ impl ::std::fmt::Debug for self::BarPatch {
     }
 }
 
-unsafe impl ::std::marker::Send for self::BarPatch {}
-unsafe impl ::std::marker::Sync for self::BarPatch {}
-impl ::std::marker::Unpin for self::BarPatch {}
-impl ::std::panic::RefUnwindSafe for self::BarPatch {}
-impl ::std::panic::UnwindSafe for self::BarPatch {}
+unsafe impl ::std::marker::Send for self::BarPatchStructInternalDoNotUse {}
+unsafe impl ::std::marker::Sync for self::BarPatchStructInternalDoNotUse {}
+impl ::std::marker::Unpin for self::BarPatchStructInternalDoNotUse {}
+impl ::std::panic::RefUnwindSafe for self::BarPatchStructInternalDoNotUse {}
+impl ::std::panic::UnwindSafe for self::BarPatchStructInternalDoNotUse {}
 
-impl ::fbthrift::GetTType for self::BarPatch {
+impl ::fbthrift::GetTType for self::BarPatchStructInternalDoNotUse {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
-impl ::fbthrift::GetUri for self::BarPatch {
+impl ::fbthrift::GetUri for self::BarPatchStructInternalDoNotUse {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/BarPatch"
     }
 }
 
-impl<P> ::fbthrift::Serialize<P> for self::BarPatch
+impl<P> ::fbthrift::Serialize<P> for self::BarPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolWriter,
 {
@@ -6997,7 +6997,7 @@ where
     }
 }
 
-impl<P> ::fbthrift::Deserialize<P> for self::BarPatch
+impl<P> ::fbthrift::Deserialize<P> for self::BarPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolReader,
 {
@@ -7303,7 +7303,7 @@ where
 
 
 #[allow(clippy::derivable_impls)]
-impl ::std::default::Default for self::LoopPatch {
+impl ::std::default::Default for self::LoopPatchStructInternalDoNotUse {
     fn default() -> Self {
         Self {
             assign: ::std::option::Option::None,
@@ -7313,33 +7313,33 @@ impl ::std::default::Default for self::LoopPatch {
     }
 }
 
-impl ::std::fmt::Debug for self::LoopPatch {
+impl ::std::fmt::Debug for self::LoopPatchStructInternalDoNotUse {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
-            .debug_struct("LoopPatch")
+            .debug_struct("LoopPatchStructInternalDoNotUse")
             .field("assign", &self.assign)
             .field("clear", &self.clear)
             .finish()
     }
 }
 
-unsafe impl ::std::marker::Send for self::LoopPatch {}
-unsafe impl ::std::marker::Sync for self::LoopPatch {}
-impl ::std::marker::Unpin for self::LoopPatch {}
-impl ::std::panic::RefUnwindSafe for self::LoopPatch {}
-impl ::std::panic::UnwindSafe for self::LoopPatch {}
+unsafe impl ::std::marker::Send for self::LoopPatchStructInternalDoNotUse {}
+unsafe impl ::std::marker::Sync for self::LoopPatchStructInternalDoNotUse {}
+impl ::std::marker::Unpin for self::LoopPatchStructInternalDoNotUse {}
+impl ::std::panic::RefUnwindSafe for self::LoopPatchStructInternalDoNotUse {}
+impl ::std::panic::UnwindSafe for self::LoopPatchStructInternalDoNotUse {}
 
-impl ::fbthrift::GetTType for self::LoopPatch {
+impl ::fbthrift::GetTType for self::LoopPatchStructInternalDoNotUse {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
-impl ::fbthrift::GetUri for self::LoopPatch {
+impl ::fbthrift::GetUri for self::LoopPatchStructInternalDoNotUse {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/LoopPatch"
     }
 }
 
-impl<P> ::fbthrift::Serialize<P> for self::LoopPatch
+impl<P> ::fbthrift::Serialize<P> for self::LoopPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolWriter,
 {
@@ -7359,7 +7359,7 @@ where
     }
 }
 
-impl<P> ::fbthrift::Deserialize<P> for self::LoopPatch
+impl<P> ::fbthrift::Deserialize<P> for self::LoopPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolReader,
 {
@@ -7485,7 +7485,7 @@ where
 
 
 #[allow(clippy::derivable_impls)]
-impl ::std::default::Default for self::RefFieldsPatch {
+impl ::std::default::Default for self::RefFieldsPatchStructInternalDoNotUse {
     fn default() -> Self {
         Self {
             assign: ::std::option::Option::None,
@@ -7499,10 +7499,10 @@ impl ::std::default::Default for self::RefFieldsPatch {
     }
 }
 
-impl ::std::fmt::Debug for self::RefFieldsPatch {
+impl ::std::fmt::Debug for self::RefFieldsPatchStructInternalDoNotUse {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
-            .debug_struct("RefFieldsPatch")
+            .debug_struct("RefFieldsPatchStructInternalDoNotUse")
             .field("assign", &self.assign)
             .field("clear", &self.clear)
             .field("patchPrior", &self.patchPrior)
@@ -7513,23 +7513,23 @@ impl ::std::fmt::Debug for self::RefFieldsPatch {
     }
 }
 
-unsafe impl ::std::marker::Send for self::RefFieldsPatch {}
-unsafe impl ::std::marker::Sync for self::RefFieldsPatch {}
-impl ::std::marker::Unpin for self::RefFieldsPatch {}
-impl ::std::panic::RefUnwindSafe for self::RefFieldsPatch {}
-impl ::std::panic::UnwindSafe for self::RefFieldsPatch {}
+unsafe impl ::std::marker::Send for self::RefFieldsPatchStructInternalDoNotUse {}
+unsafe impl ::std::marker::Sync for self::RefFieldsPatchStructInternalDoNotUse {}
+impl ::std::marker::Unpin for self::RefFieldsPatchStructInternalDoNotUse {}
+impl ::std::panic::RefUnwindSafe for self::RefFieldsPatchStructInternalDoNotUse {}
+impl ::std::panic::UnwindSafe for self::RefFieldsPatchStructInternalDoNotUse {}
 
-impl ::fbthrift::GetTType for self::RefFieldsPatch {
+impl ::fbthrift::GetTType for self::RefFieldsPatchStructInternalDoNotUse {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
-impl ::fbthrift::GetUri for self::RefFieldsPatch {
+impl ::fbthrift::GetUri for self::RefFieldsPatchStructInternalDoNotUse {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/RefFieldsPatch"
     }
 }
 
-impl<P> ::fbthrift::Serialize<P> for self::RefFieldsPatch
+impl<P> ::fbthrift::Serialize<P> for self::RefFieldsPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolWriter,
 {
@@ -7561,7 +7561,7 @@ where
     }
 }
 
-impl<P> ::fbthrift::Deserialize<P> for self::RefFieldsPatch
+impl<P> ::fbthrift::Deserialize<P> for self::RefFieldsPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolReader,
 {

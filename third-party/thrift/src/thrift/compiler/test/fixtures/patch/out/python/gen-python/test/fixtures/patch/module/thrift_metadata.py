@@ -423,6 +423,7 @@ def _fbthrift_gen_metadata_struct_MyDataPatchStructInternalDoNotUse(metadata_str
         structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="hack.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="MyDataPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="python.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="MyDataPatchStructInternalDoNotUse"),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="rust.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="MyDataPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>"), "underlyingName": _fbthrift_metadata.ThriftConstValue(cv_string="MyDataPatchStruct"), "extraNamespace": _fbthrift_metadata.ThriftConstValue(cv_string=""),  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
@@ -552,6 +553,7 @@ def _fbthrift_gen_metadata_struct_MyDataWithCustomDefaultPatchStructInternalDoNo
         structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="hack.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="MyDataWithCustomDefaultPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="python.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="MyDataWithCustomDefaultPatchStructInternalDoNotUse"),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="rust.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="MyDataWithCustomDefaultPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>"), "underlyingName": _fbthrift_metadata.ThriftConstValue(cv_string="MyDataWithCustomDefaultPatchStruct"), "extraNamespace": _fbthrift_metadata.ThriftConstValue(cv_string=""),  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
@@ -875,6 +877,7 @@ def _fbthrift_gen_metadata_struct_MyStructPatchStructInternalDoNotUse(metadata_s
         structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="hack.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="MyStructPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="python.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="MyStructPatchStructInternalDoNotUse"),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="rust.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="MyStructPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyStructPatchStruct>"), "underlyingName": _fbthrift_metadata.ThriftConstValue(cv_string="MyStructPatchStruct"), "extraNamespace": _fbthrift_metadata.ThriftConstValue(cv_string=""),  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
@@ -1540,6 +1543,7 @@ def _fbthrift_gen_metadata_struct_LateDefStructPatchStructInternalDoNotUse(metad
         structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="hack.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="LateDefStructPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="python.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="LateDefStructPatchStructInternalDoNotUse"),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="rust.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="LateDefStructPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>"), "underlyingName": _fbthrift_metadata.ThriftConstValue(cv_string="LateDefStructPatchStruct"), "extraNamespace": _fbthrift_metadata.ThriftConstValue(cv_string=""),  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
@@ -1655,6 +1659,7 @@ def _fbthrift_gen_metadata_struct_RecursivePatchStructInternalDoNotUse(metadata_
         structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="hack.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="RecursivePatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="python.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="RecursivePatchStructInternalDoNotUse"),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="rust.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="RecursivePatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::RecursivePatchStruct>"), "underlyingName": _fbthrift_metadata.ThriftConstValue(cv_string="RecursivePatchStruct"), "extraNamespace": _fbthrift_metadata.ThriftConstValue(cv_string=""),  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
@@ -1807,6 +1812,7 @@ def _fbthrift_gen_metadata_struct_BarPatchStructInternalDoNotUse(metadata_struct
         structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="hack.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="BarPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="python.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="BarPatchStructInternalDoNotUse"),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="rust.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="BarPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::BarPatchStruct>"), "underlyingName": _fbthrift_metadata.ThriftConstValue(cv_string="BarPatchStruct"), "extraNamespace": _fbthrift_metadata.ThriftConstValue(cv_string=""),  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
@@ -1922,6 +1928,7 @@ def _fbthrift_gen_metadata_struct_LoopPatchStructInternalDoNotUse(metadata_struc
         structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="hack.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="LoopPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="python.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="LoopPatchStructInternalDoNotUse"),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="rust.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="LoopPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>"), "underlyingName": _fbthrift_metadata.ThriftConstValue(cv_string="LoopPatchStruct"), "extraNamespace": _fbthrift_metadata.ThriftConstValue(cv_string=""),  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
@@ -1989,6 +1996,7 @@ def _fbthrift_gen_metadata_struct_RefFieldsPatchStructInternalDoNotUse(metadata_
         structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="hack.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="RefFieldsPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="python.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="RefFieldsPatchStructInternalDoNotUse"),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="rust.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="RefFieldsPatchStructInternalDoNotUse"),  }),
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::RefFieldsPatchStruct>"), "underlyingName": _fbthrift_metadata.ThriftConstValue(cv_string="RefFieldsPatchStruct"), "extraNamespace": _fbthrift_metadata.ThriftConstValue(cv_string=""),  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)

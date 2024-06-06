@@ -27,6 +27,7 @@ import io.rsocket.transport.ClientTransport;
 import io.rsocket.transport.netty.TcpDuplexConnection;
 import java.net.SocketAddress;
 import reactor.core.publisher.Mono;
+import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.resources.LoopResources;
 import reactor.netty.tcp.SslProvider;
 import reactor.netty.tcp.TcpClient;
@@ -51,7 +52,9 @@ public class ReactorClientTransport implements ClientTransport {
 
   @Override
   public Mono<DuplexConnection> connect() {
-    TcpClient tcpClient = TcpClient.create();
+    // Max number of connections to a specific socket address.
+    TcpClient tcpClient =
+        TcpClient.create(ConnectionProvider.create("thrift-connection-provider", 30000));
 
     if (sslContext != null) {
       tcpClient.secure(SslProvider.builder().sslContext(sslContext).build());

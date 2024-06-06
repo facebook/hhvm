@@ -44,14 +44,22 @@ class EventHandlerBase {
 };
 
 template <typename SM, typename SM::StateEnum state, typename SM::Event event>
-class EventHandler : public EventHandlerBase<SM, state, event> {
- public:
-  static typename SM::Actions handle(
-      const typename SM::State& curState,
-      typename SM::Param& param) {
-    return SM::InvalidEventHandler(curState, param);
-  }
-};
+class EventHandler;
+
+template <
+    class SM,
+    typename SM::StateEnum S,
+    typename SM::Event E,
+    class = void>
+struct IsValidEventHandler : std::false_type {};
+
+template <class SM, typename SM::StateEnum S, typename SM::Event E>
+struct IsValidEventHandler<
+    SM,
+    S,
+    E,
+    std::void_t<decltype(fizz::sm::EventHandler<SM, S, E>::handle)>>
+    : std::true_type {};
 
 #define FIZZ_DECLARE_EVENT_HANDLER(sm, statename, eventname, ...)        \
   template <>                                                            \
@@ -79,10 +87,13 @@ template <typename SM>
 template <std::size_t i>
 constexpr typename StateMachine<SM>::EventHandlerFun
 StateMachine<SM>::getEventHandler() {
-  return EventHandler<
-      SM,
-      static_cast<typename SM::StateEnum>(i / SM::NumEvents),
-      static_cast<typename SM::Event>(i % SM::NumEvents)>::handle;
+  constexpr auto state = static_cast<typename SM::StateEnum>(i / SM::NumEvents);
+  constexpr auto event = static_cast<typename SM::Event>(i % SM::NumEvents);
+  if constexpr (IsValidEventHandler<SM, state, event>::value) {
+    return EventHandler<SM, state, event>::handle;
+  } else {
+    return SM::InvalidEventHandler;
+  }
 }
 } // namespace sm
 } // namespace fizz

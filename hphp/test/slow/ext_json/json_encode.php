@@ -76,6 +76,9 @@ function main_json_encode() :mixed{
 
   var_dump(json_encode(vec[1, 2, 3, vec[1, 2, 3]], JSON_PRETTY_PRINT));
 
+  var_dump(json_encode(vec[dict["b" => 1, "a" => 1]], JSON_PRETTY_PRINT));
+  var_dump(json_encode(vec[dict["b" => 1, "a" => 1]], JSON_PRETTY_PRINT | JSON_FB_SORT_KEYS));
+
   $arr = dict[
     "a" => 1,
     "b" => vec[1, 2],

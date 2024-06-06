@@ -1983,19 +1983,56 @@ void VariableSerializer::serializeString(const String& str) {
   }
 }
 
+void sortTvPairs(req::vector<std::pair<TypedValue, TypedValue>>& elems) {
+  using KVPair = std::pair<TypedValue, TypedValue>;
+  sort(elems.begin(), elems.end(), [](const KVPair& a, const KVPair& b) {
+    if (tvIsString(a.first)) {
+      // Integers come before strings
+      if (!tvIsString(b.first)) {
+        assertx(tvIsInt(b.first));
+        return false;
+      }
+      return strcmp(val(a.first).pstr->data(), val(b.first).pstr->data()) < 0;
+    } else {
+      assertx(tvIsInt(a.first));
+      if (!tvIsInt(b.first)) {
+        assertx(tvIsString(b.first));
+        return true;
+      }
+      return val(a.first).num < val(b.first).num;
+    }
+  });
+}
+
 void VariableSerializer::serializeArrayImpl(const ArrayData* arr,
                                             bool isVectorData) {
   using AK = VariableSerializer::ArrayKind;
   AK kind = getKind(arr);
   writeArrayHeader(arr->size(), isVectorData, kind);
 
-  IterateKV(
-    arr,
-    [&](TypedValue k, TypedValue v) {
+  if (UNLIKELY(m_sortArrayKeys)) {
+    using KVPair = std::pair<TypedValue, TypedValue>;
+    req::vector<KVPair> elems;
+    IterateKV(
+      arr,
+      [&elems](TypedValue k, TypedValue v) {
+        elems.push_back(std::make_pair(k, v));
+      }
+    );
+    sortTvPairs(elems);
+    for (const auto& [k, v]: elems) {
       writeArrayKey(VarNR(k), kind);
       writeArrayValue(VarNR(v), kind);
     }
-  );
+  } else {
+    IterateKV(
+      arr,
+      [&](TypedValue k, TypedValue v) {
+        writeArrayKey(VarNR(k), kind);
+        writeArrayValue(VarNR(v), kind);
+      }
+    );
+  }
 
   writeArrayFooter(kind);
 }
@@ -2053,6 +2090,20 @@ void VariableSerializer::serializeObjProps(Array& arr) {
   decRefArr(dict);
 }
 
+void VariableSerializer::writeCollectionKVSorted(ObjectData* obj) {
+  using AK = VariableSerializer::ArrayKind;
+  using KVPair = std::pair<TypedValue, TypedValue>;
+  req::vector<KVPair> elems;
+  for (ArrayIter iter(obj); iter; ++iter) {
+    elems.push_back(std::make_pair(iter.nvFirst(), iter.secondVal()));
+  }
+  sortTvPairs(elems);
+  for (const auto& [k, v]: elems) {
+    writeCollectionKey(VarNR(k), AK::PHP);
+    writeArrayValue(VarNR(v), AK::PHP);
+  }
+}
+
 void VariableSerializer::serializeCollection(ObjectData* obj) {
   using AK = VariableSerializer::ArrayKind;
   int64_t sz = collections::getSize(obj);
@@ -2061,9 +2112,13 @@ void VariableSerializer::serializeCollection(ObjectData* obj) {
   if (isMapCollection(type)) {
     pushObjectInfo(obj->getClassName(),'K');
     writeArrayHeader(sz, false, AK::PHP);
-    for (ArrayIter iter(obj); iter; ++iter) {
-      writeCollectionKey(iter.first(), AK::PHP);
-      writeArrayValue(iter.second(), AK::PHP);
+    if (UNLIKELY(m_sortArrayKeys)) {
+      writeCollectionKVSorted(obj);
+    } else {
+      for (ArrayIter iter(obj); iter; ++iter) {
+        writeCollectionKey(iter.first(), AK::PHP);
+        writeArrayValue(iter.second(), AK::PHP);
+      }
     }
     writeArrayFooter(AK::PHP);
 
@@ -2103,9 +2158,13 @@ void VariableSerializer::serializeCollection(ObjectData* obj) {
           writeArrayValue(iter.second(), AK::PHP);
         }
       } else {
-        for (ArrayIter iter(obj); iter; ++iter) {
-          writeCollectionKey(iter.first(), AK::PHP);
-          writeArrayValue(iter.second(), AK::PHP);
+        if (UNLIKELY(m_sortArrayKeys)) {
+          writeCollectionKVSorted(obj);
+        } else {
+          for (ArrayIter iter(obj); iter; ++iter) {
+              writeCollectionKey(iter.first(), AK::PHP);
+              writeArrayValue(iter.second(), AK::PHP);
+          }
         }
       }
     }

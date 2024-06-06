@@ -37,8 +37,7 @@ class EventHandlerBase {
   static void Transition(typename SM::State& stateStruct) {
     static_assert(
         Or<StateSame<SM, to, AllowedStates>...>::value, "Transition invalid");
-    CHECK_EQ(stateStruct.state(), state);
-    VLOG(8) << "Transition from " << toString(state) << " to " << toString(to);
+    DCHECK_EQ(stateStruct.state(), state);
     stateStruct.state() = to;
   }
 };

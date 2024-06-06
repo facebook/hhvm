@@ -19,15 +19,15 @@ The following outlines the compatibility for changes to data:
 |Add a field    |yes    |yes    |Dropped by old    |
 |Remove a field    |yes    |no    |Dropped by new    |
 |Rename a field    |yes    |no    |Only affect code gen and text format    |
-|Change field type    |rarely    |no    |Only changes between utf-8 encoded string and binary are wire compatible    |
+|Change field type    |rarely    |no    |1. Changes between utf-8 encoded string and binary are wire compatible for Binary/Compact protocol. <br/>2. Changes between i32 and enum are wire compatible.    |
 |Add enum value    |yes    |yes    |Preserved by old    |
 |Remove enum value    |yes    |no    |Preserved by new    |
 |New enum field with no 0 value    |yes    |yes    |    |
 |Default on new non-optional field    |yes    |yes    |Gets new default    |
 |Default on new optional field    |yes    |yes    |Stays unset    |
-|Default changed on an non-optional field    |yes    |yes    |    |
-|Default changed on an optional field    |yes    |yes    |    |
-|Constant changed    |yes    |yes    |Old constant in old, new constant in new    |
+|Default changed on an non-optional field    |yes    |no    |    |
+|Default changed on an optional field    |yes    |no    |    |
+|Constant changed    |yes    |no    |Old constant in old, new constant in new    |
 |Required to unspecified    |yes    |no    |    |
 |Unspecified to required    |yes    |no    |    |
 |Optional to unspecified    |yes    |no    |    |

@@ -41,7 +41,10 @@ SSATmp* resolveTypeConstantChain(IRGS& env, const Func* f, SSATmp* cls,
   for (auto const type : types) {
     auto const name =
       gen(env, LdTypeCnsClsName, result, cns(env, type.get()));
-    result = gen(env, LdCls, LdClsFallbackData::Fatal(), name, ctx);
+    result =
+      gen(env,
+          AssertNonNull,
+          gen(env, LdCls, LdClsFallbackData::Fatal(), name, ctx));
   }
   return result;
 }
@@ -135,7 +138,10 @@ SSATmp* emitCCReified(IRGS& env, const Func* f,
     }
   );
   auto const ctx = isClass ? cns(env, f->cls()) : cns(env, nullptr);
-  auto const ctxCls = gen(env, LdCls, LdClsFallbackData::Fatal(), classname, ctx);
+  auto const ctxCls = 
+    gen(env,
+        AssertNonNull,
+        gen(env, LdCls, LdClsFallbackData::Fatal(), classname, ctx));
   auto const cls = resolveTypeConstantChain(env, f, ctxCls, types);
   return gen(env, LookupClsCtxCns, cls, cns(env, name));
 }
@@ -218,11 +224,10 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
   };
 
   auto const fnFromName = [&](SSATmp* clsName, SSATmp* methodName) {
-    auto const cls = gen(env,
-                         LdCls,
-                         LdClsFallbackData::Fatal(),
-                         clsName,
-                         cns(env, nullptr));
+    auto const cls = 
+      gen(env,
+          AssertNonNull,
+          gen(env, LdCls, LdClsFallbackData::Fatal(), clsName, cns(env, nullptr)));
     auto const data = OptClassAndFuncData { nullptr, f };
     return gen(env, LdObjMethodD, data, cls, methodName);
   };

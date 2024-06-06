@@ -4,4 +4,7 @@
 include_paths=["./package_access/*"]
 
 [packages.pkg2]
-include_paths=["package_access/include_paths_bad1.php--foo.php"]
+include_paths=[
+    "package_access/include_paths_bad1.php--foo.php",
+    "package_access/include_paths_bad4.php--__tests__.php"
+]

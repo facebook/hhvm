@@ -16,6 +16,7 @@ include_paths_bad2.php--foo.php:3:6
 4 | include_paths=["./package_access/*"]
 5 |
 [3] 6 | [packages.pkg2]
-7 | include_paths=["package_access/include_paths_bad1.php--foo.php"]
+7 | include_paths=[
+8 |     "package_access/include_paths_bad1.php--foo.php",
 
 1 error found.

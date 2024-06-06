@@ -21,19 +21,20 @@ namespace proxygen {
 
 const SocketAddress HTTPSessionAcceptor::unknownSocketAddress_("0.0.0.0", 0);
 
-HTTPSessionAcceptor::HTTPSessionAcceptor(const AcceptorConfiguration& accConfig)
-    : HTTPSessionAcceptor(accConfig, nullptr) {
+HTTPSessionAcceptor::HTTPSessionAcceptor(
+    std::shared_ptr<const AcceptorConfiguration> accConfig)
+    : HTTPSessionAcceptor(std::move(accConfig), nullptr) {
 }
 
 HTTPSessionAcceptor::HTTPSessionAcceptor(
-    const AcceptorConfiguration& accConfig,
+    std::shared_ptr<const AcceptorConfiguration> accConfig,
     std::shared_ptr<HTTPCodecFactory> codecFactory)
-    : HTTPAcceptor(accConfig),
+    : HTTPAcceptor(std::move(accConfig)),
       codecFactory_(codecFactory),
       simpleController_(std::make_shared<SimpleController>(this)) {
   if (!codecFactory_) {
     codecFactory_ =
-        std::make_shared<HTTPDefaultSessionCodecFactory>(accConfig_);
+        std::make_shared<HTTPDefaultSessionCodecFactory>(getConfig());
   }
 }
 
@@ -82,8 +83,8 @@ void HTTPSessionAcceptor::onNewConnection(folly::AsyncTransport::UniquePtr sock,
 
   // overwrite address if the socket has no IP, e.g. Unix domain socket
   if (!localAddress.isFamilyInet()) {
-    if (accConfig_.bindAddress.isFamilyInet()) {
-      localAddress = accConfig_.bindAddress;
+    if (getConfig()->bindAddress.isFamilyInet()) {
+      localAddress = getConfig()->bindAddress;
     } else {
       localAddress = unknownSocketAddress_;
     }
@@ -102,22 +103,22 @@ void HTTPSessionAcceptor::onNewConnection(folly::AsyncTransport::UniquePtr sock,
                                 std::move(codec),
                                 tinfo,
                                 sessionInfoCb);
-  if (accConfig_.maxConcurrentIncomingStreams) {
+  if (getConfig()->maxConcurrentIncomingStreams) {
     session->setMaxConcurrentIncomingStreams(
-        accConfig_.maxConcurrentIncomingStreams);
+        getConfig()->maxConcurrentIncomingStreams);
   }
-  session->setEgressSettings(accConfig_.egressSettings);
+  session->setEgressSettings(getConfig()->egressSettings);
 
   // set HTTP2 priorities flag on session object
   auto HTTP2PrioritiesEnabled = getHttp2PrioritiesEnabled();
   session->setHTTP2PrioritiesEnabled(HTTP2PrioritiesEnabled);
 
   // set flow control parameters
-  session->setFlowControl(accConfig_.initialReceiveWindow,
-                          accConfig_.receiveStreamWindowSize,
-                          accConfig_.receiveSessionWindowSize);
-  if (accConfig_.writeBufferLimit > 0) {
-    session->setWriteBufferLimit(accConfig_.writeBufferLimit);
+  session->setFlowControl(getConfig()->initialReceiveWindow,
+                          getConfig()->receiveStreamWindowSize,
+                          getConfig()->receiveSessionWindowSize);
+  if (getConfig()->writeBufferLimit > 0) {
+    session->setWriteBufferLimit(getConfig()->writeBufferLimit);
   }
   session->setSessionStats(downstreamSessionStats_);
   Acceptor::addConnection(session);

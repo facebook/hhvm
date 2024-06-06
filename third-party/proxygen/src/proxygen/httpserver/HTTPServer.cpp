@@ -28,11 +28,11 @@ class AcceptorFactory : public wangle::AcceptorFactory {
  public:
   AcceptorFactory(std::shared_ptr<HTTPServerOptions> options,
                   std::shared_ptr<HTTPCodecFactory> codecFactory,
-                  AcceptorConfiguration config,
+                  std::shared_ptr<const AcceptorConfiguration> config,
                   HTTPSession::InfoCallback* sessionInfoCb)
       : options_(options),
         codecFactory_(codecFactory),
-        config_(config),
+        config_(std::move(config)),
         sessionInfoCb_(sessionInfoCb) {
   }
   std::shared_ptr<wangle::Acceptor> newAcceptor(
@@ -49,7 +49,7 @@ class AcceptorFactory : public wangle::AcceptorFactory {
  private:
   std::shared_ptr<HTTPServerOptions> options_;
   std::shared_ptr<HTTPCodecFactory> codecFactory_;
-  AcceptorConfiguration config_;
+  std::shared_ptr<const AcceptorConfiguration> config_;
   HTTPSession::InfoCallback* sessionInfoCb_;
 };
 
@@ -150,17 +150,17 @@ folly::Expected<folly::Unit, std::exception_ptr> HTTPServer::startTcpServer(
       bootstrap_.push_back(wangle::ServerBootstrap<wangle::DefaultPipeline>());
       bootstrap_[i].childHandler(acceptorFactory);
       bootstrap_[i].useZeroCopy(options_->useZeroCopy);
-      if (accConfig.enableTCPFastOpen) {
+      if (accConfig->enableTCPFastOpen) {
         // We need to do this because wangle's bootstrap has 2 acceptor
         // configs and the socketConfig gets passed to the SocketFactory. The
         // number of configs should really be one, and when that happens, we
         // can remove this code path.
         bootstrap_[i].socketConfig.enableTCPFastOpen = true;
         bootstrap_[i].socketConfig.fastOpenQueueSize =
-            accConfig.fastOpenQueueSize;
+            accConfig->fastOpenQueueSize;
       }
       bootstrap_[i].group(accExe, ioExecutor);
-      if (accConfig.reusePort) {
+      if (accConfig->reusePort) {
         bootstrap_[i].setReusePort(true);
       }
       if (options_->preboundSockets_.size() > i) {

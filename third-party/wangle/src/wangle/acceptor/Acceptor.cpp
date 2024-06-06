@@ -47,9 +47,9 @@ namespace wangle {
 
 static const std::string empty_string;
 
-Acceptor::Acceptor(const ServerSocketConfig& accConfig)
-    : accConfig_(accConfig),
-      socketOptions_(accConfig.getSocketOptions()),
+Acceptor::Acceptor(std::shared_ptr<const ServerSocketConfig> accConfig)
+    : accConfig_(std::move(accConfig)),
+      socketOptions_(accConfig_->getSocketOptions()),
       observerList_(this) {}
 
 void Acceptor::init(
@@ -57,22 +57,22 @@ void Acceptor::init(
     EventBase* eventBase,
     SSLStats* stats,
     std::shared_ptr<const fizz::server::FizzServerContext> fizzContext) {
-  if (accConfig_.isSSL()) {
-    if (accConfig_.allowInsecureConnectionsOnSecureServer) {
+  if (accConfig_->isSSL()) {
+    if (accConfig_->allowInsecureConnectionsOnSecureServer) {
       securityProtocolCtxManager_.addPeeker(&tlsPlaintextPeekingCallback_);
     }
 
-    if (accConfig_.fizzConfig.enableFizz) {
+    if (accConfig_->fizzConfig.enableFizz) {
       ticketSecrets_ = {
-          accConfig_.initialTicketSeeds.oldSeeds,
-          accConfig_.initialTicketSeeds.currentSeeds,
-          accConfig_.initialTicketSeeds.newSeeds};
+          accConfig_->initialTicketSeeds.oldSeeds,
+          accConfig_->initialTicketSeeds.currentSeeds,
+          accConfig_->initialTicketSeeds.newSeeds};
 
       if (!fizzCertManager_) {
         fizzCertManager_ = createFizzCertManager(
-            accConfig_.sslContextConfigs,
+            accConfig_->sslContextConfigs,
             /* pwFactory = */ nullptr,
-            accConfig_.strictSSL);
+            accConfig_->strictSSL);
       }
 
       auto context = fizzContext ? fizzContext : recreateFizzContext();
@@ -80,8 +80,8 @@ void Acceptor::init(
       auto* peeker = getFizzPeeker();
       peeker->setContext(std::move(context));
       peeker->options().setHandshakeRecordAlignedReads(
-          accConfig_.fizzConfig.preferKTLS);
-      peeker->options().setPreferIoUringSocket(accConfig_.preferIoUring);
+          accConfig_->fizzConfig.preferKTLS);
+      peeker->options().setPreferIoUringSocket(accConfig_->preferIoUring);
       securityProtocolCtxManager_.addPeeker(peeker);
     } else {
       securityProtocolCtxManager_.addPeeker(&defaultPeekingCallback_);
@@ -90,7 +90,7 @@ void Acceptor::init(
     if (!sslCtxManager_) {
       sslCtxManager_ = std::make_unique<SSLContextManager>(
           "vip_" + getName(),
-          SSLContextManagerSettings().setStrict(accConfig_.strictSSL),
+          SSLContextManagerSettings().setStrict(accConfig_->strictSSL),
           stats);
     }
     getFizzPeeker()->setSSLContextManager(sslCtxManager_);
@@ -98,27 +98,27 @@ void Acceptor::init(
       // If the default ctx is nullptr, we can assume it hasn't been configured
       // yet.
       if (sslCtxManager_->getDefaultSSLCtx() == nullptr) {
-        for (const auto& sslCtxConfig : accConfig_.sslContextConfigs) {
+        for (const auto& sslCtxConfig : accConfig_->sslContextConfigs) {
           sslCtxManager_->addSSLContextConfig(
               sslCtxConfig,
-              accConfig_.sslCacheOptions,
-              &accConfig_.initialTicketSeeds,
-              accConfig_.bindAddress,
+              accConfig_->sslCacheOptions,
+              &accConfig_->initialTicketSeeds,
+              accConfig_->bindAddress,
               cacheProvider_);
         }
-        for (const auto& sniConfig : accConfig_.sniConfigs) {
+        for (const auto& sniConfig : accConfig_->sniConfigs) {
           sslCtxManager_->addSSLContextConfig(
               sniConfig.snis,
               sniConfig.contextConfig,
-              accConfig_.sslCacheOptions,
-              &accConfig_.initialTicketSeeds,
-              accConfig_.bindAddress,
+              accConfig_->sslCacheOptions,
+              &accConfig_->initialTicketSeeds,
+              accConfig_->bindAddress,
               cacheProvider_);
         }
       }
       CHECK(sslCtxManager_->getDefaultSSLCtx());
     } catch (const std::runtime_error& ex) {
-      if (accConfig_.strictSSL) {
+      if (accConfig_->strictSSL) {
         throw;
       } else {
         sslCtxManager_->clear();
@@ -150,8 +150,8 @@ void Acceptor::initDownstreamConnectionManager(EventBase* eventBase) {
   state_ = State::kRunning;
   downstreamConnectionManager_ = ConnectionManager::makeUnique(
       eventBase,
-      accConfig_.connectionIdleTimeout,
-      accConfig_.connectionAgeTimeout,
+      accConfig_->connectionIdleTimeout,
+      accConfig_->connectionAgeTimeout,
       this);
 }
 
@@ -169,9 +169,9 @@ Acceptor::recreateFizzContext() {
     return nullptr;
   }
   auto ctx = createFizzContext(
-      accConfig_.sslContextConfigs,
-      accConfig_.fizzConfig,
-      accConfig_.strictSSL);
+      accConfig_->sslContextConfigs,
+      accConfig_->fizzConfig,
+      accConfig_->strictSSL);
   if (ctx) {
     ctx->setCertManager(fizzCertManager_);
     ctx->setTicketCipher(createFizzTicketCipher(
@@ -190,8 +190,8 @@ std::shared_ptr<fizz::server::TicketCipher> Acceptor::createFizzTicketCipher(
     folly::Optional<std::string> pskContext) {
   return FizzConfigUtil::createFizzTicketCipher(
       seeds,
-      accConfig_.sslCacheOptions.sslCacheTimeout,
-      accConfig_.sslCacheOptions.handshakeValidity,
+      accConfig_->sslCacheOptions.sslCacheTimeout,
+      accConfig_->sslCacheOptions.handshakeValidity,
       std::move(factory),
       std::move(certManager),
       std::move(pskContext));
@@ -207,9 +207,9 @@ std::unique_ptr<fizz::server::CertManager> Acceptor::createFizzCertManager(
 
 std::string Acceptor::getPskContext() {
   std::string pskContext;
-  if (!accConfig_.sslContextConfigs.empty()) {
+  if (!accConfig_->sslContextConfigs.empty()) {
     pskContext =
-        accConfig_.sslContextConfigs.front().sessionContext.value_or("");
+        accConfig_->sslContextConfigs.front().sessionContext.value_or("");
   }
   return pskContext;
 }
@@ -219,12 +219,12 @@ void Acceptor::resetSSLContextConfigs(
     std::shared_ptr<SSLContextManager> ctxManager,
     std::shared_ptr<const fizz::server::FizzServerContext> fizzContext) {
   try {
-    if (accConfig_.fizzConfig.enableFizz) {
+    if (accConfig_->fizzConfig.enableFizz) {
       auto manager = certManager ? std::move(certManager)
                                  : createFizzCertManager(
-                                       accConfig_.sslContextConfigs,
+                                       accConfig_->sslContextConfigs,
                                        /* pwFactory = */ nullptr,
-                                       accConfig_.strictSSL);
+                                       accConfig_->strictSSL);
       if (manager) {
         fizzCertManager_ = std::move(manager);
         auto context = fizzContext ? fizzContext : recreateFizzContext();
@@ -235,11 +235,11 @@ void Acceptor::resetSSLContextConfigs(
       sslCtxManager_ = ctxManager;
     } else if (sslCtxManager_) {
       sslCtxManager_->resetSSLContextConfigs(
-          accConfig_.sslContextConfigs,
-          accConfig_.sniConfigs,
-          accConfig_.sslCacheOptions,
+          accConfig_->sslContextConfigs,
+          accConfig_->sniConfigs,
+          accConfig_->sslCacheOptions,
           nullptr,
-          accConfig_.bindAddress,
+          accConfig_->bindAddress,
           cacheProvider_);
     }
     getFizzPeeker()->setSSLContextManager(sslCtxManager_);
@@ -255,14 +255,14 @@ void Acceptor::resetSSLContextConfigs(
   std::shared_ptr<SSLContextManager> ctxManager = nullptr;
   std::shared_ptr<const fizz::server::FizzServerContext> fizzContext = nullptr;
   try {
-    if (accConfig_.fizzConfig.enableFizz) {
+    if (accConfig_->fizzConfig.enableFizz) {
       certManager = createFizzCertManager(
           sslContextConfigs,
           /* pwFactory = */ nullptr,
-          accConfig_.strictSSL);
+          accConfig_->strictSSL);
       if (certManager) {
         auto context = createFizzContext(
-            sslContextConfigs, accConfig_.fizzConfig, accConfig_.strictSSL);
+            sslContextConfigs, accConfig_->fizzConfig, accConfig_->strictSSL);
         if (context) {
           context->setCertManager(certManager);
           std::string pskContext;
@@ -281,13 +281,13 @@ void Acceptor::resetSSLContextConfigs(
     if (sslCtxManager_) {
       // The API only updates sslContextConfigs, this API should be only called
       // for acceptors that hos no SNI configs
-      DCHECK(accConfig_.sniConfigs.empty());
+      DCHECK(accConfig_->sniConfigs.empty());
       sslCtxManager_->resetSSLContextConfigs(
           sslContextConfigs,
-          accConfig_.sniConfigs,
-          accConfig_.sslCacheOptions,
+          accConfig_->sniConfigs,
+          accConfig_->sslCacheOptions,
           nullptr,
-          accConfig_.bindAddress,
+          accConfig_->bindAddress,
           cacheProvider_);
     }
     resetSSLContextConfigs(certManager, sslCtxManager_, fizzContext);
@@ -310,7 +310,7 @@ void Acceptor::setTLSTicketSecrets(
     const std::vector<std::string>& oldSecrets,
     const std::vector<std::string>& currentSecrets,
     const std::vector<std::string>& newSecrets) {
-  if (accConfig_.fizzConfig.enableFizz) {
+  if (accConfig_->fizzConfig.enableFizz) {
     ticketSecrets_ = {oldSecrets, currentSecrets, newSecrets};
     getFizzPeeker()->setContext(recreateFizzContext());
   }
@@ -386,7 +386,7 @@ void Acceptor::processEstablishedConnection(
     TransportInfo& tinfo,
     folly::AsyncSocket::LegacyLifecycleObserver* observer) noexcept {
   bool shouldDoSSL = false;
-  if (accConfig_.isSSL()) {
+  if (accConfig_->isSSL()) {
     CHECK(sslCtxManager_);
     shouldDoSSL = sslCtxManager_->getDefaultSSLCtx() != nullptr;
   }
@@ -397,8 +397,8 @@ void Acceptor::processEstablishedConnection(
       sslSock->addLifecycleObserver(observer);
     }
     ++numPendingSSLConns_;
-    if (numPendingSSLConns_ > accConfig_.maxConcurrentSSLHandshakes) {
-      VLOG(2) << "dropped SSL handshake on " << accConfig_.name
+    if (numPendingSSLConns_ > accConfig_->maxConcurrentSSLHandshakes) {
+      VLOG(2) << "dropped SSL handshake on " << accConfig_->name
               << " too many handshakes in progress";
       auto error = SSLErrorEnum::DROPPED;
       auto latency = std::chrono::milliseconds(0);
@@ -466,11 +466,11 @@ void Acceptor::startHandshakeManager(
 AsyncTransport::UniquePtr Acceptor::transformTransport(
     AsyncTransport::UniquePtr sock) {
   if constexpr (fizz::platformCapableOfKTLS) {
-    fizz::KTLSRxPad rxPad = accConfig_.fizzConfig.expectNoPadKTLSRx
+    fizz::KTLSRxPad rxPad = accConfig_->fizzConfig.expectNoPadKTLSRx
         ? fizz::KTLSRxPad::RxExpectNoPad
         : fizz::KTLSRxPad::RxPadUnknown;
-    if (accConfig_.fizzConfig.preferKTLS) {
-      if (accConfig_.fizzConfig.preferKTLSRx) {
+    if (accConfig_->fizzConfig.preferKTLS) {
+      if (accConfig_->fizzConfig.preferKTLSRx) {
         std::string sockLogContext;
         if (VLOG_IS_ON(5)) {
           sockLogContext = logContext(*sock);
@@ -539,7 +539,7 @@ void Acceptor::connectionReady(
   // both to keep memory usage under control and to prevent one fast-
   // writing client from starving other connections.
   if (auto asyncSocket = sock->getUnderlyingTransport<AsyncSocket>()) {
-    asyncSocket->setMaxReadsPerEvent(accConfig_.socketMaxReadsPerEvent);
+    asyncSocket->setMaxReadsPerEvent(accConfig_->socketMaxReadsPerEvent);
     tinfo.initWithSocket(asyncSocket);
   }
   tinfo.appProtocol = std::make_shared<std::string>(nextProtocolName);
@@ -650,7 +650,7 @@ void Acceptor::drainConnections(double pctToDrain) {
 }
 
 milliseconds Acceptor::getConnTimeout() const {
-  return accConfig_.connectionIdleTimeout;
+  return accConfig_->connectionIdleTimeout;
 }
 
 void Acceptor::addConnection(ManagedConnection* conn) {

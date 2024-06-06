@@ -78,9 +78,9 @@ wangle::SSLContextConfig getSSLContextConfig() {
   ;
 }
 
-wangle::ServerSocketConfig getServerSocketConfig() {
-  wangle::ServerSocketConfig config;
-  config.sslContextConfigs.emplace_back(getSSLContextConfig());
+std::shared_ptr<wangle::ServerSocketConfig> getServerSocketConfig() {
+  auto config = std::make_shared<wangle::ServerSocketConfig>();
+  config->sslContextConfigs.emplace_back(getSSLContextConfig());
   return config;
 }
 } // namespace
@@ -89,7 +89,7 @@ namespace wangle {
 class TestAcceptor : public Acceptor {
  public:
   using Acceptor::getFizzPeeker;
-  explicit TestAcceptor(ServerSocketConfig accConfig)
+  explicit TestAcceptor(std::shared_ptr<const ServerSocketConfig> accConfig)
       : Acceptor(std::move(accConfig)) {}
   std::shared_ptr<SSLContextManager> getContextManager() const {
     return sslCtxManager_;
@@ -98,7 +98,7 @@ class TestAcceptor : public Acceptor {
 
 class SharedSSLContextManagerTest : public ::testing::Test {
  public:
-  void initialize(ServerSocketConfig config) {
+  void initialize(std::shared_ptr<const ServerSocketConfig> config) {
     manager_ =
         std::make_shared<SharedSSLContextManagerImpl<wangle::FizzConfigUtil>>(
             config);
@@ -186,7 +186,8 @@ class SharedSSLContextManagerTest : public ::testing::Test {
     }
   }
 
-  std::shared_ptr<TestAcceptor> initTestAcceptor(ServerSocketConfig config) {
+  std::shared_ptr<TestAcceptor> initTestAcceptor(
+      std::shared_ptr<const ServerSocketConfig> config) {
     auto acceptor = std::make_shared<TestAcceptor>(std::move(config));
     acceptor->init(nullptr, &evb_);
     return acceptor;
@@ -199,7 +200,7 @@ class SharedSSLContextManagerTest : public ::testing::Test {
 
 TEST_F(SharedSSLContextManagerTest, TestUpdateTLSTicketKeys) {
   auto config = getServerSocketConfig();
-  config.initialTicketSeeds = {{"01"}, {"02"}, {"03"}};
+  config->initialTicketSeeds = {{"01"}, {"02"}, {"03"}};
   initialize(std::move(config));
 
   auto update = [this]() {
@@ -216,7 +217,8 @@ TEST_F(SharedSSLContextManagerTest, TestUpdateTLSTicketKeysFailure) {
   auto tmpFile = getCertFile();
   const auto tmpFilePath = folly::fs::canonical(tmpFile.path()).string();
   auto config = getServerSocketConfig();
-  config.sslContextConfigs.front().setCertificate(tmpFilePath, tmpFilePath, "");
+  config->sslContextConfigs.front().setCertificate(
+      tmpFilePath, tmpFilePath, "");
   initialize(std::move(config));
 
   std::string corruptedCert =
@@ -248,7 +250,8 @@ TEST_F(SharedSSLContextManagerTest, TestReloadSSLContextConfigsFailure) {
   auto tmpFile = getCertFile();
   const auto tmpFilePath = folly::fs::canonical(tmpFile.path()).string();
   auto config = getServerSocketConfig();
-  config.sslContextConfigs.front().setCertificate(tmpFilePath, tmpFilePath, "");
+  config->sslContextConfigs.front().setCertificate(
+      tmpFilePath, tmpFilePath, "");
   initialize(std::move(config));
 
   std::string corruptedCert =

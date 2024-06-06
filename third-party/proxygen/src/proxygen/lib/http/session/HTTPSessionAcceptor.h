@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <proxygen/lib/http/codec/HTTPCodecFactory.h>
 #include <proxygen/lib/http/session/HTTPDownstreamSession.h>
@@ -27,9 +29,11 @@ class HTTPSessionAcceptor
     : public HTTPAcceptor
     , private HTTPSessionBase::InfoCallback {
  public:
-  explicit HTTPSessionAcceptor(const AcceptorConfiguration& accConfig);
-  explicit HTTPSessionAcceptor(const AcceptorConfiguration& accConfig,
-                               std::shared_ptr<HTTPCodecFactory> codecFactory);
+  explicit HTTPSessionAcceptor(
+      std::shared_ptr<const AcceptorConfiguration> accConfig);
+  explicit HTTPSessionAcceptor(
+      std::shared_ptr<const AcceptorConfiguration> accConfig,
+      std::shared_ptr<HTTPCodecFactory> codecFactory);
   ~HTTPSessionAcceptor() override;
 
   /**
@@ -90,7 +94,7 @@ class HTTPSessionAcceptor
   }
 
   virtual bool getHttp2PrioritiesEnabled() {
-    return accConfig_.HTTP2PrioritiesEnabled;
+    return getConfig()->HTTP2PrioritiesEnabled;
   }
 
  protected:

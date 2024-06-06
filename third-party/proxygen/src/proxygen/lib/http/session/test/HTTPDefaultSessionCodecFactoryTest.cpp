@@ -8,6 +8,8 @@
 
 #include <proxygen/lib/http/session/HTTPDefaultSessionCodecFactory.h>
 
+#include <memory>
+
 #include <folly/portability/GTest.h>
 #include <proxygen/lib/http/codec/HTTP1xCodec.h>
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
@@ -18,10 +20,10 @@
 using namespace proxygen;
 
 TEST(HTTPDefaultSessionCodecFactoryTest, GetCodecH2) {
-  AcceptorConfiguration conf;
+  auto conf = std::make_shared<AcceptorConfiguration>();
   // If set directly on the acceptor, we should always return the H2C version.
-  conf.plaintextProtocol = "h2c";
-  HTTPDefaultSessionCodecFactory factory(conf);
+  conf->plaintextProtocol = "h2c";
+  HTTPDefaultSessionCodecFactory factory(std::move(conf));
   auto codec = factory.getCodec(
       "http/1.1", TransportDirection::DOWNSTREAM, false /* isTLS */);
   HTTP2Codec* httpCodec = dynamic_cast<HTTP2Codec*>(codec.get());
@@ -39,9 +41,9 @@ TEST(HTTPDefaultSessionCodecFactoryTest, GetCodecH2) {
 
 TEST(HTTPDefaultSessionCodecFactoryTest, GetCodecUpgradeProtocols) {
   std::list<std::string> plainTextUpgrades = {http2::kProtocolCleartextString};
-  AcceptorConfiguration conf;
-  conf.allowedPlaintextUpgradeProtocols = plainTextUpgrades;
-  HTTPDefaultSessionCodecFactory factory(conf);
+  auto conf = std::make_shared<AcceptorConfiguration>();
+  conf->allowedPlaintextUpgradeProtocols = plainTextUpgrades;
+  HTTPDefaultSessionCodecFactory factory(std::move(conf));
 
   auto codec =
       factory.getCodec("http/1.1", TransportDirection::DOWNSTREAM, false);
@@ -59,8 +61,8 @@ TEST(HTTPDefaultSessionCodecFactoryTest, GetCodecUpgradeProtocols) {
 }
 
 TEST(HTTPDefaultSessionCodecFactoryTest, GetCodec) {
-  AcceptorConfiguration conf;
-  HTTPDefaultSessionCodecFactory factory(conf);
+  auto conf = std::make_shared<AcceptorConfiguration>();
+  HTTPDefaultSessionCodecFactory factory(std::move(conf));
 
   // Empty protocol should default to http/1.1
   auto codec =
@@ -90,9 +92,10 @@ class HTTPDefaultSessionCodecFactoryValidationTest
     : public ::testing::TestWithParam<TestParams> {};
 
 TEST_P(HTTPDefaultSessionCodecFactoryValidationTest, StrictValidation) {
-  AcceptorConfiguration conf;
-  conf.plaintextProtocol = GetParam().plaintextProto;
-  HTTPDefaultSessionCodecFactory factory(conf);
+  auto conf = std::make_shared<AcceptorConfiguration>();
+  conf->plaintextProtocol = GetParam().plaintextProto;
+  auto isPlaintextProtocolEmpty = conf->plaintextProtocol.empty();
+  HTTPDefaultSessionCodecFactory factory(std::move(conf));
   bool strict = GetParam().strict;
   factory.setStrictValidationFn([strict] { return strict; });
 
@@ -113,7 +116,7 @@ TEST_P(HTTPDefaultSessionCodecFactoryValidationTest, StrictValidation) {
   EXPECT_EQ(callbacks.streamErrors, strict ? 1 : 0);
   output.reset();
 
-  if (conf.plaintextProtocol.empty()) {
+  if (isPlaintextProtocolEmpty) {
     callbacks.reset();
     codec = factory.getCodec("http/1.1", TransportDirection::DOWNSTREAM, true);
     codec->setCallback(&callbacks);

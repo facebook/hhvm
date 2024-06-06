@@ -67,7 +67,7 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
     kDone, // no longer accepting, and all connections finished
   };
 
-  explicit Acceptor(const ServerSocketConfig& accConfig);
+  explicit Acceptor(std::shared_ptr<const ServerSocketConfig> accConfig);
   ~Acceptor() override;
 
   /**
@@ -209,14 +209,14 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
    * Will return an empty string if no name has been configured.
    */
   const std::string& getName() const {
-    return accConfig_.name;
+    return accConfig_->name;
   }
 
   /**
    * Returns the ssl handshake connection timeout of this VIP
    */
   std::chrono::milliseconds getSSLHandshakeTimeout() const {
-    return accConfig_.sslHandshakeTimeout;
+    return accConfig_->sslHandshakeTimeout;
   }
 
   /**
@@ -242,10 +242,10 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
   virtual void forceStop();
 
   bool isSSL() const {
-    return accConfig_.isSSL();
+    return accConfig_->isSSL();
   }
 
-  const ServerSocketConfig& getConfig() const {
+  std::shared_ptr<const ServerSocketConfig> getConfig() const {
     return accConfig_;
   }
 
@@ -520,7 +520,7 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
   void onConnectionAdded(const ManagedConnection*) override {}
   void onConnectionRemoved(const ManagedConnection*) override {}
 
-  const ServerSocketConfig accConfig_;
+  std::shared_ptr<const ServerSocketConfig> accConfig_;
 
   // Helper function to initialize downstreamConnectionManager_
   virtual void initDownstreamConnectionManager(folly::EventBase* eventBase);

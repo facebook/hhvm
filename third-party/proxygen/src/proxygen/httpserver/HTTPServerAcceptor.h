@@ -16,11 +16,11 @@ namespace proxygen {
 
 class HTTPServerAcceptor final : public HTTPSessionAcceptor {
  public:
-  static AcceptorConfiguration makeConfig(const HTTPServer::IPConfig& ipConfig,
-                                          const HTTPServerOptions& opts);
+  static std::shared_ptr<const AcceptorConfiguration> makeConfig(
+      const HTTPServer::IPConfig& ipConfig, const HTTPServerOptions& opts);
 
   static std::unique_ptr<HTTPServerAcceptor> make(
-      const AcceptorConfiguration& conf,
+      std::shared_ptr<const AcceptorConfiguration> conf,
       const HTTPServerOptions& opts,
       const std::shared_ptr<HTTPCodecFactory>& codecFactory = nullptr);
 
@@ -32,7 +32,7 @@ class HTTPServerAcceptor final : public HTTPSessionAcceptor {
   ~HTTPServerAcceptor() override;
 
  private:
-  HTTPServerAcceptor(const AcceptorConfiguration& conf,
+  HTTPServerAcceptor(std::shared_ptr<const AcceptorConfiguration> conf,
                      const std::shared_ptr<HTTPCodecFactory>& codecFactory,
                      std::vector<RequestHandlerFactory*> handlerFactories,
                      const HTTPServerOptions& options);

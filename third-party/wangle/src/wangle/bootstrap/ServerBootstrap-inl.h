@@ -156,8 +156,8 @@ class ServerAcceptor : public Acceptor,
   explicit ServerAcceptor(
       std::shared_ptr<AcceptPipelineFactory> acceptPipelineFactory,
       std::shared_ptr<PipelineFactory<Pipeline>> childPipelineFactory,
-      const ServerSocketConfig& accConfig)
-      : Acceptor(accConfig),
+      std::shared_ptr<const ServerSocketConfig> accConfig)
+      : Acceptor(std::move(accConfig)),
         acceptPipelineFactory_(acceptPipelineFactory),
         childPipelineFactory_(childPipelineFactory) {}
 
@@ -195,7 +195,7 @@ class ServerAcceptor : public Acceptor,
     // Setup local and remote addresses
     auto tInfoPtr = std::make_shared<TransportInfo>(connInfo.tinfo);
     tInfoPtr->localAddr =
-        std::make_shared<folly::SocketAddress>(accConfig_.bindAddress);
+        std::make_shared<folly::SocketAddress>(accConfig_->bindAddress);
     transport->getLocalAddress(tInfoPtr->localAddr.get());
     tInfoPtr->remoteAddr =
         std::make_shared<folly::SocketAddress>(*connInfo.clientAddr);
@@ -335,10 +335,10 @@ class ServerAcceptorFactory : public AcceptorFactory {
   explicit ServerAcceptorFactory(
       std::shared_ptr<AcceptPipelineFactory> acceptPipelineFactory,
       std::shared_ptr<PipelineFactory<Pipeline>> childPipelineFactory,
-      const ServerSocketConfig& accConfig)
+      std::shared_ptr<const ServerSocketConfig> accConfig)
       : acceptPipelineFactory_(acceptPipelineFactory),
         childPipelineFactory_(childPipelineFactory),
-        accConfig_(accConfig) {}
+        accConfig_(std::move(accConfig)) {}
 
   virtual void enableSharedSSLContext(bool enable) {
     if (enable) {
@@ -372,7 +372,7 @@ class ServerAcceptorFactory : public AcceptorFactory {
  private:
   std::shared_ptr<AcceptPipelineFactory> acceptPipelineFactory_;
   std::shared_ptr<PipelineFactory<Pipeline>> childPipelineFactory_;
-  ServerSocketConfig accConfig_;
+  std::shared_ptr<const ServerSocketConfig> accConfig_;
   std::shared_ptr<SharedSSLContextManager> sharedSSLContextManager_;
 };
 

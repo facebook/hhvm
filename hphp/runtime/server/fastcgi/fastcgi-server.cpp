@@ -86,8 +86,9 @@ FastCGIServer::FastCGIServer(const std::string &address,
   } else {
     sock_addr.setFromHostPort(address, port);
   }
-  m_socketConfig.bindAddress = sock_addr;
-  m_socketConfig.acceptBacklog = Cfg::Server::Backlog;
+  auto accConfig = std::make_shared<wangle::ServerSocketConfig>();
+  accConfig->bindAddress = sock_addr;
+  accConfig->acceptBacklog = Cfg::Server::Backlog;
   std::chrono::seconds timeout;
   if (Cfg::Server::ConnectionTimeoutSeconds >= 0) {
     timeout = std::chrono::seconds(Cfg::Server::ConnectionTimeoutSeconds);
@@ -95,24 +96,25 @@ FastCGIServer::FastCGIServer(const std::string &address,
     // default to 2 minutes
     timeout = std::chrono::seconds(120);
   }
-  m_socketConfig.connectionIdleTimeout = timeout;
+  accConfig->connectionIdleTimeout = timeout;
+  m_socketConfig = std::move(accConfig);
 }
 
 void FastCGIServer::start() {
   // It's not safe to call this function more than once
   m_socket.reset(new folly::AsyncServerSocket(m_worker.getEventBase()));
   try {
-    m_socket->bind(m_socketConfig.bindAddress);
+    m_socket->bind(m_socketConfig->bindAddress);
   } catch (const std::system_error& ex) {
     Logger::Error(std::string(ex.what()));
-    if (m_socketConfig.bindAddress.getFamily() == AF_UNIX) {
-      throw FailedToListenException(m_socketConfig.bindAddress.getPath());
+    if (m_socketConfig->bindAddress.getFamily() == AF_UNIX) {
+      throw FailedToListenException(m_socketConfig->bindAddress.getPath());
     }
-    throw FailedToListenException(m_socketConfig.bindAddress.getAddressStr(),
-                                  m_socketConfig.bindAddress.getPort());
+    throw FailedToListenException(m_socketConfig->bindAddress.getAddressStr(),
+                                  m_socketConfig->bindAddress.getPort());
   }
-  if (m_socketConfig.bindAddress.getFamily() == AF_UNIX) {
-    auto path = m_socketConfig.bindAddress.getPath();
+  if (m_socketConfig->bindAddress.getFamily() == AF_UNIX) {
+    auto path = m_socketConfig->bindAddress.getPath();
     chmod(path.c_str(), 0760);
   }
   m_acceptor.reset(new FastCGIAcceptor(m_socketConfig, this));
@@ -124,7 +126,7 @@ void FastCGIServer::start() {
       // we mutate m_socket is done within the event base.
       return;
     }
-    m_socket->listen(m_socketConfig.acceptBacklog);
+    m_socket->listen(m_socketConfig->acceptBacklog);
     m_socket->startAccepting();
   });
   setStatus(RunStatus::RUNNING);

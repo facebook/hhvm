@@ -434,13 +434,15 @@ TEST_F(ServerProtocolTest, TestAlertReceived) {
   setUpAcceptingData();
   Alert alert;
   alert.description = AlertDescription::unexpected_message;
-  auto actions = getActions(detail::processEvent(state_, std::move(alert)));
+  fizz::Param param = std::move(alert);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(actions, folly::none, "received alert");
 }
 
 TEST_F(ServerProtocolTest, TestCloseNotifyReceived) {
   setUpAcceptingData();
-  auto actions = getActions(detail::processEvent(state_, CloseNotify()));
+  fizz::Param param = CloseNotify();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, EndOfData>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::Closed);
@@ -452,7 +454,8 @@ TEST_F(ServerProtocolTest, TestCloseNotifyReceivedWithUnparsedHandshakeData) {
   setUpAcceptingData();
   EXPECT_CALL(*appRead_, hasUnparsedHandshakeData())
       .WillRepeatedly(Return(true));
-  auto actions = getActions(detail::processEvent(state_, CloseNotify()));
+  fizz::Param param = CloseNotify();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(actions, AlertDescription::unexpected_message);
 }
 
@@ -785,8 +788,8 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
             folly::IOBuf::copyBuffer("serverappiv")};
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHello()));
+  fizz::Param param = TestMessages::clientHello();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   auto write = expectAction<WriteToSocket>(actions);
@@ -1064,7 +1067,8 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
   CertificateCompressionAlgorithms algos;
   algos.algorithms = {CertificateCompressionAlgorithm::zlib};
   chlo.extensions.push_back(encodeExtension(algos));
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   auto write = expectAction<WriteToSocket>(actions);
@@ -1390,8 +1394,8 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
         return ret;
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, setupClientHelloOuter()));
+  fizz::Param param = setupClientHelloOuter();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   auto write = expectAction<WriteToSocket>(actions);
@@ -1454,8 +1458,8 @@ TEST_F(ServerProtocolTest, TestECHMissingInnerExtension) {
                 std::make_unique<hpke::test::MockHpkeContext>()};
           }));
   context_->setECHDecrypter(decrypter);
-  auto actions =
-      getActions(detail::processEvent(state_, setupClientHelloOuter()));
+  fizz::Param param = setupClientHelloOuter();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions,
       AlertDescription::missing_extension,
@@ -1703,8 +1707,8 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
         return ret;
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, setupClientHelloOuter()));
+  fizz::Param param = setupClientHelloOuter();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   auto write = expectAction<WriteToSocket>(actions);
@@ -1964,8 +1968,8 @@ TEST_F(ServerProtocolTest, TestClientHelloCertRequestFlow) {
             folly::IOBuf::copyBuffer("serverappiv")};
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHello()));
+  fizz::Param param = TestMessages::clientHello();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   auto write = expectAction<WriteToSocket>(actions);
@@ -2186,8 +2190,8 @@ TEST_F(ServerProtocolTest, TestClientHelloPskFlow) {
             folly::IOBuf::copyBuffer("serverappiv")};
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHelloPsk()));
+  fizz::Param param = TestMessages::clientHelloPsk();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   auto write = expectAction<WriteToSocket>(actions);
@@ -2428,8 +2432,8 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheFlow) {
             folly::IOBuf::copyBuffer("serverappiv")};
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHelloPsk()));
+  fizz::Param param = TestMessages::clientHelloPsk();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   auto write = expectAction<WriteToSocket>(actions);
@@ -2529,8 +2533,8 @@ TEST_F(ServerProtocolTest, TestClientHelloHelloRetryRequestFlow) {
   EXPECT_CALL(*newRrl, setSkipEncryptedRecords(false));
 
   context_->setSupportedGroups({NamedGroup::secp256r1, NamedGroup::x25519});
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHello()));
+  fizz::Param param = TestMessages::clientHello();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState, WriteToSocket>(actions);
   auto write = expectAction<WriteToSocket>(actions);
@@ -2747,8 +2751,8 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloFullHandshakeFlow) {
             folly::IOBuf::copyBuffer("serverappiv")};
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHello()));
+  fizz::Param param = TestMessages::clientHello();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   auto write = expectAction<WriteToSocket>(actions);
@@ -2981,8 +2985,8 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloPskDheFlow) {
             folly::IOBuf::copyBuffer("serverappiv")};
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHelloPsk()));
+  fizz::Param param = TestMessages::clientHelloPsk();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   auto write = expectAction<WriteToSocket>(actions);
@@ -3270,8 +3274,8 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
             folly::IOBuf::copyBuffer("serverappiv")};
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, setupClientHelloOuterHRR()));
+  fizz::Param param = setupClientHelloOuterHRR();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   auto write = expectAction<WriteToSocket>(actions);
@@ -3333,8 +3337,8 @@ TEST_F(ServerProtocolTest, TestRetryECHMissingInnerExtension) {
       .WillOnce(
           InvokeWithoutArgs([=]() { return TestMessages::clientHello(); }));
   context_->setECHDecrypter(decrypter);
-  auto actions =
-      getActions(detail::processEvent(state_, setupClientHelloOuterHRR()));
+  fizz::Param param = setupClientHelloOuterHRR();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions,
       AlertDescription::missing_extension,
@@ -3545,8 +3549,8 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
             folly::IOBuf::copyBuffer("serverappiv")};
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, setupClientHelloOuterHRR()));
+  fizz::Param param = setupClientHelloOuterHRR();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   auto write = expectAction<WriteToSocket>(actions);
@@ -3828,8 +3832,9 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheEarlyFlow) {
 
   std::chrono::milliseconds age =
       std::chrono::minutes(5) - std::chrono::seconds(10);
-  auto actions = getActions(detail::processEvent(
-      state_, TestMessages::clientHelloPskEarly(age.count())));
+
+  fizz::Param param = TestMessages::clientHelloPskEarly(age.count());
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<
       MutateState,
@@ -4108,8 +4113,9 @@ TEST_F(ServerProtocolTest, TestClientHelloPskEarlyFlow) {
 
   std::chrono::milliseconds age =
       std::chrono::minutes(5) - std::chrono::seconds(10);
-  auto actions = getActions(detail::processEvent(
-      state_, TestMessages::clientHelloPskEarly(age.count())));
+
+  fizz::Param param = TestMessages::clientHelloPskEarly(age.count());
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<
       MutateState,
@@ -4179,8 +4185,8 @@ TEST_F(ServerProtocolTest, TestClientHelloPskEarlyFlow) {
 TEST_F(ServerProtocolTest, TestClientHelloNullExtensions) {
   addExtensions_ = false;
   setUpExpectingClientHello();
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHello()));
+  fizz::Param param = TestMessages::clientHello();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_CALL(*extensions_, getExtensions(_)).Times(0);
@@ -4190,8 +4196,8 @@ TEST_F(ServerProtocolTest, TestClientHelloLegacySessionId) {
   setUpExpectingClientHello();
   auto chloWithLegacy = TestMessages::clientHello();
   chloWithLegacy.legacy_session_id = folly::IOBuf::copyBuffer("middleboxes");
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(chloWithLegacy)));
+  fizz::Param param = std::move(chloWithLegacy);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   auto write = expectAction<WriteToSocket>(actions);
   EXPECT_EQ(write.contents.size(), 3);
@@ -4208,8 +4214,8 @@ TEST_F(ServerProtocolTest, TestClientHelloLegacyHrr) {
   auto chloWithLegacy = TestMessages::clientHello();
   chloWithLegacy.legacy_session_id = folly::IOBuf::copyBuffer("middleboxes");
   context_->setSupportedGroups({NamedGroup::secp256r1, NamedGroup::x25519});
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(chloWithLegacy)));
+  fizz::Param param = std::move(chloWithLegacy);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket>(actions);
   auto write = expectAction<WriteToSocket>(actions);
   EXPECT_EQ(write.contents.size(), 2);
@@ -4223,24 +4229,24 @@ TEST_F(ServerProtocolTest, TestClientHelloLegacyHrr) {
 
 TEST_F(ServerProtocolTest, TestClientHelloFullHandshake) {
   setUpExpectingClientHello();
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHello()));
+  fizz::Param param = TestMessages::clientHello();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
 }
 
 TEST_F(ServerProtocolTest, TestClientHelloPsk) {
   context_->setSupportedPskModes({PskKeyExchangeMode::psk_ke});
   setUpExpectingClientHello();
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHelloPsk()));
+  fizz::Param param = TestMessages::clientHelloPsk();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
 }
 
 TEST_F(ServerProtocolTest, TestClientHelloPskDhe) {
   context_->setSupportedPskModes({PskKeyExchangeMode::psk_dhe_ke});
   setUpExpectingClientHello();
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHelloPsk()));
+  fizz::Param param = TestMessages::clientHelloPsk();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
 }
 
@@ -4251,7 +4257,8 @@ TEST_F(ServerProtocolTest, TestClientHelloPskModeMismatch) {
   PskKeyExchangeModes modes;
   chlo.extensions.push_back(encodeExtension(std::move(modes)));
   TestMessages::addPsk(chlo);
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
 }
 
@@ -4259,7 +4266,8 @@ TEST_F(ServerProtocolTest, TestClientHelloNoSni) {
   setUpExpectingClientHello();
   auto chlo = TestMessages::clientHello();
   TestMessages::removeExtension(chlo, ExtensionType::server_name);
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
 }
 
@@ -4269,8 +4277,8 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeRejectedPsk) {
     return std::make_pair(PskType::Rejected, folly::none);
   }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHelloPsk()));
+  fizz::Param param = TestMessages::clientHelloPsk();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -4281,7 +4289,8 @@ TEST_F(ServerProtocolTest, TestClientHelloPskNoModes) {
   setUpExpectingClientHello();
   auto chlo = TestMessages::clientHelloPsk();
   TestMessages::removeExtension(chlo, ExtensionType::psk_key_exchange_modes);
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::missing_extension, "no psk modes");
 }
@@ -4290,7 +4299,8 @@ TEST_F(ServerProtocolTest, TestClientHelloPskNotSupported) {
   setUpExpectingClientHello();
   auto chlo = TestMessages::clientHello();
   TestMessages::removeExtension(chlo, ExtensionType::psk_key_exchange_modes);
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -4310,7 +4320,8 @@ TEST_F(ServerProtocolTest, TestClientHelloPskBadBinder) {
   binder.binder = folly::IOBuf::copyBuffer("verifyxxxx");
   cpk.binders.push_back(std::move(binder));
   chlo.extensions.push_back(encodeExtension(std::move(cpk)));
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::bad_record_mac, "binder does not match");
 }
@@ -4320,8 +4331,8 @@ TEST_F(ServerProtocolTest, TestClientHelloFallback) {
   setUpExpectingClientHello();
   auto clientHello = TestMessages::clientHello();
   TestMessages::removeExtension(clientHello, ExtensionType::supported_versions);
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(clientHello)));
+  fizz::Param param = std::move(clientHello);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, AttemptVersionFallback>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::Error);
@@ -4341,8 +4352,8 @@ TEST_F(ServerProtocolTest, TestClientHelloFallbackNoSNI) {
   auto clientHello = TestMessages::clientHello();
   TestMessages::removeExtension(clientHello, ExtensionType::supported_versions);
   TestMessages::removeExtension(clientHello, ExtensionType::server_name);
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(clientHello)));
+  fizz::Param param = std::move(clientHello);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, AttemptVersionFallback>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::Error);
@@ -4360,8 +4371,8 @@ TEST_F(ServerProtocolTest, TestClientHelloNoSupportedVersions) {
   setUpExpectingClientHello();
   auto clientHello = TestMessages::clientHello();
   TestMessages::removeExtension(clientHello, ExtensionType::supported_versions);
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(clientHello)));
+  fizz::Param param = std::move(clientHello);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions,
       AlertDescription::protocol_version,
@@ -4376,8 +4387,8 @@ TEST_F(ServerProtocolTest, TestClientHelloSupportedVersionsMismatch) {
   supportedVersions.versions.push_back(static_cast<ProtocolVersion>(0x0200));
   clientHello.extensions.push_back(
       encodeExtension(std::move(supportedVersions)));
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(clientHello)));
+  fizz::Param param = std::move(clientHello);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions,
       AlertDescription::protocol_version,
@@ -4388,8 +4399,8 @@ TEST_F(ServerProtocolTest, TestClientHelloCipherMismatch) {
   setUpExpectingClientHello();
   auto clientHello = TestMessages::clientHello();
   clientHello.cipher_suites.clear();
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(clientHello)));
+  fizz::Param param = std::move(clientHello);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::handshake_failure, "no cipher match");
 }
@@ -4398,8 +4409,8 @@ TEST_F(ServerProtocolTest, TestClientHelloNoSupportedGroups) {
   setUpExpectingClientHello();
   auto clientHello = TestMessages::clientHello();
   TestMessages::removeExtension(clientHello, ExtensionType::supported_groups);
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(clientHello)));
+  fizz::Param param = std::move(clientHello);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::missing_extension, "no named groups");
 }
@@ -4411,8 +4422,8 @@ TEST_F(ServerProtocolTest, TestClientHelloNamedGroupsMismatch) {
   SupportedGroups sg;
   sg.named_group_list.push_back(static_cast<NamedGroup>(0x0707));
   clientHello.extensions.push_back(encodeExtension(std::move(sg)));
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(clientHello)));
+  fizz::Param param = std::move(clientHello);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::handshake_failure, "no group match");
 }
@@ -4421,8 +4432,8 @@ TEST_F(ServerProtocolTest, TestClientHelloNoClientKeyShare) {
   setUpExpectingClientHello();
   auto clientHello = TestMessages::clientHello();
   TestMessages::removeExtension(clientHello, ExtensionType::key_share);
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(clientHello)));
+  fizz::Param param = std::move(clientHello);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::missing_extension, "no client share");
 }
@@ -4432,8 +4443,8 @@ TEST_F(ServerProtocolTest, TestClientHelloNoSigScemes) {
   auto clientHello = TestMessages::clientHello();
   TestMessages::removeExtension(
       clientHello, ExtensionType::signature_algorithms);
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(clientHello)));
+  fizz::Param param = std::move(clientHello);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::missing_extension, "no sig schemes");
 }
@@ -4442,8 +4453,8 @@ TEST_F(ServerProtocolTest, TestClientHelloDataAfter) {
   setUpExpectingClientHello();
   EXPECT_CALL(*mockRead_, hasUnparsedHandshakeData())
       .WillRepeatedly(Return(true));
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHello()));
+  fizz::Param param = TestMessages::clientHello();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::unexpected_message, "data after client hello");
 }
@@ -4453,7 +4464,8 @@ TEST_F(ServerProtocolTest, TestClientHelloNoAlpnAllowMismatch) {
   auto chlo = TestMessages::clientHello();
   TestMessages::removeExtension(
       chlo, ExtensionType::application_layer_protocol_negotiation);
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_FALSE(state_.alpn().has_value());
@@ -4469,7 +4481,8 @@ TEST_F(ServerProtocolTest, TestClientHelloWithAlpnAllowMismatch) {
   h3.name = folly::IOBuf::copyBuffer("h3");
   alpn.protocol_name_list.push_back(std::move(h3));
   chlo.extensions.push_back(encodeExtension(std::move(alpn)));
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_TRUE(state_.alpn().has_value());
@@ -4485,7 +4498,8 @@ TEST_F(ServerProtocolTest, TestClientHelloMismatchAlpnAllowMismatch) {
   gopher.name = folly::IOBuf::copyBuffer("gopher");
   alpn.protocol_name_list.push_back(std::move(gopher));
   chlo.extensions.push_back(encodeExtension(std::move(alpn)));
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_FALSE(state_.alpn().has_value());
@@ -4497,7 +4511,8 @@ TEST_F(ServerProtocolTest, TestClientHelloNAlpnOptional) {
   auto chlo = TestMessages::clientHello();
   TestMessages::removeExtension(
       chlo, ExtensionType::application_layer_protocol_negotiation);
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_FALSE(state_.alpn().has_value());
@@ -4514,7 +4529,8 @@ TEST_F(ServerProtocolTest, TestClientHelloWithAlpnOptional) {
   h3.name = folly::IOBuf::copyBuffer("h3");
   alpn.protocol_name_list.push_back(std::move(h3));
   chlo.extensions.push_back(encodeExtension(std::move(alpn)));
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_TRUE(state_.alpn().has_value());
@@ -4531,7 +4547,8 @@ TEST_F(ServerProtocolTest, TestClientHelloMismatchAlpnOptional) {
   gopher.name = folly::IOBuf::copyBuffer("gopher");
   alpn.protocol_name_list.push_back(std::move(gopher));
   chlo.extensions.push_back(encodeExtension(std::move(alpn)));
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions,
       AlertDescription::no_application_protocol,
@@ -4544,7 +4561,8 @@ TEST_F(ServerProtocolTest, TestClientHelloNoAlpnRequired) {
   auto chlo = TestMessages::clientHello();
   TestMessages::removeExtension(
       chlo, ExtensionType::application_layer_protocol_negotiation);
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::no_application_protocol, "ALPN is required");
 }
@@ -4560,7 +4578,8 @@ TEST_F(ServerProtocolTest, TestClientHelloWithAlpnRequired) {
   h3.name = folly::IOBuf::copyBuffer("h3");
   alpn.protocol_name_list.push_back(std::move(h3));
   chlo.extensions.push_back(encodeExtension(std::move(alpn)));
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_TRUE(state_.alpn().has_value());
@@ -4577,7 +4596,8 @@ TEST_F(ServerProtocolTest, TestClientHelloMismatchAlpnRequired) {
   gopher.name = folly::IOBuf::copyBuffer("gopher");
   alpn.protocol_name_list.push_back(std::move(gopher));
   chlo.extensions.push_back(encodeExtension(std::move(alpn)));
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions,
       AlertDescription::no_application_protocol,
@@ -4597,7 +4617,8 @@ TEST_F(ServerProtocolTest, TestClientHelloServerPref) {
   h2.name = folly::IOBuf::copyBuffer("h2");
   alpn.protocol_name_list.push_back(std::move(h2));
   chlo.extensions.push_back(encodeExtension(std::move(alpn)));
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(*state_.alpn(), "h2");
@@ -4609,8 +4630,9 @@ TEST_F(ServerProtocolTest, TestClientHelloAcceptEarlyData) {
 
   std::chrono::milliseconds age =
       std::chrono::minutes(5) - std::chrono::seconds(10);
-  auto actions = getActions(detail::processEvent(
-      state_, TestMessages::clientHelloPskEarly(age.count())));
+
+  fizz::Param param = TestMessages::clientHelloPskEarly(age.count());
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<
       MutateState,
       WriteToSocket,
@@ -4637,8 +4659,9 @@ TEST_F(ServerProtocolTest, TestClientHelloAcceptEarlyDataOmitEarlyRecort) {
 
   std::chrono::milliseconds age =
       std::chrono::minutes(5) - std::chrono::seconds(10);
-  auto actions = getActions(detail::processEvent(
-      state_, TestMessages::clientHelloPskEarly(age.count())));
+
+  fizz::Param param = TestMessages::clientHelloPskEarly(age.count());
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<
       MutateState,
       WriteToSocket,
@@ -4669,8 +4692,8 @@ TEST_F(
         << "Early data not attempted, validator shoudn't be called";
     return false;
   }));
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHelloPsk()));
+  fizz::Param param = TestMessages::clientHelloPsk();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -4711,8 +4734,9 @@ TEST_F(ServerProtocolTest, TestClientHelloAcceptEarlyDataWithValidAppToken) {
 
   std::chrono::milliseconds age =
       std::chrono::minutes(5) - std::chrono::seconds(10);
-  auto actions = getActions(detail::processEvent(
-      state_, TestMessages::clientHelloPskEarly(age.count())));
+
+  fizz::Param param = TestMessages::clientHelloPskEarly(age.count());
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<
       MutateState,
       WriteToSocket,
@@ -4740,8 +4764,8 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyData) {
           [rrl]() { return std::unique_ptr<EncryptedReadRecordLayer>(rrl); }));
   EXPECT_CALL(*rrl, setSkipFailedDecryption(true));
 
-  auto actions = getActions(
-      detail::processEvent(state_, TestMessages::clientHelloPskEarly()));
+  fizz::Param param = TestMessages::clientHelloPskEarly();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -4767,8 +4791,9 @@ TEST_F(ServerProtocolTest, TestClientHelloHrrRejectEarlyData) {
 
   std::chrono::milliseconds age =
       std::chrono::minutes(5) - std::chrono::seconds(10);
-  auto actions = getActions(detail::processEvent(
-      state_, TestMessages::clientHelloPskEarly(age.count())));
+
+  fizz::Param param = TestMessages::clientHelloPskEarly(age.count());
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingClientHello);
@@ -4794,8 +4819,9 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieRejectEarlyData) {
   c.cookie = folly::IOBuf::copyBuffer("cookie");
   chlo.extensions.push_back(encodeExtension(std::move(c)));
   TestMessages::addPsk(chlo);
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
 
@@ -4820,8 +4846,8 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataPskRejected) {
 
   std::chrono::milliseconds age =
       std::chrono::minutes(5) - std::chrono::seconds(10);
-  auto actions = getActions(detail::processEvent(
-      state_, TestMessages::clientHelloPskEarly(age.count())));
+  fizz::Param param = TestMessages::clientHelloPskEarly(age.count());
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -4845,8 +4871,9 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataReplayCache) {
 
   std::chrono::milliseconds age =
       std::chrono::minutes(5) - std::chrono::seconds(10);
-  auto actions = getActions(detail::processEvent(
-      state_, TestMessages::clientHelloPskEarly(age.count())));
+
+  fizz::Param param = TestMessages::clientHelloPskEarly(age.count());
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -4864,8 +4891,9 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataNoAlpn) {
   auto chlo = TestMessages::clientHelloPskEarly(age.count());
   TestMessages::removeExtension(
       chlo, ExtensionType::application_layer_protocol_negotiation);
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -4887,8 +4915,9 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataDiffAlpn) {
   chlo.extensions.push_back(encodeExtension(std::move(alpn)));
   chlo.extensions.push_back(encodeExtension(ClientEarlyData()));
   TestMessages::addPsk(chlo);
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -4902,8 +4931,9 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataAfterHrr) {
 
   std::chrono::milliseconds age =
       std::chrono::minutes(5) - std::chrono::seconds(10);
-  auto actions = getActions(detail::processEvent(
-      state_, TestMessages::clientHelloPskEarly(age.count())));
+
+  fizz::Param param = TestMessages::clientHelloPskEarly(age.count());
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -4926,8 +4956,9 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataClockBehind) {
   chlo.extensions.push_back(encodeExtension(ClientEarlyData()));
   // Set age here to 4 seconds (6 seconds behind)
   TestMessages::addPsk(chlo, 4000);
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -4951,8 +4982,9 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataClockAhead) {
   chlo.extensions.push_back(encodeExtension(ClientEarlyData()));
   // Client believes issued 16 seconds ago (6 seconds ahead);
   TestMessages::addPsk(chlo, 16000);
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -4983,8 +5015,9 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataTicketAgeOverflow) {
   auto chlo = TestMessages::clientHello();
   chlo.extensions.push_back(encodeExtension(ClientEarlyData()));
   TestMessages::addPsk(chlo, 2000000);
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -5015,8 +5048,9 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataNegativeExpectedAge) {
   auto chlo = TestMessages::clientHello();
   chlo.extensions.push_back(encodeExtension(ClientEarlyData()));
   TestMessages::addPsk(chlo, 2000000);
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -5059,8 +5093,9 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataInvalidAppToken) {
 
   std::chrono::milliseconds age =
       std::chrono::minutes(5) - std::chrono::seconds(10);
-  auto actions = getActions(detail::processEvent(
-      state_, TestMessages::clientHelloPskEarly(age.count())));
+
+  fizz::Param param = TestMessages::clientHelloPskEarly(age.count());
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -5074,8 +5109,8 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataInvalidAppToken) {
 TEST_F(ServerProtocolTest, TestClientHelloHandshakeLogging) {
   setUpExpectingClientHello();
   state_.handshakeLogging() = std::make_unique<HandshakeLogging>();
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHello()));
+  fizz::Param param = TestMessages::clientHello();
+  auto actions = getActions(detail::processEvent(state_, param));
   processStateMutations(actions);
   EXPECT_EQ(
       state_.handshakeLogging()->clientLegacyVersion, ProtocolVersion::tls_1_2);
@@ -5115,7 +5150,8 @@ TEST_F(ServerProtocolTest, TestClientHelloTestByte) {
   chlo.extensions.push_back(
       {ExtensionType::test_extension,
        folly::IOBuf::copyBuffer(&testExtensionByte, 1)});
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   processStateMutations(actions);
 
   EXPECT_TRUE(state_.handshakeLogging()->testExtensionByte.has_value());
@@ -5127,7 +5163,8 @@ TEST_F(ServerProtocolTest, TestClientHelloHandshakeLoggingError) {
   state_.handshakeLogging() = std::make_unique<HandshakeLogging>();
   ClientHello chlo;
   chlo.legacy_version = static_cast<ProtocolVersion>(0x0301);
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   EXPECT_EQ(
       state_.handshakeLogging()->clientLegacyVersion,
       static_cast<ProtocolVersion>(0x0301));
@@ -5137,7 +5174,8 @@ TEST_F(ServerProtocolTest, TestClientHelloNoCompressionMethods) {
   setUpExpectingClientHello();
   auto chlo = TestMessages::clientHello();
   chlo.legacy_compression_methods.clear();
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::illegal_parameter, "compression methods");
 }
@@ -5146,7 +5184,8 @@ TEST_F(ServerProtocolTest, TestClientHelloDuplicateExtensions) {
   setUpExpectingClientHello();
   auto chlo = TestMessages::clientHello();
   chlo.extensions.push_back(encodeExtension(SupportedGroups()));
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::illegal_parameter, "duplicate extension");
 }
@@ -5168,8 +5207,9 @@ TEST_F(ServerProtocolTest, TestClientHelloDuplicateGroups) {
   keyShare.client_shares.push_back(std::move(entry2));
 
   chlo.extensions.push_back(encodeExtension(std::move(keyShare)));
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions,
       AlertDescription::illegal_parameter,
@@ -5182,8 +5222,8 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloStillNoKeyShare) {
   TestMessages::removeExtension(clientHello, ExtensionType::key_share);
   ClientKeyShare keyShare;
   clientHello.extensions.push_back(encodeExtension(std::move(keyShare)));
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(clientHello)));
+  fizz::Param param = std::move(clientHello);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::illegal_parameter, "key share not found");
 }
@@ -5195,8 +5235,8 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloCookie) {
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("cookie");
   clientHello.extensions.push_back(encodeExtension(std::move(c)));
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(clientHello)));
+  fizz::Param param = std::move(clientHello);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions,
       AlertDescription::illegal_parameter,
@@ -5208,8 +5248,8 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRequired) {
   auto decrypter = std::make_shared<MockECHDecrypter>();
   context_->setECHDecrypter(decrypter);
   state_.echStatus() = ECHStatus::Accepted;
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHello()));
+  fizz::Param param = TestMessages::clientHello();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::missing_extension, "ech not sent for hrr");
 }
@@ -5229,7 +5269,8 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHCipherMismatch) {
   echExt.enc = folly::IOBuf::create(0);
   echExt.payload = folly::IOBuf::copyBuffer("encryptedchlo");
   chlo.extensions.push_back(encodeExtension(std::move(echExt)));
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions,
       AlertDescription::illegal_parameter,
@@ -5241,8 +5282,8 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloDifferentVersion) {
   setUpExpectingClientHelloRetry();
   auto clientHello = TestMessages::clientHello();
   TestMessages::removeExtension(clientHello, ExtensionType::supported_versions);
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(clientHello)));
+  fizz::Param param = std::move(clientHello);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions,
       AlertDescription::illegal_parameter,
@@ -5267,8 +5308,8 @@ TEST_F(ServerProtocolTest, TestClientHelloRenegotiatePskCipher) {
         return std::make_pair(PskType::Resumption, std::move(res));
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHelloPsk()));
+  fizz::Param param = TestMessages::clientHelloPsk();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -5294,8 +5335,8 @@ TEST_F(ServerProtocolTest, TestClientHelloRenegotiatePskCipherIncompatible) {
         return std::make_pair(PskType::Resumption, std::move(res));
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::clientHelloPsk()));
+  fizz::Param param = TestMessages::clientHelloPsk();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -5311,8 +5352,9 @@ TEST_F(ServerProtocolTest, TestClientHelloCookie) {
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("cookie");
   chlo.extensions.push_back(encodeExtension(std::move(c)));
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -5343,8 +5385,9 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieECH) {
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("echcookie");
   chlo.extensions.push_back(encodeExtension(std::move(c)));
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -5376,8 +5419,9 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieECHMissingInner) {
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("echcookie");
   chlo.extensions.push_back(encodeExtension(std::move(c)));
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions,
       AlertDescription::missing_extension,
@@ -5392,8 +5436,9 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieFail) {
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("xyz");
   chlo.extensions.push_back(encodeExtension(std::move(c)));
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::decrypt_error, "decrypt cookie");
 }
@@ -5405,8 +5450,9 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieNoCipher) {
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("cookie");
   chlo.extensions.push_back(encodeExtension(std::move(c)));
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::unsupported_extension, "no cookie cipher");
 }
@@ -5430,8 +5476,9 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieVersionMismatch) {
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("cookie");
   chlo.extensions.push_back(encodeExtension(std::move(c)));
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions,
       AlertDescription::protocol_version,
@@ -5457,8 +5504,9 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieCipherMismatch) {
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("cookie");
   chlo.extensions.push_back(encodeExtension(std::move(c)));
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions,
       AlertDescription::handshake_failure,
@@ -5485,8 +5533,9 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieGroupMismatch) {
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("cookie");
   chlo.extensions.push_back(encodeExtension(std::move(c)));
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions,
       AlertDescription::illegal_parameter,
@@ -5504,8 +5553,9 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieNoGroup) {
   TestMessages::removeExtension(chlo, ExtensionType::key_share);
   ClientKeyShare keyShare;
   chlo.extensions.push_back(encodeExtension(std::move(keyShare)));
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::illegal_parameter, "key share not found");
 }
@@ -5529,8 +5579,9 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieRejectECHCipher) {
   echExt.enc = folly::IOBuf::create(0);
   echExt.payload = folly::IOBuf::copyBuffer("encryptedchlo");
   chlo.extensions.push_back(encodeExtension(std::move(echExt)));
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions,
       AlertDescription::illegal_parameter,
@@ -5547,8 +5598,9 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieRejectECHRequired) {
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("echcookie");
   chlo.extensions.push_back(encodeExtension(std::move(c)));
+  fizz::Param param = std::move(chlo);
 
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::missing_extension, "ech not sent for hrr");
 }
@@ -5561,7 +5613,8 @@ TEST_F(ServerProtocolTest, TestNoCertCompressionAlgorithmMatch) {
   CertificateCompressionAlgorithms algos;
   algos.algorithms = {static_cast<CertificateCompressionAlgorithm>(0xfb)};
   chlo.extensions.push_back(encodeExtension(algos));
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -5574,7 +5627,8 @@ TEST_F(ServerProtocolTest, TestCertCompressionRequestedNotSupported) {
   CertificateCompressionAlgorithms algos;
   algos.algorithms = {static_cast<CertificateCompressionAlgorithm>(0xfb)};
   chlo.extensions.push_back(encodeExtension(algos));
-  auto actions = getActions(detail::processEvent(state_, std::move(chlo)));
+  fizz::Param param = std::move(chlo);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -5584,8 +5638,8 @@ TEST_F(ServerProtocolTest, TestCertCompressionRequestedNotSupported) {
 TEST_F(ServerProtocolTest, TestEarlyAppData) {
   setUpAcceptingEarlyData();
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::appData()));
+  fizz::Param param = TestMessages::appData();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectSingleAction<DeliverAppData>(std::move(actions));
 }
@@ -5604,8 +5658,8 @@ TEST_F(ServerProtocolTest, TestEarlyAppWrite) {
         return content;
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::appWrite()));
+  fizz::Param param = TestMessages::appWrite();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   auto write = expectSingleAction<WriteToSocket>(std::move(actions));
   EXPECT_TRUE(folly::IOBufEqualTo()(
@@ -5619,8 +5673,8 @@ TEST_F(ServerProtocolTest, TestEndOfEarlyData) {
   EXPECT_CALL(
       *mockHandshakeContext_, appendToTranscript(BufMatches("eoedencoding")));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::endOfEarlyData()));
+  fizz::Param param = TestMessages::endOfEarlyData();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
@@ -5637,8 +5691,8 @@ TEST_F(ServerProtocolTest, TestEndOfEarlyDataExtraData) {
   EXPECT_CALL(*mockRead_, hasUnparsedHandshakeData())
       .WillRepeatedly(Return(true));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::endOfEarlyData()));
+  fizz::Param param = TestMessages::endOfEarlyData();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
       actions, AlertDescription::unexpected_message, "data after eoed");
 }
@@ -5722,8 +5776,8 @@ TEST_F(ServerProtocolTest, TestFullHandshakeFinished) {
       }));
   EXPECT_CALL(*mockKeyScheduler_, clearMasterSecret());
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::finished()));
+  fizz::Param param = TestMessages::finished();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<
       MutateState,
@@ -5753,8 +5807,8 @@ TEST_F(ServerProtocolTest, TestFinishedNoTicket) {
     return folly::none;
   }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::finished()));
+  fizz::Param param = TestMessages::finished();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, ReportHandshakeSuccess, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::AcceptingData);
@@ -5781,8 +5835,8 @@ TEST_F(ServerProtocolTest, TestFinishedTicketEarly) {
         return content;
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::finished()));
+  fizz::Param param = TestMessages::finished();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<
       MutateState,
       ReportHandshakeSuccess,
@@ -5796,8 +5850,8 @@ TEST_F(ServerProtocolTest, TestFinishedPskNotSupported) {
   setUpExpectingFinished();
   state_.pskType() = PskType::NotSupported;
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::finished()));
+  fizz::Param param = TestMessages::finished();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, ReportHandshakeSuccess, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::AcceptingData);
@@ -5808,8 +5862,8 @@ TEST_F(ServerProtocolTest, TestFinishedNoAutomaticNewSessionTicket) {
   context_->setSendNewSessionTicket(false);
 
   EXPECT_CALL(*mockKeyScheduler_, clearMasterSecret());
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::finished()));
+  fizz::Param param = TestMessages::finished();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, ReportHandshakeSuccess, SecretAvailable>(actions);
   processStateMutations(actions);
   EXPECT_EQ(state_.state(), StateEnum::AcceptingData);
@@ -5822,8 +5876,8 @@ TEST_F(ServerProtocolTest, TestFinishedMismatch) {
       .WillOnce(InvokeWithoutArgs(
           []() { return folly::IOBuf::copyBuffer("wrongverifydata"); }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::finished()));
+  fizz::Param param = TestMessages::finished();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectError<FizzException>(actions, folly::none, "finished verify failure");
 }
@@ -5833,8 +5887,8 @@ TEST_F(ServerProtocolTest, TestFinishedExtraData) {
   EXPECT_CALL(*mockRead_, hasUnparsedHandshakeData())
       .WillRepeatedly(Return(true));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::finished()));
+  fizz::Param param = TestMessages::finished();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectError<FizzException>(actions, folly::none, "data after finished");
 }
@@ -5853,8 +5907,8 @@ TEST_F(ServerProtocolTest, TestExpectingFinishedAppWrite) {
         return content;
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::appWrite()));
+  fizz::Param param = TestMessages::appWrite();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   auto write = expectSingleAction<WriteToSocket>(std::move(actions));
   EXPECT_TRUE(folly::IOBufEqualTo()(
@@ -5902,8 +5956,8 @@ TEST_F(ServerProtocolTest, TestWriteNewSessionTicket) {
         return content;
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, WriteNewSessionTicket()));
+  fizz::Param param = WriteNewSessionTicket();
+  auto actions = getActions(detail::processEvent(state_, param));
   auto write = expectSingleAction<WriteToSocket>(std::move(actions));
   EXPECT_EQ(write.contents[0].contentType, ContentType::handshake);
   EXPECT_EQ(write.contents[0].encryptionLevel, EncryptionLevel::AppTraffic);
@@ -5931,8 +5985,8 @@ TEST_F(ServerProtocolTest, TestWriteNewSessionTicketWithTicketEarly) {
         return content;
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, WriteNewSessionTicket()));
+  fizz::Param param = WriteNewSessionTicket();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectSingleAction<WriteToSocket>(std::move(actions));
 }
 
@@ -5956,8 +6010,8 @@ TEST_F(ServerProtocolTest, TestWriteNewSessionTicketWithAppToken) {
 
   WriteNewSessionTicket writeNewSessionTicket;
   writeNewSessionTicket.appToken = folly::IOBuf::copyBuffer(appToken);
-  auto actions = getActions(
-      detail::processEvent(state_, std::move(writeNewSessionTicket)));
+  fizz::Param param = std::move(writeNewSessionTicket);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectSingleAction<WriteToSocket>(std::move(actions));
 }
 
@@ -5978,8 +6032,8 @@ TEST_F(
         return std::make_pair(
             folly::IOBuf::copyBuffer("ticket"), std::chrono::seconds(100));
       }));
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::finished()));
+  fizz::Param param = TestMessages::finished();
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<
       MutateState,
       ReportHandshakeSuccess,
@@ -6003,8 +6057,10 @@ TEST_F(
       }));
   WriteNewSessionTicket writeNewSessionTicket;
   writeNewSessionTicket.appToken = folly::IOBuf::copyBuffer(appToken);
-  auto writeNewSessionTicketActions = getActions(
-      detail::processEvent(state_, std::move(writeNewSessionTicket)));
+
+  param = std::move(writeNewSessionTicket);
+  auto writeNewSessionTicketActions =
+      getActions(detail::processEvent(state_, param));
   expectSingleAction<WriteToSocket>(std::move(writeNewSessionTicketActions));
 }
 
@@ -6016,8 +6072,8 @@ TEST_F(ServerProtocolTest, TestWriteNewSessionTicketNoTicket) {
     return folly::none;
   }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, WriteNewSessionTicket()));
+  fizz::Param param = WriteNewSessionTicket();
+  auto actions = getActions(detail::processEvent(state_, param));
   EXPECT_TRUE(actions.empty());
 }
 
@@ -6026,16 +6082,16 @@ TEST_F(ServerProtocolTest, TestWriteNewSessionTicketPskNotSupported) {
   context_->setSendNewSessionTicket(false);
   state_.pskType() = PskType::NotSupported;
 
-  auto actions =
-      getActions(detail::processEvent(state_, WriteNewSessionTicket()));
+  fizz::Param param = WriteNewSessionTicket();
+  auto actions = getActions(detail::processEvent(state_, param));
   EXPECT_TRUE(actions.empty());
 }
 
 TEST_F(ServerProtocolTest, TestAppData) {
   setUpAcceptingData();
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::appData()));
+  fizz::Param param = TestMessages::appData();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectSingleAction<DeliverAppData>(std::move(actions));
 }
@@ -6054,8 +6110,8 @@ TEST_F(ServerProtocolTest, TestAppWrite) {
         return content;
       }));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::appWrite()));
+  fizz::Param param = TestMessages::appWrite();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   auto write = expectSingleAction<WriteToSocket>(std::move(actions));
   EXPECT_TRUE(folly::IOBufEqualTo()(
@@ -6091,8 +6147,8 @@ TEST_F(ServerProtocolTest, TestKeyUpdateNotRequested) {
   expectEncryptedReadRecordLayerCreation(
       &rrl, &raead, folly::StringPiece("cat"));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::keyUpdate(false)));
+  fizz::Param param = TestMessages::keyUpdate(false);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, SecretAvailable>(actions);
   EXPECT_EQ(getNumActions<WriteToSocket>(actions, false), 0);
 
@@ -6108,8 +6164,8 @@ TEST_F(ServerProtocolTest, TestKeyUpdateExtraData) {
   setUpAcceptingData();
   EXPECT_CALL(*appRead_, hasUnparsedHandshakeData())
       .WillRepeatedly(Return(true));
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::keyUpdate(false)));
+  fizz::Param param = TestMessages::keyUpdate(false);
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectError<FizzException>(actions, folly::none, "data after key_update");
 }
@@ -6172,8 +6228,8 @@ TEST_F(ServerProtocolTest, TestKeyUpdateRequest) {
       &rrl, &raead, folly::StringPiece("cat"));
   expectEncryptedWriteRecordLayerCreation(
       &wrl, &waead, folly::StringPiece("sat"));
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::keyUpdate(true)));
+  fizz::Param param = TestMessages::keyUpdate(true);
+  auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   auto write = expectAction<WriteToSocket>(actions);
   EXPECT_TRUE(folly::IOBufEqualTo()(
@@ -6209,8 +6265,8 @@ TEST_F(ServerProtocolTest, TestCertificate) {
   CertificateEntry entry2;
   entry2.cert_data = folly::IOBuf::copyBuffer("cert2");
   certificate.certificate_list.push_back(std::move(entry2));
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(certificate)));
+  fizz::Param param = std::move(certificate);
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState>(actions);
   processStateMutations(actions);
@@ -6228,8 +6284,8 @@ TEST_F(ServerProtocolTest, TestCertificateNonemptyContext) {
   auto badCertMsg = TestMessages::certificate();
   badCertMsg.certificate_request_context =
       folly::IOBuf::copyBuffer("garbagecontext");
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(badCertMsg)));
+  fizz::Param param = std::move(badCertMsg);
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectError<FizzException>(
       actions,
@@ -6242,8 +6298,8 @@ TEST_F(ServerProtocolTest, TestCertificateEmptyForbidden) {
   EXPECT_CALL(
       *mockHandshakeContext_, appendToTranscript(BufMatches("certencoding")));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::certificate()));
+  fizz::Param param = TestMessages::certificate();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectError<FizzException>(
       actions,
@@ -6257,8 +6313,8 @@ TEST_F(ServerProtocolTest, TestCertificateEmptyPermitted) {
   EXPECT_CALL(
       *mockHandshakeContext_, appendToTranscript(BufMatches("certencoding")));
 
-  auto actions =
-      getActions(detail::processEvent(state_, TestMessages::certificate()));
+  fizz::Param param = TestMessages::certificate();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState>(actions);
   processStateMutations(actions);
@@ -6281,8 +6337,8 @@ TEST_F(ServerProtocolTest, TestCertificateExtensionsNotSupported) {
   CertificateEntry entry2;
   entry2.cert_data = folly::IOBuf::copyBuffer("cert2");
   certificate.certificate_list.push_back(std::move(entry2));
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(certificate)));
+  fizz::Param param = std::move(certificate);
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectError<FizzException>(
       actions,
@@ -6312,8 +6368,8 @@ TEST_F(ServerProtocolTest, TestCertificateExtensionsSupported) {
   certificate.certificate_list.push_back(std::move(entry2));
 
   state_.certReqExtensions().push_back(algos.extension_type);
-  auto actions =
-      getActions(detail::processEvent(state_, std::move(certificate)));
+  fizz::Param param = std::move(certificate);
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState>(actions);
   processStateMutations(actions);
@@ -6346,8 +6402,8 @@ TEST_F(ServerProtocolTest, TestCertificateVerifyNoVerifier) {
       appendToTranscript(BufMatches("certverifyencoding")))
       .InSequence(contextSeq);
 
-  auto actions = getActions(
-      detail::processEvent(state_, TestMessages::certificateVerify()));
+  fizz::Param param = TestMessages::certificateVerify();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState>(actions);
   processStateMutations(actions);
@@ -6388,8 +6444,8 @@ TEST_F(ServerProtocolTest, TestCertificateVerifyWithVerifier) {
       appendToTranscript(BufMatches("certverifyencoding")))
       .InSequence(contextSeq);
 
-  auto actions = getActions(
-      detail::processEvent(state_, TestMessages::certificateVerify()));
+  fizz::Param param = TestMessages::certificateVerify();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState>(actions);
   processStateMutations(actions);
@@ -6403,8 +6459,8 @@ TEST_F(ServerProtocolTest, TestCertificateVerifyAlgoMismatch) {
 
   context_->setSupportedSigSchemes({SignatureScheme::ed25519});
 
-  auto actions = getActions(
-      detail::processEvent(state_, TestMessages::certificateVerify()));
+  fizz::Param param = TestMessages::certificateVerify();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectError<FizzException>(
       actions,
@@ -6431,8 +6487,8 @@ TEST_F(ServerProtocolTest, TestCertificateVerifySignatureFailure) {
       .WillOnce(Throw(
           FizzException("verify failed", AlertDescription::bad_record_mac)));
 
-  auto actions = getActions(
-      detail::processEvent(state_, TestMessages::certificateVerify()));
+  fizz::Param param = TestMessages::certificateVerify();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectError<FizzException>(
       actions, AlertDescription::bad_record_mac, "verify failed");
@@ -6460,8 +6516,8 @@ TEST_F(ServerProtocolTest, TestCertificateVerifyVerifierFailure) {
       .WillOnce(Throw(FizzVerificationException(
           "verifier failed", AlertDescription::bad_certificate)));
 
-  auto actions = getActions(
-      detail::processEvent(state_, TestMessages::certificateVerify()));
+  fizz::Param param = TestMessages::certificateVerify();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectError<FizzVerificationException>(
       actions, AlertDescription::bad_certificate, "verifier failed");
@@ -6487,8 +6543,8 @@ TEST_F(ServerProtocolTest, TestOptionalCertificateVerifySignatureFailure) {
       .WillOnce(Throw(
           FizzException("verify failed", AlertDescription::bad_record_mac)));
 
-  auto actions = getActions(
-      detail::processEvent(state_, TestMessages::certificateVerify()));
+  fizz::Param param = TestMessages::certificateVerify();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectError<FizzException>(
       actions, AlertDescription::bad_record_mac, "verify failed");
@@ -6517,8 +6573,8 @@ TEST_F(ServerProtocolTest, TestOptionalCertificateVerifyVerifierFailure) {
       .WillOnce(Throw(
           FizzException("verifier failed", AlertDescription::bad_certificate)));
 
-  auto actions = getActions(
-      detail::processEvent(state_, TestMessages::certificateVerify()));
+  fizz::Param param = TestMessages::certificateVerify();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectError<FizzException>(
       actions, AlertDescription::bad_certificate, "verifier failed");
@@ -6545,8 +6601,8 @@ TEST_F(ServerProtocolTest, TestCertificateVerifyVerifierGenericFailure) {
       .InSequence(contextSeq)
       .WillOnce(Throw(std::runtime_error("oops")));
 
-  auto actions = getActions(
-      detail::processEvent(state_, TestMessages::certificateVerify()));
+  fizz::Param param = TestMessages::certificateVerify();
+  auto actions = getActions(detail::processEvent(state_, param));
 
   expectError<FizzException>(
       actions,
@@ -6644,8 +6700,9 @@ TEST_F(ServerProtocolTest, AsyncKeyExchangeTest) {
         return asyncKex;
       }));
 
+  fizz::Param param = TestMessages::clientHello();
   // The returned future shouldn't have been fulfilled
-  auto asyncActions = detail::processEvent(state_, TestMessages::clientHello());
+  auto asyncActions = detail::processEvent(state_, param);
   auto& actionsFuture =
       boost::strict_get<folly::SemiFuture<Actions>>(asyncActions);
   executor_.drain();

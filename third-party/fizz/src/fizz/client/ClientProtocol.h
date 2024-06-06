@@ -57,7 +57,7 @@ class ClientStateMachine {
 
 namespace detail {
 
-Actions processEvent(const State& state, Param param);
+Actions processEvent(const State& state, Param& param);
 
 Actions handleError(
     const State& state,
@@ -67,7 +67,7 @@ Actions handleError(
 Actions handleAppCloseImmediate(const State& state);
 Actions handleAppClose(const State& state);
 
-Actions handleInvalidEvent(const State& state, Event event, Param param);
+Actions handleInvalidEvent(const State& state, Event event, Param& param);
 } // namespace detail
 
 struct ClientTypes {

@@ -149,7 +149,8 @@ AsyncActions ServerStateMachine::processAccept(
   accept.executor = executor;
   accept.context = std::move(context);
   accept.extensions = extensions;
-  return detail::processEvent(state, std::move(accept));
+  fizz::Param param = std::move(accept);
+  return detail::processEvent(state, param);
 }
 
 AsyncActions ServerStateMachine::processSocketData(
@@ -163,11 +164,14 @@ AsyncActions ServerStateMachine::processSocketData(
           ReportError("attempting to process data without record layer"),
           folly::none);
     }
-    auto param = state.readRecordLayer()->readEvent(buf, std::move(options));
-    if (!param.has_value()) {
-      return actions(WaitForData{param.sizeHint});
+    auto readResult =
+        state.readRecordLayer()->readEvent(buf, std::move(options));
+    if (!readResult.has_value()) {
+      return actions(WaitForData{readResult.sizeHint});
     }
-    return detail::processEvent(state, std::move(*param));
+
+    fizz::Param param = std::move(readResult.message).value();
+    return detail::processEvent(state, param);
   } catch (const FizzException& e) {
     return detail::handleError(
         state,
@@ -190,19 +194,22 @@ AsyncActions ServerStateMachine::processSocketData(
 AsyncActions ServerStateMachine::processWriteNewSessionTicket(
     const State& state,
     WriteNewSessionTicket write) {
-  return detail::processEvent(state, std::move(write));
+  fizz::Param param = std::move(write);
+  return detail::processEvent(state, param);
 }
 
 AsyncActions ServerStateMachine::processAppWrite(
     const State& state,
     AppWrite write) {
-  return detail::processEvent(state, std::move(write));
+  fizz::Param param = std::move(write);
+  return detail::processEvent(state, param);
 }
 
 AsyncActions ServerStateMachine::processEarlyAppWrite(
     const State& state,
     EarlyAppWrite write) {
-  return detail::processEvent(state, std::move(write));
+  fizz::Param param = std::move(write);
+  return detail::processEvent(state, param);
 }
 
 Actions ServerStateMachine::processAppClose(const State& state) {
@@ -216,18 +223,19 @@ Actions ServerStateMachine::processAppCloseImmediate(const State& state) {
 AsyncActions ServerStateMachine::processKeyUpdateInitiation(
     const State& state,
     KeyUpdateInitiation keyUpdateInitiation) {
-  return detail::processEvent(state, std::move(keyUpdateInitiation));
+  fizz::Param param = std::move(keyUpdateInitiation);
+  return detail::processEvent(state, param);
 }
 
 namespace detail {
 
-AsyncActions processEvent(const State& state, Param param) {
+AsyncActions processEvent(const State& state, Param& param) {
   auto event = EventVisitor()(param);
   // We can have an exception directly in the handler or in a future so we need
   // to handle both types.
   try {
     auto actions = sm::StateMachine<ServerTypes>::getHandler(
-        state.state(), event)(state, std::move(param));
+        state.state(), event)(state, param);
 
     return folly::variant_match(
         actions,
@@ -329,7 +337,7 @@ Actions handleAppClose(const State& state) {
   }
 }
 
-Actions handleInvalidEvent(const State& state, Event event, Param param) {
+Actions handleInvalidEvent(const State& state, Event event, Param& param) {
   if (event == Event::Alert) {
     auto& alert = *param.asAlert();
     throw FizzException(
@@ -387,7 +395,7 @@ static void ensureNoUnparsedHandshakeData(const State& state, Event event) {
 AsyncActions
 EventHandler<ServerTypes, StateEnum::Uninitialized, Event::Accept>::handle(
     const State& /*state*/,
-    Param param) {
+    Param& param) {
   auto& accept = *param.asAccept();
   auto factory = accept.context->getFactory();
   auto readRecordLayer = factory->makePlaintextReadRecordLayer();
@@ -1199,7 +1207,7 @@ static std::pair<ECHStatus, folly::Optional<ECHState>> processECH(
 
 AsyncActions
 EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
-    handle(const State& state, Param param) {
+    handle(const State& state, Param& param) {
   ClientHello chlo = std::move(*param.asClientHello());
 
   auto cookieState = getCookieState(chlo, state.context()->getCookieCipher());
@@ -1992,7 +2000,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
 
 AsyncActions
 EventHandler<ServerTypes, StateEnum::AcceptingEarlyData, Event::AppData>::
-    handle(const State&, Param param) {
+    handle(const State&, Param& param) {
   auto& appData = *param.asAppData();
 
   return actions(DeliverAppData{std::move(appData.data)});
@@ -2000,7 +2008,7 @@ EventHandler<ServerTypes, StateEnum::AcceptingEarlyData, Event::AppData>::
 
 AsyncActions
 EventHandler<ServerTypes, StateEnum::AcceptingEarlyData, Event::AppWrite>::
-    handle(const State& state, Param param) {
+    handle(const State& state, Param& param) {
   auto& appWrite = *param.asAppWrite();
 
   WriteToSocket write;
@@ -2015,7 +2023,7 @@ EventHandler<ServerTypes, StateEnum::AcceptingEarlyData, Event::AppWrite>::
 AsyncActions EventHandler<
     ServerTypes,
     StateEnum::AcceptingEarlyData,
-    Event::EndOfEarlyData>::handle(const State& state, Param param) {
+    Event::EndOfEarlyData>::handle(const State& state, Param& param) {
   auto& eoed = *param.asEndOfEarlyData();
 
   if (state.readRecordLayer()->hasUnparsedHandshakeData()) {
@@ -2037,7 +2045,7 @@ AsyncActions EventHandler<
 
 AsyncActions
 EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::AppWrite>::
-    handle(const State& state, Param param) {
+    handle(const State& state, Param& param) {
   auto& appWrite = *param.asAppWrite();
 
   WriteToSocket write;
@@ -2127,7 +2135,7 @@ static SemiFuture<Optional<WriteToSocket>> generateTicket(
 
 AsyncActions
 EventHandler<ServerTypes, StateEnum::ExpectingCertificate, Event::Certificate>::
-    handle(const State& state, Param param) {
+    handle(const State& state, Param& param) {
   auto certMsg = std::move(*param.asCertificateMsg());
 
   state.handshakeContext()->appendToTranscript(*certMsg.originalEncoding);
@@ -2173,7 +2181,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingCertificate, Event::Certificate>::
 AsyncActions EventHandler<
     ServerTypes,
     StateEnum::ExpectingCertificateVerify,
-    Event::CertificateVerify>::handle(const State& state, Param param) {
+    Event::CertificateVerify>::handle(const State& state, Param& param) {
   auto certVerify = std::move(*param.asCertificateVerify());
 
   if (std::find(
@@ -2229,7 +2237,7 @@ AsyncActions EventHandler<
 
 AsyncActions
 EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::Finished>::
-    handle(const State& state, Param param) {
+    handle(const State& state, Param& param) {
   auto& finished = *param.asFinished();
 
   auto expectedFinished = state.handshakeContext()->getFinishedData(
@@ -2310,7 +2318,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::Finished>::
 AsyncActions EventHandler<
     ServerTypes,
     StateEnum::AcceptingData,
-    Event::WriteNewSessionTicket>::handle(const State& state, Param param) {
+    Event::WriteNewSessionTicket>::handle(const State& state, Param& param) {
   auto& writeNewSessionTicket = *param.asWriteNewSessionTicket();
   auto ticketFuture = generateTicket(
       state,
@@ -2330,7 +2338,7 @@ AsyncActions EventHandler<
 AsyncActions
 EventHandler<ServerTypes, StateEnum::AcceptingData, Event::AppData>::handle(
     const State& /*state*/,
-    Param param) {
+    Param& param) {
   auto& appData = *param.asAppData();
 
   return actions(DeliverAppData{std::move(appData.data)});
@@ -2339,7 +2347,7 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::AppData>::handle(
 AsyncActions
 EventHandler<ServerTypes, StateEnum::AcceptingData, Event::AppWrite>::handle(
     const State& state,
-    Param param) {
+    Param& param) {
   auto& appWrite = *param.asAppWrite();
 
   WriteToSocket write;
@@ -2354,7 +2362,7 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::AppWrite>::handle(
 AsyncActions EventHandler<
     ServerTypes,
     StateEnum::AcceptingData,
-    Event::KeyUpdateInitiation>::handle(const State& state, Param param) {
+    Event::KeyUpdateInitiation>::handle(const State& state, Param& param) {
   if (state.readRecordLayer()->hasUnparsedHandshakeData()) {
     throw FizzException("data after key_update", folly::none);
   }
@@ -2392,7 +2400,7 @@ AsyncActions EventHandler<
 AsyncActions
 EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
     const State& state,
-    Param param) {
+    Param& param) {
   auto& keyUpdate = *param.asKeyUpdate();
 
   if (state.readRecordLayer()->hasUnparsedHandshakeData()) {
@@ -2458,7 +2466,7 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
 AsyncActions
 EventHandler<ServerTypes, StateEnum::AcceptingData, Event::CloseNotify>::handle(
     const State& state,
-    Param param) {
+    Param& param) {
   ensureNoUnparsedHandshakeData(state, Event::CloseNotify);
   auto& closenotify = *param.asCloseNotify();
   auto eod = EndOfData(std::move(closenotify.ignoredPostCloseData));
@@ -2480,7 +2488,7 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::CloseNotify>::handle(
 
 AsyncActions
 EventHandler<ServerTypes, StateEnum::ExpectingCloseNotify, Event::CloseNotify>::
-    handle(const State& state, Param param) {
+    handle(const State& state, Param& param) {
   ensureNoUnparsedHandshakeData(state, Event::CloseNotify);
   auto& closenotify = *param.asCloseNotify();
   auto eod = EndOfData(std::move(closenotify.ignoredPostCloseData));

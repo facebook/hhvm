@@ -178,7 +178,8 @@ Actions ClientStateMachine::processConnect(
   connect.extensions = extensions;
   connect.cachedPsk = std::move(cachedPsk);
   connect.echConfigs = std::move(echConfigs);
-  return detail::processEvent(state, std::move(connect));
+  fizz::Param p(std::move(connect));
+  return detail::processEvent(state, p);
 }
 
 Actions ClientStateMachine::processSocketData(
@@ -196,7 +197,7 @@ Actions ClientStateMachine::processSocketData(
     if (!param.has_value()) {
       return actions(WaitForData{param.sizeHint});
     }
-    return detail::processEvent(state, std::move(*param));
+    return detail::processEvent(state, *param);
   } catch (const FizzException& e) {
     return detail::handleError(
         state,
@@ -219,19 +220,22 @@ Actions ClientStateMachine::processSocketData(
 Actions ClientStateMachine::processWriteNewSessionTicket(
     const State& state,
     WriteNewSessionTicket write) {
-  return detail::processEvent(state, std::move(write));
+  fizz::Param p = std::move(write);
+  return detail::processEvent(state, p);
 }
 
 Actions ClientStateMachine::processAppWrite(
     const State& state,
     AppWrite write) {
-  return detail::processEvent(state, std::move(write));
+  fizz::Param p = std::move(write);
+  return detail::processEvent(state, p);
 }
 
 Actions ClientStateMachine::processEarlyAppWrite(
     const State& state,
     EarlyAppWrite write) {
-  return detail::processEvent(state, std::move(write));
+  fizz::Param p = std::move(write);
+  return detail::processEvent(state, p);
 }
 
 Actions ClientStateMachine::processAppClose(const State& state) {
@@ -245,16 +249,17 @@ Actions ClientStateMachine::processAppCloseImmediate(const State& state) {
 Actions ClientStateMachine::processKeyUpdateInitiation(
     const State& state,
     KeyUpdateInitiation keyUpdateInitiation) {
-  return detail::processEvent(state, std::move(keyUpdateInitiation));
+  fizz::Param p = std::move(keyUpdateInitiation);
+  return detail::processEvent(state, p);
 }
 
 namespace detail {
 
-Actions processEvent(const State& state, Param param) {
+Actions processEvent(const State& state, Param& param) {
   auto event = EventVisitor()(param);
   try {
     return sm::StateMachine<ClientTypes>::getHandler(state.state(), event)(
-        state, std::move(param));
+        state, param);
   } catch (const FizzException& e) {
     return detail::handleError(
         state,
@@ -330,7 +335,7 @@ Actions handleAppClose(const State& state) {
   }
 }
 
-Actions handleInvalidEvent(const State& state, Event event, Param param) {
+Actions handleInvalidEvent(const State& state, Event event, Param& param) {
   if (event == Event::Alert) {
     auto& alert = *param.asAlert();
     throw FizzException(
@@ -771,7 +776,7 @@ static ClientHello constructEncryptedClientHello(
 Actions
 EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
     const State& /*state*/,
-    Param param) {
+    Param& param) {
   auto& connect = *param.asConnect();
 
   auto context = std::move(connect.context);
@@ -1171,7 +1176,7 @@ static NegotiatedPsk negotiatePsk(
 
 Actions
 EventHandler<ClientTypes, StateEnum::ExpectingServerHello, Event::ServerHello>::
-    handle(const State& state, Param param) {
+    handle(const State& state, Param& param) {
   auto shlo = std::move(*param.asServerHello());
 
   Protocol::checkAllowedExtensions(shlo, *state.requestedExtensions());
@@ -1463,7 +1468,7 @@ static std::map<NamedGroup, std::unique_ptr<KeyExchange>> getHrrKeyExchangers(
 Actions EventHandler<
     ClientTypes,
     StateEnum::ExpectingServerHello,
-    Event::HelloRetryRequest>::handle(const State& state, Param param) {
+    Event::HelloRetryRequest>::handle(const State& state, Param& param) {
   auto hrr = std::move(*param.asHelloRetryRequest());
 
   Protocol::checkAllowedExtensions(hrr, *state.requestedExtensions());
@@ -1731,7 +1736,7 @@ static void validateAcceptedEarly(
 Actions EventHandler<
     ClientTypes,
     StateEnum::ExpectingEncryptedExtensions,
-    Event::EncryptedExtensions>::handle(const State& state, Param param) {
+    Event::EncryptedExtensions>::handle(const State& state, Param& param) {
   auto ee = std::move(*param.asEncryptedExtensions());
 
   Protocol::checkAllowedExtensions(ee, *state.requestedExtensions());
@@ -1846,7 +1851,7 @@ getClientCert(
 Actions EventHandler<
     ClientTypes,
     StateEnum::ExpectingCertificate,
-    Event::CertificateRequest>::handle(const State& state, Param param) {
+    Event::CertificateRequest>::handle(const State& state, Param& param) {
   if (state.clientAuthRequested()) {
     throw FizzException(
         "duplicate certificate request message",
@@ -1960,7 +1965,7 @@ static MutateState handleCertMsg(
 Actions EventHandler<
     ClientTypes,
     StateEnum::ExpectingCertificate,
-    Event::CompressedCertificate>::handle(const State& state, Param param) {
+    Event::CompressedCertificate>::handle(const State& state, Param& param) {
   if (state.context()->getSupportedCertDecompressionAlgorithms().empty()) {
     throw FizzException(
         "compressed certificate received unexpectedly",
@@ -1999,7 +2004,7 @@ Actions EventHandler<
 
 Actions
 EventHandler<ClientTypes, StateEnum::ExpectingCertificate, Event::Certificate>::
-    handle(const State& state, Param param) {
+    handle(const State& state, Param& param) {
   auto certMsg = std::move(*param.asCertificateMsg());
 
   state.handshakeContext()->appendToTranscript(*certMsg.originalEncoding);
@@ -2012,7 +2017,7 @@ EventHandler<ClientTypes, StateEnum::ExpectingCertificate, Event::Certificate>::
 Actions EventHandler<
     ClientTypes,
     StateEnum::ExpectingCertificateVerify,
-    Event::CertificateVerify>::handle(const State& state, Param param) {
+    Event::CertificateVerify>::handle(const State& state, Param& param) {
   auto certVerify = std::move(*param.asCertificateVerify());
 
   if (std::find(
@@ -2071,7 +2076,7 @@ Actions EventHandler<
 
 Actions
 EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
-    handle(const State& state, Param param) {
+    handle(const State& state, Param& param) {
   auto finished = std::move(*param.asFinished());
 
   if (state.readRecordLayer()->hasUnparsedHandshakeData()) {
@@ -2262,7 +2267,7 @@ static uint32_t getMaxEarlyDataSize(const NewSessionTicket& nst) {
 
 Actions
 EventHandler<ClientTypes, StateEnum::Established, Event::NewSessionTicket>::
-    handle(const State& state, Param param) {
+    handle(const State& state, Param& param) {
   auto nst = std::move(*param.asNewSessionTicket());
 
   auto derivedResumptionSecret = state.keyScheduler()->getResumptionSecret(
@@ -2296,7 +2301,7 @@ EventHandler<ClientTypes, StateEnum::Established, Event::NewSessionTicket>::
 Actions
 EventHandler<ClientTypes, StateEnum::Established, Event::AppData>::handle(
     const State&,
-    Param param) {
+    Param& param) {
   auto& appData = *param.asAppData();
 
   return actions(DeliverAppData{std::move(appData.data)});
@@ -2305,7 +2310,7 @@ EventHandler<ClientTypes, StateEnum::Established, Event::AppData>::handle(
 Actions
 EventHandler<ClientTypes, StateEnum::Established, Event::AppWrite>::handle(
     const State& state,
-    Param param) {
+    Param& param) {
   auto& appWrite = *param.asAppWrite();
 
   WriteToSocket write;
@@ -2319,7 +2324,7 @@ EventHandler<ClientTypes, StateEnum::Established, Event::AppWrite>::handle(
 
 Actions
 EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdateInitiation>::
-    handle(const State& state, Param param) {
+    handle(const State& state, Param& param) {
   if (state.readRecordLayer()->hasUnparsedHandshakeData()) {
     throw FizzException(
         "data after key_update", AlertDescription::unexpected_message);
@@ -2357,7 +2362,7 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdateInitiation>::
 Actions
 EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdate>::handle(
     const State& state,
-    Param param) {
+    Param& param) {
   auto& keyUpdate = *param.asKeyUpdate();
 
   if (state.readRecordLayer()->hasUnparsedHandshakeData()) {
@@ -2479,41 +2484,41 @@ static Actions handleEarlyAppWrite(const State& state, EarlyAppWrite appWrite) {
 Actions EventHandler<
     ClientTypes,
     StateEnum::ExpectingServerHello,
-    Event::EarlyAppWrite>::handle(const State& state, Param param) {
+    Event::EarlyAppWrite>::handle(const State& state, Param& param) {
   return handleEarlyAppWrite(state, std::move(*param.asEarlyAppWrite()));
 }
 
 Actions EventHandler<
     ClientTypes,
     StateEnum::ExpectingEncryptedExtensions,
-    Event::EarlyAppWrite>::handle(const State& state, Param param) {
+    Event::EarlyAppWrite>::handle(const State& state, Param& param) {
   return handleEarlyAppWrite(state, std::move(*param.asEarlyAppWrite()));
 }
 
 Actions EventHandler<
     ClientTypes,
     StateEnum::ExpectingCertificate,
-    Event::EarlyAppWrite>::handle(const State& state, Param param) {
+    Event::EarlyAppWrite>::handle(const State& state, Param& param) {
   return ignoreEarlyAppWrite(state, std::move(*param.asEarlyAppWrite()));
 }
 
 Actions EventHandler<
     ClientTypes,
     StateEnum::ExpectingCertificateVerify,
-    Event::EarlyAppWrite>::handle(const State& state, Param param) {
+    Event::EarlyAppWrite>::handle(const State& state, Param& param) {
   return ignoreEarlyAppWrite(state, std::move(*param.asEarlyAppWrite()));
 }
 
 Actions
 EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::EarlyAppWrite>::
-    handle(const State& state, Param param) {
+    handle(const State& state, Param& param) {
   return handleEarlyAppWrite(state, std::move(*param.asEarlyAppWrite()));
 }
 
 Actions
 EventHandler<ClientTypes, StateEnum::Established, Event::EarlyAppWrite>::handle(
     const State& state,
-    Param param) {
+    Param& param) {
   auto appWrite = std::move(*param.asEarlyAppWrite());
   if (*state.earlyDataType() == EarlyDataType::Accepted) {
     // It's possible that we had queued early writes before full handshake
@@ -2534,7 +2539,7 @@ EventHandler<ClientTypes, StateEnum::Established, Event::EarlyAppWrite>::handle(
 Actions
 EventHandler<ClientTypes, StateEnum::Established, Event::CloseNotify>::handle(
     const State& state,
-    Param param) {
+    Param& param) {
   ensureNoUnparsedHandshakeData(state, Event::CloseNotify);
   auto& closenotify = *param.asCloseNotify();
   auto eod = EndOfData(std::move(closenotify.ignoredPostCloseData));
@@ -2556,7 +2561,7 @@ EventHandler<ClientTypes, StateEnum::Established, Event::CloseNotify>::handle(
 
 Actions
 EventHandler<ClientTypes, StateEnum::ExpectingCloseNotify, Event::CloseNotify>::
-    handle(const State& state, Param param) {
+    handle(const State& state, Param& param) {
   ensureNoUnparsedHandshakeData(state, Event::CloseNotify);
   auto& closenotify = *param.asCloseNotify();
   auto eod = EndOfData(std::move(closenotify.ignoredPostCloseData));

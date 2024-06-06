@@ -48,8 +48,8 @@ class EventHandler : public EventHandlerBase<SM, state, event> {
  public:
   static typename SM::Actions handle(
       const typename SM::State& curState,
-      typename SM::Param param) {
-    return SM::InvalidEventHandler(curState, event, std::move(param));
+      typename SM::Param& param) {
+    return SM::InvalidEventHandler(curState, event, param);
   }
 };
 
@@ -60,7 +60,7 @@ class EventHandler : public EventHandlerBase<SM, state, event> {
    public:                                                               \
     static typename sm::Actions handle(                                  \
         const typename sm::State&,                                       \
-        typename sm::Param param);                                       \
+        typename sm::Param& param);                                      \
   }
 
 template <typename SM>

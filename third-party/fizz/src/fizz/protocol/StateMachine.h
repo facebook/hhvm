@@ -19,7 +19,7 @@ template <typename SM>
 class StateMachine {
  public:
   using EventHandlerFun =
-      typename SM::Actions (*)(const typename SM::State&, typename SM::Param);
+      typename SM::Actions (*)(const typename SM::State&, typename SM::Param&);
 
   /**
    * Returns the appropriate event handler for event in state.

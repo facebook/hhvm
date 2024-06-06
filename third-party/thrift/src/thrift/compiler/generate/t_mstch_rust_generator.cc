@@ -1908,7 +1908,7 @@ class mstch_rust_struct_field : public mstch_base {
             {"field:has_adapter?", &mstch_rust_struct_field::has_adapter},
         });
   }
-  mstch::node key() { return std::to_string(field_->get_key()); }
+  mstch::node key() { return field_->get_key(); }
   mstch::node rust_name() { return named_rust_name(field_); }
   mstch::node is_optional() {
     return field_->get_req() == t_field::e_req::optional;

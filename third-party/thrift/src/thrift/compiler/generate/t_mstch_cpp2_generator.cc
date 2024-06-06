@@ -1047,9 +1047,7 @@ class cpp_mstch_type : public mstch_type {
     }
     return {};
   }
-  mstch::node resolved_cpp_type() {
-    return fmt::to_string(cpp2::get_type(resolved_type_));
-  }
+  mstch::node resolved_cpp_type() { return cpp2::get_type(resolved_type_); }
   mstch::node is_string_or_binary() {
     return resolved_type_->is_string_or_binary();
   }
@@ -1760,7 +1758,7 @@ class cpp_mstch_field : public mstch_field {
   mstch::node name_hash() {
     return "__fbthrift_hash_" + cpp2::sha256_hex(field_->get_name());
   }
-  mstch::node index_plus_one() { return std::to_string(pos_.index + 1); }
+  mstch::node index_plus_one() { return pos_.index + 1; }
   mstch::node ordinal() { return index_plus_one(); }
   mstch::node isset_index() {
     assert(field_context_);
@@ -2085,7 +2083,7 @@ class cpp_mstch_enum : public mstch_enum {
   }
   mstch::node cpp_is_unscoped() { return cpp_is_unscoped_(); }
   mstch::node cpp_name() { return cpp2::get_name(enum_); }
-  mstch::node cpp_enum_type() { return fmt::to_string(cpp_enum_type(*enum_)); }
+  mstch::node cpp_enum_type() { return cpp_enum_type(*enum_); }
   mstch::node cpp_declare_bitwise_ops() {
     return enum_->find_annotation_or_null(
                {"cpp.declare_bitwise_ops", "cpp2.declare_bitwise_ops"}) ||

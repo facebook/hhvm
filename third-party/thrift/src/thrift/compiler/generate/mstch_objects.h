@@ -1053,7 +1053,7 @@ class mstch_field : public mstch_base {
         });
   }
   mstch::node name() { return field_->get_name(); }
-  mstch::node key() { return std::to_string(field_->get_key()); }
+  mstch::node key() { return field_->get_key(); }
   mstch::node value();
   mstch::node type();
   /**
@@ -1065,7 +1065,7 @@ class mstch_field : public mstch_base {
    * element types, etc.).
    */
   mstch::node idl_type();
-  mstch::node index() { return std::to_string(pos_.index); }
+  mstch::node index() { return pos_.index; }
   mstch::node is_terse() {
     return field_->qualifier() == t_field_qualifier::terse;
   }
@@ -1274,7 +1274,7 @@ class mstch_enum_value : public mstch_base {
         });
   }
   mstch::node name() { return enum_value_->get_name(); }
-  mstch::node value() { return std::to_string(enum_value_->get_value()); }
+  mstch::node value() { return enum_value_->get_value(); }
 
  protected:
   const t_enum_value* enum_value_;

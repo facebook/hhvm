@@ -212,8 +212,7 @@ mstch::node mstch_const_value::integer_value() {
 }
 
 mstch::node mstch_const_value::double_value() {
-  return type_ == cv::CV_DOUBLE ? fmt::format("{}", const_value_->get_double())
-                                : mstch::node();
+  return type_ == cv::CV_DOUBLE ? const_value_->get_double() : mstch::node();
 }
 
 mstch::node mstch_const_value::bool_value() {

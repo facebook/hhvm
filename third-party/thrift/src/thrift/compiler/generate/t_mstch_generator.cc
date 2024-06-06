@@ -265,14 +265,14 @@ mstch::map t_mstch_generator::dump(const t_const_value& value) {
 
   switch (type) {
     case cv::CV_DOUBLE:
-      result.emplace("value", fmt::format("{}", value.get_double()));
-      result.emplace("double_value", fmt::format("{}", value.get_double()));
+      result.emplace("value", value.get_double());
+      result.emplace("double_value", value.get_double());
       result.emplace("nonzero?", value.get_double() != 0.0);
       break;
     case cv::CV_BOOL:
-      result.emplace("value", std::to_string(value.get_bool()));
-      result.emplace("bool_value", value.get_bool() == true);
-      result.emplace("nonzero?", value.get_bool() == true);
+      result.emplace("value", value.get_bool() ? 1 : 0);
+      result.emplace("bool_value", value.get_bool());
+      result.emplace("nonzero?", value.get_bool());
       break;
     case cv::CV_INTEGER:
       if (value.get_enum_value()) {

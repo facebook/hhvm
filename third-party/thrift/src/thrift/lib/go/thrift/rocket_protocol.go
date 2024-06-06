@@ -19,6 +19,7 @@ package thrift
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
 
@@ -207,6 +208,9 @@ func (p *rocketProtocol) ReadMessageBegin() (string, MessageType, int32, error) 
 			return "", EXCEPTION, 0, err
 		}
 		p.respMetadata = metadata
+		if p.respMetadata.PayloadMetadata != nil && p.respMetadata.PayloadMetadata.ExceptionMetadata != nil {
+			return "", EXCEPTION, 0, newRocketException(p.respMetadata.PayloadMetadata.ExceptionMetadata)
+		}
 	}
 	name := p.reqMetadata.Name
 	dataBytes := resp.Data()
@@ -219,6 +223,70 @@ func (p *rocketProtocol) ReadMessageBegin() (string, MessageType, int32, error) 
 	p.buf.Buffer = bytes.NewBuffer(dataBytes)
 	p.buf.size = len(dataBytes)
 	return name, REPLY, p.seqID, err
+}
+
+type rocketException struct {
+	Name          string
+	What          string
+	ExceptionType string
+	Kind          string
+	Blame         string
+	Safety        string
+}
+
+func (e *rocketException) Error() string {
+	data, err := json.Marshal(e)
+	if err != nil {
+		panic(err)
+	}
+	return string(data)
+}
+
+func newRocketException(exception *PayloadExceptionMetadataBase) error {
+	err := &rocketException{
+		Name:          "unknown",
+		What:          "unknown",
+		ExceptionType: "unknown",
+		Kind:          "none",
+		Blame:         "none",
+		Safety:        "none",
+	}
+	if exception.NameUTF8 != nil {
+		err.Name = *exception.NameUTF8
+	}
+	if exception.WhatUTF8 != nil {
+		err.What = *exception.WhatUTF8
+	}
+	var class *ErrorClassification
+	if exception.Metadata != nil {
+		if exception.Metadata.DeclaredException != nil {
+			err.ExceptionType = "DeclaredException"
+			if exception.Metadata.DeclaredException.ErrorClassification != nil {
+				class = exception.Metadata.DeclaredException.ErrorClassification
+			}
+		} else if exception.Metadata.AppUnknownException != nil {
+			err.ExceptionType = "AppUnknownException"
+			if exception.Metadata.AppUnknownException.ErrorClassification != nil {
+				class = exception.Metadata.AppUnknownException.ErrorClassification
+			}
+		} else if exception.Metadata.AnyException != nil {
+			err.ExceptionType = "AnyException"
+		} else if exception.Metadata.DEPRECATEDProxyException != nil {
+			err.ExceptionType = "DEPRECATEDProxyException"
+		}
+		if class != nil {
+			if class.Kind != nil {
+				err.Kind = class.Kind.String()
+			}
+			if class.Blame != nil {
+				err.Blame = class.Blame.String()
+			}
+			if class.Safety != nil {
+				err.Safety = class.Safety.String()
+			}
+		}
+	}
+	return NewTransportExceptionFromError(err)
 }
 
 func (p *rocketProtocol) ReadMessageEnd() error {

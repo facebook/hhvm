@@ -2434,7 +2434,8 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdate>::handle(
 // action to invoke depends on how the higher layer will react to rejected
 // early data, we give the write back in a special action for the higher layer
 // to handle.
-static Actions ignoreEarlyAppWrite(const State& state, EarlyAppWrite write) {
+static Actions ignoreEarlyAppWrite(const State& state, Param& param) {
+  auto& write = *param.asEarlyAppWrite();
   if (*state.earlyDataType() != EarlyDataType::Rejected) {
     throw FizzException("ignoring valid early write", folly::none);
   }
@@ -2444,7 +2445,8 @@ static Actions ignoreEarlyAppWrite(const State& state, EarlyAppWrite write) {
   return actions(std::move(failedWrite));
 }
 
-static Actions handleEarlyAppWrite(const State& state, EarlyAppWrite appWrite) {
+static Actions handleEarlyAppWrite(const State& state, Param& param) {
+  auto& appWrite = *param.asEarlyAppWrite();
   if (state.context()->getOmitEarlyRecordLayer()) {
     throw FizzException("early app writes disabled", folly::none);
   }
@@ -2453,7 +2455,7 @@ static Actions handleEarlyAppWrite(const State& state, EarlyAppWrite appWrite) {
     case EarlyDataType::NotAttempted:
       throw FizzException("invalid early write", folly::none);
     case EarlyDataType::Rejected:
-      return ignoreEarlyAppWrite(state, std::move(appWrite));
+      return ignoreEarlyAppWrite(state, param);
     case EarlyDataType::Attempted:
     case EarlyDataType::Accepted: {
       WriteToSocket write;
@@ -2486,42 +2488,42 @@ Actions EventHandler<
     ClientTypes,
     StateEnum::ExpectingServerHello,
     Event::EarlyAppWrite>::handle(const State& state, Param& param) {
-  return handleEarlyAppWrite(state, std::move(*param.asEarlyAppWrite()));
+  return handleEarlyAppWrite(state, param);
 }
 
 Actions EventHandler<
     ClientTypes,
     StateEnum::ExpectingEncryptedExtensions,
     Event::EarlyAppWrite>::handle(const State& state, Param& param) {
-  return handleEarlyAppWrite(state, std::move(*param.asEarlyAppWrite()));
+  return handleEarlyAppWrite(state, param);
 }
 
 Actions EventHandler<
     ClientTypes,
     StateEnum::ExpectingCertificate,
     Event::EarlyAppWrite>::handle(const State& state, Param& param) {
-  return ignoreEarlyAppWrite(state, std::move(*param.asEarlyAppWrite()));
+  return ignoreEarlyAppWrite(state, param);
 }
 
 Actions EventHandler<
     ClientTypes,
     StateEnum::ExpectingCertificateVerify,
     Event::EarlyAppWrite>::handle(const State& state, Param& param) {
-  return ignoreEarlyAppWrite(state, std::move(*param.asEarlyAppWrite()));
+  return ignoreEarlyAppWrite(state, param);
 }
 
 Actions
 EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::EarlyAppWrite>::
     handle(const State& state, Param& param) {
-  return handleEarlyAppWrite(state, std::move(*param.asEarlyAppWrite()));
+  return handleEarlyAppWrite(state, param);
 }
 
 Actions
 EventHandler<ClientTypes, StateEnum::Established, Event::EarlyAppWrite>::handle(
     const State& state,
     Param& param) {
-  auto appWrite = std::move(*param.asEarlyAppWrite());
   if (*state.earlyDataType() == EarlyDataType::Accepted) {
+    auto appWrite = std::move(*param.asEarlyAppWrite());
     // It's possible that we had queued early writes before full handshake
     // success. It's fine to write them on the normal record layer as long as
     // the early data was accepted, otherwise we need to ignore them to preserve
@@ -2533,7 +2535,7 @@ EventHandler<ClientTypes, StateEnum::Established, Event::EarlyAppWrite>::handle(
     write.flags = appWrite.flags;
     return actions(std::move(write));
   } else {
-    return ignoreEarlyAppWrite(state, std::move(appWrite));
+    return ignoreEarlyAppWrite(state, param);
   }
 }
 

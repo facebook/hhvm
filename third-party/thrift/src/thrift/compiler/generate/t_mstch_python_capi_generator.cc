@@ -575,7 +575,7 @@ class python_capi_mstch_struct : public mstch_struct {
     return cpp_resolver_.get_underlying_namespaced_name(*struct_);
   }
 
-  mstch::node fields_size() { return std::to_string(struct_->fields().size()); }
+  mstch::node fields_size() { return struct_->fields().size(); }
 
  private:
   gen::cpp::type_resolver cpp_resolver_;

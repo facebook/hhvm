@@ -28,6 +28,7 @@ SOFTWARE.
 */
 #pragma once
 
+#include <cstddef>
 #include <functional>
 #include <map>
 #include <memory>
@@ -187,6 +188,7 @@ struct node : internal::node_base<node> {
 
   using base::base;
   /* implicit */ node(std::string_view sv) : base(std::string(sv)) {}
+  /* implicit */ node(std::size_t i);
 
   template <typename... Visitor>
   decltype(auto) visit(Visitor&&... visitor) {

@@ -26,12 +26,24 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 #include <thrift/compiler/detail/mustache/mstch.h>
+
+#include <limits>
+#include <stdexcept>
+#include <fmt/core.h>
 #include <thrift/compiler/detail/mustache/render_context.h>
 
 namespace apache {
 namespace thrift {
 namespace mstch {
+
+node::node(std::size_t i) : base(static_cast<int>(i)) {
+  if (i > static_cast<unsigned int>(std::numeric_limits<int>::max())) {
+    throw std::overflow_error(
+        fmt::format("size_t greater than int max: {}", i));
+  }
+}
 
 std::string render(
     const std::string& tmplt,

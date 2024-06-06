@@ -477,9 +477,7 @@ class mstch_program : public mstch_base {
   mstch::node constants();
 
   mstch::node has_interned_values() { return !program_->intern_list().empty(); }
-  mstch::node num_interned_values() {
-    return static_cast<int>(program_->intern_list().size());
-  }
+  mstch::node num_interned_values() { return program_->intern_list().size(); }
   mstch::node interned_values();
 
  protected:

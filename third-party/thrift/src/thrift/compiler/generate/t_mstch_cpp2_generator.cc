@@ -1201,7 +1201,7 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::is_trivially_destructible},
         });
   }
-  mstch::node fields_size() { return std::to_string(struct_->fields().size()); }
+  mstch::node fields_size() { return struct_->fields().size(); }
   mstch::node explicitly_constructed_fields() {
     // Filter fields according to the following criteria:
     // Get all enums
@@ -1423,7 +1423,7 @@ class cpp_mstch_struct : public mstch_struct {
         size++;
       }
     }
-    return std::to_string(size);
+    return size;
   }
   mstch::node isset_bitset_option() {
     static const std::string kPrefix =
@@ -1479,7 +1479,7 @@ class cpp_mstch_struct : public mstch_struct {
     if (!struct_->is_union()) {
       throw std::runtime_error("not a union struct");
     }
-    return std::to_string(struct_->fields().size());
+    return struct_->fields().size();
   }
   mstch::node has_non_optional_and_non_terse_field() {
     const auto& fields = struct_->fields();
@@ -2058,7 +2058,7 @@ class cpp_mstch_enum : public mstch_enum {
         });
   }
   mstch::node is_empty() { return enum_->get_enum_values().empty(); }
-  mstch::node size() { return std::to_string(enum_->get_enum_values().size()); }
+  mstch::node size() { return enum_->get_enum_values().size(); }
   mstch::node min() {
     if (!enum_->get_enum_values().empty()) {
       auto e_min = std::min_element(

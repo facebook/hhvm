@@ -820,7 +820,7 @@ class py3_mstch_struct : public mstch_struct {
         py3_fields_.end());
   }
 
-  mstch::node getSize() { return std::to_string(py3_fields_.size()); }
+  mstch::node getSize() { return py3_fields_.size(); }
 
   mstch::node isStructOrderable() {
     return cpp2::is_orderable(*struct_) &&

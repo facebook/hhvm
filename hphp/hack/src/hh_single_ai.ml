@@ -21,13 +21,6 @@ type options = {
   tcopt: GlobalOptions.t;
 }
 
-(** If the user passed --root, then all pathnames have to be canonicalized.
-The fact of whether they passed --root is kind of stored inside Relative_path
-global variables: the Relative_path.(path_of_prefix Root) is either "/"
-if they failed to pass something, or the thing that they passed. *)
-let use_canonical_filenames () =
-  not (String.equal "/" (Relative_path.path_of_prefix Relative_path.Root))
-
 (* Canonical builtins from our hhi library *)
 let hhi_builtins = Hhi.get_raw_hhi_contents ()
 
@@ -73,12 +66,7 @@ let print_error format ?(oc = stderr) l =
     | Errors.Highlighted -> Highlighted_error_formatter.to_string
     | Errors.Extended -> Extended_error_formatter.to_string
   in
-  let absolute_errors =
-    if use_canonical_filenames () then
-      User_error.to_absolute l
-    else
-      User_error.to_absolute_for_test l
-  in
+  let absolute_errors = User_error.to_absolute l in
   Out_channel.output_string oc (formatter absolute_errors)
 
 let comma_string_to_iset (s : string) : ISet.t =
@@ -289,15 +277,10 @@ let decl_and_run_mode
           ~data:src)
   in
   let files =
-    if use_canonical_filenames () then
-      files
-      |> List.map ~f:Sys_utils.realpath
-      |> List.map ~f:(fun s -> Option.value_exn s)
-      |> List.map ~f:Relative_path.create_detect_prefix
-    else
-      files
-      |> List.map ~f:(fun file ->
-             Relative_path.create Relative_path.Root (Filename.basename file))
+    files
+    |> List.map ~f:Sys_utils.realpath
+    |> List.map ~f:(fun s -> Option.value_exn s)
+    |> List.map ~f:Relative_path.create_detect_prefix
   in
   let files_contents =
     List.fold

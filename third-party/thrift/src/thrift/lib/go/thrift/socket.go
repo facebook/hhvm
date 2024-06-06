@@ -27,7 +27,6 @@ var _ net.Conn = (*socket)(nil)
 
 type socket struct {
 	conn    net.Conn
-	addr    net.Addr
 	timeout time.Duration
 }
 
@@ -57,14 +56,13 @@ func SocketAddr(hostPort string) SocketOption {
 		if err != nil {
 			return err
 		}
-		socket.addr = addr
-		if len(socket.addr.Network()) == 0 {
+		if len(addr.Network()) == 0 {
 			return NewTransportException(NOT_OPEN, "Cannot open bad network name.")
 		}
-		if len(socket.addr.String()) == 0 {
+		if len(addr.String()) == 0 {
 			return NewTransportException(NOT_OPEN, "Cannot open bad address.")
 		}
-		if socket.conn, err = net.Dial(socket.addr.Network(), socket.addr.String()); err != nil {
+		if socket.conn, err = net.Dial(addr.Network(), addr.String()); err != nil {
 			return NewTransportException(NOT_OPEN, err.Error())
 		}
 		return nil
@@ -75,7 +73,6 @@ func SocketAddr(hostPort string) SocketOption {
 func SocketConn(conn net.Conn) SocketOption {
 	return func(socket *socket) error {
 		socket.conn = conn
-		socket.addr = conn.RemoteAddr()
 		return nil
 	}
 }
@@ -94,7 +91,7 @@ func NewSocket(options ...SocketOption) (net.Conn, error) {
 		}
 	}
 
-	if socket.addr.String() == "" && socket.conn.RemoteAddr().String() == "" && socket.addr.Network() != "unix" {
+	if socket.conn.RemoteAddr().String() == "" {
 		return nil, errors.New("must supply either an address or a connection")
 	}
 

@@ -190,6 +190,13 @@ struct node : internal::node_base<node> {
   /* implicit */ node(std::string_view sv) : base(std::string(sv)) {}
   /* implicit */ node(std::size_t i);
 
+  // Equivalent to the int constructor brought in by `using base::base`, but
+  // having this here forces integer callers which are neither int nor size_t to
+  // intentionally convert to one or the other. Without the following line,
+  // calls like node(int64_t) would silently disambiguate to the size_t
+  // constructor, which is potentially surprising.
+  /* implicit */ node(int i) : base(i) {}
+
   template <typename... Visitor>
   decltype(auto) visit(Visitor&&... visitor) {
     return std::visit(visitor..., static_cast<base&>(*this));

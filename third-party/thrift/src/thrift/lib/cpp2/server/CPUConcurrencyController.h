@@ -21,7 +21,7 @@
 #include <variant>
 
 #include <folly/Synchronized.h>
-#include <folly/experimental/FunctionScheduler.h>
+#include <folly/executors/FunctionScheduler.h>
 #include <folly/observer/Observer.h>
 #include <folly/observer/SimpleObservable.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>

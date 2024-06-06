@@ -19,8 +19,8 @@
 #include <thrift/lib/cpp/concurrency/SFQThreadManager.h>
 
 #include <glog/logging.h>
+#include <folly/executors/FunctionScheduler.h>
 #include <folly/executors/MeteredExecutor.h>
-#include <folly/experimental/FunctionScheduler.h>
 #include <folly/hash/Hash.h>
 
 #include <thrift/lib/cpp/concurrency/SFQThreadManager.h>

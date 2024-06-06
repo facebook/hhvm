@@ -1351,7 +1351,6 @@ class mstch_const_value : public mstch_base {
             {"value:list?", &mstch_const_value::is_list},
             {"value:container?", &mstch_const_value::is_container},
             {"value:empty_container?", &mstch_const_value::is_empty_container},
-            {"value:value", &mstch_const_value::value},
             {"value:integer_value", &mstch_const_value::integer_value},
             {"value:double_value", &mstch_const_value::double_value},
             {"value:bool_value", &mstch_const_value::bool_value},
@@ -1396,7 +1395,6 @@ class mstch_const_value : public mstch_base {
     return (type_ == cv::CV_MAP && const_value_->get_map().empty()) ||
         (type_ == cv::CV_LIST && const_value_->get_list().empty());
   }
-  mstch::node value();
   mstch::node integer_value();
   mstch::node double_value();
   mstch::node bool_value();

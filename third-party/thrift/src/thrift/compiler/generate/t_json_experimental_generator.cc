@@ -397,6 +397,10 @@ class json_experimental_const_value : public mstch_const_value {
     register_cached_methods(
         this,
         {
+            {"value:integer_or_enum?",
+             &json_experimental_const_value::is_integer_or_enum},
+            {"value:bool_integer_value",
+             &json_experimental_const_value::get_bool_integer_value},
             {"value:lineno", &json_experimental_const_value::get_lineno},
             {"value:type_name", &json_experimental_const_value::get_type_name},
             {"value:qualified_name",
@@ -406,6 +410,14 @@ class json_experimental_const_value : public mstch_const_value {
             {"value:docstring?", &json_experimental_const_value::has_docstring},
             {"value:docstring", &json_experimental_const_value::get_docstring},
         });
+  }
+  mstch::node is_integer_or_enum() {
+    // Enums are represented with CV_INTEGER with const_value_->is_enum().
+    return type_ == cv::CV_INTEGER;
+  }
+  mstch::node get_bool_integer_value() {
+    return type_ == cv::CV_BOOL ? (const_value_->get_bool() ? 1 : 0)
+                                : mstch::node();
   }
   mstch::node get_lineno() {
     return compiler::get_lineno(*current_const_, source_mgr_);

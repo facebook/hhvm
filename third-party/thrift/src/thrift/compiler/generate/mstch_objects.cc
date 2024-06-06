@@ -191,21 +191,6 @@ mstch::node mstch_const_map_element::element_value() {
       element_.second, context_, pos_, current_const_, expected_types_.second);
 }
 
-mstch::node mstch_const_value::value() {
-  switch (type_) {
-    case cv::CV_DOUBLE:
-      return fmt::format("{}", const_value_->get_double());
-    case cv::CV_BOOL:
-      return std::to_string(const_value_->get_bool());
-    case cv::CV_INTEGER:
-      return std::to_string(const_value_->get_integer());
-    case cv::CV_STRING:
-      return const_value_->get_string();
-    default:
-      return mstch::node();
-  }
-}
-
 mstch::node mstch_const_value::integer_value() {
   return type_ == cv::CV_INTEGER ? std::to_string(const_value_->get_integer())
                                  : mstch::node();

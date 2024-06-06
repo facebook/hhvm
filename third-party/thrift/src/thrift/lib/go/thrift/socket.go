@@ -123,14 +123,26 @@ func (s *socket) RemoteAddr() net.Addr {
 }
 
 func (s *socket) SetDeadline(t time.Time) error {
+	if s.timeout > 0 {
+		// timeout is preferred over deadline
+		return nil
+	}
 	return s.conn.SetDeadline(t)
 }
 
 func (s *socket) SetReadDeadline(t time.Time) error {
+	if s.timeout > 0 {
+		// timeout is preferred over deadline
+		return nil
+	}
 	return s.conn.SetReadDeadline(t)
 }
 
 func (s *socket) SetWriteDeadline(t time.Time) error {
+	if s.timeout > 0 {
+		// timeout is preferred over deadline
+		return nil
+	}
 	return s.conn.SetWriteDeadline(t)
 }
 

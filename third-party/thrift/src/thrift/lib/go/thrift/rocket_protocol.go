@@ -143,6 +143,8 @@ func (p *rocketProtocol) Flush() (err error) {
 		}),
 		rx.OnError(func(e error) {
 			p.errChan <- e
+			close(p.responseChan)
+			close(p.errChan)
 		}),
 		rx.OnComplete(func() {
 			close(p.responseChan)

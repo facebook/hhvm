@@ -47,7 +47,7 @@ Thrift Exception is treated identical to Thrift Struct. Users can use `@thrift.T
 
 ## Certain details to note while implementing the APIs
 
-* `@thrift.TerseWrite` can be applied on the package-level, structured-level, and field-level. For package-level, all unqualified fields in Struct or Exception in the thrift file are promoted to terse fields. For structured-level, all unqualified fields within the specific Struct or Exception are promoted to terse fields. For field-level, the specific unqualified field is promoted to terse field. Please refer to the [user guide](../features/terse-write) for examples.
+* `@thrift.TerseWrite` can be applied on the package-level, structured-level, and field-level. For package-level, all unqualified fields in Struct or Exception in the Thrift file are promoted to terse fields. For structured-level, all unqualified fields within the specific Struct or Exception are promoted to terse fields. For field-level, the specific unqualified field is promoted to terse field. Please refer to the [user guide](../features/terse-write) for examples.
 
 * `@thrift.TerseWrite` changes the field qualifier in `t_field` directly. Therefore, `t_field_qualifier::terse` can be used in Thrift AST to determine whether a field is terse or not. Each language implementor does not need to check the existence of the annotation.
 * There is no need to touch Thrift Compiler; please make an appropriate changes in codegen for consuming Thrift terse fields.

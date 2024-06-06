@@ -4,7 +4,7 @@ The following naming style **should** be used in all Thrift IDL files for consis
 
 ## Naming
 
-Use snake case for file names, as they function like "module" names when included in other thrift files, for example: `standard.thrift`, `security_domain.thrift.`
+Use snake case for file names, as they function like "module" names when included in other Thrift files, for example: `standard.thrift`, `security_domain.thrift.`
 
 Use upper camel case (PascalCase) for type and service names.
 

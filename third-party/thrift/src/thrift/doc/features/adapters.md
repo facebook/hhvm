@@ -48,7 +48,7 @@ struct BitsetAdapter {
 }
 ```
 ```thrift
-// In thrift file
+// In Thrift file
 include "thrift/annotation/cpp.thrift"
 cpp_include "BitsetAdapter.h"
 struct Foo {
@@ -237,7 +237,7 @@ final class TimestampToTimeAdapter implements IThriftAdapter {
 }
 ```
 ```thrift
-// In thrift file
+// In Thrift file
 include "thrift/annotation/hack.thrift"
 @hack.Adapter {name = '\\TimestampToTimeAdapter'}
 typedef i32 i32_withAdapter;
@@ -266,7 +266,7 @@ function timeSinceCreated(Document $doc): Duration {
 Similar to typedef, adapter can be added to fields directly. It should implement [`IThriftAdapter` ](https://www.internalfb.com/code/www/[1cce1dcd39b3d25482944ebc796fafb4c3a3d4fd]/flib/thrift/core/IThriftAdapter.php?lines=19-29)interface. Below IDL will generate the same code as above.
 
 ```thrift
-// In thrift file
+// In Thrift file
 struct Document {
   @hack.Adapter{name = '\\TimestampToTimeAdapter'}
   1: i32 created_time;
@@ -336,7 +336,7 @@ final class FooOnlyAllowOwnerToAccess<TThriftType, TStructType>
 }
 ```
 ```thrift
-// In thrift file
+// In Thrift file
 struct Document {
   @hack.Wrapper{name = '\\FooOnlyAllowOwnerToAccess'}
   1: i32 created_time;
@@ -410,7 +410,7 @@ class DatetimeAdapter(Adapter[int, datetime]):
         return int(adapted.timestamp())
 ```
 ```thrift
-// In thrift file
+// In Thrift file
 include "thrift/annotation/python.thrift"
 struct Foo {
   @python.Adapter{

@@ -1,1 +1,2 @@
-No errors
+WARN: File "while_continue2.php", line 14, characters 11-12:
+Invalid condition: a value of type `null` will always be falsy (Warn[12006])

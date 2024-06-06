@@ -191,6 +191,53 @@ module CastNonPrimitive = struct
   let lint_quickfix _ = None
 end
 
+module TruthinessTest = struct
+  open Typing_warning.TruthinessTest
+
+  type t = Typing_warning.TruthinessTest.t
+
+  let code = Codes.TruthinessTest
+
+  let lint_code { kind; _ } =
+    match kind with
+    | Invalid _ -> Lints_codes.Codes.invalid_truthiness_test
+    | Sketchy _ -> Lints_codes.Codes.sketchy_truthiness_test
+
+  let lint_severity = Lints_core.Lint_warning
+
+  let claim { kind; ty } =
+    match kind with
+    | Invalid { truthy } ->
+      Printf.sprintf
+        "Invalid condition: a value of type %s will always be %s"
+        (Markdown_lite.md_codify ty)
+        (if truthy then
+          "truthy"
+        else
+          "falsy")
+    | Sketchy sketchy ->
+      Printf.sprintf
+        "Sketchy condition: testing the truthiness of %s may not behave as expected.\n%s"
+        ty
+        (match sketchy with
+        | String ->
+          "The values `\"\"` and `\"0\"` are both considered falsy. To check for emptiness, use `Str\\is_empty`."
+        | Arraykey ->
+          "The values `0`, `\"\"`, and `\"0\"` are all considered falsy. Test for them explicitly."
+        | Stringish ->
+          "The values `\"\"` and `\"0\"` are both considered falsy, but objects will be truthy even if their `__toString` returns `\"\"` or `\"0\"`.\nTo check for emptiness, convert to a string and use `Str\\is_empty`."
+        | Xhp_child ->
+          "The values `\"\"` and `\"0\"` are both considered falsy, but objects (including XHP elements) will be truthy even if their `__toString` returns `\"\"` or `\"0\"`."
+        | Traversable ->
+          "A value of this type may be truthy even when empty.\nHack collections and arrays are falsy when empty, but user-defined Traversables will always be truthy, even when empty.\nIf you would like to only allow containers which are falsy when empty, use the `Container` or `KeyedContainer` interfaces.")
+
+  let reasons _ = []
+
+  let quickfixes _ = []
+
+  let lint_quickfix _ = None
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -199,6 +246,7 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Sketchy_null_check -> (module SketchyNullCheck)
   | Typing_warning.Non_disjoint_check -> (module NonDisjointCheck)
   | Typing_warning.Cast_non_primitive -> (module CastNonPrimitive)
+  | Typing_warning.Truthiness_test -> (module TruthinessTest)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :
@@ -208,6 +256,7 @@ let module_of_migrated
   | Typing_warning.Sketchy_null_check -> (module SketchyNullCheck)
   | Typing_warning.Non_disjoint_check -> (module NonDisjointCheck)
   | Typing_warning.Cast_non_primitive -> (module CastNonPrimitive)
+  | Typing_warning.Truthiness_test -> (module TruthinessTest)
 
 let code_is_enabled tcopt code =
   match TypecheckerOptions.hack_warnings tcopt with

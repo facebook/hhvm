@@ -142,47 +142,6 @@ let missing_override_attribute
 
   Lints.add ~autofix Codes.missing_override_attribute Lint_error name_pos @@ msg
 
-let invalid_truthiness_test pos ty =
-  Lints.add Codes.invalid_truthiness_test Lint_warning pos
-  @@ Printf.sprintf
-       "Invalid condition: a value of type %s will always be truthy"
-       (Markdown_lite.md_codify ty)
-
-let invalid_truthiness_test_falsy pos ty =
-  Lints.add Codes.invalid_truthiness_test Lint_warning pos
-  @@ Printf.sprintf
-       "Invalid condition: a value of type %s will always be falsy"
-       (Markdown_lite.md_codify ty)
-
-let sketchy_truthiness_test pos ty truthiness =
-  Lints.add Codes.sketchy_truthiness_test Lint_warning pos
-  @@
-  match truthiness with
-  | `String ->
-    Printf.sprintf
-      "Sketchy condition: testing the truthiness of %s may not behave as expected.\nThe values `\"\"` and `\"0\"` are both considered falsy. To check for emptiness, use `Str\\is_empty`."
-      ty
-  | `Arraykey ->
-    Printf.sprintf
-      "Sketchy condition: testing the truthiness of %s may not behave as expected.\nThe values `0`, `\"\"`, and `\"0\"` are all considered falsy. Test for them explicitly."
-      ty
-  | `Stringish ->
-    Printf.sprintf
-      "Sketchy condition: testing the truthiness of a %s may not behave as expected.\nThe values `\"\"` and `\"0\"` are both considered falsy, but objects will be truthy even if their `__toString` returns `\"\"` or `\"0\"`.\nTo check for emptiness, convert to a string and use `Str\\is_empty`."
-      ty
-  | `XHPChild ->
-    Printf.sprintf
-      "Sketchy condition: testing the truthiness of an %s may not behave as expected.\nThe values `\"\"` and `\"0\"` are both considered falsy, but objects (including XHP elements) will be truthy even if their `__toString` returns `\"\"` or `\"0\"`."
-      ty
-  | `Traversable ->
-    (* We have a truthiness test on a value with an interface type which is a
-         subtype of Traversable, but not a subtype of Container.
-         Since the runtime value may be a falsy-when-empty Container or an
-         always-truthy Iterable/Generator, we forbid the test. *)
-    Printf.sprintf
-      "Sketchy condition: a value of type %s may be truthy even when empty.\nHack collections and arrays are falsy when empty, but user-defined Traversables will always be truthy, even when empty.\nIf you would like to only allow containers which are falsy when empty, use the `Container` or `KeyedContainer` interfaces."
-      ty
-
 let redundant_covariant pos name msg suggest =
   Lints.add Codes.redundant_generic Lint_warning pos
   @@ "The generic parameter "
@@ -437,12 +396,3 @@ let awaitable_awaitable pos =
     ^ " You probably want to use await inside this async lambda,"
     ^ " so stack traces include the lambda position."
     ^ " If this is intentional, please annotate the return type.")
-
-let cast_non_primitive pos =
-  Lints.add
-    Codes.cast_non_primitive
-    Lint_error
-    pos
-    ("Casting a non-primitive to a primitive rarely yields a "
-    ^ "useful value. Did you mean to extract a value from this object "
-    ^ "before casting it, or to do a null-check?")

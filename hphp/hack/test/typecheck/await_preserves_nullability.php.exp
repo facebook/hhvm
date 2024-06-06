@@ -11,3 +11,6 @@ This is a sketchy null check.
 It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
 If you want to test for them, please consider doing so explicitly.
 If you only meant to test for `null`, use `$item is nonnull` instead (Warn[12003])
+WARN: File "await_preserves_nullability.php", line 21, characters 9-13:
+Sketchy condition: testing the truthiness of an array key (int | string) may not behave as expected.
+The values `0`, `""`, and `"0"` are all considered falsy. Test for them explicitly. (Warn[12006])

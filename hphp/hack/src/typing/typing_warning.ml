@@ -68,11 +68,30 @@ module CastNonPrimitive = struct
   }
 end
 
+module TruthinessTest = struct
+  type sketchy_kind =
+    | String
+    | Arraykey
+    | Stringish
+    | Xhp_child
+    | Traversable
+
+  type kind =
+    | Invalid of { truthy: bool }
+    | Sketchy of sketchy_kind
+
+  type t = {
+    kind: kind;
+    ty: string;
+  }
+end
+
 type (_, _) kind =
   | Sketchy_equality : (SketchyEquality.t, warn) kind
   | Is_as_always : (IsAsAlways.t, migrated) kind
   | Sketchy_null_check : (SketchyNullCheck.t, migrated) kind
   | Non_disjoint_check : (NonDisjointCheck.t, migrated) kind
   | Cast_non_primitive : (CastNonPrimitive.t, migrated) kind
+  | Truthiness_test : (TruthinessTest.t, migrated) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

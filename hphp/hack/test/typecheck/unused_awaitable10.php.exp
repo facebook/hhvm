@@ -6,3 +6,7 @@ ERROR: File "unused_awaitable10.php", line 15, characters 14-15:
 This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
   File "unused_awaitable10.php", line 7, characters 21-35:
   This is why I think it is `Awaitable`
+WARN: File "unused_awaitable10.php", line 15, characters 8-9:
+Invalid condition: a value of type `Awaitable<int>` will always be truthy (Warn[12006])
+WARN: File "unused_awaitable10.php", line 15, characters 14-15:
+Invalid condition: a value of type `Awaitable<?int>` will always be truthy (Warn[12006])

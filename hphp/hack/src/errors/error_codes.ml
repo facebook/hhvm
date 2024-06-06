@@ -784,6 +784,7 @@ module Warning = struct
     | SketchyNullCheck [@value 12003]
     | NonDisjointCheck [@value 12004]
     | CastNonPrimitive [@value 12005]
+    | TruthinessTest [@value 12006]
   [@@deriving enum, show { with_path = false }]
 end
 

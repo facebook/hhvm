@@ -30,7 +30,6 @@ let typed_linters tcopt =
     Linter_equality_check.handler;
     Linter_switch_check.handler;
     Linter_missing_override_attribute.handler;
-    Linter_truthiness_test.handler;
     Linter_redundant_generics.handler;
     Linter_class_overrides_trait.handler;
     Linter_expr_tree_types.handler;

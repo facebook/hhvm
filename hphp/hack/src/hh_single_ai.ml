@@ -17,7 +17,6 @@ type options = {
   files: string list;
   extra_builtins: string list;
   ai_options: Ai_options.t;
-  error_format: Errors.format;
   tcopt: GlobalOptions.t;
 }
 
@@ -57,17 +56,11 @@ let die str =
   Out_channel.close oc;
   exit 2
 
-let print_error format ?(oc = stderr) l =
-  let formatter =
-    match format with
-    | Errors.Context -> (fun e -> Contextual_error_formatter.to_string e)
-    | Errors.Raw -> (fun e -> Raw_error_formatter.to_string e)
-    | Errors.Plain -> (fun e -> Errors.to_string e)
-    | Errors.Highlighted -> Highlighted_error_formatter.to_string
-    | Errors.Extended -> Extended_error_formatter.to_string
-  in
+let print_error ?(oc = stderr) l =
   let absolute_errors = User_error.to_absolute l in
-  Out_channel.output_string oc (formatter absolute_errors)
+  Out_channel.output_string
+    oc
+    (Highlighted_error_formatter.to_string absolute_errors)
 
 let comma_string_to_iset (s : string) : ISet.t =
   Str.split (Str.regexp ", *") s |> List.map ~f:int_of_string |> ISet.of_list
@@ -150,13 +143,7 @@ let parse_options () =
     GlobalOptions.allowed_fixme_codes_strict tcopt;
   Errors.report_pos_from_reason :=
     TypecheckerOptions.report_pos_from_reason tcopt;
-  ( {
-      files = fns;
-      extra_builtins = !extra_builtins;
-      ai_options;
-      error_format = Errors.Highlighted;
-      tcopt;
-    },
+  ( { files = fns; extra_builtins = !extra_builtins; ai_options; tcopt },
     None,
     Ai_options.modify_shared_mem ai_options SharedMem.default_config )
 
@@ -196,9 +183,9 @@ let parse_name_and_skip_decl ctx files_contents =
           ());
       files_info)
 
-let handle_mode ai_options ctx files_info parse_errors error_format =
+let handle_mode ai_options ctx files_info parse_errors =
   if not (List.is_empty parse_errors) then
-    List.iter ~f:(print_error error_format) parse_errors
+    List.iter ~f:print_error parse_errors
   else
     (* No type check *)
     Ai.do_ files_info ai_options ctx
@@ -228,7 +215,7 @@ let file_to_files filename =
 (*****************************************************************************)
 
 let decl_and_run_mode
-    { files; extra_builtins; ai_options; error_format; tcopt }
+    { files; extra_builtins; ai_options; tcopt }
     (popt : ParserOptions.t)
     (hhi_root : Path.t)
     (naming_table_path : string option) : unit =
@@ -321,12 +308,7 @@ let decl_and_run_mode
   in
   let (errors, files_info) = parse_name_and_skip_decl ctx to_decl in
   let ctx = Provider_context.set_backend ctx Provider_backend.Analysis in
-  handle_mode
-    ai_options
-    ctx
-    files_info
-    (Errors.get_sorted_error_list errors)
-    error_format
+  handle_mode ai_options ctx files_info (Errors.get_sorted_error_list errors)
 
 let write_file_to_root ~(root : Path.t) ~file =
   let write (file, content) =

@@ -187,6 +187,13 @@ class HTTPServer final {
    */
   void updateTicketSeeds(wangle::TLSTicketKeySeeds seeds);
 
+  /**
+   * Allows the caller to apply a function to each acceptor the server is
+   * responsible for
+   */
+  void forEachAcceptor(
+      const std::function<void(wangle::Acceptor* acceptor)>& fn);
+
  protected:
   /**
    * Start TCP HTTP server.

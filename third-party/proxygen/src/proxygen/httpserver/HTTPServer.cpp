@@ -273,36 +273,39 @@ int HTTPServer::getListenSocket() const {
 }
 
 void HTTPServer::updateTLSCredentials() {
-  for (auto& bootstrap : bootstrap_) {
-    bootstrap.forEachWorker([&](wangle::Acceptor* acceptor) {
-      if (!acceptor || !acceptor->isSSL()) {
-        return;
-      }
-      auto evb = acceptor->getEventBase();
-      if (!evb) {
-        return;
-      }
-      evb->runInEventBaseThread(
-          [acceptor] { acceptor->reloadSSLContextConfigs(); });
-    });
-  }
+  forEachAcceptor([&](wangle::Acceptor* acceptor) {
+    if (!acceptor || !acceptor->isSSL()) {
+      return;
+    }
+    auto evb = acceptor->getEventBase();
+    if (!evb) {
+      return;
+    }
+    evb->runInEventBaseThread(
+        [acceptor] { acceptor->reloadSSLContextConfigs(); });
+  });
 }
 
 void HTTPServer::updateTicketSeeds(wangle::TLSTicketKeySeeds seeds) {
-  for (auto& bootstrap : bootstrap_) {
-    bootstrap.forEachWorker([&](wangle::Acceptor* acceptor) {
-      if (!acceptor || !acceptor->isSSL()) {
-        return;
-      }
-      auto evb = acceptor->getEventBase();
-      if (!evb) {
-        return;
-      }
-      evb->runInEventBaseThread([acceptor, seeds] {
-        acceptor->setTLSTicketSecrets(
-            seeds.oldSeeds, seeds.currentSeeds, seeds.newSeeds);
-      });
+  forEachAcceptor([&](wangle::Acceptor* acceptor) {
+    if (!acceptor || !acceptor->isSSL()) {
+      return;
+    }
+    auto evb = acceptor->getEventBase();
+    if (!evb) {
+      return;
+    }
+    evb->runInEventBaseThread([acceptor, seeds] {
+      acceptor->setTLSTicketSecrets(
+          seeds.oldSeeds, seeds.currentSeeds, seeds.newSeeds);
     });
+  });
+}
+
+void HTTPServer::forEachAcceptor(
+    const std::function<void(wangle::Acceptor* acceptor)>& fn) {
+  for (auto& bootstrap : bootstrap_) {
+    bootstrap.forEachWorker(fn);
   }
 }
 

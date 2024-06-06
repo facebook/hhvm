@@ -98,12 +98,6 @@ func NewSocket(options ...SocketOption) (net.Conn, error) {
 	return socket, nil
 }
 
-// Sets the socket timeout
-func (s *socket) SetTimeout(timeout time.Duration) error {
-	s.timeout = timeout
-	return nil
-}
-
 func (s *socket) pushDeadline(read, write bool) {
 	var t time.Time
 	if s.timeout > 0 {

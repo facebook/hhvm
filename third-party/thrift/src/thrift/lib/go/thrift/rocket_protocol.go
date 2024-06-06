@@ -57,11 +57,7 @@ func NewRocketProtocol(conn net.Conn) Protocol {
 		protoID:           ProtocolIDCompact,
 		persistentHeaders: make(map[string]string),
 		buf:               NewMemoryBuffer(),
-	}
-	if cc, ok := conn.(interface{ Conn() net.Conn }); ok {
-		p.conn = cc.Conn()
-	} else {
-		p.conn = conn
+		conn:              conn,
 	}
 	if err := p.resetProtocol(); err != nil {
 		panic(err)

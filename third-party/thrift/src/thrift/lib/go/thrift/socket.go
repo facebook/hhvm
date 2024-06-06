@@ -159,11 +159,6 @@ func (s *socket) ConnectionState() tls.ConnectionState {
 	return tlsConn.ConnectionState()
 }
 
-// Conn retrieves the underlying net.Conn
-func (s *socket) Conn() net.Conn {
-	return s.conn
-}
-
 // Close closes the underlying net.Conn
 func (s *socket) Close() error {
 	return s.conn.Close()

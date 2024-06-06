@@ -108,6 +108,14 @@ TEST(ObjectTest, TypeEnforced) {
   EXPECT_TRUE(value.get_boolValue());
 }
 
+TEST(ObjectTest, Empty) {
+  Value value;
+  value.emplace_object();
+  value.as_object().members().reset();
+  serializeValue<CompactProtocolWriter>(value);
+  serializeObject<CompactProtocolWriter>(value.as_object());
+}
+
 TEST(ObjectTest, Bool) {
   Value value = asValueStruct<type::bool_t>(20);
   ASSERT_EQ(value.getType(), Value::Type::boolValue);

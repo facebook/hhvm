@@ -776,11 +776,13 @@ template <class Protocol>
 uint32_t serializeObject(Protocol& prot, const Object& obj) {
   uint32_t serializedSize = 0;
   serializedSize += prot.writeStructBegin("");
-  for (const auto& [fieldID, fieldVal] : *obj.members()) {
-    auto fieldType = getTType(fieldVal);
-    serializedSize += prot.writeFieldBegin("", fieldType, fieldID);
-    serializedSize += serializeValue(prot, fieldVal);
-    serializedSize += prot.writeFieldEnd();
+  if (obj.members()) {
+    for (const auto& [fieldID, fieldVal] : *obj.members()) {
+      auto fieldType = getTType(fieldVal);
+      serializedSize += prot.writeFieldBegin("", fieldType, fieldID);
+      serializedSize += serializeValue(prot, fieldVal);
+      serializedSize += prot.writeFieldEnd();
+    }
   }
   serializedSize += prot.writeFieldStop();
   serializedSize += prot.writeStructEnd();

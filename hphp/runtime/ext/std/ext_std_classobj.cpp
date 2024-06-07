@@ -203,77 +203,35 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(get_class, const Variant& object /* = uninit_variant */) {
-  auto logOrThrow = [&](const Variant& object) {
-    if (RuntimeOption::EvalGetClassBadArgument == 0) return;
-    auto msg = folly::sformat("get_class() was called with {}, expected object",
-                              getDataTypeString(object.getType()));
-    if (RuntimeOption::EvalGetClassBadArgument == 1) {
-      raise_warning(msg);
-    } else {
-      SystemLib::throwRuntimeExceptionObject(msg);
-    }
-  };
-  if (object.isNull()) {
-    // No arg passed.
-    logOrThrow(object);
-
-    if (auto const cls = clsFromCallerSkipBuiltins()) {
-      return Variant{cls->name(), Variant::PersistentStrInit{}};
-    }
-
-    raise_warning("get_class() called without object from outside a class");
-    return false;
-  }
-  if (!object.isObject()) {
-    logOrThrow(object);
-    return false;
-  }
-  return Variant{object.asCObjRef()->getVMClass()->name(),
-                 Variant::PersistentStrInit{}};
+TypedValue HHVM_FUNCTION(get_class, const Object& object) {
+  return make_tv<KindOfClass>(object->getVMClass());
 }
 
-Variant HHVM_FUNCTION(get_parent_class,
-                      const Variant& object /* = uninit_variant */) {
-  auto logOrThrow = [&](const Variant& object) {
-    if (RuntimeOption::EvalGetClassBadArgument == 0) return;
-    auto msg = folly::sformat(
-      "get_parent_class() was called with {}, expected object or string",
-      getDataTypeString(object.getType()));
-    if (RuntimeOption::EvalGetClassBadArgument == 1) {
-      raise_warning(msg);
+TypedValue HHVM_FUNCTION(get_parent_class, const Variant& object) {
+  const Class* cls = [&] {
+    if (object.isObject()) {
+      return object.asCObjRef()->getVMClass();
+    } else if (object.isString()) {
+      // TODO(T168044199) log and eliminate strings
+      return Class::load(object.asCStrRef().get());
+    } else if (object.isLazyClass()) {
+      return Class::load(object.toLazyClassVal().name());
+    } else if (object.isClass()) {
+      return object.toClassVal();
     } else {
+      auto msg = folly::sformat(
+        "get_parent_class() was called with {}, expected object or string",
+        getDataTypeString(object.getType()));
       SystemLib::throwRuntimeExceptionObject(msg);
     }
-  };
+  }();
 
-  const Class* cls;
-  if (object.isNull()) {
-    logOrThrow(object);
-    cls = fromCaller(
-      [] (const BTFrame& frm) { return frm.func()->cls(); }
-    );
-    if (!cls) return false;
-  } else {
-    if (object.isObject()) {
-      cls = object.asCObjRef()->getVMClass();
-    } else if (object.isString()) {
-      cls = Class::load(object.asCStrRef().get());
-      if (!cls) return false;
-    } else if (object.isLazyClass()) {
-      cls = Class::load(object.toLazyClassVal().name());
-      if (!cls) return false;
-    } else if (object.isClass()) {
-      cls = object.toClassVal();
-    } else {
-      logOrThrow(object);
-      return false;
-    }
-  }
+  // TODO(T168044199) return null so function can return ?class<T>
+  if (!cls) return make_tv<KindOfBoolean>(false);
+  auto parent = cls->parent();
+  if (!parent) return make_tv<KindOfBoolean>(false);
 
-  if (!cls->parent()) return false;
-
-  return Variant{cls->parentStr().get(), Variant::PersistentStrInit{}};
+  return make_tv<KindOfClass>(parent);
 }
 
 static bool is_a_impl(const Variant& class_or_object, const String& class_name,

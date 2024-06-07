@@ -4,10 +4,10 @@ class Base {
 }
 trait T {
   public function sayClass() :mixed{
-    echo get_class() . "\n";
+    echo get_class(new self()) . "\n";
   }
   public function sayParent() :mixed{
-    echo get_parent_class();
+    echo get_parent_class(self::class);
   }
 }
 class Cls extends Base {

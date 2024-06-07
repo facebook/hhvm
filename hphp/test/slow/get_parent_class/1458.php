@@ -5,17 +5,17 @@ interface i {
 }
 class foo implements i {
   function test() :mixed{
-    var_dump(get_parent_class());
+    var_dump(get_parent_class(self::class));
   }
 }
 class bar extends foo {
   function test_bar() :mixed{
-    var_dump(get_parent_class());
+    var_dump(get_parent_class(self::class));
   }
 }
 class goo extends bar {
   function test_goo() :mixed{
-    var_dump(get_parent_class());
+    var_dump(get_parent_class(self::class));
   }
 }
 
@@ -41,6 +41,4 @@ var_dump(get_parent_class(""));
 var_dump(get_parent_class("[[[["));
 var_dump(get_parent_class(" "));
 var_dump(get_parent_class(new stdClass));
-var_dump(get_parent_class(vec[]));
-var_dump(get_parent_class(1));
 }

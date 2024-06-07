@@ -209,7 +209,7 @@ function dynamic_class_meth_force(string $cls, string $meth)[]: mixed;
 <<__Native>>
 function classname_from_string_unsafe(string $classname)[]: mixed;
 
-<<__Native>>
+<<__Native("NoRecording")>>
 function class_to_classname(readonly classname<mixed> $cn)[]: classname<mixed>;
 
 /**

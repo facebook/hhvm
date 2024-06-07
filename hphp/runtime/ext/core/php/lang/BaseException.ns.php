@@ -181,13 +181,13 @@ trait BaseException {
   }
 
   private static function getClassOfThrowable(\Throwable $ex)[]: string {
-    $cls = HH\FIXME\UNSAFE_CAST<mixed, string>(\get_class($ex));
+    /* HH_FIXME[2049] need to make class_to_classname visible */
+    /* HH_FIXME[4107] need to make class_to_classname visible */
+    $cls = \HH\class_to_classname(\get_class($ex));
     if (\substr($cls, 0, \strlen("__SystemLib\\")) === "__SystemLib\\") {
-      $cls = HH\FIXME\UNSAFE_CAST<mixed, string>(
-        \substr($cls, \strlen("__SystemLib\\"))
-      );
+      $cls = \substr($cls, \strlen("__SystemLib\\"));
     }
-    return $cls;
+    return \HH\FIXME\UNSAFE_CAST<mixed, string>($cls);
   }
 
   final protected static function toStringFromGetMessage(

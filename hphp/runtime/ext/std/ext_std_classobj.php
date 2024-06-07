@@ -57,12 +57,10 @@ function get_class_vars(string $class_name): mixed;
  * @param object $object - The tested object. This parameter may be
  *   omitted when inside a class.
  *
- * @return string - Returns the name of the class of which object is an
- *   instance. Returns FALSE if object is not an object.   If object is
- *   omitted when inside a class, the name of that class is returned.
+ * @return class - Returns the class of which object is an instance.
  */
 <<__Native("NoRecording")>>
-function get_class(readonly mixed $object = null)[]: mixed;
+function get_class(readonly HH\object $object)[]: classname<mixed>;
 
 /**
  * Returns an array with the name of the defined classes
@@ -113,14 +111,12 @@ function get_object_vars(\HH\object $object)[]: darray<string, mixed>;
  *
  * @param mixed $object - The tested object or class name
  *
- * @return string - Returns the name of the parent class of the class of
- *   which object is an instance or the name.    If the object does not
- *   have a parent or the class given does not exist FALSE will be
- *   returned.    If called without parameter outside object, this function
- *   returns FALSE.
+ * @return class - Returns the parent class of the class of which object is
+ *   an instance. If the object does not have a parent or the class given
+ *   does not exist FALSE will be returned.
  */
 <<__Native>>
-function get_parent_class(readonly mixed $object = null)[]: mixed;
+function get_parent_class(readonly mixed $object)[]: mixed;
 
 /**
  * Checks if the interface has been defined

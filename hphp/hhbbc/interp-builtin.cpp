@@ -62,11 +62,11 @@ TypeOrReduced builtin_get_class(ISS& env, const php::Func* func,
 
   if (!ty.subtypeOf(BObj)) return NoReduced{};
 
-  if (!is_specialized_obj(ty)) return TStr;
+  if (!is_specialized_obj(ty)) return TCls;
   auto const& d = dobj_of(ty);
-  if (!d.isExact()) return TStr;
+  if (!d.isExact()) return TCls;
   constprop(env);
-  return sval(d.cls().name());
+  return clsExact(d.cls(), true);
 }
 
 TypeOrReduced builtin_abs(ISS& env, const php::Func* func,

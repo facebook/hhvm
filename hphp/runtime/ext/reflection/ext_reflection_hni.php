@@ -384,7 +384,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   // Prevent cloning
   final public function __clone() {
     throw new BadMethodCallException(
-      'Trying to clone an uncloneable object of class ' . get_class($this)
+      'Trying to clone an uncloneable object of class ' . HH\class_to_classname(get_class($this))
     );
   }
 
@@ -503,7 +503,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   public function getName()[]: string {
     if ($this->closure) {
       // Format: Closure$scope;hash
-      $cls = get_class($this->closure);
+      $cls = HH\class_to_classname(get_class($this->closure));
       $ns_end = strrpos($cls, '\\');
       if ($ns_end !== false) {
         $ns_start = strpos($cls, '$') + 1;
@@ -565,7 +565,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    */
   public function invoke(...$args) {
     if ($this->closure) {
-      return hphp_invoke_method($this->closure, get_class($this->closure),
+      // TODO(T168044199) make hphp_invoke_method take a class pointer
+      return hphp_invoke_method($this->closure, HH\class_to_classname(get_class($this->closure)),
                                 '__invoke', $args);
     }
     return hphp_invoke($this->getName(), $args);
@@ -584,7 +585,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    */
   public function invokeArgs($args) {
     if ($this->closure) {
-      return hphp_invoke_method($this->closure, get_class($this->closure),
+      // TODO(T168044199) make hphp_invoke_method take a class pointer
+      return hphp_invoke_method($this->closure, HH\class_to_classname(get_class($this->closure)),
                                 '__invoke', array_values($args));
     }
     return hphp_invoke($this->getName(), array_values($args));
@@ -683,7 +685,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
       $mth_names = explode('::', (string)$args[1]);
       $name = $mth_names[count($mth_names) - 1];
 
-      $classname = is_object($cls) ? get_class($cls) : $cls;
+      $classname = is_object($cls) ? HH\class_to_classname(get_class($cls)) : $cls;
       $method = $args[1];
     }
 
@@ -1088,7 +1090,7 @@ class ReflectionClass implements Reflector {
   public function __construct(mixed $name_or_obj)[] {
     if (is_object($name_or_obj)) {
       $this->obj = $name_or_obj;
-      $classname = get_class($name_or_obj);
+      $classname = HH\class_to_classname(get_class($name_or_obj));
     } else {
       $classname = $name_or_obj;
     }
@@ -2266,7 +2268,7 @@ class ReflectionTypeConstant implements Reflector {
    */
   public function __construct(mixed $cls, string $name)[] {
     if (!$this->__init($cls, (string) $name)) {
-      $classname = is_object($cls) ? get_class($cls) : $cls;
+      $classname = is_object($cls) ? HH\class_to_classname(get_class($cls)) : $cls;
       throw new ReflectionException(
         "Type Constant $classname::$name does not exist");
     }

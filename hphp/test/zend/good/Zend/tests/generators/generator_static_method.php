@@ -2,7 +2,7 @@
 
 class Test {
     public static function gen() :AsyncGenerator<mixed,mixed,void>{
-        var_dump(get_class());
+        var_dump(get_class(new self()));
         var_dump(static::class);
         yield 1;
         yield 2;

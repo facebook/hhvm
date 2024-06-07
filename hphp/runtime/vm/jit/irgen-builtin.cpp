@@ -472,25 +472,13 @@ SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
 }
 
 SSATmp* opt_get_class(IRGS& env, const ParamPrep& params) {
-  auto const curCls = curClass(env);
-  auto const curName = [&] {
-    return curCls != nullptr ? cns(env, curCls->name()) : nullptr;
-  };
-  if (params.size() == 0 && RuntimeOption::EvalGetClassBadArgument == 0) {
-    return curName();
-  }
   if (params.size() != 1) return nullptr;
 
   auto const val = params[0].value;
-  auto const ty  = val->type();
-  if (ty <= TNull && RuntimeOption::EvalGetClassBadArgument == 0) {
-    return curName();
+  if (val->type() <= TObj) {
+    return gen(env, LdObjClass, val);
   }
-  if (ty <= TObj) {
-    auto const cls = gen(env, LdObjClass, val);
-    return gen(env, LdClsName, cls);
-  }
-
+  
   return nullptr;
 }
 

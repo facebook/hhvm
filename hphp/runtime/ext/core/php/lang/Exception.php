@@ -78,7 +78,9 @@ class Exception implements Throwable {
           return $fallback($throwable);
         } else {
           return 'Message ommitted because ' .
-            HH\FIXME\UNSAFE_CAST<mixed, string>(get_class($throwable)) .
+            /* HH_FIXME[2049] need to make class_to_classname visible */
+            /* HH_FIXME[4107] need to make class_to_classname visible */
+            HH\class_to_classname(get_class($throwable)) .
             ' does not implement ' . IExceptionWithPureGetMessage::class;
         }
       },

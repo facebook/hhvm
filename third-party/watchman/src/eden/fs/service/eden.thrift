@@ -2357,8 +2357,8 @@ service EdenService extends fb303_core.BaseService {
   );
 
   /**
-   * Gets a list of hg events stored in Eden's Hg ActivityBuffer. Used for
-   * retroactive debugging by the `eden trace hg --retroactive` command.
+   * Gets a list of Sapling events stored in Eden's Sapling ActivityBuffer. Used for
+   * retroactive debugging by the `eden trace sl --retroactive` command.
    */
   GetRetroactiveHgEventsResult getRetroactiveHgEvents(
     1: GetRetroactiveHgEventsParams params,

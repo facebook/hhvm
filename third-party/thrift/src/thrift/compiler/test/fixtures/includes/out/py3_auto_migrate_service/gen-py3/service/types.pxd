@@ -9,6 +9,7 @@ from libc.stdint cimport (
     int16_t as cint16_t,
     int32_t as cint32_t,
     int64_t as cint64_t,
+    uint16_t as cuint16_t,
     uint32_t as cuint32_t,
 )
 from libcpp.string cimport string
@@ -18,8 +19,9 @@ from libcpp.memory cimport shared_ptr, unique_ptr
 from libcpp.vector cimport vector
 from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
-from thrift.python.exceptions cimport cTException
+from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+from thrift.python.exceptions cimport cTException
 from thrift.py3.types cimport (
     bstring,
     field_ref as __field_ref,

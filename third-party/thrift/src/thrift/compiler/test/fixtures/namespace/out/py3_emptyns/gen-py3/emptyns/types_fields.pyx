@@ -6,7 +6,7 @@
 #
 cimport cython as __cython
 from cython.operator cimport dereference as deref
-from libcpp.memory cimport unique_ptr, shared_ptr
+from libcpp.utility cimport move as cmove
 from thrift.py3.types cimport (
     assign_unique_ptr,
     assign_shared_ptr,

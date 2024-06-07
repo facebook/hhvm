@@ -17,13 +17,12 @@ from libcpp.string cimport string
 from libcpp cimport bool as cbool, nullptr, nullptr_t
 from cpython cimport bool as pbool
 from libcpp.memory cimport shared_ptr, unique_ptr
-from libcpp.utility cimport move as cmove
 from libcpp.vector cimport vector
 from libcpp.set cimport set as cset
-from libcpp.map cimport map as cmap
+from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
-from thrift.python.exceptions cimport cTException
 cimport folly.iobuf as _fbthrift_iobuf
+from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
 from thrift.python.std_libcpp cimport string_view as __cstring_view

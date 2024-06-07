@@ -16,25 +16,12 @@
 
 }}{{!
 
-This is a template for exposing cimports needed for binding cpp extern in .pxd
+This is a template for exposing cimports needed for binding cpp extern in types.pxd
 
 }}
-from libc.stdint cimport (
-    int8_t as cint8_t,
-    int16_t as cint16_t,
-    int32_t as cint32_t,
-    int64_t as cint64_t,
-    uint32_t as cuint32_t,
-)
-from libcpp.string cimport string
-from libcpp cimport bool as cbool, nullptr, nullptr_t
-from cpython cimport bool as pbool
-from libcpp.memory cimport shared_ptr, unique_ptr
-from libcpp.vector cimport vector
-from libcpp.set cimport set as cset
-from libcpp.map cimport map as cmap, pair as cpair
+{{> types/cimport_std }}
+
 from thrift.python.exceptions cimport cTException
-cimport folly.iobuf as _fbthrift_iobuf
 from thrift.py3.types cimport (
     bstring,
     field_ref as __field_ref,
@@ -46,5 +33,7 @@ from thrift.py3.types cimport (
 )
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 {{#program:includeNamespaces}}
+{{#hasTypes?}}
 cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+{{/hasTypes?}}
 {{/program:includeNamespaces}}

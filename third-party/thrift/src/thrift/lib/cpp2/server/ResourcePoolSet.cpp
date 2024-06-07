@@ -26,7 +26,8 @@ void ResourcePoolSet::setResourcePool(
     std::unique_ptr<RequestPileInterface>&& requestPile,
     std::shared_ptr<folly::Executor> executor,
     std::unique_ptr<ConcurrencyControllerInterface>&& concurrencyController,
-    std::optional<concurrency::PRIORITY> priorityHint_deprecated) {
+    std::optional<concurrency::PRIORITY> priorityHint_deprecated,
+    bool joinExecutorOnStop) {
   std::lock_guard<std::mutex> lock(mutex_);
   if (locked_) {
     throw std::logic_error("Cannot setResourcePool() after lock()");
@@ -41,7 +42,8 @@ void ResourcePoolSet::setResourcePool(
       std::move(requestPile),
       executor,
       std::move(concurrencyController),
-      handle.name()}};
+      handle.name(),
+      joinExecutorOnStop}};
   resourcePools_.at(handle.index()) = std::move(pool);
 
   priorities_.resize(std::max(priorities_.size(), handle.index() + 1));
@@ -53,7 +55,8 @@ ResourcePoolHandle ResourcePoolSet::addResourcePool(
     std::unique_ptr<RequestPileInterface>&& requestPile,
     std::shared_ptr<folly::Executor> executor,
     std::unique_ptr<ConcurrencyControllerInterface>&& concurrencyController,
-    std::optional<concurrency::PRIORITY> priorityHint_deprecated) {
+    std::optional<concurrency::PRIORITY> priorityHint_deprecated,
+    bool joinExecutorOnStop) {
   std::lock_guard<std::mutex> lock(mutex_);
   if (locked_) {
     throw std::logic_error("Cannot addResourcePool() after lock()");
@@ -63,7 +66,8 @@ ResourcePoolHandle ResourcePoolSet::addResourcePool(
       std::move(requestPile),
       executor,
       std::move(concurrencyController),
-      poolName}};
+      poolName,
+      joinExecutorOnStop}};
   // Ensure that any default slots have been initialized (with empty unique_ptr
   // if necessary).
   resourcePools_.resize(std::max(

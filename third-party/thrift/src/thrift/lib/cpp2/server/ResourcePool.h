@@ -121,11 +121,13 @@ class ResourcePool : public IResourcePoolAcceptor {
       std::unique_ptr<RequestPileInterface>&& requestPile,
       std::shared_ptr<folly::Executor> executor,
       std::unique_ptr<ConcurrencyControllerInterface>&& concurrencyController,
-      std::string_view name);
+      std::string_view name,
+      bool joinExecutorOnStop);
 
   std::unique_ptr<RequestPileInterface> requestPile_;
   std::shared_ptr<folly::Executor> executor_;
   std::unique_ptr<ConcurrencyControllerInterface> concurrencyController_;
   std::string name_;
+  const bool joinExecutorOnStop_;
 };
 } // namespace apache::thrift

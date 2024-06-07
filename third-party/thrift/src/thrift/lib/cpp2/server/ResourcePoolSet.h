@@ -48,7 +48,8 @@ class ResourcePoolSet {
       std::unique_ptr<RequestPileInterface>&& requestPile,
       std::shared_ptr<folly::Executor> executor,
       std::unique_ptr<ConcurrencyControllerInterface>&& concurrencyController,
-      std::optional<concurrency::PRIORITY> priorityHint = std::nullopt);
+      std::optional<concurrency::PRIORITY> priorityHint = std::nullopt,
+      bool joinExecutorOnStop = true);
 
   // Add a ResourcePool to the set by name and return a ResourcePoolHandle that
   // can be used to obtain it. This can only be called before lock() is called.
@@ -57,7 +58,8 @@ class ResourcePoolSet {
       std::unique_ptr<RequestPileInterface>&& requestPile,
       std::shared_ptr<folly::Executor> executor,
       std::unique_ptr<ConcurrencyControllerInterface>&& concurrencyController,
-      std::optional<concurrency::PRIORITY> priorityHint = std::nullopt);
+      std::optional<concurrency::PRIORITY> priorityHint = std::nullopt,
+      bool joinExecutorOnStop = true);
 
   // Set a ResourcePool selection function that returns a ResourcePoolHandle or
   // reject based on the request

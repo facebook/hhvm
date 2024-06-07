@@ -13,7 +13,7 @@
 
 #include <folly/Synchronized.h>
 #include <folly/container/EvictingCacheMap.h>
-#include <folly/experimental/FunctionScheduler.h>
+#include <folly/executors/FunctionScheduler.h>
 #include <folly/experimental/ReadMostlySharedPtr.h>
 #include <folly/fibers/TimedMutex.h>
 #include <folly/io/async/EventBaseThread.h>

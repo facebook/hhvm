@@ -16,7 +16,7 @@
 #include <folly/IntrusiveList.h>
 #include <folly/Optional.h>
 #include <folly/Range.h>
-#include <folly/experimental/FunctionScheduler.h>
+#include <folly/executors/FunctionScheduler.h>
 
 namespace folly {
 class AsyncTimeout;

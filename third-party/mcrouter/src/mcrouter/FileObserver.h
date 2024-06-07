@@ -12,7 +12,7 @@
 #include <memory>
 #include <string>
 
-#include <folly/experimental/FunctionScheduler.h>
+#include <folly/executors/FunctionScheduler.h>
 
 namespace facebook {
 namespace memcache {

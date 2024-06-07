@@ -240,6 +240,9 @@ val is_sub_type_for_union : env -> Tast.ty -> Tast.ty -> bool
 (** Simplify unions in a type. *)
 val simplify_unions : env -> Tast.ty -> env * Tast.ty
 
+(** Simplify intersections in a type. *)
+val simplify_intersections : env -> Tast.ty -> env * Tast.ty
+
 (** Union a list of types. *)
 val union_list : env -> Typing_reason.t -> Tast.ty list -> env * Tast.ty
 

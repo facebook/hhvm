@@ -197,6 +197,9 @@ let is_fresh_generic_parameter = Typing_env.is_fresh_generic_parameter
 
 let simplify_unions env ty = Typing_union.simplify_unions env ty
 
+let simplify_intersections env ty =
+  Typing_intersection.simplify_intersections env ty
+
 let union_list env r tyl = Typing_union.union_list env r tyl
 
 let get_reified = Typing_env.get_reified

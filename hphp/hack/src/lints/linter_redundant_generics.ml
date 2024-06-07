@@ -101,7 +101,27 @@ let ft_redundant_tparams env tparams ty =
                 name
                 bounds_message
                 (Tast_env.print_decl_ty env t)
-            | _ -> ()
+            | _ ->
+              let ts = List.map as_bounds ~f:snd in
+              let t = mk (Reason.none, Tintersection ts) in
+              (* Need to localize in order to simplify *)
+              let (_, locl_ty) =
+                Tast_env.localize_no_subst ~ignore_errors:true env t
+              in
+              (* Multiple bounds can be expressed as an intersection,
+               * but it might be possible to simplify this *)
+              let (_, locl_ty) = Tast_env.simplify_intersections env locl_ty in
+              begin
+                match get_node locl_ty with
+                (* We can't denote this in source code so don't emit lint warning *)
+                | Tintersection _ -> ()
+                | _ ->
+                  Lints_errors.redundant_contravariant
+                    pos
+                    name
+                    bounds_message
+                    (Tast_env.print_ty env locl_ty)
+              end
           end
         | (None, None) -> Lints_errors.redundant_generic pos name)
 

@@ -73,6 +73,11 @@ void SinkServiceAsyncProcessor::executeRequest_method(apache::thrift::ServerRequ
       ::cpp2::SinkService_method_pargs args;
       return args;
     }
+
+    auto asTupleOfRefs() & {
+      return std::tie(
+      );
+    }
   } args;
 
   auto ctxStack = apache::thrift::ContextStack::create(
@@ -109,24 +114,27 @@ void SinkServiceAsyncProcessor::executeRequest_method(apache::thrift::ServerRequ
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   const auto makeExecuteHandler = [&] {
-    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+    return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
       ifacePtr->async_tm_method(std::move(cb));
     };
   };
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
-    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
-      executeHandler(std::move(callback));
-    }(std::move(callback), makeExecuteHandler())
+    [](auto callback, auto executeHandler, ArgsState args) -> folly::coro::Task<void> {
+      auto argRefs = args.asTupleOfRefs();
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+          *callback,
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs));
+      executeHandler(std::move(callback), std::move(args));
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
               .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
               .startInlineUnsafe();
   } else {
-    makeExecuteHandler()(std::move(callback));
+    makeExecuteHandler()(std::move(callback), std::move(args));
   }
 #else
-  makeExecuteHandler()(std::move(callback));
+  makeExecuteHandler()(std::move(callback), std::move(args));
 #endif // FOLLY_HAS_COROUTINES
 }
 
@@ -183,6 +191,11 @@ void SinkServiceAsyncProcessor::executeRequest_methodAndReponse(apache::thrift::
       ::cpp2::SinkService_methodAndReponse_pargs args;
       return args;
     }
+
+    auto asTupleOfRefs() & {
+      return std::tie(
+      );
+    }
   } args;
 
   auto ctxStack = apache::thrift::ContextStack::create(
@@ -219,24 +232,27 @@ void SinkServiceAsyncProcessor::executeRequest_methodAndReponse(apache::thrift::
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   const auto makeExecuteHandler = [&] {
-    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+    return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
       ifacePtr->async_tm_methodAndReponse(std::move(cb));
     };
   };
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
-    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
-      executeHandler(std::move(callback));
-    }(std::move(callback), makeExecuteHandler())
+    [](auto callback, auto executeHandler, ArgsState args) -> folly::coro::Task<void> {
+      auto argRefs = args.asTupleOfRefs();
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+          *callback,
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs));
+      executeHandler(std::move(callback), std::move(args));
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
               .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
               .startInlineUnsafe();
   } else {
-    makeExecuteHandler()(std::move(callback));
+    makeExecuteHandler()(std::move(callback), std::move(args));
   }
 #else
-  makeExecuteHandler()(std::move(callback));
+  makeExecuteHandler()(std::move(callback), std::move(args));
 #endif // FOLLY_HAS_COROUTINES
 }
 
@@ -295,6 +311,11 @@ void SinkServiceAsyncProcessor::executeRequest_methodThrow(apache::thrift::Serve
       ::cpp2::SinkService_methodThrow_pargs args;
       return args;
     }
+
+    auto asTupleOfRefs() & {
+      return std::tie(
+      );
+    }
   } args;
 
   auto ctxStack = apache::thrift::ContextStack::create(
@@ -331,24 +352,27 @@ void SinkServiceAsyncProcessor::executeRequest_methodThrow(apache::thrift::Serve
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   const auto makeExecuteHandler = [&] {
-    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+    return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
       ifacePtr->async_tm_methodThrow(std::move(cb));
     };
   };
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
-    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
-      executeHandler(std::move(callback));
-    }(std::move(callback), makeExecuteHandler())
+    [](auto callback, auto executeHandler, ArgsState args) -> folly::coro::Task<void> {
+      auto argRefs = args.asTupleOfRefs();
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+          *callback,
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs));
+      executeHandler(std::move(callback), std::move(args));
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
               .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
               .startInlineUnsafe();
   } else {
-    makeExecuteHandler()(std::move(callback));
+    makeExecuteHandler()(std::move(callback), std::move(args));
   }
 #else
-  makeExecuteHandler()(std::move(callback));
+  makeExecuteHandler()(std::move(callback), std::move(args));
 #endif // FOLLY_HAS_COROUTINES
 }
 
@@ -422,6 +446,11 @@ void SinkServiceAsyncProcessor::executeRequest_methodSinkThrow(apache::thrift::S
       ::cpp2::SinkService_methodSinkThrow_pargs args;
       return args;
     }
+
+    auto asTupleOfRefs() & {
+      return std::tie(
+      );
+    }
   } args;
 
   auto ctxStack = apache::thrift::ContextStack::create(
@@ -458,24 +487,27 @@ void SinkServiceAsyncProcessor::executeRequest_methodSinkThrow(apache::thrift::S
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   const auto makeExecuteHandler = [&] {
-    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+    return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
       ifacePtr->async_tm_methodSinkThrow(std::move(cb));
     };
   };
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
-    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
-      executeHandler(std::move(callback));
-    }(std::move(callback), makeExecuteHandler())
+    [](auto callback, auto executeHandler, ArgsState args) -> folly::coro::Task<void> {
+      auto argRefs = args.asTupleOfRefs();
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+          *callback,
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs));
+      executeHandler(std::move(callback), std::move(args));
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
               .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
               .startInlineUnsafe();
   } else {
-    makeExecuteHandler()(std::move(callback));
+    makeExecuteHandler()(std::move(callback), std::move(args));
   }
 #else
-  makeExecuteHandler()(std::move(callback));
+  makeExecuteHandler()(std::move(callback), std::move(args));
 #endif // FOLLY_HAS_COROUTINES
 }
 
@@ -532,6 +564,11 @@ void SinkServiceAsyncProcessor::executeRequest_methodFinalThrow(apache::thrift::
       ::cpp2::SinkService_methodFinalThrow_pargs args;
       return args;
     }
+
+    auto asTupleOfRefs() & {
+      return std::tie(
+      );
+    }
   } args;
 
   auto ctxStack = apache::thrift::ContextStack::create(
@@ -568,24 +605,27 @@ void SinkServiceAsyncProcessor::executeRequest_methodFinalThrow(apache::thrift::
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   const auto makeExecuteHandler = [&] {
-    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+    return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
       ifacePtr->async_tm_methodFinalThrow(std::move(cb));
     };
   };
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
-    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
-      executeHandler(std::move(callback));
-    }(std::move(callback), makeExecuteHandler())
+    [](auto callback, auto executeHandler, ArgsState args) -> folly::coro::Task<void> {
+      auto argRefs = args.asTupleOfRefs();
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+          *callback,
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs));
+      executeHandler(std::move(callback), std::move(args));
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
               .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
               .startInlineUnsafe();
   } else {
-    makeExecuteHandler()(std::move(callback));
+    makeExecuteHandler()(std::move(callback), std::move(args));
   }
 #else
-  makeExecuteHandler()(std::move(callback));
+  makeExecuteHandler()(std::move(callback), std::move(args));
 #endif // FOLLY_HAS_COROUTINES
 }
 
@@ -652,6 +692,11 @@ void SinkServiceAsyncProcessor::executeRequest_methodBothThrow(apache::thrift::S
       ::cpp2::SinkService_methodBothThrow_pargs args;
       return args;
     }
+
+    auto asTupleOfRefs() & {
+      return std::tie(
+      );
+    }
   } args;
 
   auto ctxStack = apache::thrift::ContextStack::create(
@@ -688,24 +733,27 @@ void SinkServiceAsyncProcessor::executeRequest_methodBothThrow(apache::thrift::S
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   const auto makeExecuteHandler = [&] {
-    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+    return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
       ifacePtr->async_tm_methodBothThrow(std::move(cb));
     };
   };
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
-    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
-      executeHandler(std::move(callback));
-    }(std::move(callback), makeExecuteHandler())
+    [](auto callback, auto executeHandler, ArgsState args) -> folly::coro::Task<void> {
+      auto argRefs = args.asTupleOfRefs();
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+          *callback,
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs));
+      executeHandler(std::move(callback), std::move(args));
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
               .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
               .startInlineUnsafe();
   } else {
-    makeExecuteHandler()(std::move(callback));
+    makeExecuteHandler()(std::move(callback), std::move(args));
   }
 #else
-  makeExecuteHandler()(std::move(callback));
+  makeExecuteHandler()(std::move(callback), std::move(args));
 #endif // FOLLY_HAS_COROUTINES
 }
 
@@ -775,6 +823,11 @@ void SinkServiceAsyncProcessor::executeRequest_methodFast(apache::thrift::Server
       ::cpp2::SinkService_methodFast_pargs args;
       return args;
     }
+
+    auto asTupleOfRefs() & {
+      return std::tie(
+      );
+    }
   } args;
 
   auto ctxStack = apache::thrift::ContextStack::create(
@@ -811,24 +864,27 @@ void SinkServiceAsyncProcessor::executeRequest_methodFast(apache::thrift::Server
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   const auto makeExecuteHandler = [&] {
-    return [ifacePtr = iface_, args = std::move(args)](auto&& cb) mutable {
+    return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
       ifacePtr->async_eb_methodFast(std::move(cb));
     };
   };
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
-    [](auto callback, auto executeHandler) -> folly::coro::Task<void> {
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(*callback);
-      executeHandler(std::move(callback));
-    }(std::move(callback), makeExecuteHandler())
+    [](auto callback, auto executeHandler, ArgsState args) -> folly::coro::Task<void> {
+      auto argRefs = args.asTupleOfRefs();
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+          *callback,
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs));
+      executeHandler(std::move(callback), std::move(args));
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
               .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
               .startInlineUnsafe();
   } else {
-    makeExecuteHandler()(std::move(callback));
+    makeExecuteHandler()(std::move(callback), std::move(args));
   }
 #else
-  makeExecuteHandler()(std::move(callback));
+  makeExecuteHandler()(std::move(callback), std::move(args));
 #endif // FOLLY_HAS_COROUTINES
 }
 

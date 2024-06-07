@@ -982,7 +982,8 @@ bool HandlerCallbackBase::shouldProcessServiceInterceptorsOnResponse() const {
 
 #if FOLLY_HAS_COROUTINES
 folly::coro::Task<void>
-HandlerCallbackBase::processServiceInterceptorsOnRequest() {
+HandlerCallbackBase::processServiceInterceptorsOnRequest(
+    detail::ServiceInterceptorOnRequestArguments arguments) {
   DCHECK(shouldProcessServiceInterceptorsOnRequest());
   const apache::thrift::server::ServerConfigs* server =
       reqCtx_->getConnectionContext()->getWorkerContext()->getServerContext();
@@ -997,7 +998,9 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest() {
         connectionCtx,
         connectionCtx->getStorageForServiceInterceptorOnConnectionByIndex(i)};
     auto requestInfo = ServiceInterceptorBase::RequestInfo{
-        reqCtx_, reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i)};
+        reqCtx_,
+        reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i),
+        arguments};
     try {
       co_await serviceInterceptors[i]->internal_onRequest(
           std::move(connectionInfo), std::move(requestInfo));
@@ -1063,9 +1066,10 @@ bool shouldProcessServiceInterceptorsOnRequest(HandlerCallbackBase& callback) {
 
 #if FOLLY_HAS_COROUTINES
 folly::coro::Task<void> processServiceInterceptorsOnRequest(
-    HandlerCallbackBase& callback) {
+    HandlerCallbackBase& callback,
+    detail::ServiceInterceptorOnRequestArguments arguments) {
   try {
-    co_await callback.processServiceInterceptorsOnRequest();
+    co_await callback.processServiceInterceptorsOnRequest(std::move(arguments));
   } catch (...) {
     callback.exception(std::current_exception());
     throw;

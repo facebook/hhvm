@@ -47,6 +47,7 @@ class ServiceInterceptorBase {
   struct RequestInfo {
     const Cpp2RequestContext* context = nullptr;
     detail::ServiceInterceptorOnRequestStorage* storage = nullptr;
+    detail::ServiceInterceptorOnRequestArguments arguments;
   };
   virtual folly::coro::Task<void> internal_onRequest(
       ConnectionInfo, RequestInfo) = 0;

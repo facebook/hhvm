@@ -26,6 +26,11 @@ interaction SampleInteraction2 {
   string echo(1: string str);
 }
 
+struct RequestArgsStruct {
+  1: i32 foo;
+  2: string bar;
+}
+
 service ServiceInterceptorTest {
   void noop();
 
@@ -35,6 +40,12 @@ service ServiceInterceptorTest {
   performs SampleInteraction2;
 
   stream<i32> iota(1: i32 start);
+
+  string requestArgs(
+    1: i32 primitive,
+    2: string str,
+    3: RequestArgsStruct request,
+  );
 
   @cpp.ProcessInEbThreadUnsafe
   string echo_eb(1: string str);

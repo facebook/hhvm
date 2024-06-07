@@ -1195,7 +1195,8 @@ bool shouldProcessServiceInterceptorsOnRequest(HandlerCallbackBase&);
 
 #if FOLLY_HAS_COROUTINES
 folly::coro::Task<void> processServiceInterceptorsOnRequest(
-    HandlerCallbackBase&);
+    HandlerCallbackBase&,
+    detail::ServiceInterceptorOnRequestArguments arguments);
 #endif // FOLLY_HAS_COROUTINES
 } // namespace detail
 
@@ -1450,11 +1451,13 @@ class HandlerCallbackBase {
   bool shouldProcessServiceInterceptorsOnResponse() const;
 
 #if FOLLY_HAS_COROUTINES
-  folly::coro::Task<void> processServiceInterceptorsOnRequest();
+  folly::coro::Task<void> processServiceInterceptorsOnRequest(
+      detail::ServiceInterceptorOnRequestArguments arguments);
   folly::coro::Task<void> processServiceInterceptorsOnResponse();
 
   friend folly::coro::Task<void> detail::processServiceInterceptorsOnRequest(
-      HandlerCallbackBase&);
+      HandlerCallbackBase&,
+      detail::ServiceInterceptorOnRequestArguments arguments);
 #endif // FOLLY_HAS_COROUTINES
 
 #if !FOLLY_HAS_COROUTINES

@@ -103,6 +103,13 @@ struct TestHandler
     co_return std::move(str);
   }
 
+  folly::coro::Task<std::unique_ptr<std::string>> co_requestArgs(
+      std::int32_t,
+      std::unique_ptr<std::string>,
+      std::unique_ptr<test::RequestArgsStruct>) override {
+    co_return std::make_unique<std::string>("return value");
+  }
+
   void async_eb_echo_eb(
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::string>> callback,
       std::unique_ptr<std::string> str) override {
@@ -610,6 +617,49 @@ CO_TEST_P(ServiceInterceptorTestP, BasicStream) {
     EXPECT_EQ(interceptor->onRequestCount, 1);
     EXPECT_EQ(interceptor->onResponseCount, 1);
   }
+}
+
+CO_TEST_P(ServiceInterceptorTestP, RequestArguments) {
+  struct ServiceInterceptorCountWithRequestState
+      : public ServiceInterceptor<folly::Unit> {
+   public:
+    using ConnectionState = folly::Unit;
+    using RequestState = folly::Unit;
+
+    folly::coro::Task<std::optional<RequestState>> onRequest(
+        ConnectionState*, RequestInfo requestInfo) override {
+      argsCount = requestInfo.arguments.count();
+      arg1 = requestInfo.arguments.get(0)->value<std::int32_t>();
+      arg2 = requestInfo.arguments.get(1)->value<std::string>();
+      arg3 = requestInfo.arguments.get(2)->value<test::RequestArgsStruct>();
+      EXPECT_THROW(
+          requestInfo.arguments.get(2)->value<std::int32_t>(), std::bad_cast);
+      EXPECT_FALSE(requestInfo.arguments.get(3).has_value());
+      co_return std::nullopt;
+    }
+
+    std::size_t argsCount = 0;
+    std::int32_t arg1 = 0;
+    std::string arg2;
+    test::RequestArgsStruct arg3;
+  };
+  auto interceptor =
+      std::make_shared<ServiceInterceptorCountWithRequestState>();
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(interceptor));
+      });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  test::RequestArgsStruct requestArgs;
+  requestArgs.foo() = 1;
+  requestArgs.bar() = "hello";
+  auto result = co_await client->co_requestArgs(1, "hello", requestArgs);
+  EXPECT_EQ(interceptor->argsCount, 3);
+  EXPECT_EQ(interceptor->arg1, 1);
+  EXPECT_EQ(interceptor->arg2, "hello");
+  EXPECT_EQ(interceptor->arg3, requestArgs);
 }
 
 INSTANTIATE_TEST_SUITE_P(

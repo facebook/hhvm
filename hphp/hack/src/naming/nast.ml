@@ -855,7 +855,8 @@ module Visitor_DEPRECATED = struct
         | Lfun (f, idl) -> this#on_lfun acc f idl
         | Import (_, e) -> this#on_expr acc e
         | Collection (_, tal, fl) -> this#on_collection acc tal fl
-        | ET_Splice { spliced_expr; extract_client_type = _ } ->
+        | ET_Splice
+            { spliced_expr; extract_client_type = _; contains_await = _ } ->
           this#on_et_splice acc spliced_expr
         | EnumClassLabel (opt_sid, name) ->
           this#on_enum_class_label acc opt_sid name

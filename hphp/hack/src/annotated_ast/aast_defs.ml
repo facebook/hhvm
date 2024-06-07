@@ -362,6 +362,10 @@ and ('ex, 'en) as_ = {
 
 and ('ex, 'en) et_splice = {
   extract_client_type: bool;
+      (** The spliced_expr should have type Spliceble<t1, t2, t3>, and if extract_client_type is true, the
+          overall type should be t3. If false, the entire Spliceable should be the type. *)
+  contains_await: bool;
+      (** Does the spliced_expr contain an await expression *)
   spliced_expr: ('ex, 'en) expr;
 }
 

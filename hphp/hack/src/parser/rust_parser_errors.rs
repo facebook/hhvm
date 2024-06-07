@@ -117,6 +117,7 @@ pub enum UnstableFeatures {
     ExpressionTreeMap,
     ExpressionTreeNest,
     SealedMethods,
+    AwaitInSplice,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -155,6 +156,7 @@ impl UnstableFeatures {
             UnstableFeatures::ExpressionTreeMap => OngoingRelease,
             UnstableFeatures::ExpressionTreeNest => Preview,
             UnstableFeatures::SealedMethods => Unstable,
+            UnstableFeatures::AwaitInSplice => Unstable,
         }
     }
 }
@@ -2870,6 +2872,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     break;
                 }
                 LambdaExpression(x) if std::ptr::eq(node, &x.body) => break,
+                ETSpliceExpression(_) => {
+                    self.check_can_use_feature(node, &UnstableFeatures::AwaitInSplice);
+                    break;
+                }
                 PrefixUnaryExpression(x) if token_kind(&x.operator) == Some(TokenKind::Await) => {
                     let (feature, enabled) = self.is_pipe_await_enabled();
                     if !enabled {

@@ -97,6 +97,7 @@ pub fn desugar(
         global_function_pointers: vec![],
         static_method_pointers: vec![],
         errors: vec![],
+        contains_spliced_await: false,
     };
     let rewritten_expr = state.rewrite_expr(e, visitor_name);
 
@@ -115,7 +116,7 @@ pub fn desugar(
                 &et_literal_pos,
             )]),
         };
-        let mut typing_fun_ = wrap_fun_(typing_fun_body, vec![], et_literal_pos.clone());
+        let mut typing_fun_ = wrap_fun_(false, typing_fun_body, vec![], et_literal_pos.clone());
         typing_fun_.ctxs = Some(aast::Contexts(
             et_literal_pos.clone(),
             vec![ast::Hint(
@@ -204,7 +205,7 @@ pub fn desugar(
         user_attributes: Default::default(),
         visibility: None,
     };
-    let visitor_fun_ = wrap_fun_(visitor_body, vec![param], et_literal_pos.clone());
+    let visitor_fun_ = wrap_fun_(false, visitor_body, vec![param], et_literal_pos.clone());
     let visitor_lambda = Expr::new(
         (),
         et_literal_pos.clone(),
@@ -249,7 +250,12 @@ pub fn desugar(
             _ => vec![],
         };
 
-        immediately_invoked_lambda(&et_literal_pos, body, lambda_args)
+        immediately_invoked_lambda(
+            env.in_async && state.contains_spliced_await,
+            &et_literal_pos,
+            body,
+            lambda_args,
+        )
     };
 
     let expr = Expr::new(
@@ -272,7 +278,12 @@ fn wrap_return(e: Expr, pos: &Pos) -> Stmt {
 }
 
 /// Wrap a FuncBody into an anonymous Fun_
-fn wrap_fun_(body: ast::FuncBody, params: Vec<ast::FunParam>, span: Pos) -> ast::Fun_ {
+fn wrap_fun_(
+    async_: bool,
+    body: ast::FuncBody,
+    params: Vec<ast::FunParam>,
+    span: Pos,
+) -> ast::Fun_ {
     ast::Fun_ {
         span,
         readonly_this: None,
@@ -281,7 +292,11 @@ fn wrap_fun_(body: ast::FuncBody, params: Vec<ast::FunParam>, span: Pos) -> ast:
         ret: ast::TypeHint((), None),
         params,
         body,
-        fun_kind: ast::FunKind::FSync,
+        fun_kind: if async_ {
+            ast::FunKind::FAsync
+        } else {
+            ast::FunKind::FSync
+        },
         ctxs: None,        // TODO(T70095684)
         unsafe_ctxs: None, // TODO(T70095684)
         user_attributes: Default::default(),
@@ -653,6 +668,7 @@ struct RewriteState {
     global_function_pointers: Vec<Expr>,
     static_method_pointers: Vec<Expr>,
     errors: Vec<(Pos, String)>,
+    contains_spliced_await: bool,
 }
 
 impl RewriteState {
@@ -1289,6 +1305,7 @@ impl RewriteState {
             ETSplice(box aast::EtSplice {
                 spliced_expr,
                 extract_client_type,
+                contains_await,
             }) => {
                 let len = self.splices.len();
                 let expr_pos = spliced_expr.1.clone();
@@ -1298,6 +1315,7 @@ impl RewriteState {
                     ETSplice(Box::new(aast::EtSplice {
                         spliced_expr,
                         extract_client_type: false,
+                        contains_await,
                     })),
                 ));
                 let temp_variable = temp_splice_lvar(&expr_pos, len);
@@ -1313,8 +1331,10 @@ impl RewriteState {
                     ETSplice(Box::new(aast::EtSplice {
                         spliced_expr: temp_variable,
                         extract_client_type,
+                        contains_await,
                     })),
                 );
+                self.contains_spliced_await |= contains_await;
                 RewriteResult {
                     virtual_expr,
                     desugar_expr,
@@ -1754,6 +1774,7 @@ impl RewriteState {
 }
 
 fn immediately_invoked_lambda(
+    async_: bool,
     pos: &Pos,
     stmts: Vec<Stmt>,
     captured_arguments: Vec<((String, Pos), Expr)>,
@@ -1787,10 +1808,10 @@ fn immediately_invoked_lambda(
     let func_body = ast::FuncBody {
         fb_ast: ast::Block(stmts),
     };
-    let fun_ = wrap_fun_(func_body, fun_params, pos.clone());
+    let fun_ = wrap_fun_(async_, func_body, fun_params, pos.clone());
     let lambda_expr = Expr::new((), pos.clone(), Expr_::mk_lfun(fun_, vec![]));
 
-    Expr::new(
+    let call = Expr::new(
         (),
         pos.clone(),
         Expr_::Call(Box::new(ast::CallExpr {
@@ -1799,7 +1820,12 @@ fn immediately_invoked_lambda(
             args: call_args,
             unpacked_arg: None,
         })),
-    )
+    );
+    if async_ {
+        Expr::new((), pos.clone(), Expr_::Await(Box::new(call)))
+    } else {
+        call
+    }
 }
 
 /// Is this is a typechecker pseudo function like `hh_show` that

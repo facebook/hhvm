@@ -1,0 +1,2 @@
+ERROR: File "await_in_splice_error.php", line 10, characters 20-42:
+Cannot use unstable feature: `await_in_splice` (Parsing[1002])

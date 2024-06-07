@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2ef58af4dfe1dc807c16c19f4e387902>>
+// @generated SignedSource<<ca22bd6ca23fe21ab0a89348fbde5900>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -882,7 +882,11 @@ arena_deserializer::impl_deserialize_in_arena!(As_<'arena, Ex, En>);
 #[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct EtSplice<'a, Ex, En> {
+    /// The spliced_expr should have type Spliceble<t1, t2, t3>, and if extract_client_type is true, the
+    /// overall type should be t3. If false, the entire Spliceable should be the type.
     pub extract_client_type: bool,
+    /// Does the spliced_expr contain an await expression
+    pub contains_await: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub spliced_expr: &'a Expr<'a, Ex, En>,
 }

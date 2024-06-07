@@ -1,9 +1,10 @@
 <?hh
 
-type ExprTreeInfo = shape(
+type ExprTreeInfo<TInfer> = shape(
   'splices' => dict<string, mixed>,
   'functions' => vec<mixed>,
   'static_methods' => vec<mixed>,
+  ?'type' => (function (): TInfer),
 );
 
 function concat_arg_list(vec<string> $args): string {
@@ -44,7 +45,7 @@ class Code {
 
   public static function makeTree<TVisitor as Code, TInfer>(
     ?ExprPos $pos,
-    ExprTreeInfo $metadata,
+    ExprTreeInfo<TInfer> $metadata,
     (function(TVisitor): Code::TAst) $ast,
   ): ExprTree<TVisitor, Code::TAst, TInfer> {
     return new ExprTree($pos, $metadata, $ast);
@@ -243,7 +244,7 @@ final class ExprTree<TVisitor, TResult, +TInfer>
   implements Spliceable<TVisitor, TResult, TInfer> {
   public function __construct(
     private ?ExprPos $pos,
-    private ExprTreeInfo $metadata,
+    private ExprTreeInfo<TInfer> $metadata,
     private (function(TVisitor): TResult) $ast,
   ) {}
 

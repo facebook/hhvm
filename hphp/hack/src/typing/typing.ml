@@ -4793,7 +4793,8 @@ end = struct
     in
     make_result env p (Aast.Class_const (ce, mid)) const_ty
 
-  and et_splice env dsl_opt p { spliced_expr; extract_client_type } =
+  and et_splice
+      env dsl_opt p { spliced_expr; extract_client_type; contains_await } =
     let open Option.Let_syntax in
     let dsl_opt =
       let* (_, dsl_name) = dsl_opt in
@@ -4884,7 +4885,7 @@ end = struct
     make_result
       env
       p
-      (Aast.ET_Splice { spliced_expr = te; extract_client_type })
+      (Aast.ET_Splice { spliced_expr = te; extract_client_type; contains_await })
       ty
 
   and new_object

@@ -646,6 +646,9 @@ fn print_expr(
             if ctx.dump_lambdas {
                 let fun_ = &lfun.0;
                 write::paren(w, |w| {
+                    if fun_.fun_kind.is_fasync() || fun_.fun_kind.is_fasync_generator() {
+                        write!(w, "async ",)?;
+                    };
                     write::paren(w, |w| {
                         write::concat_by(w, ", ", &fun_.params, |w, param| {
                             print_fparam(ctx, w, env, param)

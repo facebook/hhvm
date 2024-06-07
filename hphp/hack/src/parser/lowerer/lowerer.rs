@@ -183,7 +183,12 @@ pub struct Env<'a> {
     pos_none: Pos,
     pub empty_ns_env: Arc<NamespaceEnv>,
 
-    pub saw_yield: bool, /* Information flowing back up */
+    // Whether we have encountered an yield expression
+    pub found_yield: bool,
+    // Whether we have encountered an await expression
+    found_await: bool,
+    // Whether we are in the body of an async function
+    pub in_async: bool,
 
     pub indexed_source_text: &'a IndexedSourceText<'a>,
     pub parser_options: &'a ParserOptions,
@@ -214,7 +219,9 @@ impl<'a> Env<'a> {
             show_all_errors,
             file_mode: mode,
             top_level_statements: true,
-            saw_yield: false,
+            found_yield: false,
+            found_await: false,
+            in_async: false,
             indexed_source_text,
             parser_options,
             pos_none: Pos::NONE,
@@ -340,6 +347,32 @@ impl<'a> Env<'a> {
         } else {
             Either::Right(e)
         }
+    }
+
+    // A function body introduces a new scope for yields and awaits, and it
+    // doesn't inherit whether it's async from its context, so we need to clear
+    // these flags for checking the body, and then restore them after.
+    fn reset_for_function_body<F, R>(
+        &mut self,
+        node: S<'a>,
+        async_: SuspensionKind,
+        p: F,
+    ) -> Result<(R, bool)>
+    where
+        F: FnOnce(S<'a>, &mut Env<'a>) -> Result<R>,
+    {
+        let outer_found_yield = self.found_yield;
+        let outer_found_await = self.found_await;
+        let outer_in_async = self.in_async;
+        self.found_yield = false;
+        self.found_await = false;
+        self.in_async = matches!(async_, SuspensionKind::SKAsync);
+        let r = p(node, self);
+        let found_yield = self.found_yield;
+        self.found_yield = outer_found_yield;
+        self.found_await = outer_found_await;
+        self.in_async = outer_in_async;
+        Ok((r?, found_yield))
     }
 }
 
@@ -1711,10 +1744,11 @@ fn p_lambda_expression<'a>(
     };
 
     let (body, yield_) = if !c.body.is_compound_statement() {
-        map_yielding(&c.body, env, p_function_body)?
+        env.reset_for_function_body(&c.body, suspension_kind, p_function_body)?
     } else {
         let mut env1 = Env::clone_and_unset_toplevel_if_toplevel(env);
-        map_yielding(&c.body, env1.as_mut(), p_function_body)?
+        env1.as_mut()
+            .reset_for_function_body(&c.body, suspension_kind, p_function_body)?
     };
     let external = c.body.is_external();
     let fun = ast::Fun_ {
@@ -1955,7 +1989,10 @@ fn p_pre_post_unary_decorated_expr<'a>(node: S<'a>, env: &mut Env<'a>, pos: Pos)
             Some(TK::Tilde) => mk_unop(Utild, expr),
             Some(TK::Plus) => mk_unop(Uplus, expr),
             Some(TK::Minus) => mk_unop(Uminus, expr),
-            Some(TK::Await) => Ok(Expr_::mk_await(expr)),
+            Some(TK::Await) => {
+                env.found_await = true;
+                Ok(Expr_::mk_await(expr))
+            }
             Some(TK::Readonly) => Ok(process_readonly_expr(expr)),
             Some(TK::Clone) => Ok(Expr_::mk_clone(expr)),
             Some(TK::Print) => Ok(Expr_::mk_call(ast::CallExpr {
@@ -2032,7 +2069,7 @@ fn p_yield_expr<'a>(
     location: ExprLocation,
 ) -> Result<Expr_> {
     use ExprLocation::*;
-    env.saw_yield = true;
+    env.found_yield = true;
     if location != AsStatement
         && location != RightOfAssignment
         && location != RightOfAssignmentInUsingStatement
@@ -2185,8 +2222,10 @@ fn p_prefixed_code_expr<'a>(
         p_expr(&c.body, env)?
     } else {
         let pos = p_pos(&c.body, env);
+        let suspension_kind = SuspensionKind::SKSync;
         // Take the body and create a no argument lambda expression
-        let (body, yield_) = map_yielding(&c.body, env, p_function_body)?;
+        let (body, yield_) =
+            env.reset_for_function_body(&c.body, suspension_kind, p_function_body)?;
         let external = c.body.is_external();
         let fun = ast::Fun_ {
             span: pos.clone(),
@@ -2195,7 +2234,7 @@ fn p_prefixed_code_expr<'a>(
             readonly_ret: None,
             ret: ast::TypeHint((), None),
             body: ast::FuncBody { fb_ast: body },
-            fun_kind: mk_fun_kind(SuspensionKind::SKSync, yield_),
+            fun_kind: mk_fun_kind(suspension_kind, yield_),
             params: vec![],
             ctxs: None,
             unsafe_ctxs: None,
@@ -2226,11 +2265,17 @@ fn p_prefixed_code_expr<'a>(
 }
 
 fn p_et_splice_expr<'a>(expr: S<'a>, env: &mut Env<'a>, location: ExprLocation) -> Result<Expr_> {
+    // Clear out found awaits since we want to see if there is one in this splice expression.
+    let old_found_await = env.found_await;
+    env.found_await = false;
     let inner_pos = p_pos(expr, env);
     let inner_expr_ = p_expr_recurse(location, expr, env, None)?;
     let spliced_expr = ast::Expr::new((), inner_pos, inner_expr_);
+    let contains_await = env.found_await;
+    env.found_await |= old_found_await;
     Ok(Expr_::ETSplice(Box::new(aast::EtSplice {
         spliced_expr,
+        contains_await,
         extract_client_type: true,
     })))
 }
@@ -2367,6 +2412,7 @@ fn p_anonymous_function<'a>(
     c: &'a AnonymousFunctionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
 ) -> Result<Expr_> {
+    let suspension_kind = mk_suspension_kind(&c.async_keyword);
     let ctxs = p_contexts(
         &c.ctx_list,
         env,
@@ -2381,10 +2427,10 @@ fn p_anonymous_function<'a>(
         AnonymousFunctionUseClause(c) => could_map(&c.variables, e, p_use_var),
         _ => Ok(vec![]),
     };
-    let suspension_kind = mk_suspension_kind(&c.async_keyword);
     let (body, yield_) = {
         let mut env1 = Env::clone_and_unset_toplevel_if_toplevel(env);
-        map_yielding(&c.body, env1.as_mut(), p_function_body)?
+        env1.as_mut()
+            .reset_for_function_body(&c.body, suspension_kind, p_function_body)?
     };
     let doc_comment = extract_docblock(node, env).or_else(|| env.top_docblock().clone());
     let user_attributes = p_user_attributes(&c.attribute_spec, env);
@@ -2419,7 +2465,8 @@ fn p_awaitable_creation_expr<'a>(
     pos: Pos,
 ) -> Result<Expr_> {
     let suspension_kind = mk_suspension_kind(&c.async_);
-    let (blk, yld) = map_yielding(&c.compound_statement, env, p_function_body)?;
+    let (blk, yld) =
+        env.reset_for_function_body(&c.compound_statement, suspension_kind, p_function_body)?;
     let user_attributes = p_user_attributes(&c.attribute_spec, env);
     let external = c.compound_statement.is_external();
     let body = ast::Fun_ {
@@ -2785,11 +2832,13 @@ fn p_stmt_list_<'a>(
             Some(n) => match &n.children {
                 UsingStatementFunctionScoped(c) => {
                     let body = p_stmt_list_(pos, nodes, env)?;
+                    let has_await = !c.await_keyword.is_missing();
+                    env.found_await |= has_await;
                     let using = ast::Stmt::new(
                         pos.clone(),
                         ast::Stmt_::mk_using(ast::UsingStmt {
                             is_block_scoped: false,
-                            has_await: !c.await_keyword.is_missing(),
+                            has_await,
                             exprs: p_exprs_with_loc(&c.expression, env)?,
                             block: ast::Block(body),
                         }),
@@ -2850,7 +2899,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         TryStatement(c) => p_try_stmt(env, pos, c),
         ReturnStatement(c) => p_return_stmt(env, pos, c),
         YieldBreakStatement(_) => {
-            env.saw_yield = true;
+            env.found_yield = true;
             Ok(ast::Stmt::new(pos, ast::Stmt_::mk_yield_break()))
         }
         EchoStatement(c) => p_echo_stmt(env, pos, c),
@@ -3055,7 +3104,10 @@ fn p_foreach_stmt<'a>(
 
     let col = p_expr(&c.collection, env)?;
     let akw = match token_kind(&c.await_keyword) {
-        Some(TK::Await) => Some(p_pos(&c.await_keyword, env)),
+        Some(TK::Await) => {
+            env.found_await = true;
+            Some(p_pos(&c.await_keyword, env))
+        }
         _ => None,
     };
     let value = p_expr(&c.value, env)?;
@@ -3092,12 +3144,13 @@ fn p_using_statement_function_scoped_stmt<'a>(
     use ast::Stmt;
     use ast::Stmt_ as S_;
     let new = Stmt::new;
-
+    let has_await = !&c.await_keyword.is_missing();
+    env.found_await |= has_await;
     Ok(new(
         pos,
         S_::mk_using(ast::UsingStmt {
             is_block_scoped: false,
-            has_await: !&c.await_keyword.is_missing(),
+            has_await,
             exprs: p_exprs_with_loc(&c.expression, env)?,
             block: ast::Block(vec![mk_noop(env)]),
         }),
@@ -3112,12 +3165,13 @@ fn p_using_statement_block_scoped_stmt<'a>(
     use ast::Stmt;
     use ast::Stmt_ as S_;
     let new = Stmt::new;
-
+    let has_await = !&c.await_keyword.is_missing();
+    env.found_await |= has_await;
     Ok(new(
         pos,
         S_::mk_using(ast::UsingStmt {
             is_block_scoped: true,
-            has_await: !&c.await_keyword.is_missing(),
+            has_await,
             exprs: p_exprs_with_loc(&c.expressions, env)?,
             block: p_block(false, &c.body, env)?,
         }),
@@ -4224,7 +4278,7 @@ fn p_function_body<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Block> {
             match (compound_statements, compound_right_brace) {
                 (Missing, Token(_)) => mk_noop_result(env),
                 (SyntaxList(t), _) if t.len() == 1 && t[0].is_yield() => {
-                    env.saw_yield = true;
+                    env.found_yield = true;
                     mk_noop_result(env)
                 }
                 _ => {
@@ -4469,18 +4523,6 @@ fn p_docs_url<'a>(attrs: &ast::UserAttributes, env: &mut Env<'a>) -> Option<Stri
     }
 
     url
-}
-
-fn map_yielding<'a, F, R>(node: S<'a>, env: &mut Env<'a>, p: F) -> Result<(R, bool)>
-where
-    F: FnOnce(S<'a>, &mut Env<'a>) -> Result<R>,
-{
-    let outer_saw_yield = env.saw_yield;
-    env.saw_yield = false;
-    let r = p(node, env);
-    let saw_yield = env.saw_yield;
-    env.saw_yield = outer_saw_yield;
-    Ok((r?, saw_yield))
 }
 
 fn mk_empty_ns_env(env: &Env<'_>) -> Arc<NamespaceEnv> {
@@ -5071,14 +5113,17 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
             let readonly_this = kinds.has(modifier::READONLY);
             *env.in_static_method() = is_static;
             check_effect_polymorphic_reification(hdr.contexts.as_ref(), env, node);
-            let (mut body, body_has_yield) =
-                match map_yielding(&c.function_body, env, p_function_body) {
-                    Ok(value) => value,
-                    Err(e) => {
-                        emit_error(e, env);
-                        return;
-                    }
-                };
+            let (mut body, body_has_yield) = match env.reset_for_function_body(
+                &c.function_body,
+                hdr.suspension_kind,
+                p_function_body,
+            ) {
+                Ok(value) => value,
+                Err(e) => {
+                    emit_error(e, env);
+                    return;
+                }
+            };
             if env.is_codegen() {
                 member_init.reverse();
             }
@@ -5560,7 +5605,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             let (block, yield_) = if is_external {
                 (Default::default(), false)
             } else {
-                map_yielding(body, env, p_function_body)?
+                env.reset_for_function_body(body, hdr.suspension_kind, p_function_body)?
             };
             let user_attributes = p_user_attributes(attribute_spec, env);
             check_effect_memoized(hdr.contexts.as_ref(), &user_attributes, "function", env);

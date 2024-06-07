@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4f60dda126691867f41728e611ff545b>>
+// @generated SignedSource<<7ca8008c14aa736613e56ae81f46e036>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -687,7 +687,11 @@ pub struct As_<Ex, En> {
 #[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct EtSplice<Ex, En> {
+    /// The spliced_expr should have type Spliceble<t1, t2, t3>, and if extract_client_type is true, the
+    /// overall type should be t3. If false, the entire Spliceable should be the type.
     pub extract_client_type: bool,
+    /// Does the spliced_expr contain an await expression
+    pub contains_await: bool,
     pub spliced_expr: Expr<Ex, En>,
 }
 

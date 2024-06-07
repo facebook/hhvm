@@ -40,6 +40,11 @@ from thrift.python.types cimport (
     getCTypeInfo,
     i32TypeInfo,
 )
+from thrift.python.mutable_typeinfos cimport (
+    MutableListTypeInfo,
+    MutableSetTypeInfo,
+)
+from thrift.python.mutable_containers cimport MutableSet
 from thrift.python.test.containers.thrift_types import (
     Foo,
     Bar,
@@ -308,4 +313,58 @@ cdef class TypeInfoTests():
         expected_python_val = Map(typeinfo_string, value_type_info, {"a": {1: [1, 2]}, "b":{}})
         self.ut.assertEqual(map_type_info.to_python_value(data), expected_python_val)
 
-    # DO_BEFORE(alperyoney,20240603): Add tests for `Mutable` TypeInfo classes.
+    def test_MutableListTypeInfo(self) -> None:
+        list_type_info = MutableListTypeInfo(typeinfo_i64)
+        self.ut.assertIsInstance(list_type_info, TypeInfoBase)
+
+        with self.ut.assertRaises(TypeError):
+            list_type_info.to_internal_data(None)
+
+        data = list_type_info.to_internal_data([1, 2, 3])
+        self.ut.assertEqual(data, [1, 2, 3])
+
+        self.assertEqual(
+            (<MutableListTypeInfo>list_type_info).cpp_obj.get().get(),
+            getCTypeInfo(list_type_info),
+        )
+
+        self.ut.assertTrue(list_type_info.same_as(list_type_info))
+        self.ut.assertTrue(MutableListTypeInfo(typeinfo_i64).same_as(list_type_info))
+        self.ut.assertFalse(MutableListTypeInfo(typeinfo_i32).same_as(list_type_info))
+
+        with self.ut.assertRaisesRegex(
+            NotImplementedError,
+            "Use the 'same_as' method for comparing TypeInfoBase instances."):
+            list_type_info == list_type_info
+
+    def test_MutableListTypeInfo_nested(self) -> None:
+        element_type_info = MutableListTypeInfo(typeinfo_i64)
+        list_type_info = MutableListTypeInfo(element_type_info)
+        self.ut.assertIsInstance(list_type_info, TypeInfoBase)
+
+        init_val = [[1, 2], [3, 4], []]
+        data = list_type_info.to_internal_data(init_val)
+        self.ut.assertEqual(data, [[1, 2], [3, 4], []])
+        self.ut.assertEqual(list_type_info.to_python_value(data), init_val)
+
+    def test_MutableSetTypeInfo(self) -> None:
+        set_type_info = MutableSetTypeInfo(typeinfo_i64)
+        self.ut.assertIsInstance(set_type_info, TypeInfoBase)
+
+        with self.ut.assertRaises(TypeError):
+            set_type_info.to_internal_data(None)
+
+        data = set_type_info.to_internal_data([1, 2, 3])
+        self.ut.assertEqual(data, {1, 2, 3})
+
+        data = set_type_info.to_internal_data([1, 2, 3, 1, 2])
+        self.ut.assertEqual(data, {1, 2, 3})
+
+        self.assertEqual(
+            (<MutableSetTypeInfo>set_type_info).cpp_obj.get().get(),
+            getCTypeInfo(set_type_info),
+        )
+
+        self.ut.assertTrue(set_type_info.same_as(set_type_info))
+        self.ut.assertTrue(MutableSetTypeInfo(typeinfo_i64).same_as(set_type_info))
+        self.ut.assertFalse(MutableSetTypeInfo(typeinfo_i32).same_as(set_type_info))

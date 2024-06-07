@@ -109,3 +109,12 @@ class TypeInfoTests(unittest.TestCase):
 
     def test_MapTypeInfo_nested(self) -> None:
         CTests(self).test_MapTypeInfo_nested()
+
+    def test_MutableListTypeInfo(self) -> None:
+        CTests(self).test_MutableListTypeInfo()
+
+    def test_MutableListTypeInfo_nested(self) -> None:
+        CTests(self).test_MutableListTypeInfo_nested()
+
+    def test_MutableSetTypeInfo(self) -> None:
+        CTests(self).test_MutableSetTypeInfo()

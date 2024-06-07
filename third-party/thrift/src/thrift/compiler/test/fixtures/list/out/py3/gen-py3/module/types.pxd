@@ -56,6 +56,7 @@ cdef class List__string(thrift.py3.types.List):
     cdef _fbthrift_create(shared_ptr[vector[string]])
     @staticmethod
     cdef shared_ptr[vector[string]] _make_instance(object items) except *
+    cdef _check_item_type(self, item)
 
 cdef class Map__i64_List__string(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint64_t,vector[string]]] _cpp_obj
@@ -63,6 +64,7 @@ cdef class Map__i64_List__string(thrift.py3.types.Map):
     cdef _fbthrift_create(shared_ptr[cmap[cint64_t,vector[string]]])
     @staticmethod
     cdef shared_ptr[cmap[cint64_t,vector[string]]] _make_instance(object items) except *
+    cdef _check_key_type(self, key)
 
 
 cdef extern from "thrift/compiler/test/fixtures/list/gen-cpp2/module_constants.h" namespace "::cpp2":

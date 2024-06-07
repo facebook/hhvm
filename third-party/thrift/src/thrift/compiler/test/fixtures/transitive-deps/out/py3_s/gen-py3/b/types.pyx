@@ -70,6 +70,7 @@ cdef object get_types_reflection():
     )
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__c_C(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__c_C):

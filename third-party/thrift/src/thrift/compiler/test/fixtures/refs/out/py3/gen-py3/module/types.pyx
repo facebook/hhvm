@@ -3115,6 +3115,7 @@ cdef class StructWithString(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithString, self)
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__RecursiveStruct(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__RecursiveStruct):
@@ -3192,6 +3193,7 @@ cdef class List__RecursiveStruct(thrift.py3.types.List):
 Sequence.register(List__RecursiveStruct)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__i32):
@@ -3270,6 +3272,7 @@ cdef class List__i32(thrift.py3.types.List):
 Sequence.register(List__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Set__i32(thrift.py3.types.Set):
     def __init__(self, items=None):
         if isinstance(items, Set__i32):
@@ -3351,6 +3354,7 @@ cdef class Set__i32(thrift.py3.types.Set):
 Set.register(Set__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__i32_i32(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__i32_i32):
@@ -3448,6 +3452,7 @@ cdef class Map__i32_i32(thrift.py3.types.Map):
 Mapping.register(Map__i32_i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__i64(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__i64):

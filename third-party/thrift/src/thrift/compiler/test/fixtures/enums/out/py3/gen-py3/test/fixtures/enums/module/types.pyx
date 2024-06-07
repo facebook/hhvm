@@ -755,6 +755,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Set__i32(thrift.py3.types.Set):
     def __init__(self, items=None):
         if isinstance(items, Set__i32):

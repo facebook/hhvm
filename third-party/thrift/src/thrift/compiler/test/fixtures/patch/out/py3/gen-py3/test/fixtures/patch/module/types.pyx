@@ -1846,6 +1846,7 @@ cdef class RefFields(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.RefFields, self)
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__i16(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__i16):
@@ -1924,6 +1925,7 @@ cdef class List__i16(thrift.py3.types.List):
 Sequence.register(List__i16)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Set__string(thrift.py3.types.Set):
     def __init__(self, items=None):
         if isinstance(items, Set__string):
@@ -2006,6 +2008,7 @@ cdef class Set__string(thrift.py3.types.Set):
 Set.register(Set__string)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__string_string(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__string_string):
@@ -2101,6 +2104,7 @@ cdef class Map__string_string(thrift.py3.types.Map):
 Mapping.register(Map__string_string)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__string_i32(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__string_i32):
@@ -2197,6 +2201,7 @@ cdef class Map__string_i32(thrift.py3.types.Map):
 Mapping.register(Map__string_i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__Map__string_i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__Map__string_i32):
@@ -2280,6 +2285,7 @@ cdef class List__Map__string_i32(thrift.py3.types.List):
 Sequence.register(List__Map__string_i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__string_Map__string_i32(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__string_Map__string_i32):
@@ -2377,6 +2383,7 @@ cdef class Map__string_Map__string_i32(thrift.py3.types.Map):
 Mapping.register(Map__string_Map__string_i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__string_Recursive(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__string_Recursive):
@@ -2472,6 +2479,7 @@ cdef class Map__string_Recursive(thrift.py3.types.Map):
 Mapping.register(Map__string_Recursive)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__i32):

@@ -68,6 +68,7 @@ cdef object get_types_reflection():
     )
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, std_unordered_map__Map__i32_string):
@@ -164,6 +165,7 @@ cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
 Mapping.register(std_unordered_map__Map__i32_string)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__std_unordered_map__Map__i32_string):

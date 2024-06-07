@@ -1228,6 +1228,7 @@ cdef class BinaryUnionStruct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.BinaryUnionStruct, self)
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__i16(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__i16):
@@ -1306,6 +1307,7 @@ cdef class List__i16(thrift.py3.types.List):
 Sequence.register(List__i16)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__i32):
@@ -1384,6 +1386,7 @@ cdef class List__i32(thrift.py3.types.List):
 Sequence.register(List__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__i64(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__i64):
@@ -1462,6 +1465,7 @@ cdef class List__i64(thrift.py3.types.List):
 Sequence.register(List__i64)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__string(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__string):
@@ -1541,6 +1545,7 @@ cdef class List__string(thrift.py3.types.List):
 Sequence.register(List__string)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__SimpleStruct(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__SimpleStruct):
@@ -1618,6 +1623,7 @@ cdef class List__SimpleStruct(thrift.py3.types.List):
 Sequence.register(List__SimpleStruct)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Set__i32(thrift.py3.types.Set):
     def __init__(self, items=None):
         if isinstance(items, Set__i32):
@@ -1699,6 +1705,7 @@ cdef class Set__i32(thrift.py3.types.Set):
 Set.register(Set__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Set__string(thrift.py3.types.Set):
     def __init__(self, items=None):
         if isinstance(items, Set__string):
@@ -1781,6 +1788,7 @@ cdef class Set__string(thrift.py3.types.Set):
 Set.register(Set__string)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__string_string(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__string_string):
@@ -1876,6 +1884,7 @@ cdef class Map__string_string(thrift.py3.types.Map):
 Mapping.register(Map__string_string)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__string_SimpleStruct(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__string_SimpleStruct):
@@ -1971,6 +1980,7 @@ cdef class Map__string_SimpleStruct(thrift.py3.types.Map):
 Mapping.register(Map__string_SimpleStruct)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__string_i16(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__string_i16):
@@ -2067,6 +2077,7 @@ cdef class Map__string_i16(thrift.py3.types.Map):
 Mapping.register(Map__string_i16)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__List__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__List__i32):
@@ -2150,6 +2161,7 @@ cdef class List__List__i32(thrift.py3.types.List):
 Sequence.register(List__List__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__string_i32(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__string_i32):
@@ -2246,6 +2258,7 @@ cdef class Map__string_i32(thrift.py3.types.Map):
 Mapping.register(Map__string_i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__string_Map__string_i32(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__string_Map__string_i32):
@@ -2343,6 +2356,7 @@ cdef class Map__string_Map__string_i32(thrift.py3.types.Map):
 Mapping.register(Map__string_Map__string_i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__Set__string(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__Set__string):
@@ -2426,6 +2440,7 @@ cdef class List__Set__string(thrift.py3.types.List):
 Sequence.register(List__Set__string)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__string_List__SimpleStruct(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__string_List__SimpleStruct):
@@ -2523,6 +2538,7 @@ cdef class Map__string_List__SimpleStruct(thrift.py3.types.Map):
 Mapping.register(Map__string_List__SimpleStruct)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__List__string(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__List__string):
@@ -2606,6 +2622,7 @@ cdef class List__List__string(thrift.py3.types.List):
 Sequence.register(List__List__string)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__Set__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__Set__i32):
@@ -2689,6 +2706,7 @@ cdef class List__Set__i32(thrift.py3.types.List):
 Sequence.register(List__Set__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__Map__string_string(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__Map__string_string):
@@ -2772,6 +2790,7 @@ cdef class List__Map__string_string(thrift.py3.types.List):
 Sequence.register(List__Map__string_string)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__binary(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__binary):
@@ -2851,6 +2870,7 @@ cdef class List__binary(thrift.py3.types.List):
 Sequence.register(List__binary)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Set__binary(thrift.py3.types.Set):
     def __init__(self, items=None):
         if isinstance(items, Set__binary):
@@ -2933,6 +2953,7 @@ cdef class Set__binary(thrift.py3.types.Set):
 Set.register(Set__binary)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__AnEnum(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__AnEnum):
@@ -3010,6 +3031,7 @@ cdef class List__AnEnum(thrift.py3.types.List):
 Sequence.register(List__AnEnum)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__i32_double(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__i32_double):
@@ -3106,6 +3128,7 @@ cdef class Map__i32_double(thrift.py3.types.Map):
 Mapping.register(Map__i32_double)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__Map__i32_double(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__Map__i32_double):
@@ -3189,6 +3212,7 @@ cdef class List__Map__i32_double(thrift.py3.types.List):
 Sequence.register(List__Map__i32_double)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__AnEnumRenamed_i32(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__AnEnumRenamed_i32):

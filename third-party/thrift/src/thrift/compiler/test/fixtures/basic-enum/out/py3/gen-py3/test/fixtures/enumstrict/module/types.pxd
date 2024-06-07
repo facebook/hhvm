@@ -117,6 +117,7 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
     cdef _fbthrift_create(shared_ptr[cmap[cMyEnum,string]])
     @staticmethod
     cdef shared_ptr[cmap[cMyEnum,string]] _make_instance(object items) except *
+    cdef _check_key_type(self, key)
 
 
 cdef extern from "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_constants.h" namespace "::test::fixtures::enumstrict":

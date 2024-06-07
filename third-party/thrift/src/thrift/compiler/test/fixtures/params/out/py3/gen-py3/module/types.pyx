@@ -68,6 +68,7 @@ cdef object get_types_reflection():
     )
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__i32):
@@ -146,6 +147,7 @@ cdef class List__i32(thrift.py3.types.List):
 Sequence.register(List__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__i32_List__i32(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__i32_List__i32):
@@ -244,6 +246,7 @@ cdef class Map__i32_List__i32(thrift.py3.types.Map):
 Mapping.register(Map__i32_List__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Set__i32(thrift.py3.types.Set):
     def __init__(self, items=None):
         if isinstance(items, Set__i32):
@@ -325,6 +328,7 @@ cdef class Set__i32(thrift.py3.types.Set):
 Set.register(Set__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__i32_Set__i32(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__i32_Set__i32):
@@ -423,6 +427,7 @@ cdef class Map__i32_Set__i32(thrift.py3.types.Map):
 Mapping.register(Map__i32_Set__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__i32_i32(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__i32_i32):
@@ -520,6 +525,7 @@ cdef class Map__i32_i32(thrift.py3.types.Map):
 Mapping.register(Map__i32_i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__Map__i32_i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__Map__i32_i32):
@@ -603,6 +609,7 @@ cdef class List__Map__i32_i32(thrift.py3.types.List):
 Sequence.register(List__Map__i32_i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__Set__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__Set__i32):
@@ -686,6 +693,7 @@ cdef class List__Set__i32(thrift.py3.types.List):
 Sequence.register(List__Set__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__i32_Map__i32_Set__i32(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__i32_Map__i32_Set__i32):
@@ -784,6 +792,7 @@ cdef class Map__i32_Map__i32_Set__i32(thrift.py3.types.Map):
 Mapping.register(Map__i32_Map__i32_Set__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__Map__i32_Map__i32_Set__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__Map__i32_Map__i32_Set__i32):
@@ -867,6 +876,7 @@ cdef class List__Map__i32_Map__i32_Set__i32(thrift.py3.types.List):
 Sequence.register(List__Map__i32_Map__i32_Set__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__List__Map__i32_Map__i32_Set__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__List__Map__i32_Map__i32_Set__i32):

@@ -4341,6 +4341,7 @@ cdef class StructWithDoubleUnderscores(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithDoubleUnderscores, self)
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, std_unordered_map__Map__i32_string):
@@ -4437,6 +4438,7 @@ cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
 Mapping.register(std_unordered_map__Map__i32_string)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__i64(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__i64):
@@ -4515,6 +4517,7 @@ cdef class List__i64(thrift.py3.types.List):
 Sequence.register(List__i64)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__binary_i64(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__binary_i64):
@@ -4611,6 +4614,7 @@ cdef class Map__binary_i64(thrift.py3.types.Map):
 Mapping.register(Map__binary_i64)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__i32):
@@ -4689,6 +4693,7 @@ cdef class List__i32(thrift.py3.types.List):
 Sequence.register(List__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class std_list__List__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, std_list__List__i32):
@@ -4767,6 +4772,7 @@ cdef class std_list__List__i32(thrift.py3.types.List):
 Sequence.register(std_list__List__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class std_deque__List__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, std_deque__List__i32):
@@ -4845,6 +4851,7 @@ cdef class std_deque__List__i32(thrift.py3.types.List):
 Sequence.register(std_deque__List__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class folly_fbvector__List__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, folly_fbvector__List__i32):
@@ -4923,6 +4930,7 @@ cdef class folly_fbvector__List__i32(thrift.py3.types.List):
 Sequence.register(folly_fbvector__List__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class folly_small_vector__List__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, folly_small_vector__List__i32):
@@ -5001,6 +5009,7 @@ cdef class folly_small_vector__List__i32(thrift.py3.types.List):
 Sequence.register(folly_small_vector__List__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class folly_sorted_vector_set__Set__i32(thrift.py3.types.Set):
     def __init__(self, items=None):
         if isinstance(items, folly_sorted_vector_set__Set__i32):
@@ -5082,6 +5091,7 @@ cdef class folly_sorted_vector_set__Set__i32(thrift.py3.types.Set):
 Set.register(folly_sorted_vector_set__Set__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__i32_string(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__i32_string):
@@ -5178,6 +5188,7 @@ cdef class Map__i32_string(thrift.py3.types.Map):
 Mapping.register(Map__i32_string)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class std_list_int32_t__List__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, std_list_int32_t__List__i32):
@@ -5256,6 +5267,7 @@ cdef class std_list_int32_t__List__i32(thrift.py3.types.List):
 Sequence.register(std_list_int32_t__List__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__string_i32(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__string_i32):
@@ -5352,6 +5364,7 @@ cdef class Map__string_i32(thrift.py3.types.Map):
 Mapping.register(Map__string_i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__std_unordered_map__Map__i32_string):
@@ -5435,6 +5448,7 @@ cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
 Sequence.register(List__std_unordered_map__Map__i32_string)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__i32_IncompleteMapDep(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__i32_IncompleteMapDep):
@@ -5531,6 +5545,7 @@ cdef class Map__i32_IncompleteMapDep(thrift.py3.types.Map):
 Mapping.register(Map__i32_IncompleteMapDep)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class std_unordered_map__Map__i32_CompleteMapDep(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, std_unordered_map__Map__i32_CompleteMapDep):
@@ -5627,6 +5642,7 @@ cdef class std_unordered_map__Map__i32_CompleteMapDep(thrift.py3.types.Map):
 Mapping.register(std_unordered_map__Map__i32_CompleteMapDep)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class _std_list__List__IncompleteListDep(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, _std_list__List__IncompleteListDep):
@@ -5704,6 +5720,7 @@ cdef class _std_list__List__IncompleteListDep(thrift.py3.types.List):
 Sequence.register(_std_list__List__IncompleteListDep)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class folly_small_vector__List__CompleteListDep(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, folly_small_vector__List__CompleteListDep):
@@ -5781,6 +5798,7 @@ cdef class folly_small_vector__List__CompleteListDep(thrift.py3.types.List):
 Sequence.register(folly_small_vector__List__CompleteListDep)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__AdaptedListDep(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__AdaptedListDep):
@@ -5858,6 +5876,7 @@ cdef class List__AdaptedListDep(thrift.py3.types.List):
 Sequence.register(List__AdaptedListDep)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__DependentAdaptedListDep(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__DependentAdaptedListDep):
@@ -5935,6 +5954,7 @@ cdef class List__DependentAdaptedListDep(thrift.py3.types.List):
 Sequence.register(List__DependentAdaptedListDep)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Set__i32(thrift.py3.types.Set):
     def __init__(self, items=None):
         if isinstance(items, Set__i32):
@@ -6016,6 +6036,7 @@ cdef class Set__i32(thrift.py3.types.Set):
 Set.register(Set__i32)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__i32_i32(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__i32_i32):

@@ -337,6 +337,7 @@ cdef class Combo(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("matching_struct_names.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Combo, self)
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__MyStruct(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__MyStruct):
@@ -414,6 +415,7 @@ cdef class List__MyStruct(thrift.py3.types.List):
 Sequence.register(List__MyStruct)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__List__MyStruct(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__List__MyStruct):
@@ -497,6 +499,7 @@ cdef class List__List__MyStruct(thrift.py3.types.List):
 Sequence.register(List__List__MyStruct)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__module_MyStruct(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__module_MyStruct):
@@ -574,6 +577,7 @@ cdef class List__module_MyStruct(thrift.py3.types.List):
 Sequence.register(List__module_MyStruct)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__List__module_MyStruct(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__List__module_MyStruct):

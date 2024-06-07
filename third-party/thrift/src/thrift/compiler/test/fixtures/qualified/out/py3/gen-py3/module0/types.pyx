@@ -248,6 +248,7 @@ cdef class Struct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module0.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Struct, self)
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__Enum(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__Enum):

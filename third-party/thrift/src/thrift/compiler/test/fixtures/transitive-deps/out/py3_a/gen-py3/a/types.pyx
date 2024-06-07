@@ -201,6 +201,7 @@ cdef class A(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("a.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.A, self)
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__c_C(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__c_C):
@@ -278,6 +279,7 @@ cdef class List__c_C(thrift.py3.types.List):
 Sequence.register(List__c_C)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__List__c_C(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__List__c_C):

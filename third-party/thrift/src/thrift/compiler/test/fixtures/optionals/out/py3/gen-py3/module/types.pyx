@@ -649,6 +649,7 @@ cdef class Person(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Person, self)
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Set__i64(thrift.py3.types.Set):
     def __init__(self, items=None):
         if isinstance(items, Set__i64):
@@ -730,6 +731,7 @@ cdef class Set__i64(thrift.py3.types.Set):
 Set.register(Set__i64)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__Animal_string(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__Animal_string):
@@ -825,6 +827,7 @@ cdef class Map__Animal_string(thrift.py3.types.Map):
 Mapping.register(Map__Animal_string)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__Vehicle(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__Vehicle):

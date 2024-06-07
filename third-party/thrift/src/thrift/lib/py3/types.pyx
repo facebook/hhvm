@@ -359,8 +359,6 @@ cdef class List(Container):
     cdef _get_single_item(self, size_t index):
         raise NotImplementedError()
 
-    cdef _check_item_type(self, item):
-        raise NotImplementedError()
 
 @cython.auto_pickle(False)
 cdef class Set(Container):
@@ -483,10 +481,6 @@ cdef class Map(Container):
             return self.__getitem__(key)
         except KeyError:
             return default
-
-    cdef _check_key_type(self, key):
-        raise NotImplementedError()
-
 
 
 @cython.auto_pickle(False)

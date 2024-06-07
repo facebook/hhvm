@@ -168,7 +168,6 @@ cdef class List(Container):
     cdef int _normalize_index(self, int index) except *
     cdef _get_slice(self, slice index_obj)
     cdef _get_single_item(self, size_t index)
-    cdef _check_item_type(self, item)
 
 cdef class Set(Container):
     cdef _fbthrift_py_richcmp(self, other, int op)
@@ -176,7 +175,7 @@ cdef class Set(Container):
 
 
 cdef class Map(Container):
-    cdef _check_key_type(self, key)
+    pass
 
 
 cdef class CompiledEnum:

@@ -1481,6 +1481,7 @@ cdef class NonCopyableUnion(thrift.py3.types.Union):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.NonCopyableUnion, self)
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__i64(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__i64):
@@ -1559,6 +1560,7 @@ cdef class List__i64(thrift.py3.types.List):
 Sequence.register(List__i64)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__string(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__string):
@@ -1638,6 +1640,7 @@ cdef class List__string(thrift.py3.types.List):
 Sequence.register(List__string)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Map__i16_string(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__i16_string):

@@ -364,6 +364,7 @@ cdef class SecretStruct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.SecretStruct, self)
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class std_deque_std_string__List__string(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, std_deque_std_string__List__string):

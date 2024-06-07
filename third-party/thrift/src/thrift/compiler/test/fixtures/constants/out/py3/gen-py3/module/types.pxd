@@ -345,6 +345,7 @@ cdef class List__i32(thrift.py3.types.List):
     cdef _fbthrift_create(shared_ptr[vector[cint32_t]])
     @staticmethod
     cdef shared_ptr[vector[cint32_t]] _make_instance(object items) except *
+    cdef _check_item_type(self, item)
 
 cdef class Map__string_i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,cint32_t]] _cpp_obj
@@ -352,6 +353,7 @@ cdef class Map__string_i32(thrift.py3.types.Map):
     cdef _fbthrift_create(shared_ptr[cmap[string,cint32_t]])
     @staticmethod
     cdef shared_ptr[cmap[string,cint32_t]] _make_instance(object items) except *
+    cdef _check_key_type(self, key)
 
 cdef class List__Map__string_i32(thrift.py3.types.List):
     cdef shared_ptr[vector[cmap[string,cint32_t]]] _cpp_obj
@@ -359,6 +361,7 @@ cdef class List__Map__string_i32(thrift.py3.types.List):
     cdef _fbthrift_create(shared_ptr[vector[cmap[string,cint32_t]]])
     @staticmethod
     cdef shared_ptr[vector[cmap[string,cint32_t]]] _make_instance(object items) except *
+    cdef _check_item_type(self, item)
 
 cdef class Map__string_string(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,string]] _cpp_obj
@@ -366,6 +369,7 @@ cdef class Map__string_string(thrift.py3.types.Map):
     cdef _fbthrift_create(shared_ptr[cmap[string,string]])
     @staticmethod
     cdef shared_ptr[cmap[string,string]] _make_instance(object items) except *
+    cdef _check_key_type(self, key)
 
 cdef class List__Range(thrift.py3.types.List):
     cdef shared_ptr[vector[cRange]] _cpp_obj
@@ -373,6 +377,7 @@ cdef class List__Range(thrift.py3.types.List):
     cdef _fbthrift_create(shared_ptr[vector[cRange]])
     @staticmethod
     cdef shared_ptr[vector[cRange]] _make_instance(object items) except *
+    cdef _check_item_type(self, item)
 
 cdef class List__Internship(thrift.py3.types.List):
     cdef shared_ptr[vector[cInternship]] _cpp_obj
@@ -380,6 +385,7 @@ cdef class List__Internship(thrift.py3.types.List):
     cdef _fbthrift_create(shared_ptr[vector[cInternship]])
     @staticmethod
     cdef shared_ptr[vector[cInternship]] _make_instance(object items) except *
+    cdef _check_item_type(self, item)
 
 cdef class List__string(thrift.py3.types.List):
     cdef shared_ptr[vector[string]] _cpp_obj
@@ -387,6 +393,7 @@ cdef class List__string(thrift.py3.types.List):
     cdef _fbthrift_create(shared_ptr[vector[string]])
     @staticmethod
     cdef shared_ptr[vector[string]] _make_instance(object items) except *
+    cdef _check_item_type(self, item)
 
 cdef class Set__i32(thrift.py3.types.Set):
     cdef shared_ptr[cset[cint32_t]] _cpp_obj
@@ -408,6 +415,7 @@ cdef class Map__i32_i32(thrift.py3.types.Map):
     cdef _fbthrift_create(shared_ptr[cmap[cint32_t,cint32_t]])
     @staticmethod
     cdef shared_ptr[cmap[cint32_t,cint32_t]] _make_instance(object items) except *
+    cdef _check_key_type(self, key)
 
 cdef class Map__i32_string(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint32_t,string]] _cpp_obj
@@ -415,6 +423,7 @@ cdef class Map__i32_string(thrift.py3.types.Map):
     cdef _fbthrift_create(shared_ptr[cmap[cint32_t,string]])
     @staticmethod
     cdef shared_ptr[cmap[cint32_t,string]] _make_instance(object items) except *
+    cdef _check_key_type(self, key)
 
 cdef class Map__i32_bool(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint32_t,cbool]] _cpp_obj
@@ -422,6 +431,7 @@ cdef class Map__i32_bool(thrift.py3.types.Map):
     cdef _fbthrift_create(shared_ptr[cmap[cint32_t,cbool]])
     @staticmethod
     cdef shared_ptr[cmap[cint32_t,cbool]] _make_instance(object items) except *
+    cdef _check_key_type(self, key)
 
 
 cdef extern from "thrift/compiler/test/fixtures/constants/gen-cpp2/module_constants.h" namespace "::cpp2":

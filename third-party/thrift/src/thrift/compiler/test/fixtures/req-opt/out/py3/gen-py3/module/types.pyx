@@ -217,6 +217,7 @@ cdef class Foo(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Foo, self)
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__bool(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__bool):
@@ -294,6 +295,7 @@ cdef class List__bool(thrift.py3.types.List):
 Sequence.register(List__bool)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class List__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__i32):

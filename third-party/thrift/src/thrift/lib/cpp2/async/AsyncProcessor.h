@@ -1405,7 +1405,7 @@ class HandlerCallbackBase {
     }
     const auto doProcess =
         [](Ptr callback,
-           DoExceptionFunc doException) -> folly::coro::Task<void> {
+           DoExceptionFunc doException_1) -> folly::coro::Task<void> {
       folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
           callback->processServiceInterceptorsOnResponse());
       if (onResponseResult.hasException()) {
@@ -1415,7 +1415,7 @@ class HandlerCallbackBase {
         LOG(ERROR) << "Exception in ServiceInterceptor::onResponse: "
                    << folly::exceptionStr(onResponseResult.exception());
       }
-      std::forward<DoExceptionFunc>(doException)(*callback);
+      std::forward<DoExceptionFunc>(doException_1)(*callback);
     };
     startOnExecutor(doProcess(
         sharedFromThis(), std::forward<DoExceptionFunc>(doException)));

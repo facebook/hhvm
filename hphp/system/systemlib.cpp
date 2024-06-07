@@ -172,6 +172,10 @@ Object AllocInvalidOperationExceptionObject(const Variant& message) {
   return createAndConstructThrowable(getInvalidOperationExceptionClass(), message);
 }
 
+Object AllocUnexpectedValueExceptionObject(const Variant& message) {
+  return createAndConstructThrowable(getUnexpectedValueExceptionClass(), message);
+}
+
 Object AllocDOMExceptionObject(const Variant& message) {
   return createAndConstructThrowable(getDOMExceptionClass(), message);
 }
@@ -292,6 +296,10 @@ void throwOutOfBoundsExceptionObject(const Variant& message) {
 
 void throwInvalidOperationExceptionObject(const Variant& message) {
   throw_object(AllocInvalidOperationExceptionObject(message));
+}
+
+void throwUnexpectedValueExceptionObject(const Variant& message) {
+  throw_object(AllocUnexpectedValueExceptionObject(message));
 }
 
 void throwDOMExceptionObject(const Variant& message) {

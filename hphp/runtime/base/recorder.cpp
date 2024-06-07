@@ -299,6 +299,10 @@ struct Recorder::FactsStore final : public HPHP::FactsStore {
     get()->m_parentFactsStore->close();
   }
 
+  void validate(const std::set<std::string>& types_to_ignore) override {
+    get()->m_parentFactsStore->validate(types_to_ignore);
+  }
+
   void ensureUpdated() override {
     get()->m_parentFactsStore->ensureUpdated();
   }

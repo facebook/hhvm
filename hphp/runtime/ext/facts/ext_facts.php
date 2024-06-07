@@ -185,6 +185,12 @@ function is_abstract(
 )[]: bool;
 
 /**
+ * validate facts sql database
+ */
+<<__Native>>
+function validate(vec<string> $types_to_ignore = vec[]): void;
+
+/**
  * True iff the given type cannot be inherited.
  */
 <<__Native>>

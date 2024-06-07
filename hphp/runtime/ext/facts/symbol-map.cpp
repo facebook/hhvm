@@ -1211,6 +1211,10 @@ Clock SymbolMap::getClock() const noexcept {
   return rlock->m_clock;
 }
 
+void SymbolMap::validate(const std::set<std::string>& types_to_ignore) {
+  getDB()->validate(types_to_ignore);
+}
+
 Clock SymbolMap::dbClock() const {
   return getDB()->getClock();
 }

@@ -28,7 +28,7 @@ codegen.svg)
 Thrift has a set of protocols for serialization that may be used in different
 languages to serialize the generated structures created from the code generator.
 
-## An RPC Framework
+## A RPC Framework
 
 Thrift has a framework to frame messages to send between clients and servers,
 and to call application-defined functions when receiving messages in different

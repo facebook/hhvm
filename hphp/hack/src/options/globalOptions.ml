@@ -182,6 +182,7 @@ type t = {
   tco_strict_switch: bool;
   tco_allowed_files_for_ignore_readonly: string list;
   tco_package_v2: bool;
+  tco_package_v2_bypass_package_check_for_class_const: bool;
   preexisting_warnings: bool;
   re_no_cache: bool;
   hh_distc_should_disable_trace_store: bool;
@@ -289,6 +290,7 @@ let default =
     tco_strict_switch = false;
     tco_allowed_files_for_ignore_readonly = [];
     tco_package_v2 = false;
+    tco_package_v2_bypass_package_check_for_class_const = false;
     preexisting_warnings = false;
     re_no_cache = false;
     hh_distc_should_disable_trace_store = false;
@@ -394,6 +396,7 @@ let set
     ?tco_strict_switch
     ?tco_allowed_files_for_ignore_readonly
     ?tco_package_v2
+    ?tco_package_v2_bypass_package_check_for_class_const
     ?preexisting_warnings
     ?re_no_cache
     ?hh_distc_should_disable_trace_store
@@ -657,6 +660,10 @@ let set
         tco_allowed_files_for_ignore_readonly
         options.tco_allowed_files_for_ignore_readonly;
     tco_package_v2 = setting tco_package_v2 options.tco_package_v2;
+    tco_package_v2_bypass_package_check_for_class_const =
+      setting
+        tco_package_v2_bypass_package_check_for_class_const
+        options.tco_package_v2_bypass_package_check_for_class_const;
     preexisting_warnings =
       setting preexisting_warnings options.preexisting_warnings;
     re_no_cache = setting re_no_cache options.re_no_cache;

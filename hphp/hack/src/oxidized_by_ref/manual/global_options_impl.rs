@@ -140,6 +140,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     hack_warnings: false,
     tco_allowed_files_for_module_declarations: vec![],
     tco_package_v2: false,
+    tco_package_v2_bypass_package_check_for_class_const: false,
 };
 
 impl GlobalOptions<'static> {

@@ -1668,7 +1668,11 @@ let check_argument_type_against_parameter_type
       let check_dynamic_only =
         (not is_single_argument)
         && (not (TUtils.is_dynamic env param.fp_type))
-        && Option.is_some (Typing_utils.try_strip_dynamic env dep_ty)
+        && Option.is_some
+             (Typing_utils.try_strip_dynamic
+                ~accept_intersections:true
+                env
+                dep_ty)
         && Option.is_none (Typing_utils.try_strip_dynamic env param.fp_type)
       in
       if check_dynamic_only then

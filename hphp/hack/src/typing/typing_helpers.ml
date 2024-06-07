@@ -258,7 +258,7 @@ let refine_and_simplify_intersection ~hint_first env ~is_class reason ty hint_ty
        If H is enforced: ~X & H is an intersection so may not behave well
        if passed as LHS of subtyping, so we distribute the intersection:
 
-         ~X & H = ~H | (X & H)
+         ~X & H = (~ & H) | (X & H)
 
        (With the hope that (X & H) simplifies)
 

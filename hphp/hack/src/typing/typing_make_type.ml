@@ -107,7 +107,7 @@ let dynamic r = mk (r, Tdynamic)
 let like r ty = mk (r, Tlike ty)
 
 let locl_like r ty =
-  if is_dynamic ty then
+  if Typing_defs.is_dynamic ty then
     ty
   else
     match get_node ty with

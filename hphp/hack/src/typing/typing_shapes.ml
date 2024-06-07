@@ -296,7 +296,10 @@ let shapes_idx_not_null env shape_ty (fld : Nast.expr) =
   let (_, p, _) = fld in
   refine_handle_errors env shape_ty fld (shapes_idx_not_null_with_ty_err p)
 
-(* Typing rules for Shapes::idx
+(* /!\ This is not used fur typing Shapes::idx anymore,
+ * only to type field access on the LHS of ??
+ *
+ * Typing rules for Shapes::idx
  *
  *     e : ?shape(?sfn => t, ...)
  *     ----------------------------

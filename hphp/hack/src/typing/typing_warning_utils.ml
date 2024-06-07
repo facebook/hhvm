@@ -238,6 +238,48 @@ module TruthinessTest = struct
   let lint_quickfix _ = None
 end
 
+module EqualityCheck = struct
+  open Typing_warning.EqualityCheck
+
+  type t = Typing_warning.EqualityCheck.t
+
+  let code = Codes.EqualityCheck
+
+  let lint_code { kind; _ } =
+    match kind with
+    | Equality _ -> Lints_codes.Codes.non_equatable_comparison
+    | Contains
+    | Contains_key ->
+      Lints_codes.Codes.invalid_contains_check
+
+  let lint_severity = Lints_core.Lint_warning
+
+  let claim { kind; ty1; ty2 } =
+    match kind with
+    | Equality b ->
+      Printf.sprintf
+        "Invalid comparison: This expression will always return %s.\nA value of type %s can never be equal to a value of type %s"
+        (string_of_bool b |> Markdown_lite.md_codify)
+        (Markdown_lite.md_codify ty1)
+        (Markdown_lite.md_codify ty2)
+    | Contains ->
+      Printf.sprintf
+        "Invalid `C\\contains` check: This call will always return `false`.\nA `Traversable<%s>` cannot contain a value of type %s"
+        ty1
+        (Markdown_lite.md_codify ty2)
+    | Contains_key ->
+      Printf.sprintf
+        "Invalid `C\\contains_key` check: This call will always return `false`.\nA `KeyedTraversable<%s, ...>` cannot contain a key of type %s"
+        ty1
+        (Markdown_lite.md_codify ty2)
+
+  let reasons _ = []
+
+  let quickfixes _ = []
+
+  let lint_quickfix _ = None
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -247,6 +289,7 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Non_disjoint_check -> (module NonDisjointCheck)
   | Typing_warning.Cast_non_primitive -> (module CastNonPrimitive)
   | Typing_warning.Truthiness_test -> (module TruthinessTest)
+  | Typing_warning.Equality_check -> (module EqualityCheck)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :
@@ -257,6 +300,7 @@ let module_of_migrated
   | Typing_warning.Non_disjoint_check -> (module NonDisjointCheck)
   | Typing_warning.Cast_non_primitive -> (module CastNonPrimitive)
   | Typing_warning.Truthiness_test -> (module TruthinessTest)
+  | Typing_warning.Equality_check -> (module EqualityCheck)
 
 let code_is_enabled tcopt code =
   match TypecheckerOptions.hack_warnings tcopt with

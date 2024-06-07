@@ -17,6 +17,10 @@ module Env = Tast_env
 module MakeType = Typing_make_type
 module SN = Naming_special_names
 
+let warning_kind = Typing_warning.Equality_check
+
+let error_code = Typing_warning_utils.code warning_kind
+
 (** Warns when comparing two expression whose types are disjoint *)
 
 let enum_base_type env cid =
@@ -57,6 +61,16 @@ let is_nothing env ty =
   let nothing = MakeType.nothing Reason.none in
   Tast_env.is_sub_type env ty nothing
 
+let add_warning env ~as_lint pos kind ty1 ty2 =
+  Typing_warning_utils.add_for_migration
+    (Env.get_tcopt env)
+    ~as_lint:
+      (if as_lint then
+        Some None
+      else
+        None)
+    (pos, warning_kind, { Typing_warning.EqualityCheck.kind; ty1; ty2 })
+
 let error_if_inequatable env ty1 ty2 err =
   let expand_tydef =
     Typing_tdef.force_expand_typedef ~ety_env:empty_expand_env
@@ -75,30 +89,34 @@ let error_if_inequatable env ty1 ty2 err =
   else if Typing_subtype.is_type_disjoint typing_env ety1 ety2 then
     err (Env.print_ty env ty1) (Env.print_ty env ty2)
 
-let ensure_valid_equality_check env p bop e1 e2 =
+let ensure_valid_equality_check env ~as_lint p bop e1 e2 =
   let ty1 = get_type e1 in
   let ty2 = get_type e2 in
   error_if_inequatable
     env
     ty1
     ty2
-    (Lints_errors.non_equatable_comparison p (equal_bop bop Diff2))
+    (add_warning
+       env
+       ~as_lint
+       p
+       (Typing_warning.EqualityCheck.Equality (equal_bop bop Diff2)))
 
-let ensure_valid_contains_check env p trv_val_ty val_ty =
+let ensure_valid_contains_check env ~as_lint p trv_val_ty val_ty =
   error_if_inequatable
     env
     trv_val_ty
     val_ty
-    (Lints_errors.invalid_contains_check p)
+    (add_warning env ~as_lint p Typing_warning.EqualityCheck.Contains)
 
-let ensure_valid_contains_key_check env p trv_key_ty key_ty =
+let ensure_valid_contains_key_check env ~as_lint p trv_key_ty key_ty =
   error_if_inequatable
     env
     trv_key_ty
     key_ty
-    (Lints_errors.invalid_contains_key_check p)
+    (add_warning env ~as_lint p Typing_warning.EqualityCheck.Contains_key)
 
-let handler =
+let handler ~as_lint =
   object
     inherit Tast_visitor.handler_base
 
@@ -106,17 +124,17 @@ let handler =
       function
       | (_, p, Binop { bop = (Diff | Diff2 | Eqeqeq | Eqeq) as bop; lhs; rhs })
         ->
-        ensure_valid_equality_check env p bop lhs rhs
+        ensure_valid_equality_check env ~as_lint p bop lhs rhs
       | ( _,
           p,
           Call { func = (_, _, Id (_, id)); targs = [(tv1, _); (tv2, _)]; _ } )
         when String.equal id SN.HH.contains ->
-        ensure_valid_contains_check env p tv1 tv2
+        ensure_valid_contains_check env ~as_lint p tv1 tv2
       | ( _,
           p,
           Call { func = (_, _, Id (_, id)); targs = [(tk1, _); (tk2, _); _]; _ }
         )
         when String.equal id SN.HH.contains_key ->
-        ensure_valid_contains_key_check env p tk1 tk2
+        ensure_valid_contains_key_check env ~as_lint p tk1 tk2
       | _ -> ()
   end

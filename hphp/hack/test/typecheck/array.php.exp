@@ -1,1 +1,3 @@
-No errors
+WARN: File "array.php", line 5, characters 7-17:
+Invalid comparison: This expression will always return `false`.
+A value of type `vec<int>` can never be equal to a value of type `null` (Warn[12007])

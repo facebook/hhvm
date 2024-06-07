@@ -39,6 +39,7 @@ let warning_checks =
     (module Disjoint_types);
     (module Cast_non_primitive);
     (module Truthiness_test);
+    (module Equality_check);
   ]
 
 let visitor ctx =

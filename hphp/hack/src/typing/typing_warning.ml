@@ -86,6 +86,19 @@ module TruthinessTest = struct
   }
 end
 
+module EqualityCheck = struct
+  type kind =
+    | Equality of bool
+    | Contains
+    | Contains_key
+
+  type t = {
+    kind: kind;
+    ty1: string;
+    ty2: string;
+  }
+end
+
 type (_, _) kind =
   | Sketchy_equality : (SketchyEquality.t, warn) kind
   | Is_as_always : (IsAsAlways.t, migrated) kind
@@ -93,5 +106,6 @@ type (_, _) kind =
   | Non_disjoint_check : (NonDisjointCheck.t, migrated) kind
   | Cast_non_primitive : (CastNonPrimitive.t, migrated) kind
   | Truthiness_test : (TruthinessTest.t, migrated) kind
+  | Equality_check : (EqualityCheck.t, migrated) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

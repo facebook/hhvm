@@ -27,7 +27,6 @@ let typed_linters tcopt =
           None)
   in
   [
-    Linter_equality_check.handler;
     Linter_switch_check.handler;
     Linter_missing_override_attribute.handler;
     Linter_redundant_generics.handler;

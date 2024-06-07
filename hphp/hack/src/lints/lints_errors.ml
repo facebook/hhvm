@@ -66,28 +66,6 @@ let bad_virtualized_method p =
     p
     "`__bool` methods should return `bool`. They show that an expression tree type can be used in a boolean expression."
 
-let non_equatable_comparison p ret ty1 ty2 =
-  Lints.add Codes.non_equatable_comparison Lint_warning p
-  @@ Printf.sprintf
-       "Invalid comparison: This expression will always return %s.\nA value of type %s can never be equal to a value of type %s"
-       (string_of_bool ret |> Markdown_lite.md_codify)
-       (Markdown_lite.md_codify ty1)
-       (Markdown_lite.md_codify ty2)
-
-let invalid_contains_check p trv_val_ty val_ty =
-  Lints.add Codes.invalid_contains_check Lint_warning p
-  @@ Printf.sprintf
-       "Invalid `C\\contains` check: This call will always return `false`.\nA `Traversable<%s>` cannot contain a value of type %s"
-       trv_val_ty
-       (Markdown_lite.md_codify val_ty)
-
-let invalid_contains_key_check p trv_key_ty key_ty =
-  Lints.add Codes.invalid_contains_check Lint_warning p
-  @@ Printf.sprintf
-       "Invalid `C\\contains_key` check: This call will always return `false`.\nA `KeyedTraversable<%s, ...>` cannot contain a key of type %s"
-       trv_key_ty
-       (Markdown_lite.md_codify key_ty)
-
 let class_overrides_all_trait_methods pos class_name trait_name =
   Lints.add
     Codes.class_overrides_all_trait_methods

@@ -4770,7 +4770,7 @@ end = struct
   and class_const
       ?(is_attribute_param = false) ?(incl_tc = false) env p (cid, mid) =
     let (env, _tal, ce, cty) =
-      Class_id.class_expr ~is_attribute_param env [] cid
+      Class_id.class_expr ~is_attribute_param ~is_const:true env [] cid
     in
     let env =
       match get_node cty with
@@ -9601,6 +9601,7 @@ and Class_id : sig
     ?exact:exact ->
     ?check_explicit_targs:is_variadic ->
     ?inside_nameof:bool ->
+    ?is_const:bool ->
     env ->
     Nast.targ list ->
     Nast.class_id ->
@@ -9665,6 +9666,7 @@ end = struct
       ?(exact = nonexact)
       ?(check_explicit_targs = false)
       ?(inside_nameof = false)
+      ?(is_const = false)
       (env : env)
       (tal : Nast.targ list)
       ((_, p, cid_) : Nast.class_id) :
@@ -9777,7 +9779,12 @@ end = struct
           make_result env [] (Aast.CI c) ty
         | Decl_entry.Found class_ ->
           (if not is_attribute_param then
-            let ignore_package_errors = Env.package_v2 env && inside_nameof in
+            let ignore_package_errors =
+              Env.package_v2 env
+              && (inside_nameof
+                 || Env.package_v2_bypass_package_check_for_class_const env
+                    && is_const)
+            in
             Option.iter
               ~f:(Typing_error_utils.add_typing_error ~env)
               (TVis.check_top_level_access

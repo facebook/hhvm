@@ -564,6 +564,8 @@ val is_package_loaded : env -> string -> bool
 
 val package_v2 : env -> bool
 
+val package_v2_bypass_package_check_for_class_const : env -> bool
+
 (** Remove solved variable from environment by replacing it by its binding. *)
 val remove_var :
   env ->

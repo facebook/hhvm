@@ -12,9 +12,9 @@
 #include <unordered_map>
 
 #include <folly/Synchronized.h>
+#include <folly/concurrency/memory/ReadMostlySharedPtr.h>
 #include <folly/container/EvictingCacheMap.h>
 #include <folly/executors/FunctionScheduler.h>
-#include <folly/experimental/ReadMostlySharedPtr.h>
 #include <folly/fibers/TimedMutex.h>
 #include <folly/io/async/EventBaseThread.h>
 #include <folly/synchronization/CallOnce.h>

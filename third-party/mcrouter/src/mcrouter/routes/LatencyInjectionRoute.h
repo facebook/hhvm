@@ -13,7 +13,7 @@
 #include <folly/Format.h>
 #include <folly/fibers/Baton.h>
 
-#include <folly/experimental/ReadMostlySharedPtr.h>
+#include <folly/concurrency/memory/ReadMostlySharedPtr.h>
 
 #include "mcrouter/config.h"
 #include "mcrouter/lib/RouteHandleTraverser.h"

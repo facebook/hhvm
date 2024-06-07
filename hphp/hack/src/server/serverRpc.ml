@@ -42,10 +42,7 @@ let single_ctx_path env path =
 let log_check_response env =
   HackEventLogger.check_response
     (Errors.get_error_list env.errorl
-    |> List.filter_map ~f:(fun { User_error.severity; code; _ } ->
-           match severity with
-           | User_error.Err -> Some code
-           | User_error.Warning -> None))
+    |> List.map ~f:(fun { User_error.code; _ } -> code))
 
 (* Might raise {!Naming_table.File_info_not_found} *)
 let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =

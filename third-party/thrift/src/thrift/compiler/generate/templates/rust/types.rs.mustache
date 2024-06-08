@@ -98,7 +98,7 @@ mod dot_dot {{>lib/block}}{{!
 }}{{/program:nonexhaustiveStructs?}}
 
 {{#program:any?}}
-pub fn init_registry(registry: &mut fbthrift_conformance::AnyRegistry) -> anyhow::Result<bool> {
+pub fn init_registry(registry: &mut ::fbthrift_conformance::AnyRegistry) -> ::anyhow::Result<bool> {
 {{#program:structs}}
     registry.register_type::<{{struct:rust_name}}>()?;
 {{/program:structs}}

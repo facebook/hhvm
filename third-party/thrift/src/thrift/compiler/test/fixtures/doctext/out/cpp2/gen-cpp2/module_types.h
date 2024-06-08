@@ -153,6 +153,8 @@ class A final  {
   using __fbthrift_cpp2_type = A;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -304,6 +306,8 @@ class U final  {
   using __fbthrift_cpp2_type = U;
   static constexpr bool __fbthrift_cpp2_is_union =
     true;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -579,6 +583,8 @@ class FOLLY_EXPORT Bang : public virtual apache::thrift::TException {
  public:
   using __fbthrift_cpp2_type = Bang;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

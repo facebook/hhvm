@@ -708,6 +708,8 @@ class MyStructFloatFieldThrowExp final  {
   using __fbthrift_cpp2_type = MyStructFloatFieldThrowExp;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -1021,6 +1023,8 @@ class MyStructMapFloatThrowExp final  {
   using __fbthrift_cpp2_type = MyStructMapFloatThrowExp;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -1220,6 +1224,8 @@ class MyDataItem final  {
   using __fbthrift_cpp2_type = MyDataItem;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -1367,6 +1373,8 @@ class MyStruct final  {
  public:
   using __fbthrift_cpp2_type = MyStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -2909,6 +2917,8 @@ class SimpleStruct final  {
   using __fbthrift_cpp2_type = SimpleStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -3149,6 +3159,8 @@ class ComplexNestedStruct final  {
  public:
   using __fbthrift_cpp2_type = ComplexNestedStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -4176,6 +4188,8 @@ class MyUnion final  {
   using __fbthrift_cpp2_type = MyUnion;
   static constexpr bool __fbthrift_cpp2_is_union =
     true;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -4754,6 +4768,8 @@ class defaultStruct final  {
  public:
   using __fbthrift_cpp2_type = defaultStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -6012,6 +6028,8 @@ class MyStructTypeDef final  {
   using __fbthrift_cpp2_type = MyStructTypeDef;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -6589,6 +6607,8 @@ class MyUnionFloatFieldThrowExp final  {
   using __fbthrift_cpp2_type = MyUnionFloatFieldThrowExp;
   static constexpr bool __fbthrift_cpp2_is_union =
     true;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -7014,6 +7034,8 @@ class TypeRemapped final  {
   using __fbthrift_cpp2_type = TypeRemapped;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -7327,6 +7349,8 @@ class FOLLY_EXPORT emptyXcep : public virtual apache::thrift::TException {
   using __fbthrift_cpp2_type = emptyXcep;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -7434,6 +7458,8 @@ class FOLLY_EXPORT reqXcep : public virtual apache::thrift::TException {
  public:
   using __fbthrift_cpp2_type = reqXcep;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -7651,6 +7677,8 @@ class FOLLY_EXPORT optXcep : public virtual apache::thrift::TException {
  public:
   using __fbthrift_cpp2_type = optXcep;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -7884,6 +7912,8 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
  public:
   using __fbthrift_cpp2_type = complexException;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

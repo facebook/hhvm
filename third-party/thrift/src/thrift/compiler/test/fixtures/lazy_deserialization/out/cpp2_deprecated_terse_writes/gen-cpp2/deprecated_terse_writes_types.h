@@ -176,6 +176,8 @@ class TerseFoo final  {
   using __fbthrift_cpp2_type = TerseFoo;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -483,6 +485,8 @@ class TerseLazyFoo final  {
  public:
   using __fbthrift_cpp2_type = TerseLazyFoo;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -796,6 +800,8 @@ class TerseOptionalFoo final  {
   using __fbthrift_cpp2_type = TerseOptionalFoo;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -1107,6 +1113,8 @@ class TerseOptionalLazyFoo final  {
  public:
   using __fbthrift_cpp2_type = TerseOptionalLazyFoo;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

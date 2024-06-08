@@ -533,6 +533,8 @@ class MyStruct final  {
   using __fbthrift_cpp2_type = MyStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -654,6 +656,8 @@ class MyUnion final  {
   using __fbthrift_cpp2_type = MyUnion;
   static constexpr bool __fbthrift_cpp2_is_union =
     true;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -1714,6 +1718,8 @@ class MyStructWithCustomDefault final  {
   using __fbthrift_cpp2_type = MyStructWithCustomDefault;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -1891,6 +1897,8 @@ class StructLevelTerseStruct final  {
  public:
   using __fbthrift_cpp2_type = StructLevelTerseStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -2831,6 +2839,8 @@ class FieldLevelTerseStruct final  {
  public:
   using __fbthrift_cpp2_type = FieldLevelTerseStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -4527,6 +4537,8 @@ class TerseStructWithCustomDefault final  {
   using __fbthrift_cpp2_type = TerseStructWithCustomDefault;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -5362,6 +5374,8 @@ class AdaptedFields final  {
   using __fbthrift_cpp2_type = AdaptedFields;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    true;
 
 
  public:
@@ -5587,6 +5601,8 @@ class WrappedFields final  {
   using __fbthrift_cpp2_type = WrappedFields;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -5740,6 +5756,8 @@ class FOLLY_EXPORT TerseException : public virtual apache::thrift::TException {
  public:
   using __fbthrift_cpp2_type = TerseException;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

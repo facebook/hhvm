@@ -1154,6 +1154,8 @@ class Empty final  {
   using __fbthrift_cpp2_type = Empty;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -1247,6 +1249,8 @@ class ASimpleStruct final  {
  public:
   using __fbthrift_cpp2_type = ASimpleStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -1396,6 +1400,8 @@ class ASimpleStructNoexcept final  {
  public:
   using __fbthrift_cpp2_type = ASimpleStructNoexcept;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -1566,6 +1572,8 @@ class MyStruct final  {
   using __fbthrift_cpp2_type = MyStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    true;
 
 
  public:
@@ -2241,6 +2249,8 @@ class SimpleUnion  {
   using __fbthrift_cpp2_type = SimpleUnion;
   static constexpr bool __fbthrift_cpp2_is_union =
     true;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -2549,6 +2559,8 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
   using __fbthrift_cpp2_type = AnException;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    true;
 
 
  public:
@@ -3568,6 +3580,8 @@ class ComplexUnion final  {
  public:
   using __fbthrift_cpp2_type = ComplexUnion;
   static constexpr bool __fbthrift_cpp2_is_union =
+    true;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     true;
 
 
@@ -5677,6 +5691,8 @@ class FOLLY_EXPORT AnotherException : public virtual apache::thrift::TException 
   using __fbthrift_cpp2_type = AnotherException;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -6029,6 +6045,8 @@ class containerStruct final  {
  public:
   using __fbthrift_cpp2_type = containerStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -7616,6 +7634,8 @@ class MyIncludedStruct final  {
   using __fbthrift_cpp2_type = MyIncludedStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -7985,6 +8005,8 @@ class AnnotatedStruct  {
  public:
   using __fbthrift_cpp2_type = AnnotatedStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -9171,6 +9193,8 @@ class ComplexContainerStruct final  {
   using __fbthrift_cpp2_type = ComplexContainerStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -9371,6 +9395,8 @@ class FloatStruct final  {
  public:
   using __fbthrift_cpp2_type = FloatStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -9576,6 +9602,8 @@ class FloatUnion final  {
   using __fbthrift_cpp2_type = FloatUnion;
   static constexpr bool __fbthrift_cpp2_is_union =
     true;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -9825,6 +9853,8 @@ class AllRequiredNoExceptMoveCtrStruct final  {
  public:
   using __fbthrift_cpp2_type = AllRequiredNoExceptMoveCtrStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

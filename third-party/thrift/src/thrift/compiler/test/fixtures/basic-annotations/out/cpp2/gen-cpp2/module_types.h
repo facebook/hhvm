@@ -200,6 +200,8 @@ class YourUnion final  {
   using __fbthrift_cpp2_type = YourUnion;
   static constexpr bool __fbthrift_cpp2_is_union =
     true;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -354,6 +356,8 @@ class YourStruct final  {
   using __fbthrift_cpp2_type = YourStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    true;
 
 
  public:
@@ -938,6 +942,8 @@ class MyStructNestedAnnotation final  {
   using __fbthrift_cpp2_type = MyStructNestedAnnotation;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -1098,6 +1104,8 @@ class FOLLY_EXPORT YourException : public virtual apache::thrift::TException {
   using __fbthrift_cpp2_type = YourException;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -1202,6 +1210,8 @@ class SecretStruct final  {
  public:
   using __fbthrift_cpp2_type = SecretStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

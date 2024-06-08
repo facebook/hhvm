@@ -112,6 +112,8 @@ class Struct final  {
   using __fbthrift_cpp2_type = Struct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -310,6 +312,8 @@ class BigStruct final  {
  public:
   using __fbthrift_cpp2_type = BigStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

@@ -135,6 +135,8 @@ class Fields final  {
   using __fbthrift_cpp2_type = Fields;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -289,6 +291,8 @@ class FieldsInjectedToEmptyStruct final  {
  public:
   using __fbthrift_cpp2_type = FieldsInjectedToEmptyStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -446,6 +450,8 @@ class FieldsInjectedToStruct final  {
  public:
   using __fbthrift_cpp2_type = FieldsInjectedToStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -664,6 +670,8 @@ class FieldsInjectedWithIncludedStruct final  {
  public:
   using __fbthrift_cpp2_type = FieldsInjectedWithIncludedStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

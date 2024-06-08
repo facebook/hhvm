@@ -222,6 +222,8 @@ class ModuleA final  {
   using __fbthrift_cpp2_type = ModuleA;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -635,6 +637,8 @@ class ModuleB final  {
   using __fbthrift_cpp2_type = ModuleB;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -838,6 +842,8 @@ class DirectlyAdapted final  {
   using __fbthrift_cpp2_type = DirectlyAdapted;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -997,6 +1003,8 @@ class CppRef final  {
  public:
   using __fbthrift_cpp2_type = CppRef;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

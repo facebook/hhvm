@@ -216,6 +216,8 @@ class TrivialTypesStruct final  {
   using __fbthrift_cpp2_type = TrivialTypesStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -611,6 +613,8 @@ class ContainerStruct final  {
  public:
   using __fbthrift_cpp2_type = ContainerStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -1122,6 +1126,8 @@ class ExampleUnion final  {
   using __fbthrift_cpp2_type = ExampleUnion;
   static constexpr bool __fbthrift_cpp2_is_union =
     true;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:

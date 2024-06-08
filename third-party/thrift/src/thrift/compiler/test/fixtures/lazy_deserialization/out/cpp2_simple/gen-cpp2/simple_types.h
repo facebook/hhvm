@@ -295,6 +295,8 @@ class Foo final  {
   using __fbthrift_cpp2_type = Foo;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -602,6 +604,8 @@ class LazyFoo final  {
  public:
   using __fbthrift_cpp2_type = LazyFoo;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -915,6 +919,8 @@ class OptionalFoo final  {
   using __fbthrift_cpp2_type = OptionalFoo;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -1226,6 +1232,8 @@ class OptionalLazyFoo final  {
  public:
   using __fbthrift_cpp2_type = OptionalLazyFoo;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -1541,6 +1549,8 @@ class OptionalBoxedLazyFoo final  {
   using __fbthrift_cpp2_type = OptionalBoxedLazyFoo;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -1832,6 +1842,8 @@ class LazyCppRef final  {
  public:
   using __fbthrift_cpp2_type = LazyCppRef;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -2136,6 +2148,8 @@ class IndexedFoo final  {
  public:
   using __fbthrift_cpp2_type = IndexedFoo;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -2552,6 +2566,8 @@ class OptionalIndexedFoo final  {
   using __fbthrift_cpp2_type = OptionalIndexedFoo;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
 
 
  public:
@@ -2958,6 +2974,8 @@ class Empty final  {
  public:
   using __fbthrift_cpp2_type = Empty;
   static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

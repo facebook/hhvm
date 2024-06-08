@@ -1195,6 +1195,7 @@ class cpp_mstch_struct : public mstch_struct {
             {"struct:extra_namespace", &cpp_mstch_struct::extra_namespace},
             {"struct:type_tag", &cpp_mstch_struct::type_tag},
             {"struct:patch?", &cpp_mstch_struct::patch},
+            {"struct:use_op_encode?", &cpp_mstch_struct::use_op_encode},
             {"struct:is_trivially_destructible?",
              &cpp_mstch_struct::is_trivially_destructible},
         });
@@ -1666,6 +1667,15 @@ class cpp_mstch_struct : public mstch_struct {
       }
     }
     return true;
+  }
+
+  mstch::node use_op_encode() {
+    for (const auto& field : struct_->fields()) {
+      if (needs_op_encode(field, *struct_)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   std::shared_ptr<cpp2_generator_context> cpp_context_;

@@ -128,9 +128,9 @@ let validator =
         acc
 
     method! on_alias acc r _id tyl ty =
-      if List.is_empty tyl then
-        this#on_type acc ty
-      else
+      match List.filter ~f:(fun ty -> not @@ this#is_wildcard ty) tyl with
+      | [] -> this#on_type acc ty
+      | _ ->
         this#invalid
           acc
           r

@@ -40,6 +40,7 @@ let warning_checks =
     (module Cast_non_primitive);
     (module Truthiness_test);
     (module Equality_check);
+    (module Duplicate_properties);
   ]
 
 let visitor ctx =

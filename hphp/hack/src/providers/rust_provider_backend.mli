@@ -74,7 +74,7 @@ module Decl : sig
 end
 
 module File : sig
-  val get_contents : t -> Relative_path.t -> string
+  val get_contents : t -> Relative_path.t -> string option
 
   val provide_file_for_tests : t -> Relative_path.t -> string -> unit
 

@@ -99,6 +99,15 @@ module EqualityCheck = struct
   }
 end
 
+module DuplicateProperties = struct
+  type t = {
+    class_name: string;
+    prop_name: string;
+    class_names: string list;
+    initialized_with_constant: bool;
+  }
+end
+
 type (_, _) kind =
   | Sketchy_equality : (SketchyEquality.t, warn) kind
   | Is_as_always : (IsAsAlways.t, migrated) kind
@@ -107,5 +116,6 @@ type (_, _) kind =
   | Cast_non_primitive : (CastNonPrimitive.t, migrated) kind
   | Truthiness_test : (TruthinessTest.t, migrated) kind
   | Equality_check : (EqualityCheck.t, migrated) kind
+  | Duplicate_properties : (DuplicateProperties.t, migrated) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

@@ -12,6 +12,10 @@ open Aast
 open Typing_defs
 module Cls = Folded_class
 
+let warning_kind = Typing_warning.Duplicate_properties
+
+let error_code = Typing_warning_utils.code warning_kind
+
 (* efficient check for List.length l > 1 *)
 let more_than_one l =
   match l with
@@ -86,27 +90,54 @@ let check_initialisation ast expr : bool =
   checker#on_expr ast expr;
   checker#result
 
-let handler =
+let add_warning
+    env
+    pos
+    ~as_lint
+    ~class_name
+    ~prop_name
+    ~class_names
+    ~initialized_with_constant =
+  Typing_warning_utils.add_for_migration
+    (Tast_env.get_tcopt env)
+    ~as_lint:
+      (if as_lint then
+        Some None
+      else
+        None)
+    ( pos,
+      warning_kind,
+      {
+        Typing_warning.DuplicateProperties.class_name;
+        prop_name;
+        class_names;
+        initialized_with_constant;
+      } )
+
+let handler ~as_lint =
   object
     inherit Tast_visitor.handler_base
 
     method! at_class_ env c =
       let ctx = Tast_env.get_ctx env in
-      let (cls_pos, cls_name) = c.c_name in
+      let (cls_pos, class_name) = c.c_name in
 
-      (* props_seen maps
-       * - the property names of each trait used by cls to their origin
-       * - the properties defined by cls itself to cls
-       * If a property is inherited multiple times, props_seen will report multiple origins*)
-      let props_seen = Hashtbl.create (module Base.String) in
+      (* This map contains
+         - the property names of each trait used by cls to their origin
+         - the properties defined by cls itself to cls
+         If a property is inherited multiple times, props_seen will report multiple origins *)
+      let props_seen : (string, string list) Hashtbl.t =
+        Hashtbl.create (module Base.String)
+      in
 
-      (* in decls static properties are stored with a leading dollar, in class_var without:
-       * normalise removing leading dollars *)
+      (* In decls, static properties are stored with a leading dollar,
+       * but in class_var without a leading dollar.
+       * So normalise by removing leading dollars *)
       let strip_dollar s = String.lstrip s ~drop:(fun c -> Char.equal c '$') in
 
       (* add the properties defined in the class itself to props_seen *)
       List.iter c.c_vars ~f:(fun v ->
-          Hashtbl.add_multi props_seen ~key:(snd v.cv_id) ~data:cls_name);
+          Hashtbl.add_multi props_seen ~key:(snd v.cv_id) ~data:class_name);
 
       (* for each used trait add the properties defined in the trait, mapped to their origin *)
       List.iter (traits c) ~f:(fun (_, type_name) ->
@@ -122,9 +153,9 @@ let handler =
                   ~data:prop_elt.ce_origin));
 
       (* if the props_seen reports multiple origins for a property,
-       * ensure that in none of the origins it is initialisedl
+       * ensure that in none of the origins it is initialised
        * with an enum or class constant *)
-      Hashtbl.iteri props_seen ~f:(fun ~key ~data ->
+      Hashtbl.iteri props_seen ~f:(fun ~key:prop_name ~data ->
           if more_than_one data then
             (* property key is inherited multiple times, possibly via diamond inclusion
              * ensure that is never initialised with an enum or class constant *)
@@ -139,7 +170,7 @@ let handler =
                     get_class_nast ctx file_path origin >>= fun ast ->
                     let opt_var =
                       List.find ast.c_vars ~f:(fun v ->
-                          String.equal (snd v.cv_id) key)
+                          String.equal (snd v.cv_id) prop_name)
                     in
                     opt_var >>= fun var ->
                     var.cv_expr >>| fun expr ->
@@ -148,20 +179,28 @@ let handler =
                   Option.value ~default:status res)
             in
             (* remove duplicate trait names arising from diamond inclusion from data *)
-            let dedup_data = List.dedup_and_sort data ~compare:String.compare in
+            let class_names =
+              List.dedup_and_sort data ~compare:String.compare
+            in
 
             if is_initialised_with_class_constant then
               (* HHVM will unconditinally fatal, so report a linter error *)
-              Lints_errors.duplicate_property_class_constant_init
+              add_warning
+                env
                 cls_pos
-                ~class_name:cls_name
-                ~prop_name:key
-                ~class_names:dedup_data
-            else if more_than_one dedup_data then
+                ~as_lint
+                ~class_name
+                ~prop_name
+                ~class_names
+                ~initialized_with_constant:true
+            else if more_than_one class_names then
               (* there is a duplicate property not arising from diamond inclusion, warn about it *)
-              Lints_errors.duplicate_property
+              add_warning
+                env
                 cls_pos
-                ~class_name:cls_name
-                ~prop_name:key
-                ~class_names:dedup_data)
+                ~as_lint
+                ~class_name
+                ~prop_name
+                ~class_names
+                ~initialized_with_constant:false)
   end

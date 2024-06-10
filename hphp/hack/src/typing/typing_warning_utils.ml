@@ -28,7 +28,7 @@ module type Lint = sig
 
   val lint_code : t -> int
 
-  val lint_severity : Lints_core.severity
+  val lint_severity : t -> Lints_core.severity
 
   val lint_quickfix : t -> Typing_warning.quickfix option
 end
@@ -69,7 +69,7 @@ module IsAsAlways = struct
 
   let code = Codes.IsAsAlways
 
-  let lint_severity = Lints_core.Lint_warning
+  let lint_severity _ = Lints_core.Lint_warning
 
   let claim { Typing_warning.IsAsAlways.kind; lhs_ty; rhs_ty } =
     Printf.sprintf
@@ -116,7 +116,7 @@ module SketchyNullCheck = struct
 
   let lint_code _ = Lints_codes.Codes.sketchy_null_check
 
-  let lint_severity = Lints_core.Lint_warning
+  let lint_severity _ = Lints_core.Lint_warning
 
   let claim { Typing_warning.SketchyNullCheck.name; kind } =
     let name = Option.value name ~default:"$x" in
@@ -147,7 +147,7 @@ module NonDisjointCheck = struct
 
   let lint_code _ = Lints_codes.Codes.invalid_disjointness_check
 
-  let lint_severity = Lints_core.Lint_warning
+  let lint_severity _ = Lints_core.Lint_warning
 
   let claim { Typing_warning.NonDisjointCheck.name; ty1; ty2; dynamic } =
     Printf.sprintf
@@ -174,7 +174,7 @@ module CastNonPrimitive = struct
 
   let lint_code _ = Lints_codes.Codes.cast_non_primitive
 
-  let lint_severity = Lints_core.Lint_error
+  let lint_severity _ = Lints_core.Lint_error
 
   let claim { Typing_warning.CastNonPrimitive.cast_hint; ty } =
     Printf.sprintf
@@ -203,7 +203,7 @@ module TruthinessTest = struct
     | Invalid _ -> Lints_codes.Codes.invalid_truthiness_test
     | Sketchy _ -> Lints_codes.Codes.sketchy_truthiness_test
 
-  let lint_severity = Lints_core.Lint_warning
+  let lint_severity _ = Lints_core.Lint_warning
 
   let claim { kind; ty } =
     match kind with
@@ -252,7 +252,7 @@ module EqualityCheck = struct
     | Contains_key ->
       Lints_codes.Codes.invalid_contains_check
 
-  let lint_severity = Lints_core.Lint_warning
+  let lint_severity _ = Lints_core.Lint_warning
 
   let claim { kind; ty1; ty2 } =
     match kind with
@@ -280,6 +280,60 @@ module EqualityCheck = struct
   let lint_quickfix _ = None
 end
 
+module DuplicatedProperties = struct
+  open Typing_warning.DuplicateProperties
+
+  type t = Typing_warning.DuplicateProperties.t
+
+  let code = Codes.Duplicate_properties
+
+  let lint_code { initialized_with_constant; _ } =
+    if initialized_with_constant then
+      Lints_codes.Codes.duplicate_property_enum_init
+    else
+      Lints_codes.Codes.duplicate_property
+
+  let lint_severity { initialized_with_constant; _ } =
+    if initialized_with_constant then
+      Lints_core.Lint_error
+    else
+      Lints_core.Lint_warning
+
+  let rec prettify_class_list names =
+    match names with
+    | [] -> ""
+    | [c] -> c
+    | [c1; c2] -> c1 ^ " and " ^ c2
+    | h :: t -> h ^ ", " ^ prettify_class_list t
+
+  let claim { initialized_with_constant; class_name; prop_name; class_names } =
+    if initialized_with_constant then
+      "Property "
+      ^ (Utils.strip_ns prop_name |> Markdown_lite.md_codify)
+      ^ ", defined in "
+      ^ prettify_class_list (List.map ~f:Utils.strip_ns class_names)
+      ^ ", is inherited multiple times by class "
+      ^ (Utils.strip_ns class_name |> Markdown_lite.md_codify)
+      ^ " and one of its instances is initialised with a class or enum constant"
+    else
+      "Duplicated property "
+      ^ (Utils.strip_ns prop_name |> Markdown_lite.md_codify)
+      ^ " in "
+      ^ (Utils.strip_ns class_name |> Markdown_lite.md_codify)
+      ^ " (defined in "
+      ^ prettify_class_list
+          (List.map
+             ~f:(fun n -> Utils.strip_ns n |> Markdown_lite.md_codify)
+             class_names)
+      ^ "): all instances will be aliased at runtime"
+
+  let reasons _ = []
+
+  let quickfixes _ = []
+
+  let lint_quickfix _ = None
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -290,6 +344,7 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Cast_non_primitive -> (module CastNonPrimitive)
   | Typing_warning.Truthiness_test -> (module TruthinessTest)
   | Typing_warning.Equality_check -> (module EqualityCheck)
+  | Typing_warning.Duplicate_properties -> (module DuplicatedProperties)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :
@@ -301,6 +356,7 @@ let module_of_migrated
   | Typing_warning.Cast_non_primitive -> (module CastNonPrimitive)
   | Typing_warning.Truthiness_test -> (module TruthinessTest)
   | Typing_warning.Equality_check -> (module EqualityCheck)
+  | Typing_warning.Duplicate_properties -> (module DuplicatedProperties)
 
 let code_is_enabled tcopt code =
   match TypecheckerOptions.hack_warnings tcopt with
@@ -338,7 +394,7 @@ let add_for_migration
       ~autofix:(M.lint_quickfix warning |> Option.map ~f:Lints_errors.quickfix)
       (M.lint_code warning)
       ~check_status
-      M.lint_severity
+      (M.lint_severity warning)
       pos
       (M.claim warning)
 

@@ -1,1 +1,2 @@
-No errors
+WARN: File "multiple_concrete_defs_from_traits.php", line 16, characters 7-7:
+Duplicated property `p` in `C` (defined in `T1`, `T2` and `T3`): all instances will be aliased at runtime (Warn[12008])

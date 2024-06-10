@@ -787,6 +787,7 @@ module Warning = struct
     | CastNonPrimitive [@value 12005]
     | TruthinessTest [@value 12006]
     | EqualityCheck [@value 12007]
+    | Duplicate_properties [@value 12008]
   [@@deriving enum, show { with_path = false }]
 end
 

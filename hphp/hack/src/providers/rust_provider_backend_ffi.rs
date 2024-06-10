@@ -177,8 +177,8 @@ ocaml_ffi! {
     fn hh_rust_provider_backend_file_provider_get_contents(
         backend: Backend,
         path: RelativePath,
-    ) -> bstr::BString {
-        backend.file_provider().get(path).unwrap()
+    ) -> Option<bstr::BString> {
+        backend.file_provider().get(path).ok()
     }
 
     fn hh_rust_provider_backend_file_provider_provide_file_for_tests(

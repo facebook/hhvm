@@ -400,7 +400,7 @@ let pop_local_changes t =
   pop_local_changes_ffi t
 
 module File = struct
-  external get_contents : t -> Relative_path.t -> string
+  external get_contents : t -> Relative_path.t -> string option
     = "hh_rust_provider_backend_file_provider_get_contents"
 
   external provide_file_for_tests : t -> Relative_path.t -> string -> unit

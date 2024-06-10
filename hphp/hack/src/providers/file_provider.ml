@@ -56,7 +56,7 @@ let get_contents ?(force_read_disk = false) fn =
       in
       Some contents)
   | Provider_backend.Rust_provider_backend backend ->
-    Some (Rust_provider_backend.File.get_contents backend fn)
+    Rust_provider_backend.File.get_contents backend fn
   | Provider_backend.Local_memory _ -> read_file_contents_from_disk fn
 
 let provide_file_for_tests fn contents =

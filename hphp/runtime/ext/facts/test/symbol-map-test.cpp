@@ -51,6 +51,9 @@ using ::testing::SaveArg;
 using ::testing::SizeIs;
 using ::testing::UnorderedElementsAre;
 
+#define DRAIN_EXECUTOR(m) \
+  (dynamic_cast<folly::ManualExecutor*>(m.m_exec.get()))->drain()
+
 /**
  * Implements our StringPtr class in terms of std::string.
  *
@@ -1155,15 +1158,15 @@ TEST_F(SymbolMapTest, DoesNotFillDeadPathFromDB) {
   FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
-  m_exec1->drain();
-  m_exec2->drain();
-  m_exec3->drain();
+  DRAIN_EXECUTOR(m1);
+  DRAIN_EXECUTOR(m2);
+  DRAIN_EXECUTOR(m3);
   m1.waitForDBUpdate();
 
   update(m2, "1:2:3", "1:2:4", {}, {path}, {});
-  m_exec1->drain();
-  m_exec2->drain();
-  m_exec3->drain();
+  DRAIN_EXECUTOR(m1);
+  DRAIN_EXECUTOR(m2);
+  DRAIN_EXECUTOR(m3);
   m2.waitForDBUpdate();
   EXPECT_EQ(m2.getTypeFile("SomeClass"), nullptr);
 
@@ -1436,15 +1439,15 @@ TEST_F(SymbolMapTest, InterleaveDBUpdates) {
   EXPECT_EQ(m2.getFileFunctions(path).at(0).slice(), "some_fn");
   EXPECT_EQ(m2.getFunctionFile("some_fn"), path.native());
 
-  m_exec1->drain();
-  m_exec2->drain();
+  DRAIN_EXECUTOR(m1);
+  DRAIN_EXECUTOR(m2);
   m1.waitForDBUpdate();
   EXPECT_EQ(m1.getFunctionFile("some_fn"), path.native());
   EXPECT_EQ(m2.getFileFunctions(path).at(0).slice(), "some_fn");
   EXPECT_EQ(m2.getFunctionFile("some_fn"), path.native());
 
-  m_exec1->drain();
-  m_exec2->drain();
+  DRAIN_EXECUTOR(m1);
+  DRAIN_EXECUTOR(m2);
   m2.waitForDBUpdate();
   EXPECT_EQ(m1.getFunctionFile("some_fn"), path.native());
   EXPECT_EQ(m2.getFunctionFile("some_fn"), path.native());
@@ -1563,12 +1566,12 @@ TEST_F(SymbolMapTest, DBUpdatesOutOfOrder) {
   EXPECT_TRUE(m2.getDerivedTypes("SomeClass", DeriveKind::Extends).empty());
 
   // m2 updates the DB first, bringing the DB to 1:2:4.
-  m_exec2->drain();
+  DRAIN_EXECUTOR(m2);
   m2.waitForDBUpdate();
 
   // m1 updates the DB next. m1's update should fail. m1 only knows
   // about 1:2:3, so it would be updating the DB with stale data.
-  m_exec1->drain();
+  DRAIN_EXECUTOR(m1);
   m1.waitForDBUpdate();
 
   // Create a third map to observe the state of the DB.
@@ -1640,8 +1643,8 @@ TEST_F(SymbolMapTest, MoveAndCopySymbol) {
 
   // Initialize m2 as dependent on the DB
   update(m1, "", "1:2:3", {path1}, {}, {ff});
-  m_exec1->drain();
-  m_exec2->drain();
+  DRAIN_EXECUTOR(m1);
+  DRAIN_EXECUTOR(m2);
   m1.waitForDBUpdate();
 
   update(m2, "1:2:3", "1:2:3", {}, {}, {});
@@ -1680,7 +1683,7 @@ TEST_F(SymbolMapTest, AttrQueriesDoNotConfuseTypeAndTypeAlias) {
   EXPECT_THAT(m1.getAttributesOfType("SomeTypeAlias"), ElementsAre());
 
   // Create a second map and fill it from the DB
-  m_exec1->drain();
+  DRAIN_EXECUTOR(m1);
   m1.waitForDBUpdate();
   auto& m2 = make("/var/www", m_exec2);
   update(m2, "1", "1", {}, {}, {});
@@ -1772,8 +1775,8 @@ TEST_F(SymbolMapTest, MemoryAndDBDisagreeOnFileHash) {
   fs::path path1 = {"some/path1.php"};
 
   update(m1, "", "1:2:3", {path1}, {}, {ff});
-  m_exec1->drain();
-  m_exec2->drain();
+  DRAIN_EXECUTOR(m1);
+  DRAIN_EXECUTOR(m2);
   m1.waitForDBUpdate();
   auto oldHash = getSha1Hex(ff);
   EXPECT_EQ(m1.getAllPathsWithHashes().at(Path{path1}).toString(), oldHash);
@@ -1808,7 +1811,7 @@ TEST_F(SymbolMapTest, PartiallyFillDerivedTypeInfo) {
   fs::path p3 = "some/path3.php";
 
   update(m1, "", "1:2:3", {p1, p2, p3}, {}, {ff1, ff2, ff3});
-  m_exec1->drain();
+  DRAIN_EXECUTOR(m1);
   m1.waitForDBUpdate();
 
   auto& m2 = make("/var/www", m_exec2);
@@ -1853,7 +1856,7 @@ TEST_F(SymbolMapTest, BaseTypesWithDifferentCases) {
 
   // Define both "baseclass" and "BaseClass"
   update(m1, "", "1", {p1, p2, p3, p4}, {}, {ff1, ff2, ff3, ff4});
-  m_exec1->drain();
+  DRAIN_EXECUTOR(m1);
   m1.waitForDBUpdate();
   auto& m2 = make("/var/www");
   update(m2, "1", "1", {}, {}, {});
@@ -1939,7 +1942,7 @@ TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
   testMap(m1);
-  m_exec1->drain();
+  DRAIN_EXECUTOR(m1);
   m1.waitForDBUpdate();
 
   auto& m2 = make("/var/www");
@@ -1956,7 +1959,7 @@ TEST_F(SymbolMapTest, ErasePathStoredInDB) {
 
   update(m1, "", "1:2:3", {p}, {}, {ff});
   EXPECT_EQ(m1.getTypeFile("SomeClass"), p.native());
-  m_exec1->drain();
+  DRAIN_EXECUTOR(m1);
   m1.waitForDBUpdate();
 
   auto& m2 = make("/var/www", m_exec1);
@@ -2012,7 +2015,7 @@ TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
 
   update(m1, "", "1:2:3", {p}, {}, {ff});
   testMap(m1);
-  m_exec1->drain();
+  DRAIN_EXECUTOR(m1);
   m1.waitForDBUpdate();
 
   auto& m2 = make("/var/www", m_exec2);
@@ -2220,7 +2223,7 @@ TEST_F(SymbolMapTest, ConcurrentFillsFromDB) {
 
   // Update the DB with all path information
   update(dbUpdater, "", "1:2:3", std::move(paths), {}, std::move(facts));
-  m_exec1->drain();
+  DRAIN_EXECUTOR(dbUpdater);
   dbUpdater.waitForDBUpdate();
 
   update(map, "1:2:3", "1:2:3", {}, {}, {});

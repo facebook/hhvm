@@ -593,6 +593,9 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
     if (!m_exec2) {
       m_exec2 = std::make_shared<folly::ManualExecutor>();
     }
+    if (!m_exec3) {
+      m_exec3 = std::make_shared<folly::ManualExecutor>();
+    }
   }
 
   void TearDown() override {
@@ -651,6 +654,7 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
   std::unique_ptr<folly::test::TemporaryDirectory> m_tmpdir;
   std::shared_ptr<folly::ManualExecutor> m_exec1;
   std::shared_ptr<folly::ManualExecutor> m_exec2;
+  std::shared_ptr<folly::ManualExecutor> m_exec3;
   std::vector<SymbolMapWrapper> m_wrappers;
 };
 
@@ -1144,18 +1148,22 @@ TEST_F(SymbolMapTest, CopiedFile) {
 
 TEST_F(SymbolMapTest, DoesNotFillDeadPathFromDB) {
   auto& m1 = make("/var/www", m_exec1);
-  auto& m2 = make("/var/www", m_exec1);
-  auto& m3 = make("/var/www", m_exec1);
+  auto& m2 = make("/var/www", m_exec2);
+  auto& m3 = make("/var/www", m_exec3);
 
   fs::path path = {"some/path.php"};
   FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
   m_exec1->drain();
+  m_exec2->drain();
+  m_exec3->drain();
   m1.waitForDBUpdate();
 
   update(m2, "1:2:3", "1:2:4", {}, {path}, {});
   m_exec1->drain();
+  m_exec2->drain();
+  m_exec3->drain();
   m2.waitForDBUpdate();
   EXPECT_EQ(m2.getTypeFile("SomeClass"), nullptr);
 
@@ -1412,7 +1420,7 @@ TEST_F(SymbolMapTest, MultipleRoots) {
 
 TEST_F(SymbolMapTest, InterleaveDBUpdates) {
   auto& m1 = make("/var/www", m_exec1);
-  auto& m2 = make("/var/www", m_exec1);
+  auto& m2 = make("/var/www", m_exec2);
 
   fs::path path = {"some/path.php"};
 
@@ -1429,12 +1437,14 @@ TEST_F(SymbolMapTest, InterleaveDBUpdates) {
   EXPECT_EQ(m2.getFunctionFile("some_fn"), path.native());
 
   m_exec1->drain();
+  m_exec2->drain();
   m1.waitForDBUpdate();
   EXPECT_EQ(m1.getFunctionFile("some_fn"), path.native());
   EXPECT_EQ(m2.getFileFunctions(path).at(0).slice(), "some_fn");
   EXPECT_EQ(m2.getFunctionFile("some_fn"), path.native());
 
   m_exec1->drain();
+  m_exec2->drain();
   m2.waitForDBUpdate();
   EXPECT_EQ(m1.getFunctionFile("some_fn"), path.native());
   EXPECT_EQ(m2.getFunctionFile("some_fn"), path.native());
@@ -1562,7 +1572,7 @@ TEST_F(SymbolMapTest, DBUpdatesOutOfOrder) {
   m1.waitForDBUpdate();
 
   // Create a third map to observe the state of the DB.
-  auto& m3 = make("/var/www", m_exec1);
+  auto& m3 = make("/var/www", m_exec3);
   // The DB clock should be 1:2:4, and the DB state should be
   // consistent with the state in m2, not m1.
   update(m3, "1:2:4", "1:2:4", {}, {}, {});
@@ -1618,7 +1628,7 @@ TEST_F(SymbolMapTest, RemovePathFromExistingFile) {
 
 TEST_F(SymbolMapTest, MoveAndCopySymbol) {
   auto& m1 = make("/var/www", m_exec1);
-  auto& m2 = make("/var/www", m_exec1);
+  auto& m2 = make("/var/www", m_exec2);
 
   FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
@@ -1631,6 +1641,7 @@ TEST_F(SymbolMapTest, MoveAndCopySymbol) {
   // Initialize m2 as dependent on the DB
   update(m1, "", "1:2:3", {path1}, {}, {ff});
   m_exec1->drain();
+  m_exec2->drain();
   m1.waitForDBUpdate();
 
   update(m2, "1:2:3", "1:2:3", {}, {}, {});
@@ -1671,7 +1682,7 @@ TEST_F(SymbolMapTest, AttrQueriesDoNotConfuseTypeAndTypeAlias) {
   // Create a second map and fill it from the DB
   m_exec1->drain();
   m1.waitForDBUpdate();
-  auto& m2 = make("/var/www", m_exec1);
+  auto& m2 = make("/var/www", m_exec2);
   update(m2, "1", "1", {}, {}, {});
 
   EXPECT_THAT(m2.getAttributesOfType("SomeClass"), ElementsAre("ClassAttr"));
@@ -1754,7 +1765,7 @@ TEST_F(SymbolMapTest, TwoFilesDisagreeOnBaseTypes) {
 
 TEST_F(SymbolMapTest, MemoryAndDBDisagreeOnFileHash) {
   auto& m1 = make("/var/www", m_exec1);
-  auto& m2 = make("/var/www", m_exec1);
+  auto& m2 = make("/var/www", m_exec2);
 
   FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
@@ -1762,6 +1773,7 @@ TEST_F(SymbolMapTest, MemoryAndDBDisagreeOnFileHash) {
 
   update(m1, "", "1:2:3", {path1}, {}, {ff});
   m_exec1->drain();
+  m_exec2->drain();
   m1.waitForDBUpdate();
   auto oldHash = getSha1Hex(ff);
   EXPECT_EQ(m1.getAllPathsWithHashes().at(Path{path1}).toString(), oldHash);
@@ -1799,7 +1811,7 @@ TEST_F(SymbolMapTest, PartiallyFillDerivedTypeInfo) {
   m_exec1->drain();
   m1.waitForDBUpdate();
 
-  auto& m2 = make("/var/www", m_exec1);
+  auto& m2 = make("/var/www", m_exec2);
   update(m2, "1:2:3", "1:2:3", {}, {}, {});
 
   // Fetch the supertypes of SomeClass from the DB
@@ -2003,7 +2015,7 @@ TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
   m_exec1->drain();
   m1.waitForDBUpdate();
 
-  auto& m2 = make("/var/www", m_exec1);
+  auto& m2 = make("/var/www", m_exec2);
   update(m2, "1:2:3", "1:2:3", {}, {}, {});
   testMap(m2);
 }

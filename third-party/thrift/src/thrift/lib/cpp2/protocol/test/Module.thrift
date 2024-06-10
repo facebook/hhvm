@@ -165,3 +165,8 @@ struct ListIOBuf {
 struct StructWithBinaryField {
   1: binary field;
 }
+
+@cpp.UseOpEncode
+struct OpEncode {
+  1: map<i32, i32> f;
+}

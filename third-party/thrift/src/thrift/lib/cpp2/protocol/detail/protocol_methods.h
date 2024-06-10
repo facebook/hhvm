@@ -304,6 +304,40 @@ inline uint32_t checked_container_size(size_t size) {
   return static_cast<uint32_t>(size);
 }
 
+template <typename Protocol>
+using map_value_begin_t =
+    decltype(std::declval<Protocol>().writeMapValueBegin());
+
+template <typename Protocol>
+using map_value_end_t = decltype(std::declval<Protocol>().writeMapValueEnd());
+
+template <typename Protocol>
+static constexpr bool map_value_api_v =
+    folly::is_detected_v<map_value_begin_t, Protocol> &&
+    folly::is_detected_v<map_value_end_t, Protocol>;
+
+template <typename Protocol>
+std::size_t writeMapValueBegin(Protocol& protocol) {
+  const auto writeMapValueBeginFunc =
+      std::get<map_value_api_v<Protocol&>>(std::make_pair(
+          [](auto&) { return 0u; },
+          [](auto& protocolWithMapValueApi) {
+            return protocolWithMapValueApi.writeMapValueBegin();
+          }));
+  return writeMapValueBeginFunc(protocol);
+}
+
+template <typename Protocol>
+std::size_t writeMapValueEnd(Protocol& protocol) {
+  const auto writeMapValueEndFunc =
+      std::get<map_value_api_v<Protocol&>>(std::make_pair(
+          [](auto&) { return 0u; },
+          [](auto& protocolWithMapValueApi) {
+            return protocolWithMapValueApi.writeMapValueEnd();
+          }));
+  return writeMapValueEndFunc(protocol);
+}
+
 /*
  * Primitive Types Specialization
  */
@@ -853,41 +887,6 @@ struct protocol_methods<type_class::map<KeyClass, MappedClass>, Type> {
     }
     xfer += protocol.serializedSizeMapEnd();
     return xfer;
-  }
-
- private:
-  template <typename Protocol>
-  using map_value_begin_t =
-      decltype(std::declval<Protocol>().writeMapValueBegin());
-
-  template <typename Protocol>
-  using map_value_end_t = decltype(std::declval<Protocol>().writeMapValueEnd());
-
-  template <typename Protocol>
-  static constexpr bool map_value_api_v =
-      folly::is_detected_v<map_value_begin_t, Protocol> &&
-      folly::is_detected_v<map_value_end_t, Protocol>;
-
-  template <typename Protocol>
-  static std::size_t writeMapValueBegin(Protocol& protocol) {
-    const auto writeMapValueBeginFunc =
-        std::get<map_value_api_v<Protocol&>>(std::make_pair(
-            [](auto&) { return 0u; },
-            [](auto& protocolWithMapValueApi) {
-              return protocolWithMapValueApi.writeMapValueBegin();
-            }));
-    return writeMapValueBeginFunc(protocol);
-  }
-
-  template <typename Protocol>
-  static std::size_t writeMapValueEnd(Protocol& protocol) {
-    const auto writeMapValueEndFunc =
-        std::get<map_value_api_v<Protocol&>>(std::make_pair(
-            [](auto&) { return 0u; },
-            [](auto& protocolWithMapValueApi) {
-              return protocolWithMapValueApi.writeMapValueEnd();
-            }));
-    return writeMapValueEndFunc(protocol);
   }
 };
 

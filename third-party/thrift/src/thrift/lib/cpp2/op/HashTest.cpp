@@ -303,5 +303,13 @@ TEST(HashTest, Struct) {
   EXPECT_NE(previousResult, result);
 }
 
+TEST(HashTest, OpEncode) {
+  using Tag = type::struct_t<test::OpEncode>;
+  test::OpEncode x, y;
+  x.f() = {{1, 2}};
+  y.f() = {{2, 1}};
+  EXPECT_NE(op::hash<Tag>(x), op::hash<Tag>(y));
+}
+
 } // namespace
 } // namespace apache::thrift::op

@@ -530,28 +530,6 @@ struct MockAutoloadDB : public AutoloadDB {
   Clock clock_;
 };
 
-/**
- * RAII wrapper which ensures we finish draining the given
- * ManualExecutor before ending each test.
- */
-struct SymbolMapWrapper {
-  SymbolMapWrapper(std::unique_ptr<SymbolMap> m, bool useManualExecutor)
-      : m_map{std::move(m)} {
-    if (useManualExecutor) {
-      m_map->m_exec = std::make_shared<folly::ManualExecutor>();
-    }
-  }
-
-  SymbolMapWrapper(SymbolMapWrapper&& old) noexcept
-      : m_map{std::move(old.m_map)} {}
-
-  SymbolMapWrapper(const SymbolMapWrapper&) = delete;
-  SymbolMapWrapper& operator=(const SymbolMapWrapper&) = delete;
-  SymbolMapWrapper& operator=(SymbolMapWrapper&& old) noexcept = delete;
-
-  std::unique_ptr<SymbolMap> m_map;
-};
-
 std::string getSha1Hex(const FileFacts& ff) {
   return SHA1{hackc::hash_facts(ff)}.toString();
 }
@@ -583,9 +561,9 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
             folly::test::TemporaryDirectory{"autoload"})) {}
 
   virtual ~SymbolMapTest() override {
-    for (auto& map : m_wrappers) {
+    for (auto& map : m_maps) {
       auto* manual_executor =
-          dynamic_cast<folly::ManualExecutor*>(map.m_map->m_exec.get());
+          dynamic_cast<folly::ManualExecutor*>(map->m_exec.get());
       if (manual_executor != nullptr) {
         manual_executor->drain();
       }
@@ -604,19 +582,20 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
     for (auto& attr : indexedMethodAttributesVec) {
       indexedMethodAttributes.insert(Symbol<SymKind::Type>{attr});
     }
-    m_wrappers.push_back(SymbolMapWrapper{
-        std::make_unique<SymbolMap>(
-            std::move(root),
-            [dbPath]() -> std::shared_ptr<AutoloadDB> {
-              return SQLiteAutoloadDB::get(SQLiteKey::readWriteCreate(
-                  fs::path{dbPath.native()}, static_cast<::gid_t>(-1), 0644));
-            },
-            std::move(indexedMethodAttributes),
-            true,
-            true,
-            std::chrono::milliseconds(5000)),
-        useManualExecutor});
-    return *m_wrappers.back().m_map;
+    m_maps.push_back(std::make_unique<SymbolMap>(
+        std::move(root),
+        [dbPath]() -> std::shared_ptr<AutoloadDB> {
+          return SQLiteAutoloadDB::get(SQLiteKey::readWriteCreate(
+              fs::path{dbPath.native()}, static_cast<::gid_t>(-1), 0644));
+        },
+        std::move(indexedMethodAttributes),
+        true,
+        true,
+        std::chrono::milliseconds(5000)));
+    if (useManualExecutor) {
+      m_maps.back()->m_exec = std::make_shared<folly::ManualExecutor>();
+    }
+    return *m_maps.back();
   }
 
   SymbolMap& make(
@@ -629,20 +608,21 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
     for (auto& attr : indexedMethodAttributesVec) {
       indexedMethodAttributes.insert(Symbol<SymKind::Type>{attr});
     }
-    m_wrappers.push_back(SymbolMapWrapper{
-        std::make_unique<SymbolMap>(
-            std::move(root),
-            [&db]() -> std::shared_ptr<AutoloadDB> { return db; },
-            std::move(indexedMethodAttributes),
-            true,
-            true,
-            std::chrono::milliseconds(5000)),
-        useManualExecutor});
-    return *m_wrappers.back().m_map;
+    m_maps.push_back(std::make_unique<SymbolMap>(
+        std::move(root),
+        [&db]() -> std::shared_ptr<AutoloadDB> { return db; },
+        std::move(indexedMethodAttributes),
+        true,
+        true,
+        std::chrono::milliseconds(5000)));
+    if (useManualExecutor) {
+      m_maps.back()->m_exec = std::make_shared<folly::ManualExecutor>();
+    }
+    return *m_maps.back();
   }
 
   std::unique_ptr<folly::test::TemporaryDirectory> m_tmpdir;
-  std::vector<SymbolMapWrapper> m_wrappers;
+  std::vector<std::unique_ptr<SymbolMap>> m_maps;
 };
 
 TEST_F(SymbolMapTest, NewModules) {

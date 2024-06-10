@@ -74,12 +74,13 @@ hackc::FileFacts decode_facts(const std::string& blob) {
 ExtractorFactory* s_extractorFactory = nullptr;
 
 struct SimpleExtractor final : Extractor {
-  explicit SimpleExtractor(folly::Executor& exec) : Extractor{exec} {}
+  explicit SimpleExtractor(folly::Executor::KeepAlive<folly::Executor> token)
+      : Extractor{token} {}
 
   ~SimpleExtractor() override = default;
 
   folly::SemiFuture<std::string> get(const PathAndOptionalHash& key) override {
-    return folly::via(&m_exec, [key]() { return facts_binary_from_path(key); });
+    return folly::via(m_token, [key]() { return facts_binary_from_path(key); });
   }
 };
 
@@ -104,15 +105,16 @@ void setExtractorFactory(ExtractorFactory* factory) {
   s_extractorFactory = factory;
 }
 
-std::unique_ptr<Extractor> makeExtractor(folly::Executor& exec) {
+std::unique_ptr<Extractor> makeExtractor(
+    folly::Executor::KeepAlive<folly::Executor> token) {
   // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
   if (s_extractorFactory && Cfg::Autoload::EnableExternFactExtractor) {
     XLOG(INFO) << "Creating a external HPHP::Facts::Extractor.";
-    return s_extractorFactory->make(exec);
+    return s_extractorFactory->make(token);
   }
   XLOG(INFO) << "Creating an internal HPHP::Facts::SimpleExtractor.";
-  return std::make_unique<SimpleExtractor>(exec);
+  return std::make_unique<SimpleExtractor>(token);
 }
 
 std::vector<folly::Try<FileFacts>> facts_from_paths(
@@ -126,7 +128,7 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
 
   // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
-  auto extractor = makeExtractor(exec);
+  auto extractor = makeExtractor(folly::getKeepAliveToken(exec));
 
   std::atomic<int> completed_tasks = 0;
   std::vector<folly::SemiFuture<FileFacts>> factsFutures;

@@ -429,7 +429,7 @@ struct SymbolMap {
    */
   hphp_hash_map<Path, SHA1> getAllPathsWithHashes() const;
 
-  std::shared_ptr<folly::Executor> m_exec;
+  std::unique_ptr<folly::Executor> m_exec;
 
   struct Data {
     Data();

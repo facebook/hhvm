@@ -30,7 +30,8 @@ namespace HPHP {
 namespace Facts {
 
 struct Extractor {
-  explicit Extractor(folly::Executor& exec) : m_exec(exec) {}
+  explicit Extractor(folly::Executor::KeepAlive<folly::Executor> token)
+      : m_token(token) {}
 
   virtual ~Extractor() = default;
 
@@ -48,13 +49,14 @@ struct Extractor {
   Extractor& operator=(const Extractor&) = delete;
   Extractor& operator=(Extractor&&) noexcept = delete;
 
-  folly::Executor& m_exec;
+  folly::Executor::KeepAlive<folly::Executor> m_token;
 };
 
 struct ExtractorFactory {
   virtual ~ExtractorFactory() = default;
 
-  virtual std::unique_ptr<Extractor> make(folly::Executor&) = 0;
+  virtual std::unique_ptr<Extractor> make(
+      folly::Executor::KeepAlive<folly::Executor>) = 0;
 
   virtual void prefetchDb(
       const std::filesystem::path& root,

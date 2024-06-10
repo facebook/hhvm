@@ -119,7 +119,7 @@ SymbolMap::SymbolMap(
     bool enableBlockingDbWait,
     bool useSymbolMapForGetFilesWithAttrAndAnyVal,
     std::chrono::milliseconds blockingDbWaitTimeout)
-    : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
+    : m_exec{std::make_unique<folly::CPUThreadPoolExecutor>(
           1,
           std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))},
       m_root{std::move(root)},

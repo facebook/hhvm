@@ -569,9 +569,9 @@ class TestingSymbolMap : public SymbolMap {
             useSymbolMapForGetFilesWithAttrAndAnyVal,
             blockingDbwWaitTimeout) {
     if (useManualExecutor) {
-      auto manual_executor = std::make_shared<folly::ManualExecutor>();
+      auto manual_executor = std::make_unique<folly::ManualExecutor>();
       m_token = folly::getKeepAliveToken(*manual_executor);
-      m_exec = manual_executor;
+      m_exec = std::move(manual_executor);
     }
   }
 

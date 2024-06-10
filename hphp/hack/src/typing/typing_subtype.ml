@@ -6377,7 +6377,10 @@ end = struct
     (* Prioritize types that aren't dynamic or intersections with dynamic
        to get better error messages *)
     let (last_tyl, first_tyl) =
-      TUtils.partition_union ~f:contains_dynamic_through_intersection ty_subs
+      TUtils.partition_union
+        ~f:contains_dynamic_through_intersection
+        env
+        ty_subs
     in
     let init = List.fold_left first_tyl ~init:(env, TL.valid) ~f in
     List.fold_left last_tyl ~init ~f

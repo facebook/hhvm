@@ -105,7 +105,7 @@
          { fb_ast =
            [([6:3-24],
              (Expr
-                ((~null), [6:3-23],
+                ((~?nothing), [6:3-23],
                  (Call
                     { func =
                       (((function<Tv>(?shape(?'x' => nothing, ...) $shape, arraykey $index)[]: null)), [6:3-14],

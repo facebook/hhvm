@@ -121,6 +121,7 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
   let ((env, ty_err_opt), ty) = extract_inner env opt_ty_maybe in
   let (env, err) = Typing_solver.close_tyvars_and_solve env in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+  let (env, ty) = Typing_union.simplify_unions env ty in
   ((env, err), ty)
 
 let overload_extract_from_awaitable env ~p opt_ty_maybe =

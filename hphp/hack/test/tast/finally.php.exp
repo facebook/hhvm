@@ -49,7 +49,7 @@ Errors:
                            }))));
                   ([14:5-28],
                    (Expr
-                      ((~null), [14:5-27],
+                      ((~?nothing), [14:5-27],
                        (Call
                           { func =
                             (((function<Tv>(?shape(?'foo' => nothing, ...) $shape, arraykey $index)[]: null)), [14:5-16],

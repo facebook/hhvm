@@ -757,25 +757,31 @@ let has_ancestor_including_req_refl =
 
 (* search through tyl, and any unions directly-recursively contained in tyl,
    and return those that satisfy f, and those that do not, separately.*)
-let rec partition_union ~f tyl =
+let rec partition_union ~f env tyl =
   match tyl with
   | [] -> ([], [])
   | t :: tyl ->
-    let (dyns, nondyns) = partition_union ~f tyl in
-    if f t then
-      (t :: dyns, nondyns)
-    else (
-      match get_node t with
-      | Tunion tyl ->
-        (match strip_union ~f tyl with
-        | Some (sub_dyns, sub_nondyns) ->
-          (sub_dyns @ dyns, MakeType.union (get_reason t) sub_nondyns :: nondyns)
-        | None -> (dyns, t :: nondyns))
-      | _ -> (dyns, t :: nondyns)
-    )
+    let (_, t) = Env.expand_type env t in
+    (match get_node t with
+    | Tunion tyl' when not (List.is_empty tyl') ->
+      partition_union ~f env (tyl' @ tyl)
+    | _ ->
+      let (dyns, nondyns) = partition_union ~f env tyl in
+      if f t then
+        (t :: dyns, nondyns)
+      else (
+        match get_node t with
+        | Tunion tyl ->
+          (match strip_union ~f env tyl with
+          | Some (sub_dyns, sub_nondyns) ->
+            ( sub_dyns @ dyns,
+              MakeType.union (get_reason t) sub_nondyns :: nondyns )
+          | None -> (dyns, t :: nondyns))
+        | _ -> (dyns, t :: nondyns)
+      ))
 
-and strip_union tyl ~f =
-  let (dyns, nondyns) = partition_union ~f tyl in
+and strip_union ~f env tyl =
+  let (dyns, nondyns) = partition_union ~f env tyl in
   match (dyns, nondyns) with
   | ([], _) -> None
   | (_, _) -> Some (dyns, nondyns)
@@ -794,6 +800,7 @@ let rec try_strip_dynamic_from_union ?(accept_intersections = false) env tyl =
   match
     strip_union
       ~f:(is_dynamic_or_intersection_with_dynamic ~accept_intersections env)
+      env
       tyl
   with
   | Some (ty :: _, tyl) -> Some (ty, tyl)

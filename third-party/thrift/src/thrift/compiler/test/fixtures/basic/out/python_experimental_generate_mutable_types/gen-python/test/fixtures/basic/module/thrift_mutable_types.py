@@ -168,7 +168,7 @@ class Containers(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "StringToI64Map",  # name
             "StringToI64Map", # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i64),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i64),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive

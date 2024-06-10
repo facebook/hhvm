@@ -47,9 +47,9 @@ TODO: This file is a copy of its immutable counterpart, `typeinfo.mustache`.
 }}{{/type:struct}}{{!
 }}{{#type:list?}}_fbthrift_python_mutable_typeinfos.MutableListTypeInfo({{#type:list_elem_type}}{{ >types/mutable_typeinfo }}{{/type:list_elem_type}}){{/type:list?}}{{!
 }}{{#type:set?}}_fbthrift_python_mutable_typeinfos.MutableSetTypeInfo({{#type:set_elem_type}}{{ >types/mutable_typeinfo }}{{/type:set_elem_type}}){{/type:set?}}{{!
-}}{{#type:map?}}_fbthrift_python_types.MapTypeInfo({{!
-  }}{{#type:key_type}}{{ >types/typeinfo }}{{/type:key_type}}, {{!
-  }}{{#type:value_type}}{{ >types/typeinfo }}{{/type:value_type}}{{!
+}}{{#type:map?}}_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo({{!
+  }}{{#type:key_type}}{{ >types/mutable_typeinfo }}{{/type:key_type}}, {{!
+  }}{{#type:value_type}}{{ >types/mutable_typeinfo }}{{/type:value_type}}{{!
 }}){{/type:map?}}{{!
 }}{{#type:enum}}_fbthrift_python_types.EnumTypeInfo({{!
   }}{{#type:need_module_path?}}{{type:module_path}}.{{/type:need_module_path?}}{{!

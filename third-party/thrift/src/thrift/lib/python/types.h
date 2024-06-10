@@ -399,9 +399,18 @@ inline void* setList(void* objectPtr) {
   return objectPtr;
 }
 
-// Sets the Python object pointed to by `object` to an empty Python `set`
+// Sets the Python object pointed to by `objectPtr` to an empty Python `set`
 inline void* setMutableSet(void* objectPtr) {
   if (!setPyObject(objectPtr, UniquePyObjectPtr{PySet_New(nullptr)})) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  return objectPtr;
+}
+
+// Sets the Python object pointed to by `objectPtr` to an empty Python
+// `dictionary`
+inline void* setMutableMap(void* objectPtr) {
+  if (!setPyObject(objectPtr, UniquePyObjectPtr{PyDict_New()})) {
     THRIFT_PY3_CHECK_ERROR();
   }
   return objectPtr;
@@ -715,6 +724,99 @@ class MapTypeInfo {
  private:
   const detail::MapFieldExt ext_;
   const detail::TypeInfo typeinfo_;
+};
+
+class MutableMapTypeInfo {
+ public:
+  static std::uint32_t size(const void* object) {
+    return folly::to<std::uint32_t>(
+        PyDict_Size(const_cast<PyObject*>(toPyObject(object))));
+  }
+
+  static void clear(void* objectPtr) { setMutableMap(objectPtr); }
+
+  /**
+   * Deserializes a dict (with `mapSize` key/value pairs) into `objectPtr`.
+   *
+   * The function pointer arguments (`keyReader` and `valueReader`) are expected
+   * to take two (type-erased, i.e. `void*`) arguments:
+   *   1. The given `context`
+   *   2. A pointer to a `PyObject*`, that should be set by the function to the
+   *      (next) key and value, respectively.
+   *
+   * @param context Will be passed to every call to `keyReader` and
+   *        `valueReader`.
+   * @param objectPtr Pointer to a `PyObject*`, that will be set to a new
+   *        `PyDict` instance containing `mapSize` elements whose keys and
+   *        values are obtained by calling the given `*Reader` functions.
+   */
+  static void read(
+      const void* context,
+      void* objectPtr,
+      std::uint32_t mapSize,
+      void (*keyReader)(const void* context, void* key),
+      void (*valueReader)(const void* context, void* val));
+
+  /**
+   * Serializes the dict given in `object`.
+   *
+   * The `writer` function will be called for every item in the dict pointed by
+   * the given `object`. It is expected to take the arguments described below,
+   * and return the number of bytes written:
+   *   1. The given `context`
+   *   2 & 3. `PyObject**` pointing to the next key and value from dict,
+   * respectively.
+   *
+   * @param context Passed to `writer` on every call.
+   * @param object Input `PyObject*`, holds the `PyDict` to serialize.
+   *
+   * @return Total number of bytes written.
+   */
+  static size_t write(
+      const void* context,
+      const void* object,
+      bool protocolSortKeys,
+      size_t (*writer)(
+          const void* context, const void* keyElem, const void* valueElem));
+
+  /**
+   * Deserializes a single key, value pair (using the given function pointers)
+   * and adds it to the given dict.
+   *
+   * See `read()` for the expectations on `keyReader` and `valueReader`.
+   *
+   * @param context Passed to `keyReader` and `valueReader` on every call.
+   * @param objectPtr Pointer to a `PyObject*` that holds a dict, to which the
+   *        new key/value pair will be added.
+   */
+  static void consumeElem(
+      const void* context,
+      void* object,
+      void (*keyReader)(const void* /*context*/, void* /*val*/),
+      void (*valueReader)(const void* /*context*/, void* /*val*/));
+
+  explicit MutableMapTypeInfo(
+      const detail::TypeInfo* keyInfo, const detail::TypeInfo* valInfo)
+      : tableBasedSerializerMapFieldExt_{
+            /* .keyInfo */ keyInfo,
+            /* .valInfo */ valInfo,
+            /* .size */ size,
+            /* .clear */ clear,
+            /* .consumeElem */ consumeElem,
+            /* .readSet */ read,
+            /* .writeSet */ write,
+        },
+        tableBasedSerializerTypeinfo_{
+            protocol::TType::T_MAP,
+            getStruct,
+            reinterpret_cast<detail::VoidFuncPtr>(setMutableMap),
+            &tableBasedSerializerMapFieldExt_,
+        } {}
+  const detail::TypeInfo* get() const { return &tableBasedSerializerTypeinfo_; }
+
+ private:
+  const detail::MapFieldExt tableBasedSerializerMapFieldExt_;
+  const detail::TypeInfo tableBasedSerializerTypeinfo_;
 };
 
 using FieldValueMap = std::unordered_map<int16_t, PyObject*>;

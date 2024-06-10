@@ -22,7 +22,11 @@ from cpython.set cimport PySet_New, PySet_Add
 
 from cython.operator cimport dereference as deref
 
-from thrift.python.mutable_containers cimport MutableList, MutableSet
+from thrift.python.mutable_containers cimport (
+    MutableList,
+    MutableSet,
+    MutableMap,
+)
 from thrift.python.mutable_types cimport MutableStruct, MutableStructInfo
 from thrift.python.exceptions cimport GeneratedError
 from thrift.python.types cimport getCTypeInfo
@@ -198,3 +202,63 @@ cdef class MutableSetTypeInfo(TypeInfoBase):
             return False
 
         return self.val_info.same_as((<MutableSetTypeInfo>other).val_info)
+
+
+@cython.final
+cdef class MutableMapTypeInfo(TypeInfoBase):
+    def __cinit__(self, key_info, val_info):
+        self.key_info = key_info
+        self.val_info = val_info
+        self.cpp_obj = make_unique[cMutableMapTypeInfo](
+            getCTypeInfo(key_info),
+            getCTypeInfo(val_info),
+        )
+
+    cdef const cTypeInfo* get_cTypeInfo(self):
+        return self.cpp_obj.get().get()
+
+    cdef to_internal_data(self, object values):
+        """
+        Validates the `values` and converts them into an internal data representation.
+
+        Args:
+            values (iterable): An iterable object. Each key, value pair in the iteration
+            should be of a valid key and valid value type as verified by in `self.key_info`
+            and `self.val_info`.
+
+        Returns a Python dict with converted values, representing the internal data
+        """
+        if values is None:
+            raise TypeError("Argument 'value' must not be None")
+
+        cdef TypeInfoBase key_type_info = self.key_info
+        cdef TypeInfoBase val_type_info = self.val_info
+        return {
+            key_type_info.to_internal_data(k): val_type_info.to_internal_data(v) for k, v in values.items()
+        }
+
+    cdef to_python_value(self, object value):
+        """
+        Converts the given internal data (`value`) into a `MutableMap` The
+        resulting `MutableMap` is capable of converting the internal data to
+        Python values for its items.
+
+        Args:
+            value (object): A Python dict, very likely returned by the
+            `MutableMapTypeInfo.to_internal_data()` method. The types of all
+            items in this dictionary MUST match `key_info` and `val_info`.
+
+        Returns a `MutableMap` instance with the internal data (`value`) and
+            the type infos (`self.key_info` and `self.val_info`) attached.
+        """
+        return MutableMap(self.key_info, self.val_info, value)
+
+    def same_as(MutableMapTypeInfo self, other):
+        if other is self:
+            return True
+
+        if not isinstance(other, MutableMapTypeInfo):
+            return False
+
+        return (self.key_info.same_as((<MutableMapTypeInfo>other).key_info) and
+            self.val_info.same_as((<MutableMapTypeInfo>other).val_info))

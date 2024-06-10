@@ -25,6 +25,7 @@ from thrift.python.mutable_serializer cimport cserialize, cdeserialize
 from thrift.python.mutable_typeinfos cimport (
     MutableListTypeInfo,
     MutableSetTypeInfo,
+    MutableMapTypeInfo,
 )
 from thrift.python.types cimport (
     AdaptedTypeInfo,

@@ -24,7 +24,7 @@ import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
 
 from parameterized import parameterized
-from thrift.python.mutable_containers import MutableList, MutableSet
+from thrift.python.mutable_containers import MutableList, MutableMap, MutableSet
 
 from thrift.python.mutable_types import (
     MutableStruct,
@@ -973,3 +973,172 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(set(), s.unqualified_set_string)
         self.assertEqual(set(), set1)
         self.assertEqual(set(), set2)
+
+    def test_create_and_assign_for_map(self) -> None:
+        s = MutableTestStructAllThriftContainerTypes(
+            unqualified_map_string_i32={"a": 1, "b": 2}
+        )
+
+        self.assertEqual(2, len(s.unqualified_map_string_i32))
+        self.assertEqual({"a": 1, "b": 2}, s.unqualified_map_string_i32)
+
+        with self.assertRaisesRegex(
+            TypeError, "Thrift container types do not support direct assignment."
+        ):
+            s.unqualified_map_string_i32 = {"a": 1, "b": 2}
+
+        map1 = s.unqualified_map_string_i32
+        map2 = s.unqualified_map_string_i32
+
+        # maps are instance of thrift.python.mutable_containers.MutableMap
+        self.assertTrue(isinstance(map1, MutableMap))
+        self.assertTrue(isinstance(map2, MutableMap))
+
+        # map1 and map2 are the same instances
+        self.assertIs(map1, map2)
+
+        # Update on any variable is reflected on others
+        map1["c"] = 3
+        self.assertEqual({"a": 1, "b": 2, "c": 3}, s.unqualified_map_string_i32)
+        self.assertEqual({"a": 1, "b": 2, "c": 3}, map1)
+        self.assertEqual({"a": 1, "b": 2, "c": 3}, map2)
+
+        # `__contains__()`
+        self.assertIn("a", s.unqualified_map_string_i32)
+        self.assertIn("b", s.unqualified_map_string_i32)
+        self.assertNotIn("x", s.unqualified_map_string_i32)
+        self.assertNotIn("y", s.unqualified_map_string_i32)
+
+        # `__contains__()` is type checked
+        self.assertIn("a", s.unqualified_map_string_i32)
+        with self.assertRaisesRegex(
+            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
+        ):
+            self.assertIn(1, s.unqualified_map_string_i32)
+
+        # `__getitem__()`
+        self.assertEqual(1, s.unqualified_map_string_i32["a"])
+        self.assertEqual(2, s.unqualified_map_string_i32["b"])
+        self.assertEqual(3, s.unqualified_map_string_i32["c"])
+
+        with self.assertRaises(KeyError):
+            s.unqualified_map_string_i32["Not Exists"]
+
+        # `__getitem__()` is type checked
+        with self.assertRaisesRegex(
+            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
+        ):
+            s.unqualified_map_string_i32[999]
+
+        # `get()`
+        self.assertEqual(1, s.unqualified_map_string_i32.get("a"))
+        # `get(, default=None)`
+        self.assertEqual(None, s.unqualified_map_string_i32.get("Not Exists"))
+        self.assertEqual(
+            "MyDefaultValue",
+            s.unqualified_map_string_i32.get("Not Exists", "MyDefaultValue"),
+        )
+
+        # `get()` is type checked
+        with self.assertRaisesRegex(
+            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
+        ):
+            s.unqualified_map_string_i32.get(999, "MyDefaultValue")
+
+        # `__setitem__()`
+        self.assertEqual(1, s.unqualified_map_string_i32["a"])
+        s.unqualified_map_string_i32["a"] = 11
+        self.assertEqual(11, s.unqualified_map_string_i32["a"])
+        s.unqualified_map_string_i32["a"] = 1
+        self.assertEqual(1, s.unqualified_map_string_i32["a"])
+
+        # `__setitem__()` is type checked for both key and value
+        with self.assertRaisesRegex(
+            TypeError, "not a <class 'int'>, is actually of type <class 'str'>"
+        ):
+            s.unqualified_map_string_i32["a"] = "Not an integer"
+
+        with self.assertRaisesRegex(
+            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
+        ):
+            s.unqualified_map_string_i32[999] = 11
+
+        # `__iter__()`
+        python_set = {"a", "b", "c"}
+        for key in s.unqualified_map_string_i32:
+            # `remove()` raises a `KeyError` if key is absent
+            python_set.remove(key)
+
+        self.assertEqual(0, len(python_set))
+
+        # `keys()`
+        self.assertEqual(3, len(s.unqualified_map_string_i32.keys()))
+
+        python_set = {"a", "b", "c"}
+        for key in s.unqualified_map_string_i32.keys():
+            # `remove()` raises a `KeyError` if key is absent
+            python_set.remove(key)
+
+        # `keys()` returns a view
+        keys = s.unqualified_map_string_i32.keys()
+        self.assertEqual(3, len(keys))
+        self.assertEqual({"a", "b", "c"}, set(keys))
+
+        s.unqualified_map_string_i32["d"] = 4
+
+        self.assertEqual(4, len(keys))
+        self.assertEqual({"a", "b", "c", "d"}, set(keys))
+
+        # `values()`
+        self.assertEqual(4, len(s.unqualified_map_string_i32.values()))
+
+        python_list = [1, 2, 3, 4]
+        for value in s.unqualified_map_string_i32.values():
+            python_list.remove(value)
+
+        # `values()` returns a view
+        values = s.unqualified_map_string_i32.values()
+        self.assertEqual(4, len(values))
+        self.assertEqual([1, 2, 3, 4], sorted(values))
+
+        s.unqualified_map_string_i32["e"] = 5
+
+        self.assertEqual(5, len(values))
+        self.assertEqual([1, 2, 3, 4, 5], sorted(values))
+
+        # `items()`
+        self.assertEqual(5, len(s.unqualified_map_string_i32.items()))
+        self.assertEqual(
+            [("a", 1), ("b", 2), ("c", 3), ("d", 4), ("e", 5)],
+            sorted(s.unqualified_map_string_i32.items()),
+        )
+
+        # `items()` returns a view
+        items = s.unqualified_map_string_i32.items()
+        self.assertEqual(5, len(items))
+        self.assertEqual(
+            [("a", 1), ("b", 2), ("c", 3), ("d", 4), ("e", 5)],
+            sorted(items),
+        )
+
+        s.unqualified_map_string_i32["f"] = 6
+
+        self.assertEqual(6, len(items))
+        self.assertEqual(
+            [("a", 1), ("b", 2), ("c", 3), ("d", 4), ("e", 5), ("f", 6)],
+            sorted(items),
+        )
+
+        # `MutableMap` instances are not hashable
+        with self.assertRaisesRegex(
+            TypeError, "unhashable type: 'thrift.python.mutable_containers.MutableMap'"
+        ):
+            hash(s.unqualified_map_string_i32)
+
+        _thrift_serialization_round_trip(self, mutable_serializer, s)
+
+        # `clear()`
+        s.unqualified_map_string_i32.clear()
+        self.assertEqual({}, s.unqualified_map_string_i32)
+        self.assertEqual({}, map1)
+        self.assertEqual({}, map2)

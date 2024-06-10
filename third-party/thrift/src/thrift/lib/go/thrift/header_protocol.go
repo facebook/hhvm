@@ -121,14 +121,6 @@ func (p *headerProtocol) GetSeqID() uint32 {
 
 // Control underlying header transport
 
-func (p *headerProtocol) SetIdentity(identity string) {
-	p.trans.SetIdentity(identity)
-}
-
-func (p *headerProtocol) Identity() string {
-	return p.trans.Identity()
-}
-
 func (p *headerProtocol) SetPersistentHeader(key, value string) {
 	p.trans.SetPersistentHeader(key, value)
 }
@@ -207,15 +199,6 @@ func (p *headerProtocol) SetFlags(flags HeaderFlags) {
 func (p *headerProtocol) AddTransform(trans TransformID) error {
 	return p.trans.AddTransform(trans)
 }
-
-// Deprecated: HeaderProtocolIdentity is a deprecated type, temporarily introduced to ease transition to new API.
-type HeaderProtocolIdentity interface {
-	SetIdentity(identity string)
-	Identity() string
-}
-
-// Compile time interface enforcer
-var _ HeaderProtocolIdentity = (*headerProtocol)(nil)
 
 // Deprecated: HeaderProtocolSeqID is a deprecated type, temporarily introduced to ease transition to new API.
 type HeaderProtocolSeqID interface {

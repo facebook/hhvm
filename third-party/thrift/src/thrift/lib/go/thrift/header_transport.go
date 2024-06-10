@@ -86,19 +86,6 @@ func (t *headerTransport) SeqID() uint32 {
 	return t.readSeqID
 }
 
-func (t *headerTransport) Identity() string {
-	v, ok := t.GetPersistentHeader(IdentityHeader)
-	if !ok {
-		return ""
-	}
-	return v
-}
-
-func (t *headerTransport) SetIdentity(identity string) {
-	t.SetPersistentHeader(IDVersionHeader, IDVersion)
-	t.SetPersistentHeader(IdentityHeader, identity)
-}
-
 func (t *headerTransport) SetPersistentHeader(key, value string) {
 	t.persistentWriteInfoHeaders[key] = value
 }

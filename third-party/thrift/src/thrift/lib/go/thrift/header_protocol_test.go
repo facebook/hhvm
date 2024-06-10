@@ -41,8 +41,8 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 		t.Fatalf("wrong number of headers")
 	}
 
-	proto1.(*headerProtocol).SetIdentity("batman")
-	if proto1.(*headerProtocol).Identity() != "batman" {
+	SetIdentity(proto1, "batman")
+	if gotIdentity, ok := proto1.GetPersistentHeader(IdentityHeader); !ok || gotIdentity != "batman" {
 		t.Fatalf("failed to set identity")
 	}
 

@@ -1362,8 +1362,9 @@ end = struct
         match ty_supers with
         | [] ->
           ( env,
-            TL.Disj (Typing_error.intersect_opt @@ List.filter_opt errs, props)
-          )
+            TL.Disj
+              ( Typing_error.intersect_opt @@ List.filter_opt errs,
+                List.rev props ) )
         | ty_super :: ty_supers ->
           let ty_super =
             Prov.(

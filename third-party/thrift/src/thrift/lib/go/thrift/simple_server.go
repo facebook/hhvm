@@ -40,6 +40,7 @@ type SimpleServer struct {
 	processorContext ProcessorContext
 	serverTransport  ServerTransport
 	newProtocol      func(net.Conn) Protocol
+	quit             chan struct{}
 	*ServerOptions
 }
 
@@ -49,6 +50,7 @@ func NewSimpleServer(processor ProcessorContext, serverTransport ServerTransport
 		panic(fmt.Sprintf("SimpleServer only supports Header Transport and not %s", transportType))
 	}
 	return &SimpleServer{
+		quit:             make(chan struct{}, 1),
 		processorContext: processor,
 		serverTransport:  serverTransport,
 		newProtocol:      NewHeaderProtocol,

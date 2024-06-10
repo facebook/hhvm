@@ -23,7 +23,6 @@ import (
 
 // ServerOptions is options needed to run a thrift server
 type ServerOptions struct {
-	quit        chan struct{}
 	log         *log.Logger
 	interceptor Interceptor
 }
@@ -44,7 +43,6 @@ func WithInterceptor(interceptor Interceptor) func(*ServerOptions) {
 
 func defaultServerOptions() *ServerOptions {
 	return &ServerOptions{
-		quit: make(chan struct{}, 1),
-		log:  log.New(os.Stderr, "", log.LstdFlags),
+		log: log.New(os.Stderr, "", log.LstdFlags),
 	}
 }

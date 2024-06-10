@@ -173,7 +173,8 @@ func TestHeaderHeaders(t *testing.T) {
 	trans1.SetPersistentHeader("preferred_cheese", "gouda")
 
 	assertEq(t, 3, len(trans1.Headers()))
-	assertEq(t, 1, len(trans1.GetPersistentHeaders()))
+	// 1 for persistent header and 2 more for identity headers
+	assertEq(t, 3, len(trans1.GetPersistentHeaders()))
 
 	headerval, _ := trans1.GetRequestHeader("preferred_cheese")
 	assertEq(t, "cheddar", headerval)
@@ -192,7 +193,7 @@ func TestHeaderHeaders(t *testing.T) {
 	// Make sure we zero the headers
 	assertEq(t, 0, len(trans1.Headers()))
 	// But not the persistent ones
-	assertEq(t, 1, len(trans1.GetPersistentHeaders()))
+	assertEq(t, 3, len(trans1.GetPersistentHeaders()))
 
 	err = trans2.ResetProtocol()
 	if err != nil {
@@ -206,14 +207,23 @@ func TestHeaderHeaders(t *testing.T) {
 	// make sure we prefer persistent headers
 	headerval, _ = trans2.GetResponseHeader("preferred_cheese")
 	assertEq(t, "gouda", headerval)
-	assertEq(t, "localhost", trans2.peerIdentity())
+	assertEq(t, "localhost", peerIdentity(trans2))
 	assertEq(t, 5, len(trans2.GetResponseHeaders()))
 
-	trans2.readHeader.headers[IDVersionHeader] = "invalid"
-	assertEq(t, "", trans2.peerIdentity())
+	trans2.readHeader.pHeaders[IDVersionHeader] = "invalid"
+	assertEq(t, "", peerIdentity(trans2))
 
 	trans1.ClearPersistentHeaders()
 	assertEq(t, 0, len(trans1.GetPersistentHeaders()))
+}
+
+func peerIdentity(t *headerTransport) string {
+	v, ok := t.GetResponseHeader(IdentityHeader)
+	vers, versok := t.GetResponseHeader(IDVersionHeader)
+	if ok && versok && vers == IDVersion {
+		return v
+	}
+	return ""
 }
 
 func TestHeaderRWSmall(t *testing.T) {

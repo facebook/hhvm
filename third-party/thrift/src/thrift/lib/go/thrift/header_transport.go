@@ -43,7 +43,6 @@ type headerTransport struct {
 
 	// Used on write
 	wbuf                       *bytes.Buffer
-	identity                   string
 	writeInfoHeaders           map[string]string
 	persistentWriteInfoHeaders map[string]string
 
@@ -88,20 +87,16 @@ func (t *headerTransport) SeqID() uint32 {
 }
 
 func (t *headerTransport) Identity() string {
-	return t.identity
+	v, ok := t.GetPersistentHeader(IdentityHeader)
+	if !ok {
+		return ""
+	}
+	return v
 }
 
 func (t *headerTransport) SetIdentity(identity string) {
-	t.identity = identity
-}
-
-func (t *headerTransport) peerIdentity() string {
-	v, ok := t.GetResponseHeader(IdentityHeader)
-	vers, versok := t.GetResponseHeader(IDVersionHeader)
-	if ok && versok && vers == IDVersion {
-		return v
-	}
-	return ""
+	t.SetPersistentHeader(IDVersionHeader, IDVersion)
+	t.SetPersistentHeader(IdentityHeader, identity)
 }
 
 func (t *headerTransport) SetPersistentHeader(key, value string) {
@@ -411,11 +406,6 @@ func (t *headerTransport) flushHeader() error {
 	hdr.protoID = t.protoID
 	hdr.clientType = t.clientType
 	hdr.flags = t.flags
-
-	if t.identity != "" {
-		hdr.headers[IdentityHeader] = t.identity
-		hdr.headers[IDVersionHeader] = IDVersion
-	}
 
 	outbuf, err := applyTransforms(t.wbuf, t.writeTransforms)
 	if err != nil {

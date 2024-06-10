@@ -129,10 +129,6 @@ func (p *headerProtocol) Identity() string {
 	return p.trans.Identity()
 }
 
-func (p *headerProtocol) peerIdentity() string {
-	return p.trans.peerIdentity()
-}
-
 func (p *headerProtocol) SetPersistentHeader(key, value string) {
 	p.trans.SetPersistentHeader(key, value)
 }

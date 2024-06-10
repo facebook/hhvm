@@ -68,6 +68,7 @@ func TestHeaderDeserSer(t *testing.T) {
 }
 
 func assertEq(t *testing.T, expected interface{}, actual interface{}) {
+	t.Helper()
 	if expected != actual {
 		t.Errorf("assertEq failed: actual=%+v expected=%+v", actual, expected)
 	}

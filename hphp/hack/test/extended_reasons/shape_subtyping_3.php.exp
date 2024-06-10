@@ -1,5 +1,13 @@
 error: Typing[4163] Invalid argument
 
+  8 | function passes_optional_a_at_bool(
+  9 |   shape(?'a' => bool) $s,
+ 10 | ): void {
+ 11 |   expects_required_a_at_int(»$s«);
+ 12 | }
+
+File "shape_subtyping_3.php", line 11, character 29 - line 11, character 30:
+
 The field `a` is **optional**
 
  8 | function passes_optional_a_at_bool(

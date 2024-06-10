@@ -171,7 +171,11 @@ let to_string User_error.{ code; claim = (pos, msg); reasons; severity; _ } =
          "%s: %s %s\n\n"
          (User_error.Severity.to_string severity)
          (User_error.error_code_to_string code)
-         msg
+         msg;
+    mark_with_context pos ~buf ~spans;
+    Buffer.add_string buf "\n";
+    Buffer.add_string buf (Pos.multiline_string pos);
+    Buffer.add_string buf "\n\n"
   in
   let (_ : unit) =
     List.iter reasons ~f:(fun (pos, msg) ->

@@ -1,5 +1,13 @@
 error: Typing[4110] Invalid argument
 
+ 11 | function passes_required_a_at_bool_alias(
+ 12 |   required_a_at_bool $s,
+ 13 | ): void {
+ 14 |   expects_required_a_at_int_alias(»$s«);
+ 15 | }
+
+File "shape_subtyping_4.php", line 14, character 35 - line 14, character 36:
+
 Expected `int`
 
  3 | type required_a_at_int = shape('a' => »int«);

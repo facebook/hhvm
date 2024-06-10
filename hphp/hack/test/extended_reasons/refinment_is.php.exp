@@ -1,5 +1,11 @@
 error: Typing[4110] Invalid return type
 
+ 12 |   }
+ 13 |   return »$z«;
+ 14 | }
+
+File "refinment_is.php", line 13, character 10 - line 13, character 11:
+
 Expected `C`
 
  7 | function inter_is(A $a, C $c): »C« {
@@ -123,6 +129,12 @@ File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
 error: Typing[4110] Invalid return type
 
+ 12 |   }
+ 13 |   return »$z«;
+ 14 | }
+
+File "refinment_is.php", line 13, character 10 - line 13, character 11:
+
 Expected `C`
 
  7 | function inter_is(A $a, C $c): »C« {
@@ -221,6 +233,12 @@ which itself flows *into* this hint
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
 error: Typing[4110] Invalid return type
+
+ 12 |   }
+ 13 |   return »$z«;
+ 14 | }
+
+File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
 Expected `C`
 

@@ -1,5 +1,12 @@
 error: Typing[4110] Invalid return type
 
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = $ai;
+ 9 |   return »$c«;
+10 | }
+
+File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
+
 Expected `C`
 
  7 | function inter_l((A & I) $ai): »C« {
@@ -82,6 +89,13 @@ which itself flows *into* this hint
 File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
 
 error: Typing[4110] Invalid return type
+
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = $ai;
+ 9 |   return »$c«;
+10 | }
+
+File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
 Expected `C`
 
@@ -174,6 +188,13 @@ which itself flows *into* this hint
 File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
 
 error: Typing[4110] Invalid return type
+
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = $ai;
+ 9 |   return »$c«;
+10 | }
+
+File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
 Expected `C`
 

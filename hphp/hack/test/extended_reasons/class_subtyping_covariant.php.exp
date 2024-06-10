@@ -1,5 +1,13 @@
 error: Typing[4110] Invalid argument
 
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
+ 14 |   takes_my_a(»$x«);
+ 15 | }
+
+File "class_subtyping_covariant.php", line 14, character 14 - line 14, character 15:
+
 Expected `Sub`
 
  11 | function takes_my_a(MyA<»Sub«, Super, Super> $_): void {}

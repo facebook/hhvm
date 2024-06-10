@@ -1,5 +1,13 @@
 error: Typing[4110] Invalid argument
 
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_invariant(MyB<Super, Sub> $x): void {
+ 14 |   takes_my_a(»$x«);
+ 15 | }
+
+File "class_subtyping_invariant.php", line 14, character 14 - line 14, character 15:
+
 Expected `Super`
 
  11 | function takes_my_a(MyA<Sub, Super, »Super«> $_): void {}
@@ -246,6 +254,14 @@ Flow:
 File "", line 0, character 0 - line 0, character -1:
 
 error: Typing[4110] Invalid argument
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_invariant(MyB<Super, Sub> $x): void {
+ 14 |   takes_my_a(»$x«);
+ 15 | }
+
+File "class_subtyping_invariant.php", line 14, character 14 - line 14, character 15:
 
 Expected `Sub`
 

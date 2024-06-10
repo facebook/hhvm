@@ -1,5 +1,13 @@
 error: Typing[4110] Invalid argument
 
+ 3 | function foo(arraykey... $_): void {}
+ 4 | 
+ 5 | function bar(int $x, string $y, bool $z): void{
+ 6 |   foo($x, $y, »$z«);
+ 7 | }
+
+File "fn_call_variadic.php", line 6, character 15 - line 6, character 16:
+
 Expected `arraykey` (variadic argument)
 
  3 | function foo(arraykey... »$_«): void {}

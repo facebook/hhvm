@@ -1,5 +1,12 @@
 error: Typing[4110] Invalid argument
 
+ 8 | function bar_1((string,Super,bool) $xyz): void {
+ 9 |   list($_, $y, $_) = $xyz;
+10 |   foo(»$y«);
+11 | }
+
+File "assign_list.php", line 10, character 7 - line 10, character 8:
+
 Expected `Sub`
 
  6 | function foo(»Sub« $_): void {}

@@ -1,5 +1,11 @@
 error: Typing[4110] Invalid return type
 
+ 7 | function inter_r(C $c) : (A & I) {
+ 8 |   return »$c«;
+ 9 | }
+
+File "intersection_subtyping_r.php", line 8, character 10 - line 8, character 11:
+
 Expected `I`
 
  7 | function inter_r(C $c) : (A & »I«) {

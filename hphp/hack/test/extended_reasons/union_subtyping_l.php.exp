@@ -1,5 +1,11 @@
 error: Typing[4110] Invalid return type
 
+ 6 | function union_l((A | B) $ab): C {
+ 7 |   return »$ab«;
+ 8 | }
+
+File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
+
 Expected `C`
 
  6 | function union_l((A | B) $ab): »C« {
@@ -65,6 +71,12 @@ which itself flows *into* this hint
 File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
 
 error: Typing[4110] Invalid return type
+
+ 6 | function union_l((A | B) $ab): C {
+ 7 |   return »$ab«;
+ 8 | }
+
+File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
 
 Expected `C`
 

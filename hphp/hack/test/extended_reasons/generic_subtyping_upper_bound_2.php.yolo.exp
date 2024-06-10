@@ -1,5 +1,13 @@
 error: Typing[4323] Invalid argument
 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 12 |   rcvr_both_bounds(»$x«);
+ 13 | }
+
+File "generic_subtyping_upper_bound_2.php", line 12, character 20 - line 12, character 21:
+
 `T` is a constrained type parameter
 
  9 | function rcvr_both_bounds<»T« as D as B>(T $x): void {}

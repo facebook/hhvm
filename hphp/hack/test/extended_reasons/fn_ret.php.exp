@@ -1,5 +1,11 @@
 error: Typing[4110] Invalid return type
 
+ 7 | function bar(): bool {
+ 8 |   return »foo()«;
+ 9 | }
+
+File "fn_ret.php", line 8, character 10 - line 8, character 14:
+
 Expected `bool`
 
  7 | function bar(): »bool« {
@@ -33,6 +39,12 @@ flows *into* this hint
 File "fn_ret.php", line 7, character 17 - line 7, character 20:
 
 error: Typing[4110] Invalid return type
+
+ 7 | function bar(): bool {
+ 8 |   return »foo()«;
+ 9 | }
+
+File "fn_ret.php", line 8, character 10 - line 8, character 14:
 
 Expected `bool`
 

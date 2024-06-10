@@ -1,5 +1,11 @@
 error: Typing[4110] Invalid argument
 
+ 7 | function pass_my_int(myint $y) : bool {
+ 8 |   return expect_bool(»$y«);
+ 9 | }
+
+File "newtype1.php--file2.php", line 8, character 22 - line 8, character 23:
+
 Expected `bool`
 
  3 | function expect_bool(»bool« $x): bool {

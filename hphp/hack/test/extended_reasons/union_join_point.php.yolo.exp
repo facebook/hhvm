@@ -1,5 +1,14 @@
 error: Typing[4110] Invalid return type
 
+  8 |   } else{
+  9 |     $z = $y;
+ 10 |   }
+ 11 | 
+ 12 |   return »$z«;
+ 13 | }
+
+File "union_join_point.php", line 12, character 10 - line 12, character 11:
+
 Expected `A`
 
  5 | function foo(bool  $p, A $x, B $y): »A« {

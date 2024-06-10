@@ -1,5 +1,11 @@
 error: Typing[4110] Invalid return type
 
+ 6 | function union_r(C $c): (A|B) {
+ 7 |   return »$c«;
+ 8 | }
+
+File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
+
 Expected `B`
 
  5 | <<__NoAutoLikes>>

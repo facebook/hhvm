@@ -1,5 +1,12 @@
 error: Typing[4110] Invalid argument
 
+ 14 | function bar(SuperBox $f): void {
+ 15 |   $g = $f->get();
+ 16 |   foo(»$g«);
+ 17 | }
+
+File "assign_obj_get.php", line 16, character 7 - line 16, character 8:
+
 Expected `Sub`
 
  12 | function foo(»Sub« $_): void {}

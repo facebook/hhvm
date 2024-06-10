@@ -1,5 +1,13 @@
 error: Typing[4057] Invalid argument
 
+ 11 | function passes_missing_a_alias(
+ 12 |   missing_a $s,
+ 13 | ): void {
+ 14 |   expects_required_a_at_int_alias(»$s«);
+ 15 | }
+
+File "shape_subtyping_7.php", line 14, character 35 - line 14, character 36:
+
 The field `b` is missing
 
  3 | type required_a_at_int = »shape('a' => int)«;
@@ -120,6 +128,14 @@ which itself flows *into* nothing, via the non-existent shape field `'b'`
 File "", line 0, character 0 - line 0, character -1:
 
 error: Typing[4057] Invalid argument
+
+ 11 | function passes_missing_a_alias(
+ 12 |   missing_a $s,
+ 13 | ): void {
+ 14 |   expects_required_a_at_int_alias(»$s«);
+ 15 | }
+
+File "shape_subtyping_7.php", line 14, character 35 - line 14, character 36:
 
 The field `a` is missing
 

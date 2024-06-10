@@ -1,5 +1,12 @@
 error: Typing[4110] Invalid argument
 
+  9 | function bar(Super $f): void {
+ 10 |   $g = $f;
+ 11 |   foo(»$g«);
+ 12 | }
+
+File "assign_local.php", line 11, character 7 - line 11, character 8:
+
 Expected `Sub`
 
  7 | function foo(»Sub« $_): void {}

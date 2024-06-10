@@ -51,9 +51,6 @@ using ::testing::SaveArg;
 using ::testing::SizeIs;
 using ::testing::UnorderedElementsAre;
 
-#define DRAIN_EXECUTOR(m) \
-  (dynamic_cast<folly::ManualExecutor*>(m.m_exec.get()))->drain()
-
 /**
  * Implements our StringPtr class in terms of std::string.
  *
@@ -554,48 +551,83 @@ void update(
 
 } // namespace
 
+class TestingSymbolMap : public SymbolMap {
+ public:
+  TestingSymbolMap(
+      std::filesystem::path root,
+      AutoloadDB::Opener dbOpener,
+      hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes,
+      bool enableBlockingDbWait,
+      bool useSymbolMapForGetFilesWithAttrAndAnyVal,
+      std::chrono::milliseconds blockingDbwWaitTimeout,
+      bool useManualExecutor)
+      : SymbolMap(
+            root,
+            std::move(dbOpener),
+            indexedMethodAttributes,
+            enableBlockingDbWait,
+            useSymbolMapForGetFilesWithAttrAndAnyVal,
+            blockingDbwWaitTimeout) {
+    if (useManualExecutor) {
+      auto manual_executor = std::make_shared<folly::ManualExecutor>();
+      m_token = folly::getKeepAliveToken(*manual_executor);
+      m_exec = manual_executor;
+    }
+  }
+
+  virtual ~TestingSymbolMap() {
+    drain();
+  }
+
+  void drain() {
+    if (m_token.has_value()) {
+      m_token->get()->drain();
+    }
+  }
+
+ private:
+  std::optional<folly::Executor::KeepAlive<folly::ManualExecutor>> m_token;
+};
+
 class SymbolMapTest : public ::testing::TestWithParam<bool> {
  protected:
   SymbolMapTest()
       : m_tmpdir(std::make_unique<folly::test::TemporaryDirectory>(
             folly::test::TemporaryDirectory{"autoload"})) {}
 
-  virtual ~SymbolMapTest() override {
-    for (auto& map : m_maps) {
-      auto* manual_executor =
-          dynamic_cast<folly::ManualExecutor*>(map->m_exec.get());
-      if (manual_executor != nullptr) {
-        manual_executor->drain();
-      }
+  TestingSymbolMap& make(
+      std::string root,
+      AutoloadDB::Opener dbOpener,
+      bool useManualExecutor,
+      std::vector<std::string> indexedMethodAttributesVec) {
+    hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes;
+    indexedMethodAttributes.reserve(indexedMethodAttributesVec.size());
+    for (auto& attr : indexedMethodAttributesVec) {
+      indexedMethodAttributes.insert(Symbol<SymKind::Type>{attr});
     }
+    m_maps.push_back(std::make_unique<TestingSymbolMap>(
+        std::move(root),
+        std::move(dbOpener),
+        std::move(indexedMethodAttributes),
+        true,
+        true,
+        std::chrono::milliseconds(5000),
+        useManualExecutor));
+    return *m_maps.back();
   }
 
-  SymbolMap& make(
+  TestingSymbolMap& make(
       std::string root,
       bool useManualExecutor = false,
       std::vector<std::string> indexedMethodAttributesVec = {}) {
     auto dbPath = m_tmpdir->path() /
         folly::to<std::string>(
                       "autoload_", std::hash<std::string>{}(root), "_db.sql3");
-    hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes;
-    indexedMethodAttributes.reserve(indexedMethodAttributesVec.size());
-    for (auto& attr : indexedMethodAttributesVec) {
-      indexedMethodAttributes.insert(Symbol<SymKind::Type>{attr});
-    }
-    m_maps.push_back(std::make_unique<SymbolMap>(
-        std::move(root),
-        [dbPath]() -> std::shared_ptr<AutoloadDB> {
-          return SQLiteAutoloadDB::get(SQLiteKey::readWriteCreate(
-              fs::path{dbPath.native()}, static_cast<::gid_t>(-1), 0644));
-        },
-        std::move(indexedMethodAttributes),
-        true,
-        true,
-        std::chrono::milliseconds(5000)));
-    if (useManualExecutor) {
-      m_maps.back()->m_exec = std::make_shared<folly::ManualExecutor>();
-    }
-    return *m_maps.back();
+    auto dbOpener = [dbPath]() -> std::shared_ptr<AutoloadDB> {
+      return SQLiteAutoloadDB::get(SQLiteKey::readWriteCreate(
+          fs::path{dbPath.native()}, static_cast<::gid_t>(-1), 0644));
+    };
+    return make(root, dbOpener, useManualExecutor, indexedMethodAttributesVec);
   }
 
   SymbolMap& make(
@@ -603,26 +635,12 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
       std::shared_ptr<MockAutoloadDB> db,
       bool useManualExecutor = false,
       std::vector<std::string> indexedMethodAttributesVec = {}) {
-    hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes;
-    indexedMethodAttributes.reserve(indexedMethodAttributesVec.size());
-    for (auto& attr : indexedMethodAttributesVec) {
-      indexedMethodAttributes.insert(Symbol<SymKind::Type>{attr});
-    }
-    m_maps.push_back(std::make_unique<SymbolMap>(
-        std::move(root),
-        [&db]() -> std::shared_ptr<AutoloadDB> { return db; },
-        std::move(indexedMethodAttributes),
-        true,
-        true,
-        std::chrono::milliseconds(5000)));
-    if (useManualExecutor) {
-      m_maps.back()->m_exec = std::make_shared<folly::ManualExecutor>();
-    }
-    return *m_maps.back();
+    auto dbOpener = [&db]() -> std::shared_ptr<AutoloadDB> { return db; };
+    return make(root, dbOpener, false, indexedMethodAttributesVec);
   }
 
   std::unique_ptr<folly::test::TemporaryDirectory> m_tmpdir;
-  std::vector<std::unique_ptr<SymbolMap>> m_maps;
+  std::vector<std::unique_ptr<TestingSymbolMap>> m_maps;
 };
 
 TEST_F(SymbolMapTest, NewModules) {
@@ -1122,15 +1140,15 @@ TEST_F(SymbolMapTest, DoesNotFillDeadPathFromDB) {
   FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
-  DRAIN_EXECUTOR(m1);
-  DRAIN_EXECUTOR(m2);
-  DRAIN_EXECUTOR(m3);
+  m1.drain();
+  m2.drain();
+  m3.drain();
   m1.waitForDBUpdate();
 
   update(m2, "1:2:3", "1:2:4", {}, {path}, {});
-  DRAIN_EXECUTOR(m1);
-  DRAIN_EXECUTOR(m2);
-  DRAIN_EXECUTOR(m3);
+  m1.drain();
+  m2.drain();
+  m3.drain();
   m2.waitForDBUpdate();
   EXPECT_EQ(m2.getTypeFile("SomeClass"), nullptr);
 
@@ -1403,15 +1421,15 @@ TEST_F(SymbolMapTest, InterleaveDBUpdates) {
   EXPECT_EQ(m2.getFileFunctions(path).at(0).slice(), "some_fn");
   EXPECT_EQ(m2.getFunctionFile("some_fn"), path.native());
 
-  DRAIN_EXECUTOR(m1);
-  DRAIN_EXECUTOR(m2);
+  m1.drain();
+  m2.drain();
   m1.waitForDBUpdate();
   EXPECT_EQ(m1.getFunctionFile("some_fn"), path.native());
   EXPECT_EQ(m2.getFileFunctions(path).at(0).slice(), "some_fn");
   EXPECT_EQ(m2.getFunctionFile("some_fn"), path.native());
 
-  DRAIN_EXECUTOR(m1);
-  DRAIN_EXECUTOR(m2);
+  m1.drain();
+  m2.drain();
   m2.waitForDBUpdate();
   EXPECT_EQ(m1.getFunctionFile("some_fn"), path.native());
   EXPECT_EQ(m2.getFunctionFile("some_fn"), path.native());
@@ -1530,12 +1548,12 @@ TEST_F(SymbolMapTest, DBUpdatesOutOfOrder) {
   EXPECT_TRUE(m2.getDerivedTypes("SomeClass", DeriveKind::Extends).empty());
 
   // m2 updates the DB first, bringing the DB to 1:2:4.
-  DRAIN_EXECUTOR(m2);
+  m2.drain();
   m2.waitForDBUpdate();
 
   // m1 updates the DB next. m1's update should fail. m1 only knows
   // about 1:2:3, so it would be updating the DB with stale data.
-  DRAIN_EXECUTOR(m1);
+  m1.drain();
   m1.waitForDBUpdate();
 
   // Create a third map to observe the state of the DB.
@@ -1607,8 +1625,8 @@ TEST_F(SymbolMapTest, MoveAndCopySymbol) {
 
   // Initialize m2 as dependent on the DB
   update(m1, "", "1:2:3", {path1}, {}, {ff});
-  DRAIN_EXECUTOR(m1);
-  DRAIN_EXECUTOR(m2);
+  m1.drain();
+  m2.drain();
   m1.waitForDBUpdate();
 
   update(m2, "1:2:3", "1:2:3", {}, {}, {});
@@ -1647,7 +1665,7 @@ TEST_F(SymbolMapTest, AttrQueriesDoNotConfuseTypeAndTypeAlias) {
   EXPECT_THAT(m1.getAttributesOfType("SomeTypeAlias"), ElementsAre());
 
   // Create a second map and fill it from the DB
-  DRAIN_EXECUTOR(m1);
+  m1.drain();
   m1.waitForDBUpdate();
   auto& m2 = make("/var/www", /* useManualExecutor = */ true);
   update(m2, "1", "1", {}, {}, {});
@@ -1739,8 +1757,8 @@ TEST_F(SymbolMapTest, MemoryAndDBDisagreeOnFileHash) {
   fs::path path1 = {"some/path1.php"};
 
   update(m1, "", "1:2:3", {path1}, {}, {ff});
-  DRAIN_EXECUTOR(m1);
-  DRAIN_EXECUTOR(m2);
+  m1.drain();
+  m2.drain();
   m1.waitForDBUpdate();
   auto oldHash = getSha1Hex(ff);
   EXPECT_EQ(m1.getAllPathsWithHashes().at(Path{path1}).toString(), oldHash);
@@ -1775,7 +1793,7 @@ TEST_F(SymbolMapTest, PartiallyFillDerivedTypeInfo) {
   fs::path p3 = "some/path3.php";
 
   update(m1, "", "1:2:3", {p1, p2, p3}, {}, {ff1, ff2, ff3});
-  DRAIN_EXECUTOR(m1);
+  m1.drain();
   m1.waitForDBUpdate();
 
   auto& m2 = make("/var/www", /* useManualExecutor = */ true);
@@ -1820,7 +1838,7 @@ TEST_F(SymbolMapTest, BaseTypesWithDifferentCases) {
 
   // Define both "baseclass" and "BaseClass"
   update(m1, "", "1", {p1, p2, p3, p4}, {}, {ff1, ff2, ff3, ff4});
-  DRAIN_EXECUTOR(m1);
+  m1.drain();
   m1.waitForDBUpdate();
   auto& m2 = make("/var/www");
   update(m2, "1", "1", {}, {}, {});
@@ -1906,7 +1924,7 @@ TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
   testMap(m1);
-  DRAIN_EXECUTOR(m1);
+  m1.drain();
   m1.waitForDBUpdate();
 
   auto& m2 = make("/var/www");
@@ -1923,7 +1941,7 @@ TEST_F(SymbolMapTest, ErasePathStoredInDB) {
 
   update(m1, "", "1:2:3", {p}, {}, {ff});
   EXPECT_EQ(m1.getTypeFile("SomeClass"), p.native());
-  DRAIN_EXECUTOR(m1);
+  m1.drain();
   m1.waitForDBUpdate();
 
   auto& m2 = make("/var/www", /* useManualExecutor = */ true);
@@ -1979,7 +1997,7 @@ TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
 
   update(m1, "", "1:2:3", {p}, {}, {ff});
   testMap(m1);
-  DRAIN_EXECUTOR(m1);
+  m1.drain();
   m1.waitForDBUpdate();
 
   auto& m2 = make("/var/www", /* useManualExecutor = */ true);
@@ -2187,7 +2205,7 @@ TEST_F(SymbolMapTest, ConcurrentFillsFromDB) {
 
   // Update the DB with all path information
   update(dbUpdater, "", "1:2:3", std::move(paths), {}, std::move(facts));
-  DRAIN_EXECUTOR(dbUpdater);
+  dbUpdater.drain();
   dbUpdater.waitForDBUpdate();
 
   update(map, "1:2:3", "1:2:3", {}, {}, {});

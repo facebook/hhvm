@@ -21,6 +21,7 @@ from parameterized import parameterized
 
 from thrift.python.mutable_typeinfos import (
     MutableListTypeInfo,
+    MutableMapTypeInfo,
     MutableSetTypeInfo,
     MutableStructTypeInfo,
 )
@@ -57,6 +58,7 @@ class TypeInfoTests(unittest.TestCase):
             MutableListTypeInfo,
             MutableSetTypeInfo,
             MutableStructTypeInfo,
+            MutableMapTypeInfo,
             SetTypeInfo,
             StringTypeInfo,
             StructTypeInfo,
@@ -118,3 +120,6 @@ class TypeInfoTests(unittest.TestCase):
 
     def test_MutableSetTypeInfo(self) -> None:
         CTests(self).test_MutableSetTypeInfo()
+
+    def test_MutableMapTypeInfo(self) -> None:
+        CTests(self).test_MutableMapTypeInfo()

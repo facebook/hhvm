@@ -43,8 +43,12 @@ from thrift.python.types cimport (
 from thrift.python.mutable_typeinfos cimport (
     MutableListTypeInfo,
     MutableSetTypeInfo,
+    MutableMapTypeInfo,
 )
-from thrift.python.mutable_containers cimport MutableSet
+from thrift.python.mutable_containers cimport (
+    MutableMap,
+    MutableSet,
+)
 from thrift.python.test.containers.thrift_types import (
     Foo,
     Bar,
@@ -368,3 +372,25 @@ cdef class TypeInfoTests():
         self.ut.assertTrue(set_type_info.same_as(set_type_info))
         self.ut.assertTrue(MutableSetTypeInfo(typeinfo_i64).same_as(set_type_info))
         self.ut.assertFalse(MutableSetTypeInfo(typeinfo_i32).same_as(set_type_info))
+
+    def test_MutableMapTypeInfo(self) -> None:
+        map_type_info = MutableMapTypeInfo(typeinfo_string, typeinfo_i64)
+        self.ut.assertIsInstance(map_type_info, TypeInfoBase)
+
+        with self.ut.assertRaises(TypeError):
+            map_type_info.to_internal_data(None)
+
+        data = map_type_info.to_internal_data({"a":1, "b":2})
+        self.ut.assertEqual(data, {b"a":1, b"b":2})
+        expected_python_val = MutableMap(typeinfo_string, typeinfo_i64, {b"a": 1, b"b":2})
+        self.ut.assertEqual(map_type_info.to_python_value(data), expected_python_val)
+
+        self.assertEqual(
+            (<MutableMapTypeInfo>map_type_info).cpp_obj.get().get(),
+            getCTypeInfo(map_type_info),
+        )
+
+        self.ut.assertTrue(map_type_info.same_as(map_type_info))
+        self.ut.assertTrue(MutableMapTypeInfo(typeinfo_string, typeinfo_i64).same_as(map_type_info))
+        self.ut.assertFalse(MutableMapTypeInfo(typeinfo_string, typeinfo_i32).same_as(map_type_info))
+        self.ut.assertFalse(MutableMapTypeInfo(typeinfo_i32, typeinfo_i64).same_as(map_type_info))

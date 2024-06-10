@@ -6054,11 +6054,25 @@ end = struct
             && (Typing_defs_flags.ClassElt.supports_dynamic_type ce_flags
                || Cls.get_support_dynamic_type class_)
           in
-          ( env,
+          let fty =
             Typing_dynamic.maybe_wrap_with_supportdyn
               ~should_wrap
               (Reason.localize (get_reason m))
-              ft )
+              ft
+          in
+          (* If we used constraint solving for function typing, the
+             inferred type of the function call would be the supertype and the
+             declared function type, instantiated at the calls type arguents, would
+             be the subtype. We would then project on the individual type parameters
+             and create the contravariant constraints with this path reversed so we
+             construct that reversed path here. *)
+          let fty =
+            Prov.(
+              update fty ~env ~f:(fun r_sub ->
+                  let r_super = Reason.witness p in
+                  flow ~from:r_super ~into:(rev r_sub)))
+          in
+          (env, fty)
         | _ ->
           Errors.internal_error p "Expected function type for constructor";
           Env.fresh_type_error env p

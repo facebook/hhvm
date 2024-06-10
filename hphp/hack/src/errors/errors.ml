@@ -1001,6 +1001,7 @@ let as_telemetry
            ~key:"error_json"
            ~value:
              (User_error.to_json
+                ~human_formatter:None
                 ~filename_to_string:Relative_path.suffix
                 rel_err)
     in

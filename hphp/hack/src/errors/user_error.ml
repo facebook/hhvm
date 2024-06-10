@@ -215,7 +215,8 @@ let to_string
       Buffer.add_string buf msg);
   Buffer.contents buf
 
-let to_json ~filename_to_string error =
+let to_json ~(human_formatter : (_ -> string) option) ~filename_to_string error
+    =
   let {
     severity;
     code;
@@ -246,10 +247,19 @@ let to_json ~filename_to_string error =
     List.map ~f:(fun msg -> Hh_json.JSON_String msg) custom_msgs
   in
   let flags = User_error_flags.to_json flags in
-  Hh_json.JSON_Object
+  let human_format = Option.map ~f:(fun f -> f error) human_formatter in
+  let obj =
     [
       ("severity", Hh_json.JSON_String (Severity.to_string severity));
       ("message", Hh_json.JSON_Array elts);
       ("custom_messages", Hh_json.JSON_Array custom_msgs);
       ("flags", flags);
     ]
+  in
+  let obj =
+    match human_format with
+    | None -> obj
+    | Some human_format ->
+      obj @ [("human_format", Hh_json.JSON_String human_format)]
+  in
+  Hh_json.JSON_Object obj

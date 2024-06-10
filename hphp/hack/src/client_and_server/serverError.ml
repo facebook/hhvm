@@ -28,14 +28,28 @@ let get_save_state_result_json
     Hh_json.JSON_Object (get_save_state_result_props_json save_state_result) )
 
 let get_error_list_json
+    (error_format : Errors.format)
     (error_list : Errors.finalized_error list)
     ~(save_state_result : SaveStateServiceTypes.save_state_result option)
     ~(recheck_stats : Telemetry.t option) =
+  (* for extended reasons, we produce a human-readable format. *)
+  let human_formatter =
+    Errors.(
+      match error_format with
+      | Extended -> Some Extended_error_formatter.to_string
+      | Context
+      | Raw
+      | Highlighted
+      | Plain ->
+        None)
+  in
   let (error_list, did_pass) =
     match error_list with
     | [] -> ([], true)
     | error_list ->
-      ( List.map ~f:(User_error.to_json ~filename_to_string:Fn.id) error_list,
+      ( List.map
+          ~f:(User_error.to_json ~human_formatter ~filename_to_string:Fn.id)
+          error_list,
         false )
   in
   let (properties : (string * Hh_json.json) list) =
@@ -64,10 +78,17 @@ let get_error_list_json
 
 let print_error_list_json
     (oc : Out_channel.t)
+    (error_format : Errors.format)
     (error_list : Errors.finalized_error list)
     (save_state_result : SaveStateServiceTypes.save_state_result option)
     (recheck_stats : Telemetry.t option) =
-  let res = get_error_list_json error_list ~save_state_result ~recheck_stats in
+  let res =
+    get_error_list_json
+      error_format
+      error_list
+      ~save_state_result
+      ~recheck_stats
+  in
   Hh_json.json_to_output oc res;
   Out_channel.flush oc
 
@@ -75,11 +96,17 @@ let print_error_list
     (oc : Out_channel.t)
     ~(stale_msg : string option)
     ~(output_json : bool)
+    ~(error_format : Errors.format)
     ~(error_list : Errors.finalized_error list)
     ~(save_state_result : SaveStateServiceTypes.save_state_result option)
     ~(recheck_stats : Telemetry.t option) =
   (if output_json then
-    print_error_list_json oc error_list save_state_result recheck_stats
+    print_error_list_json
+      oc
+      error_format
+      error_list
+      save_state_result
+      recheck_stats
   else if List.is_empty error_list then
     Out_channel.output_string oc "No errors!\n"
   else

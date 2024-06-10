@@ -101,6 +101,7 @@ val error_code_to_string : int -> string
 val to_string : bool -> (Pos.absolute, Pos.absolute) t -> string
 
 val to_json :
+  human_formatter:(('a Pos.pos, 'a Pos.pos) t -> string) option ->
   filename_to_string:('a -> string) ->
   ('a Pos.pos, 'a Pos.pos) t ->
   Hh_json.json

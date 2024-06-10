@@ -86,6 +86,7 @@ module Program = struct
       stdout
       ~stale_msg:None
       ~output_json:(ServerArgs.json_mode genv.options)
+      ~error_format:Errors.Raw
       ~error_list:
         (List.map (Errors.get_error_list env.errorl) ~f:User_error.to_absolute)
       ~save_state_result

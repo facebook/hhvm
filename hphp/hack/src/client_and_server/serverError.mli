@@ -13,6 +13,7 @@ val print_error_list :
   Out_channel.t ->
   stale_msg:string option ->
   output_json:bool ->
+  error_format:Errors.format ->
   error_list:Errors.finalized_error list ->
   save_state_result:SaveStateServiceTypes.save_state_result option ->
   recheck_stats:Telemetry.t option ->

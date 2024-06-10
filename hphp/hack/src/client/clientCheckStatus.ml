@@ -55,6 +55,7 @@ let go status output_json from error_format max_errors =
       stdout
       ~stale_msg
       ~output_json
+      ~error_format
       ~error_list
       ~save_state_result:None
       ~recheck_stats:last_recheck_stats

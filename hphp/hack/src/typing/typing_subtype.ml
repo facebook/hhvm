@@ -1358,25 +1358,37 @@ end = struct
        * TODO: identify under what circumstances this reduction is complete.
        * TODO(T120921930): Don't do this if require_completeness is set.
        *)
-      let rec try_disjuncts tys env =
-        match tys with
-        | [] -> invalid_env env
-        | ty :: tys ->
+      let rec aux ty_supers ~env ~errs ~props =
+        match ty_supers with
+        | [] ->
+          ( env,
+            TL.Disj (Typing_error.intersect_opt @@ List.filter_opt errs, props)
+          )
+        | ty_super :: ty_supers ->
           let ty_super =
             Prov.(
-              update ty ~env ~f:(fun into ->
+              update ty_super ~env ~f:(fun into ->
                   flow ~from:(prj_union_right r_super) ~into))
           in
-          let ( ||| ) = ( ||| ) ~fail in
-          simplify
-            ~subtype_env
-            ~this_ty
-            ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-            ~rhs:{ super_like; super_supportdyn = false; ty_super }
-            env
-          ||| try_disjuncts tys
+          let (env, prop) =
+            simplify
+              ~subtype_env
+              ~this_ty
+              ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+              ~rhs:{ super_like; super_supportdyn = false; ty_super }
+              env
+          in
+          if TL.is_valid prop then
+            (env, prop)
+          else
+            let (errs, props) =
+              match TL.get_error_if_unsat prop with
+              | Some err -> (err :: errs, props)
+              | _ -> (errs, prop :: props)
+            in
+            aux ty_supers ~env ~errs ~props
       in
-      env |> try_disjuncts lty_supers
+      aux lty_supers ~env ~errs:[fail] ~props:[]
 
   (* == Function subtyping ================================================== *)
   and simplify_subtype_params_with_variadic

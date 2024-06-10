@@ -538,25 +538,19 @@ struct SymbolMapWrapper {
   SymbolMapWrapper(
       std::unique_ptr<SymbolMap> m,
       std::shared_ptr<folly::ManualExecutor> exec)
-      : m_exec{exec}, m_map{std::move(m)} {
-    if (m_exec) {
-      m_map->m_exec = m_exec;
+      : m_map{std::move(m)} {
+    if (exec) {
+      m_map->m_exec = exec;
     }
   }
 
-  ~SymbolMapWrapper() {
-    if (m_exec) {
-      m_exec->drain();
-    }
-  }
+  SymbolMapWrapper(SymbolMapWrapper&& old) noexcept
+      : m_map{std::move(old.m_map)} {}
 
   SymbolMapWrapper(const SymbolMapWrapper&) = delete;
   SymbolMapWrapper& operator=(const SymbolMapWrapper&) = delete;
-  SymbolMapWrapper(SymbolMapWrapper&& old) noexcept
-      : m_exec{std::move(old.m_exec)}, m_map{std::move(old.m_map)} {}
   SymbolMapWrapper& operator=(SymbolMapWrapper&& old) noexcept = delete;
 
-  std::shared_ptr<folly::ManualExecutor> m_exec;
   std::unique_ptr<SymbolMap> m_map;
 };
 
@@ -602,6 +596,13 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
   }
 
   void TearDown() override {
+    for (auto& map : m_wrappers) {
+      auto* manual_executor =
+          dynamic_cast<folly::ManualExecutor*>(map.m_map->m_exec.get());
+      if (manual_executor != nullptr) {
+        manual_executor->drain();
+      }
+    }
     m_wrappers.clear();
   }
 

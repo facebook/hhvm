@@ -98,7 +98,7 @@ struct SymbolMap {
       hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes,
       bool enableBlockingDbWait,
       bool useSymbolMapForGetFilesWithAttrAndAnyVal,
-      std::chrono::milliseconds blockingDbwWaitTimeout);
+      std::chrono::milliseconds blockingDbWaitTimeout);
   SymbolMap() = delete;
   SymbolMap(const SymbolMap&) = delete;
   SymbolMap(SymbolMap&&) noexcept = delete;

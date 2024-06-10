@@ -559,7 +559,7 @@ class TestingSymbolMap : public SymbolMap {
       hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes,
       bool enableBlockingDbWait,
       bool useSymbolMapForGetFilesWithAttrAndAnyVal,
-      std::chrono::milliseconds blockingDbwWaitTimeout,
+      std::chrono::milliseconds blockingDbWaitTimeout,
       bool useManualExecutor)
       : SymbolMap(
             root,
@@ -567,7 +567,7 @@ class TestingSymbolMap : public SymbolMap {
             indexedMethodAttributes,
             enableBlockingDbWait,
             useSymbolMapForGetFilesWithAttrAndAnyVal,
-            blockingDbwWaitTimeout) {
+            blockingDbWaitTimeout) {
     if (useManualExecutor) {
       auto manual_executor = std::make_unique<folly::ManualExecutor>();
       m_token = folly::getKeepAliveToken(*manual_executor);

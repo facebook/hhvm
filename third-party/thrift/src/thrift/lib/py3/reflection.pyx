@@ -224,10 +224,7 @@ cdef class MapSpec:
 cdef class InterfaceSpec:
     def __cinit__(self, str name, methods, dict annotations = {}):
         self.name = name
-        if methods:
-            for method in methods:
-                Py_INCREF(method)
-                self._methods.push_back(<PyObject*>method)
+        self._methods = list(methods) if methods else list()
         self.annotations = MappingProxyType(annotations)
 
     @staticmethod
@@ -235,16 +232,11 @@ cdef class InterfaceSpec:
         return InterfaceSpec.__new__(InterfaceSpec, name, None, annotations)
 
     cdef void add_method(self, MethodSpec method):
-        Py_INCREF(method)
-        self._methods.push_back(<PyObject*>method)
-
-    def __dealloc__(self):
-        for method in self._methods:
-            Py_XDECREF(method)
+        self._methods.append(method)
 
     @property
     def methods(self):
-        return tuple(<object>method for method in self._methods)
+        return tuple(method for method in self._methods)
 
     def __iter__(self):
         yield self.name

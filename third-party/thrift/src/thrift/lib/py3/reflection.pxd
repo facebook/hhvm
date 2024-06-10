@@ -77,7 +77,7 @@ cdef class MapSpec:
 
 cdef class InterfaceSpec:
     cdef readonly str name
-    cdef cvector[PyObject*] _methods
+    cdef list _methods
     cdef readonly object annotations
 
     @staticmethod

@@ -535,12 +535,10 @@ struct MockAutoloadDB : public AutoloadDB {
  * ManualExecutor before ending each test.
  */
 struct SymbolMapWrapper {
-  SymbolMapWrapper(
-      std::unique_ptr<SymbolMap> m,
-      std::shared_ptr<folly::ManualExecutor> exec)
+  SymbolMapWrapper(std::unique_ptr<SymbolMap> m, bool useManualExecutor)
       : m_map{std::move(m)} {
-    if (exec) {
-      m_map->m_exec = exec;
+    if (useManualExecutor) {
+      m_map->m_exec = std::make_shared<folly::ManualExecutor>();
     }
   }
 
@@ -582,10 +580,7 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
  protected:
   SymbolMapTest()
       : m_tmpdir(std::make_unique<folly::test::TemporaryDirectory>(
-            folly::test::TemporaryDirectory{"autoload"})),
-        m_exec1(std::make_shared<folly::ManualExecutor>()),
-        m_exec2(std::make_shared<folly::ManualExecutor>()),
-        m_exec3(std::make_shared<folly::ManualExecutor>()) {}
+            folly::test::TemporaryDirectory{"autoload"})) {}
 
   virtual ~SymbolMapTest() override {
     for (auto& map : m_wrappers) {
@@ -599,7 +594,7 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
 
   SymbolMap& make(
       std::string root,
-      std::shared_ptr<folly::ManualExecutor> exec = nullptr,
+      bool useManualExecutor = false,
       std::vector<std::string> indexedMethodAttributesVec = {}) {
     auto dbPath = m_tmpdir->path() /
         folly::to<std::string>(
@@ -620,14 +615,14 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
             true,
             true,
             std::chrono::milliseconds(5000)),
-        std::move(exec)});
+        useManualExecutor});
     return *m_wrappers.back().m_map;
   }
 
   SymbolMap& make(
       std::string root,
       std::shared_ptr<MockAutoloadDB> db,
-      std::shared_ptr<folly::ManualExecutor> exec = nullptr,
+      bool useManualExecutor = false,
       std::vector<std::string> indexedMethodAttributesVec = {}) {
     hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes;
     indexedMethodAttributes.reserve(indexedMethodAttributesVec.size());
@@ -642,14 +637,11 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
             true,
             true,
             std::chrono::milliseconds(5000)),
-        std::move(exec)});
+        useManualExecutor});
     return *m_wrappers.back().m_map;
   }
 
   std::unique_ptr<folly::test::TemporaryDirectory> m_tmpdir;
-  std::shared_ptr<folly::ManualExecutor> m_exec1;
-  std::shared_ptr<folly::ManualExecutor> m_exec2;
-  std::shared_ptr<folly::ManualExecutor> m_exec3;
   std::vector<SymbolMapWrapper> m_wrappers;
 };
 
@@ -1142,9 +1134,9 @@ TEST_F(SymbolMapTest, CopiedFile) {
 }
 
 TEST_F(SymbolMapTest, DoesNotFillDeadPathFromDB) {
-  auto& m1 = make("/var/www", m_exec1);
-  auto& m2 = make("/var/www", m_exec2);
-  auto& m3 = make("/var/www", m_exec3);
+  auto& m1 = make("/var/www", /* useManualExecutor = */ true);
+  auto& m2 = make("/var/www", /* useManualExecutor = */ true);
+  auto& m3 = make("/var/www", /* useManualExecutor = */ true);
 
   fs::path path = {"some/path.php"};
   FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
@@ -1199,11 +1191,11 @@ TEST_F(SymbolMapTest, DelayedDBUpdateDoesNotMakeResultsIncorrect) {
 
   m.waitForDBUpdate();
 
-  auto& m2 = make("/var/www", m_exec1);
+  auto& m2 = make("/var/www", /* useManualExecutor = */ true);
 
   update(m2, "1:2:3", "1:2:4", {}, {path2}, {});
   // We do not wait for the DB update to complete.
-  // m_exec1.drive();
+  // /* useManualExecutor = */ true.drive();
   // m2.waitForDBUpdate();
   EXPECT_EQ(m2.getKind("SomeClass"), TypeKind::Class);
   EXPECT_EQ(m2.getKind("BaseClass"), TypeKind::Class);
@@ -1414,8 +1406,8 @@ TEST_F(SymbolMapTest, MultipleRoots) {
 }
 
 TEST_F(SymbolMapTest, InterleaveDBUpdates) {
-  auto& m1 = make("/var/www", m_exec1);
-  auto& m2 = make("/var/www", m_exec2);
+  auto& m1 = make("/var/www", /* useManualExecutor = */ true);
+  auto& m2 = make("/var/www", /* useManualExecutor = */ true);
 
   fs::path path = {"some/path.php"};
 
@@ -1446,7 +1438,7 @@ TEST_F(SymbolMapTest, InterleaveDBUpdates) {
 }
 
 TEST_F(SymbolMapTest, RemoveBaseTypeFromDerivedType) {
-  auto& m = make("/var/www", m_exec1);
+  auto& m = make("/var/www", /* useManualExecutor = */ true);
 
   FileFacts ff{
       .types = {
@@ -1473,7 +1465,7 @@ TEST_F(SymbolMapTest, RemoveBaseTypeFromDerivedType) {
 }
 
 TEST_F(SymbolMapTest, DuplicateDefineDerivedType) {
-  auto& m = make("/var/www", m_exec1);
+  auto& m = make("/var/www", /* useManualExecutor = */ true);
 
   FileFacts ff1{
       .types = {
@@ -1508,8 +1500,8 @@ TEST_F(SymbolMapTest, DuplicateDefineDerivedType) {
 }
 
 TEST_F(SymbolMapTest, DBUpdatesOutOfOrder) {
-  auto& m1 = make("/var/www", m_exec1);
-  auto& m2 = make("/var/www", m_exec2);
+  auto& m1 = make("/var/www", /* useManualExecutor = */ true);
+  auto& m2 = make("/var/www", /* useManualExecutor = */ true);
 
   FileFacts ff{
       .types = {
@@ -1567,7 +1559,7 @@ TEST_F(SymbolMapTest, DBUpdatesOutOfOrder) {
   m1.waitForDBUpdate();
 
   // Create a third map to observe the state of the DB.
-  auto& m3 = make("/var/www", m_exec3);
+  auto& m3 = make("/var/www", /* useManualExecutor = */ true);
   // The DB clock should be 1:2:4, and the DB state should be
   // consistent with the state in m2, not m1.
   update(m3, "1:2:4", "1:2:4", {}, {}, {});
@@ -1622,8 +1614,8 @@ TEST_F(SymbolMapTest, RemovePathFromExistingFile) {
 }
 
 TEST_F(SymbolMapTest, MoveAndCopySymbol) {
-  auto& m1 = make("/var/www", m_exec1);
-  auto& m2 = make("/var/www", m_exec2);
+  auto& m1 = make("/var/www", /* useManualExecutor = */ true);
+  auto& m2 = make("/var/www", /* useManualExecutor = */ true);
 
   FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
@@ -1653,7 +1645,7 @@ TEST_F(SymbolMapTest, MoveAndCopySymbol) {
 }
 
 TEST_F(SymbolMapTest, AttrQueriesDoNotConfuseTypeAndTypeAlias) {
-  auto& m1 = make("/var/www", m_exec1);
+  auto& m1 = make("/var/www", /* useManualExecutor = */ true);
   fs::path p = "foo.php";
   FileFacts ffTypeAliasWithAttr{
       .types = {
@@ -1677,7 +1669,7 @@ TEST_F(SymbolMapTest, AttrQueriesDoNotConfuseTypeAndTypeAlias) {
   // Create a second map and fill it from the DB
   DRAIN_EXECUTOR(m1);
   m1.waitForDBUpdate();
-  auto& m2 = make("/var/www", m_exec2);
+  auto& m2 = make("/var/www", /* useManualExecutor = */ true);
   update(m2, "1", "1", {}, {}, {});
 
   EXPECT_THAT(m2.getAttributesOfType("SomeClass"), ElementsAre("ClassAttr"));
@@ -1691,7 +1683,7 @@ TEST_F(SymbolMapTest, AttrQueriesDoNotConfuseTypeAndTypeAlias) {
 }
 
 TEST_F(SymbolMapTest, TwoFilesDisagreeOnBaseTypes) {
-  auto& m = make("/var/www", m_exec1);
+  auto& m = make("/var/www", /* useManualExecutor = */ true);
 
   FileFacts ffSomeClassDerivesBaseClass{
       .types = {
@@ -1759,8 +1751,8 @@ TEST_F(SymbolMapTest, TwoFilesDisagreeOnBaseTypes) {
 }
 
 TEST_F(SymbolMapTest, MemoryAndDBDisagreeOnFileHash) {
-  auto& m1 = make("/var/www", m_exec1);
-  auto& m2 = make("/var/www", m_exec2);
+  auto& m1 = make("/var/www", /* useManualExecutor = */ true);
+  auto& m2 = make("/var/www", /* useManualExecutor = */ true);
 
   FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
@@ -1782,7 +1774,7 @@ TEST_F(SymbolMapTest, MemoryAndDBDisagreeOnFileHash) {
 }
 
 TEST_F(SymbolMapTest, PartiallyFillDerivedTypeInfo) {
-  auto& m1 = make("/var/www", m_exec1);
+  auto& m1 = make("/var/www", /* useManualExecutor = */ true);
 
   FileFacts ff1{
       .types = {
@@ -1806,7 +1798,7 @@ TEST_F(SymbolMapTest, PartiallyFillDerivedTypeInfo) {
   DRAIN_EXECUTOR(m1);
   m1.waitForDBUpdate();
 
-  auto& m2 = make("/var/www", m_exec2);
+  auto& m2 = make("/var/www", /* useManualExecutor = */ true);
   update(m2, "1:2:3", "1:2:3", {}, {}, {});
 
   // Fetch the supertypes of SomeClass from the DB
@@ -1823,7 +1815,7 @@ TEST_F(SymbolMapTest, PartiallyFillDerivedTypeInfo) {
 }
 
 TEST_F(SymbolMapTest, BaseTypesWithDifferentCases) {
-  auto& m1 = make("/var/www", m_exec1);
+  auto& m1 = make("/var/www", /* useManualExecutor = */ true);
 
   FileFacts ff1{
       .types = {
@@ -1873,7 +1865,7 @@ TEST_F(SymbolMapTest, BaseTypesWithDifferentCases) {
 }
 
 TEST_F(SymbolMapTest, DerivedTypesWithDifferentCases) {
-  auto& m = make("/var/www", m_exec1);
+  auto& m = make("/var/www", /* useManualExecutor = */ true);
 
   FileFacts ff1{
       .types = {
@@ -1912,7 +1904,7 @@ TEST_F(SymbolMapTest, DerivedTypesWithDifferentCases) {
 }
 
 TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
-  auto& m1 = make("/var/www", m_exec1);
+  auto& m1 = make("/var/www", /* useManualExecutor = */ true);
 
   FileFacts ff{
       .types = {
@@ -1943,7 +1935,7 @@ TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
 }
 
 TEST_F(SymbolMapTest, ErasePathStoredInDB) {
-  auto& m1 = make("/var/www", m_exec1);
+  auto& m1 = make("/var/www", /* useManualExecutor = */ true);
 
   FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
@@ -1954,14 +1946,14 @@ TEST_F(SymbolMapTest, ErasePathStoredInDB) {
   DRAIN_EXECUTOR(m1);
   m1.waitForDBUpdate();
 
-  auto& m2 = make("/var/www", m_exec1);
+  auto& m2 = make("/var/www", /* useManualExecutor = */ true);
   update(m2, "1:2:3", "1:2:4", {}, {p}, {});
   update(m2, "1:2:4", "1:2:5", {p}, {}, {ff});
   EXPECT_EQ(m2.getTypeFile("SomeClass"), p.native());
 }
 
 TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
-  auto& m1 = make("/var/www", m_exec1);
+  auto& m1 = make("/var/www", /* useManualExecutor = */ true);
 
   FileFacts ff{
       .types = {
@@ -2010,7 +2002,7 @@ TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
   DRAIN_EXECUTOR(m1);
   m1.waitForDBUpdate();
 
-  auto& m2 = make("/var/www", m_exec2);
+  auto& m2 = make("/var/www", /* useManualExecutor = */ true);
   update(m2, "1:2:3", "1:2:3", {}, {}, {});
   testMap(m2);
 }
@@ -2106,7 +2098,7 @@ TEST_F(SymbolMapTest, GetAttributesOfRenamedMethod) {
 
 TEST_F(SymbolMapTest, OnlyIndexCertainMethodAttrs) {
   // Index A2 but not A1
-  auto& m1 = make("/var/www", nullptr, {"A2"});
+  auto& m1 = make("/var/www", /* useManualExecutor = */ false, {"A2"});
 
   // Create method `C1::m1`
   FileFacts ff1{
@@ -2137,7 +2129,7 @@ TEST_F(SymbolMapTest, OnlyIndexCertainMethodAttrs) {
   check(m1);
   m1.waitForDBUpdate();
 
-  auto& m2 = make("/var/www", nullptr, {"A2"});
+  auto& m2 = make("/var/www", /* useManualExecutor = */ false, {"A2"});
   update(m2, "1", "1", {}, {}, {});
   check(m2);
 }
@@ -2182,7 +2174,7 @@ TEST_F(SymbolMapTest, GetFilesWithAttribute) {
 }
 
 TEST_F(SymbolMapTest, ConcurrentFillsFromDB) {
-  auto& dbUpdater = make("/var/www", m_exec1);
+  auto& dbUpdater = make("/var/www", /* useManualExecutor = */ true);
   auto& map = make("/var/www");
 
   auto makeSym = [](size_t i) -> std::string {

@@ -59,7 +59,7 @@ func (t *rpcClientConformanceTester) getClient() (*rpc.RPCConformanceServiceClie
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to %s", addr)
 	}
-	return rpc.NewRPCConformanceServiceClient(thrift.NewHeaderProtocol(transport)), nil
+	return rpc.NewRPCConformanceServiceClient(thrift.NewUpgradeToRocketProtocol(transport)), nil
 }
 
 func (t *rpcClientConformanceTester) execute() {

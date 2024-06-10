@@ -84,7 +84,7 @@ TEST_F(BroadcastHandlerTest, SubscribeUnsubscribe) {
             auto buf = q.move();
             if (buf) {
               buf->coalesce();
-              data = buf->moveToFbString().toStdString();
+              data = buf->to<std::string>();
               return true;
             }
             return false;
@@ -153,7 +153,7 @@ TEST_F(BroadcastHandlerTest, BufferedRead) {
             }
             auto buf = bufQueue.move();
             buf->coalesce();
-            data = buf->moveToFbString().toStdString();
+            data = buf->to<std::string>();
             return true;
           }));
 
@@ -222,7 +222,7 @@ TEST_F(BroadcastHandlerTest, OnCompleted) {
             auto buf = q.move();
             if (buf) {
               buf->coalesce();
-              data = buf->moveToFbString().toStdString();
+              data = buf->to<std::string>();
               return true;
             }
             return false;
@@ -277,7 +277,7 @@ TEST_F(BroadcastHandlerTest, OnError) {
             auto buf = q.move();
             if (buf) {
               buf->coalesce();
-              data = buf->moveToFbString().toStdString();
+              data = buf->to<std::string>();
               return true;
             }
             return false;

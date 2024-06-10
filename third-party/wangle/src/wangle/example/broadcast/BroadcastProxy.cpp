@@ -71,7 +71,7 @@ class ByteToStringDecoder : public ByteToMessageDecoder<std::string> {
   bool decode(Context*, IOBufQueue& buf, std::string& result, size_t&)
       override {
     if (buf.chainLength() > 0) {
-      result = buf.move()->moveToFbString().toStdString();
+      result = buf.move()->to<std::string>();
       return true;
     }
     return false;

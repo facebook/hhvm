@@ -1579,6 +1579,14 @@ class MyService_MyInteraction_frobnicate_result extends \ThriftSyncStructWithRes
     }
     return null;
   }
+  
+  public function setException(\TException $e): bool {
+    if ($e is CustomException) {
+      $this->ex = $e;
+      return true;
+    }
+    return false;
+  }
 }
 
 class MyService_MyInteraction_ping_args implements \IThriftSyncStruct, \IThriftStructMetadata {

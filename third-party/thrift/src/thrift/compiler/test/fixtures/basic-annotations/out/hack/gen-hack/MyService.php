@@ -971,6 +971,14 @@ class MyService_ping_result extends \ThriftSyncStructWithoutResult implements \I
     }
     return null;
   }
+  
+  public function setException(\TException $e): bool {
+    if ($e is MyException) {
+      $this->myExcept = $e;
+      return true;
+    }
+    return false;
+  }
 }
 
 class MyService_getRandomData_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {

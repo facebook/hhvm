@@ -388,6 +388,14 @@ class TestService_ping_result extends \ThriftSyncStructWithResult implements \IT
     }
     return null;
   }
+  
+  public function setException(\TException $e): bool {
+    if ($e is \foo\hack_ns\FooException) {
+      $this->ex = $e;
+      return true;
+    }
+    return false;
+  }
 }
 
 class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {

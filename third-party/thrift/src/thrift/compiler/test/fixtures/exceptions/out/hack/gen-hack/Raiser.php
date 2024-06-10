@@ -626,6 +626,22 @@ class Raiser_doRaise_result extends \ThriftSyncStructWithoutResult implements \I
     }
     return null;
   }
+  
+  public function setException(\TException $e): bool {
+    if ($e is Banal) {
+      $this->b = $e;
+      return true;
+    }
+    if ($e is Fiery) {
+      $this->f = $e;
+      return true;
+    }
+    if ($e is Serious) {
+      $this->s = $e;
+      return true;
+    }
+    return false;
+  }
 }
 
 class Raiser_get200_args implements \IThriftSyncStruct, \IThriftStructMetadata {
@@ -968,6 +984,22 @@ class Raiser_get500_result extends \ThriftSyncStructWithResult implements \IThri
       return $this->s;
     }
     return null;
+  }
+  
+  public function setException(\TException $e): bool {
+    if ($e is Fiery) {
+      $this->f = $e;
+      return true;
+    }
+    if ($e is Banal) {
+      $this->b = $e;
+      return true;
+    }
+    if ($e is Serious) {
+      $this->s = $e;
+      return true;
+    }
+    return false;
   }
 }
 

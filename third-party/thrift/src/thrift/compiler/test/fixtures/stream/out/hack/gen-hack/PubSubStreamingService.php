@@ -959,6 +959,14 @@ class PubSubStreamingService_streamthrows_StreamResponse extends \ThriftSyncStru
     }
     return null;
   }
+  
+  public function setException(\TException $e): bool {
+    if ($e is FooStreamEx) {
+      $this->e = $e;
+      return true;
+    }
+    return false;
+  }
 }
 
 class PubSubStreamingService_streamthrows_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
@@ -1246,6 +1254,14 @@ class PubSubStreamingService_servicethrows_FirstResponse extends \ThriftSyncStru
     }
     return null;
   }
+  
+  public function setException(\TException $e): bool {
+    if ($e is FooEx) {
+      $this->e = $e;
+      return true;
+    }
+    return false;
+  }
 }
 
 class PubSubStreamingService_servicethrows2_args implements \IThriftSyncStruct, \IThriftStructMetadata {
@@ -1509,6 +1525,18 @@ class PubSubStreamingService_servicethrows2_FirstResponse extends \ThriftSyncStr
     }
     return null;
   }
+  
+  public function setException(\TException $e): bool {
+    if ($e is FooEx) {
+      $this->e1 = $e;
+      return true;
+    }
+    if ($e is FooEx2) {
+      $this->e2 = $e;
+      return true;
+    }
+    return false;
+  }
 }
 
 class PubSubStreamingService_boththrows_args implements \IThriftSyncStruct, \IThriftStructMetadata {
@@ -1690,6 +1718,14 @@ class PubSubStreamingService_boththrows_StreamResponse extends \ThriftSyncStruct
     }
     return null;
   }
+  
+  public function setException(\TException $e): bool {
+    if ($e is FooStreamEx) {
+      $this->e = $e;
+      return true;
+    }
+    return false;
+  }
 }
 
 class PubSubStreamingService_boththrows_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
@@ -1774,6 +1810,14 @@ class PubSubStreamingService_boththrows_FirstResponse extends \ThriftSyncStructW
       return $this->e;
     }
     return null;
+  }
+  
+  public function setException(\TException $e): bool {
+    if ($e is FooEx) {
+      $this->e = $e;
+      return true;
+    }
+    return false;
   }
 }
 
@@ -1955,6 +1999,14 @@ class PubSubStreamingService_responseandstreamstreamthrows_StreamResponse extend
       return $this->e;
     }
     return null;
+  }
+  
+  public function setException(\TException $e): bool {
+    if ($e is FooStreamEx) {
+      $this->e = $e;
+      return true;
+    }
+    return false;
   }
 }
 
@@ -2289,6 +2341,14 @@ class PubSubStreamingService_responseandstreamservicethrows_FirstResponse extend
     }
     return null;
   }
+  
+  public function setException(\TException $e): bool {
+    if ($e is FooEx) {
+      $this->e = $e;
+      return true;
+    }
+    return false;
+  }
 }
 
 class PubSubStreamingService_responseandstreamboththrows_args implements \IThriftSyncStruct, \IThriftStructMetadata {
@@ -2470,6 +2530,14 @@ class PubSubStreamingService_responseandstreamboththrows_StreamResponse extends 
     }
     return null;
   }
+  
+  public function setException(\TException $e): bool {
+    if ($e is FooStreamEx) {
+      $this->e = $e;
+      return true;
+    }
+    return false;
+  }
 }
 
 class PubSubStreamingService_responseandstreamboththrows_FirstResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
@@ -2576,6 +2644,14 @@ class PubSubStreamingService_responseandstreamboththrows_FirstResponse extends \
       return $this->e;
     }
     return null;
+  }
+  
+  public function setException(\TException $e): bool {
+    if ($e is FooEx) {
+      $this->e = $e;
+      return true;
+    }
+    return false;
   }
 }
 

@@ -620,6 +620,14 @@ class C_thing_result extends \ThriftSyncStructWithResult implements \IThriftStru
     }
     return null;
   }
+  
+  public function setException(\TException $e): bool {
+    if ($e is Bang) {
+      $this->bang = $e;
+      return true;
+    }
+    return false;
+  }
 }
 
 class C_numbers_args implements \IThriftSyncStruct, \IThriftStructMetadata {

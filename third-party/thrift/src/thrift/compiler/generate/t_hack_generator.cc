@@ -4469,6 +4469,32 @@ void t_hack_generator::generate_exception_method(
   indent(out) << "return null;\n";
   indent_down();
   indent(out) << "}\n";
+
+  indent(out) << "\n";
+  indent(out) << "public function setException(\\TException $e): bool {\n";
+  indent_up();
+  it = fields.begin() + (fields[0].name() == "success");
+  for (; it != fields.end(); ++it) {
+    const auto& field = it[0];
+    if (it[0].type()->get_true_type()->is_exception()) {
+      indent(out) << "if ($e is "
+                  << type_to_typehint(
+                         field.get_type(),
+                         // Type aliases are not supported in `catch` clauses.
+                         // Hack expects the name of a class.
+                         {{TypeToTypehintVariations::IGNORE_TYPEDEF_OPTION,
+                           true}})
+                  << ") {\n";
+      indent_up();
+      indent(out) << "$this->" << field.name() << " = " << "$e;\n";
+      indent(out) << "return true;\n";
+      indent_down();
+      indent(out) << "}\n";
+    }
+  }
+  indent(out) << "return false;\n";
+  indent_down();
+  indent(out) << "}\n";
 }
 
 void t_hack_generator::generate_php_struct_constructor_field_assignment(

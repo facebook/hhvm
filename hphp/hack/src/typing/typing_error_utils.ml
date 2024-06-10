@@ -1699,6 +1699,21 @@ end = struct
         [],
         User_error_flags.empty )
 
+    let attribute_value pos attr_name valid_values =
+      ( Error_code.InvalidXhpAttributeValue,
+        lazy
+          ( pos,
+            let valid_values =
+              List.map valid_values ~f:Markdown_lite.md_codify
+            in
+            Printf.sprintf
+              "Invalid value for %s, expected one of %s."
+              (Markdown_lite.md_codify attr_name)
+              (String.concat ~sep:", " valid_values) ),
+        lazy [],
+        [],
+        User_error_flags.empty )
+
     let to_error t ~env:_ =
       let open Typing_error.Primary.Xhp in
       match t with
@@ -1708,6 +1723,8 @@ end = struct
         illegal_xhp_child pos ty_reason_msg
       | Missing_xhp_required_attr { pos; attr; ty_reason_msg } ->
         missing_xhp_required_attr pos attr ty_reason_msg
+      | Attribute_value { pos; attr_name; valid_values } ->
+        attribute_value pos attr_name valid_values
   end
 
   module Eval_casetype = struct

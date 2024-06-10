@@ -1,0 +1,2 @@
+ERROR: File "xhp_invalid_attr_value_int_and_string.php", line 9, characters 18-18:
+Invalid value for `bar`, expected one of `1`, `"stuff"`. (Typing[4483])

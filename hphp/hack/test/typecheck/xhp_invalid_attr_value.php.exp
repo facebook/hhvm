@@ -1,0 +1,2 @@
+ERROR: File "xhp_invalid_attr_value.php", line 9, characters 18-25:
+Invalid value for `size`, expected one of `"big"`, `"small"`. (Typing[4483])

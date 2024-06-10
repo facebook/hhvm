@@ -393,6 +393,11 @@ module Primary = struct
           attr: string;
           ty_reason_msg: Pos_or_decl.t Message.t list Lazy.t;
         }
+      | Attribute_value of {
+          pos: Pos.t;
+          attr_name: string;
+          valid_values: string list;
+        }
     [@@deriving show]
   end
 

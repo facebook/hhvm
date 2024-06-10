@@ -48,6 +48,14 @@ let int_of_hack_literal (literal : string) : int option =
   let clean_literal = String.concat ~sep:"" parts in
   int_of_string_opt clean_literal
 
+let add_error env pos attr_name attr_values =
+  Typing_error_utils.add_typing_error
+    ~env:(Tast_env.tast_env_as_typing_env env)
+    Typing_error.(
+      xhp
+      @@ Primary.Xhp.Attribute_value
+           { pos; attr_name; valid_values = attr_value_literals attr_values })
+
 (** If [attr] is initialized with a literal value that isn't in the
     enum declaration, show a lint error. *)
 let check_attr_value env (cls : Cls.t) (attr : ('a, 'b) xhp_attribute) : unit =
@@ -63,17 +71,11 @@ let check_attr_value env (cls : Cls.t) (attr : ('a, 'b) xhp_attribute) : unit =
         (match int_of_hack_literal i with
         | Some i ->
           if not (List.mem int_values i ~equal:Int.equal) then
-            Lints_errors.invalid_attribute_value
-              attr_val_pos
-              attr_name
-              (attr_value_literals attr_values)
+            add_error env attr_val_pos attr_name attr_values
         | None -> ())
       | String s ->
         if not (List.mem string_values s ~equal:String.equal) then
-          Lints_errors.invalid_attribute_value
-            attr_val_pos
-            attr_name
-            (attr_value_literals attr_values)
+          add_error env attr_val_pos attr_name attr_values
       | _ -> ())
     | None -> ())
   | Xhp_spread _ -> ()

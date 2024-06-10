@@ -482,10 +482,6 @@ func (t *headerTransport) Flush() error {
 	// Remove the non-persistent headers on flush
 	t.clearRequestHeaders()
 
-	if b, ok := t.conn.(*bufferedConn); ok {
-		err = b.Flush()
-	}
-
 	t.wbuf.Reset() // reset incase wbuf pointer changes in xform
 	return NewTransportExceptionFromError(err)
 }

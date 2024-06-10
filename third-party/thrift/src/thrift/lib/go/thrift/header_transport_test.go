@@ -28,11 +28,6 @@ func TestHeaderTransport(t *testing.T) {
 	TransportTest(t, trans, trans)
 }
 
-func TestBufferedHeaderTransport(t *testing.T) {
-	trans := newHeaderTransport(NewBufferedTransport(newMockSocket(), 8192))
-	TransportTest(t, trans, trans)
-}
-
 // testHeaderToProto Use a non-header proto to send to a header transport.
 // Reflect the result after going through the header pipeline, and make sure that:
 // The original proto could still read what it sent

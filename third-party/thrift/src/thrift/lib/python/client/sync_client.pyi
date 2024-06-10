@@ -27,9 +27,9 @@ class SyncClient:
     def __enter__(self: TSyncClient) -> TSyncClient: ...
     def __exit__(
         self,
-        type: typing.Type[Exception],
-        value: Exception,
-        traceback: types.TracebackType,
+        type: typing.Optional[typing.Type[BaseException]],
+        value: typing.Optional[BaseException],
+        traceback: typing.Optional[types.TracebackType],
     ) -> None: ...
     def clear_event_handlers(self: TSyncClient) -> None: ...
     def _send_request(

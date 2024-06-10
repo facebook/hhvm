@@ -675,8 +675,6 @@ TEST_F(SymbolMapTest, NewModules) {
   EXPECT_THAT(
       m.getFileModules(path1),
       UnorderedElementsAre("some_module", "some_other_module"));
-
-  m_wrappers.clear();
 }
 
 TEST_F(SymbolMapTest, ModulesFromDB) {
@@ -710,8 +708,6 @@ TEST_F(SymbolMapTest, ModulesFromDB) {
       UnorderedElementsAre("some_new_module", "some_other_new_module"));
   EXPECT_THAT(
       m.getFileModules(path2), UnorderedElementsAre("some_new_third_module"));
-
-  m_wrappers.clear();
 }
 
 TEST_F(SymbolMapTest, OverwriteExistingDbModules) {
@@ -801,8 +797,6 @@ TEST_F(SymbolMapTest, OverwriteExistingDbModules) {
   EXPECT_THAT(
       m.getFileModules(path2),
       UnorderedElementsAre(kSecondPath2, kSecondPath3));
-
-  m_wrappers.clear();
 }
 
 TEST_F(SymbolMapTest, addPaths) {

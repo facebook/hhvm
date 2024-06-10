@@ -580,22 +580,14 @@ void update(
 
 class SymbolMapTest : public ::testing::TestWithParam<bool> {
  protected:
-  void SetUp() override {
-    m_tmpdir = std::make_unique<folly::test::TemporaryDirectory>(
-        folly::test::TemporaryDirectory{"autoload"});
+  SymbolMapTest()
+      : m_tmpdir(std::make_unique<folly::test::TemporaryDirectory>(
+            folly::test::TemporaryDirectory{"autoload"})),
+        m_exec1(std::make_shared<folly::ManualExecutor>()),
+        m_exec2(std::make_shared<folly::ManualExecutor>()),
+        m_exec3(std::make_shared<folly::ManualExecutor>()) {}
 
-    if (!m_exec1) {
-      m_exec1 = std::make_shared<folly::ManualExecutor>();
-    }
-    if (!m_exec2) {
-      m_exec2 = std::make_shared<folly::ManualExecutor>();
-    }
-    if (!m_exec3) {
-      m_exec3 = std::make_shared<folly::ManualExecutor>();
-    }
-  }
-
-  void TearDown() override {
+  virtual ~SymbolMapTest() override {
     for (auto& map : m_wrappers) {
       auto* manual_executor =
           dynamic_cast<folly::ManualExecutor*>(map.m_map->m_exec.get());
@@ -603,7 +595,6 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
         manual_executor->drain();
       }
     }
-    m_wrappers.clear();
   }
 
   SymbolMap& make(

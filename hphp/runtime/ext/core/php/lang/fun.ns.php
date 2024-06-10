@@ -13,7 +13,7 @@ namespace __SystemLib {
       invariant(
         \is_a($x, $this->class),
         'object must be an instance of ('.$this->class.'), instead it is ('.
-        (\is_object($x) ? \HH\class_to_classname(\get_class($x)) : \gettype($x)).')'
+        (\is_object($x) ? \get_class($x) : \gettype($x)).')'
       );
       return $x->{$this->method}(...$args);
     }
@@ -51,7 +51,7 @@ namespace __SystemLib {
       invariant(
         \is_a($x, $this->class),
         'object must be an instance of ('.$this->class.'), instead it is ('.
-        (\is_object($x) ? \HH\class_to_classname(\get_class($x)) : \gettype($x)).')'
+        (\is_object($x) ? \get_class($x) : \gettype($x)).')'
       );
       return ($this->lambda)($x, $this->method, ...$args);
     }

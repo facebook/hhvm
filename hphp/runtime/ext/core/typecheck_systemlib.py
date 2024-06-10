@@ -14,8 +14,6 @@ FIXME_CODES: List[int] = [
     # be mutually recursive or referential in some form (e.g.: any class with
     # a `__Sealed` attribute).
     2049,
-    # Unbound name (typing) same as above, and symptom of dupe errors in Hack
-    4107,
     # Typing of idx($this, _) is broken
     4110,
     # "Memoizing object parameters requires the capability AccessGlobals:" for

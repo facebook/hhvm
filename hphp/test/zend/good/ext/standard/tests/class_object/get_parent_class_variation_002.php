@@ -64,11 +64,7 @@ $values = vec[
 
 foreach($values as $value) {
       echo "\nArg value ".(string)$value." \n";
-      try { 
-        var_dump( get_parent_class($value) );
-      } catch (Exception $ex) {
-        var_dump($ex->getMessage());
-      }
+      var_dump( get_parent_class($value) );
 };
 
 echo "Done";

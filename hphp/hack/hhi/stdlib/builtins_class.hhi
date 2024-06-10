@@ -36,7 +36,7 @@ namespace {
     readonly HH\FIXME\MISSING_PARAM_TYPE $object,
   )[]: \HH\FIXME\MISSING_RETURN_TYPE;
   function get_parent_class(
-    HH\FIXME\MISSING_PARAM_TYPE $object,
+    HH\FIXME\MISSING_PARAM_TYPE $object = null,
   )[]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function is_a(

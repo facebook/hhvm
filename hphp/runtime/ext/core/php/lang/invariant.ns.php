@@ -16,9 +16,7 @@ function invariant_violation_helper(mixed $arg)[]: mixed {
     return $arg;
   }
   return 'Object of type '.
-    /* HH_FIXME[2049] need to make class_to_classname visible */
-    /* HH_FIXME[4107] need to make class_to_classname visible */
-    \HH\class_to_classname(\get_class($arg));
+    HH\FIXME\UNSAFE_CAST<mixed, string>(\get_class($arg));
 }
 
 }

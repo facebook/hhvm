@@ -4,7 +4,7 @@ trait T {
   function foo() :mixed{
     echo "Foo";
     parent::bar();
-    echo "I'm in class " . get_class(new self()) . "\n";
+    echo "I'm in class " . get_class() . "\n";
   }
 }
 class C {

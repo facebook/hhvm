@@ -1,0 +1,15 @@
+Warning: get_parent_class() was called with null, expected object or string in %s/get_parent_class_warn.php on line 7
+string(16) "GetClassTestBase"
+
+Warning: get_parent_class() was called with null, expected object or string in %s/get_parent_class_warn.php on line 8
+string(16) "GetClassTestBase"
+
+Warning: get_parent_class() was called with integer, expected object or string in %s/get_parent_class_warn.php on line 9
+bool(false)
+
+Warning: get_parent_class() was called with double, expected object or string in %s/get_parent_class_warn.php on line 10
+bool(false)
+bool(false)
+string(16) "GetClassTestBase"
+bool(false)
+bool(false)

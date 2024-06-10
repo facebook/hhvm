@@ -3,7 +3,7 @@ namespace Foo {
 
 class Biz {
   function wat() :mixed{
-    \var_dump(\get_class($this));
+    \var_dump(\get_class());
   }
 }
 
@@ -11,7 +11,7 @@ namespace Bar {
 
 class Baz {
   function wat() :mixed{
-    \var_dump(\get_class($this));
+    \var_dump(\get_class());
   }
 }
 
@@ -19,7 +19,7 @@ class Baz {
 
 class Fiz {
   function wat() :mixed{
-    \var_dump(\get_class($this));
+    \var_dump(\get_class());
   }
 }
 

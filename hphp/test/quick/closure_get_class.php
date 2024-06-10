@@ -6,6 +6,10 @@ trait Too {
       var_dump(__CLASS__);
     };
     $a();
+    $a = function () {
+      var_dump(get_class());
+    };
+    $a();
     if (isset($this)) {
       $a = function () {
         var_dump(get_class($this));

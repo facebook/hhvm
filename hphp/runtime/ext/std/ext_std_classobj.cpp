@@ -278,14 +278,16 @@ Variant HHVM_FUNCTION(get_parent_class,
 
 static bool is_a_impl(const Variant& class_or_object, const String& class_name,
                       bool allow_str_cls, bool subclass_only) {
-  if (!(class_or_object.isObject() ||
-        class_or_object.isString() ||
-        class_or_object.isLazyClass() ||
-        class_or_object.isClass())) {
+  if ((class_or_object.isString() ||
+       class_or_object.isClass() ||
+       class_or_object.isLazyClass()) &&
+       !allow_str_cls) {
     return false;
   }
-
-  if (!(class_or_object.isObject() || allow_str_cls)) {
+  if (!(class_or_object.isString() ||
+        class_or_object.isObject() ||
+        class_or_object.isLazyClass() ||
+        class_or_object.isClass())) {
     return false;
   }
 

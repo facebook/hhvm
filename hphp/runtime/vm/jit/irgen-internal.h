@@ -674,9 +674,9 @@ inline const Class* lookupUniqueClass(IRGS& env,
     name, curClass(env), trustUnit ? curUnit(env) : nullptr);
 }
 
-inline SSATmp* ldClsOpt(IRGS& env,
-                        SSATmp* lazyClassOrName,
-                        LdClsFallback fallback) {
+inline SSATmp* ldCls(IRGS& env,
+                     SSATmp* lazyClassOrName,
+                     LdClsFallback fallback = LdClsFallback::Fatal) {
   auto const isLazy = lazyClassOrName->isA(TLazyCls);
   assertx(lazyClassOrName->isA(TStr) || isLazy);
   if (lazyClassOrName->hasConstVal()) {
@@ -699,11 +699,6 @@ inline SSATmp* ldClsOpt(IRGS& env,
   return gen(env, LdCls, LdClsFallbackData { fallback }, clsName, ctxTmp);
 }
 
-inline SSATmp* ldCls(IRGS& env,
-                     SSATmp* lazyClassOrName,
-                     LdClsFallback fallback = LdClsFallback::Fatal) {
-  return gen(env, AssertNonNull, ldClsOpt(env, lazyClassOrName, fallback));
-}
 //////////////////////////////////////////////////////////////////////
 // Local variables
 

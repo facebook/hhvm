@@ -1552,10 +1552,10 @@ void emitNewObjD(IRGS& env, const StringData* className) {
     push(env, gen(env, AllocObj, cns(env, cls)));
     return;
   }
-  auto const cachedCls = 
-    gen(env,
-        AssertNonNull,
-        gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className)));
+  auto const cachedCls = gen(env,
+                             LdClsCached,
+                             LdClsFallbackData::Fatal(),
+                             cns(env, className));
   push(env, gen(env, AllocObj, cachedCls));
 }
 
@@ -1722,9 +1722,7 @@ void emitFCallClsMethodD(IRGS& env,
     auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
     if (func) {
       if (!classIsPersistentOrCtxParent(env, cls)) {
-        gen(env, 
-            AssertNonNull,
-            gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className)));
+        gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
       }
       auto const ctx = ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
       emitModuleBoundaryCheckKnown(env, cls);
@@ -1842,9 +1840,7 @@ void checkClsMethodAndLdCtx(IRGS& env, const Class* cls, const Func* func,
                             const StringData* className) {
   gen(env, CheckClsMethFunc, cns(env, func));
   if (!classIsPersistentOrCtxParent(env, cls)) {
-    gen(env, 
-        AssertNonNull,
-        gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className)));
+    gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
   }
   ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
 }
@@ -1858,10 +1854,10 @@ resolveClsMethodDSlow(IRGS& env, const StringData* className,
     ClsMethodData { className, methodName, ne, curClass(env), curFunc(env) };
   auto const func = loadClsMethodUnknown(env, data, slowExit);
   gen(env, CheckClsMethFunc, func);
-  auto const cls =
-    gen(env,
-        AssertNonNull,
-        gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className)));
+  auto const cls = gen(env,
+                       LdClsCached,
+                       LdClsFallbackData::Fatal(),
+                       cns(env, className));
   emitDeploymentBoundaryCheck(env, cls);
   return std::pair(cls, func);
 }

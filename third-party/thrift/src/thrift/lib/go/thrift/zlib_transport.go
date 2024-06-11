@@ -24,13 +24,15 @@ import (
 
 // ZlibTransport is a Transport implementation that makes use of zlib compression.
 type ZlibTransport struct {
-	reader    io.ReadCloser
-	transport Transport
-	writer    *zlib.Writer
+	reader io.ReadCloser
+	buffer io.ReadWriteCloser
+	writer *zlib.Writer
 }
 
+var _ io.ReadWriteCloser = (*ZlibTransport)(nil)
+
 // NewZlibTransport constructs a new instance of ZlibTransport
-func NewZlibTransport(trans Transport, level int) (*ZlibTransport, error) {
+func NewZlibTransport(trans io.ReadWriteCloser, level int) (*ZlibTransport, error) {
 	w, err := zlib.NewWriterLevel(trans, level)
 	if err != nil {
 		log.Println(err)
@@ -38,13 +40,13 @@ func NewZlibTransport(trans Transport, level int) (*ZlibTransport, error) {
 	}
 
 	return &ZlibTransport{
-		writer:    w,
-		transport: trans,
+		writer: w,
+		buffer: trans,
 	}, nil
 }
 
 // Close closes the reader and writer (flushing any unwritten data) and closes
-// the underlying transport.
+// the underlying buffer.
 func (z *ZlibTransport) Close() error {
 	if z.reader != nil {
 		if err := z.reader.Close(); err != nil {
@@ -54,20 +56,23 @@ func (z *ZlibTransport) Close() error {
 	if err := z.writer.Close(); err != nil {
 		return err
 	}
-	return z.transport.Close()
+	return z.buffer.Close()
 }
 
-// Flush flushes the writer and its underlying transport.
+// Flush flushes the writer and its underlying buffer.
 func (z *ZlibTransport) Flush() error {
 	if err := z.writer.Flush(); err != nil {
 		return err
 	}
-	return z.transport.Flush()
+	if flusher, ok := z.buffer.(Flusher); ok {
+		return flusher.Flush()
+	}
+	return nil
 }
 
 func (z *ZlibTransport) Read(p []byte) (int, error) {
 	if z.reader == nil {
-		r, err := zlib.NewReader(z.transport)
+		r, err := zlib.NewReader(z.buffer)
 		if err != nil {
 			return 0, NewTransportExceptionFromError(err)
 		}
@@ -75,10 +80,6 @@ func (z *ZlibTransport) Read(p []byte) (int, error) {
 	}
 
 	return z.reader.Read(p)
-}
-
-func (z *ZlibTransport) RemainingBytes() uint64 {
-	return UnknownRemaining // the truth is, we just don't know unless framed is used
 }
 
 func (z *ZlibTransport) Write(p []byte) (int, error) {

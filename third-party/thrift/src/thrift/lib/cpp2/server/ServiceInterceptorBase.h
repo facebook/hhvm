@@ -34,6 +34,8 @@ class ServiceInterceptorBase {
  public:
   virtual ~ServiceInterceptorBase() = default;
 
+  virtual std::string getName() const = 0;
+
   struct InitParams {};
   virtual folly::coro::Task<void> co_onStartServing(InitParams);
 

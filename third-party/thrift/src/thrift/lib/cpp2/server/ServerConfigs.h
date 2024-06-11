@@ -240,10 +240,16 @@ class ServerConfigs {
     return kEmpty;
   }
 
-  virtual const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
-  getServiceInterceptors() const {
-    static const std::vector<std::shared_ptr<ServiceInterceptorBase>> kEmpty;
-    return kEmpty;
+  struct ServiceInterceptorInfo {
+    // The naming format is "{module_name}.{interceptor_name}"
+    std::string qualifiedName;
+    std::shared_ptr<ServiceInterceptorBase> interceptor;
+  };
+  virtual const std::vector<ServiceInterceptorInfo>& getServiceInterceptors()
+      const {
+    static const folly::Indestructible<std::vector<ServiceInterceptorInfo>>
+        kEmpty;
+    return *kEmpty;
   }
 
  private:

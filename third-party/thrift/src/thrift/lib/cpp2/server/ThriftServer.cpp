@@ -1718,8 +1718,8 @@ void ThriftServer::callOnStartServing() {
   {
     ServiceInterceptorBase::InitParams initParams;
     std::vector<folly::coro::Task<void>> tasks;
-    for (auto& serviceInterceptor : getServiceInterceptors()) {
-      tasks.emplace_back(serviceInterceptor->co_onStartServing(initParams));
+    for (const auto& info : getServiceInterceptors()) {
+      tasks.emplace_back(info.interceptor->co_onStartServing(initParams));
     }
     folly::coro::blockingWait(folly::coro::collectAllRange(std::move(tasks)));
   }
@@ -2440,10 +2440,6 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
         info.module->getLegacyEventHandlers();
     std::vector<std::shared_ptr<server::TServerEventHandler>>
         legacyServerEventHandlers = info.module->getLegacyServerEventHandlers();
-    std::vector<std::shared_ptr<ServiceInterceptorBase>> serviceInterceptors =
-        info.module->getServiceInterceptors();
-
-    result.modules.emplace_back(std::move(info));
 
     result.coalescedLegacyEventHandlers.insert(
         result.coalescedLegacyEventHandlers.end(),
@@ -2453,10 +2449,30 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
         result.coalescedLegacyServerEventHandlers.end(),
         std::make_move_iterator(legacyServerEventHandlers.begin()),
         std::make_move_iterator(legacyServerEventHandlers.end()));
-    result.coalescedServiceInterceptors.insert(
-        result.coalescedServiceInterceptors.end(),
-        std::make_move_iterator(serviceInterceptors.begin()),
-        std::make_move_iterator(serviceInterceptors.end()));
+
+#if FOLLY_HAS_COROUTINES
+    std::vector<std::shared_ptr<ServiceInterceptorBase>> serviceInterceptors =
+        info.module->getServiceInterceptors();
+
+    for (auto& interceptor : serviceInterceptors) {
+      auto qualifiedName =
+          fmt::format("{}.{}", info.name, interceptor->getName());
+      if (std::find_if(
+              result.coalescedServiceInterceptors.begin(),
+              result.coalescedServiceInterceptors.end(),
+              [&](const ServiceInterceptorInfo& serviceInterceptorInfo)
+                  -> bool {
+                return qualifiedName == serviceInterceptorInfo.qualifiedName;
+              }) != result.coalescedServiceInterceptors.end()) {
+        throw std::logic_error(
+            fmt::format("Duplicate ServiceInterceptor: {}", qualifiedName));
+      }
+      result.coalescedServiceInterceptors.emplace_back(ServiceInterceptorInfo{
+          std::move(qualifiedName), std::move(interceptor)});
+    }
+#endif // FOLLY_HAS_COROUTINES
+
+    result.modules.emplace_back(std::move(info));
   }
 
   return result;

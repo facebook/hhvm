@@ -129,6 +129,7 @@ class ScopedServerThread::Helper : public Runnable, public TServerEventHandler {
     tryHandleServeError<TTransportException>(x) ||
         tryHandleServeError<TException>(x) ||
         tryHandleServeError<std::system_error>(x) ||
+        tryHandleServeError<std::logic_error>(x) ||
         tryHandleServeError<std::exception>(x);
   }
 

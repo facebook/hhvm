@@ -169,28 +169,30 @@ Cpp2Connection::Cpp2Connection(
   }
 
 #if FOLLY_HAS_COROUTINES
-  const auto& serviceInterceptors =
+  const auto& serviceInterceptorsInfo =
       apache::thrift::detail::getServiceInterceptorsIfServerIsSetUp(
           *worker_->getServer());
-  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
+  for (std::size_t i = 0; i < serviceInterceptorsInfo.size(); ++i) {
     ServiceInterceptorBase::ConnectionInfo connectionInfo{
         &context_,
         context_.getStorageForServiceInterceptorOnConnectionByIndex(i)};
-    serviceInterceptors[i]->internal_onConnection(connectionInfo);
+    serviceInterceptorsInfo[i].interceptor->internal_onConnection(
+        connectionInfo);
   }
 #endif // FOLLY_HAS_COROUTINES
 }
 
 Cpp2Connection::~Cpp2Connection() {
 #if FOLLY_HAS_COROUTINES
-  const auto& serviceInterceptors =
+  const auto& serviceInterceptorsInfo =
       apache::thrift::detail::getServiceInterceptorsIfServerIsSetUp(
           *worker_->getServer());
-  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
+  for (std::size_t i = 0; i < serviceInterceptorsInfo.size(); ++i) {
     ServiceInterceptorBase::ConnectionInfo connectionInfo{
         &context_,
         context_.getStorageForServiceInterceptorOnConnectionByIndex(i)};
-    serviceInterceptors[i]->internal_onConnectionClosed(connectionInfo);
+    serviceInterceptorsInfo[i].interceptor->internal_onConnectionClosed(
+        connectionInfo);
   }
 #endif // FOLLY_HAS_COROUTINES
 

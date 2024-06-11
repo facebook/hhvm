@@ -54,6 +54,8 @@
 #include <folly/observer/Observer.h>
 #include <folly/synchronization/CallOnce.h>
 
+#include <fmt/core.h>
+
 #include <thrift/lib/cpp/concurrency/PosixThreadFactory.h>
 #include <thrift/lib/cpp/concurrency/Thread.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
@@ -240,7 +242,7 @@ ThriftServerConfig& getThriftServerConfig(ThriftServer&);
  * setup is bypassed. This is a safe alternative to
  * ThriftServer::getServiceInterceptors() which returns 0 for such unit tests.
  */
-const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
+const std::vector<server::ServerConfigs::ServiceInterceptorInfo>&
 getServiceInterceptorsIfServerIsSetUp(ThriftServer&);
 } // namespace detail
 
@@ -872,7 +874,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
  private:
   friend ThriftServerConfig& detail::getThriftServerConfig(ThriftServer&);
-  friend const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
+  friend const std::vector<ServiceInterceptorInfo>&
   detail::getServiceInterceptorsIfServerIsSetUp(ThriftServer&);
 
   ThriftServerConfig thriftConfig_;
@@ -2036,8 +2038,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
         coalescedLegacyEventHandlers;
     std::vector<std::shared_ptr<server::TServerEventHandler>>
         coalescedLegacyServerEventHandlers;
-    std::vector<std::shared_ptr<ServiceInterceptorBase>>
-        coalescedServiceInterceptors;
+    std::vector<ServiceInterceptorInfo> coalescedServiceInterceptors;
   };
   static ProcessedModuleSet processModulesSpecification(ModulesSpecification&&);
 
@@ -2103,7 +2104,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     CHECK(configMutable());
     auto name = module->getName();
     if (unprocessedModulesSpecification_.names.count(name)) {
-      throw std::invalid_argument("Duplicate module name");
+      throw std::invalid_argument(
+          fmt::format("Duplicate module name: {}", name));
     }
     unprocessedModulesSpecification_.infos.emplace_back(
         ModulesSpecification::Info{std::move(module), std::move(name)});
@@ -2835,8 +2837,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    * Gets all ServiceInterceptors installed on this ThriftServer instance via
    * addModule().
    */
-  const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
-  getServiceInterceptors() const override {
+  const std::vector<ServiceInterceptorInfo>& getServiceInterceptors()
+      const override {
     CHECK(processedServiceDescription_)
         << "Server must be set up before calling this method";
     return processedServiceDescription_->modules.coalescedServiceInterceptors;
@@ -3171,13 +3173,13 @@ inline ThriftServerConfig& getThriftServerConfig(ThriftServer& server) {
   return server.thriftConfig_;
 }
 
-inline const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
+inline const std::vector<server::ServerConfigs::ServiceInterceptorInfo>&
 getServiceInterceptorsIfServerIsSetUp(ThriftServer& server) {
   if (auto* description = server.processedServiceDescription_.get()) {
     return description->modules.coalescedServiceInterceptors;
   }
   static const folly::Indestructible<
-      std::vector<std::shared_ptr<ServiceInterceptorBase>>>
+      std::vector<server::ServerConfigs::ServiceInterceptorInfo>>
       kEmpty;
   return *kEmpty;
 }

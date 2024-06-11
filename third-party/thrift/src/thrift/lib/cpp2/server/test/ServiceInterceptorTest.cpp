@@ -158,11 +158,24 @@ class TestModule : public apache::thrift::ServerModule {
   InterceptorList interceptors_;
 };
 
+template <class RequestState, class ConnectionState = folly::Unit>
+struct NamedServiceInterceptor
+    : public ServiceInterceptor<RequestState, ConnectionState> {
+  explicit NamedServiceInterceptor(std::string name) : name_(std::move(name)) {}
+
+  std::string getName() const override { return name_; }
+
+ private:
+  std::string name_;
+};
+
 struct ServiceInterceptorCountWithRequestState
-    : public ServiceInterceptor<int, int> {
+    : public NamedServiceInterceptor<int, int> {
  public:
   using ConnectionState = int;
   using RequestState = int;
+
+  using NamedServiceInterceptor::NamedServiceInterceptor;
 
   std::optional<ConnectionState> onConnection(
       ConnectionInfo) noexcept override {
@@ -193,8 +206,10 @@ struct ServiceInterceptorCountWithRequestState
 };
 
 struct ServiceInterceptorThrowOnRequest
-    : public ServiceInterceptor<folly::Unit> {
+    : public NamedServiceInterceptor<folly::Unit> {
  public:
+  using NamedServiceInterceptor::NamedServiceInterceptor;
+
   folly::coro::Task<std::optional<folly::Unit>> onRequest(
       folly::Unit*, RequestInfo) override {
     onRequestCount++;
@@ -214,8 +229,10 @@ struct ServiceInterceptorThrowOnRequest
 };
 
 struct ServiceInterceptorThrowOnResponse
-    : public ServiceInterceptor<folly::Unit> {
+    : public NamedServiceInterceptor<folly::Unit> {
  public:
+  using NamedServiceInterceptor::NamedServiceInterceptor;
+
   folly::coro::Task<std::optional<folly::Unit>> onRequest(
       folly::Unit*, RequestInfo) override {
     onRequestCount++;
@@ -238,7 +255,7 @@ struct ServiceInterceptorThrowOnResponse
 
 CO_TEST_P(ServiceInterceptorTestP, BasicTM) {
   auto interceptor =
-      std::make_shared<ServiceInterceptorCountWithRequestState>();
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor1");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(interceptor));
@@ -257,7 +274,7 @@ CO_TEST_P(ServiceInterceptorTestP, BasicTM) {
 
 CO_TEST_P(ServiceInterceptorTestP, BasicEB) {
   auto interceptor =
-      std::make_shared<ServiceInterceptorCountWithRequestState>();
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor1");
   ScopedServerInterfaceThread runner(
       std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(interceptor));
@@ -278,9 +295,9 @@ CO_TEST_P(ServiceInterceptorTestP, BasicEB) {
 // HandlerCallback::result()
 CO_TEST_P(ServiceInterceptorTestP, BasicVoidReturn) {
   auto interceptor1 =
-      std::make_shared<ServiceInterceptorCountWithRequestState>();
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor1");
   auto interceptor2 =
-      std::make_shared<ServiceInterceptorCountWithRequestState>();
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor2");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
@@ -324,9 +341,11 @@ CO_TEST_P(ServiceInterceptorTestP, BasicVoidReturn) {
 
 TEST_P(ServiceInterceptorTestP, OnStartServing) {
   struct ServiceInterceptorCountOnStartServing
-      : public ServiceInterceptor<folly::Unit> {
+      : public NamedServiceInterceptor<folly::Unit> {
    public:
     using RequestState = folly::Unit;
+
+    using NamedServiceInterceptor::NamedServiceInterceptor;
 
     folly::coro::Task<void> co_onStartServing(InitParams) override {
       onStartServingCount++;
@@ -345,8 +364,10 @@ TEST_P(ServiceInterceptorTestP, OnStartServing) {
 
     int onStartServingCount = 0;
   };
-  auto interceptor1 = std::make_shared<ServiceInterceptorCountOnStartServing>();
-  auto interceptor2 = std::make_shared<ServiceInterceptorCountOnStartServing>();
+  auto interceptor1 =
+      std::make_shared<ServiceInterceptorCountOnStartServing>("Interceptor1");
+  auto interceptor2 =
+      std::make_shared<ServiceInterceptorCountOnStartServing>("Interceptor2");
   ScopedServerInterfaceThread runner(
       std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
@@ -358,10 +379,33 @@ TEST_P(ServiceInterceptorTestP, OnStartServing) {
   }
 }
 
-CO_TEST_P(ServiceInterceptorTestP, OnRequestException) {
-  auto interceptor1 = std::make_shared<ServiceInterceptorThrowOnRequest>();
+TEST_P(ServiceInterceptorTestP, DuplicateNameThrows) {
+  auto interceptor1 =
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Duplicate");
   auto interceptor2 =
-      std::make_shared<ServiceInterceptorCountWithRequestState>();
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Duplicate");
+
+  EXPECT_THROW(
+      {
+        try {
+          makeServer(
+              std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+                server.addModule(std::make_unique<TestModule>(
+                    InterceptorList{interceptor1, interceptor2}));
+              });
+        } catch (const std::logic_error& ex) {
+          EXPECT_THAT(ex.what(), HasSubstr("TestModule.Duplicate"));
+          throw;
+        }
+      },
+      std::logic_error);
+}
+
+CO_TEST_P(ServiceInterceptorTestP, OnRequestException) {
+  auto interceptor1 =
+      std::make_shared<ServiceInterceptorThrowOnRequest>("Interceptor1");
+  auto interceptor2 =
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor2");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
@@ -393,7 +437,8 @@ CO_TEST_P(ServiceInterceptorTestP, OnRequestException) {
 }
 
 CO_TEST_P(ServiceInterceptorTestP, OnRequestExceptionEB) {
-  auto interceptor = std::make_shared<ServiceInterceptorThrowOnRequest>();
+  auto interceptor =
+      std::make_shared<ServiceInterceptorThrowOnRequest>("Interceptor1");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(interceptor));
@@ -422,7 +467,8 @@ CO_TEST_P(ServiceInterceptorTestP, OnRequestExceptionEB) {
 }
 
 CO_TEST_P(ServiceInterceptorTestP, OnResponseException) {
-  auto interceptor = std::make_shared<ServiceInterceptorThrowOnResponse>();
+  auto interceptor =
+      std::make_shared<ServiceInterceptorThrowOnResponse>("Interceptor1");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(interceptor));
@@ -451,9 +497,10 @@ CO_TEST_P(ServiceInterceptorTestP, OnResponseException) {
 }
 
 CO_TEST(ServiceInterceptorTest, OnResponseExceptionEB) {
-  auto interceptor1 = std::make_shared<ServiceInterceptorThrowOnResponse>();
+  auto interceptor1 =
+      std::make_shared<ServiceInterceptorThrowOnResponse>("Interceptor1");
   auto interceptor2 =
-      std::make_shared<ServiceInterceptorCountWithRequestState>();
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor2");
   ScopedServerInterfaceThread runner(
       std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
@@ -487,7 +534,7 @@ CO_TEST(ServiceInterceptorTest, OnResponseExceptionEB) {
 CO_TEST_P(
     ServiceInterceptorTestP, OnResponseBypassedForUnsafeReleasedCallback) {
   auto interceptor =
-      std::make_shared<ServiceInterceptorCountWithRequestState>();
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor1");
 
   struct TestHandlerUnsafeReleaseCallback
       : apache::thrift::ServiceHandler<test::ServiceInterceptorTest> {
@@ -521,7 +568,8 @@ CO_TEST_P(
 
 CO_TEST_P(
     ServiceInterceptorTestP, OnResponseExceptionPreservesApplicationException) {
-  auto interceptor = std::make_shared<ServiceInterceptorThrowOnResponse>();
+  auto interceptor =
+      std::make_shared<ServiceInterceptorThrowOnResponse>("Interceptor1");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(interceptor));
@@ -549,9 +597,9 @@ CO_TEST_P(ServiceInterceptorTestP, BasicInteraction) {
     co_return;
   }
   auto interceptor1 =
-      std::make_shared<ServiceInterceptorCountWithRequestState>();
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor1");
   auto interceptor2 =
-      std::make_shared<ServiceInterceptorCountWithRequestState>();
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor2");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
@@ -592,9 +640,9 @@ CO_TEST_P(ServiceInterceptorTestP, BasicStream) {
     co_return;
   }
   auto interceptor1 =
-      std::make_shared<ServiceInterceptorCountWithRequestState>();
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor1");
   auto interceptor2 =
-      std::make_shared<ServiceInterceptorCountWithRequestState>();
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor2");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
@@ -620,11 +668,15 @@ CO_TEST_P(ServiceInterceptorTestP, BasicStream) {
 }
 
 CO_TEST_P(ServiceInterceptorTestP, RequestArguments) {
-  struct ServiceInterceptorCountWithRequestState
-      : public ServiceInterceptor<folly::Unit> {
+  struct ServiceInterceptorWithRequestArguments
+      : public NamedServiceInterceptor<folly::Unit> {
    public:
     using ConnectionState = folly::Unit;
     using RequestState = folly::Unit;
+
+    using NamedServiceInterceptor::NamedServiceInterceptor;
+
+    std::string getName() const override { return typeid(*this).name(); }
 
     folly::coro::Task<std::optional<RequestState>> onRequest(
         ConnectionState*, RequestInfo requestInfo) override {
@@ -644,7 +696,7 @@ CO_TEST_P(ServiceInterceptorTestP, RequestArguments) {
     test::RequestArgsStruct arg3;
   };
   auto interceptor =
-      std::make_shared<ServiceInterceptorCountWithRequestState>();
+      std::make_shared<ServiceInterceptorWithRequestArguments>("Interceptor1");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(interceptor));

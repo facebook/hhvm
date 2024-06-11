@@ -988,11 +988,11 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
   const apache::thrift::server::ServerConfigs* server =
       reqCtx_->getConnectionContext()->getWorkerContext()->getServerContext();
   DCHECK(server);
-  const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
-      serviceInterceptors = server->getServiceInterceptors();
+  const std::vector<server::ServerConfigs::ServiceInterceptorInfo>&
+      serviceInterceptorsInfo = server->getServiceInterceptors();
   std::vector<std::exception_ptr> exceptions;
 
-  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
+  for (std::size_t i = 0; i < serviceInterceptorsInfo.size(); ++i) {
     auto* connectionCtx = reqCtx_->getConnectionContext();
     auto connectionInfo = ServiceInterceptorBase::ConnectionInfo{
         connectionCtx,
@@ -1002,7 +1002,7 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
         reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i),
         arguments};
     try {
-      co_await serviceInterceptors[i]->internal_onRequest(
+      co_await serviceInterceptorsInfo[i].interceptor->internal_onRequest(
           std::move(connectionInfo), std::move(requestInfo));
     } catch (...) {
       exceptions.emplace_back(std::current_exception());
@@ -1026,11 +1026,12 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse() {
   const apache::thrift::server::ServerConfigs* server =
       reqCtx_->getConnectionContext()->getWorkerContext()->getServerContext();
   DCHECK(server);
-  const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
-      serviceInterceptors = server->getServiceInterceptors();
+  const std::vector<server::ServerConfigs::ServiceInterceptorInfo>&
+      serviceInterceptorsInfo = server->getServiceInterceptors();
   std::vector<std::exception_ptr> exceptions;
 
-  for (auto i = std::ptrdiff_t(serviceInterceptors.size()) - 1; i >= 0; --i) {
+  for (auto i = std::ptrdiff_t(serviceInterceptorsInfo.size()) - 1; i >= 0;
+       --i) {
     auto* connectionCtx = reqCtx_->getConnectionContext();
     auto connectionInfo = ServiceInterceptorBase::ConnectionInfo{
         connectionCtx,
@@ -1038,7 +1039,7 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse() {
     auto responseInfo = ServiceInterceptorBase::ResponseInfo{
         reqCtx_, reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i)};
     try {
-      co_await serviceInterceptors[i]->internal_onResponse(
+      co_await serviceInterceptorsInfo[i].interceptor->internal_onResponse(
           std::move(connectionInfo), std::move(responseInfo));
     } catch (...) {
       exceptions.emplace_back(std::current_exception());

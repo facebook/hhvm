@@ -24,7 +24,7 @@ import (
 	"strconv"
 )
 
-type HTTPClient struct {
+type httpClient struct {
 	client             *http.Client
 	response           *http.Response
 	url                *url.URL
@@ -36,23 +36,23 @@ type HTTPClient struct {
 }
 
 // newHTTPPostClient creates a new HTTP POST client.
-func newHTTPPostClient(urlstr string) (Transport, error) {
+func newHTTPPostClient(urlstr string) (*httpClient, error) {
 	parsedURL, err := url.Parse(urlstr)
 	if err != nil {
 		return nil, err
 	}
 	buf := make([]byte, 0, 1024)
 	client := http.DefaultClient
-	return &HTTPClient{client: client, url: parsedURL, requestBuffer: bytes.NewBuffer(buf), header: http.Header{}}, nil
+	return &httpClient{client: client, url: parsedURL, requestBuffer: bytes.NewBuffer(buf), header: http.Header{}}, nil
 }
 
 // SetHeader sets the HTTP Header for this specific Thrift Transport
 // It is important that you first assert the Transport as a HTTPClient type
 // like so:
 //
-// httpTrans := trans.(HTTPClient)
+// httpTrans := trans.(*httpClient)
 // httpTrans.SetHeader("User-Agent","Thrift Client 1.0")
-func (p *HTTPClient) SetHeader(key string, value string) {
+func (p *httpClient) SetHeader(key string, value string) {
 	p.header.Add(key, value)
 }
 
@@ -60,9 +60,9 @@ func (p *HTTPClient) SetHeader(key string, value string) {
 // It is important that you first assert the Transport as a HTTPClient type
 // like so:
 //
-// httpTrans := trans.(HTTPClient)
+// httpTrans := trans.(*httpClient)
 // hdrValue := httpTrans.GetHeader("User-Agent")
-func (p *HTTPClient) GetHeader(key string) string {
+func (p *httpClient) GetHeader(key string) string {
 	return p.header.Get(key)
 }
 
@@ -70,24 +70,24 @@ func (p *HTTPClient) GetHeader(key string) string {
 // It is important that you first assert the Transport as a HTTPClient type
 // like so:
 //
-// httpTrans := trans.(HTTPClient)
+// httpTrans := trans.(*httpClient)
 // httpTrans.DelHeader("User-Agent")
-func (p *HTTPClient) DelHeader(key string) {
+func (p *httpClient) DelHeader(key string) {
 	p.header.Del(key)
 }
 
-func (p *HTTPClient) Open() error {
+func (p *httpClient) Open() error {
 	// do nothing
 	return nil
 }
 
-func (p *HTTPClient) closeResponse() error {
+func (p *httpClient) closeResponse() error {
 	p.response = nil
 	p.responseBuffer.Reset()
 	return nil
 }
 
-func (p *HTTPClient) Close() error {
+func (p *httpClient) Close() error {
 	if p.requestBuffer != nil {
 		p.requestBuffer.Reset()
 		p.requestBuffer = nil
@@ -95,7 +95,7 @@ func (p *HTTPClient) Close() error {
 	return p.closeResponse()
 }
 
-func (p *HTTPClient) Read(buf []byte) (int, error) {
+func (p *httpClient) Read(buf []byte) (int, error) {
 	if p.response == nil {
 		return 0, NewTransportException(NOT_OPEN, "Response buffer is empty, no request.")
 	}
@@ -106,24 +106,24 @@ func (p *HTTPClient) Read(buf []byte) (int, error) {
 	return n, NewTransportExceptionFromError(err)
 }
 
-func (p *HTTPClient) ReadByte() (c byte, err error) {
+func (p *httpClient) ReadByte() (c byte, err error) {
 	return readByte(&p.responseBuffer)
 }
 
-func (p *HTTPClient) Write(buf []byte) (int, error) {
+func (p *httpClient) Write(buf []byte) (int, error) {
 	n, err := p.requestBuffer.Write(buf)
 	return n, err
 }
 
-func (p *HTTPClient) WriteByte(c byte) error {
+func (p *httpClient) WriteByte(c byte) error {
 	return p.requestBuffer.WriteByte(c)
 }
 
-func (p *HTTPClient) WriteString(s string) (n int, err error) {
+func (p *httpClient) WriteString(s string) (n int, err error) {
 	return p.requestBuffer.WriteString(s)
 }
 
-func (p *HTTPClient) Flush() error {
+func (p *httpClient) Flush() error {
 	// Close any previous response body to avoid leaking connections.
 	p.closeResponse()
 
@@ -159,6 +159,6 @@ func (p *HTTPClient) Flush() error {
 	return nil
 }
 
-func (p *HTTPClient) RemainingBytes() (num_bytes uint64) {
+func (p *httpClient) RemainingBytes() (num_bytes uint64) {
 	return uint64(p.responseBuffer.Len())
 }

@@ -23,19 +23,19 @@ import (
 
 type httpProtocol struct {
 	Format
-	transport         *HTTPClient
+	transport         *httpClient
 	protoID           ProtocolID
 	persistentHeaders map[string]string
 }
 
 // NewHTTPProtocol creates a Protocol from a format that serializes directly to an HTTPClient.
 func NewHTTPProtocol(url string) Protocol {
-	transport, err := newHTTPPostClient(url)
+	httpClient, err := newHTTPPostClient(url)
 	if err != nil {
 		panic(err)
 	}
 	p := &httpProtocol{
-		transport:         transport.(*HTTPClient),
+		transport:         httpClient,
 		persistentHeaders: make(map[string]string),
 		protoID:           ProtocolIDCompact,
 	}

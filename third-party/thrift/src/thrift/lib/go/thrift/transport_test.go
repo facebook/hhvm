@@ -111,11 +111,11 @@ func TransportTest(t *testing.T, writeTrans io.Writer, readTrans io.Reader) {
 	}
 }
 
-func TransportHeaderTest(t *testing.T, writeTrans io.Writer, readTrans io.Reader) {
+func transportHTTPClientTest(t *testing.T, writeTrans io.Writer, readTrans io.Reader) {
 	buf := make([]byte, TRANSPORT_BINARY_DATA_SIZE)
 
 	// Need to assert type of Transport to HTTPClient to expose the Setter
-	httpWPostTrans := writeTrans.(*HTTPClient)
+	httpWPostTrans := writeTrans.(*httpClient)
 	httpWPostTrans.SetHeader(transport_header["key"], transport_header["value"])
 
 	_, err := writeTrans.Write(transport_bdata)
@@ -129,7 +129,7 @@ func TransportHeaderTest(t *testing.T, writeTrans io.Writer, readTrans io.Reader
 		}
 	}
 	// Need to assert type of Transport to HTTPClient to expose the Getter
-	httpRPostTrans := readTrans.(*HTTPClient)
+	httpRPostTrans := readTrans.(*httpClient)
 	readHeader := httpRPostTrans.GetHeader(transport_header["key"])
 	if err != nil {
 		t.Errorf("Transport %T cannot read HTTP Header Value", httpRPostTrans)

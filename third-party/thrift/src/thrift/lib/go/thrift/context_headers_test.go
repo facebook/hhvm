@@ -59,7 +59,10 @@ func TestRocketProtocolSomeHeaders(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	protocol := NewRocketProtocol(newMockSocket())
+	protocol, err := NewRocketProtocol(newMockSocket())
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := setRequestHeaders(ctx, protocol); err != nil {
 		t.Fatal(err)
 	}
@@ -69,8 +72,11 @@ func TestRocketProtocolSomeHeaders(t *testing.T) {
 
 // somewhere we are still passing context as nil, so we need to support this for now
 func TestRocketProtocolSetNilHeaders(t *testing.T) {
-	transport := NewRocketProtocol(newMockSocket())
-	if err := setRequestHeaders(nil, transport); err != nil {
+	protocol, err := NewRocketProtocol(newMockSocket())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := setRequestHeaders(nil, protocol); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -85,7 +91,10 @@ func TestUpgradeToRocketProtocolSomeHeaders(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	protocol := NewUpgradeToRocketProtocol(newMockSocket())
+	protocol, err := NewUpgradeToRocketProtocol(newMockSocket())
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := setRequestHeaders(ctx, protocol); err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +104,10 @@ func TestUpgradeToRocketProtocolSomeHeaders(t *testing.T) {
 
 // somewhere we are still passing context as nil, so we need to support this for now
 func TestUpgradeToRocketProtocolSetNilHeaders(t *testing.T) {
-	protocol := NewUpgradeToRocketProtocol(newMockSocket())
+	protocol, err := NewUpgradeToRocketProtocol(newMockSocket())
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := setRequestHeaders(nil, protocol); err != nil {
 		t.Fatal(err)
 	}

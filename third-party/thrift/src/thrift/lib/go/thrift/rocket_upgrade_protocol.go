@@ -28,19 +28,15 @@ type upgradeToRocketProtocol struct {
 }
 
 // NewUpgradeToRocketProtocol creates a protocol that upgrades from Header to Rocket protocol from a socket.
-func NewUpgradeToRocketProtocol(conn net.Conn) Protocol {
+func NewUpgradeToRocketProtocol(conn net.Conn) (Protocol, error) {
+	rocket, err := NewRocketProtocol(conn)
+	if err != nil {
+		return nil, err
+	}
 	return &upgradeToRocketProtocol{
-		rocketProtocol: NewRocketProtocol(conn),
+		rocketProtocol: rocket,
 		headerProtocol: NewHeaderProtocol(conn),
-	}
-}
-
-// NewUpgradeToRocketProtocols creates a protocol that upgrades from Header to Rocket protocol given both protocols.
-func NewUpgradeToRocketProtocols(rocketProtocol, headerProtocol Protocol) Protocol {
-	return &upgradeToRocketProtocol{
-		rocketProtocol: rocketProtocol,
-		headerProtocol: headerProtocol,
-	}
+	}, nil
 }
 
 // WriteMessageBegin first sends a upgradeToRocket message using the HeaderProtocol.

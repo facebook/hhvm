@@ -6,7 +6,7 @@ use std::path::Path;
 use thrift_compiler::Config;
 use thrift_compiler::GenContext;
 const CRATEMAP: &str = "\
-test_structs crate //thrift/lib/rust/deterministic_hash/src/tests:teststructs-rust
+thrift/lib/rust/deterministic_hash/src/tests/test_structs.thrift crate //thrift/lib/rust/deterministic_hash/src/tests:teststructs-rust
 ";
 #[rustfmt::skip]
 fn main() {

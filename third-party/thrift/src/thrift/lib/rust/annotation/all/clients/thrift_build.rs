@@ -6,17 +6,17 @@ use std::path::Path;
 use thrift_compiler::Config;
 use thrift_compiler::GenContext;
 const CRATEMAP: &str = "\
-annotation annotations //thrift/facebook/erlang:annotations-rust
-compat compat //thrift/annotation:compat-rust
-cpp cpp //thrift/annotation:cpp-rust
-go go //thrift/annotation:go-rust
-hack hack //thrift/annotation:hack-rust
-internal internal //thrift/annotation:internal-rust
-java java //thrift/annotation:java-rust
-python python //thrift/annotation:python-rust
-rust rust //thrift/annotation:rust-rust
-scope scope //thrift/annotation:scope-rust
-thrift thrift //thrift/annotation:thrift-rust
+thrift/annotation/compat.thrift compat //thrift/annotation:compat-rust
+thrift/annotation/cpp.thrift cpp //thrift/annotation:cpp-rust
+thrift/annotation/go.thrift go //thrift/annotation:go-rust
+thrift/annotation/hack.thrift hack //thrift/annotation:hack-rust
+thrift/annotation/internal.thrift internal //thrift/annotation:internal-rust
+thrift/annotation/java.thrift java //thrift/annotation:java-rust
+thrift/annotation/python.thrift python //thrift/annotation:python-rust
+thrift/annotation/rust.thrift rust //thrift/annotation:rust-rust
+thrift/annotation/scope.thrift scope //thrift/annotation:scope-rust
+thrift/annotation/thrift.thrift thrift //thrift/annotation:thrift-rust
+thrift/facebook/erlang/annotation.thrift annotations //thrift/facebook/erlang:annotations-rust
 ";
 #[rustfmt::skip]
 fn main() {

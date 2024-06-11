@@ -6,9 +6,9 @@ use std::path::Path;
 use thrift_compiler::Config;
 use thrift_compiler::GenContext;
 const CRATEMAP: &str = "\
-cpp crate //thrift/annotation:cpp-rust
-scope scope //thrift/annotation:scope-rust
-thrift thrift //thrift/annotation:thrift-rust
+thrift/annotation/cpp.thrift crate //thrift/annotation:cpp-rust
+thrift/annotation/scope.thrift scope //thrift/annotation:scope-rust
+thrift/annotation/thrift.thrift thrift //thrift/annotation:thrift-rust
 ";
 #[rustfmt::skip]
 fn main() {

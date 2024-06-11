@@ -6,7 +6,7 @@ use std::path::Path;
 use thrift_compiler::Config;
 use thrift_compiler::GenContext;
 const CRATEMAP: &str = "\
-test_thrift crate //thrift/lib/rust/src/dep_tests:test_if-rust
+thrift/lib/rust/src/dep_tests/test_thrift.thrift crate //thrift/lib/rust/src/dep_tests:test_if-rust
 ";
 #[rustfmt::skip]
 fn main() {

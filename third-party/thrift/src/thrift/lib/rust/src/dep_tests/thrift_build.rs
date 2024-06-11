@@ -6,7 +6,7 @@ use std::path::Path;
 use thrift_compiler::Config;
 use thrift_compiler::GenContext;
 const CRATEMAP: &str = "\
-test_deprecated_optional_with_default_is_some crate //thrift/lib/rust/src/dep_tests:test_deprecated_optional_with_default_is_some_if-rust
+thrift/lib/rust/src/dep_tests/test_deprecated_optional_with_default_is_some.thrift crate //thrift/lib/rust/src/dep_tests:test_deprecated_optional_with_default_is_some_if-rust
 ";
 #[rustfmt::skip]
 fn main() {

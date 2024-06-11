@@ -7622,7 +7622,7 @@ echo $undefined_var;
         # When `--notebook-mode` is passed to `hh lsp` and the notebook
         # is stopped at a breakpoint:
         # There should be NO undefined variable errors
-        os.makedirs(os.path.dirname(_HHVM_IS_PAUSED_FILE))
+        os.makedirs(os.path.dirname(_HHVM_IS_PAUSED_FILE), exist_ok=True)
         with open(_HHVM_IS_PAUSED_FILE, "w") as f:
             pass
         contents = """<?hh

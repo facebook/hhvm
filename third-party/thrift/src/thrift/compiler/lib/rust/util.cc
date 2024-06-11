@@ -87,16 +87,12 @@ rust_crate_map load_crate_map(const std::string& path) {
       ret.label = label;
     }
 
-    if (multifile) {
+    if (multifile || crate_name != "crate") {
       for (const auto& thrift_name : thrift_names) {
         ret.cratemap[thrift_name].name = crate_name;
-        ret.cratemap[thrift_name].multifile_module = thrift_name;
+        ret.cratemap[thrift_name].multifile = multifile;
         ret.cratemap[thrift_name].label = label;
       }
-    } else if (crate_name != "crate") {
-      ret.cratemap[thrift_names[0]].name = crate_name;
-      ret.cratemap[thrift_names[0]].multifile_module = std::nullopt;
-      ret.cratemap[thrift_names[0]].label = label;
     }
   }
 
@@ -107,7 +103,7 @@ static bool is_legal_crate_name(const std::string& name) {
   return name == mangle(name) && name != "core" && name != "std";
 }
 
-std::string rust_crate::import_name() const {
+std::string rust_crate::import_name(const t_program* program) const {
   std::string absolute_crate_name;
 
   if (name == "crate") {
@@ -118,8 +114,8 @@ std::string rust_crate::import_name() const {
     absolute_crate_name = "::" + name + "_";
   }
 
-  if (multifile_module) {
-    return absolute_crate_name + "::" + mangle(*multifile_module);
+  if (multifile) {
+    return absolute_crate_name + "::" + multifile_module_name(program);
   } else {
     return absolute_crate_name;
   }

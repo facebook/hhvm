@@ -175,9 +175,9 @@ std::string get_types_import_name(
   if (crate == options.cratemap.end()) {
     return program_name + "__types";
   } else if (crate->second.name == "crate") {
-    return crate->second.import_name() + "::types";
+    return crate->second.import_name(program) + "::types";
   } else {
-    return crate->second.import_name();
+    return crate->second.import_name(program);
   }
 }
 
@@ -192,12 +192,12 @@ std::string get_client_import_name(
   if (crate == options.cratemap.end()) {
     return program_name + "__clients";
   } else if (crate->second.name == "crate") {
-    return crate->second.import_name() + "::client";
+    return crate->second.import_name(program) + "::client";
   }
 
   std::string absolute_crate_name = "::" + crate->second.name + "_clients";
-  if (crate->second.multifile_module) {
-    return absolute_crate_name + "::" + mangle(*crate->second.multifile_module);
+  if (crate->second.multifile) {
+    return absolute_crate_name + "::" + multifile_module_name(program);
   } else {
     return absolute_crate_name;
   }
@@ -214,12 +214,12 @@ std::string get_server_import_name(
   if (crate == options.cratemap.end()) {
     return program_name + "__services";
   } else if (crate->second.name == "crate") {
-    return crate->second.import_name();
+    return crate->second.import_name(program);
   }
 
   std::string absolute_crate_name = "::" + crate->second.name + "_services";
-  if (crate->second.multifile_module) {
-    return absolute_crate_name + "::" + mangle(*crate->second.multifile_module);
+  if (crate->second.multifile) {
+    return absolute_crate_name + "::" + multifile_module_name(program);
   } else {
     return absolute_crate_name;
   }
@@ -236,12 +236,12 @@ std::string get_mock_import_name(
   if (crate == options.cratemap.end()) {
     return program_name + "__mocks";
   } else if (crate->second.name == "crate") {
-    return crate->second.import_name();
+    return crate->second.import_name(program);
   }
 
   std::string absolute_crate_name = "::" + crate->second.name + "_mocks";
-  if (crate->second.multifile_module) {
-    return absolute_crate_name + "::" + mangle(*crate->second.multifile_module);
+  if (crate->second.multifile) {
+    return absolute_crate_name + "::" + multifile_module_name(program);
   } else {
     return absolute_crate_name;
   }

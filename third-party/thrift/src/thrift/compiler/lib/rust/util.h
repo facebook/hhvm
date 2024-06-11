@@ -31,10 +31,10 @@ namespace rust {
 
 struct rust_crate {
   std::string name;
-  std::optional<std::string> multifile_module;
+  bool multifile = false;
   std::string label;
 
-  std::string import_name() const;
+  std::string import_name(const t_program* program) const;
 };
 
 struct rust_crate_map {

@@ -43,7 +43,9 @@ type rocketProtocol struct {
 	responseChan chan payload.Payload
 	errChan      chan error
 
-	protoID      ProtocolID
+	protoID ProtocolID
+	zstd    bool
+
 	reqMetadata  *requestRPCMetadata
 	respMetadata *ResponseRpcMetadata
 	seqID        int32
@@ -60,6 +62,7 @@ func NewRocketProtocol(conn net.Conn) (Protocol, error) {
 		persistentHeaders: make(map[string]string),
 		buf:               NewMemoryBuffer(),
 		conn:              conn,
+		zstd:              true,
 	}
 	if err := p.resetProtocol(); err != nil {
 		return nil, err
@@ -95,7 +98,7 @@ func (p *rocketProtocol) WriteMessageBegin(name string, typeID MessageType, seqi
 	p.reqMetadata.Name = name
 	p.reqMetadata.TypeID = typeID
 	p.reqMetadata.ProtoID = p.protoID
-	p.reqMetadata.Zstd = true
+	p.reqMetadata.Zstd = p.zstd
 	return nil
 }
 
@@ -172,6 +175,37 @@ func (p *rocketProtocol) open() error {
 		// KeepaliveLifetime = time.Duration(missedAcks = 1) * (ackTimeout = 3600000)
 		KeepAlive(time.Millisecond*30000, time.Millisecond*3600000, 1).
 		SetupPayload(setupPayload).
+		Acceptor(func(ctx context.Context, socket rsocket.RSocket) rsocket.RSocket {
+			return rsocket.NewAbstractSocket(
+				rsocket.MetadataPush(func(pay payload.Payload) {
+					// For documentation/reference see the CPP implementation
+					// https://www.internalfb.com/code/fbsource/[ec968d3ea0ab]/fbcode/thrift/lib/cpp2/transport/rocket/client/RocketClient.cpp?lines=181
+					metadataBytes, ok := pay.Metadata()
+					if !ok {
+						panic("no metadata in metadata push")
+					}
+					metadata := &ServerPushMetadata{}
+					compactDeserializer := NewCompactDeserializer()
+					if err = compactDeserializer.Read(metadata, metadataBytes); err != nil {
+						panic(fmt.Errorf("unable to deserialize metadata push into ServerPushMetadata %w", err))
+					}
+					if metadata.SetupResponse != nil {
+						if metadata.SetupResponse.ZstdSupported != nil {
+							p.zstd = *metadata.SetupResponse.ZstdSupported
+						}
+						if metadata.SetupResponse.Version != nil {
+							if *metadata.SetupResponse.Version != 8 {
+								panic(fmt.Errorf("unsupported protocol version %d received in metadata push", *metadata.SetupResponse.Version))
+							}
+						}
+					} else if metadata.StreamHeadersPush != nil {
+						panic("metadata push: StreamHeadersPush not implemented")
+					} else if metadata.DrainCompletePush != nil {
+						p.Close()
+					}
+				}),
+			)
+		}).
 		Transport(transporter).
 		Start(p.ctx)
 	return err

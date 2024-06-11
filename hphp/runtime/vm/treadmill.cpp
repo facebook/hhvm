@@ -394,6 +394,39 @@ void checkForStuckTreadmill() {
   checkOldest(g, true);
 }
 
+std::string dumpActiveRequestInfo() {
+  std::string out;
+  out += "\nActive Requests:\n";
+  for (auto& req : s_inflightRequests) {
+    if (req.startTime != kNoStartTime) {
+      folly::format(
+        &out,
+        "  {} {} {} (age {}ms){} {}{}\n",
+        req.pthreadId,
+        req.requestInfo ? req.requestInfo->m_id.toString() : "none",
+        req.startTime.time_since_epoch().count(),
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+          Clock::now() - req.startTime
+        ).count(),
+        req.requestInfo
+          ? folly::sformat(
+            " (timeout {}s)",
+            req.requestInfo->m_reqInjectionData.getTimeout()
+          )
+          : "",
+        getSessionKindName(req.sessionKind),
+        req.startTime ==  getOldestRequestStartTime() ? " OLDEST" : ""
+      );
+    }
+  }
+
+  return out;
+}
+
+unsigned long long getNumInflightRequests() {
+    return s_inflightRequests.size();
+}
+
 std::string dumpTreadmillInfo(bool forCrash) {
   std::string out;
   Optional<StateGuard> g;
@@ -438,29 +471,8 @@ std::string dumpTreadmillInfo(bool forCrash) {
     s_inflightRequests.size()
   );
 
-  out += "\nActive Requests:\n";
-  for (auto& req : s_inflightRequests) {
-    if (req.startTime != kNoStartTime) {
-      folly::format(
-        &out,
-        "  {} {} {} (age {}ms){} {}{}\n",
-        req.pthreadId,
-        req.requestInfo ? req.requestInfo->m_id.toString() : "none",
-        req.startTime.time_since_epoch().count(),
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-          Clock::now() - req.startTime
-        ).count(),
-        req.requestInfo
-          ? folly::sformat(
-            " (timeout {}s)",
-            req.requestInfo->m_reqInjectionData.getTimeout()
-          )
-          : "",
-        getSessionKindName(req.sessionKind),
-        req.startTime == oldestStart ? " OLDEST" : ""
-      );
-    }
-  }
+  out += dumpActiveRequestInfo();
+
   return out;
 }
 

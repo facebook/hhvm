@@ -107,6 +107,10 @@ void checkForStuckTreadmill();
  */
 std::string dumpTreadmillInfo(bool forCrash = false);
 
+/* TODO: Add docs for these requests */
+std::string dumpActiveRequestInfo();
+unsigned long long getNumInflightRequests();
+
 /*
  * Schedule a function to run on the next appropriate treadmill round.
  *

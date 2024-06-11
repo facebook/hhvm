@@ -27,26 +27,26 @@ import (
 const DEFAULT_MAX_LENGTH = 16384000
 
 type FramedTransport struct {
-	transport Transport
+	buffer    io.ReadWriteCloser
 	framebuf  byteReader    // buffer for reading complete frames off the wire
 	buf       bytes.Buffer  // buffers the writes
-	reader    *bufio.Reader // just a buffer over the underlying transport
+	reader    *bufio.Reader // just a buffer over the underlying buffer
 	frameSize uint32        // Current remaining size of the frame. if ==0 read next frame header
 	rBuffer   [4]byte       // used for reading
 	wBuffer   [4]byte       // used for writing
 	maxLength uint32
 }
 
-func NewFramedTransport(transport Transport) *FramedTransport {
-	return &FramedTransport{transport: transport, reader: bufio.NewReader(transport), maxLength: DEFAULT_MAX_LENGTH}
+func NewFramedTransport(buffer io.ReadWriteCloser) *FramedTransport {
+	return &FramedTransport{buffer: buffer, reader: bufio.NewReader(buffer), maxLength: DEFAULT_MAX_LENGTH}
 }
 
-func NewFramedTransportMaxLength(transport Transport, maxLength uint32) *FramedTransport {
-	return &FramedTransport{transport: transport, reader: bufio.NewReader(transport), maxLength: maxLength}
+func NewFramedTransportMaxLength(buffer io.ReadWriteCloser, maxLength uint32) *FramedTransport {
+	return &FramedTransport{buffer: buffer, reader: bufio.NewReader(buffer), maxLength: maxLength}
 }
 
 func (p *FramedTransport) Close() error {
-	return p.transport.Close()
+	return p.buffer.Close()
 }
 
 func (p *FramedTransport) Read(buf []byte) (l int, err error) {
@@ -109,17 +109,19 @@ func (p *FramedTransport) Flush() error {
 	size := p.buf.Len()
 	buf := p.wBuffer[:4]
 	binary.BigEndian.PutUint32(buf, uint32(size))
-	_, err := p.transport.Write(buf)
+	_, err := p.buffer.Write(buf)
 	if err != nil {
 		return NewTransportExceptionFromError(err)
 	}
 	if size > 0 {
-		if n, err := p.buf.WriteTo(p.transport); err != nil {
+		if n, err := p.buf.WriteTo(p.buffer); err != nil {
 			print("Error while flushing write buffer of size ", size, " to transport, only wrote ", n, " bytes: ", err.Error(), "\n")
 			return NewTransportExceptionFromError(err)
 		}
 	}
-	err = p.transport.Flush()
+	if flusher, ok := p.buffer.(Flusher); ok {
+		err = flusher.Flush()
+	}
 	return NewTransportExceptionFromError(err)
 }
 

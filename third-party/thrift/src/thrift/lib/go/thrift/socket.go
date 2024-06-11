@@ -77,10 +77,9 @@ func SocketConn(conn net.Conn) SocketOption {
 	}
 }
 
-// NewSocket creates a net.Conn-backed Transport, given a host and port,
-// or an existing connection.
+// NewSocket creates a net.Conn, given a host and port or an existing connection.
 //
-//	trans, err := thrift.NewSocket(thrift.SocketAddr("localhost:9090"))
+//	conn, err := thrift.NewSocket(thrift.SocketAddr("localhost:9090"))
 func NewSocket(options ...SocketOption) (net.Conn, error) {
 	socket := &socket{}
 

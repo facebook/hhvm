@@ -26,16 +26,7 @@ fn main() {
     fs::write(cratemap_path, CRATEMAP).expect("Failed to write cratemap");
     let mut conf = Config::from_env(GenContext::Clients)
         .expect("Failed to instantiate thrift_compiler::Config");
-    let cargo_manifest_dir = env::var_os("CARGO_MANIFEST_DIR")
-        .expect("CARGO_MANIFEST_DIR not provided");
-    let mut base_path = Path::new(&cargo_manifest_dir)
-        .join("../../../../../..")
-        .canonicalize()
-        .expect("Failed to canonicalize base_path");
-    if cfg!(windows) {
-        base_path = base_path.to_string_lossy().trim_start_matches(r"\\?\").into();
-    }
-    conf.base_path(base_path);
+    conf.base_path("../../../../../..");
     conf.types_crate("all__types");
     conf.clients_crate("all__clients");
     let srcs: &[&str] = &[];

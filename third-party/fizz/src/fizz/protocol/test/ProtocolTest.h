@@ -167,7 +167,7 @@ class ProtocolTest : public testing::Test {
       auto ret = std::make_unique<MockAead>();
       EXPECT_CALL(*ret, _setKey(_))
           .WillOnce(Invoke([keys, ptr = ret.get()](TrafficKey& key) {
-            *keys.at(key.key->clone()->moveToFbString().toStdString()) = ptr;
+            *keys.at(key.key->clone()->to<std::string>()) = ptr;
           }));
       return ret;
     }));

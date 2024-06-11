@@ -21,8 +21,7 @@ std::string generateDelegatedCredentialPEM(
   auto encodedCred = fizz::extensions::encodeExtension(credential);
   std::string pemData;
   pemData += kDCHeader;
-  pemData += folly::base64Encode(
-      encodedCred.extension_data->moveToFbString().toStdString());
+  pemData += folly::base64Encode(encodedCred.extension_data->to<std::string>());
   pemData += "\n";
   pemData += kDCFooter;
   pemData += credKeyData;

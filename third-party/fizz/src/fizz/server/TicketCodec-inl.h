@@ -73,7 +73,7 @@ ResumptionState TicketCodec<Storage>::decode(
   Buf alpnBuf;
   fizz::detail::readBuf<uint8_t>(alpnBuf, cursor);
   if (!alpnBuf->empty()) {
-    resState.alpn = alpnBuf->moveToFbString().toStdString();
+    resState.alpn = alpnBuf->to<std::string>();
   }
 
   resState.ticketIssueTime = std::chrono::time_point<std::chrono::system_clock>(
@@ -81,8 +81,7 @@ ResumptionState TicketCodec<Storage>::decode(
   // If unset, set handshake timestamp to ticket timestamp
   resState.handshakeTime = resState.ticketIssueTime;
 
-  resState.serverCert =
-      certManager.getCert(selfIdentity->moveToFbString().toStdString());
+  resState.serverCert = certManager.getCert(selfIdentity->to<std::string>());
 
   if (cursor.isAtEnd()) {
     return resState;

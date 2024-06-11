@@ -1270,7 +1270,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
     auto ret = std::make_unique<MockAead>();
     EXPECT_CALL(*ret, _setKey(_))
         .WillOnce(Invoke([keys, ptr = ret.get()](TrafficKey& key) {
-          *keys.at(key.key->clone()->moveToFbString().toStdString()) = ptr;
+          *keys.at(key.key->clone()->to<std::string>()) = ptr;
         }));
     return ret;
   }));
@@ -1576,7 +1576,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
     auto ret = std::make_unique<MockAead>();
     EXPECT_CALL(*ret, _setKey(_))
         .WillOnce(Invoke([keys, ptr = ret.get()](TrafficKey& key) {
-          *keys.at(key.key->clone()->moveToFbString().toStdString()) = ptr;
+          *keys.at(key.key->clone()->to<std::string>()) = ptr;
         }));
     return ret;
   }));
@@ -4342,7 +4342,7 @@ TEST_F(ServerProtocolTest, TestClientHelloFallback) {
       "\x16\x03\x01\x00\x13"
       "clienthelloencoding",
       24);
-  EXPECT_EQ(fallback.clientHello->moveToFbString().toStdString(), expectedChlo);
+  EXPECT_EQ(fallback.clientHello->to<std::string>(), expectedChlo);
   EXPECT_EQ(fallback.sni.value(), "www.hostname.com");
 }
 
@@ -4363,7 +4363,7 @@ TEST_F(ServerProtocolTest, TestClientHelloFallbackNoSNI) {
       "\x16\x03\x01\x00\x13"
       "clienthelloencoding",
       24);
-  EXPECT_EQ(fallback.clientHello->moveToFbString().toStdString(), expectedChlo);
+  EXPECT_EQ(fallback.clientHello->to<std::string>(), expectedChlo);
   EXPECT_FALSE(fallback.sni.has_value());
 }
 

@@ -65,7 +65,7 @@ class BrotliCertificateCompressorTest : public testing::Test {
   template <class T>
   std::string encodeHex(T&& msg) {
     auto buf = encode(std::forward<T>(msg));
-    auto str = buf->moveToFbString().toStdString();
+    auto str = buf->template to<std::string>();
     return hexlify(str);
   }
   std::unique_ptr<BrotliCertificateCompressor> compressor_;

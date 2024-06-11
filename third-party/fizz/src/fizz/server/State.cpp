@@ -31,13 +31,12 @@ void HandshakeLogging::populateFromClientHello(const ClientHello& chlo) {
   auto alpn = getExtension<ProtocolNameList>(chlo.extensions);
   if (alpn) {
     for (auto& protocol : alpn->protocol_name_list) {
-      clientAlpns.push_back(protocol.name->moveToFbString().toStdString());
+      clientAlpns.push_back(protocol.name->to<std::string>());
     }
   }
   auto sni = getExtension<ServerNameList>(chlo.extensions);
   if (sni && !sni->server_name_list.empty()) {
-    clientSni =
-        sni->server_name_list.front().hostname->moveToFbString().toStdString();
+    clientSni = sni->server_name_list.front().hostname->to<std::string>();
   }
   auto supportedGroups = getExtension<SupportedGroups>(chlo.extensions);
   if (supportedGroups) {

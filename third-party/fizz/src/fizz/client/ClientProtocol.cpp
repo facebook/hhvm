@@ -931,7 +931,7 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
 
     // Update SNI now
     echSni = std::move(sni);
-    sni = echParams->fakeSni->clone()->moveToFbString().toStdString();
+    sni = echParams->fakeSni->to<std::string>();
 
     // Save client hello inner
     encodedECH = std::move(encodedClientHello);
@@ -1752,8 +1752,7 @@ Actions EventHandler<
           "alpn list does not contain exactly one protocol",
           AlertDescription::illegal_parameter);
     }
-    appProto =
-        alpn->protocol_name_list.front().name->moveToFbString().toStdString();
+    appProto = alpn->protocol_name_list.front().name->to<std::string>();
     if (std::find(
             state.context()->getSupportedAlpns().begin(),
             state.context()->getSupportedAlpns().end(),

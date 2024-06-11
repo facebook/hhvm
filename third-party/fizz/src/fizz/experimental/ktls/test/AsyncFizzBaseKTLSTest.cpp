@@ -288,7 +288,7 @@ TEST(AsyncFizzBaseKTLSTest, TestFizzClientKTLSServer) {
         .thenValue([](auto&& res) {
           auto& [t, data] = res;
           ASSERT_TRUE(data.get());
-          auto value = data->moveToFbString().toStdString();
+          auto value = data->template to<std::string>();
           VLOG(1) << "ktls read: " << value;
           EXPECT_EQ(value, "hello from fizz");
         })
@@ -315,7 +315,7 @@ TEST(AsyncFizzBaseKTLSTest, TestFizzClientKTLSServer) {
       .thenValue([](auto&& res) {
         auto& [t, data] = res;
         ASSERT_TRUE(data.get());
-        auto value = data->moveToFbString().toStdString();
+        auto value = data->template to<std::string>();
         VLOG(1) << "client received: " << value;
         EXPECT_EQ(value, "hello from ktls");
 
@@ -353,7 +353,7 @@ TEST(AsyncFizzBaseKTLSTest, TestKTLSClientFizzServer) {
         .thenValue([](auto&& res) {
           auto& [t, data] = res;
           ASSERT_TRUE(data.get());
-          auto value = data->moveToFbString().toStdString();
+          auto value = data->template to<std::string>();
           VLOG(1) << "fizz server read: " << value;
           EXPECT_EQ(value, "hello from ktls");
         })
@@ -391,7 +391,7 @@ TEST(AsyncFizzBaseKTLSTest, TestKTLSClientFizzServer) {
         .thenValue([](auto&& res) {
           auto& [t, data] = res;
           ASSERT_TRUE(data.get());
-          auto value = data->moveToFbString().toStdString();
+          auto value = data->template to<std::string>();
           VLOG(1) << "client received: " << value;
           EXPECT_EQ(value, "hello from fizz");
           t->write(nullptr, "hello from ktls", sizeof("hello from ktls") - 1);

@@ -67,7 +67,7 @@ std::string serializePsk(const fizz::client::CachedPsk& psk) {
   fizz::detail::write(psk.maxEarlyDataSize, appender);
   fizz::detail::write(ticketHandshakeTime, appender);
 
-  return serialized->moveToFbString().toStdString();
+  return serialized->to<std::string>();
 }
 
 fizz::client::CachedPsk deserializePsk(
@@ -80,11 +80,11 @@ fizz::client::CachedPsk deserializePsk(
 
   std::unique_ptr<IOBuf> pskData;
   fizz::detail::readBuf<uint16_t>(pskData, cursor);
-  psk.psk = pskData->moveToFbString().toStdString();
+  psk.psk = pskData->to<std::string>();
 
   std::unique_ptr<IOBuf> secretData;
   fizz::detail::readBuf<uint16_t>(secretData, cursor);
-  psk.secret = secretData->moveToFbString().toStdString();
+  psk.secret = secretData->to<std::string>();
 
   fizz::detail::read(psk.version, cursor);
   fizz::detail::read(psk.cipher, cursor);
@@ -99,7 +99,7 @@ fizz::client::CachedPsk deserializePsk(
   std::unique_ptr<IOBuf> alpnData;
   fizz::detail::readBuf<uint8_t>(alpnData, cursor);
   if (!alpnData->empty()) {
-    psk.alpn = alpnData->moveToFbString().toStdString();
+    psk.alpn = alpnData->to<std::string>();
   }
 
   fizz::detail::read(psk.ticketAgeAdd, cursor);

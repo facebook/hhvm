@@ -197,7 +197,7 @@ TEST(BatchSignatureTest, TestThreadLocalBatcher) {
       EXPECT_TRUE(std::equal(
           rootValue1->data(), rootValue1->tail(), rootValue2->data()));
       EXPECT_EQ(
-          folly::hexlify(rootValue1->moveToFbString().toStdString()),
+          folly::hexlify(rootValue1->to<std::string>()),
           "66d793b168a6f5c84a0e3edd033df7b4676a4ef32917819562cada78b7a4fcff");
     }));
   }

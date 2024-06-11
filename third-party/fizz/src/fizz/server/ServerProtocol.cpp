@@ -814,7 +814,7 @@ static Optional<std::string> negotiateAlpn(
   // Check whether client supports ALPN
   if (ext) {
     for (auto& protocol : ext->protocol_name_list) {
-      clientProtocols.push_back(protocol.name->moveToFbString().toStdString());
+      clientProtocols.push_back(protocol.name->to<std::string>());
     }
   } else {
     VLOG(6) << "Client did not send ALPN extension";
@@ -981,9 +981,7 @@ static std::pair<std::shared_ptr<SelfCert>, SignatureScheme> chooseCert(
   Optional<std::string> sni;
   auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
   if (serverNameList && !serverNameList->server_name_list.empty()) {
-    sni = serverNameList->server_name_list.front()
-              .hostname->moveToFbString()
-              .toStdString();
+    sni = serverNameList->server_name_list.front().hostname->to<std::string>();
   }
 
   auto certAndScheme = context.getCert(
@@ -1059,9 +1057,7 @@ static std::string getSNI(const ClientHello& chlo) {
   auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
   std::string sni;
   if (serverNameList && !serverNameList->server_name_list.empty()) {
-    sni = serverNameList->server_name_list.front()
-              .hostname->moveToFbString()
-              .toStdString();
+    sni = serverNameList->server_name_list.front().hostname->to<std::string>();
   }
   return sni;
 }
@@ -1259,8 +1255,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
       auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
       if (serverNameList && !serverNameList->server_name_list.empty()) {
         fallback.sni = serverNameList->server_name_list.front()
-                           .hostname->moveToFbString()
-                           .toStdString();
+                           .hostname->to<std::string>();
       }
 
       return actions(

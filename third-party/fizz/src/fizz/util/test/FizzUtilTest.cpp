@@ -91,7 +91,7 @@ TEST(UtilTest, CreateTokenCipher) {
     auto inPlaintextBuf = folly::IOBuf::copyBuffer(inMessage);
     auto cipherTextBuf = cipher->encrypt(std::move(inPlaintextBuf)).value();
     auto outPlaintextBuf = cipher->decrypt(std::move(cipherTextBuf)).value();
-    auto outMessage = outPlaintextBuf->moveToFbString().toStdString();
+    auto outMessage = outPlaintextBuf->to<std::string>();
     EXPECT_EQ(inMessage, outMessage);
   }
   {
@@ -105,7 +105,7 @@ TEST(UtilTest, CreateTokenCipher) {
     auto inPlaintextBuf = folly::IOBuf::copyBuffer(inMessage);
     auto cipherTextBuf = newCipher->encrypt(std::move(inPlaintextBuf)).value();
     auto outPlaintextBuf = newCipher->decrypt(std::move(cipherTextBuf)).value();
-    auto outMessage = outPlaintextBuf->moveToFbString().toStdString();
+    auto outMessage = outPlaintextBuf->to<std::string>();
     EXPECT_EQ(inMessage, outMessage);
   }
 }

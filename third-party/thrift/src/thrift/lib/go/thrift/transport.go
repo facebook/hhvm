@@ -63,7 +63,7 @@ type stringWriter interface {
 // Notably, Socket does not implement this interface, and it is always a mistake to use
 // Socket directly in protocol.
 type RichTransport interface {
-	io.ReadWriter
+	io.ReadWriteCloser
 	io.ByteReader
 	io.ByteWriter
 	stringWriter

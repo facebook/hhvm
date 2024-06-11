@@ -194,9 +194,9 @@ std::string debugString(
       options);
   proto.setOutput(&queue);
   Cpp2Ops<T>::write(&proto, &obj);
-  auto buf = queue.move();
-  auto br = buf->coalesce();
-  return std::string(reinterpret_cast<const char*>(br.data()), br.size());
+  std::string ret;
+  queue.appendToString(ret);
+  return ret;
 }
 
 // TODO: Replace `debugString()` with this function
@@ -209,9 +209,9 @@ std::string debugStringViaEncode(
       options);
   proto.setOutput(&queue);
   Encode<type::infer_tag<T>>{}(proto, obj);
-  auto buf = queue.move();
-  auto br = buf->coalesce();
-  return std::string(reinterpret_cast<const char*>(br.data()), br.size());
+  std::string ret;
+  queue.appendToString(ret);
+  return ret;
 }
 
 } // namespace thrift

@@ -57,8 +57,8 @@ cdef class List__c_C(thrift.py3.types.List):
     cdef shared_ptr[vector[_c_types.cC]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[_c_types.cC]])
-    @staticmethod
-    cdef shared_ptr[vector[_c_types.cC]] _make_instance(object items) except *
     cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[_c_types.cC]] List__c_C__make_instance(object items) except *
 
 

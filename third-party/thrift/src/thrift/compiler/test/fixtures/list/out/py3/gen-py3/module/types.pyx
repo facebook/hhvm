@@ -74,7 +74,7 @@ cdef class List__string(thrift.py3.types.List):
         if isinstance(items, List__string):
             self._cpp_obj = (<List__string> items)._cpp_obj
         else:
-            self._cpp_obj = List__string._make_instance(items)
+            self._cpp_obj = List__string__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[string]] c_items):
@@ -90,18 +90,6 @@ cdef class List__string(thrift.py3.types.List):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[vector[string]] _make_instance(object items) except *:
-        cdef shared_ptr[vector[string]] c_inst = make_shared[vector[string]]()
-        if items is not None:
-            if isinstance(items, str):
-                raise TypeError("If you really want to pass a string into a _typing.Sequence[str] field, explicitly convert it first.")
-            for item in items:
-                if not isinstance(item, str):
-                    raise TypeError(f"{item!r} is not of type str")
-                deref(c_inst).push_back(item.encode('UTF-8'))
-        return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
@@ -147,6 +135,17 @@ cdef class List__string(thrift.py3.types.List):
 
 Sequence.register(List__string)
 
+cdef shared_ptr[vector[string]] List__string__make_instance(object items) except *:
+    cdef shared_ptr[vector[string]] c_inst = make_shared[vector[string]]()
+    if items is not None:
+        if isinstance(items, str):
+            raise TypeError("If you really want to pass a string into a _typing.Sequence[str] field, explicitly convert it first.")
+        for item in items:
+            if not isinstance(item, str):
+                raise TypeError(f"{item!r} is not of type str")
+            deref(c_inst).push_back(item.encode('UTF-8'))
+    return cmove(c_inst)
+
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class Map__i64_List__string(thrift.py3.types.Map):
@@ -154,7 +153,7 @@ cdef class Map__i64_List__string(thrift.py3.types.Map):
         if isinstance(items, Map__i64_List__string):
             self._cpp_obj = (<Map__i64_List__string> items)._cpp_obj
         else:
-            self._cpp_obj = Map__i64_List__string._make_instance(items)
+            self._cpp_obj = Map__i64_List__string__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cmap[cint64_t,vector[string]]] c_items):
@@ -170,22 +169,6 @@ cdef class Map__i64_List__string(thrift.py3.types.Map):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[cmap[cint64_t,vector[string]]] _make_instance(object items) except *:
-        cdef shared_ptr[cmap[cint64_t,vector[string]]] c_inst = make_shared[cmap[cint64_t,vector[string]]]()
-        if items is not None:
-            for key, item in items.items():
-                if not isinstance(key, int):
-                    raise TypeError(f"{key!r} is not of type int")
-                key = <cint64_t> key
-                if item is None:
-                    raise TypeError("None is not of type _typing.Sequence[str]")
-                if not isinstance(item, List__string):
-                    item = List__string(item)
-
-                deref(c_inst)[key] = deref((<List__string>item)._cpp_obj)
-        return c_inst
 
     cdef _check_key_type(self, key):
         if not self or key is None:
@@ -245,5 +228,20 @@ cdef class Map__i64_List__string(thrift.py3.types.Map):
         return get_types_reflection().get_reflection__Map__i64_List__string()
 
 Mapping.register(Map__i64_List__string)
+
+cdef shared_ptr[cmap[cint64_t,vector[string]]] Map__i64_List__string__make_instance(object items) except *:
+    cdef shared_ptr[cmap[cint64_t,vector[string]]] c_inst = make_shared[cmap[cint64_t,vector[string]]]()
+    if items is not None:
+        for key, item in items.items():
+            if not isinstance(key, int):
+                raise TypeError(f"{key!r} is not of type int")
+            key = <cint64_t> key
+            if item is None:
+                raise TypeError("None is not of type _typing.Sequence[str]")
+            if not isinstance(item, List__string):
+                item = List__string(item)
+
+            deref(c_inst)[key] = deref((<List__string>item)._cpp_obj)
+    return cmove(c_inst)
 
 TEST_MAP = Map__i64_List__string._fbthrift_create(constant_shared_ptr(cTEST_MAP()))

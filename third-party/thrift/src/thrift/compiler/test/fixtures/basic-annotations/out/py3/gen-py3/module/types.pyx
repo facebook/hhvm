@@ -370,7 +370,7 @@ cdef class std_deque_std_string__List__string(thrift.py3.types.List):
         if isinstance(items, std_deque_std_string__List__string):
             self._cpp_obj = (<std_deque_std_string__List__string> items)._cpp_obj
         else:
-            self._cpp_obj = std_deque_std_string__List__string._make_instance(items)
+            self._cpp_obj = std_deque_std_string__List__string__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[std_deque_std_string] c_items):
@@ -386,18 +386,6 @@ cdef class std_deque_std_string__List__string(thrift.py3.types.List):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[std_deque_std_string] _make_instance(object items) except *:
-        cdef shared_ptr[std_deque_std_string] c_inst = make_shared[std_deque_std_string]()
-        if items is not None:
-            if isinstance(items, str):
-                raise TypeError("If you really want to pass a string into a _typing.Sequence[str] field, explicitly convert it first.")
-            for item in items:
-                if not isinstance(item, str):
-                    raise TypeError(f"{item!r} is not of type str")
-                deref(c_inst).push_back(item.encode('UTF-8'))
-        return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
@@ -442,6 +430,17 @@ cdef class std_deque_std_string__List__string(thrift.py3.types.List):
 
 
 Sequence.register(std_deque_std_string__List__string)
+
+cdef shared_ptr[std_deque_std_string] std_deque_std_string__List__string__make_instance(object items) except *:
+    cdef shared_ptr[std_deque_std_string] c_inst = make_shared[std_deque_std_string]()
+    if items is not None:
+        if isinstance(items, str):
+            raise TypeError("If you really want to pass a string into a _typing.Sequence[str] field, explicitly convert it first.")
+        for item in items:
+            if not isinstance(item, str):
+                raise TypeError(f"{item!r} is not of type str")
+            deref(c_inst).push_back(item.encode('UTF-8'))
+    return cmove(c_inst)
 
 myStruct = MyStruct._fbthrift_create(constant_shared_ptr(cmyStruct()))
 list_string_6884 = std_deque_std_string__List__string

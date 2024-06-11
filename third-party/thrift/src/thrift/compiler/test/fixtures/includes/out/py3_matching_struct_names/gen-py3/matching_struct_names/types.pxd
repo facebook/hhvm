@@ -120,32 +120,32 @@ cdef class List__MyStruct(thrift.py3.types.List):
     cdef shared_ptr[vector[cMyStruct]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[cMyStruct]])
-    @staticmethod
-    cdef shared_ptr[vector[cMyStruct]] _make_instance(object items) except *
     cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[cMyStruct]] List__MyStruct__make_instance(object items) except *
 
 cdef class List__List__MyStruct(thrift.py3.types.List):
     cdef shared_ptr[vector[vector[cMyStruct]]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[vector[cMyStruct]]])
-    @staticmethod
-    cdef shared_ptr[vector[vector[cMyStruct]]] _make_instance(object items) except *
     cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[vector[cMyStruct]]] List__List__MyStruct__make_instance(object items) except *
 
 cdef class List__module_MyStruct(thrift.py3.types.List):
     cdef shared_ptr[vector[_module_types.cMyStruct]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[_module_types.cMyStruct]])
-    @staticmethod
-    cdef shared_ptr[vector[_module_types.cMyStruct]] _make_instance(object items) except *
     cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[_module_types.cMyStruct]] List__module_MyStruct__make_instance(object items) except *
 
 cdef class List__List__module_MyStruct(thrift.py3.types.List):
     cdef shared_ptr[vector[vector[_module_types.cMyStruct]]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[vector[_module_types.cMyStruct]]])
-    @staticmethod
-    cdef shared_ptr[vector[vector[_module_types.cMyStruct]]] _make_instance(object items) except *
     cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[vector[_module_types.cMyStruct]]] List__List__module_MyStruct__make_instance(object items) except *
 
 

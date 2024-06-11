@@ -223,7 +223,7 @@ cdef class List__bool(thrift.py3.types.List):
         if isinstance(items, List__bool):
             self._cpp_obj = (<List__bool> items)._cpp_obj
         else:
-            self._cpp_obj = List__bool._make_instance(items)
+            self._cpp_obj = List__bool__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[cbool]] c_items):
@@ -239,16 +239,6 @@ cdef class List__bool(thrift.py3.types.List):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[vector[cbool]] _make_instance(object items) except *:
-        cdef shared_ptr[vector[cbool]] c_inst = make_shared[vector[cbool]]()
-        if items is not None:
-            for item in items:
-                if not isinstance(item, bool):
-                    raise TypeError(f"{item!r} is not of type bool")
-                deref(c_inst).push_back(item)
-        return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
@@ -294,6 +284,15 @@ cdef class List__bool(thrift.py3.types.List):
 
 Sequence.register(List__bool)
 
+cdef shared_ptr[vector[cbool]] List__bool__make_instance(object items) except *:
+    cdef shared_ptr[vector[cbool]] c_inst = make_shared[vector[cbool]]()
+    if items is not None:
+        for item in items:
+            if not isinstance(item, bool):
+                raise TypeError(f"{item!r} is not of type bool")
+            deref(c_inst).push_back(item)
+    return cmove(c_inst)
+
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class List__i32(thrift.py3.types.List):
@@ -301,7 +300,7 @@ cdef class List__i32(thrift.py3.types.List):
         if isinstance(items, List__i32):
             self._cpp_obj = (<List__i32> items)._cpp_obj
         else:
-            self._cpp_obj = List__i32._make_instance(items)
+            self._cpp_obj = List__i32__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[cint32_t]] c_items):
@@ -317,17 +316,6 @@ cdef class List__i32(thrift.py3.types.List):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[vector[cint32_t]] _make_instance(object items) except *:
-        cdef shared_ptr[vector[cint32_t]] c_inst = make_shared[vector[cint32_t]]()
-        if items is not None:
-            for item in items:
-                if not isinstance(item, int):
-                    raise TypeError(f"{item!r} is not of type int")
-                item = <cint32_t> item
-                deref(c_inst).push_back(item)
-        return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
@@ -372,4 +360,14 @@ cdef class List__i32(thrift.py3.types.List):
 
 
 Sequence.register(List__i32)
+
+cdef shared_ptr[vector[cint32_t]] List__i32__make_instance(object items) except *:
+    cdef shared_ptr[vector[cint32_t]] c_inst = make_shared[vector[cint32_t]]()
+    if items is not None:
+        for item in items:
+            if not isinstance(item, int):
+                raise TypeError(f"{item!r} is not of type int")
+            item = <cint32_t> item
+            deref(c_inst).push_back(item)
+    return cmove(c_inst)
 

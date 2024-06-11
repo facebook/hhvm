@@ -254,7 +254,7 @@ cdef class List__Enum(thrift.py3.types.List):
         if isinstance(items, List__Enum):
             self._cpp_obj = (<List__Enum> items)._cpp_obj
         else:
-            self._cpp_obj = List__Enum._make_instance(items)
+            self._cpp_obj = List__Enum__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[cEnum]] c_items):
@@ -270,16 +270,6 @@ cdef class List__Enum(thrift.py3.types.List):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[vector[cEnum]] _make_instance(object items) except *:
-        cdef shared_ptr[vector[cEnum]] c_inst = make_shared[vector[cEnum]]()
-        if items is not None:
-            for item in items:
-                if not isinstance(item, Enum):
-                    raise TypeError(f"{item!r} is not of type Enum")
-                deref(c_inst).push_back(<cEnum><int>item)
-        return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
@@ -324,6 +314,15 @@ cdef class List__Enum(thrift.py3.types.List):
 
 
 Sequence.register(List__Enum)
+
+cdef shared_ptr[vector[cEnum]] List__Enum__make_instance(object items) except *:
+    cdef shared_ptr[vector[cEnum]] c_inst = make_shared[vector[cEnum]]()
+    if items is not None:
+        for item in items:
+            if not isinstance(item, Enum):
+                raise TypeError(f"{item!r} is not of type Enum")
+            deref(c_inst).push_back(<cEnum><int>item)
+    return cmove(c_inst)
 
 c0 = Struct._fbthrift_create(constant_shared_ptr(cc0()))
 e0s = List__Enum._fbthrift_create(constant_shared_ptr(ce0s()))

@@ -761,7 +761,7 @@ cdef class Set__i32(thrift.py3.types.Set):
         if isinstance(items, Set__i32):
             self._cpp_obj = (<Set__i32> items)._cpp_obj
         else:
-            self._cpp_obj = Set__i32._make_instance(items)
+            self._cpp_obj = Set__i32__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cset[cint32_t]] c_items):
@@ -777,17 +777,6 @@ cdef class Set__i32(thrift.py3.types.Set):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[cset[cint32_t]] _make_instance(object items) except *:
-        cdef shared_ptr[cset[cint32_t]] c_inst = make_shared[cset[cint32_t]]()
-        if items is not None:
-            for item in items:
-                if not isinstance(item, int):
-                    raise TypeError(f"{item!r} is not of type int")
-                item = <cint32_t> item
-                deref(c_inst).insert(item)
-        return c_inst
 
     def __contains__(self, item):
         if not self or item is None:
@@ -835,4 +824,14 @@ cdef class Set__i32(thrift.py3.types.Set):
 
 
 Set.register(Set__i32)
+
+cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *:
+    cdef shared_ptr[cset[cint32_t]] c_inst = make_shared[cset[cint32_t]]()
+    if items is not None:
+        for item in items:
+            if not isinstance(item, int):
+                raise TypeError(f"{item!r} is not of type int")
+            item = <cint32_t> item
+            deref(c_inst).insert(item)
+    return cmove(c_inst)
 

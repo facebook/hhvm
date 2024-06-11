@@ -183,7 +183,7 @@ cdef class Set__i32(thrift.py3.types.Set):
     cdef shared_ptr[cset[cint32_t]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cset[cint32_t]])
-    @staticmethod
-    cdef shared_ptr[cset[cint32_t]] _make_instance(object items) except *
+
+cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *
 
 

@@ -343,7 +343,7 @@ cdef class List__MyStruct(thrift.py3.types.List):
         if isinstance(items, List__MyStruct):
             self._cpp_obj = (<List__MyStruct> items)._cpp_obj
         else:
-            self._cpp_obj = List__MyStruct._make_instance(items)
+            self._cpp_obj = List__MyStruct__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[cMyStruct]] c_items):
@@ -359,16 +359,6 @@ cdef class List__MyStruct(thrift.py3.types.List):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[vector[cMyStruct]] _make_instance(object items) except *:
-        cdef shared_ptr[vector[cMyStruct]] c_inst = make_shared[vector[cMyStruct]]()
-        if items is not None:
-            for item in items:
-                if not isinstance(item, MyStruct):
-                    raise TypeError(f"{item!r} is not of type MyStruct")
-                deref(c_inst).push_back(deref((<MyStruct>item)._cpp_obj))
-        return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
@@ -414,6 +404,15 @@ cdef class List__MyStruct(thrift.py3.types.List):
 
 Sequence.register(List__MyStruct)
 
+cdef shared_ptr[vector[cMyStruct]] List__MyStruct__make_instance(object items) except *:
+    cdef shared_ptr[vector[cMyStruct]] c_inst = make_shared[vector[cMyStruct]]()
+    if items is not None:
+        for item in items:
+            if not isinstance(item, MyStruct):
+                raise TypeError(f"{item!r} is not of type MyStruct")
+            deref(c_inst).push_back(deref((<MyStruct>item)._cpp_obj))
+    return cmove(c_inst)
+
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class List__List__MyStruct(thrift.py3.types.List):
@@ -421,7 +420,7 @@ cdef class List__List__MyStruct(thrift.py3.types.List):
         if isinstance(items, List__List__MyStruct):
             self._cpp_obj = (<List__List__MyStruct> items)._cpp_obj
         else:
-            self._cpp_obj = List__List__MyStruct._make_instance(items)
+            self._cpp_obj = List__List__MyStruct__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[vector[cMyStruct]]] c_items):
@@ -437,18 +436,6 @@ cdef class List__List__MyStruct(thrift.py3.types.List):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[vector[vector[cMyStruct]]] _make_instance(object items) except *:
-        cdef shared_ptr[vector[vector[cMyStruct]]] c_inst = make_shared[vector[vector[cMyStruct]]]()
-        if items is not None:
-            for item in items:
-                if item is None:
-                    raise TypeError("None is not of the type _typing.Sequence[MyStruct]")
-                if not isinstance(item, List__MyStruct):
-                    item = List__MyStruct(item)
-                deref(c_inst).push_back(deref((<List__MyStruct>item)._cpp_obj))
-        return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
@@ -498,6 +485,17 @@ cdef class List__List__MyStruct(thrift.py3.types.List):
 
 Sequence.register(List__List__MyStruct)
 
+cdef shared_ptr[vector[vector[cMyStruct]]] List__List__MyStruct__make_instance(object items) except *:
+    cdef shared_ptr[vector[vector[cMyStruct]]] c_inst = make_shared[vector[vector[cMyStruct]]]()
+    if items is not None:
+        for item in items:
+            if item is None:
+                raise TypeError("None is not of the type _typing.Sequence[MyStruct]")
+            if not isinstance(item, List__MyStruct):
+                item = List__MyStruct(item)
+            deref(c_inst).push_back(deref((<List__MyStruct>item)._cpp_obj))
+    return cmove(c_inst)
+
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class List__module_MyStruct(thrift.py3.types.List):
@@ -505,7 +503,7 @@ cdef class List__module_MyStruct(thrift.py3.types.List):
         if isinstance(items, List__module_MyStruct):
             self._cpp_obj = (<List__module_MyStruct> items)._cpp_obj
         else:
-            self._cpp_obj = List__module_MyStruct._make_instance(items)
+            self._cpp_obj = List__module_MyStruct__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[_module_types.cMyStruct]] c_items):
@@ -521,16 +519,6 @@ cdef class List__module_MyStruct(thrift.py3.types.List):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[vector[_module_types.cMyStruct]] _make_instance(object items) except *:
-        cdef shared_ptr[vector[_module_types.cMyStruct]] c_inst = make_shared[vector[_module_types.cMyStruct]]()
-        if items is not None:
-            for item in items:
-                if not isinstance(item, _module_types.MyStruct):
-                    raise TypeError(f"{item!r} is not of type _module_types.MyStruct")
-                deref(c_inst).push_back(deref((<_module_types.MyStruct>item)._cpp_obj))
-        return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
@@ -576,6 +564,15 @@ cdef class List__module_MyStruct(thrift.py3.types.List):
 
 Sequence.register(List__module_MyStruct)
 
+cdef shared_ptr[vector[_module_types.cMyStruct]] List__module_MyStruct__make_instance(object items) except *:
+    cdef shared_ptr[vector[_module_types.cMyStruct]] c_inst = make_shared[vector[_module_types.cMyStruct]]()
+    if items is not None:
+        for item in items:
+            if not isinstance(item, _module_types.MyStruct):
+                raise TypeError(f"{item!r} is not of type _module_types.MyStruct")
+            deref(c_inst).push_back(deref((<_module_types.MyStruct>item)._cpp_obj))
+    return cmove(c_inst)
+
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class List__List__module_MyStruct(thrift.py3.types.List):
@@ -583,7 +580,7 @@ cdef class List__List__module_MyStruct(thrift.py3.types.List):
         if isinstance(items, List__List__module_MyStruct):
             self._cpp_obj = (<List__List__module_MyStruct> items)._cpp_obj
         else:
-            self._cpp_obj = List__List__module_MyStruct._make_instance(items)
+            self._cpp_obj = List__List__module_MyStruct__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[vector[_module_types.cMyStruct]]] c_items):
@@ -599,18 +596,6 @@ cdef class List__List__module_MyStruct(thrift.py3.types.List):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[vector[vector[_module_types.cMyStruct]]] _make_instance(object items) except *:
-        cdef shared_ptr[vector[vector[_module_types.cMyStruct]]] c_inst = make_shared[vector[vector[_module_types.cMyStruct]]]()
-        if items is not None:
-            for item in items:
-                if item is None:
-                    raise TypeError("None is not of the type _typing.Sequence[_module_types.MyStruct]")
-                if not isinstance(item, List__module_MyStruct):
-                    item = List__module_MyStruct(item)
-                deref(c_inst).push_back(deref((<List__module_MyStruct>item)._cpp_obj))
-        return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
@@ -659,4 +644,15 @@ cdef class List__List__module_MyStruct(thrift.py3.types.List):
 
 
 Sequence.register(List__List__module_MyStruct)
+
+cdef shared_ptr[vector[vector[_module_types.cMyStruct]]] List__List__module_MyStruct__make_instance(object items) except *:
+    cdef shared_ptr[vector[vector[_module_types.cMyStruct]]] c_inst = make_shared[vector[vector[_module_types.cMyStruct]]]()
+    if items is not None:
+        for item in items:
+            if item is None:
+                raise TypeError("None is not of the type _typing.Sequence[_module_types.MyStruct]")
+            if not isinstance(item, List__module_MyStruct):
+                item = List__module_MyStruct(item)
+            deref(c_inst).push_back(deref((<List__module_MyStruct>item)._cpp_obj))
+    return cmove(c_inst)
 

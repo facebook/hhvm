@@ -181,23 +181,23 @@ cdef class Set__i64(thrift.py3.types.Set):
     cdef shared_ptr[cset[cint64_t]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cset[cint64_t]])
-    @staticmethod
-    cdef shared_ptr[cset[cint64_t]] _make_instance(object items) except *
+
+cdef shared_ptr[cset[cint64_t]] Set__i64__make_instance(object items) except *
 
 cdef class Map__Animal_string(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cAnimal,string]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cmap[cAnimal,string]])
-    @staticmethod
-    cdef shared_ptr[cmap[cAnimal,string]] _make_instance(object items) except *
     cdef _check_key_type(self, key)
+
+cdef shared_ptr[cmap[cAnimal,string]] Map__Animal_string__make_instance(object items) except *
 
 cdef class List__Vehicle(thrift.py3.types.List):
     cdef shared_ptr[vector[cVehicle]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[cVehicle]])
-    @staticmethod
-    cdef shared_ptr[vector[cVehicle]] _make_instance(object items) except *
     cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[cVehicle]] List__Vehicle__make_instance(object items) except *
 
 

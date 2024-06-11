@@ -74,7 +74,7 @@ cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
         if isinstance(items, std_unordered_map__Map__i32_string):
             self._cpp_obj = (<std_unordered_map__Map__i32_string> items)._cpp_obj
         else:
-            self._cpp_obj = std_unordered_map__Map__i32_string._make_instance(items)
+            self._cpp_obj = std_unordered_map__Map__i32_string__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[std_unordered_map[cint32_t,string]] c_items):
@@ -90,20 +90,6 @@ cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[std_unordered_map[cint32_t,string]] _make_instance(object items) except *:
-        cdef shared_ptr[std_unordered_map[cint32_t,string]] c_inst = make_shared[std_unordered_map[cint32_t,string]]()
-        if items is not None:
-            for key, item in items.items():
-                if not isinstance(key, int):
-                    raise TypeError(f"{key!r} is not of type int")
-                key = <cint32_t> key
-                if not isinstance(item, str):
-                    raise TypeError(f"{item!r} is not of type str")
-
-                deref(c_inst)[key] = item.encode('UTF-8')
-        return c_inst
 
     cdef _check_key_type(self, key):
         if not self or key is None:
@@ -164,6 +150,19 @@ cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
 
 Mapping.register(std_unordered_map__Map__i32_string)
 
+cdef shared_ptr[std_unordered_map[cint32_t,string]] std_unordered_map__Map__i32_string__make_instance(object items) except *:
+    cdef shared_ptr[std_unordered_map[cint32_t,string]] c_inst = make_shared[std_unordered_map[cint32_t,string]]()
+    if items is not None:
+        for key, item in items.items():
+            if not isinstance(key, int):
+                raise TypeError(f"{key!r} is not of type int")
+            key = <cint32_t> key
+            if not isinstance(item, str):
+                raise TypeError(f"{item!r} is not of type str")
+
+            deref(c_inst)[key] = item.encode('UTF-8')
+    return cmove(c_inst)
+
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
@@ -171,7 +170,7 @@ cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
         if isinstance(items, List__std_unordered_map__Map__i32_string):
             self._cpp_obj = (<List__std_unordered_map__Map__i32_string> items)._cpp_obj
         else:
-            self._cpp_obj = List__std_unordered_map__Map__i32_string._make_instance(items)
+            self._cpp_obj = List__std_unordered_map__Map__i32_string__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[std_unordered_map[cint32_t,string]]] c_items):
@@ -187,18 +186,6 @@ cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[vector[std_unordered_map[cint32_t,string]]] _make_instance(object items) except *:
-        cdef shared_ptr[vector[std_unordered_map[cint32_t,string]]] c_inst = make_shared[vector[std_unordered_map[cint32_t,string]]]()
-        if items is not None:
-            for item in items:
-                if item is None:
-                    raise TypeError("None is not of the type _typing.Mapping[int, str]")
-                if not isinstance(item, std_unordered_map__Map__i32_string):
-                    item = std_unordered_map__Map__i32_string(item)
-                deref(c_inst).push_back(deref((<std_unordered_map__Map__i32_string>item)._cpp_obj))
-        return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
@@ -247,6 +234,17 @@ cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
 
 
 Sequence.register(List__std_unordered_map__Map__i32_string)
+
+cdef shared_ptr[vector[std_unordered_map[cint32_t,string]]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *:
+    cdef shared_ptr[vector[std_unordered_map[cint32_t,string]]] c_inst = make_shared[vector[std_unordered_map[cint32_t,string]]]()
+    if items is not None:
+        for item in items:
+            if item is None:
+                raise TypeError("None is not of the type _typing.Mapping[int, str]")
+            if not isinstance(item, std_unordered_map__Map__i32_string):
+                item = std_unordered_map__Map__i32_string(item)
+            deref(c_inst).push_back(deref((<std_unordered_map__Map__i32_string>item)._cpp_obj))
+    return cmove(c_inst)
 
 SomeMap = std_unordered_map__Map__i32_string
 SomeListOfTypeMap = List__std_unordered_map__Map__i32_string

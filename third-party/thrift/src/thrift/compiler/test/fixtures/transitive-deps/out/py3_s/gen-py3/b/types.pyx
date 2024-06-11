@@ -76,7 +76,7 @@ cdef class List__c_C(thrift.py3.types.List):
         if isinstance(items, List__c_C):
             self._cpp_obj = (<List__c_C> items)._cpp_obj
         else:
-            self._cpp_obj = List__c_C._make_instance(items)
+            self._cpp_obj = List__c_C__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[_c_types.cC]] c_items):
@@ -92,16 +92,6 @@ cdef class List__c_C(thrift.py3.types.List):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[vector[_c_types.cC]] _make_instance(object items) except *:
-        cdef shared_ptr[vector[_c_types.cC]] c_inst = make_shared[vector[_c_types.cC]]()
-        if items is not None:
-            for item in items:
-                if not isinstance(item, _c_types.C):
-                    raise TypeError(f"{item!r} is not of type _c_types.C")
-                deref(c_inst).push_back(deref((<_c_types.C>item)._cpp_obj))
-        return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
@@ -146,6 +136,15 @@ cdef class List__c_C(thrift.py3.types.List):
 
 
 Sequence.register(List__c_C)
+
+cdef shared_ptr[vector[_c_types.cC]] List__c_C__make_instance(object items) except *:
+    cdef shared_ptr[vector[_c_types.cC]] c_inst = make_shared[vector[_c_types.cC]]()
+    if items is not None:
+        for item in items:
+            if not isinstance(item, _c_types.C):
+                raise TypeError(f"{item!r} is not of type _c_types.C")
+            deref(c_inst).push_back(deref((<_c_types.C>item)._cpp_obj))
+    return cmove(c_inst)
 
 B = List__c_C
 E = _c_types.E

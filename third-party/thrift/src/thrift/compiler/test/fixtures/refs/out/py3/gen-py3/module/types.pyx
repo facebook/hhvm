@@ -3121,7 +3121,7 @@ cdef class List__RecursiveStruct(thrift.py3.types.List):
         if isinstance(items, List__RecursiveStruct):
             self._cpp_obj = (<List__RecursiveStruct> items)._cpp_obj
         else:
-            self._cpp_obj = List__RecursiveStruct._make_instance(items)
+            self._cpp_obj = List__RecursiveStruct__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[cRecursiveStruct]] c_items):
@@ -3137,16 +3137,6 @@ cdef class List__RecursiveStruct(thrift.py3.types.List):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[vector[cRecursiveStruct]] _make_instance(object items) except *:
-        cdef shared_ptr[vector[cRecursiveStruct]] c_inst = make_shared[vector[cRecursiveStruct]]()
-        if items is not None:
-            for item in items:
-                if not isinstance(item, RecursiveStruct):
-                    raise TypeError(f"{item!r} is not of type RecursiveStruct")
-                deref(c_inst).push_back(deref((<RecursiveStruct>item)._cpp_obj))
-        return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
@@ -3192,6 +3182,15 @@ cdef class List__RecursiveStruct(thrift.py3.types.List):
 
 Sequence.register(List__RecursiveStruct)
 
+cdef shared_ptr[vector[cRecursiveStruct]] List__RecursiveStruct__make_instance(object items) except *:
+    cdef shared_ptr[vector[cRecursiveStruct]] c_inst = make_shared[vector[cRecursiveStruct]]()
+    if items is not None:
+        for item in items:
+            if not isinstance(item, RecursiveStruct):
+                raise TypeError(f"{item!r} is not of type RecursiveStruct")
+            deref(c_inst).push_back(deref((<RecursiveStruct>item)._cpp_obj))
+    return cmove(c_inst)
+
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class List__i32(thrift.py3.types.List):
@@ -3199,7 +3198,7 @@ cdef class List__i32(thrift.py3.types.List):
         if isinstance(items, List__i32):
             self._cpp_obj = (<List__i32> items)._cpp_obj
         else:
-            self._cpp_obj = List__i32._make_instance(items)
+            self._cpp_obj = List__i32__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[cint32_t]] c_items):
@@ -3215,17 +3214,6 @@ cdef class List__i32(thrift.py3.types.List):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[vector[cint32_t]] _make_instance(object items) except *:
-        cdef shared_ptr[vector[cint32_t]] c_inst = make_shared[vector[cint32_t]]()
-        if items is not None:
-            for item in items:
-                if not isinstance(item, int):
-                    raise TypeError(f"{item!r} is not of type int")
-                item = <cint32_t> item
-                deref(c_inst).push_back(item)
-        return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
@@ -3271,6 +3259,16 @@ cdef class List__i32(thrift.py3.types.List):
 
 Sequence.register(List__i32)
 
+cdef shared_ptr[vector[cint32_t]] List__i32__make_instance(object items) except *:
+    cdef shared_ptr[vector[cint32_t]] c_inst = make_shared[vector[cint32_t]]()
+    if items is not None:
+        for item in items:
+            if not isinstance(item, int):
+                raise TypeError(f"{item!r} is not of type int")
+            item = <cint32_t> item
+            deref(c_inst).push_back(item)
+    return cmove(c_inst)
+
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class Set__i32(thrift.py3.types.Set):
@@ -3278,7 +3276,7 @@ cdef class Set__i32(thrift.py3.types.Set):
         if isinstance(items, Set__i32):
             self._cpp_obj = (<Set__i32> items)._cpp_obj
         else:
-            self._cpp_obj = Set__i32._make_instance(items)
+            self._cpp_obj = Set__i32__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cset[cint32_t]] c_items):
@@ -3294,17 +3292,6 @@ cdef class Set__i32(thrift.py3.types.Set):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[cset[cint32_t]] _make_instance(object items) except *:
-        cdef shared_ptr[cset[cint32_t]] c_inst = make_shared[cset[cint32_t]]()
-        if items is not None:
-            for item in items:
-                if not isinstance(item, int):
-                    raise TypeError(f"{item!r} is not of type int")
-                item = <cint32_t> item
-                deref(c_inst).insert(item)
-        return c_inst
 
     def __contains__(self, item):
         if not self or item is None:
@@ -3353,6 +3340,16 @@ cdef class Set__i32(thrift.py3.types.Set):
 
 Set.register(Set__i32)
 
+cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *:
+    cdef shared_ptr[cset[cint32_t]] c_inst = make_shared[cset[cint32_t]]()
+    if items is not None:
+        for item in items:
+            if not isinstance(item, int):
+                raise TypeError(f"{item!r} is not of type int")
+            item = <cint32_t> item
+            deref(c_inst).insert(item)
+    return cmove(c_inst)
+
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class Map__i32_i32(thrift.py3.types.Map):
@@ -3360,7 +3357,7 @@ cdef class Map__i32_i32(thrift.py3.types.Map):
         if isinstance(items, Map__i32_i32):
             self._cpp_obj = (<Map__i32_i32> items)._cpp_obj
         else:
-            self._cpp_obj = Map__i32_i32._make_instance(items)
+            self._cpp_obj = Map__i32_i32__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cmap[cint32_t,cint32_t]] c_items):
@@ -3376,21 +3373,6 @@ cdef class Map__i32_i32(thrift.py3.types.Map):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[cmap[cint32_t,cint32_t]] _make_instance(object items) except *:
-        cdef shared_ptr[cmap[cint32_t,cint32_t]] c_inst = make_shared[cmap[cint32_t,cint32_t]]()
-        if items is not None:
-            for key, item in items.items():
-                if not isinstance(key, int):
-                    raise TypeError(f"{key!r} is not of type int")
-                key = <cint32_t> key
-                if not isinstance(item, int):
-                    raise TypeError(f"{item!r} is not of type int")
-                item = <cint32_t> item
-
-                deref(c_inst)[key] = item
-        return c_inst
 
     cdef _check_key_type(self, key):
         if not self or key is None:
@@ -3451,6 +3433,20 @@ cdef class Map__i32_i32(thrift.py3.types.Map):
 
 Mapping.register(Map__i32_i32)
 
+cdef shared_ptr[cmap[cint32_t,cint32_t]] Map__i32_i32__make_instance(object items) except *:
+    cdef shared_ptr[cmap[cint32_t,cint32_t]] c_inst = make_shared[cmap[cint32_t,cint32_t]]()
+    if items is not None:
+        for key, item in items.items():
+            if not isinstance(key, int):
+                raise TypeError(f"{key!r} is not of type int")
+            key = <cint32_t> key
+            if not isinstance(item, int):
+                raise TypeError(f"{item!r} is not of type int")
+            item = <cint32_t> item
+
+            deref(c_inst)[key] = item
+    return cmove(c_inst)
+
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class List__i64(thrift.py3.types.List):
@@ -3458,7 +3454,7 @@ cdef class List__i64(thrift.py3.types.List):
         if isinstance(items, List__i64):
             self._cpp_obj = (<List__i64> items)._cpp_obj
         else:
-            self._cpp_obj = List__i64._make_instance(items)
+            self._cpp_obj = List__i64__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[cint64_t]] c_items):
@@ -3474,17 +3470,6 @@ cdef class List__i64(thrift.py3.types.List):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[vector[cint64_t]] _make_instance(object items) except *:
-        cdef shared_ptr[vector[cint64_t]] c_inst = make_shared[vector[cint64_t]]()
-        if items is not None:
-            for item in items:
-                if not isinstance(item, int):
-                    raise TypeError(f"{item!r} is not of type int")
-                item = <cint64_t> item
-                deref(c_inst).push_back(item)
-        return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
@@ -3529,6 +3514,16 @@ cdef class List__i64(thrift.py3.types.List):
 
 
 Sequence.register(List__i64)
+
+cdef shared_ptr[vector[cint64_t]] List__i64__make_instance(object items) except *:
+    cdef shared_ptr[vector[cint64_t]] c_inst = make_shared[vector[cint64_t]]()
+    if items is not None:
+        for item in items:
+            if not isinstance(item, int):
+                raise TypeError(f"{item!r} is not of type int")
+            item = <cint64_t> item
+            deref(c_inst).push_back(item)
+    return cmove(c_inst)
 
 kStructWithRef = StructWithRef._fbthrift_create(constant_shared_ptr(ckStructWithRef()))
 kStructWithRefTypeUnique = StructWithRefTypeUnique._fbthrift_create(constant_shared_ptr(ckStructWithRefTypeUnique()))

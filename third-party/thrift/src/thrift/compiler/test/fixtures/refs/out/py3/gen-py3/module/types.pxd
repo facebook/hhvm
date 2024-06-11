@@ -673,40 +673,40 @@ cdef class List__RecursiveStruct(thrift.py3.types.List):
     cdef shared_ptr[vector[cRecursiveStruct]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[cRecursiveStruct]])
-    @staticmethod
-    cdef shared_ptr[vector[cRecursiveStruct]] _make_instance(object items) except *
     cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[cRecursiveStruct]] List__RecursiveStruct__make_instance(object items) except *
 
 cdef class List__i32(thrift.py3.types.List):
     cdef shared_ptr[vector[cint32_t]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[cint32_t]])
-    @staticmethod
-    cdef shared_ptr[vector[cint32_t]] _make_instance(object items) except *
     cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[cint32_t]] List__i32__make_instance(object items) except *
 
 cdef class Set__i32(thrift.py3.types.Set):
     cdef shared_ptr[cset[cint32_t]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cset[cint32_t]])
-    @staticmethod
-    cdef shared_ptr[cset[cint32_t]] _make_instance(object items) except *
+
+cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *
 
 cdef class Map__i32_i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint32_t,cint32_t]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cmap[cint32_t,cint32_t]])
-    @staticmethod
-    cdef shared_ptr[cmap[cint32_t,cint32_t]] _make_instance(object items) except *
     cdef _check_key_type(self, key)
+
+cdef shared_ptr[cmap[cint32_t,cint32_t]] Map__i32_i32__make_instance(object items) except *
 
 cdef class List__i64(thrift.py3.types.List):
     cdef shared_ptr[vector[cint64_t]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[cint64_t]])
-    @staticmethod
-    cdef shared_ptr[vector[cint64_t]] _make_instance(object items) except *
     cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[cint64_t]] List__i64__make_instance(object items) except *
 
 
 cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_constants.h" namespace "::cpp2":

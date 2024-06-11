@@ -101,9 +101,9 @@ cdef class List__Enum(thrift.py3.types.List):
     cdef shared_ptr[vector[cEnum]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[cEnum]])
-    @staticmethod
-    cdef shared_ptr[vector[cEnum]] _make_instance(object items) except *
     cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[cEnum]] List__Enum__make_instance(object items) except *
 
 
 cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_constants.h" namespace "::module1":

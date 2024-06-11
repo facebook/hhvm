@@ -655,7 +655,7 @@ cdef class Set__i64(thrift.py3.types.Set):
         if isinstance(items, Set__i64):
             self._cpp_obj = (<Set__i64> items)._cpp_obj
         else:
-            self._cpp_obj = Set__i64._make_instance(items)
+            self._cpp_obj = Set__i64__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cset[cint64_t]] c_items):
@@ -671,17 +671,6 @@ cdef class Set__i64(thrift.py3.types.Set):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[cset[cint64_t]] _make_instance(object items) except *:
-        cdef shared_ptr[cset[cint64_t]] c_inst = make_shared[cset[cint64_t]]()
-        if items is not None:
-            for item in items:
-                if not isinstance(item, int):
-                    raise TypeError(f"{item!r} is not of type int")
-                item = <cint64_t> item
-                deref(c_inst).insert(item)
-        return c_inst
 
     def __contains__(self, item):
         if not self or item is None:
@@ -730,6 +719,16 @@ cdef class Set__i64(thrift.py3.types.Set):
 
 Set.register(Set__i64)
 
+cdef shared_ptr[cset[cint64_t]] Set__i64__make_instance(object items) except *:
+    cdef shared_ptr[cset[cint64_t]] c_inst = make_shared[cset[cint64_t]]()
+    if items is not None:
+        for item in items:
+            if not isinstance(item, int):
+                raise TypeError(f"{item!r} is not of type int")
+            item = <cint64_t> item
+            deref(c_inst).insert(item)
+    return cmove(c_inst)
+
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class Map__Animal_string(thrift.py3.types.Map):
@@ -737,7 +736,7 @@ cdef class Map__Animal_string(thrift.py3.types.Map):
         if isinstance(items, Map__Animal_string):
             self._cpp_obj = (<Map__Animal_string> items)._cpp_obj
         else:
-            self._cpp_obj = Map__Animal_string._make_instance(items)
+            self._cpp_obj = Map__Animal_string__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cmap[cAnimal,string]] c_items):
@@ -753,19 +752,6 @@ cdef class Map__Animal_string(thrift.py3.types.Map):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[cmap[cAnimal,string]] _make_instance(object items) except *:
-        cdef shared_ptr[cmap[cAnimal,string]] c_inst = make_shared[cmap[cAnimal,string]]()
-        if items is not None:
-            for key, item in items.items():
-                if not isinstance(key, Animal):
-                    raise TypeError(f"{key!r} is not of type Animal")
-                if not isinstance(item, str):
-                    raise TypeError(f"{item!r} is not of type str")
-
-                deref(c_inst)[<cAnimal><int>key] = item.encode('UTF-8')
-        return c_inst
 
     cdef _check_key_type(self, key):
         if not self or key is None:
@@ -826,6 +812,18 @@ cdef class Map__Animal_string(thrift.py3.types.Map):
 
 Mapping.register(Map__Animal_string)
 
+cdef shared_ptr[cmap[cAnimal,string]] Map__Animal_string__make_instance(object items) except *:
+    cdef shared_ptr[cmap[cAnimal,string]] c_inst = make_shared[cmap[cAnimal,string]]()
+    if items is not None:
+        for key, item in items.items():
+            if not isinstance(key, Animal):
+                raise TypeError(f"{key!r} is not of type Animal")
+            if not isinstance(item, str):
+                raise TypeError(f"{item!r} is not of type str")
+
+            deref(c_inst)[<cAnimal><int>key] = item.encode('UTF-8')
+    return cmove(c_inst)
+
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class List__Vehicle(thrift.py3.types.List):
@@ -833,7 +831,7 @@ cdef class List__Vehicle(thrift.py3.types.List):
         if isinstance(items, List__Vehicle):
             self._cpp_obj = (<List__Vehicle> items)._cpp_obj
         else:
-            self._cpp_obj = List__Vehicle._make_instance(items)
+            self._cpp_obj = List__Vehicle__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[cVehicle]] c_items):
@@ -849,16 +847,6 @@ cdef class List__Vehicle(thrift.py3.types.List):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[vector[cVehicle]] _make_instance(object items) except *:
-        cdef shared_ptr[vector[cVehicle]] c_inst = make_shared[vector[cVehicle]]()
-        if items is not None:
-            for item in items:
-                if not isinstance(item, Vehicle):
-                    raise TypeError(f"{item!r} is not of type Vehicle")
-                deref(c_inst).push_back(deref((<Vehicle>item)._cpp_obj))
-        return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
@@ -903,5 +891,14 @@ cdef class List__Vehicle(thrift.py3.types.List):
 
 
 Sequence.register(List__Vehicle)
+
+cdef shared_ptr[vector[cVehicle]] List__Vehicle__make_instance(object items) except *:
+    cdef shared_ptr[vector[cVehicle]] c_inst = make_shared[vector[cVehicle]]()
+    if items is not None:
+        for item in items:
+            if not isinstance(item, Vehicle):
+                raise TypeError(f"{item!r} is not of type Vehicle")
+            deref(c_inst).push_back(deref((<Vehicle>item)._cpp_obj))
+    return cmove(c_inst)
 
 PersonID = int

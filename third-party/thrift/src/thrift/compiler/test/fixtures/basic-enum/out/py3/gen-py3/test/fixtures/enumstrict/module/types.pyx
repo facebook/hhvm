@@ -368,7 +368,7 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
         if isinstance(items, Map__MyEnum_string):
             self._cpp_obj = (<Map__MyEnum_string> items)._cpp_obj
         else:
-            self._cpp_obj = Map__MyEnum_string._make_instance(items)
+            self._cpp_obj = Map__MyEnum_string__make_instance(items)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cmap[cMyEnum,string]] c_items):
@@ -384,19 +384,6 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
 
     def __len__(self):
         return deref(self._cpp_obj).size()
-
-    @staticmethod
-    cdef shared_ptr[cmap[cMyEnum,string]] _make_instance(object items) except *:
-        cdef shared_ptr[cmap[cMyEnum,string]] c_inst = make_shared[cmap[cMyEnum,string]]()
-        if items is not None:
-            for key, item in items.items():
-                if not isinstance(key, MyEnum):
-                    raise TypeError(f"{key!r} is not of type MyEnum")
-                if not isinstance(item, str):
-                    raise TypeError(f"{item!r} is not of type str")
-
-                deref(c_inst)[<cMyEnum><int>key] = item.encode('UTF-8')
-        return c_inst
 
     cdef _check_key_type(self, key):
         if not self or key is None:
@@ -456,6 +443,18 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
         return get_types_reflection().get_reflection__Map__MyEnum_string()
 
 Mapping.register(Map__MyEnum_string)
+
+cdef shared_ptr[cmap[cMyEnum,string]] Map__MyEnum_string__make_instance(object items) except *:
+    cdef shared_ptr[cmap[cMyEnum,string]] c_inst = make_shared[cmap[cMyEnum,string]]()
+    if items is not None:
+        for key, item in items.items():
+            if not isinstance(key, MyEnum):
+                raise TypeError(f"{key!r} is not of type MyEnum")
+            if not isinstance(item, str):
+                raise TypeError(f"{item!r} is not of type str")
+
+            deref(c_inst)[<cMyEnum><int>key] = item.encode('UTF-8')
+    return cmove(c_inst)
 
 kOne = MyEnum(<int> (ckOne()))
 enumNames = Map__MyEnum_string._fbthrift_create(constant_shared_ptr(cenumNames()))

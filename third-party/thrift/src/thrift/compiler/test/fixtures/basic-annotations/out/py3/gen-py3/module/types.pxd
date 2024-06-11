@@ -160,9 +160,9 @@ cdef class std_deque_std_string__List__string(thrift.py3.types.List):
     cdef shared_ptr[std_deque_std_string] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[std_deque_std_string])
-    @staticmethod
-    cdef shared_ptr[std_deque_std_string] _make_instance(object items) except *
     cdef _check_item_type(self, item)
+
+cdef shared_ptr[std_deque_std_string] std_deque_std_string__List__string__make_instance(object items) except *
 
 
 cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_constants.h" namespace "::cpp2":

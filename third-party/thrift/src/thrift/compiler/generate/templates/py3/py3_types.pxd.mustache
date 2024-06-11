@@ -135,13 +135,13 @@ cdef class {{> types/cython_python_type}}(thrift.py3.types.{{!
     cdef shared_ptr[{{> types/cython_cpp_type}}] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[{{> types/cython_cpp_type}}])
-    @staticmethod
-    cdef shared_ptr[{{> types/cython_cpp_type}}] _make_instance(object items) except *
     {{#type:list?}}
     cdef _check_item_type(self, item)
     {{/type:list?}}{{#type:map?}}
     cdef _check_key_type(self, key)
     {{/type:map?}}
+
+cdef shared_ptr[{{> types/cython_cpp_type}}] {{type:flat_name}}__make_instance(object items) except *
 
 {{/program:containerTypes}}
 

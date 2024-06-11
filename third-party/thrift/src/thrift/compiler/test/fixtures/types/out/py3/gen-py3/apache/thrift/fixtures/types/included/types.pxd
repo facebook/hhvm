@@ -96,16 +96,16 @@ cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
     cdef shared_ptr[std_unordered_map[cint32_t,string]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[std_unordered_map[cint32_t,string]])
-    @staticmethod
-    cdef shared_ptr[std_unordered_map[cint32_t,string]] _make_instance(object items) except *
     cdef _check_key_type(self, key)
+
+cdef shared_ptr[std_unordered_map[cint32_t,string]] std_unordered_map__Map__i32_string__make_instance(object items) except *
 
 cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
     cdef shared_ptr[vector[std_unordered_map[cint32_t,string]]] _cpp_obj
     @staticmethod
     cdef _fbthrift_create(shared_ptr[vector[std_unordered_map[cint32_t,string]]])
-    @staticmethod
-    cdef shared_ptr[vector[std_unordered_map[cint32_t,string]]] _make_instance(object items) except *
     cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[std_unordered_map[cint32_t,string]]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *
 
 

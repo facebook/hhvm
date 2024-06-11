@@ -18,11 +18,6 @@ type 'a interrupt_config = 'a MultiThreadedCall.interrupt_config
 let single_threaded_call_with_worker_id job merge neutral next =
   let x = ref (next ()) in
   let acc = ref neutral in
-  (* This is a just a sanity check that the job is serializable and so
-   * that the same code will work both in single threaded and parallel
-   * mode.
-   *)
-  let _ = Marshal.to_string job [Marshal.Closures] in
   while not (Hh_bucket.is_done !x) do
     match !x with
     | Hh_bucket.Wait ->

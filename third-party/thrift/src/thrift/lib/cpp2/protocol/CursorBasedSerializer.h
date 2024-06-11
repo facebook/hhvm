@@ -20,7 +20,7 @@
 #include <initializer_list>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
-#include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/detail/CursorBasedSerialization.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
@@ -65,24 +65,34 @@ class CursorSerializationWrapper {
   explicit CursorSerializationWrapper(std::unique_ptr<folly::IOBuf> serialized)
       : serializedData_(std::move(serialized)) {}
 
+  ~CursorSerializationWrapper() {
+    DCHECK(std::holds_alternative<std::monostate>(protocol_))
+        << "Destroying wrapper with active read or write";
+  }
+  CursorSerializationWrapper(CursorSerializationWrapper&&) = default;
+  // Not worth manually implementing this to keep the DCHECK.
+  CursorSerializationWrapper& operator=(CursorSerializationWrapper&&) = default;
+
   /**
    * Object write path (traditional Thrift serialization)
    * Serializes from a Thrift object.
    */
   /* implicit */ CursorSerializationWrapper(
       const T& t, ExternalBufferSharing sharing = COPY_EXTERNAL_BUFFER) {
-    BinarySerializer::serialize(t, &queue_, sharing);
+    t.write(writer(sharing));
     serializedData_ = queue_.move();
+    done();
   }
 
   /**
    * Object read path (traditional Thrift deserialization)
    * Deserializes into a (returned) Thrift object.
    */
-  T deserialize() const {
-    assert(serializedData_);
+  T deserialize() {
+    checkHasData();
     T ret;
-    BinarySerializer::deserialize(serializedData_.get(), ret);
+    ret.read(reader());
+    done();
     return ret;
   }
 
@@ -92,38 +102,74 @@ class CursorSerializationWrapper {
    * Setting to false allows chained buffers and disables string_view API.
    */
   template <bool Contiguous = true>
-  StructuredCursorReader<Tag, Contiguous> beginRead() const {
-    assert(serializedData_);
-    return StructuredCursorReader<Tag, Contiguous>(*serializedData_);
+  StructuredCursorReader<Tag, Contiguous> beginRead() {
+    checkHasData();
+    if (Contiguous && serializedData_->isChained()) {
+      folly::throw_exception<std::runtime_error>(
+          "Chained buffer passed to contiguous reader.");
+    }
+    return StructuredCursorReader<Tag, Contiguous>(reader());
   }
   template <bool Contiguous>
-  void endRead(StructuredCursorReader<Tag, Contiguous>&& reader) const {
+  void endRead(StructuredCursorReader<Tag, Contiguous>&& reader) {
     reader.finalize();
+    done();
   }
 
   /** Cursor write path */
   StructuredCursorWriter<Tag> beginWrite() {
-    serializedData_.reset();
-    return StructuredCursorWriter<Tag>(queue_);
+    serializedData_.reset(); // Prevent concurrent read from seeing wrong data.
+    return StructuredCursorWriter<Tag>(writer());
   }
   void endWrite(StructuredCursorWriter<Tag>&& writer) {
     writer.finalize();
     serializedData_ = queue_.move();
+    done();
   }
 
   /** Access to serialized data */
   const folly::IOBuf& serializedData() const& {
-    assert(serializedData_);
+    checkHasData();
     return *serializedData_;
   }
   std::unique_ptr<folly::IOBuf> serializedData() && {
-    assert(serializedData_);
+    checkHasData();
     return std::move(serializedData_);
   }
 
  private:
+  BinaryProtocolReader* reader() {
+    checkInactive();
+    auto& reader = protocol_.emplace<BinaryProtocolReader>();
+    folly::io::Cursor cursor(serializedData_.get());
+    reader.setInput(cursor);
+    return &reader;
+  }
+  BinaryProtocolWriter* writer(
+      ExternalBufferSharing sharing = SHARE_EXTERNAL_BUFFER) {
+    checkInactive();
+    auto& writer = protocol_.emplace<BinaryProtocolWriter>(sharing);
+    writer.setOutput(&queue_);
+    return &writer;
+  }
+  void done() { protocol_.emplace<std::monostate>(); }
+
+  void checkInactive() const {
+    if (!std::holds_alternative<std::monostate>(protocol_)) {
+      folly::throw_exception<std::runtime_error>(
+          "Concurrent reads/writes not supported");
+    }
+  }
+  void checkHasData() const {
+    if (!serializedData_) {
+      folly::throw_exception<std::runtime_error>("Reading from empty data");
+    }
+  }
+
   std::unique_ptr<folly::IOBuf> serializedData_;
   folly::IOBufQueue queue_;
+  std::variant<std::monostate, BinaryProtocolReader, BinaryProtocolWriter>
+      protocol_;
 };
 
 /**
@@ -182,7 +228,7 @@ class StructuredCursorReader : detail::BaseCursorReader {
     readField<Ident>(
         [&] {
           detail::decodeTo<type_tag<Ident>>(
-              protocol_, detail::maybe_emplace(value));
+              *protocol_, detail::maybe_emplace(value));
         },
         value);
     return value;
@@ -207,7 +253,7 @@ class StructuredCursorReader : detail::BaseCursorReader {
   template <typename Ident, enable_for<type::number_c, Ident> = 0>
   [[nodiscard]] bool_if_optional<Ident> read(native_type<Ident>& value) {
     return readField<Ident>(
-        [&] { op::decode<type_tag<Ident>>(protocol_, value); }, value);
+        [&] { op::decode<type_tag<Ident>>(*protocol_, value); }, value);
   }
 
   /** string/binary */
@@ -215,17 +261,17 @@ class StructuredCursorReader : detail::BaseCursorReader {
   template <typename Ident, enable_string_view<Ident> = 0>
   [[nodiscard]] bool_if_optional<Ident> read(std::string_view& value) {
     return readField<Ident>(
-        [&] { value = detail::readStringView(protocol_); }, value);
+        [&] { value = detail::readStringView(*protocol_); }, value);
   }
 
   template <typename Ident, enable_for<type::string_c, Ident> = 0>
   [[nodiscard]] bool_if_optional<Ident> read(std::string& value) {
-    return readField<Ident>([&] { protocol_.readString(value); }, value);
+    return readField<Ident>([&] { protocol_->readString(value); }, value);
   }
 
   template <typename Ident, enable_for<type::string_c, Ident> = 0>
   [[nodiscard]] bool_if_optional<Ident> read(folly::IOBuf& value) {
-    return readField<Ident>([&] { protocol_.readBinary(value); }, value);
+    return readField<Ident>([&] { protocol_->readBinary(value); }, value);
   }
 
   /** containers
@@ -243,8 +289,7 @@ class StructuredCursorReader : detail::BaseCursorReader {
       return {};
     }
     state_ = State::Child;
-    return ContainerCursorReader<type_tag<Ident>, Contiguous>{
-        std::move(protocol_)};
+    return ContainerCursorReader<type_tag<Ident>, Contiguous>{protocol_};
   }
 
   template <typename CTag>
@@ -255,7 +300,6 @@ class StructuredCursorReader : detail::BaseCursorReader {
       return;
     }
     child.finalize();
-    protocol_ = std::move(child.protocol_);
     afterReadField();
     state_ = State::Active;
   }
@@ -273,15 +317,13 @@ class StructuredCursorReader : detail::BaseCursorReader {
       return {};
     }
     state_ = State::Child;
-    return StructuredCursorReader<type_tag<Ident>, Contiguous>{
-        std::move(protocol_)};
+    return StructuredCursorReader<type_tag<Ident>, Contiguous>{protocol_};
   }
 
   template <typename CTag>
   void endRead(StructuredCursorReader<CTag, Contiguous>&& child) {
     checkState(State::Child);
     child.finalize();
-    protocol_ = std::move(child.protocol_);
     afterReadField();
     state_ = State::Active;
   }
@@ -297,35 +339,23 @@ class StructuredCursorReader : detail::BaseCursorReader {
   }
 
  private:
-  explicit StructuredCursorReader(const folly::IOBuf& c)
-      : StructuredCursorReader([&] {
-          folly::io::Cursor cursor(&c);
-          BinaryProtocolReader reader;
-          reader.setInput(cursor);
-          return reader;
-        }()) {
-    if (Contiguous && c.isChained()) {
-      folly::throw_exception<std::runtime_error>(
-          "Chained buffer passed to contiguous reader.");
-    }
-  }
-  explicit StructuredCursorReader(BinaryProtocolReader&& p)
-      : BaseCursorReader(std::move(p)) {
-    readState_.readStructBegin(&protocol_);
-    readState_.readFieldBegin(&protocol_);
+  explicit StructuredCursorReader(BinaryProtocolReader* p)
+      : BaseCursorReader(p) {
+    readState_.readStructBegin(protocol_);
+    readState_.readFieldBegin(protocol_);
   }
   StructuredCursorReader() { readState_.fieldType = TType::T_STOP; }
 
   void finalize() {
     checkState(State::Active);
     if (readState_.fieldType != TType::T_STOP) {
-      protocol_.skip(readState_.fieldType);
-      readState_.readFieldEnd(&protocol_);
+      protocol_->skip(readState_.fieldType);
+      readState_.readFieldEnd(protocol_);
       // Because there's no struct begin marker in Binary protocol this skips
       // the rest of the struct.
-      protocol_.skip(TType::T_STRUCT);
+      protocol_->skip(TType::T_STRUCT);
     }
-    readState_.readStructEnd(&protocol_);
+    readState_.readStructEnd(protocol_);
     state_ = State::Done;
   }
 
@@ -342,10 +372,10 @@ class StructuredCursorReader : detail::BaseCursorReader {
 
     while (readState_.fieldType != TType::T_STOP &&
            FieldId{readState_.fieldId} < field_id::value) {
-      readState_.readFieldEnd(&protocol_);
-      apache::thrift::skip(protocol_, readState_.fieldType);
+      readState_.readFieldEnd(protocol_);
+      apache::thrift::skip(*protocol_, readState_.fieldType);
       int16_t lastRead = readState_.fieldId;
-      readState_.readFieldBegin(&protocol_);
+      readState_.readFieldBegin(protocol_);
       if (lastRead >= readState_.fieldId) {
         folly::throw_exception<std::runtime_error>(
             "Reading fields that were serialized out of order");
@@ -366,8 +396,8 @@ class StructuredCursorReader : detail::BaseCursorReader {
   }
 
   void afterReadField() {
-    readState_.readFieldEnd(&protocol_);
-    readState_.readFieldBegin(&protocol_);
+    readState_.readFieldEnd(protocol_);
+    readState_.readFieldBegin(protocol_);
   }
 
   template <typename Ident, typename F, typename U>
@@ -497,14 +527,13 @@ class ContainerCursorReader : detail::BaseCursorReader {
     DCHECK(!lastRead_)
         << "Can't mix manual and iterator APIs on same container.";
     state_ = State::Child;
-    return ContainerCursorReader<ElementTag, Contiguous>{std::move(protocol_)};
+    return ContainerCursorReader<ElementTag, Contiguous>{protocol_};
   }
 
   template <typename CTag>
   void endRead(ContainerCursorReader<CTag, Contiguous>&& child) {
     checkState(State::Child);
     child.finalize();
-    protocol_ = std::move(child.protocol_);
     state_ = State::Active;
     --remaining_;
   }
@@ -543,20 +572,19 @@ class ContainerCursorReader : detail::BaseCursorReader {
     DCHECK(!lastRead_)
         << "Can't mix manual and iterator APIs on same container.";
     state_ = State::Child;
-    return StructuredCursorReader<ElementTag, Contiguous>{std::move(protocol_)};
+    return StructuredCursorReader<ElementTag, Contiguous>{protocol_};
   }
 
   template <typename CTag>
   void endRead(StructuredCursorReader<CTag, Contiguous>&& child) {
     checkState(State::Child);
     child.finalize();
-    protocol_ = std::move(child.protocol_);
     state_ = State::Active;
     --remaining_;
   }
 
  private:
-  explicit ContainerCursorReader(BinaryProtocolReader&& p);
+  explicit ContainerCursorReader(BinaryProtocolReader* p);
   ContainerCursorReader() { remaining_ = 0; }
 
   void finalize();
@@ -664,15 +692,15 @@ class StringCursorWriter : detail::DelayedSizeCursorWriter {
   }
 
  private:
-  StringCursorWriter(BinaryProtocolWriter&& p, int32_t maxSize)
-      : DelayedSizeCursorWriter(std::move(p)) {
+  StringCursorWriter(BinaryProtocolWriter* p, int32_t maxSize)
+      : DelayedSizeCursorWriter(p) {
     writeSize();
-    data_ = protocol_.ensure(maxSize);
+    data_ = protocol_->ensure(maxSize);
   }
 
   void finalize(int32_t actualSize) {
     DelayedSizeCursorWriter::finalize(actualSize);
-    protocol_.advance(actualSize);
+    protocol_->advance(actualSize);
   }
 
   uint8_t* data_;
@@ -706,19 +734,19 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
   template <typename Ident, enable_for<type::number_c, Ident> = 0>
   void write(native_type<Ident> value) {
     writeField<Ident>(
-        [&] { op::encode<type_tag<Ident>>(protocol_, value); }, value);
+        [&] { op::encode<type_tag<Ident>>(*protocol_, value); }, value);
   }
 
   /** string/binary */
 
   template <typename Ident, enable_for<type::string_c, Ident> = 0>
   void write(const folly::IOBuf& value) {
-    writeField<Ident>([&] { protocol_.writeBinary(value); }, value);
+    writeField<Ident>([&] { protocol_->writeBinary(value); }, value);
   }
 
   template <typename Ident, enable_for<type::string_c, Ident> = 0>
   void write(std::string_view value) {
-    writeField<Ident>([&] { protocol_.writeBinary(value); }, value);
+    writeField<Ident>([&] { protocol_->writeBinary(value); }, value);
   }
 
   /** Allows writing strings whose size isn't known until afterwards.
@@ -732,14 +760,13 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
   StringCursorWriter beginWrite(int32_t maxSize) {
     beforeWriteField<Ident>();
     state_ = State::Child;
-    StringCursorWriter child{std::move(protocol_), maxSize};
+    StringCursorWriter child{protocol_, maxSize};
     return child;
   }
 
   void endWrite(StringCursorWriter&& child, int32_t actualSize) {
     checkState(State::Child);
     child.finalize(actualSize);
-    protocol_ = std::move(child.protocol_);
     afterWriteField();
     state_ = State::Active;
   }
@@ -752,7 +779,7 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
       enable_for<type::container_c, Ident> = 0>
   void write(const Container& value) {
     writeField<Ident>(
-        [&] { op::encode<type_tag<Ident>>(protocol_, value); }, value);
+        [&] { op::encode<type_tag<Ident>>(*protocol_, value); }, value);
   }
 
   /** Allows writing containers whose size isn't known until afterwards.
@@ -767,14 +794,13 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
   ContainerCursorWriter<type_tag<Ident>> beginWrite() {
     beforeWriteField<Ident>();
     state_ = State::Child;
-    return ContainerCursorWriter<type_tag<Ident>>{std::move(protocol_)};
+    return ContainerCursorWriter<type_tag<Ident>>{protocol_};
   }
 
   template <typename CTag>
   void endWrite(ContainerCursorWriter<CTag>&& child) {
     checkState(State::Child);
     child.finalize();
-    protocol_ = std::move(child.protocol_);
     afterWriteField();
     state_ = State::Active;
   }
@@ -789,14 +815,13 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
   StructuredCursorWriter<type_tag<Ident>> beginWrite() {
     beforeWriteField<Ident>();
     state_ = State::Child;
-    return StructuredCursorWriter<type_tag<Ident>>{std::move(protocol_)};
+    return StructuredCursorWriter<type_tag<Ident>>{protocol_};
   }
 
   template <typename CTag>
   void endWrite(StructuredCursorWriter<CTag>&& child) {
     checkState(State::Child);
     child.finalize();
-    protocol_ = std::move(child.protocol_);
     afterWriteField();
     state_ = State::Active;
   }
@@ -804,26 +829,20 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
   template <typename Ident, enable_for<type::structured_c, Ident> = 0>
   void write(const native_type<Ident>& value) {
     writeField<Ident>(
-        [&] { op::encode<type_tag<Ident>>(protocol_, value); }, value);
+        [&] { op::encode<type_tag<Ident>>(*protocol_, value); }, value);
   }
 
  private:
-  explicit StructuredCursorWriter(folly::IOBufQueue& q)
-      : StructuredCursorWriter([&] {
-          BinaryProtocolWriter writer(SHARE_EXTERNAL_BUFFER);
-          writer.setOutput(&q);
-          return writer;
-        }()) {}
-  explicit StructuredCursorWriter(BinaryProtocolWriter&& p)
-      : BaseCursorWriter(std::move(p)) {
-    protocol_.writeStructBegin(nullptr);
+  explicit StructuredCursorWriter(BinaryProtocolWriter* p)
+      : BaseCursorWriter(p) {
+    protocol_->writeStructBegin(nullptr);
   }
 
   void finalize() {
     checkState(State::Active);
     visitSkippedFields<FieldId{std::numeric_limits<int16_t>::max()}>();
-    protocol_.writeFieldStop();
-    protocol_.writeStructEnd();
+    protocol_->writeFieldStop();
+    protocol_->writeStructEnd();
     state_ = State::Done;
   }
 
@@ -850,13 +869,13 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
     if (skipWrite) {
       return;
     }
-    protocol_.writeFieldBegin(
+    protocol_->writeFieldBegin(
         nullptr,
         op::typeTagToTType<type_tag<Ident>>,
         folly::to_underlying(field_id::value));
   }
 
-  void afterWriteField() { protocol_.writeFieldEnd(); }
+  void afterWriteField() { protocol_->writeFieldEnd(); }
 
   template <typename Ident, typename F, typename U>
   void writeField(F&& f, U& value) {
@@ -932,7 +951,7 @@ class ContainerCursorWriter : detail::DelayedSizeCursorWriter {
   void write(const ElementType& val) {
     checkState(State::Active);
     ++n;
-    detail::ContainerTraits<Tag>::write(protocol_, val);
+    detail::ContainerTraits<Tag>::write(*protocol_, val);
   }
 
   /**
@@ -950,14 +969,13 @@ class ContainerCursorWriter : detail::DelayedSizeCursorWriter {
   ContainerCursorWriter<ElementTag> beginWrite() {
     checkState(State::Active);
     state_ = State::Child;
-    return ContainerCursorWriter<ElementTag>{std::move(protocol_)};
+    return ContainerCursorWriter<ElementTag>{protocol_};
   }
 
   template <typename CTag>
   void endWrite(ContainerCursorWriter<CTag>&& child) {
     checkState(State::Child);
     child.finalize();
-    protocol_ = std::move(child.protocol_);
     ++n;
     state_ = State::Active;
   }
@@ -975,20 +993,19 @@ class ContainerCursorWriter : detail::DelayedSizeCursorWriter {
   StructuredCursorWriter<ElementTag> beginWrite() {
     checkState(State::Active);
     state_ = State::Child;
-    return StructuredCursorWriter<ElementTag>{std::move(protocol_)};
+    return StructuredCursorWriter<ElementTag>{protocol_};
   }
 
   template <typename CTag>
   void endWrite(StructuredCursorWriter<CTag>&& child) {
     checkState(State::Child);
     child.finalize();
-    protocol_ = std::move(child.protocol_);
     ++n;
     state_ = State::Active;
   }
 
  private:
-  explicit ContainerCursorWriter(BinaryProtocolWriter&& p);
+  explicit ContainerCursorWriter(BinaryProtocolWriter* p);
 
   template <typename>
   friend class StructuredCursorWriter;
@@ -1059,18 +1076,18 @@ class CursorSerializationAdapter {
 // End public API
 
 template <typename Tag>
-ContainerCursorWriter<Tag>::ContainerCursorWriter(BinaryProtocolWriter&& p)
-    : DelayedSizeCursorWriter(std::move(p)) {
+ContainerCursorWriter<Tag>::ContainerCursorWriter(BinaryProtocolWriter* p)
+    : DelayedSizeCursorWriter(p) {
   if constexpr (type::is_a_v<Tag, type::list_c>) {
-    protocol_.writeByte(
+    protocol_->writeByte(
         op::typeTagToTType<typename detail::ContainerTraits<Tag>::ElementTag>);
   } else if constexpr (type::is_a_v<Tag, type::set_c>) {
-    protocol_.writeByte(
+    protocol_->writeByte(
         op::typeTagToTType<typename detail::ContainerTraits<Tag>::ElementTag>);
   } else if constexpr (type::is_a_v<Tag, type::map_c>) {
-    protocol_.writeByte(
+    protocol_->writeByte(
         op::typeTagToTType<typename detail::ContainerTraits<Tag>::KeyTag>);
-    protocol_.writeByte(
+    protocol_->writeByte(
         op::typeTagToTType<typename detail::ContainerTraits<Tag>::ValueTag>);
   } else {
     static_assert(!sizeof(Tag), "unexpected tag");
@@ -1080,12 +1097,12 @@ ContainerCursorWriter<Tag>::ContainerCursorWriter(BinaryProtocolWriter&& p)
 
 template <typename Tag, bool Contiguous>
 ContainerCursorReader<Tag, Contiguous>::ContainerCursorReader(
-    BinaryProtocolReader&& p)
-    : BaseCursorReader(std::move(p)) {
+    BinaryProtocolReader* p)
+    : BaseCursorReader(p) {
   // Check element types
   if constexpr (type::is_a_v<Tag, type::list_c>) {
     TType type;
-    protocol_.readListBegin(type, remaining_);
+    protocol_->readListBegin(type, remaining_);
     if (type !=
         op::typeTagToTType<typename detail::ContainerTraits<Tag>::ElementTag>) {
       folly::throw_exception<std::runtime_error>(
@@ -1093,7 +1110,7 @@ ContainerCursorReader<Tag, Contiguous>::ContainerCursorReader(
     }
   } else if constexpr (type::is_a_v<Tag, type::set_c>) {
     TType type;
-    protocol_.readSetBegin(type, remaining_);
+    protocol_->readSetBegin(type, remaining_);
     if (type !=
         op::typeTagToTType<typename detail::ContainerTraits<Tag>::ElementTag>) {
       folly::throw_exception<std::runtime_error>(
@@ -1101,7 +1118,7 @@ ContainerCursorReader<Tag, Contiguous>::ContainerCursorReader(
     }
   } else if constexpr (type::is_a_v<Tag, type::map_c>) {
     TType key, value;
-    protocol_.readMapBegin(key, value, remaining_);
+    protocol_->readMapBegin(key, value, remaining_);
     if (key !=
             op::typeTagToTType<typename detail::ContainerTraits<Tag>::KeyTag> ||
         value !=
@@ -1121,15 +1138,15 @@ void ContainerCursorReader<Tag, Contiguous>::finalize() {
 
   if (remaining_ > 1) {
     // Skip remaining unread elements
-    skip_n(protocol_, remaining_ - 1, detail::ContainerTraits<Tag>::wireTypes);
+    skip_n(*protocol_, remaining_ - 1, detail::ContainerTraits<Tag>::wireTypes);
   }
 
   if constexpr (type::is_a_v<Tag, type::list_c>) {
-    protocol_.readListEnd();
+    protocol_->readListEnd();
   } else if constexpr (type::is_a_v<Tag, type::set_c>) {
-    protocol_.readSetEnd();
+    protocol_->readSetEnd();
   } else if constexpr (type::is_a_v<Tag, type::map_c>) {
-    protocol_.readMapEnd();
+    protocol_->readMapEnd();
   } else {
     static_assert(!sizeof(Tag), "unexpected tag");
   }
@@ -1142,15 +1159,15 @@ void ContainerCursorReader<Tag, Contiguous>::readItem() {
 
   if constexpr (type::is_a_v<Tag, type::list_c>) {
     detail::decodeTo<typename detail::ContainerTraits<Tag>::ElementTag>(
-        protocol_, *lastRead_);
+        *protocol_, *lastRead_);
   } else if constexpr (type::is_a_v<Tag, type::set_c>) {
     detail::decodeTo<typename detail::ContainerTraits<Tag>::ElementTag>(
-        protocol_, *lastRead_);
+        *protocol_, *lastRead_);
   } else if constexpr (type::is_a_v<Tag, type::map_c>) {
     detail::decodeTo<typename detail::ContainerTraits<Tag>::KeyTag>(
-        protocol_, lastRead_->first);
+        *protocol_, lastRead_->first);
     detail::decodeTo<typename detail::ContainerTraits<Tag>::ValueTag>(
-        protocol_, lastRead_->second);
+        *protocol_, lastRead_->second);
   } else {
     static_assert(!sizeof(Tag), "unexpected tag");
   }

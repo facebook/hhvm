@@ -95,7 +95,7 @@ struct ContainerTraits<type::cpp_type<Type, Tag>> : ContainerTraits<Tag> {};
 
 class BaseCursorReader {
  protected:
-  BinaryProtocolReader protocol_;
+  BinaryProtocolReader* protocol_;
   enum class State {
     Active,
     Child, // Reading a nested struct or container
@@ -118,8 +118,7 @@ class BaseCursorReader {
     }
   }
 
-  explicit BaseCursorReader(BinaryProtocolReader&& p)
-      : protocol_(std::move(p)) {}
+  explicit BaseCursorReader(BinaryProtocolReader* p) : protocol_(p) {}
   BaseCursorReader() = default;
 
   ~BaseCursorReader() {
@@ -148,7 +147,7 @@ class BaseCursorReader {
 
 class BaseCursorWriter {
  protected:
-  BinaryProtocolWriter protocol_;
+  BinaryProtocolWriter* protocol_;
   enum class State {
     Active,
     Child,
@@ -156,8 +155,7 @@ class BaseCursorWriter {
   };
   State state_ = State::Active;
 
-  explicit BaseCursorWriter(BinaryProtocolWriter&& p)
-      : protocol_(std::move(p)) {}
+  explicit BaseCursorWriter(BinaryProtocolWriter* p) : protocol_(p) {}
 
   void checkState(State expected) const {
     if (state_ != expected) {
@@ -271,7 +269,7 @@ struct DefaultValueWriter {
             }
             const auto& val = *op::get<Id>(op::getDefault<T>());
             writer.template writeField<Id>(
-                [&] { op::encode<FTag>(writer.protocol_, val); }, val);
+                [&] { op::encode<FTag>(*writer.protocol_, val); }, val);
           }};
     });
     constexprQuickSort(fields, 0, fields.size() - 1);
@@ -293,15 +291,15 @@ class DelayedSizeCursorWriter : public BaseCursorWriter {
 
   constexpr static size_t kSizeLen = 4;
 
-  explicit DelayedSizeCursorWriter(BinaryProtocolWriter&& p)
-      : BaseCursorWriter(std::move(p)) {}
+  explicit DelayedSizeCursorWriter(BinaryProtocolWriter* p)
+      : BaseCursorWriter(p) {}
 
   void writeSize() {
     static_assert(
-        std::is_same_v<decltype(protocol_), BinaryProtocolWriter>,
+        std::is_same_v<decltype(protocol_), BinaryProtocolWriter*>,
         "Using internals of binary protocol.");
-    size_ = protocol_.ensure(kSizeLen);
-    protocol_.advance(kSizeLen);
+    size_ = protocol_->ensure(kSizeLen);
+    protocol_->advance(kSizeLen);
   }
 
   void finalize(int32_t actualSize) {

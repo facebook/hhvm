@@ -35,13 +35,13 @@ func NewHeaderProtocol(conn net.Conn) Protocol {
 	p.trans = newHeaderTransport(conn)
 
 	// Effectively an invariant violation.
-	if err := p.ResetProtocol(); err != nil {
+	if err := p.resetProtocol(); err != nil {
 		panic(err)
 	}
 	return p
 }
 
-func (p *headerProtocol) ResetProtocol() error {
+func (p *headerProtocol) resetProtocol() error {
 	if p.Format != nil && p.protoID == p.trans.ProtocolID() {
 		return nil
 	}
@@ -64,8 +64,6 @@ func (p *headerProtocol) ResetProtocol() error {
 //
 
 func (p *headerProtocol) WriteMessageBegin(name string, typeId MessageType, seqid int32) error {
-	p.ResetProtocol()
-
 	// The conditions here only match on the Go client side.
 	// If we are a client, set header seq id same as msg id
 	if typeId == CALL || typeId == ONEWAY {
@@ -84,12 +82,6 @@ func (p *headerProtocol) ReadMessageBegin() (name string, typeId MessageType, se
 			return name, EXCEPTION, seqid, err
 		}
 	}
-
-	err = p.ResetProtocol()
-	if err != nil {
-		return name, EXCEPTION, seqid, err
-	}
-
 	// see https://github.com/apache/thrift/blob/master/doc/specs/SequenceNumbers.md
 	// TODO:  This is a bug. if we are speaking header protocol, we should be using
 	// seq id from the header. However, doing it here creates a non-backwards
@@ -183,7 +175,7 @@ func (p *headerProtocol) SetProtocolID(protoID ProtocolID) error {
 	if err := p.trans.SetProtocolID(protoID); err != nil {
 		return err
 	}
-	return p.ResetProtocol()
+	return p.resetProtocol()
 }
 
 // Deprecated: GetFlags() is a deprecated method.

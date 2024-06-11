@@ -86,9 +86,6 @@ func (p *rocketProtocol) resetProtocol() error {
 }
 
 func (p *rocketProtocol) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
-	if err := p.resetProtocol(); err != nil {
-		return err
-	}
 	p.seqID = seqid
 
 	if p.reqMetadata == nil {

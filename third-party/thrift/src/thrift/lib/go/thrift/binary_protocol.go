@@ -36,11 +36,13 @@ type BinaryProtocol struct {
 	buffer      [64]byte
 }
 
-func NewBinaryProtocolTransport(t Transport) *BinaryProtocol {
+// NewBinaryProtocolTransport creates a new protocol handler using a buffer
+func NewBinaryProtocolTransport(t io.ReadWriteCloser) *BinaryProtocol {
 	return NewBinaryProtocol(t, false, true)
 }
 
-func NewBinaryProtocol(t Transport, strictRead, strictWrite bool) *BinaryProtocol {
+// NewBinaryProtocol creates a new protocol handler using a buffer
+func NewBinaryProtocol(t io.ReadWriteCloser, strictRead, strictWrite bool) *BinaryProtocol {
 	p := &BinaryProtocol{strictRead: strictRead, strictWrite: strictWrite}
 	if et, ok := t.(RichTransport); ok {
 		p.trans = et

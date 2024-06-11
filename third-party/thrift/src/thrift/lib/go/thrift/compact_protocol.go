@@ -103,7 +103,7 @@ type CompactProtocol struct {
 }
 
 // Create a CompactProtocol given a Transport
-func NewCompactProtocol(trans Transport) *CompactProtocol {
+func NewCompactProtocol(trans io.ReadWriteCloser) *CompactProtocol {
 	p := &CompactProtocol{version: COMPACT_VERSION_BE}
 	if et, ok := trans.(RichTransport); ok {
 		p.trans = et

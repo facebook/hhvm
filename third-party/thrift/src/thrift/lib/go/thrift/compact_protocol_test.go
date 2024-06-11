@@ -18,15 +18,16 @@ package thrift
 
 import (
 	"bytes"
+	"io"
 	"strings"
 	"testing"
 )
 
 func TestReadWriteCompactProtocol(t *testing.T) {
-	ReadWriteProtocolTest(t, func(transport Transport) Format { return NewCompactProtocol(transport) })
+	ReadWriteProtocolTest(t, func(transport io.ReadWriteCloser) Format { return NewCompactProtocol(transport) })
 	// CompactProtocol is capable of reading and writing in different goroutines.
-	ReadWriteProtocolParallelTest(t, func(transport Transport) Format { return NewCompactProtocol(transport) })
-	transports := []Transport{
+	ReadWriteProtocolParallelTest(t, func(transport io.ReadWriteCloser) Format { return NewCompactProtocol(transport) })
+	transports := []io.ReadWriteCloser{
 		NewMemoryBuffer(),
 		NewFramedTransport(NewMemoryBuffer()),
 	}

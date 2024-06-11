@@ -340,11 +340,6 @@ func (p *rocketProtocol) Skip(fieldType Type) (err error) {
 	return SkipDefaultDepth(p, fieldType)
 }
 
-// Deprecated: Transport is a deprecated method
-func (p *rocketProtocol) Transport() Transport {
-	return nil
-}
-
 func (p *rocketProtocol) SetPersistentHeader(key, value string) {
 	p.persistentHeaders[key] = value
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <folly/ExceptionWrapper.h>
 #include <thrift/lib/cpp2/util/ScopedServerThread.h>
 
 #include <condition_variable>
@@ -94,53 +95,19 @@ class ScopedServerThread::Helper : public Runnable, public TServerEventHandler {
     weak_ptr<Helper> outer_;
   };
 
-  // Helper class to polymorphically re-throw a saved exception type
-  class SavedException {
-   public:
-    virtual ~SavedException() {}
-    virtual void rethrow() = 0;
-  };
-
-  template <typename ExceptionT>
-  class SavedExceptionImpl : public SavedException {
-   public:
-    explicit SavedExceptionImpl(const ExceptionT& x) : exception_(x) {}
-
-    void rethrow() override { throw exception_; }
-
-   private:
-    ExceptionT exception_;
-  };
-
-  // Attempt to downcast to a specific type to avoid slicing.
-  template <typename ExceptionT>
-  bool tryHandleServeError(const std::exception& x) {
-    auto e = dynamic_cast<const ExceptionT*>(&x);
-    if (e) {
-      handleServeError<ExceptionT>(*e);
-    }
-    return e;
+  void handleServeError(const std::exception&) override {
+    // TODO(praihan): This function is no longer called by the Thrift server
+    // runtime. It should be removed.
+    std::terminate();
   }
 
-  // Copying exceptions is difficult because of the slicing problem. Match the
-  // most commonly expected exception types, and try our best to copy as much
-  // state as possible.
-  void handleServeError(const std::exception& x) override {
-    tryHandleServeError<TTransportException>(x) ||
-        tryHandleServeError<TException>(x) ||
-        tryHandleServeError<std::system_error>(x) ||
-        tryHandleServeError<std::logic_error>(x) ||
-        tryHandleServeError<std::exception>(x);
-  }
-
-  template <typename ExceptionT>
-  void handleServeError(const ExceptionT& x) {
+  void handleServeErrorImpl(folly::exception_wrapper ex) {
     std::unique_lock<std::mutex> l(stateMutex_);
 
     if (state_ == STATE_NOT_STARTED) {
       // If the error occurred before the server started,
       // save a copy of the error and notify the main thread
-      savedError_.reset(new SavedExceptionImpl<ExceptionT>(x));
+      savedError_ = ex;
       state_ = STATE_START_ERROR;
       stateCondVar_.notify_one();
     } else {
@@ -148,8 +115,8 @@ class ScopedServerThread::Helper : public Runnable, public TServerEventHandler {
       // Just log an error message.
       T_ERROR(
           "ScopedServerThread: serve() raised a %s while running: %s",
-          typeid(x).name(),
-          x.what());
+          ex.class_name().c_str(),
+          ex.what().c_str());
     }
   }
 
@@ -159,7 +126,7 @@ class ScopedServerThread::Helper : public Runnable, public TServerEventHandler {
 
   shared_ptr<ThriftServer> server_;
   Func onExit_;
-  shared_ptr<SavedException> savedError_;
+  folly::exception_wrapper savedError_;
   folly::SocketAddress address_;
 };
 
@@ -183,10 +150,8 @@ void ScopedServerThread::Helper::run() {
   // notify the main thread of the failure.
   try {
     server_->serve();
-  } catch (const std::exception& x) {
-    handleServeError(x);
   } catch (...) {
-    TServerEventHandler::handleServeError();
+    handleServeErrorImpl(folly::exception_wrapper(std::current_exception()));
   }
   if (onExit_) {
     onExit_();
@@ -208,8 +173,8 @@ void ScopedServerThread::Helper::waitUntilStarted() {
   // If an error occurred starting the server,
   // throw the saved error in the main thread
   if (state_ == STATE_START_ERROR) {
-    assert(savedError_);
-    savedError_->rethrow();
+    assert(savedError_.has_exception_ptr());
+    savedError_.throw_exception();
   }
 }
 

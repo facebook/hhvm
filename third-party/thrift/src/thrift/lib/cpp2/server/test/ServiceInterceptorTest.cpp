@@ -275,13 +275,13 @@ CO_TEST_P(ServiceInterceptorTestP, BasicTM) {
 CO_TEST_P(ServiceInterceptorTestP, BasicEB) {
   auto interceptor =
       std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor1");
-  ScopedServerInterfaceThread runner(
-      std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(interceptor));
       });
 
   auto client =
-      runner.newClient<apache::thrift::Client<test::ServiceInterceptorTest>>();
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
   co_await client->co_echo_eb("");
   EXPECT_EQ(interceptor->onRequestCount, 1);
   EXPECT_EQ(interceptor->onResponseCount, 1);
@@ -368,8 +368,8 @@ TEST_P(ServiceInterceptorTestP, OnStartServing) {
       std::make_shared<ServiceInterceptorCountOnStartServing>("Interceptor1");
   auto interceptor2 =
       std::make_shared<ServiceInterceptorCountOnStartServing>("Interceptor2");
-  ScopedServerInterfaceThread runner(
-      std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
             InterceptorList{interceptor1, interceptor2}));
       });
@@ -496,19 +496,19 @@ CO_TEST_P(ServiceInterceptorTestP, OnResponseException) {
   EXPECT_EQ(interceptor->onResponseCount, 1);
 }
 
-CO_TEST(ServiceInterceptorTest, OnResponseExceptionEB) {
+CO_TEST_P(ServiceInterceptorTestP, OnResponseExceptionEB) {
   auto interceptor1 =
       std::make_shared<ServiceInterceptorThrowOnResponse>("Interceptor1");
   auto interceptor2 =
       std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor2");
-  ScopedServerInterfaceThread runner(
-      std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
             InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
-      runner.newClient<apache::thrift::Client<test::ServiceInterceptorTest>>();
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
   EXPECT_THROW(
       {
         try {

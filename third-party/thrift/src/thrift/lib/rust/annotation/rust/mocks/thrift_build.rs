@@ -15,11 +15,11 @@ fn main() {
     let out_dir = env::var_os("OUT_DIR").expect("OUT_DIR env not provided");
     let cratemap_path = Path::new(&out_dir).join("cratemap");
     fs::write(cratemap_path, CRATEMAP).expect("Failed to write cratemap");
-    let mut conf = Config::from_env(GenContext::Mocks)
-        .expect("Failed to instantiate thrift_compiler::Config");
-    conf.base_path("../../../../../..");
-    conf.types_crate("rust__types");
-    conf.clients_crate("rust__clients");
-    let srcs: &[&str] = &["../../../../../annotation/rust.thrift"];
-    conf.run(srcs).expect("Failed while running thrift compilation");
+    Config::from_env(GenContext::Mocks)
+        .expect("Failed to instantiate thrift_compiler::Config")
+        .base_path("../../../../../..")
+        .types_crate("rust__types")
+        .clients_crate("rust__clients")
+        .run(["../../../../../annotation/rust.thrift"])
+        .expect("Failed while running thrift compilation");
 }

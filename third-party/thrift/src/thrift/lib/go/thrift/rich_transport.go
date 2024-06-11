@@ -19,20 +19,20 @@ package thrift
 import "io"
 
 type richTransport struct {
-	Transport
+	io.ReadWriteCloser
 }
 
-// Wraps Transport to provide RichTransport interface
-func NewRichTransport(trans Transport) RichTransport {
+// NewRichTransport wraps io.ReadWriteCloser to provide RichTransport interface
+func NewRichTransport(trans io.ReadWriteCloser) RichTransport {
 	return &richTransport{trans}
 }
 
 func (r *richTransport) ReadByte() (c byte, err error) {
-	return readByte(r.Transport)
+	return readByte(r.ReadWriteCloser)
 }
 
 func (r *richTransport) WriteByte(c byte) error {
-	return writeByte(r.Transport, c)
+	return writeByte(r.ReadWriteCloser, c)
 }
 
 func (r *richTransport) WriteString(s string) (n int, err error) {
@@ -40,7 +40,19 @@ func (r *richTransport) WriteString(s string) (n int, err error) {
 }
 
 func (r *richTransport) RemainingBytes() uint64 {
-	return r.Transport.RemainingBytes()
+	readSizeProvider, ok := r.ReadWriteCloser.(ReadSizeProvider)
+	if !ok {
+		return UnknownRemaining
+	}
+	return readSizeProvider.RemainingBytes()
+}
+
+func (r *richTransport) Flush() error {
+	flusher, ok := r.ReadWriteCloser.(Flusher)
+	if !ok {
+		return nil
+	}
+	return flusher.Flush()
 }
 
 func readByte(r io.Reader) (c byte, err error) {

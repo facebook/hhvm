@@ -16,8 +16,12 @@
 
 package thrift
 
+import (
+	"io"
+)
+
 type Deserializer struct {
-	Transport Transport
+	Transport io.ReadWriteCloser
 	Protocol  Format
 }
 

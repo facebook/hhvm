@@ -15,10 +15,12 @@ use anyhow::Error;
 use ascii::AsciiString;
 use hash::HashMap;
 use hash::HashSet;
+use hhbc_string_utils::strip_type_list;
 use ir::BlockId;
 use ir::FloatBits;
 use ir::LocalId;
 use ir::SrcLoc;
+use ir::Typedef;
 use itertools::Itertools;
 use newtype::newtype_int;
 use strum::EnumProperty;
@@ -28,6 +30,7 @@ use crate::mangle::FieldName;
 use crate::mangle::FunctionName;
 use crate::mangle::GlobalName;
 use crate::mangle::Intrinsic;
+use crate::mangle::Mangle;
 use crate::mangle::TypeName;
 use crate::mangle::VarName;
 
@@ -74,6 +77,25 @@ impl<'a> TextualFile<'a> {
 impl TextualFile<'_> {
     pub(crate) fn debug_separator(&mut self) -> Result {
         writeln!(self.w)?;
+        Ok(())
+    }
+
+    pub(crate) fn declare_alias(&mut self, typedef: Typedef) -> Result {
+        write!(self.w, "type {} equals ", typedef.name.as_str().mangle())?;
+        // This is pretty hacky - just grabbing something printable from wherever I can find it
+        // In the general case we have a list of types (presumably for case types) but
+        // Infer won't initially know what to do with more than one type
+        let mut sep = "";
+        for ti in typedef.type_info_union {
+            match ti.user_type {
+                ir::Maybe::Just(tyname) => {
+                    write!(self.w, "{sep}{}", strip_type_list(tyname.as_str()).mangle())?;
+                }
+                ir::Maybe::Nothing => (),
+            }
+            sep = ", ";
+        }
+        write!(self.w, "\n")?;
         Ok(())
     }
 

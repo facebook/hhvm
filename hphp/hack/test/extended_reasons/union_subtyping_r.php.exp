@@ -1,5 +1,6 @@
 error: Typing[4110] Invalid return type
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
  7 |   return »$c«;
  8 | }
@@ -8,6 +9,7 @@ File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
 
 Expected `(A | B)`
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): »(A|B)« {
  7 |   return $c;
  8 | }
@@ -16,6 +18,7 @@ File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
 
 But got `C`
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(»C« $c): (A|B) {
  7 |   return $c;
  8 | }
@@ -24,6 +27,7 @@ File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
 Here's why: this hint
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(»C« $c): (A|B) {
  7 |   return $c;
  8 | }
@@ -32,6 +36,7 @@ File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
 flows *into* this expression
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(C »$c«): (A|B) {
  7 |   return $c;
  8 | }
@@ -40,6 +45,7 @@ File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
 
 which itself flows *into* this expression
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
  7 |   return »$c«;
  8 | }
@@ -48,6 +54,7 @@ File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
 
 which itself flows *into* this expression
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
  7 |   »return $c;«
  8 | }
@@ -56,6 +63,7 @@ File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
 
 which itself flows *into* this hint
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): »(A|B)« {
  7 |   return $c;
  8 | }
@@ -64,6 +72,7 @@ File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
 
 error: Typing[4110] Invalid return type
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
  7 |   return »$c«;
  8 | }
@@ -72,6 +81,7 @@ File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
 
 Expected `A`
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (»A«|B) {
  7 |   return $c;
  8 | }
@@ -80,6 +90,7 @@ File "union_subtyping_r.php", line 6, character 26 - line 6, character 26:
 
 But got `C`
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(»C« $c): (A|B) {
  7 |   return $c;
  8 | }
@@ -88,6 +99,7 @@ File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
 Here's why: this hint
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(»C« $c): (A|B) {
  7 |   return $c;
  8 | }
@@ -96,6 +108,7 @@ File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
 flows *into* this expression
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(C »$c«): (A|B) {
  7 |   return $c;
  8 | }
@@ -104,6 +117,7 @@ File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
 
 which itself flows *into* this expression
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
  7 |   return »$c«;
  8 | }
@@ -112,6 +126,7 @@ File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
 
 which itself flows *into* this expression
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
  7 |   »return $c;«
  8 | }
@@ -120,6 +135,7 @@ File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
 
 which itself flows *into* this hint
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): »(A|B)« {
  7 |   return $c;
  8 | }
@@ -128,6 +144,7 @@ File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
 
 which itself flows *into* this hint, via the union type
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (»A«|B) {
  7 |   return $c;
  8 | }
@@ -136,6 +153,7 @@ File "union_subtyping_r.php", line 6, character 26 - line 6, character 26:
 
 error: Typing[4110] Invalid return type
 
+ 5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
  7 |   return »$c«;
  8 | }

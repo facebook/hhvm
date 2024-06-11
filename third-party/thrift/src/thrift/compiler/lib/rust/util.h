@@ -20,6 +20,7 @@
 #include <optional>
 #include <string>
 
+#include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_typedef.h>
 
@@ -63,6 +64,8 @@ inline std::string typedef_rust_name(const t_typedef* typedef_) {
 inline std::string struct_rust_name(const t_structured* struct_) {
   return type_rust_name(struct_);
 }
+
+std::string multifile_module_name(const t_program* program);
 
 } // namespace rust
 } // namespace compiler

@@ -267,19 +267,6 @@ std::string get_mock_crate(
   }
 }
 
-std::string multifile_module_name(const t_program* program) {
-  const std::string& namespace_rust = program->get_namespace("rust");
-
-  // If source file has `namespace rust cratename.modulename` then modulename.
-  auto separator = namespace_rust.find('.');
-  if (separator != std::string::npos) {
-    return namespace_rust.substr(separator + 1);
-  }
-
-  // Otherwise, the module is named after the source file, modulename.thrift.
-  return mangle(program->name());
-}
-
 bool node_is_boxed(const t_named& node) {
   return node.has_annotation("rust.box") || node.has_annotation("thrift.box") ||
       node.find_structured_annotation_or_null(kBoxUri) ||

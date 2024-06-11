@@ -320,6 +320,19 @@ std::string named_rust_name(const t_named* node) {
   return unmangled_rust_name(node);
 }
 
+std::string multifile_module_name(const t_program* program) {
+  const std::string& namespace_rust = program->get_namespace("rust");
+
+  // If source file has `namespace rust cratename.modulename` then modulename.
+  auto separator = namespace_rust.find('.');
+  if (separator != std::string::npos) {
+    return namespace_rust.substr(separator + 1);
+  }
+
+  // Otherwise, the module is named after the source file, modulename.thrift.
+  return mangle(program->name());
+}
+
 } // namespace rust
 } // namespace compiler
 } // namespace thrift

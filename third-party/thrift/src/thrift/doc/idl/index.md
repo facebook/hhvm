@@ -261,10 +261,10 @@ A package name is a string containing a domain name and a path separated with `/
 package "meta.com/search"
 ```
 
-You should pick a unique package name for a `.thrift` file or a set of closely related files. To this end combine a domain name that belongs to you or your organization with a path, possibly consisting of multiple components, that uniquely identifies this set of files within the domain/organization.
+You should choose a unique package name for a `.thrift` file or a set of closely related files. To this end combine a domain name that belongs to you or your organization with a path, possibly consisting of multiple components, that uniquely identifies this set of files within the domain/organization.
 
 :::caution
-Package name conflicts can be difficult to resolve, so pick these names carefully and prefer longer, more specific names to shorter, generic ones.
+Package name conflicts can be difficult to resolve, so choose these names carefully and prefer longer, more specific names to shorter, generic ones.
 :::
 
 <!-- package_name is defined here and not in Lexical Elements because its components are used to specify the default namespace rules. -->

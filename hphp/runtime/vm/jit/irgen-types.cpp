@@ -93,7 +93,7 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
   }
 
   auto knownCls = checkCls->hasConstVal(TCls) ? checkCls->clsVal() : nullptr;
-  assertx(IMPLIES(knownCls, classIsPersistentOrCtxParent(env, knownCls)));
+  assertx(IMPLIES(knownCls, classIsTrusted(env, knownCls)));
   assertx(IMPLIES(knownCls, knownCls->name()->tsame(className)));
 
   auto const srcType = src->type();
@@ -1001,9 +1001,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     auto const clsname = get_ts_classname(arr);
     if (arr->exists(s_generic_types)) {
       auto cls = lookupUniqueClass(env, clsname);
-      if ((classIsPersistentOrCtxParent(env, cls) &&
-           cls->hasReifiedGenerics()) ||
-          !isTSAllWildcards(arr)) {
+      if ((cls && cls->hasReifiedGenerics()) || !isTSAllWildcards(arr)) {
         // If it is a reified class or has non wildcard generics,
         // we need to bail
         return nullptr;

@@ -1542,16 +1542,17 @@ void emitNewObj(IRGS& env) {
 
 void emitNewObjD(IRGS& env, const StringData* className) {
   auto const cls = lookupUniqueClass(env, className);
-  bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
-  bool const canInstantiate = cls && isNormalClass(cls) && !isAbstract(cls);
-  if (persistentCls && canInstantiate && !cls->hasNativePropHandler()){
-    push(env, allocObjFast(env, cls));
-    return;
-  }
-  if (cls || persistentCls) {
-    push(env, gen(env, AllocObj, cns(env, cls)));
-    return;
-  }
+
+  auto const knownClass = [&]() {
+    bool const canInstantiate = isNormalClass(cls) && !isAbstract(cls);
+    if (canInstantiate && !cls->hasNativePropHandler()) {
+      push(env, allocObjFast(env, cls));
+    } else {
+      push(env, gen(env, AllocObj, cns(env, cls)));
+    }
+  };
+  if (cls) return knownClass();
+
   auto const cachedCls = gen(env,
                              LdClsCached,
                              LdClsFallbackData::Fatal(),
@@ -1721,9 +1722,6 @@ void emitFCallClsMethodD(IRGS& env,
       MemberLookupContext(callContext(env, fca, cls), curFunc(env));
     auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
     if (func) {
-      if (!classIsPersistentOrCtxParent(env, cls)) {
-        gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
-      }
       auto const ctx = ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
       emitModuleBoundaryCheckKnown(env, cls);
       return prepareAndCallKnown(env, func, fca, ctx, false, false);
@@ -1839,7 +1837,7 @@ void resolveClsMethodCommon(IRGS& env, SSATmp* clsVal,
 void checkClsMethodAndLdCtx(IRGS& env, const Class* cls, const Func* func,
                             const StringData* className) {
   gen(env, CheckClsMethFunc, cns(env, func));
-  if (!classIsPersistentOrCtxParent(env, cls)) {
+  if (!classIsTrusted(env, cls)) {
     gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
   }
   ldCtxForClsMethod(env, func, cns(env, cls), cls, true);

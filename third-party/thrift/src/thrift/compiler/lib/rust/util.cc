@@ -37,13 +37,24 @@ struct CrateInfo {
 
 rust_crate_map load_crate_map(const std::string& path) {
   // Each line of the file is:
-  // thrift_name crate_name
+  // path/to/thrift_name.thrift crate_name //path/to:target-rust
   //
-  // As an example of each value, we might have:
-  //   - thrift_name: demo
-  //     (this is the name by which the dependency is referred to in thrift)
-  //   - crate_name: demo_api
-  //     (the Rust code will refer to demo_api::types::WhateverType)
+  // The first column is the string by which this Thrift file would be
+  // identified in `include` statements within other Thrift sources. The
+  // substring between the last '/' and the last '.' is Thrift package name.
+  // For example a struct `Struct` within a Thrift file `thrift_name.thrift`
+  // would be named as `thrift_name.Struct` in downstream Thrift files.
+  //
+  // The second column is the Rust crate name. Rust code in downstream targets
+  // will refer to `crate_name::Struct`. By default, the Rust crate name is
+  // derived from the Thrift package name (sanitized to avoid Rust keywords) but
+  // may also be set to something different by a `namespace rust` statement.
+  //
+  // The third column is a build-system-specific label that identifies how one
+  // might build the Rust generated code for this Thrift file. In Buck, this
+  // would be the target label of a `thrift_library` target. This column is
+  // optional. If present, it is included in various deprecation messages or
+  // comments.
 
   rust_crate_map ret;
 #ifdef _WIN32
@@ -61,8 +72,8 @@ rust_crate_map load_crate_map(const std::string& path) {
     throw std::runtime_error(error_message.str());
   }
 
-  // Map from crate_name to list of thrift_names. Most Thrift crates consist of
-  // a single *.thrift file but some may have multiple.
+  // Map from Rust crate name to list of Thrift sources. Most Thrift libraries
+  // consist of a single *.thrift file but some may have multiple.
   std::map<std::string, CrateInfo> sources;
 
   std::string line;
@@ -99,11 +110,23 @@ rust_crate_map load_crate_map(const std::string& path) {
   return ret;
 }
 
-rust_crate_index::rust_crate_index(std::map<std::string, rust_crate> cratemap)
-    : cratemap(std::move(cratemap)) {}
+rust_crate_index::rust_crate_index(
+    const t_program* current_program,
+    std::map<std::string, rust_crate> cratemap)
+    : cratemap(std::move(cratemap)) {
+  auto current_program_path = current_program->path();
+  std::string::size_type slash = current_program_path.find_last_of("/\\");
+  if (slash != std::string::npos) {
+    directory_of_current_program = current_program_path.substr(0, slash);
+  }
+}
 
 const rust_crate* rust_crate_index::find(const t_program* program) const {
-  auto crate = cratemap.find(program->name());
+  auto crate = cratemap.find(program->path());
+  if (crate == cratemap.end()) {
+    crate = cratemap.find(
+        fmt::format("{}/{}", directory_of_current_program, program->path()));
+  }
   if (crate == cratemap.end()) {
     return nullptr;
   } else {

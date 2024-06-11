@@ -46,10 +46,13 @@ struct rust_crate_map {
 class rust_crate_index {
  public:
   rust_crate_index() = default;
-  explicit rust_crate_index(std::map<std::string, rust_crate> cratemap);
+  rust_crate_index(
+      const t_program* current_program,
+      std::map<std::string, rust_crate> cratemap);
   const rust_crate* find(const t_program* program) const;
 
  private:
+  std::string directory_of_current_program;
   std::map<std::string, rust_crate> cratemap;
 };
 

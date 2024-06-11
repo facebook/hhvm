@@ -2304,7 +2304,8 @@ void t_mstch_rust_generator::generate_program() {
     auto cratemap = load_crate_map(*cratemap_flag);
     options_.multifile_mode = cratemap.multifile_mode;
     options_.label = std::move(cratemap.label);
-    options_.crate_index = rust_crate_index{std::move(cratemap.cratemap)};
+    options_.crate_index =
+        rust_crate_index{program_, std::move(cratemap.cratemap)};
   }
 
   options_.serde = has_option("serde");

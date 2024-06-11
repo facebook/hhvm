@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "ThriftServer.h"
 #include <fcntl.h>
 #include <signal.h>
 

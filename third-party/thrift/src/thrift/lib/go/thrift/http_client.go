@@ -35,8 +35,8 @@ type HTTPClient struct {
 	nsecReadTimeout    int64
 }
 
-// NewHTTPPostClient creates a new HTTP POST client.
-func NewHTTPPostClient(urlstr string) (Transport, error) {
+// newHTTPPostClient creates a new HTTP POST client.
+func newHTTPPostClient(urlstr string) (Transport, error) {
 	parsedURL, err := url.Parse(urlstr)
 	if err != nil {
 		return nil, err

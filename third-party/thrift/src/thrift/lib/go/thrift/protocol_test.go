@@ -256,7 +256,7 @@ func ReadWriteProtocolTest(t *testing.T, newFormat func(io.ReadWriteCloser) Form
 			return NewFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH)
 		},
 		func() io.ReadWriteCloser {
-			http, err := NewHTTPPostClient("http://" + l.Addr().String())
+			http, err := newHTTPPostClient("http://" + l.Addr().String())
 			if err != nil {
 				panic(err)
 			}

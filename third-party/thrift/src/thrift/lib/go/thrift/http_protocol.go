@@ -30,7 +30,7 @@ type httpProtocol struct {
 
 // NewHTTPProtocol creates a Protocol from a format that serializes directly to an HTTPClient.
 func NewHTTPProtocol(url string) Protocol {
-	transport, err := NewHTTPPostClient(url)
+	transport, err := newHTTPPostClient(url)
 	if err != nil {
 		panic(err)
 	}

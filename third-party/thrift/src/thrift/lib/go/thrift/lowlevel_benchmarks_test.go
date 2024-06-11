@@ -18,15 +18,18 @@ package thrift
 
 import (
 	"bytes"
+	"io"
 	"testing"
 )
 
 var buf = bytes.NewBuffer(make([]byte, 0, 1024))
 
-var tfv = []func() Transport{
-	func() Transport { return NewMemoryBufferLen(1024) },
-	func() Transport { return NewStreamTransportRW(buf) },
-	func() Transport { return NewFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH) },
+var tfv = []func() io.ReadWriteCloser{
+	func() io.ReadWriteCloser { return NewMemoryBufferLen(1024) },
+	func() io.ReadWriteCloser { return NewStreamTransportRW(buf) },
+	func() io.ReadWriteCloser {
+		return NewFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH)
+	},
 }
 
 func BenchmarkBinaryBool_0(b *testing.B) {

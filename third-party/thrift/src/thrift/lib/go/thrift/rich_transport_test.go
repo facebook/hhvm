@@ -32,7 +32,7 @@ func TestEnsureTransportsAreRich(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	transports := []Transport{
+	transports := []io.ReadWriteCloser{
 		NewMemoryBufferLen(1024),
 		NewStreamTransportRW(buf),
 		NewFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH),

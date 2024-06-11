@@ -209,12 +209,3 @@ type HeaderProtocolFlags interface {
 
 // Compile time interface enforcer
 var _ HeaderProtocolFlags = (*headerProtocol)(nil)
-
-// Deprecated: HeaderProtocolProtocolID is a deprecated type, temporarily introduced to ease transition to new API.
-type HeaderProtocolProtocolID interface {
-	ProtocolID() ProtocolID
-	SetProtocolID(protoID ProtocolID) error
-}
-
-// Compile time interface enforcer
-var _ HeaderProtocolProtocolID = (*headerProtocol)(nil)

@@ -69,10 +69,6 @@ func NewRocketProtocol(conn net.Conn) Protocol {
 
 func (p *rocketProtocol) resetProtocol() error {
 	p.buf.Reset()
-	if p.Format != nil {
-		return nil
-	}
-
 	switch p.protoID {
 	case ProtocolIDBinary:
 		// These defaults match cpp implementation
@@ -83,6 +79,11 @@ func (p *rocketProtocol) resetProtocol() error {
 		return NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
 	}
 	return nil
+}
+
+func (p *rocketProtocol) SetProtocolID(protoID ProtocolID) error {
+	p.protoID = protoID
+	return p.resetProtocol()
 }
 
 func (p *rocketProtocol) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {

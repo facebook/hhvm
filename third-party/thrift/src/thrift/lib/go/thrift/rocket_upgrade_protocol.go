@@ -138,3 +138,13 @@ func (p *upgradeToRocketProtocol) GetResponseHeaders() map[string]string {
 	}
 	return p.Protocol.GetResponseHeaders()
 }
+
+func (p *upgradeToRocketProtocol) SetProtocolID(protoID ProtocolID) error {
+	if p.Protocol == nil {
+		if err := p.headerProtocol.SetProtocolID(protoID); err != nil {
+			return err
+		}
+		return p.rocketProtocol.SetProtocolID(protoID)
+	}
+	return p.Protocol.SetProtocolID(protoID)
+}

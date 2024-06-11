@@ -89,6 +89,31 @@ TEST_F(CertManagerTest, TestNoSigSchemeMatch) {
       {});
   EXPECT_FALSE(res);
 }
+
+TEST_F(CertManagerTest, TestBasicMatchNoneOverride) {
+  auto cert = getCert(kRsa);
+  manager_.addCert(cert);
+  auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
+  EXPECT_EQ(res->cert, cert);
+}
+
+TEST_F(CertManagerTest, TestSameSigSchemeNoOverride) {
+  auto cert = getCert(kRsa);
+  auto cert2 = getCert(kRsa);
+  manager_.addCert(cert);
+  manager_.addCert(cert2);
+  auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
+  EXPECT_EQ(res->cert, cert);
+}
+
+TEST_F(CertManagerTest, TestSameSigSchemeOverride) {
+  auto cert = getCert(kRsa);
+  auto cert2 = getCert(kRsa);
+  manager_.addCertAndOverride(cert);
+  manager_.addCertAndOverride(cert2);
+  auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
+  EXPECT_EQ(res->cert, cert2);
+}
 } // namespace test
 } // namespace client
 } // namespace fizz

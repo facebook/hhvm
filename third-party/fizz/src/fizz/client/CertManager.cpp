@@ -44,7 +44,7 @@ void CertManager::addCert(
     bool overrideExistingEntry) {
   auto sigSchemes = cert->getSigSchemes();
   for (auto sigScheme : sigSchemes) {
-    if (certs_.find(sigScheme) != certs_.end() || overrideExistingEntry) {
+    if (certs_.find(sigScheme) == certs_.end() || overrideExistingEntry) {
       certs_[sigScheme] = cert;
     } else {
       VLOG(8) << "Skipping duplicate certificate for signature scheme"

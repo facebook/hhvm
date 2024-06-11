@@ -19,6 +19,7 @@ package thrift
 import (
 	"encoding/base64"
 	"fmt"
+	"io"
 )
 
 const (
@@ -49,8 +50,8 @@ type JSONProtocol struct {
 }
 
 // Constructor
-func NewJSONProtocol(t Transport) *JSONProtocol {
-	v := &JSONProtocol{SimpleJSONProtocol: NewSimpleJSONProtocol(t)}
+func NewJSONProtocol(buffer io.ReadWriteCloser) *JSONProtocol {
+	v := &JSONProtocol{SimpleJSONProtocol: NewSimpleJSONProtocol(buffer)}
 	v.parseContextStack = append(v.parseContextStack, int(_CONTEXT_IN_TOPLEVEL))
 	v.dumpContext = append(v.dumpContext, int(_CONTEXT_IN_TOPLEVEL))
 	return v
@@ -210,7 +211,7 @@ func (p *JSONProtocol) WriteBinary(v []byte) error {
 	if len(v) > 0 {
 		writer := base64.NewEncoder(base64.StdEncoding, p.writer)
 		if _, e := writer.Write(v); e != nil {
-			p.writer.Reset(p.trans) // THRIFT-3735
+			p.writer.Reset(p.buffer) // THRIFT-3735
 			return NewProtocolException(e)
 		}
 		if e := writer.Close(); e != nil {
@@ -449,7 +450,9 @@ func (p *JSONProtocol) ReadBinary() ([]byte, error) {
 func (p *JSONProtocol) Flush() (err error) {
 	err = p.writer.Flush()
 	if err == nil {
-		err = p.trans.Flush()
+		if flusher, ok := p.buffer.(Flusher); ok {
+			err = flusher.Flush()
+		}
 	}
 	return NewProtocolException(err)
 }
@@ -459,7 +462,7 @@ func (p *JSONProtocol) Skip(fieldType Type) (err error) {
 }
 
 func (p *JSONProtocol) Close() error {
-	return p.trans.Close()
+	return p.buffer.Close()
 }
 
 func (p *JSONProtocol) OutputElemListBegin(elemType Type, size int) error {

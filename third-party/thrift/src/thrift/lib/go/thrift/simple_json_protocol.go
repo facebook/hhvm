@@ -62,7 +62,7 @@ func (p _ParseContext) String() string {
 // suitable for parsing by scripting languages.  It should not be
 // confused with the full-featured JSONProtocol.
 type SimpleJSONProtocol struct {
-	trans Transport
+	buffer io.ReadWriteCloser
 
 	parseContextStack []int
 	dumpContext       []int
@@ -72,10 +72,10 @@ type SimpleJSONProtocol struct {
 }
 
 // Constructor
-func NewSimpleJSONProtocol(t Transport) *SimpleJSONProtocol {
-	v := &SimpleJSONProtocol{trans: t,
-		writer: bufio.NewWriter(t),
-		reader: bufio.NewReader(t),
+func NewSimpleJSONProtocol(buffer io.ReadWriteCloser) *SimpleJSONProtocol {
+	v := &SimpleJSONProtocol{buffer: buffer,
+		writer: bufio.NewWriter(buffer),
+		reader: bufio.NewReader(buffer),
 	}
 	v.parseContextStack = append(v.parseContextStack, int(_CONTEXT_IN_TOPLEVEL))
 	v.dumpContext = append(v.dumpContext, int(_CONTEXT_IN_TOPLEVEL))
@@ -265,7 +265,7 @@ func (p *SimpleJSONProtocol) WriteBinary(v []byte) error {
 	if len(v) > 0 {
 		writer := base64.NewEncoder(base64.StdEncoding, p.writer)
 		if _, e := writer.Write(v); e != nil {
-			p.writer.Reset(p.trans) // THRIFT-3735
+			p.writer.Reset(p.buffer) // THRIFT-3735
 			return NewProtocolException(e)
 		}
 		if e := writer.Close(); e != nil {
@@ -557,7 +557,7 @@ func (p *SimpleJSONProtocol) Skip(fieldType Type) (err error) {
 }
 
 func (p *SimpleJSONProtocol) Close() error {
-	return p.trans.Close()
+	return p.buffer.Close()
 }
 
 func (p *SimpleJSONProtocol) OutputPreValue() error {
@@ -1374,7 +1374,7 @@ func (p *SimpleJSONProtocol) resetContextStack() {
 func (p *SimpleJSONProtocol) write(b []byte) (int, error) {
 	n, err := p.writer.Write(b)
 	if err != nil {
-		p.writer.Reset(p.trans) // THRIFT-3735
+		p.writer.Reset(p.buffer) // THRIFT-3735
 	}
 	return n, err
 }

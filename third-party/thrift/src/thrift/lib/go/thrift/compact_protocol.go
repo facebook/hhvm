@@ -109,7 +109,7 @@ func NewCompactProtocol(trans Transport) *CompactProtocol {
 	if et, ok := trans.(RichTransport); ok {
 		p.trans = et
 	} else {
-		p.trans = NewRichTransport(trans)
+		p.trans = newRichTransport(trans)
 	}
 
 	return p

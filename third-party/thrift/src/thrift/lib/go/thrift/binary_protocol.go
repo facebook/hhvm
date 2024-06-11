@@ -46,7 +46,7 @@ func NewBinaryProtocol(t Transport, strictRead, strictWrite bool) *BinaryProtoco
 	if et, ok := t.(RichTransport); ok {
 		p.trans = et
 	} else {
-		p.trans = NewRichTransport(t)
+		p.trans = newRichTransport(t)
 	}
 	p.reader = p.trans
 	p.writer = p.trans

@@ -22,8 +22,8 @@ type richTransport struct {
 	io.ReadWriteCloser
 }
 
-// NewRichTransport wraps io.ReadWriteCloser to provide RichTransport interface
-func NewRichTransport(trans io.ReadWriteCloser) RichTransport {
+// newRichTransport wraps io.ReadWriteCloser to provide RichTransport interface
+func newRichTransport(trans io.ReadWriteCloser) RichTransport {
 	return &richTransport{trans}
 }
 

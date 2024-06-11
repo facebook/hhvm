@@ -55,9 +55,8 @@ struct rust_codegen_options {
   // currently being generated.
   std::string label;
 
-  // Key: package name according to Thrift.
-  // Value: determines the path used by generated code to name the crate.
-  std::map<std::string, rust_crate> cratemap;
+  // Index that can resolve a Thrift t_program to a Rust crate name.
+  rust_crate_index crate_index;
 
   // Whether to emit derive(Serialize, Deserialize).
   // Enabled by `--gen rust:serde`.
@@ -170,14 +169,13 @@ std::string get_types_import_name(
     return options.current_crate + "::types";
   }
 
-  auto program_name = program->name();
-  auto crate = options.cratemap.find(program_name);
-  if (crate == options.cratemap.end()) {
-    return program_name + "__types";
-  } else if (crate->second.name == "crate") {
-    return crate->second.import_name(program) + "::types";
+  auto crate = options.crate_index.find(program);
+  if (!crate) {
+    return program->name() + "__types";
+  } else if (crate->name == "crate") {
+    return crate->import_name(program) + "::types";
   } else {
-    return crate->second.import_name(program);
+    return crate->import_name(program);
   }
 }
 
@@ -187,16 +185,15 @@ std::string get_client_import_name(
     return options.current_crate + "::client";
   }
 
-  auto program_name = program->name();
-  auto crate = options.cratemap.find(program_name);
-  if (crate == options.cratemap.end()) {
-    return program_name + "__clients";
-  } else if (crate->second.name == "crate") {
-    return crate->second.import_name(program) + "::client";
+  auto crate = options.crate_index.find(program);
+  if (!crate) {
+    return program->name() + "__clients";
+  } else if (crate->name == "crate") {
+    return crate->import_name(program) + "::client";
   }
 
-  std::string absolute_crate_name = "::" + crate->second.name + "_clients";
-  if (crate->second.multifile) {
+  std::string absolute_crate_name = "::" + crate->name + "_clients";
+  if (crate->multifile) {
     return absolute_crate_name + "::" + multifile_module_name(program);
   } else {
     return absolute_crate_name;
@@ -209,16 +206,15 @@ std::string get_server_import_name(
     return options.current_crate;
   }
 
-  auto program_name = program->name();
-  auto crate = options.cratemap.find(program_name);
-  if (crate == options.cratemap.end()) {
-    return program_name + "__services";
-  } else if (crate->second.name == "crate") {
-    return crate->second.import_name(program);
+  auto crate = options.crate_index.find(program);
+  if (!crate) {
+    return program->name() + "__services";
+  } else if (crate->name == "crate") {
+    return crate->import_name(program);
   }
 
-  std::string absolute_crate_name = "::" + crate->second.name + "_services";
-  if (crate->second.multifile) {
+  std::string absolute_crate_name = "::" + crate->name + "_services";
+  if (crate->multifile) {
     return absolute_crate_name + "::" + multifile_module_name(program);
   } else {
     return absolute_crate_name;
@@ -231,16 +227,15 @@ std::string get_mock_import_name(
     return options.current_crate;
   }
 
-  auto program_name = program->name();
-  auto crate = options.cratemap.find(program_name);
-  if (crate == options.cratemap.end()) {
-    return program_name + "__mocks";
-  } else if (crate->second.name == "crate") {
-    return crate->second.import_name(program);
+  auto crate = options.crate_index.find(program);
+  if (!crate) {
+    return program->name() + "__mocks";
+  } else if (crate->name == "crate") {
+    return crate->import_name(program);
   }
 
-  std::string absolute_crate_name = "::" + crate->second.name + "_mocks";
-  if (crate->second.multifile) {
+  std::string absolute_crate_name = "::" + crate->name + "_mocks";
+  if (crate->multifile) {
     return absolute_crate_name + "::" + multifile_module_name(program);
   } else {
     return absolute_crate_name;
@@ -256,14 +251,13 @@ std::string get_mock_crate(
     return "crate";
   }
 
-  auto program_name = program->name();
-  auto crate = options.cratemap.find(program_name);
-  if (crate == options.cratemap.end()) {
-    return program_name + "__mocks";
-  } else if (crate->second.name == "crate") {
+  auto crate = options.crate_index.find(program);
+  if (!crate) {
+    return program->name() + "__mocks";
+  } else if (crate->name == "crate") {
     return "crate";
   } else {
-    return "::" + crate->second.name + "_mocks";
+    return "::" + crate->name + "_mocks";
   }
 }
 
@@ -725,19 +719,18 @@ class rust_mstch_program : public mstch_program {
     if (program_ == options_.current_program) {
       return options_.label;
     }
-    auto crate = options_.cratemap.find(program_->name());
-    if (crate != options_.cratemap.end()) {
-      return crate->second.label;
+    auto crate = options_.crate_index.find(program_);
+    if (crate) {
+      return crate->label;
     }
     return false;
   }
   mstch::node rust_namespace() {
-    auto program_name = program_->name();
-    auto crate = options_.cratemap.find(program_name);
-    if (crate != options_.cratemap.end()) {
-      return crate->second.name;
+    auto crate = options_.crate_index.find(program_);
+    if (crate) {
+      return crate->name;
     }
-    return program_name;
+    return program_->name();
   }
   template <typename F>
   void foreach_field(F&& f) const {
@@ -2311,7 +2304,7 @@ void t_mstch_rust_generator::generate_program() {
     auto cratemap = load_crate_map(*cratemap_flag);
     options_.multifile_mode = cratemap.multifile_mode;
     options_.label = std::move(cratemap.label);
-    options_.cratemap = std::move(cratemap.cratemap);
+    options_.crate_index = rust_crate_index{std::move(cratemap.cratemap)};
   }
 
   options_.serde = has_option("serde");

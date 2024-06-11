@@ -43,6 +43,16 @@ struct rust_crate_map {
   std::map<std::string, rust_crate> cratemap;
 };
 
+class rust_crate_index {
+ public:
+  rust_crate_index() = default;
+  explicit rust_crate_index(std::map<std::string, rust_crate> cratemap);
+  const rust_crate* find(const t_program* program) const;
+
+ private:
+  std::map<std::string, rust_crate> cratemap;
+};
+
 rust_crate_map load_crate_map(const std::string& path);
 
 std::string mangle(const std::string& name);

@@ -99,6 +99,18 @@ rust_crate_map load_crate_map(const std::string& path) {
   return ret;
 }
 
+rust_crate_index::rust_crate_index(std::map<std::string, rust_crate> cratemap)
+    : cratemap(std::move(cratemap)) {}
+
+const rust_crate* rust_crate_index::find(const t_program* program) const {
+  auto crate = cratemap.find(program->name());
+  if (crate == cratemap.end()) {
+    return nullptr;
+  } else {
+    return &crate->second;
+  }
+}
+
 static bool is_legal_crate_name(const std::string& name) {
   return name == mangle(name) && name != "core" && name != "std";
 }

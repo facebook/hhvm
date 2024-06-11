@@ -28,17 +28,15 @@ type headerProtocol struct {
 	protoID ProtocolID
 }
 
-func NewHeaderProtocol(conn net.Conn) Protocol {
+func NewHeaderProtocol(conn net.Conn) (Protocol, error) {
 	p := &headerProtocol{
 		protoID: ProtocolIDCompact,
 	}
 	p.trans = newHeaderTransport(conn)
-
-	// Effectively an invariant violation.
 	if err := p.resetProtocol(); err != nil {
-		panic(err)
+		return nil, err
 	}
-	return p
+	return p, nil
 }
 
 func (p *headerProtocol) resetProtocol() error {

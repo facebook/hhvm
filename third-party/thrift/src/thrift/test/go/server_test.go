@@ -72,7 +72,10 @@ func connectTestHeaderServer(
 	if err != nil {
 		return nil, err
 	}
-	prot := thrift.NewHeaderProtocol(socket)
+	prot, err := thrift.NewHeaderProtocol(socket)
+	if err != nil {
+		return nil, err
+	}
 	return thrifttest.NewThriftTestClient(prot), nil
 }
 

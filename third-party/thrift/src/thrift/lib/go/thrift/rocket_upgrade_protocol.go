@@ -33,9 +33,13 @@ func NewUpgradeToRocketProtocol(conn net.Conn) (Protocol, error) {
 	if err != nil {
 		return nil, err
 	}
+	header, err := NewHeaderProtocol(conn)
+	if err != nil {
+		return nil, err
+	}
 	return &upgradeToRocketProtocol{
 		rocketProtocol: rocket,
-		headerProtocol: NewHeaderProtocol(conn),
+		headerProtocol: header,
 	}, nil
 }
 

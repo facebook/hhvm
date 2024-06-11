@@ -22,8 +22,14 @@ import (
 
 func TestHeaderProtocolHeaders(t *testing.T) {
 	mockSocket := newMockSocket()
-	proto1 := NewHeaderProtocol(mockSocket)
-	proto2 := NewHeaderProtocol(mockSocket)
+	proto1, err := NewHeaderProtocol(mockSocket)
+	if err != nil {
+		t.Fatalf("failed to create header protocol: %s", err)
+	}
+	proto2, err := NewHeaderProtocol(mockSocket)
+	if err != nil {
+		t.Fatalf("failed to create header protocol: %s", err)
+	}
 
 	proto1.(RequestHeaders).SetRequestHeader("preferred_cheese", "cheddar")
 	if v, _ := proto1.(RequestHeaders).GetRequestHeader("preferred_cheese"); v != "cheddar" {
@@ -50,7 +56,7 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 	proto1.WriteMessageEnd()
 	proto1.Flush()
 
-	_, _, _, err := proto2.ReadMessageBegin()
+	_, _, _, err = proto2.ReadMessageBegin()
 	if err != nil {
 		t.Fatalf("failed to read message from proto1 in proto2")
 	}

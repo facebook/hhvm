@@ -53,7 +53,7 @@ void ChannelTestFixture::sendAndReceiveStream(
     CompactProtocolWriter writer;
     writer.setOutput(envelopeBuf.get());
     writer.writeMessageBegin("dummy", MessageType::T_CALL, 0);
-    string envelope = envelopeBuf->move()->moveToFbString().toStdString();
+    string envelope = envelopeBuf->move()->to<std::string>();
     payload = envelope + inputPayload;
   }
   eventBase_->runInEventBaseThread([&]() {
@@ -79,8 +79,7 @@ void ChannelTestFixture::sendAndReceiveStream(
 }
 
 string ChannelTestFixture::toString(IOBuf* buf) {
-  // Clone so we do not destroy the IOBuf - just in case.
-  return buf->clone()->moveToFbString().toStdString();
+  return buf->to<std::string>();
 }
 
 } // namespace thrift

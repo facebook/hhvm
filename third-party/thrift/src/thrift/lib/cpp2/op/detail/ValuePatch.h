@@ -543,7 +543,7 @@ class BinaryPatch : public BaseStringPatch<Patch, BinaryPatch<Patch>> {
   void apply(std::string& val) const {
     folly::IOBuf buf;
     apply(buf);
-    val = buf.moveToFbString().toStdString();
+    val = buf.to<std::string>();
   }
 
  private:

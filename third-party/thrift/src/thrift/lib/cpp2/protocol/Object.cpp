@@ -84,7 +84,7 @@ static std::string str(const Value& value) {
     case Value::Type::stringValue:
       return value.as_string();
     case Value::Type::binaryValue:
-      return value.as_binary().clone()->moveToFbString().toStdString();
+      return value.as_binary().to<std::string>();
     default:
       folly::throw_exception<std::runtime_error>(
           "str(" + apache::thrift::util::enumNameSafe(value.getType()) +
@@ -112,7 +112,7 @@ folly::dynamic toDynamic(const Value& value) {
     case Value::Type::stringValue:
       return value.as_string();
     case Value::Type::binaryValue:
-      return value.as_binary().clone()->moveToFbString().toStdString();
+      return value.as_binary().to<std::string>();
     case Value::Type::listValue:
       ret = folly::dynamic::array();
       ret.reserve(value.as_list().size());

@@ -70,8 +70,7 @@ folly::IOBuf* FakeResponseHandler::getBodyBuf() {
 
 string FakeResponseHandler::getBody() {
   if (body_) {
-    // Clone so we do not destroy the IOBuf - just in case.
-    return body_->clone()->moveToFbString().toStdString();
+    return body_->to<std::string>();
   } else {
     return "";
   }

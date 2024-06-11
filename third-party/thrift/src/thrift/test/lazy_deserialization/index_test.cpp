@@ -92,7 +92,7 @@ std::string genFieldHeader(TType type, int16_t id, Serializer<Reader, Writer>) {
   Writer writer;
   writer.setOutput(&output);
   writer.writeFieldBegin("", type, id);
-  return output.moveAsValue().moveToFbString().toStdString();
+  return output.moveAsValue().to<std::string>();
 }
 
 template <class Reader, class Writer>
@@ -101,7 +101,7 @@ std::string writeI64(int64_t i, Serializer<Reader, Writer>) {
   Writer writer;
   writer.setOutput(&output);
   writer.writeI64(i);
-  return output.moveAsValue().moveToFbString().toStdString();
+  return output.moveAsValue().to<std::string>();
 }
 
 template <class Serializer>

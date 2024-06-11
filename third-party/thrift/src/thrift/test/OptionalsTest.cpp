@@ -32,7 +32,7 @@ static std::string objToJSON(T& obj) {
   writer.setOutput(&queue, size);
   obj.write(&writer);
   auto buf = queue.move();
-  auto ret = buf->moveToFbString().toStdString();
+  auto ret = buf->to<std::string>();
   return ret;
 }
 

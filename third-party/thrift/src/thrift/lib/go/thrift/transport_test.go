@@ -37,7 +37,7 @@ func init() {
 		"value": "Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36"}
 }
 
-func TransportTest(t *testing.T, writeTrans Transport, readTrans Transport) {
+func TransportTest(t *testing.T, writeTrans io.Writer, readTrans io.Reader) {
 	buf := make([]byte, TRANSPORT_BINARY_DATA_SIZE)
 
 	// Special case for header transport -- need to reset protocol on read
@@ -50,9 +50,11 @@ func TransportTest(t *testing.T, writeTrans Transport, readTrans Transport) {
 	if err != nil {
 		t.Fatalf("Transport %T cannot write binary data of length %d: %s", writeTrans, len(transport_bdata), err)
 	}
-	err = writeTrans.Flush()
-	if err != nil {
-		t.Fatalf("Transport %T cannot flush write of binary data: %s", writeTrans, err)
+	if flusher, ok := writeTrans.(Flusher); ok {
+		err = flusher.Flush()
+		if err != nil {
+			t.Fatalf("Transport %T cannot flush write of binary data: %s", writeTrans, err)
+		}
 	}
 
 	if headerTrans != nil {
@@ -77,9 +79,11 @@ func TransportTest(t *testing.T, writeTrans Transport, readTrans Transport) {
 	if err != nil {
 		t.Fatalf("Transport %T cannot write binary data 2 of length %d: %s", writeTrans, len(transport_bdata), err)
 	}
-	err = writeTrans.Flush()
-	if err != nil {
-		t.Fatalf("Transport %T cannot flush write binary data 2: %s", writeTrans, err)
+	if flusher, ok := writeTrans.(Flusher); ok {
+		err = flusher.Flush()
+		if err != nil {
+			t.Fatalf("Transport %T cannot flush write binary data 2: %s", writeTrans, err)
+		}
 	}
 
 	if headerTrans != nil {
@@ -107,7 +111,7 @@ func TransportTest(t *testing.T, writeTrans Transport, readTrans Transport) {
 	}
 }
 
-func TransportHeaderTest(t *testing.T, writeTrans Transport, readTrans Transport) {
+func TransportHeaderTest(t *testing.T, writeTrans io.Writer, readTrans io.Reader) {
 	buf := make([]byte, TRANSPORT_BINARY_DATA_SIZE)
 
 	// Need to assert type of Transport to HTTPClient to expose the Setter
@@ -118,9 +122,11 @@ func TransportHeaderTest(t *testing.T, writeTrans Transport, readTrans Transport
 	if err != nil {
 		t.Fatalf("Transport %T cannot write binary data of length %d: %s", writeTrans, len(transport_bdata), err)
 	}
-	err = writeTrans.Flush()
-	if err != nil {
-		t.Fatalf("Transport %T cannot flush write of binary data: %s", writeTrans, err)
+	if flusher, ok := writeTrans.(Flusher); ok {
+		err = flusher.Flush()
+		if err != nil {
+			t.Fatalf("Transport %T cannot flush write of binary data: %s", writeTrans, err)
+		}
 	}
 	// Need to assert type of Transport to HTTPClient to expose the Getter
 	httpRPostTrans := readTrans.(*HTTPClient)
@@ -144,26 +150,4 @@ func TransportHeaderTest(t *testing.T, writeTrans Transport, readTrans Transport
 			t.Fatalf("Transport %T read %d instead of %d for index %d of binary data 2", readTrans, v, transport_bdata[k], k)
 		}
 	}
-}
-
-func CloseTransports(t *testing.T, readTrans Transport, writeTrans Transport) {
-	err := readTrans.Close()
-	if err != nil {
-		t.Errorf("Transport %T cannot close read transport: %s", readTrans, err)
-	}
-	if writeTrans != readTrans {
-		err = writeTrans.Close()
-		if err != nil {
-			t.Errorf("Transport %T cannot close write transport: %s", writeTrans, err)
-		}
-	}
-}
-
-func valueInSlice(value string, slice []string) bool {
-	for _, v := range slice {
-		if value == v {
-			return true
-		}
-	}
-	return false
 }

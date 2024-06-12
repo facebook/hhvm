@@ -689,8 +689,6 @@ CO_TEST_P(ServiceInterceptorTestP, RequestArguments) {
 
     using NamedServiceInterceptor::NamedServiceInterceptor;
 
-    std::string getName() const override { return typeid(*this).name(); }
-
     folly::coro::Task<std::optional<RequestState>> onRequest(
         ConnectionState*, RequestInfo requestInfo) override {
       argsCount = requestInfo.arguments.count();

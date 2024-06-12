@@ -62,6 +62,9 @@ func (p *headerProtocol) resetProtocol() error {
 //
 
 func (p *headerProtocol) WriteMessageBegin(name string, typeId MessageType, seqid int32) error {
+	if err := p.resetProtocol(); err != nil {
+		return err
+	}
 	// The conditions here only match on the Go client side.
 	// If we are a client, set header seq id same as msg id
 	if typeId == CALL || typeId == ONEWAY {
@@ -79,6 +82,10 @@ func (p *headerProtocol) ReadMessageBegin() (name string, typeId MessageType, se
 		if err = p.trans.ResetProtocol(); err != nil {
 			return name, EXCEPTION, seqid, err
 		}
+	}
+	err = p.resetProtocol()
+	if err != nil {
+		return name, EXCEPTION, seqid, err
 	}
 	// see https://github.com/apache/thrift/blob/master/doc/specs/SequenceNumbers.md
 	// TODO:  This is a bug. if we are speaking header protocol, we should be using

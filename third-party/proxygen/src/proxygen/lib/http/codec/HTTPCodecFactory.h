@@ -29,6 +29,11 @@ class HTTPCodecFactory {
   };
 
   struct CodecConfig {
+    // The debug setting controls header logging verbosity.
+    // 0 - do not log any header names or values to stderr
+    // 1 - log header names to stderr on certain errors
+    // 2 - log header names and values to stderr on certain errors
+    uint8_t debugLevel{0};
     // Default to false for now to match existing behavior
     bool strictValidation{false};
     HTTP1xCodecConfig h1;

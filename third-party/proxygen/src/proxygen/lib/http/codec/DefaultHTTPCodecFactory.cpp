@@ -31,6 +31,7 @@ std::unique_ptr<HTTPCodec> DefaultHTTPCodecFactory::getCodec(
       if (config.h2.headerIndexingStrategy) {
         codec->setHeaderIndexingStrategy(config.h2.headerIndexingStrategy);
       }
+      codec->setDebugLevel(config.debugLevel);
       return codec;
     }
     case CodecProtocol::HQ:

@@ -196,6 +196,10 @@ class HTTP2Codec
     strictValidation_ = strict;
   }
 
+  void setDebugLevel(uint64_t debugLevel) {
+    debugLevel_ = debugLevel;
+  }
+
  private:
   size_t splitCompressed(size_t compressed,
                          uint32_t remainingFrameSize,
@@ -364,6 +368,7 @@ class HTTP2Codec
   bool validateHeaders_{true};
   // Default false for now to match existing behavior
   bool strictValidation_{false};
+  uint8_t debugLevel_{0};
 
   // CONTINUATION frame can follow either HEADERS or PUSH_PROMISE frames.
   // Keeps frame type of initiating frame of header block.

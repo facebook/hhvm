@@ -150,7 +150,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }

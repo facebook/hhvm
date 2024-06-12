@@ -26,6 +26,7 @@ use anyhow::bail;
 use anyhow::Context;
 use anyhow::Result;
 use bytes::Buf;
+use thiserror::Error;
 
 use crate::serialize;
 use crate::ApplicationException;
@@ -195,9 +196,14 @@ where
     Ok(res)
 }
 
+#[derive(Debug, Error)]
+pub enum SpawnerError {
+    #[error("runtime shutting down")]
+    RuntimeShuttingDown,
+}
 /// Abstract spawning some potentially CPU-heavy work onto a CPU thread
 pub trait Spawner: 'static {
-    fn spawn<F, R>(func: F) -> impl Future<Output = R> + Send
+    fn spawn<F, R>(func: F) -> impl Future<Output = Result<R, SpawnerError>> + Send
     where
         F: FnOnce() -> R + Send + 'static,
         R: Send + 'static;
@@ -207,12 +213,12 @@ pub trait Spawner: 'static {
 pub struct NoopSpawner;
 impl Spawner for NoopSpawner {
     #[inline]
-    async fn spawn<F, R>(func: F) -> R
+    async fn spawn<F, R>(func: F) -> Result<R, SpawnerError>
     where
         F: FnOnce() -> R + Send + 'static,
         R: Send + 'static,
     {
-        func()
+        Ok(func())
     }
 }
 
@@ -227,5 +233,5 @@ where
     EXN::Error: Send + 'static,
     S: Spawner,
 {
-    S::spawn(move || deserialize_response_envelope::<P, EXN>(&mut de)).await
+    S::spawn(move || deserialize_response_envelope::<P, EXN>(&mut de)).await?
 }

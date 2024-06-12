@@ -40,7 +40,8 @@ inline constexpr bool kProtocolSupportsDynamicPatch =
     std::is_same_v<Protocol, BinaryProtocolReader> ||
     std::is_same_v<Protocol, BinaryProtocolWriter> ||
     std::is_same_v<Protocol, CompactProtocolReader> ||
-    std::is_same_v<Protocol, CompactProtocolWriter>;
+    std::is_same_v<Protocol, CompactProtocolWriter> ||
+    std::is_same_v<Protocol, protocol::detail::ObjectWriter>;
 
 /// A patch adapter that only supports 'assign',
 /// which is the minimum any patch should support.

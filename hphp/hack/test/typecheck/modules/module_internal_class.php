@@ -20,7 +20,7 @@ internal class C {
 interface I { }
 
 class D
-// Good
+// Bad
 extends C
 // Good
 implements I {

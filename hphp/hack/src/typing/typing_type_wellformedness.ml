@@ -439,9 +439,9 @@ let class_ tenv c =
         []);
       tparams env c_tparams;
       where_constrs env c_where_constraints;
-      (* Classes inherited are not signatures from the point of view of modules because the trait
-         being use'd does not need to be seen by users of the class *)
-      hints ~in_signature:false env c_extends;
+      (* Extends clause must be checked, so that we reject public classes extending internal ones *)
+      hints ~in_signature:true env c_extends;
+      (* But for interfaces and trait use, we allow internal *)
       hints ~in_signature:false env c_implements;
       hints ~in_signature:false env c_uses;
       (if TypecheckerOptions.strict_wellformedness (Env.get_tcopt env.tenv) > 0

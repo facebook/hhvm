@@ -25,6 +25,7 @@ function test(): void {
   T::h(T::g()); // This will error
 }
 
+// This now errors: we don't allow public classes to extend internal ones
 final class C extends T {
 }
 

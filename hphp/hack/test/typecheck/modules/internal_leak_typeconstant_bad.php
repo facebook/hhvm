@@ -21,6 +21,7 @@ internal class Base {
   public static function meth4(self::TC2 $_):void { }
 }
 
+// We now reject public classes extending internal ones
 final class Derived extends Base {
 }
 

@@ -1,3 +1,7 @@
+ERROR: File "internal_multiple_instantiations.php--A.php", line 5, characters 21-28:
+You cannot use this type in a public declaration. (Typing[4446])
+  File "internal_multiple_instantiations.php--A.php", line 4, characters 20-20:
+  It is declared as `internal` here
 ERROR: File "internal_multiple_instantiations.php--B.php", line 3, characters 17-17:
 This makes D implements F<arraykey> but it already implements F at another instantiation (Typing[4480])
   File "internal_multiple_instantiations.php--B.php", line 3, characters 30-30:

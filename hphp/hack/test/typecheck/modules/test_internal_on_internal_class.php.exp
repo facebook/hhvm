@@ -2,6 +2,10 @@ ERROR: File "test_internal_on_internal_class.php--def.php", line 27, characters 
 You cannot use this type in a public declaration. (Typing[4446])
   File "test_internal_on_internal_class.php--def.php", line 5, characters 16-24:
   It is declared as `internal` here
+ERROR: File "test_internal_on_internal_class.php--def.php", line 37, characters 17-17:
+You cannot use this type in a public declaration. (Typing[4446])
+  File "test_internal_on_internal_class.php--def.php", line 31, characters 16-16:
+  It is declared as `internal` here
 ERROR: File "test_internal_on_internal_class.php--file.php", line 6, characters 9-11:
 You are trying to access the method `get` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
   File "test_internal_on_internal_class.php--def.php", line 5, characters 16-24:

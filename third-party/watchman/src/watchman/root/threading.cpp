@@ -44,12 +44,12 @@ void Root::scheduleRecrawl(const char* why) {
   view()->wakeThreads();
 }
 
-void Root::stopThreads() {
-  view()->stopThreads();
+void Root::stopThreads(std::string_view reason) {
+  view()->stopThreads(reason);
 }
 
 // Cancels a watch.
-bool Root::cancel() {
+bool Root::cancel(std::string_view reason) {
   if (inner.cancelled.exchange(true, std::memory_order_acq_rel)) {
     // Already cancelled. Return false.
     return false;
@@ -62,7 +62,7 @@ bool Root::cancel() {
   unilateralResponses->enqueue(json_object(
       {{"root", w_string_to_json(root_path)}, {"canceled", json_true()}}));
 
-  stopThreads();
+  stopThreads(reason);
   removeFromWatched();
 
   {
@@ -75,14 +75,14 @@ bool Root::cancel() {
   return true;
 }
 
-bool Root::stopWatch() {
+bool Root::stopWatch(std::string_view reason) {
   bool stopped = removeFromWatched();
 
   if (stopped) {
-    cancel();
+    cancel(reason);
     saveGlobalStateHook_();
   }
-  stopThreads();
+  stopThreads(reason);
 
   return stopped;
 }

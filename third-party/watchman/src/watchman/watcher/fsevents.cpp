@@ -597,7 +597,7 @@ bool FSEventsWatcher::start(const std::shared_ptr<Root>& root) {
       } catch (const std::exception& e) {
         watchman::log(watchman::ERR, "uncaught exception: ", e.what());
         if (!self->subdir) {
-          root->cancel();
+          root->cancel(fmt::format("FSEventsThread failed: {}", e.what()));
         }
       }
 

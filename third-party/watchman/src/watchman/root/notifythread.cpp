@@ -26,7 +26,9 @@ void InMemoryView::notifyThread(const std::shared_ptr<Root>& root) {
         "failed to start root {}, cancelling watch: {}\n",
         root->root_path,
         root->failure_reason ? *root->failure_reason : w_string{});
-    root->cancel();
+    root->cancel(fmt::format(
+        "Failed to start watcher: {}",
+        root->failure_reason ? root->failure_reason->view() : ""));
     return;
   }
 
@@ -44,7 +46,7 @@ void InMemoryView::notifyThread(const std::shared_ptr<Root>& root) {
       auto resultFlags = watcher_->consumeNotify(root, fromWatcher);
 
       if (resultFlags.cancelSelf) {
-        root->cancel();
+        root->cancel("Watcher noticed root has been removed.");
         break;
       }
       if (fromWatcher.getPendingItemCount() >= WATCHMAN_BATCH_LIMIT) {

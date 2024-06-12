@@ -249,7 +249,8 @@ bool w_root_load_state(const json_ref& state) {
             ") failed: ",
             e.what(),
             "\n");
-        root->cancel();
+        root->cancel(
+            fmt::format("Error starting threads for root: {}", e.what()));
       }
     }
   }

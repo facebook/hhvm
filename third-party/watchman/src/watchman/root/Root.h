@@ -333,13 +333,13 @@ class Root : public RootConfig, public std::enable_shared_from_this<Root> {
   // Requests cancellation of the root.
   // Returns true if this request caused the root cancellation, false
   // if it was already in the process of being cancelled.
-  bool cancel();
+  bool cancel(std::string_view reason);
 
   // Returns true if the caller should stop the watch.
   bool considerReap();
   bool removeFromWatched();
-  void stopThreads();
-  bool stopWatch();
+  void stopThreads(std::string_view reason);
+  bool stopWatch(std::string_view reason);
   json_ref triggerListToJson() const;
 
   static std::vector<RootDebugStatus> getStatusForAllRoots();

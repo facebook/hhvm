@@ -937,7 +937,7 @@ void InMemoryView::startThreads(const std::shared_ptr<Root>& root) {
       self->notifyThread(root);
     } catch (const std::exception& e) {
       log(ERR, "Exception: ", e.what(), " cancel root\n");
-      root->cancel();
+      root->cancel(fmt::format("notifyThread failed: {}", e.what()));
     }
     log(DBG, "out of loop\n");
   });
@@ -954,24 +954,30 @@ void InMemoryView::startThreads(const std::shared_ptr<Root>& root) {
       self->ioThread(root);
     } catch (const std::exception& e) {
       log(ERR, "Exception: ", e.what(), " cancel root\n");
-      root->cancel();
+      root->cancel(fmt::format("ioThread failed: {}", e.what()));
     }
     log(DBG, "out of loop\n");
   });
   ioThreadInstance.detach();
 }
 
-void InMemoryView::stopThreads() {
-  logf(DBG, "signalThreads! {} {}\n", fmt::ptr(this), rootPath_);
+void InMemoryView::stopThreads(std::string_view reason) {
+  logf(
+      DBG,
+      "signalThreads! {} {} because ... {}\n",
+      fmt::ptr(this),
+      rootPath_,
+      reason);
   stopThreads_.store(true, std::memory_order_release);
   watcher_->stopThreads();
   {
     auto pending = pendingFromWatcher_.lock();
     // we need this to make sure that watch does not hang
     for (auto& sync : pending->stealSyncs()) {
-      sync.setException(std::runtime_error("Watch shutting down because"));
+      sync.setException(std::runtime_error(
+          fmt::format("Watch shutting down because ... {}", reason)));
     }
-    pending->startRefusingSyncs();
+    pending->startRefusingSyncs(reason);
     pending->ping();
   }
 }
@@ -1064,7 +1070,7 @@ CookieSync::SyncResult InMemoryView::syncToNowCookies(
           // We may have already observed the removal via the notifythread,
           // but in some cases (eg: btrfs subvolume deletion) no notification
           // is received.
-          root->cancel();
+          root->cancel("root directory was removed or is inaccessible");
           throw std::runtime_error("root dir was removed or is inaccessible");
         } else {
           // The cookie dir was a VCS subdir and it got deleted.  Let's
@@ -1077,7 +1083,7 @@ CookieSync::SyncResult InMemoryView::syncToNowCookies(
         // directories, and syncToNow will only throw if no cookies were
         // created, ie: if all the nested watched directories are no longer
         // present and the root directory has been removed.
-        root->cancel();
+        root->cancel("root dir was removed or is inaccessible");
         throw std::runtime_error("root dir was removed or is inaccessible");
       }
     }

@@ -129,7 +129,8 @@ void ClientSubscription::processSubscription() {
           " got: ",
           exc.what(),
           ".  Cancel watch\n");
-      root->cancel();
+      root->cancel(
+          fmt::format("Error processing subscriptions: {}", exc.what()));
     } else {
       throw;
     }

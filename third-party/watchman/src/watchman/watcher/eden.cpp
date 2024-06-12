@@ -1010,7 +1010,7 @@ class EdenView final : public QueryableView {
     thr.detach();
   }
 
-  void stopThreads() override {
+  void stopThreads(std::string_view /*reason*/) override {
     subscriberEventBase_.terminateLoopSoon();
   }
 
@@ -1085,7 +1085,7 @@ class EdenView final : public QueryableView {
     SCOPE_EXIT {
       // ensure that the root gets torn down,
       // otherwise we'd leave it in a broken state.
-      root->cancel();
+      root->cancel("eden subscriber thread exiting");
     };
 
     w_set_thread_name("edensub ", root->root_path.view());

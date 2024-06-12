@@ -283,7 +283,8 @@ std::shared_ptr<Root> w_root_resolve(const char* filename, bool auto_watch) {
       root->view()->startThreads(root);
     } catch (const std::exception& e) {
       log(ERR, "w_root_resolve, while calling startThreads: ", e.what());
-      root->cancel();
+      root->cancel(
+          fmt::format("Error starting threads for root: {}", e.what()));
       throw;
     }
     w_state_save();

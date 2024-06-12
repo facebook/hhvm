@@ -124,7 +124,7 @@ InMemoryView::Continue InMemoryView::doSettleThings(
   root.unilateralResponses->enqueue(json_object({{"settled", json_true()}}));
 
   if (root.considerReap()) {
-    root.stopWatch();
+    root.stopWatch("Watch was idle for too long");
     return Continue::Stop;
   }
 

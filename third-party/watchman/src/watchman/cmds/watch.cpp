@@ -110,7 +110,7 @@ static UntypedResponse cmd_watch_delete(Client* client, const json_ref& args) {
 
   UntypedResponse resp;
   resp.set(
-      {{"watch-del", json_boolean(root->stopWatch())},
+      {{"watch-del", json_boolean(root->stopWatch("watch-del"))},
        {"root", w_string_to_json(root->root_path)}});
   return resp;
 }

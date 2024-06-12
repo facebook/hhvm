@@ -50,7 +50,7 @@ void handle_open_errno(
     if (!root.failure_reason) {
       root.failure_reason = warn;
     }
-    root.cancel();
+    root.cancel("root inaccessible");
     return;
   }
 

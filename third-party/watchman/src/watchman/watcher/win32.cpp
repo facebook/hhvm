@@ -157,7 +157,8 @@ void WinWatcher::readChangesThread(const std::shared_ptr<Root>& root) {
           ERR,
           "ReadDirectoryChangesW: failed, cancel watch. {}\n",
           win32_strerror(err));
-      root->cancel();
+      root->cancel(
+          fmt::format("ReadDirectoryChangesW failed: {}", win32_strerror(err)));
       return;
     }
     // Signal that we are done with init.  We MUST do this AFTER our first
@@ -188,7 +189,8 @@ void WinWatcher::readChangesThread(const std::shared_ptr<Root>& root) {
             ERR,
             "ReadDirectoryChangesW: failed, cancel watch. {}\n",
             win32_strerror(err));
-        root->cancel();
+        root->cancel(fmt::format(
+            "ReadDirectoryChangesW failed: {}", win32_strerror(err)));
         break;
       } else {
         initiate_read = false;
@@ -243,7 +245,9 @@ void WinWatcher::readChangesThread(const std::shared_ptr<Root>& root) {
               PendingFlags{W_PENDING_IS_DESYNCED | W_PENDING_RECURSIVE});
         } else {
           logf(ERR, "Cancelling watch for {}\n", root->root_path);
-          root->cancel();
+          root->cancel(fmt::format(
+              "unexpected error from GetOverlappedResult: {}",
+              win32_strerror(err)));
           break;
         }
       } else {
@@ -343,7 +347,7 @@ bool WinWatcher::start(const std::shared_ptr<Root>& root) {
         self->readChangesThread(root);
       } catch (const std::exception& e) {
         watchman::log(watchman::ERR, "uncaught exception: ", e.what());
-        root->cancel();
+        root->cancel(fmt::format("readChangesThread errored: {}", e.what()));
       }
 
       // Ensure that we signal the condition variable before we
@@ -362,7 +366,7 @@ bool WinWatcher::start(const std::shared_ptr<Root>& root) {
         std::cv_status::timeout) {
       watchman::log(
           watchman::ERR, "timedout waiting for readChangesThread to start\n");
-      root->cancel();
+      root->cancel("timedout waiting for readChangesThread to start");
       return false;
     }
 

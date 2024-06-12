@@ -172,13 +172,14 @@ class PendingChanges {
    */
   uint32_t getPendingItemCount() const;
 
-  void startRefusingSyncs();
+  void startRefusingSyncs(std::string_view reason);
 
  protected:
   art_tree<std::shared_ptr<watchman_pending_fs>, w_string> tree_;
   std::shared_ptr<watchman_pending_fs> pending_;
   std::vector<folly::Promise<folly::Unit>> syncs_;
   bool refuseSyncs_{false}; // true if we should refuse to add any more syncs
+  std::string refuseSyncsReason_{};
 
  private:
   void maybePruneObsoletedChildren(w_string path, PendingFlags flags);

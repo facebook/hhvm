@@ -87,7 +87,7 @@ json_ref w_root_stop_watch_all() {
       root = it->second;
     }
 
-    root->cancel();
+    root->cancel("watch-del-all");
     if (!saveGlobalStateHook) {
       saveGlobalStateHook = root->getSaveGlobalStateHook();
     } else {
@@ -289,8 +289,8 @@ void w_root_free_watched_roots() {
 
   // ... and cancel them outside of the lock
   for (auto& root : roots) {
-    if (!root->cancel()) {
-      root->stopThreads();
+    if (!root->cancel("main thread exiting")) {
+      root->stopThreads("main thread exiting");
     }
   }
 

@@ -150,7 +150,7 @@ bool PortFSWatcher::start(const std::shared_ptr<watchman_root>& root) {
   struct stat st;
   if (stat(root->root_path.c_str(), &st)) {
     watchman::log(watchman::ERR, "stat failed in PortFS root delete watch");
-    root->cancel();
+    root->cancel("root inaccessible");
     return false;
   }
 
@@ -192,7 +192,7 @@ std::unique_ptr<DirHandle> PortFSWatcher::startWatchDir(
   w_string fullPath{path};
   if (fstat(osdir->getFd(), &st) == -1) {
     if (fullPath == root->root_path) {
-      root->cancel();
+      root->cancel("root inaccessible");
     } else {
       // whaaa?
       root->scheduleRecrawl("fstat failed");

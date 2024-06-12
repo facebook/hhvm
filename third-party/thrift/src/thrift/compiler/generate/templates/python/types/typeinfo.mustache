@@ -33,6 +33,7 @@ in the client or server source rather than the type definition source.
 }}{{#type:float?}}_fbthrift_python_types.typeinfo_float{{/type:float?}}{{!
 }}{{#type:string?}}_fbthrift_python_types.typeinfo_string{{/type:string?}}{{!
 }}{{#type:binary?}}{{#type:iobuf?}}_fbthrift_python_types.typeinfo_iobuf{{/type:iobuf?}}{{^type:iobuf?}}_fbthrift_python_types.typeinfo_binary{{/type:iobuf?}}{{/type:binary?}}{{!
+}}{{^program:generate_mutable_types}}{{!
 }}{{#type:struct}}_fbthrift_python_types.StructTypeInfo({{!
   }}{{#type:need_module_path?}}{{type:module_path}}.{{/type:need_module_path?}}{{!
   }}{{> structs/unadapted_name}}){{!
@@ -43,6 +44,19 @@ in the client or server source rather than the type definition source.
   }}{{#type:key_type}}{{ >types/typeinfo }}{{/type:key_type}}, {{!
   }}{{#type:value_type}}{{ >types/typeinfo }}{{/type:value_type}}{{!
 }}){{/type:map?}}{{!
+}}{{/program:generate_mutable_types}}{{!
+}}{{#program:generate_mutable_types}}{{!
+}}{{#type:struct}}_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo({{!
+  }}{{#type:need_module_path?}}{{type:module_path}}.{{/type:need_module_path?}}{{!
+  }}{{> structs/unadapted_name}}){{!
+}}{{/type:struct}}{{!
+}}{{#type:list?}}_fbthrift_python_mutable_typeinfos.MutableListTypeInfo({{#type:list_elem_type}}{{ >types/typeinfo }}{{/type:list_elem_type}}){{/type:list?}}{{!
+}}{{#type:set?}}_fbthrift_python_mutable_typeinfos.MutableSetTypeInfo({{#type:set_elem_type}}{{ >types/typeinfo }}{{/type:set_elem_type}}){{/type:set?}}{{!
+}}{{#type:map?}}_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo({{!
+  }}{{#type:key_type}}{{ >types/typeinfo }}{{/type:key_type}}, {{!
+  }}{{#type:value_type}}{{ >types/typeinfo }}{{/type:value_type}}{{!
+}}){{/type:map?}}{{!
+}}{{/program:generate_mutable_types}}{{!
 }}{{#type:enum}}_fbthrift_python_types.EnumTypeInfo({{!
   }}{{#type:need_module_path?}}{{type:module_path}}.{{/type:need_module_path?}}{{!
   }}{{enum:name}}){{/type:enum}}{{!

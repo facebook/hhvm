@@ -677,7 +677,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_service::StreamByIdStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }
@@ -747,7 +747,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_service::StreamByIdWithExceptionStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }
@@ -817,7 +817,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_service::StreamByIdWithResponseStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }

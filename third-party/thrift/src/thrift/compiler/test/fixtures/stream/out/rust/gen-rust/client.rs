@@ -106,7 +106,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ReturnstreamStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }
@@ -176,7 +176,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::StreamthrowsStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }
@@ -246,7 +246,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ServicethrowsStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }
@@ -316,7 +316,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::Servicethrows2StreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }
@@ -386,7 +386,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::BoththrowsStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }
@@ -456,7 +456,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }
@@ -526,7 +526,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }
@@ -596,7 +596,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }
@@ -668,7 +668,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }

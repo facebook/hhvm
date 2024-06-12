@@ -194,7 +194,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_interaction::TruthifyStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }
@@ -698,7 +698,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_interaction_fast::TruthifyStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }
@@ -1558,7 +1558,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_service::SerializeStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }

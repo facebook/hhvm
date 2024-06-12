@@ -148,7 +148,7 @@ where
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::c::NumbersStreamError::ApplicationException(aexn)))
                                     }
                                 }
-                            }).await?
+                            }).await.map_err(::anyhow::Error::from)??
                         }
                     }
                 }

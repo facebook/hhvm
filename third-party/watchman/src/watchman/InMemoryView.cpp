@@ -965,7 +965,15 @@ void InMemoryView::stopThreads() {
   logf(DBG, "signalThreads! {} {}\n", fmt::ptr(this), rootPath_);
   stopThreads_.store(true, std::memory_order_release);
   watcher_->stopThreads();
-  pendingFromWatcher_.lock()->ping();
+  {
+    auto pending = pendingFromWatcher_.lock();
+    // we need this to make sure that watch does not hang
+    for (auto& sync : pending->stealSyncs()) {
+      sync.setException(std::runtime_error("Watch shutting down because"));
+    }
+    pending->startRefusingSyncs();
+    pending->ping();
+  }
 }
 
 void InMemoryView::wakeThreads() {

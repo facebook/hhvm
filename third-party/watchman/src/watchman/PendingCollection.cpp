@@ -92,7 +92,15 @@ void PendingChanges::add(
   return add(dir->getFullPathToChild(name), now, flags);
 }
 
+void PendingChanges::startRefusingSyncs() {
+  refuseSyncs_ = true;
+}
+
 void PendingChanges::addSync(folly::Promise<folly::Unit> promise) {
+  if (refuseSyncs_) {
+    promise.setException(std::runtime_error("Watch is shutting down"));
+    return;
+  }
   syncs_.push_back(std::move(promise));
 }
 

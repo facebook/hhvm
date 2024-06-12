@@ -10,7 +10,6 @@
 type env = {
   root: Path.t;
   from: string;
-  local_config: ServerLocalConfig.t;
   autostart: bool;
   force_dormant_start: bool;
   deadline: float option;

@@ -22,7 +22,6 @@ let log ?tracker ?connection_log_id s =
 type env = {
   root: Path.t;
   from: string;
-  local_config: ServerLocalConfig.t;
   autostart: bool;
   force_dormant_start: bool;
   deadline: float option;
@@ -235,18 +234,44 @@ let describe_mismatch (mismatch_info : MonitorUtils.build_mismatch_info option)
       (String.concat ~sep:" " (Array.to_list Sys.argv))
       Build_id.build_revision
 
-let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
-    conn Lwt.t =
-  env.progress_callback (Some "connecting");
-  check_for_deadline env.progress_callback env.deadline;
+let rec connect
+    ?(allow_macos_hack = true)
+    ({
+       root;
+       from;
+       autostart;
+       force_dormant_start;
+       deadline;
+       no_load;
+       preexisting_warnings;
+       watchman_debug_logging;
+       log_inference_constraints;
+       progress_callback;
+       do_post_handoff_handshake;
+       ignore_hh_version;
+       save_64bit;
+       save_human_readable_64bit_dep_map;
+       saved_state_ignore_hhconfig;
+       mini_state;
+       use_priority_pipe;
+       prechecked;
+       config;
+       custom_hhi_path;
+       custom_telemetry_data;
+       allow_non_opt_build;
+     } as env :
+      env)
+    (start_time : float) : conn Lwt.t =
+  progress_callback (Some "connecting");
+  check_for_deadline progress_callback deadline;
   let handoff_options =
     {
-      MonitorRpc.force_dormant_start = env.force_dormant_start;
+      MonitorRpc.force_dormant_start;
       pipe_name =
         MonitorRpc.pipe_type_to_string
-          (if env.force_dormant_start then
+          (if force_dormant_start then
             MonitorRpc.Force_dormant_start_only
-          else if env.use_priority_pipe then
+          else if use_priority_pipe then
             MonitorRpc.Priority
           else
             MonitorRpc.Default);
@@ -254,7 +279,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
   in
   let tracker = Connection_tracker.create () in
   let connection_log_id = Connection_tracker.log_id tracker in
-  (* We'll attempt to connect, with timeout up to [env.deadline]. Effectively, the
+  (* We'll attempt to connect, with timeout up to [deadline]. Effectively, the
      unix process list will be where we store our (unbounded) queue of incoming client requests,
      each of them waiting for the monitor's incoming socket to become available; if there's a backlog
      in the monitor->server pipe and the monitor's incoming queue is full, then the monitor's incoming
@@ -268,7 +293,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
      if it were shorter, then the monitor's incoming queue would be entirely full of requests that
      were all stale by the time it got to handle them. *)
   let timeout =
-    match env.deadline with
+    match deadline with
     | None -> 60
     | Some deadline ->
       Int.max 1 (int_of_float (deadline -. Unix.gettimeofday ()))
@@ -277,7 +302,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
     ~connection_log_id
     "ClientConnect.connect: attempting MonitorConnection.connect_once (%ds)"
     timeout;
-  let terminate_monitor_on_version_mismatch = env.autostart in
+  let terminate_monitor_on_version_mismatch = autostart in
   (* We've put our money where our mouth is -- only ask the monitor to terminate
      if we're prepared to start it again afterwards! *)
   let conn =
@@ -285,7 +310,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
       ~tracker
       ~timeout
       ~terminate_monitor_on_version_mismatch
-      env.root
+      root
       handoff_options
   in
 
@@ -296,14 +321,14 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
       ~connection_log_id
       "ClientConnect.connect: successfully connected to monitor.";
     let%lwt () =
-      if env.do_post_handoff_handshake then
+      if do_post_handoff_handshake then
         wait_for_server_hello
           connection_log_id
           ic
-          env.deadline
+          deadline
           server_specific_files
-          env.progress_callback
-          env.root
+          progress_callback
+          root
       else
         Lwt.return_unit
     in
@@ -334,7 +359,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
         is simply to have the client re-establish a connection.
       *)
       (* must hide the spinner prior to printing output or exiting *)
-      env.progress_callback None;
+      progress_callback None;
       Printf.eprintf
         "Server connection took over %.1f seconds. Refreshing...\n"
         threshold;
@@ -346,7 +371,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
       (* allow_macos_hack:false is a defensive measure against infinite connection loops *)
       connect ~allow_macos_hack:false env start_time
     ) else (
-      env.progress_callback (Some "connected");
+      progress_callback (Some "connected");
       Lwt.return
         {
           connection_log_id = Connection_tracker.log_id tracker;
@@ -356,15 +381,15 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
           (* placeholder, until we actually send it *)
           channels = (ic, oc);
           server_specific_files;
-          conn_progress_callback = env.progress_callback;
-          conn_root = env.root;
-          conn_deadline = env.deadline;
-          from = env.from;
+          conn_progress_callback = progress_callback;
+          conn_root = root;
+          conn_deadline = deadline;
+          from;
         }
     )
   | Error e ->
     (* must hide the spinner prior to printing output or exiting *)
-    env.progress_callback None;
+    progress_callback None;
     (match e with
     | MonitorUtils.Server_died
     | MonitorUtils.(Connect_to_monitor_failure { server_exists = true; _ }) ->
@@ -372,35 +397,8 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
       Unix.sleepf 0.1;
       connect env start_time
     | MonitorUtils.(Connect_to_monitor_failure { server_exists = false; _ }) ->
-      log ~tracker "connect: autostart=%b" env.autostart;
-      if env.autostart then (
-        let {
-          root;
-          from;
-          local_config = _;
-          autostart = _;
-          force_dormant_start = _;
-          deadline = _;
-          no_load;
-          watchman_debug_logging;
-          log_inference_constraints;
-          progress_callback = _;
-          do_post_handoff_handshake = _;
-          ignore_hh_version;
-          save_64bit;
-          save_human_readable_64bit_dep_map;
-          saved_state_ignore_hhconfig;
-          use_priority_pipe = _;
-          prechecked;
-          mini_state;
-          config;
-          custom_hhi_path;
-          custom_telemetry_data;
-          allow_non_opt_build;
-          preexisting_warnings;
-        } =
-          env
-        in
+      log ~tracker "connect: autostart=%b" autostart;
+      if autostart then (
         HackEventLogger.client_connect_autostart ();
         ClientStart.(
           start_server
@@ -454,13 +452,13 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
       Printf.eprintf
         "hh_server's version doesn't match the client's, so it will exit.\n%s"
         (describe_mismatch mismatch_info_opt);
-      if env.autostart then begin
+      if autostart then begin
         (* The new server is definitely not running yet, adjust the
          * start time and deadline to absorb the server startup time.
          *)
         let now = Unix.time () in
         let deadline =
-          Option.map ~f:(fun d -> d +. (now -. start_time)) env.deadline
+          Option.map ~f:(fun d -> d +. (now -. start_time)) deadline
         in
         Printf.eprintf "Going to launch a new one.\n%!";
         connect { env with deadline } now

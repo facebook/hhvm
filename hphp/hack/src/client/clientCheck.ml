@@ -15,9 +15,6 @@ open Ocaml_overrides
 module SyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 
-(** This is initialized at the start of [main] *)
-let ref_local_config : ServerLocalConfig.t option ref = ref None
-
 module SaveStateResultPrinter = ClientResultPrinter.Make (struct
   type t = SaveStateServiceTypes.save_state_result
 
@@ -134,13 +131,11 @@ let connect ?(use_priority_pipe = false) args : ClientConnect.conn Lwt.t =
   } =
     args
   in
-  let local_config = Option.value_exn !ref_local_config in
   ClientConnect.(
     connect
       {
         root;
         from;
-        local_config;
         autostart;
         force_dormant_start;
         deadline;
@@ -967,11 +962,8 @@ let main
     (args : client_check_env)
     (local_config : ServerLocalConfig.t)
     ~(init_proc_stack : string list option) : 'a =
-  ref_local_config := Some local_config;
-  (* That's a hack, just to avoid having to pass local_config into loads of callsites
-     in this module. *)
-  let mode_s = ClientEnv.Variants_of_client_mode.to_name args.mode in
-  HackEventLogger.client_set_mode mode_s;
+  HackEventLogger.client_set_mode
+    (ClientEnv.Variants_of_client_mode.to_name args.mode);
 
   HackEventLogger.client_check_start ();
   ClientSpinner.start_heartbeat_telemetry ();

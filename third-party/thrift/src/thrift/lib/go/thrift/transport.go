@@ -47,13 +47,6 @@ type ReadSizeProvider interface {
 	RemainingBytes() (numBytes uint64)
 }
 
-// Transport is an encapsulation of the I/O layer
-type Transport interface {
-	io.ReadWriteCloser
-	Flusher
-	ReadSizeProvider
-}
-
 type stringWriter interface {
 	WriteString(s string) (n int, err error)
 }

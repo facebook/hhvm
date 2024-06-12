@@ -872,6 +872,30 @@ struct DebugGetBlobMetadataResponse {
   1: list<BlobMetadataWithOrigin> metadatas;
 }
 
+struct DebugGetScmTreeRequest {
+  1: MountId mountId;
+  # id of the blob we would like to fetch SCM tree for
+  2: ThriftObjectId id;
+  # where we should fetch the blob SCM tree from
+  3: DataFetchOriginSet origins; # DataFetchOrigin
+}
+
+union ScmTreeOrError {
+  1: list<ScmTreeEntry> treeEntries;
+  2: EdenError error;
+}
+
+struct ScmTreeWithOrigin {
+  # the SCM tree data
+  1: ScmTreeOrError scmTreeData;
+  # where the SCM tree was fetched from
+  2: DataFetchOrigin origin;
+}
+
+struct DebugGetScmTreeResponse {
+  1: list<ScmTreeWithOrigin> trees;
+}
+
 struct ActivityRecorderResult {
   // 0 if the operation has failed. For example,
   // fail to start recording due to file permission issue
@@ -2082,6 +2106,9 @@ service EdenService extends fb303_core.BaseService {
   //////// Debugging APIs ////////
 
   /**
+   * DEPRECATED: Use debugGetTree().
+   * TODO: remove this API after 07/01/2024
+   *
    * Get the contents of a source control Tree.
    *
    * This can be used to confirm if eden's LocalStore contains information
@@ -2096,6 +2123,10 @@ service EdenService extends fb303_core.BaseService {
     1: PathString mountPoint,
     2: ThriftObjectId id,
     3: bool localStoreOnly,
+  ) throws (1: EdenError ex);
+
+  DebugGetScmTreeResponse debugGetTree(
+    1: DebugGetScmTreeRequest request,
   ) throws (1: EdenError ex);
 
   /**

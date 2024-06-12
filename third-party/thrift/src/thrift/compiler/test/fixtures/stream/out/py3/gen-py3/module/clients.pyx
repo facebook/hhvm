@@ -53,6 +53,7 @@ cimport module.types as _module_types
 import module.types as _module_types
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 
+import module.services_reflection as _services_reflection
 cimport module.services_reflection as _services_reflection
 
 from module.clients_wrapper cimport cPubSubStreamingServiceAsyncClient, cPubSubStreamingServiceClientWrapper

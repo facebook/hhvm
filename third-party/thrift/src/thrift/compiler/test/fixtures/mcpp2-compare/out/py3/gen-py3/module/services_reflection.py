@@ -5,36 +5,40 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  MethodSpec as __MethodSpec,
+from thrift.py3.reflection import (
   ArgumentSpec as __ArgumentSpec,
+  InterfaceSpec as __InterfaceSpec,
+  MethodSpec as __MethodSpec,
   NumberType as __NumberType,
 )
 
 import folly.iobuf as _fbthrift_iobuf
 
-cimport includes.types as _includes_types
+import includes.types as _includes_types
 
-cimport module.types as _module_types
+import module.types as _module_types
 
 
-cdef __InterfaceSpec get_reflection__EmptyService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__EmptyService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="EmptyService",
+        methods=None,
         annotations={
         },
     )
     return spec
 
 
-cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__ReturnService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="ReturnService",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="noReturn",
             arguments=(
             ),
@@ -47,7 +51,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="boolReturn",
             arguments=(
             ),
@@ -60,7 +65,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="i16Return",
             arguments=(
             ),
@@ -73,7 +79,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="i32Return",
             arguments=(
             ),
@@ -86,7 +93,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="i64Return",
             arguments=(
             ),
@@ -99,7 +107,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="floatReturn",
             arguments=(
             ),
@@ -112,7 +121,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="doubleReturn",
             arguments=(
             ),
@@ -125,7 +135,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="stringReturn",
             arguments=(
             ),
@@ -138,7 +149,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="binaryReturn",
             arguments=(
             ),
@@ -151,7 +163,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="mapReturn",
             arguments=(
             ),
@@ -164,7 +177,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="simpleTypedefReturn",
             arguments=(
             ),
@@ -177,7 +191,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="complexTypedefReturn",
             arguments=(
             ),
@@ -190,7 +205,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="list_mostComplexTypedefReturn",
             arguments=(
             ),
@@ -203,7 +219,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="enumReturn",
             arguments=(
             ),
@@ -216,7 +233,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="list_EnumReturn",
             arguments=(
             ),
@@ -229,7 +247,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="structReturn",
             arguments=(
             ),
@@ -242,7 +261,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="set_StructReturn",
             arguments=(
             ),
@@ -255,7 +275,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="unionReturn",
             arguments=(
             ),
@@ -268,7 +289,8 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="list_UnionReturn",
             arguments=(
             ),
@@ -281,10 +303,12 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="readDataEb",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="size",
                     type=int,
                     kind=__NumberType.I64,
@@ -301,10 +325,12 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="readData",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="size",
                     type=int,
                     kind=__NumberType.I64,
@@ -323,17 +349,20 @@ cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients):
     return spec
 
 
-cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__ParamService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="ParamService",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="void_ret_i16_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=int,
                     kind=__NumberType.I16,
@@ -350,17 +379,20 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="void_ret_byte_i16_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=int,
                     kind=__NumberType.BYTE,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param2",
                     type=int,
                     kind=__NumberType.I16,
@@ -377,10 +409,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="void_ret_map_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=_module_types.Map__string_i64,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -397,17 +431,20 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="void_ret_map_setlist_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=_module_types.Map__string_i64,
                     kind=__NumberType.NOT_A_NUMBER,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param2",
                     type=_module_types.Set__List__string,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -424,10 +461,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="void_ret_map_typedef_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=int,
                     kind=__NumberType.I32,
@@ -444,10 +483,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="void_ret_enum_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=_module_types.MyEnumA,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -464,10 +505,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="void_ret_struct_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=_module_types.MyStruct,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -484,10 +527,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="void_ret_listunion_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=_module_types.List__ComplexUnion,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -504,17 +549,20 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="bool_ret_i32_i64_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=int,
                     kind=__NumberType.I32,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param2",
                     type=int,
                     kind=__NumberType.I64,
@@ -531,10 +579,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="bool_ret_map_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=_module_types.Map__string_i64,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -551,10 +601,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="bool_ret_union_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=_module_types.ComplexUnion,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -571,17 +623,20 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="i64_ret_float_double_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=float,
                     kind=__NumberType.FLOAT,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param2",
                     type=float,
                     kind=__NumberType.DOUBLE,
@@ -598,17 +653,20 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="i64_ret_string_typedef_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=str,
                     kind=__NumberType.NOT_A_NUMBER,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param2",
                     type=_module_types.Set__List__List__Map__Empty_MyStruct,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -625,38 +683,44 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="i64_ret_i32_i32_i32_i32_i32_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=int,
                     kind=__NumberType.I32,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param2",
                     type=int,
                     kind=__NumberType.I32,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param3",
                     type=int,
                     kind=__NumberType.I32,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param4",
                     type=int,
                     kind=__NumberType.I32,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param5",
                     type=int,
                     kind=__NumberType.I32,
@@ -673,10 +737,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="double_ret_setstruct_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=_module_types.Set__MyStruct,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -693,10 +759,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="string_ret_string_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=str,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -713,10 +781,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="binary_ret_binary_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=bytes,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -733,10 +803,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="map_ret_bool_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=bool,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -753,17 +825,20 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="list_ret_map_setlist_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=_module_types.Map__i32_List__string,
                     kind=__NumberType.NOT_A_NUMBER,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param2",
                     type=_module_types.List__string,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -780,10 +855,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="mapsetlistmapliststring_ret_listlistlist_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=_module_types.List__List__List__List__i32,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -800,10 +877,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="typedef_ret_i32_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=int,
                     kind=__NumberType.I32,
@@ -820,10 +899,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="listtypedef_ret_typedef_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=_module_types.List__Map__Empty_MyStruct,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -840,10 +921,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="enum_ret_double_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=float,
                     kind=__NumberType.DOUBLE,
@@ -860,17 +943,20 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="enum_ret_double_enum_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=float,
                     kind=__NumberType.DOUBLE,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param2",
                     type=_module_types.MyEnumA,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -887,10 +973,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="listenum_ret_map_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=_module_types.Map__string_i64,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -907,10 +995,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="struct_ret_i16_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=int,
                     kind=__NumberType.I16,
@@ -927,10 +1017,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="setstruct_ret_set_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=_module_types.Set__string,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -947,17 +1039,20 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="union_ret_i32_i32_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=int,
                     kind=__NumberType.I32,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param2",
                     type=int,
                     kind=__NumberType.I32,
@@ -974,10 +1069,12 @@ cdef __InterfaceSpec get_reflection__ParamService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="listunion_string_param",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="param1",
                     type=str,
                     kind=__NumberType.NOT_A_NUMBER,

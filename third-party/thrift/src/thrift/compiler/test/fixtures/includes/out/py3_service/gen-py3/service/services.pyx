@@ -62,6 +62,7 @@ cimport module.types as _module_types
 import transitive.types as _transitive_types
 cimport transitive.types as _transitive_types
 
+import service.services_reflection as _services_reflection
 cimport service.services_reflection as _services_reflection
 
 import asyncio

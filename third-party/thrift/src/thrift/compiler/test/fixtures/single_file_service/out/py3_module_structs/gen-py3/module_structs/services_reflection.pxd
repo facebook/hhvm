@@ -5,7 +5,3 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  InterfaceSpec as __InterfaceSpec,
-)
-

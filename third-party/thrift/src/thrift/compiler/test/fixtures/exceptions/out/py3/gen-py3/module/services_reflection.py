@@ -5,26 +5,29 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  MethodSpec as __MethodSpec,
+from thrift.py3.reflection import (
   ArgumentSpec as __ArgumentSpec,
+  InterfaceSpec as __InterfaceSpec,
+  MethodSpec as __MethodSpec,
   NumberType as __NumberType,
 )
 
 import folly.iobuf as _fbthrift_iobuf
 
 
-cimport module.types as _module_types
+import module.types as _module_types
 
 
-cdef __InterfaceSpec get_reflection__Raiser(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__Raiser(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="Raiser",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="doBland",
             arguments=(
             ),
@@ -37,7 +40,8 @@ cdef __InterfaceSpec get_reflection__Raiser(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="doRaise",
             arguments=(
             ),
@@ -53,7 +57,8 @@ cdef __InterfaceSpec get_reflection__Raiser(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="get200",
             arguments=(
             ),
@@ -66,7 +71,8 @@ cdef __InterfaceSpec get_reflection__Raiser(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="get500",
             arguments=(
             ),

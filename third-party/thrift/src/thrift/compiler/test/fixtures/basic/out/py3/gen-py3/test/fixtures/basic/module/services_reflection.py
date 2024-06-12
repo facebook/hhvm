@@ -5,26 +5,29 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  MethodSpec as __MethodSpec,
+from thrift.py3.reflection import (
   ArgumentSpec as __ArgumentSpec,
+  InterfaceSpec as __InterfaceSpec,
+  MethodSpec as __MethodSpec,
   NumberType as __NumberType,
 )
 
 import folly.iobuf as _fbthrift_iobuf
 
 
-cimport test.fixtures.basic.module.types as _test_fixtures_basic_module_types
+import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 
 
-cdef __InterfaceSpec get_reflection__FooService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__FooService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="FooService",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="simple_rpc",
             arguments=(
             ),
@@ -39,17 +42,20 @@ cdef __InterfaceSpec get_reflection__FooService(bint for_clients):
     return spec
 
 
-cdef __InterfaceSpec get_reflection__FB303Service(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__FB303Service(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="FB303Service",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="simple_rpc",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="int_parameter",
                     type=int,
                     kind=__NumberType.I32,
@@ -68,14 +74,16 @@ cdef __InterfaceSpec get_reflection__FB303Service(bint for_clients):
     return spec
 
 
-cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__MyService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="MyService",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="ping",
             arguments=(
             ),
@@ -88,7 +96,8 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="getRandomData",
             arguments=(
             ),
@@ -101,10 +110,12 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="sink",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="sink",
                     type=int,
                     kind=__NumberType.I64,
@@ -121,17 +132,20 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="putDataById",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="id",
                     type=int,
                     kind=__NumberType.I64,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="data",
                     type=str,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -148,10 +162,12 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="hasDataById",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="id",
                     type=int,
                     kind=__NumberType.I64,
@@ -168,10 +184,12 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="getDataById",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="id",
                     type=int,
                     kind=__NumberType.I64,
@@ -188,10 +206,12 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="deleteDataById",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="id",
                     type=int,
                     kind=__NumberType.I64,
@@ -208,17 +228,20 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="lobDataById",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="id",
                     type=int,
                     kind=__NumberType.I64,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="data",
                     type=str,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -235,7 +258,8 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="invalid_return_for_hack",
             arguments=(
             ),
@@ -248,7 +272,8 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="rpc_skipped_codegen",
             arguments=(
             ),
@@ -263,17 +288,20 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
     return spec
 
 
-cdef __InterfaceSpec get_reflection__DbMixedStackArguments(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__DbMixedStackArguments(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="DbMixedStackArguments",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="getDataByKey0",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="key",
                     type=str,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -290,10 +318,12 @@ cdef __InterfaceSpec get_reflection__DbMixedStackArguments(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="getDataByKey1",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="key",
                     type=str,
                     kind=__NumberType.NOT_A_NUMBER,

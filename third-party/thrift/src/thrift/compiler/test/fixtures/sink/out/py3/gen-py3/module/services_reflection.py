@@ -5,21 +5,23 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  MethodSpec as __MethodSpec,
+from thrift.py3.reflection import (
   ArgumentSpec as __ArgumentSpec,
+  InterfaceSpec as __InterfaceSpec,
+  MethodSpec as __MethodSpec,
   NumberType as __NumberType,
 )
 
 import folly.iobuf as _fbthrift_iobuf
 
 
-cimport module.types as _module_types
+import module.types as _module_types
 
 
-cdef __InterfaceSpec get_reflection__SinkService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__SinkService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="SinkService",
+        methods=None,
         annotations={
         },
     )

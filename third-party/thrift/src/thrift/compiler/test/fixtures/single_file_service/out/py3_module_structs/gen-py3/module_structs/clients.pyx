@@ -52,6 +52,7 @@ from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_
 cimport module_structs.types as _module_structs_types
 import module_structs.types as _module_structs_types
 
+import module_structs.services_reflection as _services_reflection
 cimport module_structs.services_reflection as _services_reflection
 
 

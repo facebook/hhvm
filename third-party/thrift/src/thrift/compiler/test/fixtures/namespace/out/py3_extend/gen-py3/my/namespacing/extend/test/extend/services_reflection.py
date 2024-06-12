@@ -5,30 +5,34 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  MethodSpec as __MethodSpec,
+from thrift.py3.reflection import (
   ArgumentSpec as __ArgumentSpec,
+  InterfaceSpec as __InterfaceSpec,
+  MethodSpec as __MethodSpec,
   NumberType as __NumberType,
 )
 
 import folly.iobuf as _fbthrift_iobuf
 
-cimport my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
+import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 
-cimport my.namespacing.extend.test.extend.types as _my_namespacing_extend_test_extend_types
+import my.namespacing.extend.test.extend.types as _my_namespacing_extend_test_extend_types
 
 
-cdef __InterfaceSpec get_reflection__ExtendTestService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__ExtendTestService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="ExtendTestService",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="check",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="struct1",
                     type=_my_namespacing_test_hsmodule_types.HsFoo,
                     kind=__NumberType.NOT_A_NUMBER,

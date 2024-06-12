@@ -52,6 +52,7 @@ from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_
 cimport test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 
+import test.fixtures.basic.module.services_reflection as _services_reflection
 cimport test.fixtures.basic.module.services_reflection as _services_reflection
 
 from test.fixtures.basic.module.clients_wrapper cimport cFooServiceAsyncClient, cFooServiceClientWrapper

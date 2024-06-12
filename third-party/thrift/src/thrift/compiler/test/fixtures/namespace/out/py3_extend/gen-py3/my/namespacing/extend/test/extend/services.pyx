@@ -60,6 +60,7 @@ import my.namespacing.test.hsmodule.services as _my_namespacing_test_hsmodule_se
 import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 cimport my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 
+import my.namespacing.extend.test.extend.services_reflection as _services_reflection
 cimport my.namespacing.extend.test.extend.services_reflection as _services_reflection
 
 import asyncio

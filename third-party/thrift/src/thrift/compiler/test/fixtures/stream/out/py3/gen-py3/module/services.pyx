@@ -58,6 +58,7 @@ from thrift.py3.stream cimport cServerStream, cServerStreamPublisher, cResponseA
 cimport module.types as _module_types
 import module.types as _module_types
 
+import module.services_reflection as _services_reflection
 cimport module.services_reflection as _services_reflection
 
 import asyncio

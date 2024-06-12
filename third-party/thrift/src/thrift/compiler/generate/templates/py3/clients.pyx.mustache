@@ -84,6 +84,7 @@ import {{#includeNamespace}}{{value}}.{{/includeNamespace}}clients as _{{#includ
 {{/hasServices?}}
 {{/program:includeNamespaces}}
 
+import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.services_reflection as _services_reflection
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.services_reflection as _services_reflection
 
 {{#program:services}}

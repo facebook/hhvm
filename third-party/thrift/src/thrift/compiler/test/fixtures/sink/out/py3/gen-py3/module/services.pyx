@@ -56,6 +56,7 @@ from folly.memory cimport to_shared_ptr as __to_shared_ptr
 cimport module.types as _module_types
 import module.types as _module_types
 
+import module.services_reflection as _services_reflection
 cimport module.services_reflection as _services_reflection
 
 import asyncio

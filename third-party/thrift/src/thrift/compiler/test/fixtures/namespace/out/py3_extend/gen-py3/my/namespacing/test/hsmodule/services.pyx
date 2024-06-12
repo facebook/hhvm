@@ -56,6 +56,7 @@ from folly.memory cimport to_shared_ptr as __to_shared_ptr
 cimport my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 
+import my.namespacing.test.hsmodule.services_reflection as _services_reflection
 cimport my.namespacing.test.hsmodule.services_reflection as _services_reflection
 
 import asyncio

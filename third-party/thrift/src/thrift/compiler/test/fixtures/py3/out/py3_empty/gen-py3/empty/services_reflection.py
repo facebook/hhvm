@@ -5,21 +5,23 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  MethodSpec as __MethodSpec,
+from thrift.py3.reflection import (
   ArgumentSpec as __ArgumentSpec,
+  InterfaceSpec as __InterfaceSpec,
+  MethodSpec as __MethodSpec,
   NumberType as __NumberType,
 )
 
 import folly.iobuf as _fbthrift_iobuf
 
 
-cimport empty.types as _empty_types
+import empty.types as _empty_types
 
 
-cdef __InterfaceSpec get_reflection__NullService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__NullService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="NullService",
+        methods=None,
         annotations={
         },
     )

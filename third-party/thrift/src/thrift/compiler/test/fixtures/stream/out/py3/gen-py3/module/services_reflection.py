@@ -5,36 +5,41 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  MethodSpec as __MethodSpec,
+from thrift.py3.reflection import (
   ArgumentSpec as __ArgumentSpec,
+  InterfaceSpec as __InterfaceSpec,
+  MethodSpec as __MethodSpec,
   NumberType as __NumberType,
 )
 
 import folly.iobuf as _fbthrift_iobuf
 
 
-cimport module.types as _module_types
+import module.types as _module_types
 
 
-cdef __InterfaceSpec get_reflection__PubSubStreamingService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__PubSubStreamingService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="PubSubStreamingService",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="returnstream",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="i32_from",
                     type=int,
                     kind=__NumberType.I32,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="i32_to",
                     type=int,
                     kind=__NumberType.I32,
@@ -51,10 +56,12 @@ cdef __InterfaceSpec get_reflection__PubSubStreamingService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="streamthrows",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="foo",
                     type=int,
                     kind=__NumberType.I32,
@@ -71,10 +78,12 @@ cdef __InterfaceSpec get_reflection__PubSubStreamingService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="servicethrows",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="foo",
                     type=int,
                     kind=__NumberType.I32,
@@ -92,10 +101,12 @@ cdef __InterfaceSpec get_reflection__PubSubStreamingService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="servicethrows2",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="foo",
                     type=int,
                     kind=__NumberType.I32,
@@ -114,10 +125,12 @@ cdef __InterfaceSpec get_reflection__PubSubStreamingService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="boththrows",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="foo",
                     type=int,
                     kind=__NumberType.I32,
@@ -135,10 +148,12 @@ cdef __InterfaceSpec get_reflection__PubSubStreamingService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="responseandstreamstreamthrows",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="foo",
                     type=int,
                     kind=__NumberType.I32,
@@ -155,10 +170,12 @@ cdef __InterfaceSpec get_reflection__PubSubStreamingService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="responseandstreamservicethrows",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="foo",
                     type=int,
                     kind=__NumberType.I32,
@@ -176,10 +193,12 @@ cdef __InterfaceSpec get_reflection__PubSubStreamingService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="responseandstreamboththrows",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="foo",
                     type=int,
                     kind=__NumberType.I32,
@@ -197,17 +216,20 @@ cdef __InterfaceSpec get_reflection__PubSubStreamingService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="returnstreamFast",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="i32_from",
                     type=int,
                     kind=__NumberType.I32,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="i32_to",
                     type=int,
                     kind=__NumberType.I32,

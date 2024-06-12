@@ -58,6 +58,7 @@ import apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_type
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 
+import apache.thrift.fixtures.types.module.services_reflection as _services_reflection
 cimport apache.thrift.fixtures.types.module.services_reflection as _services_reflection
 
 import asyncio

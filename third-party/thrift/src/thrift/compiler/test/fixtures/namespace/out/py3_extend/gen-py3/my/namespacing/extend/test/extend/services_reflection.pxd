@@ -5,12 +5,6 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  InterfaceSpec as __InterfaceSpec,
-)
-
-
-cdef __InterfaceSpec get_reflection__ExtendTestService(bint for_clients)
 
 cdef extern from "thrift/compiler/test/fixtures/namespace/gen-cpp2/extend_handlers.h" namespace "::cpp2":
     cdef cppclass cExtendTestServiceSvIf "::cpp2::ExtendTestServiceSvIf":

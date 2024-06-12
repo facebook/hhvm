@@ -52,6 +52,7 @@ from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_
 cimport module.types as _module_types
 import module.types as _module_types
 
+import module.services_reflection as _services_reflection
 cimport module.services_reflection as _services_reflection
 
 from module.clients_wrapper cimport cSimpleServiceAsyncClient, cSimpleServiceClientWrapper

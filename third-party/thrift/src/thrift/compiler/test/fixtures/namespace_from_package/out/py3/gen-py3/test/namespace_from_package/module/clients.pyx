@@ -52,6 +52,7 @@ from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_
 cimport test.namespace_from_package.module.types as _test_namespace_from_package_module_types
 import test.namespace_from_package.module.types as _test_namespace_from_package_module_types
 
+import test.namespace_from_package.module.services_reflection as _services_reflection
 cimport test.namespace_from_package.module.services_reflection as _services_reflection
 
 from test.namespace_from_package.module.clients_wrapper cimport cTestServiceAsyncClient, cTestServiceClientWrapper

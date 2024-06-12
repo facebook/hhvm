@@ -5,12 +5,6 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  InterfaceSpec as __InterfaceSpec,
-)
-
-
-cdef __InterfaceSpec get_reflection__MyService(bint for_clients)
 
 cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/service_handlers.h" namespace "::cpp2":
     cdef cppclass cMyServiceSvIf "::cpp2::MyServiceSvIf":

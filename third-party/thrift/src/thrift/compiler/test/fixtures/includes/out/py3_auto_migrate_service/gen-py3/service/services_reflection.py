@@ -5,39 +5,44 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  MethodSpec as __MethodSpec,
+from thrift.py3.reflection import (
   ArgumentSpec as __ArgumentSpec,
+  InterfaceSpec as __InterfaceSpec,
+  MethodSpec as __MethodSpec,
   NumberType as __NumberType,
 )
 
 import folly.iobuf as _fbthrift_iobuf
 
-cimport includes.types as _includes_types
-cimport module.types as _module_types
-cimport transitive.types as _transitive_types
+import includes.types as _includes_types
+import module.types as _module_types
+import transitive.types as _transitive_types
 
-cimport service.types as _service_types
+import service.types as _service_types
 
 
-cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__MyService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="MyService",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="query",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="s",
                     type=_module_types.MyStruct,
                     kind=__NumberType.NOT_A_NUMBER,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="i",
                     type=_includes_types.Included,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -54,17 +59,20 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="has_arg_docs",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="s",
                     type=_module_types.MyStruct,
                     kind=__NumberType.NOT_A_NUMBER,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="i",
                     type=_includes_types.Included,
                     kind=__NumberType.NOT_A_NUMBER,

@@ -5,28 +5,31 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  MethodSpec as __MethodSpec,
+from thrift.py3.reflection import (
   ArgumentSpec as __ArgumentSpec,
+  InterfaceSpec as __InterfaceSpec,
+  MethodSpec as __MethodSpec,
   NumberType as __NumberType,
 )
 
 import folly.iobuf as _fbthrift_iobuf
 
-cimport b.types as _b_types
-cimport c.types as _c_types
+import b.types as _b_types
+import c.types as _c_types
 
-cimport s.types as _s_types
+import s.types as _s_types
 
 
-cdef __InterfaceSpec get_reflection__TestService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__TestService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="TestService",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="test",
             arguments=(
             ),

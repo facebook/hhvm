@@ -56,6 +56,7 @@ import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 cimport my.namespacing.test.hsmodule.clients as _my_namespacing_test_hsmodule_clients
 import my.namespacing.test.hsmodule.clients as _my_namespacing_test_hsmodule_clients
 
+import my.namespacing.extend.test.extend.services_reflection as _services_reflection
 cimport my.namespacing.extend.test.extend.services_reflection as _services_reflection
 
 from my.namespacing.extend.test.extend.clients_wrapper cimport cExtendTestServiceAsyncClient, cExtendTestServiceClientWrapper

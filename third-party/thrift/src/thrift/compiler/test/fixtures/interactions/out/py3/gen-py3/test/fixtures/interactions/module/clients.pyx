@@ -53,6 +53,7 @@ cimport test.fixtures.interactions.module.types as _test_fixtures_interactions_m
 import test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 
+import test.fixtures.interactions.module.services_reflection as _services_reflection
 cimport test.fixtures.interactions.module.services_reflection as _services_reflection
 
 from test.fixtures.interactions.module.clients_wrapper cimport cMyServiceAsyncClient, cMyServiceClientWrapper

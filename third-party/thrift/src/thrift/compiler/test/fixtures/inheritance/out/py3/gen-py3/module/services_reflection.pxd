@@ -5,24 +5,14 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  InterfaceSpec as __InterfaceSpec,
-)
-
-
-cdef __InterfaceSpec get_reflection__MyRoot(bint for_clients)
 
 cdef extern from "thrift/compiler/test/fixtures/inheritance/gen-cpp2/module_handlers.h" namespace "::cpp2":
     cdef cppclass cMyRootSvIf "::cpp2::MyRootSvIf":
         pass
 
-cdef __InterfaceSpec get_reflection__MyNode(bint for_clients)
-
 cdef extern from "thrift/compiler/test/fixtures/inheritance/gen-cpp2/module_handlers.h" namespace "::cpp2":
     cdef cppclass cMyNodeSvIf "::cpp2::MyNodeSvIf":
         pass
-
-cdef __InterfaceSpec get_reflection__MyLeaf(bint for_clients)
 
 cdef extern from "thrift/compiler/test/fixtures/inheritance/gen-cpp2/module_handlers.h" namespace "::cpp2":
     cdef cppclass cMyLeafSvIf "::cpp2::MyLeafSvIf":

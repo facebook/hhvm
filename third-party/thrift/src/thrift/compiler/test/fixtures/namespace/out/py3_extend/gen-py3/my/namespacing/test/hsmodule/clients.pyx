@@ -52,6 +52,7 @@ from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_
 cimport my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 
+import my.namespacing.test.hsmodule.services_reflection as _services_reflection
 cimport my.namespacing.test.hsmodule.services_reflection as _services_reflection
 
 from my.namespacing.test.hsmodule.clients_wrapper cimport cHsTestServiceAsyncClient, cHsTestServiceClientWrapper

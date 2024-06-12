@@ -5,12 +5,6 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  InterfaceSpec as __InterfaceSpec,
-)
-
-
-cdef __InterfaceSpec get_reflection__NullService(bint for_clients)
 
 cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_handlers.h" namespace "::cpp2":
     cdef cppclass cNullServiceSvIf "::cpp2::NullServiceSvIf":

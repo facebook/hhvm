@@ -5,26 +5,29 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  MethodSpec as __MethodSpec,
+from thrift.py3.reflection import (
   ArgumentSpec as __ArgumentSpec,
+  InterfaceSpec as __InterfaceSpec,
+  MethodSpec as __MethodSpec,
   NumberType as __NumberType,
 )
 
 import folly.iobuf as _fbthrift_iobuf
 
 
-cimport module.types as _module_types
+import module.types as _module_types
 
 
-cdef __InterfaceSpec get_reflection__A(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__A(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="A",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="foo",
             arguments=(
             ),
@@ -39,17 +42,20 @@ cdef __InterfaceSpec get_reflection__A(bint for_clients):
     return spec
 
 
-cdef __InterfaceSpec get_reflection__B(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__B(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="B",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="bar",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="foo",
                     type=_module_types.Foo,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -66,7 +72,8 @@ cdef __InterfaceSpec get_reflection__B(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="stream_stuff",
             arguments=(
             ),
@@ -81,9 +88,10 @@ cdef __InterfaceSpec get_reflection__B(bint for_clients):
     return spec
 
 
-cdef __InterfaceSpec get_reflection__C(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__C(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="C",
+        methods=None,
         annotations={
         },
     )

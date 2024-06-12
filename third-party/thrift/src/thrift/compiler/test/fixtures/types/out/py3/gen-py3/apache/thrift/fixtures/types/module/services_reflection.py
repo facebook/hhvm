@@ -5,30 +5,34 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  MethodSpec as __MethodSpec,
+from thrift.py3.reflection import (
   ArgumentSpec as __ArgumentSpec,
+  InterfaceSpec as __InterfaceSpec,
+  MethodSpec as __MethodSpec,
   NumberType as __NumberType,
 )
 
 import folly.iobuf as _fbthrift_iobuf
 
-cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
+import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 
-cimport apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
+import apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
 
 
-cdef __InterfaceSpec get_reflection__SomeService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__SomeService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="SomeService",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="bounce_map",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="m",
                     type=_apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -45,10 +49,12 @@ cdef __InterfaceSpec get_reflection__SomeService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="binary_keyed_map",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="r",
                     type=_apache_thrift_fixtures_types_module_types.List__i64,
                     kind=__NumberType.NOT_A_NUMBER,

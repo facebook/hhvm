@@ -21,13 +21,7 @@ Reflection functions for clients and services
 }}
 {{> common/auto_generated_py}}
 
-from thrift.py3.reflection cimport (
-  InterfaceSpec as __InterfaceSpec,
-)
-
 {{#program:services}}
-
-cdef __InterfaceSpec get_reflection__{{service:name}}(bint for_clients)
 
 cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_handlers.h"{{!
     }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":

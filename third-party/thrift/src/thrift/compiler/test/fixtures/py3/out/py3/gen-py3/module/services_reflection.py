@@ -5,26 +5,29 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  MethodSpec as __MethodSpec,
+from thrift.py3.reflection import (
   ArgumentSpec as __ArgumentSpec,
+  InterfaceSpec as __InterfaceSpec,
+  MethodSpec as __MethodSpec,
   NumberType as __NumberType,
 )
 
 import folly.iobuf as _fbthrift_iobuf
 
 
-cimport module.types as _module_types
+import module.types as _module_types
 
 
-cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__SimpleService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="SimpleService",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="get_five",
             arguments=(
             ),
@@ -37,10 +40,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="add_five",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="num",
                     type=int,
                     kind=__NumberType.I32,
@@ -57,7 +62,8 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="do_nothing",
             arguments=(
             ),
@@ -70,17 +76,20 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="concat",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="first",
                     type=str,
                     kind=__NumberType.NOT_A_NUMBER,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="second",
                     type=str,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -97,10 +106,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="get_value",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="simple_struct",
                     type=_module_types.SimpleStruct,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -117,10 +128,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="negate",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="input",
                     type=bool,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -137,10 +150,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="tiny",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="input",
                     type=int,
                     kind=__NumberType.BYTE,
@@ -157,10 +172,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="small",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="input",
                     type=int,
                     kind=__NumberType.I16,
@@ -177,10 +194,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="big",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="input",
                     type=int,
                     kind=__NumberType.I64,
@@ -197,10 +216,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="two",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="input",
                     type=float,
                     kind=__NumberType.DOUBLE,
@@ -217,7 +238,8 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="expected_exception",
             arguments=(
             ),
@@ -231,7 +253,8 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="unexpected_exception",
             arguments=(
             ),
@@ -244,10 +267,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="sum_i16_list",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="numbers",
                     type=_module_types.List__i16,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -264,10 +289,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="sum_i32_list",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="numbers",
                     type=_module_types.List__i32,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -284,10 +311,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="sum_i64_list",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="numbers",
                     type=_module_types.List__i64,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -304,10 +333,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="concat_many",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="words",
                     type=_module_types.List__string,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -324,10 +355,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="count_structs",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="items",
                     type=_module_types.List__SimpleStruct,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -344,10 +377,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="sum_set",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="numbers",
                     type=_module_types.Set__i32,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -364,17 +399,20 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="contains_word",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="words",
                     type=_module_types.Set__string,
                     kind=__NumberType.NOT_A_NUMBER,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="word",
                     type=str,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -391,17 +429,20 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="get_map_value",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="words",
                     type=_module_types.Map__string_string,
                     kind=__NumberType.NOT_A_NUMBER,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="key",
                     type=str,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -418,10 +459,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="map_length",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="items",
                     type=_module_types.Map__string_SimpleStruct,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -438,10 +481,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="sum_map_values",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="items",
                     type=_module_types.Map__string_i16,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -458,10 +503,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="complex_sum_i32",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="counter",
                     type=_module_types.ComplexStruct,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -478,10 +525,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="repeat_name",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="counter",
                     type=_module_types.ComplexStruct,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -498,7 +547,8 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="get_struct",
             arguments=(
             ),
@@ -511,10 +561,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="fib",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="n",
                     type=int,
                     kind=__NumberType.I16,
@@ -531,10 +583,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="unique_words",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="words",
                     type=_module_types.List__string,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -551,10 +605,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="words_count",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="words",
                     type=_module_types.List__string,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -571,10 +627,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="set_enum",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="in_enum",
                     type=_module_types.AnEnum,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -591,17 +649,20 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="list_of_lists",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="num_lists",
                     type=int,
                     kind=__NumberType.I16,
                     annotations={
                     },
                 ),
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="num_items",
                     type=int,
                     kind=__NumberType.I16,
@@ -618,10 +679,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="word_character_frequency",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="sentence",
                     type=str,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -638,10 +701,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="list_of_sets",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="some_words",
                     type=str,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -658,10 +723,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="nested_map_argument",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="struct_map",
                     type=_module_types.Map__string_List__SimpleStruct,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -678,10 +745,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="make_sentence",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="word_chars",
                     type=_module_types.List__List__string,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -698,10 +767,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="get_union",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="sets",
                     type=_module_types.List__Set__i32,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -718,10 +789,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="get_keys",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="string_map",
                     type=_module_types.List__Map__string_string,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -738,10 +811,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="lookup_double",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="key",
                     type=int,
                     kind=__NumberType.I32,
@@ -758,10 +833,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="retrieve_binary",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="something",
                     type=bytes,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -778,10 +855,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="contain_binary",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="binaries",
                     type=_module_types.List__binary,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -798,10 +877,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="contain_enum",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="the_enum",
                     type=_module_types.List__AnEnum,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -818,10 +899,12 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="get_binary_union_struct",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="u",
                     type=_module_types.BinaryUnion,
                     kind=__NumberType.NOT_A_NUMBER,
@@ -840,14 +923,16 @@ cdef __InterfaceSpec get_reflection__SimpleService(bint for_clients):
     return spec
 
 
-cdef __InterfaceSpec get_reflection__DerivedService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__DerivedService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="DerivedService",
+        methods=None,
         annotations={
             """bar""": """1""",            """foo""": """\"\"\"""",        },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="get_six",
             arguments=(
             ),
@@ -862,14 +947,16 @@ cdef __InterfaceSpec get_reflection__DerivedService(bint for_clients):
     return spec
 
 
-cdef __InterfaceSpec get_reflection__RederivedService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__RederivedService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="RederivedService",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="get_seven",
             arguments=(
             ),

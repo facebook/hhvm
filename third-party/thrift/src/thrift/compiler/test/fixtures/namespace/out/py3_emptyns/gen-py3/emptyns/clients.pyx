@@ -52,6 +52,7 @@ from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_
 cimport emptyns.types as _emptyns_types
 import emptyns.types as _emptyns_types
 
+import emptyns.services_reflection as _services_reflection
 cimport emptyns.services_reflection as _services_reflection
 
 from emptyns.clients_wrapper cimport cTestServiceAsyncClient, cTestServiceClientWrapper

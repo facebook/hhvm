@@ -5,26 +5,29 @@
 #  @generated
 #
 
-from thrift.py3.reflection cimport (
-  MethodSpec as __MethodSpec,
+from thrift.py3.reflection import (
   ArgumentSpec as __ArgumentSpec,
+  InterfaceSpec as __InterfaceSpec,
+  MethodSpec as __MethodSpec,
   NumberType as __NumberType,
 )
 
 import folly.iobuf as _fbthrift_iobuf
 
 
-cimport test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
+import test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
 
 
-cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
-    cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
+def get_reflection__MyService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
         name="MyService",
+        methods=None,
         annotations={
         },
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="foo",
             arguments=(
             ),
@@ -37,10 +40,12 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="interact",
             arguments=(
-                __ArgumentSpec._fbthrift_create(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
                     name="arg",
                     type=int,
                     kind=__NumberType.I32,
@@ -57,7 +62,8 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="interactFast",
             arguments=(
             ),
@@ -70,7 +76,8 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
         )
     )
     spec.add_method(
-        __MethodSpec._fbthrift_create(
+        __MethodSpec.__new__(
+            __MethodSpec,
             name="serialize",
             arguments=(
             ),

@@ -56,6 +56,7 @@ import b.types as _b_types
 cimport c.types as _c_types
 import c.types as _c_types
 
+import s.services_reflection as _services_reflection
 cimport s.services_reflection as _services_reflection
 
 from s.clients_wrapper cimport cTestServiceAsyncClient, cTestServiceClientWrapper

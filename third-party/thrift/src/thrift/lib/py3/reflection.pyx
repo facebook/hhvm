@@ -227,11 +227,7 @@ cdef class InterfaceSpec:
         self._methods = list(methods) if methods else list()
         self.annotations = MappingProxyType(annotations)
 
-    @staticmethod
-    cdef _fbthrift_create(str name, dict annotations):
-        return InterfaceSpec.__new__(InterfaceSpec, name, None, annotations)
-
-    cdef void add_method(self, MethodSpec method):
+    def add_method(self, MethodSpec method):
         self._methods.append(method)
 
     @property
@@ -268,17 +264,6 @@ cdef class MethodSpec:
         self.exceptions = tuple(exceptions)
         self.annotations = MappingProxyType(annotations)
 
-    @staticmethod
-    cdef _fbthrift_create(
-        str name,
-        tuple arguments,
-        NumberType result_kind,
-        object result,
-        tuple exceptions,
-        dict annotations,
-    ):
-        return MethodSpec.__new__(MethodSpec, name, arguments, result_kind, result, exceptions, annotations)
-
     def __iter__(self):
         yield self.name
         yield self.arguments
@@ -300,10 +285,6 @@ cdef class ArgumentSpec:
         self.kind = NumberType(kind)
         self.type = type
         self.annotations = MappingProxyType(annotations)
-
-    @staticmethod
-    cdef _fbthrift_create(str name, NumberType kind, type, dict annotations):
-        return ArgumentSpec.__new__(ArgumentSpec, name, kind, type, annotations)
 
     def __iter__(self):
         yield self.name

@@ -56,6 +56,7 @@ from folly.memory cimport to_shared_ptr as __to_shared_ptr
 cimport test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 
+import test.fixtures.basic.module.services_reflection as _services_reflection
 cimport test.fixtures.basic.module.services_reflection as _services_reflection
 
 import asyncio

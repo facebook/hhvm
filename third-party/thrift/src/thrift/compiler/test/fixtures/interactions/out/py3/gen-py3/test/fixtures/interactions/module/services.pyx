@@ -58,6 +58,7 @@ from thrift.py3.stream cimport cServerStream, cServerStreamPublisher, cResponseA
 cimport test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
 import test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
 
+import test.fixtures.interactions.module.services_reflection as _services_reflection
 cimport test.fixtures.interactions.module.services_reflection as _services_reflection
 
 import asyncio

@@ -15,7 +15,9 @@ class FileSystem;
 
 class FakeWatcher : public Watcher {
  public:
-  explicit FakeWatcher(FileSystem& fileSystem);
+  explicit FakeWatcher(FileSystem& fileSystem, bool failsToStart = false);
+
+  bool start(const std::shared_ptr<Root>& root) override;
 
   std::unique_ptr<DirHandle> startWatchDir(
       const std::shared_ptr<Root>& root,
@@ -28,6 +30,7 @@ class FakeWatcher : public Watcher {
 
  private:
   FileSystem& fileSystem_;
+  bool failsToStart_;
 };
 
 } // namespace watchman

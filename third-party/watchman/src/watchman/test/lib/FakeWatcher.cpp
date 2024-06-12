@@ -10,8 +10,14 @@
 
 namespace watchman {
 
-FakeWatcher::FakeWatcher(FileSystem& fileSystem)
-    : Watcher{"FakeWatcher", 0}, fileSystem_{fileSystem} {}
+FakeWatcher::FakeWatcher(FileSystem& fileSystem, bool failsToStart)
+    : Watcher{"FakeWatcher", 0},
+      fileSystem_{fileSystem},
+      failsToStart_(failsToStart) {}
+
+bool FakeWatcher::start(const std::shared_ptr<Root>& /*root*/) {
+  return !failsToStart_;
+}
 
 std::unique_ptr<DirHandle> FakeWatcher::startWatchDir(
     const std::shared_ptr<Root>& root,

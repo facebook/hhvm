@@ -181,7 +181,13 @@ std::chrono::milliseconds getBiggestTimeout(const Root& root) {
 void InMemoryView::ioThread(const std::shared_ptr<Root>& root) {
   IoThreadState state{getBiggestTimeout(*root)};
   state.currentTimeout = root->trigger_settle;
-
+  // Injects a temporary blocks, only in test code. This is to
+  // force the iothread to loose a race with the notify thread.
+  // TODO: Support something like EdenFS FaultInjector so that we can do
+  // something less hacky.
+  if (config_.getBool("inject_block_in_io_thread_start", false)) {
+    sleep(10);
+  }
   while (Continue::Continue == stepIoThread(root, state, pendingFromWatcher_)) {
   }
 }

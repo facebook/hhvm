@@ -130,6 +130,8 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
         protocol::detail::parseValue(prot, TType::T_STRUCT).as_object());
   }
 
+  bool empty() const { return !dynPatch_.has_value() && Base::empty(); }
+
  private:
   using Base::data_;
   std::optional<protocol::Object> dynPatch_;

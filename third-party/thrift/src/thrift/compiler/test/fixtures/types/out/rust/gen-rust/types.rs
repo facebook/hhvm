@@ -131,7 +131,7 @@ pub struct TrivialNestedWithDefault {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ComplexString {
     pub a: ::std::string::String,
     pub b: ::std::collections::BTreeMap<::std::string::String, ::std::primitive::i32>,
@@ -220,7 +220,7 @@ pub struct Renaming {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AnnotatedTypes {
     pub binary_field: crate::types::TBinary_8623,
     pub list_field: crate::types::SomeListOfTypeMap_2468,

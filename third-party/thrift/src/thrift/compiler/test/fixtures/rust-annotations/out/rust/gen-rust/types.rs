@@ -61,7 +61,7 @@ pub struct T2 {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct T3 {
     pub data: ::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>,
     // This field forces `..Default::default()` when instantiating this

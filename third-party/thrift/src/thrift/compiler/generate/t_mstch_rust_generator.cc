@@ -116,7 +116,43 @@ std::string quoted_rust_doc(const t_named* named_node) {
   return quote(doc.substr(first, last - first + 1), true);
 }
 
+std::string get_type_annotation(const t_named* node) {
+  if (const t_const* annot =
+          node->find_structured_annotation_or_null(kRustTypeUri)) {
+    return get_annotation_property_string(annot, "name");
+  }
+
+  if (const t_type* type = dynamic_cast<const t_type*>(node)) {
+    return t_typedef::get_first_annotation(type, {"rust.type"});
+  }
+
+  return "";
+}
+
+bool has_type_annotation(const t_named* node) {
+  return !get_type_annotation(node).empty();
+}
+
+bool has_nonstandard_type_annotation(const t_named* node) {
+  return get_type_annotation(node).find("::") != std::string::npos;
+}
+
+bool has_newtype_annotation(const t_named* node) {
+  if (const t_typedef* type = dynamic_cast<const t_typedef*>(node)) {
+    if (const t_const* annot =
+            node->find_structured_annotation_or_null(kRustNewTypeUri)) {
+      return true;
+    }
+
+    return type->has_annotation("rust.newtype");
+  }
+
+  return false;
+}
+
 bool can_derive_ord(const t_type* type) {
+  bool has_custom_type_annotation = has_type_annotation(type);
+
   type = type->get_true_type();
   if (type->is_string() || type->is_binary() || type->is_bool() ||
       type->is_byte() || type->is_i16() || type->is_i32() || type->is_i64() ||
@@ -130,6 +166,16 @@ bool can_derive_ord(const t_type* type) {
   if (type->is_list()) {
     auto elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
     return elem_type && can_derive_ord(elem_type);
+  }
+  // We can implement Ord on BTreeMap (the default map type) if both the key and
+  // value implement Eq.
+  if (type->is_map() && !has_custom_type_annotation) {
+    auto map_type = dynamic_cast<const t_map*>(type);
+    auto key_elem_type = map_type->get_key_type();
+    auto val_elem_type = map_type->get_val_type();
+
+    return key_elem_type && val_elem_type && can_derive_ord(key_elem_type) &&
+        can_derive_ord(val_elem_type);
   }
   return false;
 }
@@ -280,40 +326,6 @@ FieldKind field_kind(const t_named& node) {
     return FieldKind::Box;
   }
   return FieldKind::Inline;
-}
-
-std::string get_type_annotation(const t_named* node) {
-  if (const t_const* annot =
-          node->find_structured_annotation_or_null(kRustTypeUri)) {
-    return get_annotation_property_string(annot, "name");
-  }
-
-  if (const t_type* type = dynamic_cast<const t_type*>(node)) {
-    return t_typedef::get_first_annotation(type, {"rust.type"});
-  }
-
-  return "";
-}
-
-bool has_type_annotation(const t_named* node) {
-  return !get_type_annotation(node).empty();
-}
-
-bool has_nonstandard_type_annotation(const t_named* node) {
-  return get_type_annotation(node).find("::") != std::string::npos;
-}
-
-bool has_newtype_annotation(const t_named* node) {
-  if (const t_typedef* type = dynamic_cast<const t_typedef*>(node)) {
-    if (const t_const* annot =
-            node->find_structured_annotation_or_null(kRustNewTypeUri)) {
-      return true;
-    }
-
-    return type->has_annotation("rust.newtype");
-  }
-
-  return false;
 }
 
 void parse_include_srcs(
@@ -2157,7 +2169,7 @@ class rust_mstch_typedef : public mstch_typedef {
   mstch::node rust_ord() {
     return typedef_->has_annotation("rust.ord") ||
         typedef_->find_structured_annotation_or_null(kRustOrdUri) ||
-        (can_derive_ord(typedef_->get_type()) &&
+        (can_derive_ord(typedef_) &&
          !type_has_transitive_adapter(typedef_->get_type(), true));
   }
   mstch::node rust_copy() {

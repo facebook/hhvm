@@ -463,7 +463,7 @@ pub struct MyStructField28Patch {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MyStructField29Patch {
     #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::vec::Vec<::std::collections::BTreeMap<::std::string::String, ::std::primitive::i32>>>,

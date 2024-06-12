@@ -164,7 +164,7 @@ func (p *StreamTransport) WriteString(s string) (n int, err error) {
 	return
 }
 
-func (p *StreamTransport) RemainingBytes() (num_bytes uint64) {
+func (p *StreamTransport) RemainingBytes() uint64 {
 	if r, ok := p.Reader.(*io.LimitedReader); ok {
 		return uint64(r.N)
 	}

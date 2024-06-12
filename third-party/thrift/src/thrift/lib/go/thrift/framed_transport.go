@@ -148,6 +148,6 @@ func (p *FramedTransport) readFrameHeader() (uint32, error) {
 	return size, nil
 }
 
-func (p *FramedTransport) RemainingBytes() (num_bytes uint64) {
+func (p *FramedTransport) RemainingBytes() uint64 {
 	return uint64(p.frameSize)
 }

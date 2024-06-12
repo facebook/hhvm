@@ -1331,6 +1331,10 @@ class rust_mstch_struct : public mstch_struct {
           type_has_transitive_adapter(field.get_type(), true)) {
         return false;
       }
+
+      if (field.find_structured_annotation_or_null(kRustTypeUri)) {
+        return false;
+      }
     }
     return true;
   }

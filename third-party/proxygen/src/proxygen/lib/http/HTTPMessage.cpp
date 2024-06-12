@@ -533,7 +533,7 @@ std::string HTTPMessage::getDecodedQueryParam(const std::string& name) const {
   return result;
 }
 
-const std::map<std::string, std::string>& HTTPMessage::getQueryParams() const {
+const HTTPQueryParamMap& HTTPMessage::getQueryParams() const {
   // Parse the query parameters if we haven't done so yet
   if (!parsedQueryParams_) {
     parseQueryParams();
@@ -595,8 +595,8 @@ bool HTTPMessage::setQueryParam(const std::string& name,
   return setQueryStringImpl(query, false, strict);
 }
 
-std::string HTTPMessage::createQueryString(
-    const std::map<std::string, std::string>& params, uint32_t maxLength) {
+std::string HTTPMessage::createQueryString(const HTTPQueryParamMap& params,
+                                           uint32_t maxLength) {
   std::string query;
   query.reserve(maxLength);
   for (auto it = params.begin(); it != params.end(); it++) {

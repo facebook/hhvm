@@ -21,6 +21,7 @@
 #include <proxygen/lib/http/HTTPHeaders.h>
 #include <proxygen/lib/http/HTTPMethod.h>
 #include <proxygen/lib/http/HeaderConstants.h>
+#include <proxygen/lib/http/Types.h>
 #include <proxygen/lib/utils/ParseURL.h>
 #include <proxygen/lib/utils/Time.h>
 #include <string>
@@ -591,7 +592,7 @@ class HTTPMessage {
    * value is only valid as long as this
    * HTTPMessage object.
    */
-  const std::map<std::string, std::string>& getQueryParams() const;
+  const HTTPQueryParamMap& getQueryParams() const;
 
   /**
    * Set the query string to the specified value, and recreate the url_.
@@ -892,8 +893,8 @@ class HTTPMessage {
    * Create a query string from the query parameters map
    * containing the name-value pairs.
    */
-  static std::string createQueryString(
-      const std::map<std::string, std::string>& params, uint32_t maxSize);
+  static std::string createQueryString(const HTTPQueryParamMap& params,
+                                       uint32_t maxSize);
 
  protected:
   // Message start time, in msec since the epoch.
@@ -1114,7 +1115,7 @@ class HTTPMessage {
    */
   mutable std::map<folly::StringPiece, folly::StringPiece> cookies_;
   // TODO: use StringPiece for queryParams_ and delete splitNameValue()
-  mutable std::map<std::string, std::string> queryParams_;
+  mutable HTTPQueryParamMap queryParams_;
 
   HTTPHeaders headers_;
   std::unique_ptr<HTTPHeaders> strippedPerHopHeaders_;

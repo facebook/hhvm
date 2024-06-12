@@ -694,6 +694,13 @@ inline SSATmp* ldCls(IRGS& env,
   return gen(env, LdCls, LdClsFallbackData { fallback }, clsName, ctxTmp);
 }
 
+inline SSATmp* lookupCls(IRGS& env, const StringData* clsName) {
+  if (auto const knownCls = lookupUniqueClass(env, clsName)) {
+    return cns(env, knownCls);
+  }
+  return gen(env, LookupClsCached, cns(env, clsName));
+}
+
 //////////////////////////////////////////////////////////////////////
 // Local variables
 

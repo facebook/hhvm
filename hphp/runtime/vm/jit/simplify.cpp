@@ -3608,7 +3608,7 @@ SSATmp* simplifyLdEnumClassLabelName(State& env, const IRInstruction* inst) {
   return src->hasConstVal(TEnumClassLabel) ? cns(env, src->eclVal()) : nullptr;
 }
 
-SSATmp* simplifyLookupClsRDS(State& env, const IRInstruction* inst) {
+SSATmp* simplifyLookupCls(State& env, const IRInstruction* inst) {
   auto const str = inst->src(0);
   if (str->inst()->is(LdClsName, LdLazyCls)) {
     return str->inst()->src(0);
@@ -4166,7 +4166,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdWHResult)
       X(LdWHState)
       X(LdWHNotDone)
-      X(LookupClsRDS)
+      X(LookupCls)
       X(LookupSPropSlot)
       X(LdClsMethod)
       X(LdStrLen)

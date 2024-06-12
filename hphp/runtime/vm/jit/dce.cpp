@@ -169,7 +169,6 @@ bool canDCE(const IRInstruction& inst) {
   case DefConst:
   case Conjure:
   case LdClsInitData:
-  case LookupClsRDS:
   case LdClsMethodCacheCls:
   case LdFuncVecLen:
   case LdClsMethod:
@@ -194,6 +193,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdMonotypeVecElem:
   case LdVecElem:
   case LdVecElemAddr:
+  case LookupCls:
   case NewInstanceRaw:
   case NewLoggingArray:
   case NewDictArray:
@@ -404,7 +404,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdClsCtor:
   case LdCls:
   case LdClsCached:
-  case LdClsCachedSafe:
+  case LookupClsCached:
   case LdCns:
   case LdTypeCns:
   case LdTypeCnsNoThrow:

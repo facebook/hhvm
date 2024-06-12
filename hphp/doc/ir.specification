@@ -1011,19 +1011,19 @@ To string conversions:
   Loads the class named S0 via the RDS. Invokes autoload and may raise an error
   if the class is not defined.
 
-| LdClsCachedSafe, D(Cls), CStr, B
+| LookupCls, D(Cls|Nullptr), S(Str), NF
 
-  Loads the class whose name is S0 out of the RDS. If the class is not defined,
-  branch to B.
+  Looks up the class named S0 via the RDS. Returns nullptr if the class is not
+  defined. Does not invoke autoload.
+
+| LookupClsCached, D(Cls|Nullptr), CStr, NF
+
+  Looks up the class named S0 via the RDS. Returns nullptr if the class is not
+  defined. Does not invoke autoload.
 
 | LdClsInitData, D(PtrToClsInit), S(Cls), NF
 
   Loads the pointer to the property initializer array for class S0.
-
-| LookupClsRDS, D(Cls|Nullptr), S(Str), NF
-
-  Lookup the cached-class RDS handle for a given class name. Dereference that
-  handle and return the associated Class, or null if not present.
 
 | LdCns, D(InitCell), CStr, B
 

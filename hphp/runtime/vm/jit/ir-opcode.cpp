@@ -722,7 +722,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdBindAddr:
   case LdClosureCls:
   case LdClosureThis:
-  case LdClsCachedSafe:
   case LdClsCns:
   case LdClsCnsVecLen:
   case LdClsCtxCns:
@@ -815,7 +814,8 @@ bool opcodeMayRaise(Opcode opc) {
   case LockObj:
   case LogArrayReach:
   case LogGuardFailure:
-  case LookupClsRDS:
+  case LookupCls:
+  case LookupClsCached:
   case LookupSPropSlot:
   case Lshr:
   case LtBool:

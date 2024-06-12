@@ -205,11 +205,11 @@ SSATmp* is_a_impl(IRGS& env, const ParamPrep& params, bool subclassOnly) {
   auto const lhs = obj->isA(TObj) ? gen(env, LdObjClass, obj) : obj;
   auto const rhs = [&] {
     if (cls->isA(TStr)) {
-      return gen(env, LookupClsRDS, cls);
+      return gen(env, LookupCls, cls);
     }
     if (cls->isA(TLazyCls)) {
       auto const cname = gen(env, LdLazyClsName, cls);
-      return gen(env, LookupClsRDS, cname);
+      return gen(env, LookupCls, cname);
     }
     return cls;
   }();

@@ -1804,7 +1804,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ContArIncIdx:
   case ContArIncKey:
   case ContArUpdateIdx:
-  case LdClsCachedSafe:
+  case LookupClsCached:
   case LdClsInitData:
   case UnwindCheckSideExit:
   case CallViolatesModuleBoundary:
@@ -1834,7 +1834,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdWHState:
   case LdWHNotDone:
   case LookupClsMethod:
-  case LookupClsRDS:
+  case LookupCls:
   case StrictlyIntegerConv:
   case DbgAssertFunc:
   case ProfileCall:

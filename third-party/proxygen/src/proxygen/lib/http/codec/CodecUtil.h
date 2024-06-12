@@ -193,6 +193,18 @@ class CodecUtil {
                             HTTPHeaderCode headerToCheck);
 
   static const std::bitset<256>& perHopHeaderCodes();
+
+  /**
+   * Generates debug strings that omit the header values
+   */
+  static std::string debugString(const HTTPMessage& msg, uint8_t debugLevel);
+  static std::string debugString(const HTTPHeaders& hdrs, uint8_t debugLevel);
+
+  static void logIfFieldSectionExceedsPeerMax(const HTTPHeaderSize& encodedSize,
+                                              uint32_t maxHeaderListSize,
+                                              std::string debugStr,
+                                              const HTTPHeaders& fields,
+                                              uint8_t debugLevel);
 };
 
 } // namespace proxygen

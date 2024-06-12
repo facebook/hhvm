@@ -582,6 +582,11 @@ HTTP2Codec::parseHeadersDecodeFrames(
     } else {
       goawayErrorMessage_ = folly::to<std::string>(
           decodeErrorMessage, curHeader_.stream, ": headers too large");
+      if (debugLevel_ > 0 && msg) {
+        LOG(ERROR) << "HPACK Headers too large"
+                   << CodecUtil::debugString(*msg, debugLevel_)
+                   << CodecUtil::debugString(msg->getHeaders(), debugLevel_);
+      }
     }
 
     if (msg) {
@@ -1302,6 +1307,13 @@ void HTTP2Codec::generateHeaderImpl(
   writeBuf.postallocate(headerSize);
   headerCodec_.encodeHTTP(msg, writeBuf, addDateToResponse_, extraHeaders);
   *size = headerCodec_.getEncodedSize();
+  CodecUtil::logIfFieldSectionExceedsPeerMax(
+      headerCodec_.getEncodedSize(),
+      ingressSettings_.getSetting(SettingsId::MAX_HEADER_LIST_SIZE,
+                                  std::numeric_limits<uint32_t>::max()),
+      CodecUtil::debugString(msg, debugLevel_),
+      msg.getHeaders(),
+      debugLevel_);
 
   IOBufQueue queue(IOBufQueue::cacheChainLength());
   auto chunkLen =
@@ -1381,21 +1393,13 @@ void HTTP2Codec::encodeHeaders(folly::IOBufQueue& writeBuf,
   if (size) {
     *size = headerCodec_.getEncodedSize();
   }
-
-  if (headerCodec_.getEncodedSize().uncompressed >
+  CodecUtil::logIfFieldSectionExceedsPeerMax(
+      headerCodec_.getEncodedSize(),
       ingressSettings_.getSetting(SettingsId::MAX_HEADER_LIST_SIZE,
-                                  std::numeric_limits<uint32_t>::max())) {
-    // The remote side told us they don't want headers this large...
-    // but this function has no mechanism to fail
-    string serializedHeaders;
-    headers.forEach(
-        [&serializedHeaders](const string& name, const string& value) {
-          serializedHeaders =
-              folly::to<string>(serializedHeaders, "\\n", name, ":", value);
-        });
-    LOG(ERROR) << "generating HEADERS frame larger than peer maximum nHeaders="
-               << headers.size() << " all headers=" << serializedHeaders;
-  }
+                                  std::numeric_limits<uint32_t>::max()),
+      std::string(),
+      headers,
+      debugLevel_);
 }
 
 size_t HTTP2Codec::generateHeaderCallbackWrapper(StreamID stream,
@@ -1792,13 +1796,12 @@ size_t HTTP2Codec::generateCertificate(folly::IOBufQueue& writeBuf,
 
 bool HTTP2Codec::checkConnectionError(ErrorCode err, const folly::IOBuf* buf) {
   if (err != ErrorCode::NO_ERROR) {
-    LOG(ERROR) << "Connection error " << getErrorCodeString(err)
-               << " with ingress=";
+    std::string errorDescription =
+        goawayErrorMessage_.empty() ? "Connection error" : goawayErrorMessage_;
+    LOG(ERROR) << "Connection error " << getErrorCodeString(err) << " "
+               << errorDescription << " with ingress=";
     VLOG(3) << IOBufPrinter::printHexFolly(buf, true);
     if (callback_) {
-      std::string errorDescription = goawayErrorMessage_.empty()
-                                         ? "Connection error"
-                                         : goawayErrorMessage_;
       HTTPException ex(HTTPException::Direction::INGRESS_AND_EGRESS,
                        errorDescription);
       ex.setCodecStatusCode(err);

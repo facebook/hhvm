@@ -40,6 +40,10 @@ class HQStreamCodec
     strictValidation_ = strict;
   }
 
+  void setDebugLevel(uint8_t debugLevel) {
+    debugLevel_ = debugLevel;
+  }
+
   void setActivationHook(folly::Function<folly::Function<void()>()> hook) {
     activationHook_ = std::move(hook);
   }
@@ -184,6 +188,7 @@ class HQStreamCodec
   bool parsingTrailers_{false};
   bool finalEgressHeadersSeen_{false};
   bool isConnect_{false};
+  uint8_t debugLevel_{0};
   folly::Function<folly::Function<void()>()> activationHook_{
       [] { return [] {}; }};
   HTTPSettings& ingressSettings_;

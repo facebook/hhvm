@@ -91,6 +91,7 @@ class HQMultiCodec : public HQControlCodec {
     auto& codec = res.first->second;
     codec->setCallback(callback_);
     codec->setStrictValidation(strictValidation_);
+    codec->setDebugLevel(debugLevel_);
     return *codec;
   }
 
@@ -286,6 +287,7 @@ class HQMultiCodec : public HQControlCodec {
   std::function<uint64_t()> qpackEncoderMaxDataFn_;
   uint64_t nextPushID_{0};
   bool strictValidation_{true};
+  bool debugLevel_{false};
 };
 
 }} // namespace proxygen::hq

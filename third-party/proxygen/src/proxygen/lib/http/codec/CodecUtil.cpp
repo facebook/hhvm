@@ -141,4 +141,50 @@ const std::bitset<256>& CodecUtil::perHopHeaderCodes() {
   }()};
   return s_perHopHeaderCodes;
 }
+
+std::string CodecUtil::debugString(const HTTPMessage& msg, uint8_t debugLevel) {
+  std::string debug;
+  if (msg.isRequest()) {
+    debug.append(
+        folly::to<std::string>(": URL(",
+                               msg.getURL().size(),
+                               ")",
+                               (debugLevel > 1 ? msg.getURL() : std::string()),
+                               ", "));
+  }
+  return debug;
+}
+
+std::string CodecUtil::debugString(const HTTPHeaders& headers,
+                                   uint8_t debugLevel) {
+  std::string debug;
+  if (debugLevel > 0) {
+    headers.forEach([&debug, debugLevel](const auto& name, const auto& value) {
+      debug.append(
+          folly::to<std::string>(name,
+                                 "(",
+                                 value.size(),
+                                 ")",
+                                 (debugLevel > 1 ? value : std::string()),
+                                 ", "));
+    });
+  }
+  return debug;
+}
+
+void CodecUtil::logIfFieldSectionExceedsPeerMax(
+    const HTTPHeaderSize& encodedSize,
+    uint32_t maxHeaderListSize,
+    std::string debugStr,
+    const HTTPHeaders& fields,
+    uint8_t debugLevel) {
+  if (encodedSize.uncompressed > maxHeaderListSize) {
+    // The remote side told us they don't want headers this large, but try
+    // anyways
+    debugStr += CodecUtil::debugString(fields, debugLevel);
+    LOG(ERROR) << "generating HEADERS frame larger than peer maximum nHeaders="
+               << fields.size() << " all headers=" << debugStr;
+  }
+}
+
 } // namespace proxygen

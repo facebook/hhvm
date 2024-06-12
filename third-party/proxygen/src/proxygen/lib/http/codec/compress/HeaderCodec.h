@@ -59,7 +59,7 @@ class HeaderCodec {
   /**
    * compressed and uncompressed size of the last encode
    */
-  const HTTPHeaderSize& getEncodedSize() {
+  [[nodiscard]] const HTTPHeaderSize& getEncodedSize() const {
     return encodedSize_;
   }
 

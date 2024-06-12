@@ -16,29 +16,6 @@
 #include <proxygen/lib/http/codec/HQUtils.h>
 #include <proxygen/lib/http/codec/compress/QPACKCodec.h>
 
-namespace {
-
-using namespace proxygen;
-
-void logIfFieldSectionExceedsPeerMax(const HTTPHeaderSize& encodedSize,
-                                     uint32_t maxHeaderListSize,
-                                     const HTTPHeaders& fields) {
-  if (encodedSize.uncompressed > maxHeaderListSize) {
-    // The remote side told us they don't want headers this large, but try
-    // anyways
-    std::string serializedFields;
-    fields.forEach(
-        [&serializedFields](const std::string& name, const std::string& value) {
-          serializedFields =
-              folly::to<std::string>(serializedFields, "\\n", name, ":", value);
-        });
-    LOG(ERROR) << "generating HEADERS frame larger than peer maximum nHeaders="
-               << fields.size() << " all headers=" << serializedFields;
-  }
-}
-
-} // namespace
-
 namespace proxygen { namespace hq {
 
 using namespace folly;
@@ -276,9 +253,17 @@ void HQStreamCodec::onDecodeError(HPACK::DecodeError decodeError) {
   LOG(ERROR) << "Failed decoding header block for stream=" << streamId_
              << " decodeError=" << uint32_t(decodeError);
 
-  if (decodeInfo_.msg) {
+  auto& msg = decodeInfo_.msg;
+  if (decodeInfo_.decodeError == HPACK::DecodeError::HEADERS_TOO_LARGE &&
+      debugLevel_ > 0 && msg) {
+    LOG(ERROR) << "QPACK Headers too large"
+               << CodecUtil::debugString(*msg, debugLevel_)
+               << CodecUtil::debugString(msg->getHeaders(), debugLevel_);
+  }
+
+  if (msg) {
     // print the partial message
-    decodeInfo_.msg->dumpMessage(3);
+    msg->dumpMessage(3);
   }
 
   if (callback_) {
@@ -343,11 +328,13 @@ void HQStreamCodec::generateHeaderImpl(
     *size = headerCodec_.getEncodedSize();
   }
 
-  logIfFieldSectionExceedsPeerMax(
+  CodecUtil::logIfFieldSectionExceedsPeerMax(
       headerCodec_.getEncodedSize(),
       ingressSettings_.getSetting(SettingsId::MAX_HEADER_LIST_SIZE,
                                   std::numeric_limits<uint32_t>::max()),
-      msg.getHeaders());
+      CodecUtil::debugString(msg, debugLevel_),
+      msg.getHeaders(),
+      debugLevel_);
 
   // HTTP/2 serializes priority here, but HQ priorities need to go on the
   // control stream
@@ -407,11 +394,13 @@ size_t HQStreamCodec::generateTrailers(folly::IOBufQueue& writeBuf,
       headerCodec_.encode(allTrailers, streamId_, maxEncoderStreamData());
   qpackEncoderWriteBuf_.append(std::move(encodeRes.control));
 
-  logIfFieldSectionExceedsPeerMax(
+  CodecUtil::logIfFieldSectionExceedsPeerMax(
       headerCodec_.getEncodedSize(),
       ingressSettings_.getSetting(SettingsId::MAX_HEADER_LIST_SIZE,
                                   std::numeric_limits<uint32_t>::max()),
-      trailers);
+      std::string(),
+      trailers,
+      debugLevel_);
   WriteResult res;
   res = hq::writeHeaders(writeBuf, std::move(encodeRes.stream));
 

@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include <map>
+#include <folly/container/F14Map.h>
 #include <string>
 
 namespace proxygen {
 
-using HTTPQueryParamMap = std::map<std::string, std::string>;
+using HTTPQueryParamMap = folly::F14FastMap<std::string, std::string>;
 
 }

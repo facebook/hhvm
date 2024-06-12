@@ -466,6 +466,15 @@ void HTTPMessage::parseQueryParams() const {
     return;
   }
 
+  // We're taking the min in order to ensure that we don't over-allocate in the
+  // case that the other endpoint sends something like "&&&&&&&"
+  // req.query_.length() / 3 is derived from the fact that each query param
+  // takes at least 3 characters (the & the = and at least another character for
+  // the key)
+  uint32_t ampersandCount = std::count_if(
+      req.query_.begin(), req.query_.end(), [](char c) { return c == '&'; });
+  queryParams_.reserve(
+      std::min(ampersandCount + 1, uint32_t(req.query_.size() / 3) + 1));
   splitNameValue(
       req.query_, '&', '=', [this](string&& paramName, string&& paramValue) {
         auto it = queryParams_.find(paramName);

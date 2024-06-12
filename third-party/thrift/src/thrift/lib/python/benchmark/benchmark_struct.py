@@ -167,20 +167,18 @@ def benchmark_containers():
     INIT_FOR_CONTAINER = """
 val_map = {
     i: f"str_{i}"
-    for i in range(100)
+    for i in range(30)
 }
 
 val_map_structs = {
-    i: Included()
-    for i in range(100)
+    k: Included(vals=[f"str_{i}_{k}" for i in range(10)])
+    for k in range(30)
 }
-val_map_structs[50] = Included(vals=[f"str_{i}" for i in range(100)])
 inst = MyStruct(
-    val_list=list(range(100)),
-    val_set=set(range(100)),
+    val_list=list(range(30)),
+    val_set=set(range(30)),
     val_map=val_map,
     val_map_structs=val_map_structs,
-
 )
 """
 
@@ -197,10 +195,13 @@ inst = MyStruct(
         return f"{min_value_ms:.6f} ms"
 
     fields = {
-        "list field": "_ = inst.val_list[50]",
-        "set field": "_ = 50 in inst.val_set",
-        "map field": "_ = inst.val_map[50]",
-        "map struct list field": "_ = inst.val_map_structs[50].vals[50]",
+        "list field iter": "_ = [item for item in inst.val_list]",
+        "list field idx": "_ = inst.val_list[10]",
+        "set field iter": "_ = [item for item in inst.val_set]",
+        "set field lookup": "_ = 10 in inst.val_set",
+        "map field lookup one": "_ = inst.val_map[10]",
+        "map field lookup all": "_ = [inst.val_map[k] for k in range(30)]",
+        "map struct list field": "_ = [string for incl in inst.val_map_structs.values() for string in incl.vals]",
     }
 
     table = [

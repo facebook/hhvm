@@ -269,6 +269,20 @@ function hphp_debug_backtrace_hash(int $options = 0)[leak_safe]: int;
 
 namespace HH {
 
+  // Type aliases for stack traces and frames
+  type StackTrace = vec<StackFrame>;
+  type StackFrame = shape(
+    ?'file' => string,
+    ?'line' => int,
+    ?'function' => string,
+    ?'args' => vec<mixed>,
+    ?'class' => string,
+    ?'object' => mixed,
+    ?'type' => string,
+    ?'metadata' => mixed,
+    ...
+  );
+
   /*
    * Retrieve errors generated while inside the error handler. Since the error
    * handler will not be invoked recursively, such errors will not use the

@@ -30,7 +30,7 @@ struct CrateMapping {
 // If you want to change this, please coordinate with dependent teams to ensure
 // these libraries will still be able to divine the crate name.
 fn parse_map(lines: &str) -> Vec<CrateMapping> {
-    let re = Regex::new(r"(?m)^\s*([[:alnum:]_-]+)\s+([[:alnum:]_-]+)").unwrap();
+    let re = Regex::new(r"(?m)^\s*([/.[:alnum:]_-]+)\s+([[:alnum:]_-]+)").unwrap();
     re.captures_iter(lines)
         .map(|caps| CrateMapping {
             module: caps[1].to_string(),
@@ -49,7 +49,7 @@ fn test_crate_schema() -> Result<()> {
     assert_eq!(crate_names.len(), 1);
     assert!(crate_names.contains("best_crate"));
     assert_eq!(modules.len(), 2);
-    assert!(modules.contains("foos"));
-    assert!(modules.contains("bars"));
+    assert!(modules.contains("thrift/test/rust/foos.thrift"));
+    assert!(modules.contains("thrift/test/rust/bars.thrift"));
     Ok(())
 }

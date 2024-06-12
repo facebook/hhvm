@@ -35,7 +35,7 @@ func TestEnsureTransportsAreRich(t *testing.T) {
 	transports := []io.ReadWriteCloser{
 		NewMemoryBufferLen(1024),
 		NewStreamTransportRW(buf),
-		NewFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH),
+		newFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH),
 		http,
 	}
 	for _, trans := range transports {

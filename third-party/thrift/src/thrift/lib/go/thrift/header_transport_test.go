@@ -103,7 +103,7 @@ func TestHeaderFramedBinary(t *testing.T) {
 	tmb := newMockSocket()
 	testHeaderToProto(
 		t, FramedDeprecated, tmb,
-		NewBinaryProtocol(NewFramedTransport(tmb), true, true),
+		NewBinaryProtocol(newFramedTransport(tmb), true, true),
 		newHeaderTransport(tmb),
 	)
 }
@@ -112,7 +112,7 @@ func TestHeaderFramedCompact(t *testing.T) {
 	tmb := newMockSocket()
 	testHeaderToProto(
 		t, FramedCompact, tmb,
-		NewCompactProtocol(NewFramedTransport(tmb)),
+		NewCompactProtocol(newFramedTransport(tmb)),
 		newHeaderTransport(tmb),
 	)
 }

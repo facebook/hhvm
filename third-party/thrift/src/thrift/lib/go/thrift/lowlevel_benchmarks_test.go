@@ -28,7 +28,7 @@ var tfv = []func() io.ReadWriteCloser{
 	func() io.ReadWriteCloser { return NewMemoryBufferLen(1024) },
 	func() io.ReadWriteCloser { return NewStreamTransportRW(buf) },
 	func() io.ReadWriteCloser {
-		return NewFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH)
+		return newFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH)
 	},
 }
 

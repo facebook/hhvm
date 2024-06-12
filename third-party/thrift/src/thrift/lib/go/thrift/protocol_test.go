@@ -181,10 +181,10 @@ func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(io.ReadWriteClos
 
 	transports := []func() io.ReadWriteCloser{
 		func() io.ReadWriteCloser {
-			return NewFramedTransportMaxLength(NewStreamTransport(rdr, writer), DEFAULT_MAX_LENGTH)
+			return newFramedTransportMaxLength(NewStreamTransport(rdr, writer), DEFAULT_MAX_LENGTH)
 		}, // framed over pipe
 		func() io.ReadWriteCloser {
-			return NewFramedTransportMaxLength(NewStreamTransport(rConn, wConn), DEFAULT_MAX_LENGTH)
+			return newFramedTransportMaxLength(NewStreamTransport(rConn, wConn), DEFAULT_MAX_LENGTH)
 		}, // framed over tcp
 	}
 	const iterations = 100
@@ -253,7 +253,7 @@ func ReadWriteProtocolTest(t *testing.T, newFormat func(io.ReadWriteCloser) Form
 	transports := []func() io.ReadWriteCloser{
 		func() io.ReadWriteCloser { return NewMemoryBufferLen(1024) },
 		func() io.ReadWriteCloser {
-			return NewFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH)
+			return newFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH)
 		},
 		func() io.ReadWriteCloser {
 			http, err := newHTTPPostClient("http://" + l.Addr().String())

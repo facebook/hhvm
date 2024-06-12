@@ -21,6 +21,6 @@ import (
 )
 
 func TestFramedTransport(t *testing.T) {
-	trans := NewFramedTransport(newMockSocket())
+	trans := newFramedTransport(newMockSocket())
 	TransportTest(t, trans, trans)
 }

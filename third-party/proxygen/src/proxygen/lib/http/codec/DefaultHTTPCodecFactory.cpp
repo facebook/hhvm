@@ -15,25 +15,21 @@
 
 namespace proxygen {
 
-DefaultHTTPCodecFactory::DefaultHTTPCodecFactory(
-    bool forceHTTP1xCodecTo1_1,
-    const HeaderIndexingStrategy* strat,
-    std::list<std::string> allowedH1UpgradeProtocols)
-    : forceHTTP1xCodecTo1_1_(forceHTTP1xCodecTo1_1),
-      headerIndexingStrategy_(strat),
-      allowedH1UpgradeProtocols_(std::move(allowedH1UpgradeProtocols)) {
+DefaultHTTPCodecFactory::DefaultHTTPCodecFactory(CodecConfig config)
+    : HTTPCodecFactory(config) {
 }
 
 std::unique_ptr<HTTPCodec> DefaultHTTPCodecFactory::getCodec(
     const std::string& chosenProto, TransportDirection direction, bool isTLS) {
 
+  auto config = configFn_();
   auto codecProtocol = getCodecProtocolFromStr(chosenProto);
   switch (codecProtocol) {
     case CodecProtocol::HTTP_2: {
       auto codec = std::make_unique<HTTP2Codec>(direction);
-      codec->setStrictValidation(useStrictValidation());
-      if (headerIndexingStrategy_) {
-        codec->setHeaderIndexingStrategy(headerIndexingStrategy_);
+      codec->setStrictValidation(config.strictValidation);
+      if (config.h2.headerIndexingStrategy) {
+        codec->setHeaderIndexingStrategy(config.h2.headerIndexingStrategy);
       }
       return codec;
     }
@@ -54,10 +50,10 @@ std::unique_ptr<HTTPCodec> DefaultHTTPCodecFactory::getCodec(
       }
 
       auto codec = std::make_unique<HTTP1xCodec>(
-          direction, forceHTTP1xCodecTo1_1_, useStrictValidation());
+          direction, config.h1.forceHTTP1xCodecTo1_1, config.strictValidation);
       if (!isTLS && direction == TransportDirection::DOWNSTREAM &&
-          !allowedH1UpgradeProtocols_.empty()) {
-        codec->setAllowedUpgradeProtocols(allowedH1UpgradeProtocols_);
+          !config.h1.allowedH1UpgradeProtocols.empty()) {
+        codec->setAllowedUpgradeProtocols(config.h1.allowedH1UpgradeProtocols);
       }
       return codec;
     }

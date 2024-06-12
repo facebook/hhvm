@@ -31,7 +31,7 @@ HTTPConnector::HTTPConnector(Callback* callback,
                              const WheelTimerInstance& timeout)
     : cb_(CHECK_NOTNULL(callback)),
       timeout_(timeout),
-      httpCodecFactory_(std::make_unique<DefaultHTTPCodecFactory>(false)) {
+      httpCodecFactory_(std::make_unique<DefaultHTTPCodecFactory>()) {
 }
 
 HTTPConnector::~HTTPConnector() {
@@ -52,7 +52,7 @@ void HTTPConnector::setPlaintextProtocol(const std::string& plaintextProto) {
 }
 
 void HTTPConnector::setHTTPVersionOverride(bool enabled) {
-  httpCodecFactory_->setForceHTTP1xCodecTo1_1(enabled);
+  httpCodecFactory_->getDefaultConfig().h1.forceHTTP1xCodecTo1_1 = enabled;
 }
 
 void HTTPConnector::connect(EventBase* eventBase,

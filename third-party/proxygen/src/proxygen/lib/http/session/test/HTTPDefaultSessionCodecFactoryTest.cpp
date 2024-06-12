@@ -97,7 +97,11 @@ TEST_P(HTTPDefaultSessionCodecFactoryValidationTest, StrictValidation) {
   auto isPlaintextProtocolEmpty = conf->plaintextProtocol.empty();
   HTTPDefaultSessionCodecFactory factory(std::move(conf));
   bool strict = GetParam().strict;
-  factory.setStrictValidationFn([strict] { return strict; });
+  factory.setConfigFn([strict] {
+    HTTPCodecFactory::CodecConfig config;
+    config.strictValidation = strict;
+    return config;
+  });
 
   auto codec = factory.getCodec(
       http2::kProtocolString, TransportDirection::DOWNSTREAM, false);

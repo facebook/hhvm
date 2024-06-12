@@ -11,19 +11,29 @@
 
 #include <proxygen/lib/http/codec/HTTP2Constants.h>
 
+namespace {
+proxygen::HTTPCodecFactory::CodecConfig getCodecConfigFromAcceptorConfig(
+    const proxygen::AcceptorConfiguration& accConfig) {
+  proxygen::HTTPCodecFactory::CodecConfig config;
+  config.h1.forceHTTP1xCodecTo1_1 = accConfig.forceHTTP1_0_to_1_1;
+  config.h1.allowedH1UpgradeProtocols =
+      accConfig.allowedPlaintextUpgradeProtocols;
+  config.h2.headerIndexingStrategy = accConfig.headerIndexingStrategy;
+  return config;
+}
+} // namespace
+
 namespace proxygen {
 
 HTTPDefaultSessionCodecFactory::HTTPDefaultSessionCodecFactory(
     std::shared_ptr<const AcceptorConfiguration> accConfig)
-    : accConfig_{std::move(accConfig)} {
+    : HTTPCodecFactory(getCodecConfigFromAcceptorConfig(*accConfig)),
+      accConfig_{std::move(accConfig)} {
 }
 
 std::unique_ptr<HTTPCodec> HTTPDefaultSessionCodecFactory::getCodec(
     const std::string& nextProtocol, TransportDirection direction, bool isTLS) {
-  DefaultHTTPCodecFactory factory(accConfig_->forceHTTP1_0_to_1_1,
-                                  accConfig_->headerIndexingStrategy,
-                                  accConfig_->allowedPlaintextUpgradeProtocols);
-  factory.setStrictValidationFn([this] { return useStrictValidation(); });
+  DefaultHTTPCodecFactory factory(configFn_());
   if (!isTLS &&
       (accConfig_->plaintextProtocol == http2::kProtocolCleartextString)) {
     return factory.getCodec(http2::kProtocolString, direction, isTLS);

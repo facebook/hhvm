@@ -17,7 +17,7 @@
 using namespace proxygen;
 
 TEST(DefaultHTTPCodecFactoryTest, GetCodec) {
-  DefaultHTTPCodecFactory factory(false);
+  DefaultHTTPCodecFactory factory;
 
   auto codec = factory.getCodec(
       http2::kProtocolString, TransportDirection::UPSTREAM, true);
@@ -40,9 +40,13 @@ class DefaultHTTPCodecFactoryValidationTest
     : public ::testing::TestWithParam<bool> {};
 
 TEST_P(DefaultHTTPCodecFactoryValidationTest, StrictValidation) {
-  DefaultHTTPCodecFactory factory(false);
+  DefaultHTTPCodecFactory factory;
   bool strict = GetParam();
-  factory.setStrictValidationFn([strict] { return strict; });
+  factory.setConfigFn([strict] {
+    HTTPCodecFactory::CodecConfig config;
+    config.strictValidation = strict;
+    return config;
+  });
 
   auto codec = factory.getCodec(
       http2::kProtocolString, TransportDirection::DOWNSTREAM, true);

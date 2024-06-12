@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <list>
 #include <proxygen/lib/http/codec/HTTPCodec.h>
 #include <proxygen/lib/http/codec/TransportDirection.h>
 
@@ -18,7 +19,24 @@ namespace proxygen {
  */
 class HTTPCodecFactory {
  public:
-  explicit HTTPCodecFactory() {
+  struct HTTP1xCodecConfig {
+    bool forceHTTP1xCodecTo1_1{false};
+    std::list<std::string> allowedH1UpgradeProtocols;
+  };
+
+  struct HTTP2CodecConfig {
+    const HeaderIndexingStrategy* headerIndexingStrategy{nullptr};
+  };
+
+  struct CodecConfig {
+    // Default to false for now to match existing behavior
+    bool strictValidation{false};
+    HTTP1xCodecConfig h1;
+    HTTP2CodecConfig h2;
+  };
+
+  HTTPCodecFactory() = default;
+  explicit HTTPCodecFactory(CodecConfig config) : defaultConfig_(config) {
   }
   virtual ~HTTPCodecFactory() {
   }
@@ -34,17 +52,21 @@ class HTTPCodecFactory {
                                              TransportDirection direction,
                                              bool strictValidation = false);
 
-  void setStrictValidationFn(std::function<bool()> useStrictValidationFn) {
-    useStrictValidationFn_ = useStrictValidationFn;
+  CodecConfig& getDefaultConfig() {
+    return defaultConfig_;
+  }
+
+  void setConfigFn(std::function<CodecConfig()> configFn) {
+    configFn_ = configFn;
   }
 
   bool useStrictValidation() {
-    return useStrictValidationFn_();
+    return configFn_().strictValidation;
   }
 
  protected:
-  // Default to false for now to match existing behavior
-  std::function<bool()> useStrictValidationFn_{[] { return false; }};
+  CodecConfig defaultConfig_;
+  std::function<CodecConfig()> configFn_{[this] { return defaultConfig_; }};
 };
 
 } // namespace proxygen

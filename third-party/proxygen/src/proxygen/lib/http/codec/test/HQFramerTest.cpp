@@ -120,7 +120,7 @@ TEST_F(HQFramerTest, TestWriteUnframedBytes) {
   EXPECT_EQ(res, dataLen);
   queue_.append(std::move(data));
   EXPECT_EQ("I just met you and this is crazy.",
-            queue_.front()->clone()->moveToFbString().toStdString());
+            queue_.front()->clone()->to<std::string>());
 }
 
 TEST_F(HQFramerTest, DataFrameZeroLength) {

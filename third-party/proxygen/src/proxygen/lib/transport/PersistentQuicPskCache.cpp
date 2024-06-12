@@ -71,7 +71,7 @@ folly::Optional<quic::QuicCachedPsk> PersistentQuicPskCache::getPsk(
 
     std::unique_ptr<folly::IOBuf> appParams;
     fizz::detail::readBuf<uint16_t>(appParams, cursor);
-    quicCachedPsk.appParams = appParams->moveToFbString().toStdString();
+    quicCachedPsk.appParams = appParams->to<std::string>();
 
     cachedPsk->uses++;
     if (maxPskUses_ != 0 && cachedPsk->uses >= maxPskUses_) {
@@ -114,7 +114,7 @@ void PersistentQuicPskCache::putPsk(const std::string& identity,
   fizz::detail::writeBuf<uint16_t>(
       folly::IOBuf::wrapBuffer(folly::StringPiece(quicCachedPsk.appParams)),
       appender);
-  cachedPsk.quicParams = quicParams->moveToFbString().toStdString();
+  cachedPsk.quicParams = quicParams->to<std::string>();
   cachedPsk.uses = 0;
   cache_.put(identity, cachedPsk);
 }

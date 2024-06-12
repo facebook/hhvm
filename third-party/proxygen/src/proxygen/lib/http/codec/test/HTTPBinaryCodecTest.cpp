@@ -363,8 +363,7 @@ TEST_F(HTTPBinaryCodecTest, testParseContentSuccess) {
   EXPECT_EQ(
       upstreamBinaryCodec_->parseContent(cursor, content.size(), msg).value(),
       content.size());
-  EXPECT_EQ(upstreamBinaryCodec_->getMsgBody().moveToFbString().toStdString(),
-            "hello\r\n");
+  EXPECT_EQ(upstreamBinaryCodec_->getMsgBody().to<std::string>(), "hello\r\n");
 }
 
 TEST_F(HTTPBinaryCodecTest, testParseContentFailure) {
@@ -547,7 +546,7 @@ TEST_F(HTTPBinaryCodecTest, testGenerateBody) {
   folly::io::Cursor cursor(writeBuffer.front());
   HTTPMessage msg;
   EXPECT_EQ(upstreamBinaryCodec_->parseContent(cursor, 18, msg).value(), 18);
-  EXPECT_EQ(upstreamBinaryCodec_->getMsgBody().moveToFbString().toStdString(),
+  EXPECT_EQ(upstreamBinaryCodec_->getMsgBody().to<std::string>(),
             "Sample Test Body!");
 }
 
@@ -598,8 +597,7 @@ TEST_F(HTTPBinaryCodecTest, testEncodeAndDecodeRequest) {
     EXPECT_EQ(headersDecoded.getSingleOrEmpty(headerName), headerValue);
   });
 
-  EXPECT_EQ(callback.data_.move()->moveToFbString().toStdString(),
-            "Sample Test Body!");
+  EXPECT_EQ(callback.data_.move()->to<std::string>(), "Sample Test Body!");
 
   auto trailersDecoded = *callback.msg->getTrailers();
   EXPECT_EQ(trailersDecoded.size(), 1);

@@ -98,7 +98,11 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
     this_ = conn;
     if (tinfo) {
       if (auto* observer = worker_->getServer()->getObserver()) {
-        observer->connAccepted(*tinfo);
+        observer->connAccepted(
+            *tinfo,
+            server::TServerObserver::ConnectionInfo(
+                reinterpret_cast<uint64_t>(transport_.get()),
+                context_.getSecurityProtocol()));
         connectionAdded_ = true;
       }
     }

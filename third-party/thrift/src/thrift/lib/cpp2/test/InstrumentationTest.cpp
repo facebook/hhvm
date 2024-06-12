@@ -1250,3 +1250,47 @@ INSTANTIATE_TEST_CASE_P(
     TimestampsTest,
     ::testing::Combine(
         ::testing::Values(true, false), ::testing::Values(true, false)));
+
+class ConnectionsObserverTest : public RequestInstrumentationTest,
+                                public ::testing::WithParamInterface<bool> {
+ protected:
+  struct Observer : public server::TServerObserver {
+    uint64_t acceptedConnId;
+    uint64_t closedConnId;
+
+    void connAccepted(
+        const wangle::TransportInfo& /* info */,
+        const TServerObserver::ConnectionInfo& param) override {
+      ASSERT_TRUE(param.getConnectionId() != 0);
+      acceptedConnId = param.getConnectionId();
+    }
+
+    void connClosed(const TServerObserver::ConnectionInfo& param) override {
+      ASSERT_TRUE(param.getConnectionId() != 0);
+      ASSERT_TRUE(acceptedConnId != 0);
+      ASSERT_TRUE(closedConnId == 0);
+      closedConnId = param.getConnectionId();
+    }
+  };
+  bool useRocket;
+  std::shared_ptr<Observer> observer = std::make_shared<Observer>();
+  void SetUp() override {
+    useRocket = GetParam();
+    impl_ = std::make_unique<Impl>([&](auto& ts) { ts.setObserver(observer); });
+  }
+};
+
+TEST_P(ConnectionsObserverTest, Basic) {
+  auto client = useRocket ? makeRocketClient() : makeHeaderClient();
+  client->sync_runCallback();
+  impl_.reset();
+  // Make sure both connAccepted and connClosed are invoked.
+  ASSERT_TRUE(observer->acceptedConnId != 0);
+  ASSERT_TRUE(observer->closedConnId != 0);
+  ASSERT_EQ(observer->acceptedConnId, observer->closedConnId);
+}
+
+INSTANTIATE_TEST_CASE_P(
+    ConnectionsObserverTestSequence,
+    ConnectionsObserverTest,
+    ::testing::Values(true, false));

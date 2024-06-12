@@ -149,7 +149,9 @@ ThriftRocketServerHandler::~ThriftRocketServerHandler() {
   }
   // Ensure each connAccepted() call has a matching connClosed()
   if (auto* observer = worker_->getServer()->getObserver()) {
-    observer->connClosed();
+    observer->connClosed(server::TServerObserver::ConnectionInfo(
+        reinterpret_cast<uint64_t>(transport_),
+        transport_->getSecurityProtocol()));
   }
 }
 

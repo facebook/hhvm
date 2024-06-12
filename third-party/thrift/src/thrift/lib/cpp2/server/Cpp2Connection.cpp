@@ -200,12 +200,6 @@ Cpp2Connection::~Cpp2Connection() {
     handler->connectionDestroyed(&context_);
   }
 
-  if (connectionAdded_) {
-    if (auto* observer = worker_->getServer()->getObserver()) {
-      observer->connClosed();
-    }
-  }
-
   channel_.reset();
 }
 
@@ -232,6 +226,15 @@ void Cpp2Connection::stop() {
 
     // Release the socket to avoid long CLOSE_WAIT times
     channel_->closeNow();
+  }
+
+  if (connectionAdded_) {
+    if (auto* observer = worker_->getServer()->getObserver()) {
+      observer->connClosed(server::TServerObserver::ConnectionInfo(
+          reinterpret_cast<uint64_t>(transport_.get()),
+          context_.getSecurityProtocol()));
+      connectionAdded_ = false;
+    }
   }
 
   transport_.reset();

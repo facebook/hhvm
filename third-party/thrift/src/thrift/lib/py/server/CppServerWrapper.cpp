@@ -174,7 +174,9 @@ class CppServerObserver : public TServerObserver {
   explicit CppServerObserver(object serverObserver)
       : observer_(serverObserver) {}
 
-  void connAccepted(const wangle::TransportInfo& /* info */) override {
+  void connAccepted(
+      const wangle::TransportInfo& /* info */,
+      const TServerObserver::ConnectionInfo& /* connInfo */) override {
     this->call("connAccepted");
   }
   void connDropped() override { this->call("connDropped"); }

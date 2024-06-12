@@ -130,13 +130,32 @@ class TServerObserver {
     }
   };
 
-  virtual void connAccepted(const wangle::TransportInfo&) {}
+  // This class is used to pass information regarding a connection to
+  // TServerObserver callbacks.
+  //  - `connectionId` uniquely identifies a connection; connections with the
+  //  same ID are considered the same connection.
+  //  - `securityProtocol` indicates the security protocol being used; possible
+  //  values include TLS12, Fizz, stopTLS, and kTLS.
+  class ConnectionInfo {
+   public:
+    ConnectionInfo(uint64_t connectionId, const std::string& securityProtocol)
+        : connectionId_(connectionId), securityProtocol_(securityProtocol) {}
+    uint64_t getConnectionId() const { return connectionId_; }
+    const std::string& getSecurityProtocol() const { return securityProtocol_; }
+
+   private:
+    uint64_t connectionId_;
+    std::string securityProtocol_;
+  };
+
+  virtual void connAccepted(
+      const wangle::TransportInfo&, const ConnectionInfo&) {}
 
   virtual void connDropped() {}
 
   virtual void connRejected() {}
 
-  virtual void connClosed() {}
+  virtual void connClosed(const ConnectionInfo&) {}
 
   virtual void activeConnections(int32_t /*numConnections*/) {}
 

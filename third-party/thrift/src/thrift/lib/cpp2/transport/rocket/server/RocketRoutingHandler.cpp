@@ -140,6 +140,7 @@ void RocketRoutingHandler::handleConnection(
       server->getEgressBufferRecoveryFactor();
   cfg.socketOptions = &server->getPerConnectionSocketOptions();
   cfg.parserAllocator = server->getCustomAllocatorForParser();
+  const std::string& securotyProtocol = sock->getSecurityProtocol();
 
   auto* const sockPtr = sock.get();
   auto* const connection = new rocket::RocketServerConnection(
@@ -156,7 +157,10 @@ void RocketRoutingHandler::handleConnection(
       /* connectionAgeTimeout */ true);
 
   if (auto* observer = server->getObserver()) {
-    observer->connAccepted(tinfo);
+    observer->connAccepted(
+        tinfo,
+        server::TServerObserver::ConnectionInfo(
+            reinterpret_cast<uint64_t>(sockPtr), securotyProtocol));
     observer->activeConnections(
         connectionManager->getNumConnections() *
         server->getNumIOWorkerThreads());

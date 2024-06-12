@@ -46,11 +46,14 @@ class FakeServerObserver : public apache::thrift::server::TServerObserver {
 
   FakeServerObserver() : TServerObserver(1) {}
 
-  void connAccepted(const wangle::TransportInfo& /* info */) override {
+  void connAccepted(
+      const wangle::TransportInfo& /* info */,
+      const TServerObserver::ConnectionInfo& /* connInfo */) override {
     ++connAccepted_;
   }
 
-  void connClosed() override {
+  void connClosed(
+      const TServerObserver::ConnectionInfo& /* connInfo */) override {
     ++connClosed_;
     if (connClosedNotifBaton) {
       connClosedNotifBaton->post();

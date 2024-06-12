@@ -14,8 +14,18 @@ function is_equal($obj1, $obj2) :mixed{
   if ($obj1 === null && $obj2 === null) {
     return true;
   }
-  $type1 = get_class($obj1);
-  $type2 = get_class($obj2);
+  try {
+    $type1 = get_class($obj1);
+  } catch (Exception $ex) {
+    echo $ex->getMessage();
+    return false;
+  }
+  try {
+    $type2 = get_class($obj2);
+  } catch (Exception $ex) {
+    echo $ex->getMessage();
+    return false;
+  }
   if ($type1 !== $type2) {
     report("Incorrect type", $type1, $type2);
     return false;
@@ -212,5 +222,8 @@ function main() :mixed{
 
 <<__EntryPoint>>
 function main_json_decode_collections() :mixed{
-main();
+  set_error_handler(($errno, $errstr, ...$_rest) ==> {
+    throw new Exception($errstr);
+  });
+  main();
 }

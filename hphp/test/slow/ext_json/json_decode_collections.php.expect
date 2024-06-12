@@ -1,1 +1,7 @@
+Argument 1 passed to get_class() must be an instance of HH\object, int given
+Should be
+int(0)
+But found
+int(0)
+
 Done

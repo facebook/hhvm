@@ -1,8 +1,5 @@
 string(3) "foo"
 string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-bool(false)
+string(4) "foo2"
 string(3) "foo"
 string(4) "foo2"

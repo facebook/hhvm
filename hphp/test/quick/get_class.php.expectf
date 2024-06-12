@@ -2,8 +2,4 @@ string(1) "A"
 string(1) "A"
 string(1) "A"
 
-Warning: get_class() called without object from outside a class in %s on line 13
-bool(false)
-
-Warning: get_class() called without object from outside a class in %s on line 14
-bool(false)
+Catchable fatal error: Argument 1 passed to get_class() must be an instance of HH\object, null given in %s/hphp/test/quick/get_class.php on line 13

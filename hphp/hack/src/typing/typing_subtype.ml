@@ -1209,147 +1209,156 @@ end = struct
     in
     match stripped_dynamic with
     | Some (ty_dynamic, tyl) ->
-      let ty = MakeType.union r_super tyl in
-      let (env, ty) = Env.expand_type env ty in
-      let delay_push =
-        Subtype_ask.is_sub_type_for_union_i
-          env
-          (LoclType ty)
-          (LoclType (MakeType.supportdyn_mixed ~mixed_reason:r_super r_super))
-      in
-      (* This is Typing_logic_helpers.( ||| ) except with a bias towards p1 *)
-      let ( ||| ) (env, p1) (f : env -> env * TL.subtype_prop) =
-        if TL.is_valid p1 then
-          (env, p1)
-        else
-          let (env, p2) = f env in
-          if TL.is_unsat p2 then
+      (* If subtype is literally `dynamic` then we're done *)
+      if is_dynamic lty_sub then
+        valid env
+      else
+        let ty = MakeType.union r_super tyl in
+        let (env, ty) = Env.expand_type env ty in
+        let delay_push =
+          Subtype_ask.is_sub_type_for_union_i
+            env
+            (LoclType ty)
+            (LoclType (MakeType.supportdyn_mixed ~mixed_reason:r_super r_super))
+        in
+        (* This is Typing_logic_helpers.( ||| ) except with a bias towards p1 *)
+        let ( ||| ) (env, p1) (f : env -> env * TL.subtype_prop) =
+          if TL.is_valid p1 then
             (env, p1)
-          else if TL.is_unsat p1 then
-            (env, p2)
           else
-            (env, TL.disj ~fail p1 p2)
-      in
-      (* Implement the declarative subtyping rule C<~t1,...,~tn> <: ~C<t1,...,tn>
-         * for a type C<t1,...,tn> that supports dynamic. Algorithmically,
-         *   t <: ~C<t1,...,tn> iff
-         *   t <: C<~t1,...,~tn> /\ C<~t1,...,~tn> <:D dynamic.
-         * An SDT class C generalizes to other SDT constructors such as tuples and shapes.
-      *)
-      let try_push env =
-        if delay_push then
-          dyn_finish ty env
-        else
-          (* "Solve" type variables that are bounded from above and below by the same type.
-           * Push this through nullables. This addresses common completeness issues that
-           * bedevil like-pushing because of the disjunction that is generated.
-           *)
-          let rec solve_eq_tyvar env ty =
-            let (env, ty) = Env.expand_type env ty in
-            match get_node ty with
-            | Tvar v ->
-              let lower_bounds = Env.get_tyvar_lower_bounds env v in
-              let (nulls, nonnulls) =
-                ITySet.partition
-                  (fun ty ->
-                    match ty with
-                    | LoclType t -> is_prim Aast.Tnull t
-                    | _ -> false)
-                  lower_bounds
-              in
-              (* Make sure that lower bounds [null;t] intersects with ?t upper bound *)
-              let lower_bounds =
-                if ITySet.is_empty nulls then
-                  nonnulls
-                else
-                  ITySet.map
-                    (function
-                      | LoclType t -> LoclType (MakeType.nullable Reason.none t)
-                      | ConstraintType t -> ConstraintType t)
-                    nonnulls
-              in
-              let upper_bounds = Env.get_tyvar_upper_bounds env v in
-              let bounds = ITySet.inter lower_bounds upper_bounds in
-              let bounds_list = ITySet.elements bounds in
-              begin
-                match bounds_list with
-                | [LoclType lty] -> (env, lty)
-                | _ -> (env, ty)
-              end
-            | Toption ty1 ->
-              let (env, ty1) = solve_eq_tyvar env ty1 in
-              (env, mk (get_reason ty, Toption ty1))
-            | _ -> (env, ty)
-          in
-          let (env, ty) = solve_eq_tyvar env ty in
-          (* For generic parameters with lower bounds, try like-pushing wrt
-           * these lower bounds. For example, we want
-           * vec<~int> <: ~T if vec<int> <: T
-           *)
-          let ty =
-            match get_node ty with
-            | Tgeneric (name, targs) ->
-              let bounds = Env.get_lower_bounds env name targs in
-              MakeType.union (get_reason ty) (Typing_set.elements bounds)
-            | _ -> ty
-          in
-          let (env, opt_ty) = Typing_dynamic.try_push_like env ty in
-          match opt_ty with
-          | None ->
-            let istyvar =
-              match get_node ty with
-              | Tvar _ -> true
-              | Toption ty ->
-                let (_, ty) = Env.expand_type env ty in
-                is_tyvar ty
-              | _ -> false
-            in
-            if istyvar then
-              simplify
-                ~subtype_env
-                ~this_ty
-                ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-                ~rhs:
-                  { super_like = true; super_supportdyn = false; ty_super = ty }
-                env
-              ||| dyn_finish ty
+            let (env, p2) = f env in
+            if TL.is_unsat p2 then
+              (env, p1)
+            else if TL.is_unsat p1 then
+              (env, p2)
             else
-              dyn_finish ty env
-          | Some ty ->
-            let simplify_pushed_like env =
-              simplify
-                ~subtype_env:(Subtype_env.set_coercing_to_dynamic subtype_env)
-                ~this_ty
-                ~lhs:{ sub_supportdyn = None; ty_sub = ty }
-                ~rhs:
-                  {
-                    super_like = false;
-                    super_supportdyn = false;
-                    ty_super = ty_dynamic;
-                  }
-                env
-              &&& simplify
-                    ~subtype_env
-                    ~this_ty
-                    ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-                    ~rhs:
-                      {
-                        super_like = false;
-                        super_supportdyn = false;
-                        ty_super = ty;
-                      }
+              (env, TL.disj ~fail p1 p2)
+        in
+        (* Implement the declarative subtyping rule C<~t1,...,~tn> <: ~C<t1,...,tn>
+           * for a type C<t1,...,tn> that supports dynamic. Algorithmically,
+           *   t <: ~C<t1,...,tn> iff
+           *   t <: C<~t1,...,~tn> /\ C<~t1,...,~tn> <:D dynamic.
+           * An SDT class C generalizes to other SDT constructors such as tuples and shapes.
+        *)
+        let try_push env =
+          if delay_push then
+            dyn_finish ty env
+          else
+            (* "Solve" type variables that are bounded from above and below by the same type.
+             * Push this through nullables. This addresses common completeness issues that
+             * bedevil like-pushing because of the disjunction that is generated.
+             *)
+            let rec solve_eq_tyvar env ty =
+              let (env, ty) = Env.expand_type env ty in
+              match get_node ty with
+              | Tvar v ->
+                let lower_bounds = Env.get_tyvar_lower_bounds env v in
+                let (nulls, nonnulls) =
+                  ITySet.partition
+                    (fun ty ->
+                      match ty with
+                      | LoclType t -> is_prim Aast.Tnull t
+                      | _ -> false)
+                    lower_bounds
+                in
+                (* Make sure that lower bounds [null;t] intersects with ?t upper bound *)
+                let lower_bounds =
+                  if ITySet.is_empty nulls then
+                    nonnulls
+                  else
+                    ITySet.map
+                      (function
+                        | LoclType t ->
+                          LoclType (MakeType.nullable Reason.none t)
+                        | ConstraintType t -> ConstraintType t)
+                      nonnulls
+                in
+                let upper_bounds = Env.get_tyvar_upper_bounds env v in
+                let bounds = ITySet.inter lower_bounds upper_bounds in
+                let bounds_list = ITySet.elements bounds in
+                begin
+                  match bounds_list with
+                  | [LoclType lty] -> (env, lty)
+                  | _ -> (env, ty)
+                end
+              | Toption ty1 ->
+                let (env, ty1) = solve_eq_tyvar env ty1 in
+                (env, mk (get_reason ty, Toption ty1))
+              | _ -> (env, ty)
             in
+            let (env, ty) = solve_eq_tyvar env ty in
+            (* For generic parameters with lower bounds, try like-pushing wrt
+             * these lower bounds. For example, we want
+             * vec<~int> <: ~T if vec<int> <: T
+             *)
+            let ty =
+              match get_node ty with
+              | Tgeneric (name, targs) ->
+                let bounds = Env.get_lower_bounds env name targs in
+                MakeType.union (get_reason ty) (Typing_set.elements bounds)
+              | _ -> ty
+            in
+            let (env, opt_ty) = Typing_dynamic.try_push_like env ty in
+            match opt_ty with
+            | None ->
+              let istyvar =
+                match get_node ty with
+                | Tvar _ -> true
+                | Toption ty ->
+                  let (_, ty) = Env.expand_type env ty in
+                  is_tyvar ty
+                | _ -> false
+              in
+              if istyvar then
+                simplify
+                  ~subtype_env
+                  ~this_ty
+                  ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+                  ~rhs:
+                    {
+                      super_like = true;
+                      super_supportdyn = false;
+                      ty_super = ty;
+                    }
+                  env
+                ||| dyn_finish ty
+              else
+                dyn_finish ty env
+            | Some ty ->
+              let simplify_pushed_like env =
+                simplify
+                  ~subtype_env:(Subtype_env.set_coercing_to_dynamic subtype_env)
+                  ~this_ty
+                  ~lhs:{ sub_supportdyn = None; ty_sub = ty }
+                  ~rhs:
+                    {
+                      super_like = false;
+                      super_supportdyn = false;
+                      ty_super = ty_dynamic;
+                    }
+                  env
+                &&& simplify
+                      ~subtype_env
+                      ~this_ty
+                      ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+                      ~rhs:
+                        {
+                          super_like = false;
+                          super_supportdyn = false;
+                          ty_super = ty;
+                        }
+              in
 
-            env |> simplify_pushed_like ||| dyn_finish ty
-      in
-      simplify
-        ~subtype_env
-        ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-        ~rhs:
-          { super_like = delay_push; super_supportdyn = false; ty_super = ty }
-        env
-      ||| try_push
+              env |> simplify_pushed_like ||| dyn_finish ty
+        in
+        simplify
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+          ~rhs:
+            { super_like = delay_push; super_supportdyn = false; ty_super = ty }
+          env
+        ||| try_push
     | _ ->
       (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
        * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).

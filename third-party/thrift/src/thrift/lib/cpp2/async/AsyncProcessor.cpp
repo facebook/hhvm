@@ -1010,11 +1010,14 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
   }
   if (!exceptions.empty()) {
     std::string message = fmt::format(
-        "ServiceInterceptor::onRequest threw exceptions:\n[0] {}\n",
+        "ServiceInterceptor::onRequest threw exceptions:\n[{}] {}\n",
+        serviceInterceptorsInfo[0].qualifiedName,
         folly::exceptionStr(exceptions[0]));
     for (std::size_t i = 1; i < exceptions.size(); ++i) {
-      message +=
-          fmt::format("[{}] {}\n", i, folly::exceptionStr(exceptions[i]));
+      message += fmt::format(
+          "[{}] {}\n",
+          serviceInterceptorsInfo[i].qualifiedName,
+          folly::exceptionStr(exceptions[i]));
     }
     co_yield folly::coro::co_error(TApplicationException(message));
   }
@@ -1048,11 +1051,14 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse() {
 
   if (!exceptions.empty()) {
     std::string message = fmt::format(
-        "ServiceInterceptor::onResponse threw exceptions:\n[0] {}\n",
+        "ServiceInterceptor::onResponse threw exceptions:\n[{}] {}\n",
+        serviceInterceptorsInfo[0].qualifiedName,
         folly::exceptionStr(exceptions[0]));
     for (std::size_t i = 1; i < exceptions.size(); ++i) {
-      message +=
-          fmt::format("[{}] {}\n", i, folly::exceptionStr(exceptions[i]));
+      message += fmt::format(
+          "[{}] {}\n",
+          serviceInterceptorsInfo[i].qualifiedName,
+          folly::exceptionStr(exceptions[i]));
     }
     co_yield folly::coro::co_error(TApplicationException(message));
   }

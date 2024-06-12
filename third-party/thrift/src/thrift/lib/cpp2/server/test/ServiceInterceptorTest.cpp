@@ -405,7 +405,7 @@ CO_TEST_P(ServiceInterceptorTestP, OnRequestException) {
   auto interceptor1 =
       std::make_shared<ServiceInterceptorThrowOnRequest>("Interceptor1");
   auto interceptor2 =
-      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor2");
+      std::make_shared<ServiceInterceptorThrowOnRequest>("Interceptor2");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
@@ -426,6 +426,10 @@ CO_TEST_P(ServiceInterceptorTestP, OnRequestException) {
               std::string(ex.what()),
               HasSubstr(
                   "Exception from ServiceInterceptorThrowOnRequest::onRequest"));
+          EXPECT_THAT(
+              std::string(ex.what()), HasSubstr("[TestModule.Interceptor1]"));
+          EXPECT_THAT(
+              std::string(ex.what()), HasSubstr("[TestModule.Interceptor2]"));
           throw;
         }
       },
@@ -467,11 +471,14 @@ CO_TEST_P(ServiceInterceptorTestP, OnRequestExceptionEB) {
 }
 
 CO_TEST_P(ServiceInterceptorTestP, OnResponseException) {
-  auto interceptor =
+  auto interceptor1 =
       std::make_shared<ServiceInterceptorThrowOnResponse>("Interceptor1");
+  auto interceptor2 =
+      std::make_shared<ServiceInterceptorThrowOnResponse>("Interceptor2");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(interceptor));
+        server.addModule(std::make_unique<TestModule>(
+            InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
@@ -488,12 +495,18 @@ CO_TEST_P(ServiceInterceptorTestP, OnResponseException) {
               std::string(ex.what()),
               HasSubstr(
                   "Exception from ServiceInterceptorThrowOnResponse::onResponse"));
+          EXPECT_THAT(
+              std::string(ex.what()), HasSubstr("[TestModule.Interceptor1]"));
+          EXPECT_THAT(
+              std::string(ex.what()), HasSubstr("[TestModule.Interceptor2]"));
           throw;
         }
       },
       apache::thrift::TApplicationException);
-  EXPECT_EQ(interceptor->onRequestCount, 1);
-  EXPECT_EQ(interceptor->onResponseCount, 1);
+  EXPECT_EQ(interceptor1->onRequestCount, 1);
+  EXPECT_EQ(interceptor1->onResponseCount, 1);
+  EXPECT_EQ(interceptor2->onRequestCount, 1);
+  EXPECT_EQ(interceptor2->onResponseCount, 1);
 }
 
 CO_TEST_P(ServiceInterceptorTestP, OnResponseExceptionEB) {

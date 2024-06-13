@@ -123,24 +123,13 @@ TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
   assertx(*ImplicitContext::activeCtx);
   auto const obj = *ImplicitContext::activeCtx;
   auto const context = Native::data<ImplicitContext>(obj);
-
-  switch (context->m_state) {
-    case ImplicitContext::State::Value: {
-      auto const it = context->m_map.find(key.get());
-      if (it == context->m_map.end()) return make_tv<KindOfNull>();
-      auto const result = it->second.first;
-      if (isRefcountedType(result.m_type)) tvIncRefCountable(result);
-      return result;
-    }
-    case ImplicitContext::State::Inaccessible:
-      throw_implicit_context_exception("Implicit context is set to inaccessible");
-    case ImplicitContext::State::SoftInaccessible:
-      raise_implicit_context_warning("Implicit context is set to soft inaccessible");
-      [[fallthrough]];
-    case ImplicitContext::State::SoftSet:
-      return make_tv<KindOfNull>();
+  auto const it = context->m_map.find(key.get());
+  if (it == context->m_map.end()) {
+    throw_implicit_context_exception("Implicit context is set to inaccessible");
   }
-  not_reached();
+  auto const result = it->second.first;
+  if (isRefcountedType(result.m_type)) tvIncRefCountable(result);
+  return result;
 }
 
 ObjectRet HHVM_FUNCTION(get_whole_implicit_context) {

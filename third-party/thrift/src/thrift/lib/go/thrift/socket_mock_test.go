@@ -34,10 +34,6 @@ func newMockSocket() *mockSocket {
 	}
 }
 
-func (s *mockSocket) Open() error {
-	return nil
-}
-
 func (s *mockSocket) Bytes() []byte {
 	return s.ReadWriteCloser.(*MemoryBuffer).Bytes()
 }

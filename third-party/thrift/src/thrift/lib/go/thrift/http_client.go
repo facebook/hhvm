@@ -76,11 +76,6 @@ func (p *httpClient) DelHeader(key string) {
 	p.header.Del(key)
 }
 
-func (p *httpClient) Open() error {
-	// do nothing
-	return nil
-}
-
 func (p *httpClient) closeResponse() error {
 	p.response = nil
 	p.responseBuffer.Reset()

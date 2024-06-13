@@ -39,10 +39,6 @@ func NewMemoryBufferLen(size int) *MemoryBuffer {
 	return &MemoryBuffer{Buffer: bytes.NewBuffer(buf), size: size}
 }
 
-func (p *MemoryBuffer) Open() error {
-	return nil
-}
-
 func (p *MemoryBuffer) Close() error {
 	p.Buffer.Reset()
 	return nil

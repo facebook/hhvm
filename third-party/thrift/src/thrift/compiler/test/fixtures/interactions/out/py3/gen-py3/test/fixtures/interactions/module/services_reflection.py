@@ -90,3 +90,101 @@ def get_reflection__MyService(for_clients: bool):
         )
     )
     return spec
+
+
+def get_reflection__Factories(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
+        name="Factories",
+        methods=None,
+        annotations={
+        },
+    )
+    spec.add_method(
+        __MethodSpec.__new__(
+            __MethodSpec,
+            name="foo",
+            arguments=(
+            ),
+            result=None,
+            result_kind=__NumberType.NOT_A_NUMBER,
+            exceptions=(
+            ),
+            annotations={
+            },
+        )
+    )
+    spec.add_method(
+        __MethodSpec.__new__(
+            __MethodSpec,
+            name="interact",
+            arguments=(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
+                    name="arg",
+                    type=int,
+                    kind=__NumberType.I32,
+                    annotations={
+                    },
+                ),
+            ),
+            result=None,
+            result_kind=__NumberType.NOT_A_NUMBER,
+            exceptions=(
+            ),
+            annotations={
+            },
+        )
+    )
+    spec.add_method(
+        __MethodSpec.__new__(
+            __MethodSpec,
+            name="interactFast",
+            arguments=(
+            ),
+            result=int,
+            result_kind=__NumberType.I32,
+            exceptions=(
+            ),
+            annotations={
+            },
+        )
+    )
+    spec.add_method(
+        __MethodSpec.__new__(
+            __MethodSpec,
+            name="serialize",
+            arguments=(
+            ),
+            result=_test_fixtures_interactions_module_types.ResponseAndClientBufferedStream__i32_i32 if for_clients else _test_fixtures_interactions_module_types.ResponseAndServerStream__i32_i32,
+            result_kind=__NumberType.NOT_A_NUMBER,
+            exceptions=(
+            ),
+            annotations={
+            },
+        )
+    )
+    return spec
+
+
+def get_reflection__Perform(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
+        name="Perform",
+        methods=None,
+        annotations={
+        },
+    )
+    spec.add_method(
+        __MethodSpec.__new__(
+            __MethodSpec,
+            name="foo",
+            arguments=(
+            ),
+            result=None,
+            result_kind=__NumberType.NOT_A_NUMBER,
+            exceptions=(
+            ),
+            annotations={
+            },
+        )
+    )
+    return spec

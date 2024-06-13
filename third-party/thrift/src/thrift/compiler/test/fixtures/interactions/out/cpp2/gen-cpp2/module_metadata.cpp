@@ -142,6 +142,118 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   context.module() = std::move(module);
   return &context;
 }
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_foo([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "foo";
+  auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_interact([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "interact";
+  auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  ::apache::thrift::metadata::ThriftField module_Factories_interact_arg_1;
+  module_Factories_interact_arg_1.id() = 1;
+  module_Factories_interact_arg_1.name() = "arg";
+  module_Factories_interact_arg_1.is_optional() = false;
+  auto module_Factories_interact_arg_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
+  module_Factories_interact_arg_1_type->writeAndGenType(*module_Factories_interact_arg_1.type(), metadata);
+  func.arguments()->push_back(std::move(module_Factories_interact_arg_1));
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_interactFast([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "interactFast";
+  auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_serialize([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "serialize";
+  auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
+
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
+  DCHECK(self != nullptr);
+  // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
+  ::apache::thrift::metadata::ThriftServiceContext context;
+  context.module() = *self->module();
+  context.service_info() = response.metadata()->services()->at(*self->service_name());
+  response.context() = std::move(context);
+}
+
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  ::apache::thrift::metadata::ThriftService module_Factories;
+  module_Factories.name() = "module.Factories";
+  static const ThriftFunctionGenerator functions[] = {
+    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_foo,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_interact,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_interactFast,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_serialize,
+  };
+  for (auto& function_gen : functions) {
+    function_gen(metadata, module_Factories);
+  }
+  // We need to keep the index around because a reference or iterator could be invalidated.
+  auto selfIndex = services.size();
+  services.emplace_back();
+  ThriftServiceContextRef& context = services[selfIndex];
+  metadata.services()->emplace("module.Factories", std::move(module_Factories));
+  context.service_name() = "module.Factories";
+  ::apache::thrift::metadata::ThriftModuleContext module;
+  module.name() = "module";
+  context.module() = std::move(module);
+  return &context;
+}
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Perform>>::gen_foo([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "foo";
+  auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
+
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Perform>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
+  DCHECK(self != nullptr);
+  // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
+  ::apache::thrift::metadata::ThriftServiceContext context;
+  context.module() = *self->module();
+  context.service_info() = response.metadata()->services()->at(*self->service_name());
+  response.context() = std::move(context);
+}
+
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Perform>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  ::apache::thrift::metadata::ThriftService module_Perform;
+  module_Perform.name() = "module.Perform";
+  static const ThriftFunctionGenerator functions[] = {
+    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Perform>>::gen_foo,
+  };
+  for (auto& function_gen : functions) {
+    function_gen(metadata, module_Perform);
+  }
+  // We need to keep the index around because a reference or iterator could be invalidated.
+  auto selfIndex = services.size();
+  services.emplace_back();
+  ThriftServiceContextRef& context = services[selfIndex];
+  metadata.services()->emplace("module.Perform", std::move(module_Perform));
+  context.service_name() = "module.Perform";
+  ::apache::thrift::metadata::ThriftModuleContext module;
+  module.name() = "module";
+  context.module() = std::move(module);
+  return &context;
+}
 } // namespace md
 } // namespace detail
 } // namespace thrift

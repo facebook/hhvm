@@ -352,3 +352,663 @@ func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.
 }
 
 
+
+
+type Factories interface {
+    Foo(ctx context.Context) (error)
+}
+
+type FactoriesChannelClientInterface interface {
+    thrift.ClientInterface
+    Factories
+}
+
+type FactoriesClientInterface interface {
+    thrift.ClientInterface
+    Foo() (error)
+}
+
+type FactoriesContextClientInterface interface {
+    FactoriesClientInterface
+    FooContext(ctx context.Context) (error)
+}
+
+type FactoriesChannelClient struct {
+    ch thrift.RequestChannel
+}
+// Compile time interface enforcer
+var _ FactoriesChannelClientInterface = (*FactoriesChannelClient)(nil)
+
+func NewFactoriesChannelClient(channel thrift.RequestChannel) *FactoriesChannelClient {
+    return &FactoriesChannelClient{
+        ch: channel,
+    }
+}
+
+func (c *FactoriesChannelClient) Close() error {
+    return c.ch.Close()
+}
+
+type FactoriesClient struct {
+    chClient *FactoriesChannelClient
+}
+// Compile time interface enforcer
+var _ FactoriesClientInterface = (*FactoriesClient)(nil)
+var _ FactoriesContextClientInterface = (*FactoriesClient)(nil)
+
+func NewFactoriesClient(prot thrift.Protocol) *FactoriesClient {
+    return &FactoriesClient{
+        chClient: NewFactoriesChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+func (c *FactoriesClient) Close() error {
+    return c.chClient.Close()
+}
+
+func (c *FactoriesChannelClient) Foo(ctx context.Context) (error) {
+    in := &reqFactoriesFoo{
+    }
+    out := newRespFactoriesFoo()
+    err := c.ch.Call(ctx, "foo", in, out)
+    if err != nil {
+        return err
+    }
+    return nil
+}
+
+func (c *FactoriesClient) Foo() (error) {
+    return c.chClient.Foo(context.Background())
+}
+
+func (c *FactoriesClient) FooContext(ctx context.Context) (error) {
+    return c.chClient.Foo(ctx)
+}
+
+type reqFactoriesFoo struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqFactoriesFoo)(nil)
+
+// Deprecated: FactoriesFooArgsDeprecated is deprecated, since it is supposed to be internal.
+type FactoriesFooArgsDeprecated = reqFactoriesFoo
+
+func newReqFactoriesFoo() *reqFactoriesFoo {
+    return (&reqFactoriesFoo{})
+}
+
+
+
+func (x *reqFactoriesFoo) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("reqFactoriesFoo"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqFactoriesFoo) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqFactoriesFoo) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqFactoriesFoo({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type respFactoriesFoo struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respFactoriesFoo)(nil)
+var _ thrift.WritableResult = (*respFactoriesFoo)(nil)
+
+// Deprecated: FactoriesFooResultDeprecated is deprecated, since it is supposed to be internal.
+type FactoriesFooResultDeprecated = respFactoriesFoo
+
+func newRespFactoriesFoo() *respFactoriesFoo {
+    return (&respFactoriesFoo{})
+}
+
+
+
+func (x *respFactoriesFoo) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respFactoriesFoo) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("respFactoriesFoo"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respFactoriesFoo) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respFactoriesFoo) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respFactoriesFoo({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
+
+type FactoriesProcessor struct {
+    processorMap       map[string]thrift.ProcessorFunctionContext
+    functionServiceMap map[string]string
+    handler            Factories
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorContext = (*FactoriesProcessor)(nil)
+
+func NewFactoriesProcessor(handler Factories) *FactoriesProcessor {
+    p := &FactoriesProcessor{
+        handler:            handler,
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        functionServiceMap: make(map[string]string),
+    }
+    p.AddToProcessorMap("foo", &procFuncFactoriesFoo{handler: handler})
+    p.AddToFunctionServiceMap("foo", "Factories")
+
+    return p
+}
+
+func (p *FactoriesProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+    p.processorMap[key] = processor
+}
+
+func (p *FactoriesProcessor) AddToFunctionServiceMap(key, service string) {
+    p.functionServiceMap[key] = service
+}
+
+func (p *FactoriesProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
+    if processor, ok := p.processorMap[key]; ok {
+        return processor, nil
+    }
+    return nil, nil
+}
+
+func (p *FactoriesProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+    return p.processorMap
+}
+
+func (p *FactoriesProcessor) FunctionServiceMap() map[string]string {
+    return p.functionServiceMap
+}
+
+func (p *FactoriesProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadataForService("module.Factories")
+}
+
+
+type procFuncFactoriesFoo struct {
+    handler Factories
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunctionContext = (*procFuncFactoriesFoo)(nil)
+
+func (p *procFuncFactoriesFoo) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+    args := newReqFactoriesFoo()
+    if err := args.Read(iprot); err != nil {
+        return nil, err
+    }
+    iprot.ReadMessageEnd()
+    return args, nil
+}
+
+func (p *procFuncFactoriesFoo) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+    var err2 error
+    messageType := thrift.REPLY
+    switch result.(type) {
+    case thrift.ApplicationException:
+        messageType = thrift.EXCEPTION
+    }
+
+    if err2 = oprot.WriteMessageBegin("foo", messageType, seqId); err2 != nil {
+        err = err2
+    }
+    if err2 = result.Write(oprot); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.Flush(); err == nil && err2 != nil {
+        err = err2
+    }
+    return err
+}
+
+func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+    result := newRespFactoriesFoo()
+    err := p.handler.Foo(ctx)
+    if err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Foo: " + err.Error(), err)
+        return x, x
+    }
+
+    return result, nil
+}
+
+
+
+
+type Perform interface {
+    Foo(ctx context.Context) (error)
+}
+
+type PerformChannelClientInterface interface {
+    thrift.ClientInterface
+    Perform
+}
+
+type PerformClientInterface interface {
+    thrift.ClientInterface
+    Foo() (error)
+}
+
+type PerformContextClientInterface interface {
+    PerformClientInterface
+    FooContext(ctx context.Context) (error)
+}
+
+type PerformChannelClient struct {
+    ch thrift.RequestChannel
+}
+// Compile time interface enforcer
+var _ PerformChannelClientInterface = (*PerformChannelClient)(nil)
+
+func NewPerformChannelClient(channel thrift.RequestChannel) *PerformChannelClient {
+    return &PerformChannelClient{
+        ch: channel,
+    }
+}
+
+func (c *PerformChannelClient) Close() error {
+    return c.ch.Close()
+}
+
+type PerformClient struct {
+    chClient *PerformChannelClient
+}
+// Compile time interface enforcer
+var _ PerformClientInterface = (*PerformClient)(nil)
+var _ PerformContextClientInterface = (*PerformClient)(nil)
+
+func NewPerformClient(prot thrift.Protocol) *PerformClient {
+    return &PerformClient{
+        chClient: NewPerformChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+func (c *PerformClient) Close() error {
+    return c.chClient.Close()
+}
+
+func (c *PerformChannelClient) Foo(ctx context.Context) (error) {
+    in := &reqPerformFoo{
+    }
+    out := newRespPerformFoo()
+    err := c.ch.Call(ctx, "foo", in, out)
+    if err != nil {
+        return err
+    }
+    return nil
+}
+
+func (c *PerformClient) Foo() (error) {
+    return c.chClient.Foo(context.Background())
+}
+
+func (c *PerformClient) FooContext(ctx context.Context) (error) {
+    return c.chClient.Foo(ctx)
+}
+
+type reqPerformFoo struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqPerformFoo)(nil)
+
+// Deprecated: PerformFooArgsDeprecated is deprecated, since it is supposed to be internal.
+type PerformFooArgsDeprecated = reqPerformFoo
+
+func newReqPerformFoo() *reqPerformFoo {
+    return (&reqPerformFoo{})
+}
+
+
+
+func (x *reqPerformFoo) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("reqPerformFoo"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqPerformFoo) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqPerformFoo) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqPerformFoo({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type respPerformFoo struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respPerformFoo)(nil)
+var _ thrift.WritableResult = (*respPerformFoo)(nil)
+
+// Deprecated: PerformFooResultDeprecated is deprecated, since it is supposed to be internal.
+type PerformFooResultDeprecated = respPerformFoo
+
+func newRespPerformFoo() *respPerformFoo {
+    return (&respPerformFoo{})
+}
+
+
+
+func (x *respPerformFoo) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respPerformFoo) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("respPerformFoo"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respPerformFoo) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respPerformFoo) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respPerformFoo({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
+
+type PerformProcessor struct {
+    processorMap       map[string]thrift.ProcessorFunctionContext
+    functionServiceMap map[string]string
+    handler            Perform
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorContext = (*PerformProcessor)(nil)
+
+func NewPerformProcessor(handler Perform) *PerformProcessor {
+    p := &PerformProcessor{
+        handler:            handler,
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        functionServiceMap: make(map[string]string),
+    }
+    p.AddToProcessorMap("foo", &procFuncPerformFoo{handler: handler})
+    p.AddToFunctionServiceMap("foo", "Perform")
+
+    return p
+}
+
+func (p *PerformProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+    p.processorMap[key] = processor
+}
+
+func (p *PerformProcessor) AddToFunctionServiceMap(key, service string) {
+    p.functionServiceMap[key] = service
+}
+
+func (p *PerformProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
+    if processor, ok := p.processorMap[key]; ok {
+        return processor, nil
+    }
+    return nil, nil
+}
+
+func (p *PerformProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+    return p.processorMap
+}
+
+func (p *PerformProcessor) FunctionServiceMap() map[string]string {
+    return p.functionServiceMap
+}
+
+func (p *PerformProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadataForService("module.Perform")
+}
+
+
+type procFuncPerformFoo struct {
+    handler Perform
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunctionContext = (*procFuncPerformFoo)(nil)
+
+func (p *procFuncPerformFoo) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+    args := newReqPerformFoo()
+    if err := args.Read(iprot); err != nil {
+        return nil, err
+    }
+    iprot.ReadMessageEnd()
+    return args, nil
+}
+
+func (p *procFuncPerformFoo) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+    var err2 error
+    messageType := thrift.REPLY
+    switch result.(type) {
+    case thrift.ApplicationException:
+        messageType = thrift.EXCEPTION
+    }
+
+    if err2 = oprot.WriteMessageBegin("foo", messageType, seqId); err2 != nil {
+        err = err2
+    }
+    if err2 = result.Write(oprot); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.Flush(); err == nil && err2 != nil {
+        err = err2
+    }
+    return err
+}
+
+func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+    result := newRespPerformFoo()
+    err := p.handler.Foo(ctx)
+    if err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Foo: " + err.Error(), err)
+        return x, x
+    }
+
+    return result, nil
+}
+
+

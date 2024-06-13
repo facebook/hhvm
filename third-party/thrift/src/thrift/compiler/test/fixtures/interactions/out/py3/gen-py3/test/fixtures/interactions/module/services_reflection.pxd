@@ -9,3 +9,11 @@
 cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_handlers.h" namespace "::cpp2":
     cdef cppclass cMyServiceSvIf "::cpp2::MyServiceSvIf":
         pass
+
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_handlers.h" namespace "::cpp2":
+    cdef cppclass cFactoriesSvIf "::cpp2::FactoriesSvIf":
+        pass
+
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_handlers.h" namespace "::cpp2":
+    cdef cppclass cPerformSvIf "::cpp2::PerformSvIf":
+        pass

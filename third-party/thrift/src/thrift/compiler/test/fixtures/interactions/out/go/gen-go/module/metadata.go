@@ -65,6 +65,26 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetReturnType(premadeThriftType_void),
         },
     ),
+    metadata.NewThriftService().
+    SetName("module.Factories").
+    SetFunctions(
+        []*metadata.ThriftFunction{
+            metadata.NewThriftFunction().
+    SetName("foo").
+    SetIsOneway(false).
+    SetReturnType(premadeThriftType_void),
+        },
+    ),
+    metadata.NewThriftService().
+    SetName("module.Perform").
+    SetFunctions(
+        []*metadata.ThriftFunction{
+            metadata.NewThriftFunction().
+    SetName("foo").
+    SetIsOneway(false).
+    SetReturnType(premadeThriftType_void),
+        },
+    ),
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

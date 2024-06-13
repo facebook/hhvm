@@ -467,3 +467,816 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_SerialInteraction()
     
+
+class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.Factories"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.Factories"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories()
+    
+        async def foo(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> None:
+            _fbthrift_resp = await self._send_request(
+                "Factories",
+                "foo",
+                test.fixtures.interactions.module.thrift_types._fbthrift_Factories_foo_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_Factories_foo_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uri_or_name="Factories",
+                rpc_options=rpc_options,
+            )
+    
+        async def interact(
+            self,
+            arg: int,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> Factories_MyInteraction.Async:
+            _fbthrift_interaction = self.createMyInteraction()
+            _fbthrift_resp = await self._send_request(
+                "Factories",
+                "interact",
+                test.fixtures.interactions.module.thrift_types._fbthrift_Factories_interact_args(
+                    arg=arg,),
+                test.fixtures.interactions.module.thrift_types._fbthrift_Factories_interact_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Factory,
+                interaction_name="MyInteraction",
+                created_interaction = _fbthrift_interaction,
+                uri_or_name="Factories",
+                rpc_options=rpc_options,
+            )
+            return _fbthrift_interaction
+    
+        async def interactFast(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.Tuple[Factories_MyInteractionFast.Async, int]:
+            _fbthrift_interaction = self.createMyInteractionFast()
+            _fbthrift_resp = await self._send_request(
+                "Factories",
+                "interactFast",
+                test.fixtures.interactions.module.thrift_types._fbthrift_Factories_interactFast_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_Factories_interactFast_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Factory,
+                interaction_name="MyInteractionFast",
+                created_interaction = _fbthrift_interaction,
+                uri_or_name="Factories",
+                rpc_options=rpc_options,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_interaction, _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        async def serialize(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.Tuple[Factories_SerialInteraction.Async, int, _typing.AsyncGenerator[int, None]]:
+            _fbthrift_interaction = self.createSerialInteraction()
+            _fbthrift_resp = await self._send_request(
+                "Factories",
+                "serialize",
+                test.fixtures.interactions.module.thrift_types._fbthrift_Factories_serialize_args(),
+                (test.fixtures.interactions.module.thrift_types._fbthrift_Factories_serialize_result, test.fixtures.interactions.module.thrift_types._fbthrift_Factories_serialize_result_stream),
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Factory,
+                interaction_name="SerialInteraction",
+                created_interaction = _fbthrift_interaction,
+                uri_or_name="Factories",
+                rpc_options=rpc_options,
+            )
+            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_interaction, _fbthrift_resp.success, _fbthrift_stream
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        def createMyInteraction(
+            self #Factories
+        ) -> Factories_MyInteraction.Async:
+            return self._create_interaction("MyInteraction", Factories_MyInteraction.Async)
+        async def async_createMyInteraction(
+            self #Factories
+        ) -> Factories_MyInteraction.Async:
+            return self.createMyInteraction()
+        def createMyInteractionFast(
+            self #Factories
+        ) -> Factories_MyInteractionFast.Async:
+            return self._create_interaction("MyInteractionFast", Factories_MyInteractionFast.Async)
+        async def async_createMyInteractionFast(
+            self #Factories
+        ) -> Factories_MyInteractionFast.Async:
+            return self.createMyInteractionFast()
+        def createSerialInteraction(
+            self #Factories
+        ) -> Factories_SerialInteraction.Async:
+            return self._create_interaction("SerialInteraction", Factories_SerialInteraction.Async)
+        async def async_createSerialInteraction(
+            self #Factories
+        ) -> Factories_SerialInteraction.Async:
+            return self.createSerialInteraction()
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.Factories"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories()
+    
+        def foo(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> None:
+            _fbthrift_resp = self._send_request(
+                "Factories",
+                "foo",
+                test.fixtures.interactions.module.thrift_types._fbthrift_Factories_foo_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_Factories_foo_result,
+                uri_or_name="Factories",
+                rpc_options=rpc_options,
+            )
+    
+class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.Async", "Factories_MyInteraction.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyInteraction"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_MyInteraction()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.MyInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_MyInteraction()
+    
+        async def frobnicate(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> int:
+            _fbthrift_resp = await self._send_request(
+                "Factories",
+                "MyInteraction.frobnicate",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_frobnicate_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_frobnicate_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+                uri_or_name="MyInteraction",
+                rpc_options=rpc_options,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            if _fbthrift_resp.ex is not None:
+                raise _fbthrift_resp.ex
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        async def ping(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> None:
+            _fbthrift_resp = await self._send_request(
+                "Factories",
+                "MyInteraction.ping",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_ping_args(),
+                None,
+                qualifier = _fbthrift_FunctionQualifier.OneWay,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+                uri_or_name="MyInteraction",
+                rpc_options=rpc_options,
+            )
+    
+        async def truthify(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.AsyncGenerator[bool, None]:
+            _fbthrift_resp = await self._send_request(
+                "Factories",
+                "MyInteraction.truthify",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_args(),
+                (test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_result, test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_result_stream),
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+                uri_or_name="MyInteraction",
+                rpc_options=rpc_options,
+            )
+            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            return _fbthrift_stream
+    
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.MyInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_MyInteraction()
+    
+class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteractionFast.Async", "Factories_MyInteractionFast.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyInteractionFast"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+    """process_in_event_base""": """1""",    }
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_MyInteractionFast()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.MyInteractionFast"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_MyInteractionFast()
+    
+        async def frobnicate(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> int:
+            _fbthrift_resp = await self._send_request(
+                "Factories",
+                "MyInteractionFast.frobnicate",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_frobnicate_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_frobnicate_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteractionFast",
+                uri_or_name="MyInteractionFast",
+                rpc_options=rpc_options,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        async def ping(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> None:
+            _fbthrift_resp = await self._send_request(
+                "Factories",
+                "MyInteractionFast.ping",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_ping_args(),
+                None,
+                qualifier = _fbthrift_FunctionQualifier.OneWay,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteractionFast",
+                uri_or_name="MyInteractionFast",
+                rpc_options=rpc_options,
+            )
+    
+        async def truthify(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.AsyncGenerator[bool, None]:
+            _fbthrift_resp = await self._send_request(
+                "Factories",
+                "MyInteractionFast.truthify",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_truthify_args(),
+                (test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_truthify_result, test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_truthify_result_stream),
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteractionFast",
+                uri_or_name="MyInteractionFast",
+                rpc_options=rpc_options,
+            )
+            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            return _fbthrift_stream
+    
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.MyInteractionFast"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_MyInteractionFast()
+    
+class Factories_SerialInteraction(_fbthrift_python_Client["Factories_SerialInteraction.Async", "Factories_SerialInteraction.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.SerialInteraction"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+    """serial""": """1""",    }
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_SerialInteraction()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.SerialInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_SerialInteraction()
+    
+        async def frobnicate(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> None:
+            _fbthrift_resp = await self._send_request(
+                "Factories",
+                "SerialInteraction.frobnicate",
+                test.fixtures.interactions.module.thrift_types._fbthrift_SerialInteraction_frobnicate_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_SerialInteraction_frobnicate_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="SerialInteraction",
+                uri_or_name="SerialInteraction",
+                rpc_options=rpc_options,
+            )
+    
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.SerialInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Factories_SerialInteraction()
+    
+
+class Perform(_fbthrift_python_Client["Perform.Async", "Perform.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.Perform"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.Perform"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform()
+    
+        async def foo(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> None:
+            _fbthrift_resp = await self._send_request(
+                "Perform",
+                "foo",
+                test.fixtures.interactions.module.thrift_types._fbthrift_Perform_foo_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_Perform_foo_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uri_or_name="Perform",
+                rpc_options=rpc_options,
+            )
+    
+        def createMyInteraction(
+            self #Perform
+        ) -> Perform_MyInteraction.Async:
+            return self._create_interaction("MyInteraction", Perform_MyInteraction.Async)
+        async def async_createMyInteraction(
+            self #Perform
+        ) -> Perform_MyInteraction.Async:
+            return self.createMyInteraction()
+        def createMyInteractionFast(
+            self #Perform
+        ) -> Perform_MyInteractionFast.Async:
+            return self._create_interaction("MyInteractionFast", Perform_MyInteractionFast.Async)
+        async def async_createMyInteractionFast(
+            self #Perform
+        ) -> Perform_MyInteractionFast.Async:
+            return self.createMyInteractionFast()
+        def createSerialInteraction(
+            self #Perform
+        ) -> Perform_SerialInteraction.Async:
+            return self._create_interaction("SerialInteraction", Perform_SerialInteraction.Async)
+        async def async_createSerialInteraction(
+            self #Perform
+        ) -> Perform_SerialInteraction.Async:
+            return self.createSerialInteraction()
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.Perform"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform()
+    
+        def foo(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> None:
+            _fbthrift_resp = self._send_request(
+                "Perform",
+                "foo",
+                test.fixtures.interactions.module.thrift_types._fbthrift_Perform_foo_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_Perform_foo_result,
+                uri_or_name="Perform",
+                rpc_options=rpc_options,
+            )
+    
+class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async", "Perform_MyInteraction.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyInteraction"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_MyInteraction()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.MyInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_MyInteraction()
+    
+        async def frobnicate(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> int:
+            _fbthrift_resp = await self._send_request(
+                "Perform",
+                "MyInteraction.frobnicate",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_frobnicate_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_frobnicate_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+                uri_or_name="MyInteraction",
+                rpc_options=rpc_options,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            if _fbthrift_resp.ex is not None:
+                raise _fbthrift_resp.ex
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        async def ping(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> None:
+            _fbthrift_resp = await self._send_request(
+                "Perform",
+                "MyInteraction.ping",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_ping_args(),
+                None,
+                qualifier = _fbthrift_FunctionQualifier.OneWay,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+                uri_or_name="MyInteraction",
+                rpc_options=rpc_options,
+            )
+    
+        async def truthify(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.AsyncGenerator[bool, None]:
+            _fbthrift_resp = await self._send_request(
+                "Perform",
+                "MyInteraction.truthify",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_args(),
+                (test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_result, test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_result_stream),
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+                uri_or_name="MyInteraction",
+                rpc_options=rpc_options,
+            )
+            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            return _fbthrift_stream
+    
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.MyInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_MyInteraction()
+    
+class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFast.Async", "Perform_MyInteractionFast.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyInteractionFast"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+    """process_in_event_base""": """1""",    }
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_MyInteractionFast()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.MyInteractionFast"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_MyInteractionFast()
+    
+        async def frobnicate(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> int:
+            _fbthrift_resp = await self._send_request(
+                "Perform",
+                "MyInteractionFast.frobnicate",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_frobnicate_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_frobnicate_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteractionFast",
+                uri_or_name="MyInteractionFast",
+                rpc_options=rpc_options,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        async def ping(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> None:
+            _fbthrift_resp = await self._send_request(
+                "Perform",
+                "MyInteractionFast.ping",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_ping_args(),
+                None,
+                qualifier = _fbthrift_FunctionQualifier.OneWay,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteractionFast",
+                uri_or_name="MyInteractionFast",
+                rpc_options=rpc_options,
+            )
+    
+        async def truthify(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.AsyncGenerator[bool, None]:
+            _fbthrift_resp = await self._send_request(
+                "Perform",
+                "MyInteractionFast.truthify",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_truthify_args(),
+                (test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_truthify_result, test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_truthify_result_stream),
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteractionFast",
+                uri_or_name="MyInteractionFast",
+                rpc_options=rpc_options,
+            )
+            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            return _fbthrift_stream
+    
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.MyInteractionFast"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_MyInteractionFast()
+    
+class Perform_SerialInteraction(_fbthrift_python_Client["Perform_SerialInteraction.Async", "Perform_SerialInteraction.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.SerialInteraction"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+    """serial""": """1""",    }
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_SerialInteraction()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.SerialInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_SerialInteraction()
+    
+        async def frobnicate(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> None:
+            _fbthrift_resp = await self._send_request(
+                "Perform",
+                "SerialInteraction.frobnicate",
+                test.fixtures.interactions.module.thrift_types._fbthrift_SerialInteraction_frobnicate_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_SerialInteraction_frobnicate_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="SerialInteraction",
+                uri_or_name="SerialInteraction",
+                rpc_options=rpc_options,
+            )
+    
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.SerialInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_SerialInteraction()
+    

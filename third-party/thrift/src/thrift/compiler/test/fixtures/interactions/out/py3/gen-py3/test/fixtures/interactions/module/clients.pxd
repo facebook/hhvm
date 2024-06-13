@@ -19,3 +19,27 @@ cdef class MyService_MyInteractionFast(thrift.py3.client.Client):
 cdef class MyService_SerialInteraction(thrift.py3.client.Client):
     pass
 
+cdef class Factories(thrift.py3.client.Client):
+    pass
+
+cdef class Factories_MyInteraction(thrift.py3.client.Client):
+    pass
+
+cdef class Factories_MyInteractionFast(thrift.py3.client.Client):
+    pass
+
+cdef class Factories_SerialInteraction(thrift.py3.client.Client):
+    pass
+
+cdef class Perform(thrift.py3.client.Client):
+    pass
+
+cdef class Perform_MyInteraction(thrift.py3.client.Client):
+    pass
+
+cdef class Perform_MyInteractionFast(thrift.py3.client.Client):
+    pass
+
+cdef class Perform_SerialInteraction(thrift.py3.client.Client):
+    pass
+

@@ -51,3 +51,18 @@ service MyService {
   MyInteractionFast, i32 interactFast();
   SerialInteraction, i32, stream<i32> serialize();
 }
+
+service Factories {
+  void foo();
+
+  MyInteraction interact(1: i32 arg);
+  MyInteractionFast, i32 interactFast();
+  SerialInteraction, i32, stream<i32> serialize();
+}
+
+service Perform {
+  performs MyInteraction;
+  performs MyInteractionFast;
+  performs SerialInteraction;
+  void foo();
+}

@@ -13,3 +13,5 @@ from folly cimport cFollyExecutor
 
 cdef extern from "thrift/compiler/test/fixtures/interactions/gen-py3/module/services_wrapper.h" namespace "::cpp2":
     shared_ptr[cAsyncProcessorFactory] cMyServiceInterface "::cpp2::MyServiceInterface"(PyObject *if_object, cFollyExecutor* Q) except *
+    shared_ptr[cAsyncProcessorFactory] cFactoriesInterface "::cpp2::FactoriesInterface"(PyObject *if_object, cFollyExecutor* Q) except *
+    shared_ptr[cAsyncProcessorFactory] cPerformInterface "::cpp2::PerformInterface"(PyObject *if_object, cFollyExecutor* Q) except *

@@ -53,3 +53,60 @@ class MyServiceInterface(
     pass
 
 
+_FactoriesInterfaceT = _typing.TypeVar('_FactoriesInterfaceT', bound='FactoriesInterface')
+
+
+class FactoriesInterface(
+    ServiceInterface,
+    metaclass=ABCMeta,
+):
+
+
+    @abstractmethod
+    async def foo(
+        self
+    ) -> None: ...
+
+
+    @abstractmethod
+    async def interact(
+        self,
+        arg: int
+    ) -> None: ...
+
+
+    @abstractmethod
+    async def interactFast(
+        self
+    ) -> int: ...
+
+    @staticmethod
+    def createPublisher_serialize(callback=None) -> _typing.Tuple[
+        _typing.AsyncGenerator[int, None],
+        _test_fixtures_interactions_module_types.ServerPublisher_cint32_t
+    ]: ...
+
+
+    @abstractmethod
+    async def serialize(
+        self
+    ) -> _typing.Tuple[int, _typing.Union[_typing.Awaitable[_typing.AsyncGenerator[int, None]],_typing.AsyncGenerator[int, None]]]: ...
+    pass
+
+
+_PerformInterfaceT = _typing.TypeVar('_PerformInterfaceT', bound='PerformInterface')
+
+
+class PerformInterface(
+    ServiceInterface,
+    metaclass=ABCMeta,
+):
+
+
+    @abstractmethod
+    async def foo(
+        self
+    ) -> None: ...
+    pass
+
+

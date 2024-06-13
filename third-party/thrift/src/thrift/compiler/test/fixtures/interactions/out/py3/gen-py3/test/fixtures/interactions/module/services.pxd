@@ -16,3 +16,16 @@ cdef class MyServiceInterface(ServiceInterface):
     cdef bint _for_cython_serialize
     pass
 
+cdef class FactoriesInterface(ServiceInterface):
+    # these are to avoid weird Cython multiple inheritance issue
+    cdef bint _for_cython_foo
+    cdef bint _for_cython_interact
+    cdef bint _for_cython_interactFast
+    cdef bint _for_cython_serialize
+    pass
+
+cdef class PerformInterface(ServiceInterface):
+    # these are to avoid weird Cython multiple inheritance issue
+    cdef bint _for_cython_foo
+    pass
+

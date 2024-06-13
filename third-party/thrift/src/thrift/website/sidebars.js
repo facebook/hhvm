@@ -80,11 +80,7 @@ module.exports = {
         type: 'doc',
         id: 'idl/index',
       },
-      items: [
-        'idl/field-qualifiers',
-        'idl/annotations',
-        'idl/mixins',
-      ],
+      items: ['idl/field-qualifiers', 'idl/annotations', 'idl/mixins'],
     },
     {
       type: 'category',
@@ -106,7 +102,10 @@ module.exports = {
             type: 'doc',
             id: 'features/serialization/index',
           },
-          items: ['features/serialization/protocols'],
+          items: [
+            'features/serialization/protocols',
+            'features/serialization/cursor',
+          ],
         },
         'features/operators',
         'features/universal-name',
@@ -368,8 +367,7 @@ module.exports = {
                   type: 'doc',
                   id: 'fb/server/overload-protection/dls/index',
                 },
-                items: [
-                ],
+                items: [],
               },
               // 'fb/server/overload-protection/dls/index',
               'fb/server/overload-protection/adaptive-concurrency',
@@ -590,9 +588,7 @@ module.exports = {
         type: 'doc',
         id: 'glossary/index',
       },
-      items: [
-        'glossary/kinds-of-types',
-      ],
+      items: ['glossary/kinds-of-types'],
     },
   ],
 };

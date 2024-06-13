@@ -1501,12 +1501,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
 
   case LdImplicitContext:
-    // Not a PureLoad due to the leaking refcounting semantics.
-    return may_load_store(ARds { ImplicitContext::activeCtx.handle() }, AEmpty);
+    return PureLoad { ARds { ImplicitContext::activeCtx.handle() } };
 
   case StImplicitContext:
-    // Not a PureStore due to the leaking refcounting semantics.
-    return may_load_store(AEmpty, ARds { ImplicitContext::activeCtx.handle() });
+    return PureStore {
+      ARds { ImplicitContext::activeCtx.handle() }, inst.src(0), nullptr
+    };
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that never read or write memory locations tracked by this

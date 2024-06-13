@@ -57,6 +57,8 @@ static bool isStateSoft(State);
 
 static Variant getBlameVectors();
 
+static void setActive(Object&&);
+
 ////////////////////////////////////////////////////////////////////////////
 // RAII wrappers
 ////////////////////////////////////////////////////////////////////////////
@@ -65,13 +67,8 @@ static Variant getBlameVectors();
  * RAII wrapper for saving implicit context
  */
 struct Saver {
-  Saver() {
-    m_context = *ImplicitContext::activeCtx;
-    *ImplicitContext::activeCtx = *ImplicitContext::inaccessibleCtx;
-  }
-  ~Saver() {
-    *ImplicitContext::activeCtx = m_context;
-  }
+  Saver();
+  ~Saver();
 
 private:
   ObjectData* m_context;

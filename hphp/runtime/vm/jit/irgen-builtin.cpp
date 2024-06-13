@@ -2620,14 +2620,12 @@ void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
 }
 
 void emitSetImplicitContextByValue(IRGS& env) {
-  auto const tv = topC(env);
-  if(!tv->isA(TObj)) return interpOne(env);
+  auto const ic = topC(env);
+  if (!ic->isA(TObj)) return interpOne(env);
 
-  auto const prev = gen(env, LdImplicitContext);
-  gen(env, StImplicitContext, tv);
   popC(env);
-  pushIncRef(env, prev);
-  decRef(env, tv);
+  push(env, gen(env, LdImplicitContext));
+  gen(env, StImplicitContext, ic);
 }
 
 void emitGetInaccessibleImplicitContext(IRGS& env) {

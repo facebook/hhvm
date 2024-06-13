@@ -28,6 +28,21 @@ rds::Link<ObjectData*, rds::Mode::Normal> ImplicitContext::activeCtx;
 
 rds::Link<ObjectData*, rds::Mode::Normal> ImplicitContext::inaccessibleCtx;
 
+void ImplicitContext::setActive(Object&& ctx) {
+  assertx(*ImplicitContext::activeCtx);
+  (*ImplicitContext::activeCtx)->decRefCount();
+  *ImplicitContext::activeCtx = ctx.detach();
+}
+
+ImplicitContext::Saver::Saver() {
+  m_context = *ImplicitContext::activeCtx;
+  setActive(Object{*ImplicitContext::inaccessibleCtx});
+}
+
+ImplicitContext::Saver::~Saver() {
+  setActive(Object{m_context});
+}
+
 std::string ImplicitContext::stateToString(ImplicitContext::State state) {
   switch (state) {
     case ImplicitContext::State::Value:

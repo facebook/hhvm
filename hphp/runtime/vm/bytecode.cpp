@@ -5186,14 +5186,8 @@ OPTBLD_INLINE void iopWHResult() {
 }
 
 OPTBLD_INLINE void iopSetImplicitContextByValue() {
-  auto const tv = *vmStack().topC();
-  assertx(tvIsObject(tv));
-  auto const obj = tv.m_data.pobj;
-  auto const prev = *ImplicitContext::activeCtx;
-  *ImplicitContext::activeCtx = obj;
-  vmStack().discard();
-  vmStack().pushObject(prev);
-  tvDecRefGen(tv);
+  assertx(*ImplicitContext::activeCtx);
+  std::swap((*vmStack().topC()).m_data.pobj, (*ImplicitContext::activeCtx));
 }
 
 OPTBLD_INLINE void iopGetInaccessibleImplicitContext() {

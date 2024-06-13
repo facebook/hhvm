@@ -63,7 +63,7 @@ void c_WaitableWaitHandle::join() {
   session->getCurrentContext()->runUntil(this);
   assertx(isFinished());
   assertx(context);
-  *ImplicitContext::activeCtx = context;
+  ImplicitContext::setActive(Object{context});
 }
 
 String c_WaitableWaitHandle::getName() {

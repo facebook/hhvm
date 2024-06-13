@@ -1,3 +1,0 @@
-include 'sbe-tool', 'sbe-samples', 'sbe-benchmarks', 'sbe-all'
-rootProject.name = 'sbe'
-

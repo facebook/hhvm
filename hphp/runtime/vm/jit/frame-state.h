@@ -568,9 +568,6 @@ private:
   struct BlockState {
     // Mandatory in-state computed from predecessors.
     jit::vector<FrameState> in;
-    // Optionally-saved out-state.  Non-none but empty indicates that out-state
-    // should be saved.
-    Optional<jit::vector<FrameState>> out;
     // Paused state, used by IRBuilder::{push,pop}Block().
     Optional<jit::vector<FrameState>> paused;
   };

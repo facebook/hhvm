@@ -25,63 +25,24 @@ import (
 type StreamTransport struct {
 	io.Reader
 	io.Writer
-	isReadWriter bool
-	closed       bool
 }
 
-func NewStreamTransport(r io.Reader, w io.Writer) *StreamTransport {
+func newStreamTransport(r io.Reader, w io.Writer) *StreamTransport {
 	return &StreamTransport{Reader: bufio.NewReader(r), Writer: bufio.NewWriter(w)}
 }
 
-func NewStreamTransportR(r io.Reader) *StreamTransport {
-	return &StreamTransport{Reader: bufio.NewReader(r)}
-}
-
-func NewStreamTransportLimitedR(r io.Reader, n int) *StreamTransport {
-	r = &io.LimitedReader{
-		R: bufio.NewReader(r),
-		N: int64(n),
-	}
-	return &StreamTransport{Reader: r}
-}
-
-func NewStreamTransportW(w io.Writer) *StreamTransport {
-	return &StreamTransport{Writer: bufio.NewWriter(w)}
-}
-
-func NewStreamTransportRW(rw io.ReadWriter) *StreamTransport {
-	bufrw := bufio.NewReadWriter(bufio.NewReader(rw), bufio.NewWriter(rw))
-	return &StreamTransport{Reader: bufrw, Writer: bufrw, isReadWriter: true}
-}
-
-// implicitly opened on creation, can't be reopened once closed
-func (p *StreamTransport) Open() error {
-	if !p.closed {
-		return NewTransportException(ALREADY_OPEN, "StreamTransport already open.")
-	} else {
-		return NewTransportException(NOT_OPEN, "cannot reopen StreamTransport.")
-	}
-}
-
-// Closes both the reader and writer streams.
+// Close closes both the reader and writer streams.
 func (p *StreamTransport) Close() error {
-	if p.closed {
-		return NewTransportException(NOT_OPEN, "StreamTransport already closed.")
-	}
-	p.closed = true
-	closedReader := false
 	if p.Reader != nil {
 		c, ok := p.Reader.(io.Closer)
 		if ok {
 			e := c.Close()
-			closedReader = true
 			if e != nil {
 				return e
 			}
 		}
-		p.Reader = nil
 	}
-	if p.Writer != nil && (!closedReader || !p.isReadWriter) {
+	if p.Writer != nil {
 		c, ok := p.Writer.(io.Closer)
 		if ok {
 			e := c.Close()
@@ -89,85 +50,14 @@ func (p *StreamTransport) Close() error {
 				return e
 			}
 		}
-		p.Writer = nil
 	}
 	return nil
 }
 
-// Flushes the underlying output stream if not null.
+// Flush flushes the underlying output stream if not null.
 func (p *StreamTransport) Flush() error {
-	if p.Writer == nil {
-		return NewTransportException(NOT_OPEN, "Cannot flush null outputStream")
-	}
-	f, ok := p.Writer.(Flusher)
-	if ok {
-		err := f.Flush()
-		if err != nil {
-			return NewTransportExceptionFromError(err)
-		}
+	if f, ok := p.Writer.(Flusher); ok {
+		return NewTransportExceptionFromError(f.Flush())
 	}
 	return nil
-}
-
-func (p *StreamTransport) Read(c []byte) (n int, err error) {
-	n, err = p.Reader.Read(c)
-	if err != nil {
-		err = NewTransportExceptionFromError(err)
-	}
-	return
-}
-
-func (p *StreamTransport) ReadByte() (c byte, err error) {
-	f, ok := p.Reader.(io.ByteReader)
-	if ok {
-		c, err = f.ReadByte()
-	} else {
-		c, err = readByte(p.Reader)
-	}
-	if err != nil {
-		err = NewTransportExceptionFromError(err)
-	}
-	return
-}
-
-func (p *StreamTransport) Write(c []byte) (n int, err error) {
-	n, err = p.Writer.Write(c)
-	if err != nil {
-		err = NewTransportExceptionFromError(err)
-	}
-	return
-}
-
-func (p *StreamTransport) WriteByte(c byte) (err error) {
-	f, ok := p.Writer.(io.ByteWriter)
-	if ok {
-		err = f.WriteByte(c)
-	} else {
-		err = writeByte(p.Writer, c)
-	}
-	if err != nil {
-		err = NewTransportExceptionFromError(err)
-	}
-	return
-}
-
-func (p *StreamTransport) WriteString(s string) (n int, err error) {
-	f, ok := p.Writer.(stringWriter)
-	if ok {
-		n, err = f.WriteString(s)
-	} else {
-		n, err = p.Writer.Write([]byte(s))
-	}
-	if err != nil {
-		err = NewTransportExceptionFromError(err)
-	}
-	return
-}
-
-func (p *StreamTransport) RemainingBytes() uint64 {
-	if r, ok := p.Reader.(*io.LimitedReader); ok {
-		return uint64(r.N)
-	}
-
-	return UnknownRemaining // the truth is, we just don't know unless framed is used
 }

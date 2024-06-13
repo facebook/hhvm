@@ -17,7 +17,6 @@
 package thrift
 
 import (
-	"bytes"
 	"io"
 	"strings"
 	"testing"
@@ -100,9 +99,7 @@ func TestInitialAllocationMapCompactProtocolLimitedR(t *testing.T) {
 
 	// attempts to allocate a map of 930M elements for a 9 byte message
 	data := []byte("%0\x88\x8a\x97\xb7\xc4\x030")
-	p := NewCompactProtocol(
-		NewStreamTransportLimitedR(bytes.NewBuffer(data), len(data)),
-	)
+	p := NewCompactProtocol(NewMemoryBufferWithData(data))
 
 	err := m.Read(p)
 	if err == nil {

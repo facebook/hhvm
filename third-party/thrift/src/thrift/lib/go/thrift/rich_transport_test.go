@@ -17,7 +17,6 @@
 package thrift
 
 import (
-	"bytes"
 	"errors"
 	"io"
 	"reflect"
@@ -25,8 +24,6 @@ import (
 )
 
 func TestEnsureTransportsAreRich(t *testing.T) {
-	buf := bytes.NewBuffer(make([]byte, 0, 1024))
-
 	http, err := newHTTPPostClient("http://127.0.0.1")
 	if err != nil {
 		t.Fatal(err)
@@ -34,7 +31,6 @@ func TestEnsureTransportsAreRich(t *testing.T) {
 
 	transports := []io.ReadWriteCloser{
 		NewMemoryBufferLen(1024),
-		NewStreamTransportRW(buf),
 		newFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH),
 		http,
 	}

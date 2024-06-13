@@ -181,10 +181,10 @@ func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(io.ReadWriteClos
 
 	transports := []func() io.ReadWriteCloser{
 		func() io.ReadWriteCloser {
-			return newFramedTransportMaxLength(NewStreamTransport(rdr, writer), DEFAULT_MAX_LENGTH)
+			return newFramedTransportMaxLength(newStreamTransport(rdr, writer), DEFAULT_MAX_LENGTH)
 		}, // framed over pipe
 		func() io.ReadWriteCloser {
-			return newFramedTransportMaxLength(NewStreamTransport(rConn, wConn), DEFAULT_MAX_LENGTH)
+			return newFramedTransportMaxLength(newStreamTransport(rConn, wConn), DEFAULT_MAX_LENGTH)
 		}, // framed over tcp
 	}
 	const iterations = 100

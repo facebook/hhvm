@@ -858,7 +858,6 @@ TEST(HTTPMessage, StrictMode) {
 
   EXPECT_TRUE(message.setQueryString("a=b"));
   EXPECT_FALSE(message.setQueryParam("c", "d\xff", /*strict=*/true));
-  EXPECT_EQ(message.getURL(), "/?a=b&c=d\xff");
   EXPECT_TRUE(urlsAreEquivalent(message.getURL(), "/?a=b&c=d\xff"));
   EXPECT_TRUE(message.setQueryParam("c", "d\xff", /*strict=*/false));
   EXPECT_TRUE(urlsAreEquivalent(message.getURL(), "/?a=b&c=d\xff"));

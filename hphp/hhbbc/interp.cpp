@@ -1371,6 +1371,10 @@ void sameImpl(ISS& env) {
   push(env, std::move(pair.first));
 }
 
+/**
+ * Returns true if the branch in the Jmp should always be taken. Used by
+ * jmpImpl to reduce `if ($a === $b) { ... }`
+ */
 template<class JmpOp>
 bool sameJmpImpl(ISS& env, Op sameOp, const JmpOp& jmp) {
   const StackElem* elems[2];
@@ -1389,6 +1393,9 @@ bool sameJmpImpl(ISS& env, Op sameOp, const JmpOp& jmp) {
   auto const val0 = tv(ty0);
   auto const val1 = tv(ty1);
 
+  // If both have values, we expect the interp for Same to have already
+  // simplified so we shouldn't be here. Note: tv(Cls=C) still does not have a
+  // value despite knowing the exact class.
   assertx(!val0 || !val1);
   if ((loc0 == NoLocalId && !val0 && ty1.subtypeOf(ty0)) ||
       (loc1 == NoLocalId && !val1 && ty0.subtypeOf(ty1))) {
@@ -1396,8 +1403,12 @@ bool sameJmpImpl(ISS& env, Op sameOp, const JmpOp& jmp) {
   }
 
   // Same currently lies about the distinction between Func/Cls/Str
+  // TODO(T168044199) Unify this analysis with sameImpl
+  // see also: couldBeStringish
   if (ty0.couldBe(BCls) && ty1.couldBe(BStr)) return false;
   if (ty1.couldBe(BCls) && ty0.couldBe(BStr)) return false;
+  if (ty0.couldBe(BCls) && ty1.couldBe(BLazyCls)) return false;
+  if (ty1.couldBe(BCls) && ty0.couldBe(BLazyCls)) return false;
   if (ty0.couldBe(BLazyCls) && ty1.couldBe(BStr)) return false;
   if (ty1.couldBe(BLazyCls) && ty0.couldBe(BStr)) return false;
 

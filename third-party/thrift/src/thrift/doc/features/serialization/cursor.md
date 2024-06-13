@@ -18,6 +18,8 @@ Where regular Thrift codegen is optimized for usability first and performance se
 - Methods taking a Curse-enabled struct/union as a parameter may only take one parameter.
 - Reading and writing cannot be interleaved, so structs are effectively immutable during reading.
 - The user is responsible for keeping the `CursorSerializationWrapper` alive until all reading/writing is complete.
+- By default the `std::string_view` APIs are disabled. In order to enable them the reader must receive contiguous buffers, which is achieved by using Rocket as the transport and adding an override for the Thrift flag `rocket_frame_parser` to `"allocating"`. Then the reader can call `beginRead<true>` on the `CursorSerializationWrapper` to enforce the contiguous requirement and enable those APIs.
+
 
 These restrictions are all fundamental to the performance wins, and if any of them do not work for a service then that service is not a candidate for using CurSe. Most services will not be.
 

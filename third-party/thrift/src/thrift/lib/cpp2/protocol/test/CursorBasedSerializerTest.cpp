@@ -153,13 +153,13 @@ TEST(CursorSerializer, StringRead) {
   obj.string_field() = "foo";
 
   StructCursor wrapper(obj);
-  auto reader = wrapper.beginRead();
+  auto contiguousReader = wrapper.beginRead</* Contiguous = */ true>();
   std::string_view str;
-  EXPECT_TRUE(reader.read<ident::string_field>(str));
+  EXPECT_TRUE(contiguousReader.read<ident::string_field>(str));
   EXPECT_EQ("foo", str);
-  wrapper.endRead(std::move(reader));
+  wrapper.endRead(std::move(contiguousReader));
 
-  reader = wrapper.beginRead();
+  auto reader = wrapper.beginRead();
   std::string str2;
   EXPECT_TRUE(reader.read<ident::string_field>(str2));
   EXPECT_EQ("foo", str2);
@@ -187,19 +187,22 @@ TEST(CursorSerializer, ContainerRead) {
   reader.endRead(std::move(listReader));
   wrapper.endRead(std::move(reader));
 
-  reader = wrapper.beginRead();
-  listReader = reader.beginRead<ident::lucky_numbers>();
-  for (auto i : listReader) {
+  auto contiguousReader = wrapper.beginRead</* Contiguous = */ true>();
+  auto contiguousListReader =
+      contiguousReader.beginRead<ident::lucky_numbers>();
+  for (auto i : contiguousListReader) {
     EXPECT_GT(i, 500);
     break;
   }
   // Ending read in the middle of iteration still allows reading next field.
-  reader.endRead(std::move(listReader));
-  EXPECT_EQ(reader.read<ident::flavor>(), "Sugar");
+  contiguousReader.endRead(std::move(contiguousListReader));
+  EXPECT_EQ(contiguousReader.read<ident::flavor>(), "Sugar");
   static_assert(
-      std::is_same_v<decltype(reader.read<ident::flavor>()), std::string_view>,
+      std::is_same_v<
+          decltype(contiguousReader.read<ident::flavor>()),
+          std::string_view>,
       "");
-  wrapper.endRead(std::move(reader));
+  wrapper.endRead(std::move(contiguousReader));
 
   // Reading from a finalized reader is not allowed (besides the obvious
   // use-after-move).
@@ -236,7 +239,8 @@ TEST(CursorSerializer, ContainerRead) {
   Containers containers;
   containers.list_of_string() = {"foo", "bar"};
   CursorSerializationWrapper containersWrapper(containers);
-  auto containersReader = containersWrapper.beginRead();
+  auto containersReader =
+      containersWrapper.beginRead</* Contiguous = */ true>();
   auto listOfStringReader = containersReader.beginRead<ident::list_of_string>();
   for (std::string_view& str : listOfStringReader) {
     EXPECT_TRUE(str == "foo" || str == "bar");

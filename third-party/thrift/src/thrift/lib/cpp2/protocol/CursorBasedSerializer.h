@@ -100,8 +100,10 @@ class CursorSerializationWrapper {
    * Cursor read path
    * Template parameter determines whether chained buffers are supported.
    * Setting to false allows chained buffers and disables string_view API.
+   * See thrift/doc/features/serialization/cursor.md for information about how
+   * to get contiguous buffers cheaply from the socket.
    */
-  template <bool Contiguous = true>
+  template <bool Contiguous = false>
   StructuredCursorReader<Tag, Contiguous> beginRead() {
     checkHasData();
     if (Contiguous && serializedData_->isChained()) {
@@ -176,7 +178,7 @@ class CursorSerializationWrapper {
  * Cursor deserializer for Thrift structs and unions.
  * Typically constructed from a CursorSerializationWrapper.
  */
-template <typename Tag, bool Contiguous = true>
+template <typename Tag, bool Contiguous = false>
 class StructuredCursorReader : detail::BaseCursorReader {
   static_assert(
       type::is_a_v<Tag, type::structured_c>, "T must be a thrift class");

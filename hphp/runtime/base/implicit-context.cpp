@@ -26,7 +26,7 @@ namespace HPHP {
 
 rds::Link<ObjectData*, rds::Mode::Normal> ImplicitContext::activeCtx;
 
-rds::Link<ObjectData*, rds::Mode::Normal> ImplicitContext::inaccessibleCtx;
+rds::Link<ObjectData*, rds::Mode::Normal> ImplicitContext::emptyCtx;
 
 void ImplicitContext::setActive(Object&& ctx) {
   assertx(*ImplicitContext::activeCtx);
@@ -36,7 +36,7 @@ void ImplicitContext::setActive(Object&& ctx) {
 
 ImplicitContext::Saver::Saver() {
   m_context = *ImplicitContext::activeCtx;
-  setActive(Object{*ImplicitContext::inaccessibleCtx});
+  setActive(Object{*ImplicitContext::emptyCtx});
 }
 
 ImplicitContext::Saver::~Saver() {

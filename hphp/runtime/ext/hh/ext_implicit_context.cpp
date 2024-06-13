@@ -94,7 +94,7 @@ bool HHVM_FUNCTION(is_inaccessible) {
   return context->m_state == ImplicitContext::State::Inaccessible;
 }
 
-Object initInaccessibleConext() {
+Object initEmptyContext() {
   auto const obj = Object{ ImplicitContextLoader::classof() };
   auto context = Native::data<ImplicitContext>(obj.get());
   context->m_state = ImplicitContext::State::Inaccessible;

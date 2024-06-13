@@ -5191,8 +5191,8 @@ OPTBLD_INLINE void iopSetImplicitContextByValue() {
 }
 
 OPTBLD_INLINE void iopGetInaccessibleImplicitContext() {
-  assertx(*ImplicitContext::inaccessibleCtx);
-  vmStack().pushObject(*ImplicitContext::inaccessibleCtx);
+  assertx(*ImplicitContext::emptyCtx);
+  vmStack().pushObject(*ImplicitContext::emptyCtx);
 }
 
 OPTBLD_INLINE void iopCheckProp(const StringData* propName) {

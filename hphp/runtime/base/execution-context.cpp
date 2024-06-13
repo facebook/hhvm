@@ -653,8 +653,7 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
       Cfg::Server::PspCpuTimeoutSeconds
   );
 
-  // Since inaccessible is now used as the default context
-  assertx((*ImplicitContext::activeCtx) == (*ImplicitContext::inaccessibleCtx));
+  assertx((*ImplicitContext::activeCtx) == (*ImplicitContext::emptyCtx));
 
   // We mustn't destroy any callbacks until we're done with all
   // of them. So hold them in tmp.
@@ -669,7 +668,7 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
       [](TypedValue v) {
         vm_call_user_func(VarNR{v}, init_null_variant,
                           RuntimeCoeffects::defaults());
-        assertx((*ImplicitContext::activeCtx) == (*ImplicitContext::inaccessibleCtx));
+        assertx((*ImplicitContext::activeCtx) == (*ImplicitContext::emptyCtx));
       }
     );
     tmp.append(funcs);
@@ -1429,11 +1428,11 @@ void ExecutionContext::requestInit() {
     SystemLib::mergePersistentUnits();
   }
 
-  assertx(!ImplicitContext::inaccessibleCtx.isInit());
-  ImplicitContext::inaccessibleCtx.initWith(initInaccessibleConext().detach());
+  assertx(!ImplicitContext::emptyCtx.isInit());
+  ImplicitContext::emptyCtx.initWith(initEmptyContext().detach());
 
   assertx(!ImplicitContext::activeCtx.isInit());
-  ImplicitContext::activeCtx.initWith(*ImplicitContext::inaccessibleCtx);
+  ImplicitContext::activeCtx.initWith(*ImplicitContext::emptyCtx);
   (*ImplicitContext::activeCtx)->incRefCount();
 
   profileRequestStart();

@@ -2629,7 +2629,7 @@ void emitSetImplicitContextByValue(IRGS& env) {
 }
 
 void emitGetInaccessibleImplicitContext(IRGS& env) {
-    auto rdsHandleAndTypeIC = RDSHandleAndType {ImplicitContext::inaccessibleCtx.handle(), TObj};
+    auto rdsHandleAndTypeIC = RDSHandleAndType {ImplicitContext::emptyCtx.handle(), TObj};
     auto const src = gen(env, LdRDSAddr, rdsHandleAndTypeIC, TPtrToOther);
     auto obj = gen(env, LdMem, TObj, src);
     pushIncRef(env, obj);

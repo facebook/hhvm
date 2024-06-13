@@ -71,7 +71,7 @@ enum State: string as string {
 function get_state_unsafe()[zoned]: string /* State */;
 
 /**
- * Returns True if we are in ImplicitContext::State::Inaccessible
+ * Returns True if we are in the empty IC state
  * False otherwise
  *
  * Does not affect the state of the IC

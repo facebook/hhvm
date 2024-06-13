@@ -30,16 +30,6 @@ struct ImplicitContext {
 // Members
 ////////////////////////////////////////////////////////////////////////////
 
-enum class State : uint8_t {
-  Value,
-  Inaccessible,
-  SoftInaccessible,
-  SoftSet,
-};
-
-// Current state of IC
-State m_state;
-
 // HashMap of TypedValues and their instance keys
 req::fast_map<const StringData*, std::pair<TypedValue, TypedValue>,
               string_data_hash, string_data_same> m_map;
@@ -50,10 +40,6 @@ req::fast_map<const StringData*, std::pair<TypedValue, TypedValue>,
 
 static rds::Link<ObjectData*, rds::Mode::Normal> activeCtx;
 static rds::Link<ObjectData*, rds::Mode::Normal> emptyCtx;
-
-static std::string stateToString(State);
-
-static bool isStateSoft(State);
 
 static Variant getBlameVectors();
 

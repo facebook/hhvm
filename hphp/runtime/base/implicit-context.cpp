@@ -43,32 +43,6 @@ ImplicitContext::Saver::~Saver() {
   setActive(Object{m_context});
 }
 
-std::string ImplicitContext::stateToString(ImplicitContext::State state) {
-  switch (state) {
-    case ImplicitContext::State::Value:
-      return "a value";
-    case ImplicitContext::State::Inaccessible:
-      return "an inaccessible";
-    case ImplicitContext::State::SoftInaccessible:
-      return "a soft inaccessible";
-    case ImplicitContext::State::SoftSet:
-      return "a soft set";
-  }
-  not_reached();
-}
-
-bool ImplicitContext::isStateSoft(ImplicitContext::State state) {
-  switch (state) {
-    case ImplicitContext::State::Value:
-    case ImplicitContext::State::Inaccessible:
-      return false;
-    case ImplicitContext::State::SoftInaccessible:
-    case ImplicitContext::State::SoftSet:
-      return true;
-  }
-  not_reached();
-}
-
 Variant ImplicitContext::getBlameVectors() {
   /*
    * TODO: once confirmed by privacy org that we don't need

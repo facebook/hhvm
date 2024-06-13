@@ -27,8 +27,8 @@
 #include <folly/String.h>
 #include <folly/Synchronized.h>
 #include <folly/Unit.h>
+#include <folly/concurrency/memory/PrimaryPtr.h>
 #include <folly/container/F14Map.h>
-#include <folly/experimental/PrimaryPtr.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/lang/Badge.h>

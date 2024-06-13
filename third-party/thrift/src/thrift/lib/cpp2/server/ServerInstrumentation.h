@@ -22,7 +22,7 @@
 #include <string_view>
 
 #include <folly/Function.h>
-#include <folly/experimental/PrimaryPtr.h>
+#include <folly/concurrency/memory/PrimaryPtr.h>
 
 namespace apache {
 namespace thrift {

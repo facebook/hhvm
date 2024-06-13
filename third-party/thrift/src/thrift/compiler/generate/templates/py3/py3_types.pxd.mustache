@@ -127,7 +127,7 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
 {{/program:filtered_structs}}
 
 {{#program:containerTypes}}
-cdef class {{> types/cython_python_type}}(thrift.py3.types.{{!
+cdef class {{type:flat_name}}(thrift.py3.types.{{!
         }}{{#type:list?}}List{{/type:list?}}{{!
         }}{{#type:set?}}Set{{/type:set?}}{{!
         }}{{#type:map?}}Map{{/type:map?}}{{!

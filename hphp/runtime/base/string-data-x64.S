@@ -42,3 +42,7 @@ ETCH_LABEL(hend):
 ETCH_SIZE(_ZNK4HPHP10StringData10hashHelperEv)
 
 #endif
+
+#ifdef __linux__
+              .section .note.GNU-stack,"",@progbits
+#endif

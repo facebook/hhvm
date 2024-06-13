@@ -203,3 +203,7 @@ IMPLEMENT_NV_GET_STR(_ZN4HPHP5array9HashTableINS_13VanillaKeysetENS_16VanillaKey
 #undef IMPLEMENT_NV_GET_STR
 
 #endif
+
+#ifdef __linux__
+              .section .note.GNU-stack,"",@progbits
+#endif

@@ -196,3 +196,7 @@ ETCH_SIZE(HASH_FUNC_NAME)
 
 
 #endif
+
+#ifdef __linux__
+              .section .note.GNU-stack,"",@progbits
+#endif

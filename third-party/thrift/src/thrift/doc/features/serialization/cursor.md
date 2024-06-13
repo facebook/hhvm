@@ -25,7 +25,7 @@ These restrictions are all fundamental to the performance wins, and if any of th
 
 Add `cpp_include "thrift/lib/cpp2/protocol/CursorBasedSerializer.h"` and `include "thrift/annotation/cpp.thrift"` to the top of the Thrift file and annotate individual structs and unions with `@cpp.UseCursorSerialization`. Doing so means all uses of the type name in an IDL file will be opted into CurSe. To keep the opted-out struct available one can instead apply the annotation to a typedef of the struct/union.
 
-Documentation for the C++ APIs including examples is inlined in CursorBasedSerializer.h.
+Documentation for the C++ APIs including examples is inlined in [CursorBasedSerializer.h](https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/protocol/CursorBasedSerializer.h).
 
 ### Migration for existing methods
 

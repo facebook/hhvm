@@ -46,7 +46,6 @@ set(BIN_INSTALL_DIR bin CACHE STRING
 set(CMAKE_INSTALL_DIR lib/cmake/fizz CACHE STRING
     "The subdirectory where CMake package config files should be installed")
 
-find_package(folly CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 
 find_package(OpenSSL REQUIRED)

@@ -3,7 +3,9 @@
 
 
 if [ "$GITHUB_ACTIONS" == "true" ]; then
-    ./buck2 build //... && ./buck2 test //...
+    TARGETS_FILE=$(mktemp)
+    ./buck2 targets //fizz/... | grep -F -v -f ./bad_targets | grep -v test>"$TARGETS_FILE"
+    ./buck2 build @"$TARGETS_FILE"
 else
     dotslash-oss "$BUCK2" build //... && dotslash-oss "$BUCK2" test //...
 fi

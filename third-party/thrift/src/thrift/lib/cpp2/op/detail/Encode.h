@@ -640,10 +640,10 @@ struct MapEncode {
         typeTagToTType<Value>,
         checked_container_size(map.size()));
     for (const auto& kv : map) {
-      xfer += apache::thrift::detail::pm::writeMapValueBegin(prot);
+      xfer += apache::thrift::detail::pm::writeMapValueBegin(prot, true);
       xfer += Encode<Key>{}(prot, kv.first);
       xfer += Encode<Value>{}(prot, kv.second);
-      xfer += apache::thrift::detail::pm::writeMapValueEnd(prot);
+      xfer += apache::thrift::detail::pm::writeMapValueEnd(prot, true);
     }
     xfer += prot.writeMapEnd();
     return xfer;

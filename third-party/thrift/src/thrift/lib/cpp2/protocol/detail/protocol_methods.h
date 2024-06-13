@@ -306,10 +306,11 @@ inline uint32_t checked_container_size(size_t size) {
 
 template <typename Protocol>
 using map_value_begin_t =
-    decltype(std::declval<Protocol>().writeMapValueBegin());
+    decltype(std::declval<Protocol>().writeMapValueBegin(true));
 
 template <typename Protocol>
-using map_value_end_t = decltype(std::declval<Protocol>().writeMapValueEnd());
+using map_value_end_t =
+    decltype(std::declval<Protocol>().writeMapValueEnd(true));
 
 template <typename Protocol>
 static constexpr bool map_value_api_v =
@@ -317,23 +318,23 @@ static constexpr bool map_value_api_v =
     folly::is_detected_v<map_value_end_t, Protocol>;
 
 template <typename Protocol>
-std::size_t writeMapValueBegin(Protocol& protocol) {
+std::size_t writeMapValueBegin(Protocol& protocol, bool fromOpEncode = false) {
   const auto writeMapValueBeginFunc =
       std::get<map_value_api_v<Protocol&>>(std::make_pair(
           [](auto&) { return 0u; },
-          [](auto& protocolWithMapValueApi) {
-            return protocolWithMapValueApi.writeMapValueBegin();
+          [fromOpEncode](auto& protocolWithMapValueApi) {
+            return protocolWithMapValueApi.writeMapValueBegin(fromOpEncode);
           }));
   return writeMapValueBeginFunc(protocol);
 }
 
 template <typename Protocol>
-std::size_t writeMapValueEnd(Protocol& protocol) {
+std::size_t writeMapValueEnd(Protocol& protocol, bool fromOpEncode = false) {
   const auto writeMapValueEndFunc =
       std::get<map_value_api_v<Protocol&>>(std::make_pair(
           [](auto&) { return 0u; },
-          [](auto& protocolWithMapValueApi) {
-            return protocolWithMapValueApi.writeMapValueEnd();
+          [fromOpEncode](auto& protocolWithMapValueApi) {
+            return protocolWithMapValueApi.writeMapValueEnd(fromOpEncode);
           }));
   return writeMapValueEndFunc(protocol);
 }

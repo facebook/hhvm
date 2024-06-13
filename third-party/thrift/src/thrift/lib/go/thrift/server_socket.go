@@ -67,19 +67,6 @@ func (p *ServerSocket) IsListening() bool {
 	return p.listener != nil
 }
 
-// Connects the socket, creating a new socket object if necessary.
-func (p *ServerSocket) Open() error {
-	if p.IsListening() {
-		return NewTransportException(ALREADY_OPEN, "Server socket already open")
-	}
-	if l, err := net.Listen(p.addr.Network(), p.addr.String()); err != nil {
-		return err
-	} else {
-		p.listener = l
-	}
-	return nil
-}
-
 func (p *ServerSocket) Addr() net.Addr {
 	if p.listener != nil {
 		return p.listener.Addr()

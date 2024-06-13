@@ -76,14 +76,8 @@ func (p *SimpleServer) Listen() error {
 	return p.serverTransport.Listen()
 }
 
-// AcceptLoop runs the accept loop to handle requests
-func (p *SimpleServer) AcceptLoop() error {
-	return p.AcceptLoopContext(context.Background())
-}
-
-// AcceptLoopContext is an AcceptLoop that supports contexts.
-// The context is decorated with ConnInfo and passed down to new clients.
-func (p *SimpleServer) AcceptLoopContext(ctx context.Context) error {
+// acceptLoopContext takes a context that will be decorated with ConnInfo and passed down to new clients.
+func (p *SimpleServer) acceptLoopContext(ctx context.Context) error {
 	for {
 		client, err := p.serverTransport.Accept()
 		if err != nil {
@@ -131,7 +125,7 @@ func (p *SimpleServer) ServeContext(ctx context.Context) error {
 		<-ctx.Done()
 		p.Stop()
 	}()
-	err = p.AcceptLoopContext(ctx)
+	err = p.acceptLoopContext(ctx)
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}

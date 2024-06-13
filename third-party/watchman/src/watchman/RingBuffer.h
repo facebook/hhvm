@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <folly/experimental/LockFreeRingBuffer.h>
+#include <folly/concurrency/container/LockFreeRingBuffer.h>
 
 namespace watchman {
 

@@ -141,7 +141,7 @@ func (p *SimpleServer) ServeContext(ctx context.Context) error {
 // Stop stops the server
 func (p *SimpleServer) Stop() error {
 	p.quit <- struct{}{}
-	p.serverTransport.Interrupt()
+	p.serverTransport.Close()
 	return nil
 }
 

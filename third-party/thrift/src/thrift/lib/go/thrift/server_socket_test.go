@@ -28,11 +28,11 @@ func TestSocketIsntListeningAfterInterrupt(t *testing.T) {
 
 	socket := CreateServerSocket(t, addr)
 	socket.Listen()
-	socket.Interrupt()
+	socket.Close()
 
 	newSocket := CreateServerSocket(t, addr)
 	err := newSocket.Listen()
-	defer newSocket.Interrupt()
+	defer newSocket.Close()
 	if err != nil {
 		t.Fatalf("Failed to rebinds: %s", err)
 	}

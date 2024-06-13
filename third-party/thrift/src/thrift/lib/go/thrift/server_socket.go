@@ -18,7 +18,6 @@ package thrift
 
 import (
 	"net"
-	"sync"
 	"time"
 )
 
@@ -26,10 +25,6 @@ type ServerSocket struct {
 	listener      net.Listener
 	addr          net.Addr
 	clientTimeout time.Duration
-
-	// Protects the interrupted value to make it thread safe.
-	mu          sync.RWMutex
-	interrupted bool
 }
 
 func NewServerSocket(listenAddr string) (*ServerSocket, error) {
@@ -57,13 +52,6 @@ func (p *ServerSocket) Listen() error {
 }
 
 func (p *ServerSocket) Accept() (net.Conn, error) {
-	p.mu.RLock()
-	interrupted := p.interrupted
-	p.mu.RUnlock()
-
-	if interrupted {
-		return nil, errTransportInterrupted
-	}
 	if p.listener == nil {
 		return nil, NewTransportException(NOT_OPEN, "No underlying server socket")
 	}
@@ -106,14 +94,5 @@ func (p *ServerSocket) Close() error {
 	if p.IsListening() {
 		return p.listener.Close()
 	}
-	return nil
-}
-
-func (p *ServerSocket) Interrupt() error {
-	p.mu.Lock()
-	p.interrupted = true
-	p.Close()
-	p.mu.Unlock()
-
 	return nil
 }

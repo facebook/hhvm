@@ -514,7 +514,7 @@ bool hasConstParamMemoCache(IRGS& env, const Func* callee, SSATmp* objOrClass) {
 rds::Link<TypedValue, rds::Mode::Normal>
 constParamCacheLink(IRGS& env, const Func* callee, SSATmp* cls,
                     bool asyncEagerReturn) {
-  auto const clsVal = cls ? cls->clsVal() : nullptr;;
+  auto const clsVal = cls ? cls->clsVal() : nullptr;
   auto arr = Array::CreateVec();
   for (auto i = 0; i < callee->numFuncEntryInputs(); ++i) {
     auto const t = publicTopType(env, BCSPRelOffset {i});

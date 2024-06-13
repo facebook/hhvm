@@ -234,7 +234,7 @@ StaticString XenonRequestLocalData::show(EventHook::Source sourceType) {
   switch (sourceType) {
     case EventHook::Source::Asio: return s_asio;
     case EventHook::Source::Interpreter: return s_interpreter;
-    case EventHook::Source::Jit: return s_jit;;
+    case EventHook::Source::Jit: return s_jit;
     case EventHook::Source::Native: return s_native;
     case EventHook::Source::Unwinder: return s_unwinder;
   }

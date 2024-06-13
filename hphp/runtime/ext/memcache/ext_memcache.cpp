@@ -803,6 +803,6 @@ struct MemcacheExtension final : Extension {
 
       Native::registerNativeDataInfo<MemcacheData>(s_Memcache.get());
     }
-} s_memcache_extension;;
+} s_memcache_extension;
 
 }

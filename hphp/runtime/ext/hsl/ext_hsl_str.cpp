@@ -236,7 +236,7 @@ Array HHVM_FUNCTION(split_l,
                     const Variant& limit,
                     const Variant& maybe_loc) {
   if (str.empty()) {
-    return  make_vec_array(empty_string());;
+    return  make_vec_array(empty_string());
   }
 
   int64_t int_limit = limit.isNull() ? k_PHP_INT_MAX : limit.asInt64Val();

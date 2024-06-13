@@ -11158,7 +11158,7 @@ private:
         orig.originalModuleName != dstCls.moduleName;
       bool copyFromInternal =
         (orig.cls->attrs & AttrInternal)
-        && dstCls.userAttributes.count(s___ModuleLevelTrait.get());;
+        && dstCls.userAttributes.count(s___ModuleLevelTrait.get());
 
       if (Cfg::Eval::ModuleLevelTraits &&
           (copyFromModuleLevelTrait || copyFromInternal)) {

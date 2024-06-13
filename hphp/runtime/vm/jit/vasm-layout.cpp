@@ -323,7 +323,7 @@ std::string Clusterizer::toString() const {
     for (auto b : m_clusters[cid]) {
       out << folly::sformat("{}, ", b);
     }
-    out << "\n";;
+    out << "\n";
   }
   return out.str();
 }

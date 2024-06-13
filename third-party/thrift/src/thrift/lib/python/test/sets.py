@@ -23,9 +23,14 @@ import unittest
 from typing import AbstractSet, Sequence, Tuple
 
 from folly.iobuf import IOBuf
-
-from testing.thrift_types import easy, EasySet, SetI32, SetI32Lists, SetSetI32Lists
 from thrift.python.test.containers.thrift_types import Foo, Sets
+from thrift.python.test.sets.thrift_types import (
+    easy,
+    EasySet,
+    SetI32,
+    SetI32Lists,
+    SetSetI32Lists,
+)
 
 
 class SetTests(unittest.TestCase):

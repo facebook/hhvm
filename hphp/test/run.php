@@ -350,6 +350,7 @@ final class Options {
     public bool $bespoke = false;
     public bool $record = false;
     public bool $replay = false;
+    public bool $factsdir = false;
 
     // Additional state added for convenience since Options is plumbed
     // around almost everywhere.
@@ -411,6 +412,7 @@ function get_options(
     'bespoke' => '',
     '*record' => '',
     '*replay' => '',
+    '*factsdir' => '',
   ];
   $options = new Options() as dynamic;
   $files = vec[];
@@ -856,6 +858,11 @@ function hhvm_cmd_impl(
     if ($autoload_db_prefix is nonnull) {
       $args[] =
         '-vAutoload.DB.Path='.escapeshellarg("$autoload_db_prefix.$mode_num");
+      if ($options->factsdir) {
+        // enable LMDB facts by telling HHVM where to create facts LMDB instances
+        $args[] =
+          '-vAutoload.DB.LmdbDir='.escapeshellarg("$autoload_db_prefix.$mode_num");
+      }
     }
 
     if ($options->retranslate_all is nonnull) {

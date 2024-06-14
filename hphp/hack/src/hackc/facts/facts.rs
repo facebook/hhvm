@@ -43,6 +43,7 @@ impl Default for TypeKind {
 }
 
 impl TypeKind {
+    #[inline]
     pub fn is_classish(&self) -> bool {
         matches!(
             self,
@@ -50,6 +51,7 @@ impl TypeKind {
         )
     }
 
+    #[inline]
     pub fn is_typedef(&self) -> bool {
         *self == Self::TypeAlias
     }

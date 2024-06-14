@@ -172,7 +172,7 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 self.assertEqual(3, sum)
 
     async def test_transport_error(self) -> None:
-        async with get_client(TestService, path="/no/where") as client:
+        async with get_client(TestService, host="localhost", port=1) as client:
             with self.assertRaises(TransportError) as ex:
                 await client.add(1, 2)
             self.assertEqual(TransportErrorType.UNKNOWN, ex.exception.type)
@@ -310,7 +310,7 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
         self,
     ) -> None:
         with HijackTestHelper():
-            async with get_client(TestService, path="/no/where") as client:
+            async with get_client(TestService, host="localhost", port=1) as client:
                 with self.assertRaises(HijackTestException) as context:
                     options = RpcOptions()
                     options.timeout = 12.5
@@ -321,7 +321,7 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
         self,
     ) -> None:
         with HijackTestHelper():
-            async with get_client(TestService, path="/no/where") as client:
+            async with get_client(TestService, host="localhost", port=1) as client:
                 with self.assertRaises(HijackTestException) as context:
                     await client.add(1, 2)
                 self.assertEqual(context.exception.timeout, 0.0)

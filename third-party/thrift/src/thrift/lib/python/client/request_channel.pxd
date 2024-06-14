@@ -19,13 +19,19 @@ from libcpp.string cimport string
 from thrift.python.client.ssl cimport cSSLContext
 from thrift.python.protocol cimport Protocol as cProtocol
 
-
 cdef extern from "thrift/lib/cpp/transport/THeader.h":
     cpdef enum ClientType "CLIENT_TYPE":
         THRIFT_HEADER_CLIENT_TYPE,
         THRIFT_ROCKET_CLIENT_TYPE,
+        THRIFT_FRAMED_DEPRECATED,
+        THRIFT_UNFRAMED_DEPRECATED,
+        THRIFT_HTTP_SERVER_TYPE,
         THRIFT_HTTP_CLIENT_TYPE,
         THRIFT_HTTP2_CLIENT_TYPE,
+        THRIFT_FRAMED_COMPACT,
+        THRIFT_HTTP_GET_CLIENT_TYPE,
+        THRIFT_UNKNOWN_CLIENT_TYPE,
+        THRIFT_UNFRAMED_COMPACT_DEPRECATED
 
 cdef extern from "thrift/lib/cpp2/async/RequestChannel.h" namespace "::apache::thrift":
     cdef cppclass cRequestChannel "::apache::thrift::RequestChannel":
@@ -95,7 +101,7 @@ cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::thrift
         ) except +
 
     cdef cppclass DefaultChannelFactory "::thrift::python::client::DefaultChannelFactory" (ChannelFactory):
-        pass
+        DefaultChannelFactory()
 
 cdef class RequestChannel:
     cdef cRequestChannel_ptr _cpp_obj

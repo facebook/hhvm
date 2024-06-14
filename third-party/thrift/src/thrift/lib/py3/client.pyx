@@ -16,7 +16,9 @@ import sys
 cimport cython
 from thrift.python.exceptions cimport create_py_exception
 from thrift.python.common import Protocol
-cimport thrift.py3.ssl as thrift_ssl
+from thrift.python.client.request_channel import ClientType
+from thrift.python.client.request_channel cimport DefaultChannelFactory, ChannelFactory
+cimport thrift.python.client.ssl as thrift_ssl
 from libcpp.string cimport string
 from libc.stdint cimport uint64_t
 from cython.operator cimport dereference as deref
@@ -166,7 +168,7 @@ def get_client(
     path=None,
     double timeout=1,
     headers=None,
-    ClientType client_type = ClientType.THRIFT_HEADER_CLIENT_TYPE,
+    cClientType client_type = cClientType.THRIFT_HEADER_CLIENT_TYPE,
     protocol = Protocol.COMPACT,
     thrift_ssl.SSLContext ssl_context=None,
     double ssl_timeout=1
@@ -183,7 +185,7 @@ def get_client(
     cdef string cstr
 
     endpoint = b''
-    if client_type is ClientType.THRIFT_HTTP_CLIENT_TYPE:
+    if client_type is cClientType.THRIFT_HTTP_CLIENT_TYPE:
         if path is None:
             raise TypeError("use path='/endpoint' when using ClientType.THRIFT_HTTP_CLIENT_TYPE")
         endpoint = os.fsencode(path)  # means we can accept bytes/str/Path objects
@@ -210,14 +212,17 @@ def get_client(
                 ssl_timeout=ssl_timeout
             )
 
+    cdef DefaultChannelFactory channel_factory = DefaultChannelFactory()
     host = str(host)  # Accept ipaddress objects
     client = clientKlass()
+
+
 
     if path:
         fspath = os.fsencode(path)
         bridgeFutureWith[cRequestChannel_ptr](
             (<Client>client)._executor,
-            createThriftChannelUnix(move[string](fspath), _timeout_ms, client_type, protocol),
+            channel_factory.createThriftChannelUnix(move[string](fspath), _timeout_ms, client_type, protocol),
             requestchannel_callback,
             <PyObject *> client
         )
@@ -225,7 +230,7 @@ def get_client(
         cstr = <bytes> host.encode('utf-8')
         bridgeFutureWith[cRequestChannel_ptr](
             (<Client>client)._executor,
-            thrift_ssl.createThriftChannelTCP(
+            channel_factory.createThriftChannelSSL(
                 ssl_context._cpp_obj,
                 move[string](cstr),
                 port,
@@ -242,7 +247,7 @@ def get_client(
         cstr = <bytes> host.encode('utf-8')
         bridgeFutureWith[cRequestChannel_ptr](
             (<Client>client)._executor,
-            createThriftChannelTCP(
+            channel_factory.createThriftChannelTCP(
                 move[string](cstr),
                 port,
                 _timeout_ms,

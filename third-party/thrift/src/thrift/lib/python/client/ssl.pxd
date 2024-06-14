@@ -41,6 +41,11 @@ cdef extern from "folly/io/async/SSLContext.h":
         void authenticate(bint checkPeerCert, bint checkPeerName)
 
 
+cdef extern from "<utility>" namespace "std" nogil:
+    cdef shared_ptr[cSSLContext] move(shared_ptr[cSSLContext])
+
+
+
 cdef class SSLContext:
     cdef object __weakref__
     cdef shared_ptr[cSSLContext] _cpp_obj

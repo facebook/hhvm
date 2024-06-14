@@ -35,38 +35,10 @@ from libcpp cimport bool
 from asyncio import InvalidStateError as asyncio_InvalidStateError
 from thrift.python.common cimport cThriftMetadata
 from thrift.python.protocol cimport Protocol as cProtocol
-from thrift.python.client.request_channel cimport cRequestChannel, cRequestChannel_ptr, cTProcessorEventHandler
+from thrift.python.client.request_channel cimport cRequestChannel, cRequestChannel_ptr, ClientType as cClientType, cTProcessorEventHandler
 from folly.executor cimport AsyncioExecutor
 
-cdef extern from "thrift/lib/cpp/transport/THeader.h":
-    cpdef enum ClientType "CLIENT_TYPE":
-        THRIFT_HEADER_CLIENT_TYPE,
-        THRIFT_FRAMED_DEPRECATED,
-        THRIFT_UNFRAMED_DEPRECATED,
-        THRIFT_HTTP_SERVER_TYPE,
-        THRIFT_HTTP_CLIENT_TYPE,
-        THRIFT_ROCKET_CLIENT_TYPE,
-        THRIFT_FRAMED_COMPACT,
-        THRIFT_HTTP_GET_CLIENT_TYPE,
-        THRIFT_UNKNOWN_CLIENT_TYPE,
-        THRIFT_UNFRAMED_COMPACT_DEPRECATED
-
 cdef extern from "thrift/lib/py3/client.h" namespace "::thrift::py3":
-    cdef cFollyFuture[cRequestChannel_ptr] createThriftChannelTCP(
-        string&& host,
-        const uint16_t port,
-        const uint32_t connect_timeout,
-        ClientType,
-        cProtocol,
-        string&& endpoint,
-    )
-
-    cdef cFollyFuture[cRequestChannel_ptr] createThriftChannelUnix(
-        string&& path,
-        const uint32_t connect_timeout,
-        ClientType,
-        cProtocol,
-    )
     cdef void destroyInEventBaseThread(cRequestChannel_ptr)
     cdef unique_ptr[cClientWrapper] makeClientWrapper[T, U](cRequestChannel_ptr channel)
 

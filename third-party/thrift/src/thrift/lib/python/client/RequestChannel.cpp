@@ -42,11 +42,8 @@ DefaultChannelFactory::createThriftChannelTCP(
   auto future = folly::via(eb, [=]() -> RequestChannel::Ptr {
     auto socket =
         folly::AsyncSocket::newSocket(eb, host, port, connect_timeout);
-    if (client_t == THRIFT_HEADER_CLIENT_TYPE ||
-        client_t == THRIFT_HTTP_CLIENT_TYPE) {
-      return createHeaderChannel(
-          std::move(socket), client_t, proto, host, endpoint);
-    } else if (client_t == THRIFT_ROCKET_CLIENT_TYPE) {
+
+    if (client_t == THRIFT_ROCKET_CLIENT_TYPE) {
       auto chan = RocketClientChannel::newChannel(std::move(socket));
       chan->setProtocolId(proto);
       return chan;
@@ -57,7 +54,8 @@ DefaultChannelFactory::createThriftChannelTCP(
       chan->setProtocolId(proto);
       return chan;
     } else {
-      throw std::runtime_error("Unsupported client type");
+      return createHeaderChannel(
+          std::move(socket), client_t, proto, host, endpoint);
     }
   });
   return future;
@@ -75,6 +73,39 @@ RequestChannel::Ptr ChannelFactory::sync_createThriftChannelTCP(
   return std::move(future.wait().value());
 }
 
+struct FutureConnectCallback : folly::AsyncSocket::ConnectCallback {
+  explicit FutureConnectCallback(folly::AsyncSocket::UniquePtr s)
+      : socket{std::move(s)} {}
+
+  void connectSuccess() noexcept override {
+    auto deleteMe = std::unique_ptr<FutureConnectCallback>{this};
+    promise.setValue(std::move(socket));
+  }
+
+  void connectErr(const folly::AsyncSocketException& ex) noexcept override {
+    using apache::thrift::transport::TTransportException;
+    auto deleteMe = std::unique_ptr<FutureConnectCallback>{this};
+    promise.setException(TTransportException{ex});
+  }
+
+  folly::AsyncSocket::UniquePtr socket;
+  folly::Promise<folly::AsyncSocket::UniquePtr> promise;
+};
+
+/**
+ * Asynchronously connect to `address` with a new AsyncSocket. The Future will
+ * be completed on the given EventBase.
+ */
+inline folly::Future<folly::AsyncSocket::UniquePtr> asyncSocketConnect(
+    folly::EventBase* eb,
+    const folly::SocketAddress& address,
+    uint32_t connect_timeout) {
+  auto* callback = new FutureConnectCallback{folly::AsyncSocket::newSocket(eb)};
+  auto future = callback->promise.getFuture();
+  callback->socket->connect(callback, address, connect_timeout);
+  return future;
+}
+
 folly::Future<RequestChannel::Ptr>
 DefaultChannelFactory::createThriftChannelUnix(
     const std::string& path,
@@ -82,20 +113,24 @@ DefaultChannelFactory::createThriftChannelUnix(
     CLIENT_TYPE client_t,
     apache::thrift::protocol::PROTOCOL_TYPES proto) {
   auto eb = folly::getGlobalIOExecutor()->getEventBase();
-  auto future = folly::via(eb, [=]() -> RequestChannel::Ptr {
-    auto socket = folly::AsyncSocket::newSocket(
-        eb, folly::SocketAddress::makeFromPath(path), connect_timeout);
-    if (client_t == THRIFT_HEADER_CLIENT_TYPE) {
-      return createHeaderChannel(std::move(socket), client_t, proto);
-    } else if (client_t == THRIFT_ROCKET_CLIENT_TYPE) {
-      auto chan = RocketClientChannel::newChannel(std::move(socket));
-      chan->setProtocolId(proto);
-      return chan;
-    } else {
-      throw std::runtime_error("Unsupported client type");
-    }
-  });
-  return future;
+  return folly::via(
+             eb,
+             [=, path{std::move(path)}]() {
+               return asyncSocketConnect(
+                   eb,
+                   folly::SocketAddress::makeFromPath(path),
+                   connect_timeout);
+             })
+      .thenValue(
+          [=](folly::AsyncSocket::UniquePtr socket) -> RequestChannel::Ptr {
+            if (client_t == THRIFT_ROCKET_CLIENT_TYPE) {
+              auto chan = apache::thrift::RocketClientChannel::newChannel(
+                  std::move(socket));
+              chan->setProtocolId(proto);
+              return chan;
+            }
+            return createHeaderChannel(std::move(socket), client_t, proto);
+          });
 }
 
 RequestChannel::Ptr ChannelFactory::sync_createThriftChannelUnix(

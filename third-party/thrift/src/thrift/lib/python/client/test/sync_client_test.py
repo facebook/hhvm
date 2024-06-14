@@ -120,7 +120,7 @@ class SyncClientTests(unittest.TestCase):
                 self.assertEqual(3, client.add(1, 2))
 
     def test_transport_error(self) -> None:
-        with get_sync_client(TestService, path="/no/where") as client:
+        with get_sync_client(TestService, host="localhost", port=1) as client:
             with self.assertRaises(TransportError) as ex:
                 client.add(1, 2)
             self.assertEqual(TransportErrorType.UNKNOWN, ex.exception.type)
@@ -146,7 +146,7 @@ class SyncClientTests(unittest.TestCase):
         self,
     ) -> None:
         with HijackTestHelper():
-            with get_sync_client(TestService, path="/no/where") as client:
+            with get_sync_client(TestService, host="localhost", port=1) as client:
                 with self.assertRaises(HijackTestException) as context:
                     options = RpcOptions()
                     options.timeout = 12.5
@@ -157,7 +157,7 @@ class SyncClientTests(unittest.TestCase):
         self,
     ) -> None:
         with HijackTestHelper():
-            with get_sync_client(TestService, path="/no/where") as client:
+            with get_sync_client(TestService, host="localhost", port=1) as client:
                 with self.assertRaises(HijackTestException) as context:
                     client.add(1, 2)
                 self.assertEqual(context.exception.timeout, 0.0)

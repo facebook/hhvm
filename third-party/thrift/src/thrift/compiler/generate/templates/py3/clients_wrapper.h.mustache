@@ -67,7 +67,7 @@ class {{service:name}}ClientWrapper : {{!
       apache::thrift::RpcOptions& rpcOptions{{#function:args}},
       {{#field:type}}{{> types/cpp_value_type}}{{/field:type}} arg_{{field:py_name}}{{/function:args}});
 {{/service:supportedFunctions}}
-{{#service:interactions}}
+{{#service:supportedInteractions}}
 
     class {{service:name}}InteractionWrapper : public {{!
     }}{{#service:extends}}{{service:name}}{{/service:extends}}ClientWrapper {
@@ -83,10 +83,10 @@ class {{service:name}}ClientWrapper : {{!
           {{#field:type}}{{> types/cpp_value_type}}{{/field:type}} arg_{{field:py_name}}{{/function:args}});
         {{/service:supportedFunctions}}
     };
-{{/service:interactions}}
-{{#service:interactions}}
+{{/service:supportedInteractions}}
+{{#service:supportedInteractions}}
     folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> create{{service:name}}();
-{{/service:interactions}}
+{{/service:supportedInteractions}}
 };
 
 

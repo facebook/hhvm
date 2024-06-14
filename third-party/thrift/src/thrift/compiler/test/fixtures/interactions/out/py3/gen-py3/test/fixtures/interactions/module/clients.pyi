@@ -128,65 +128,6 @@ class Factories(thrift.py3.client.Client):
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _test_fixtures_interactions_module_types.ResponseAndClientBufferedStream__i32_i32: ...
 
-    def createMyInteraction(self) -> Factories_MyInteraction: ...
-    def async_createMyInteraction(self) -> Factories_MyInteraction: ...
-    def createMyInteractionFast(self) -> Factories_MyInteractionFast: ...
-    def async_createMyInteractionFast(self) -> Factories_MyInteractionFast: ...
-    def createSerialInteraction(self) -> Factories_SerialInteraction: ...
-    def async_createSerialInteraction(self) -> Factories_SerialInteraction: ...
-
-_Factories_MyInteraction = _typing.TypeVar('_Factories_MyInteraction', bound='Factories_MyInteraction')
-
-
-class Factories_MyInteraction(thrift.py3.client.Client):
-
-    async def frobnicate(
-        self,
-        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
-    ) -> int: ...
-
-    async def ping(
-        self,
-        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
-    ) -> None: ...
-
-    async def truthify(
-        self,
-        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
-    ) -> _test_fixtures_interactions_module_types.ClientBufferedStream__bool: ...
-
-
-_Factories_MyInteractionFast = _typing.TypeVar('_Factories_MyInteractionFast', bound='Factories_MyInteractionFast')
-
-
-class Factories_MyInteractionFast(thrift.py3.client.Client):
-
-    async def frobnicate(
-        self,
-        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
-    ) -> int: ...
-
-    async def ping(
-        self,
-        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
-    ) -> None: ...
-
-    async def truthify(
-        self,
-        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
-    ) -> _test_fixtures_interactions_module_types.ClientBufferedStream__bool: ...
-
-
-_Factories_SerialInteraction = _typing.TypeVar('_Factories_SerialInteraction', bound='Factories_SerialInteraction')
-
-
-class Factories_SerialInteraction(thrift.py3.client.Client):
-
-    async def frobnicate(
-        self,
-        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
-    ) -> None: ...
-
 
 
 _PerformT = _typing.TypeVar('_PerformT', bound='Perform')

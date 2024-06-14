@@ -83,11 +83,11 @@ void {{service:name}}Wrapper::async_{{#function:eb}}eb{{/function:eb}}{{^functio
     });
 }
 {{/service:supportedFunctions}}
-{{#service:interactions}}
+{{#service:supportedInteractions}}
 std::unique_ptr<{{interaction:parent_service_cpp_name}}SvIf::{{service:name}}If> {{service:parent_service_name}}Wrapper::create{{service:name}}() {
   throw std::runtime_error("Py3 server doesn't support interactions.");
 }
-{{/service:interactions}}
+{{/service:supportedInteractions}}
 std::shared_ptr<apache::thrift::ServerInterface> {{service:name}}Interface(PyObject *if_object, folly::Executor *exc) {
   return std::make_shared<{{service:name}}Wrapper>(if_object, exc);
 }

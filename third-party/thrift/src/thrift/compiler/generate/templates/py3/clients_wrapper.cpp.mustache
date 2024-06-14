@@ -41,7 +41,7 @@ folly::Future<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:
 }
 
 {{/service:supportedFunctions}}
-{{#service:interactions}}
+{{#service:supportedInteractions}}
 
 folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>>
 {{service:parent_service_name}}ClientWrapper::create{{service:name}}() {
@@ -54,8 +54,8 @@ folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>>
   );
 }
 
-{{/service:interactions}}
-{{#service:interactions}}
+{{/service:supportedInteractions}}
+{{#service:supportedInteractions}}
 {{#service:supportedFunctions}}
 folly::Future<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}>
 {{service:parent_service_name}}ClientWrapper::{{service:name}}InteractionWrapper::{{function:cppName}}(
@@ -67,7 +67,7 @@ folly::Future<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:
 }
 
 {{/service:supportedFunctions}}
-{{/service:interactions}}
+{{/service:supportedInteractions}}
 {{/program:services}}{{!
 }}{{#program:cppNamespaces}}} // namespace {{value}}
 {{/program:cppNamespaces}}

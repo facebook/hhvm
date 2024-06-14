@@ -59,16 +59,16 @@ class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
         }}{{/function:return_type}}: ...
 
 {{/service:supportedFunctions}}
-{{#service:interactions}}
+{{#service:supportedInteractions}}
     def create{{service:name}}(self) -> {{service:parent_service_name}}_{{service:name}}: ...
     def async_create{{service:name}}(self) -> {{service:parent_service_name}}_{{service:name}}: ...
-{{/service:interactions}}
-{{^service:interactions}}
+{{/service:supportedInteractions}}
+{{^service:supportedInteractions}}
 {{^service:supportedFunctions}}
     pass
 {{/service:supportedFunctions}}
-{{/service:interactions}}
-{{#service:interactions}}
+{{/service:supportedInteractions}}
+{{#service:supportedInteractions}}
 
 _{{service:parent_service_name}}_{{service:name}} = _typing.TypeVar('_{{service:parent_service_name}}_{{service:name}}', bound='{{service:parent_service_name}}_{{service:name}}')
 
@@ -92,5 +92,5 @@ class {{service:parent_service_name}}_{{service:name}}({{#service:extends}}{{#se
 {{^service:supportedFunctions}}
     pass
 {{/service:supportedFunctions}}
-{{/service:interactions}}
+{{/service:supportedInteractions}}
 {{/program:services}}

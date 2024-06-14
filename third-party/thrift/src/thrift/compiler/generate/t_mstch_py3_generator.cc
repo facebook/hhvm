@@ -427,7 +427,17 @@ class py3_mstch_service : public mstch_service {
              &py3_mstch_service::get_lifecycle_functions},
             {"service:supportedFunctionsWithLifecycle",
              &py3_mstch_service::get_supported_functions_with_lifecycle},
+            {"service:supportedInteractions",
+             &py3_mstch_service::get_supported_interactions},
         });
+
+    // Collect supported interactions
+    for (const auto* function : get_functions()) {
+      if (function->is_interaction_constructor()) {
+        supported_interactions_.insert(dynamic_cast<const t_interaction*>(
+            function->interaction().get_type()));
+      }
+    }
   }
 
   mstch::node isExternalProgram() { return prog_ != service_->program(); }
@@ -479,8 +489,13 @@ class py3_mstch_service : public mstch_service {
     return make_mstch_functions(funcs, service_);
   }
 
+  mstch::node get_supported_interactions() {
+    return make_mstch_interactions(supported_interactions_, service_);
+  }
+
  protected:
   const t_program* prog_;
+  std::set<const t_interaction*> supported_interactions_;
 };
 
 class py3_mstch_interaction : public py3_mstch_service {

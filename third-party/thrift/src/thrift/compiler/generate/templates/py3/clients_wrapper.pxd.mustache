@@ -62,7 +62,7 @@ cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:na
     }}{{service:cpp_name}}AsyncClient":
       pass
 
-{{#service:interactions}}
+{{#service:supportedInteractions}}
 cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_clients.h"{{!
     }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
   cdef cppclass c{{service:parent_service_name}}AsyncClient_{{service:name}} {{!
@@ -70,7 +70,7 @@ cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:na
     }}{{service:parent_service_name}}AsyncClient::{{service:name}}":
       pass
 
-{{/service:interactions}}
+{{/service:supportedInteractions}}
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[c{{service:name}}ClientWrapper] move(unique_ptr[c{{service:name}}ClientWrapper])
 
@@ -106,17 +106,17 @@ cdef extern from "{{program:includePrefix}}gen-py3/{{program:name}}/clients_wrap
       empty cppclass body
     }}
     {{^service:supportedFunctions}}
-    {{^service:interactions}}
+    {{^service:supportedInteractions}}
     {{#service:extends?}}
     pass
     {{/service:extends?}}
-    {{/service:interactions}}
+    {{/service:supportedInteractions}}
     {{/service:supportedFunctions}}
-    {{#service:interactions}}
+    {{#service:supportedInteractions}}
     cFollyFuture[unique_ptr[cClientWrapper]]& create{{service:name}}()
-    {{/service:interactions}}
+    {{/service:supportedInteractions}}
 
-  {{#service:interactions}}
+  {{#service:supportedInteractions}}
   cdef cppclass c{{service:parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper "{{!
   }}::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{service:parent_service_name}}ClientWrapper{{!
   }}::{{service:name}}InteractionWrapper"(cClientWrapper):
@@ -138,5 +138,5 @@ cdef extern from "{{program:includePrefix}}gen-py3/{{program:name}}/clients_wrap
     {{/service:extends?}}
     {{/service:supportedFunctions}}
 
-  {{/service:interactions}}
+  {{/service:supportedInteractions}}
 {{/program:services}}

@@ -207,15 +207,6 @@ void FactoriesWrapper::async_tm_serialize(
         });
     });
 }
-std::unique_ptr<FactoriesSvIf::MyInteractionIf> FactoriesWrapper::createMyInteraction() {
-  throw std::runtime_error("Py3 server doesn't support interactions.");
-}
-std::unique_ptr<FactoriesSvIf::MyInteractionFastIf> FactoriesWrapper::createMyInteractionFast() {
-  throw std::runtime_error("Py3 server doesn't support interactions.");
-}
-std::unique_ptr<FactoriesSvIf::SerialInteractionIf> FactoriesWrapper::createSerialInteraction() {
-  throw std::runtime_error("Py3 server doesn't support interactions.");
-}
 std::shared_ptr<apache::thrift::ServerInterface> FactoriesInterface(PyObject *if_object, folly::Executor *exc) {
   return std::make_shared<FactoriesWrapper>(if_object, exc);
 }

@@ -110,50 +110,6 @@ class FactoriesClientWrapper : public ::thrift::py3::ClientWrapper {
       apache::thrift::RpcOptions& rpcOptions);
     folly::Future<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>> serialize(
       apache::thrift::RpcOptions& rpcOptions);
-
-    class MyInteractionInteractionWrapper : public ClientWrapper {
-      public:
-        MyInteractionInteractionWrapper(
-          std::unique_ptr<apache::thrift::GeneratedAsyncClient> async_client,
-           std::shared_ptr<apache::thrift::RequestChannel> channel)
-           : ClientWrapper(std::move(async_client), channel) {}
-
-        folly::Future<int32_t> frobnicate(
-          apache::thrift::RpcOptions& rpcOptions);
-        folly::Future<folly::Unit> ping(
-          apache::thrift::RpcOptions& rpcOptions);
-        folly::Future<apache::thrift::ClientBufferedStream<bool>> truthify(
-          apache::thrift::RpcOptions& rpcOptions);
-    };
-
-    class MyInteractionFastInteractionWrapper : public ClientWrapper {
-      public:
-        MyInteractionFastInteractionWrapper(
-          std::unique_ptr<apache::thrift::GeneratedAsyncClient> async_client,
-           std::shared_ptr<apache::thrift::RequestChannel> channel)
-           : ClientWrapper(std::move(async_client), channel) {}
-
-        folly::Future<int32_t> frobnicate(
-          apache::thrift::RpcOptions& rpcOptions);
-        folly::Future<folly::Unit> ping(
-          apache::thrift::RpcOptions& rpcOptions);
-        folly::Future<apache::thrift::ClientBufferedStream<bool>> truthify(
-          apache::thrift::RpcOptions& rpcOptions);
-    };
-
-    class SerialInteractionInteractionWrapper : public ClientWrapper {
-      public:
-        SerialInteractionInteractionWrapper(
-          std::unique_ptr<apache::thrift::GeneratedAsyncClient> async_client,
-           std::shared_ptr<apache::thrift::RequestChannel> channel)
-           : ClientWrapper(std::move(async_client), channel) {}
-
-        folly::Future<folly::Unit> frobnicate(
-          apache::thrift::RpcOptions& rpcOptions);
-    };
-    folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> createMyInteraction();
-    folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> createMyInteractionFast();
-    folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> createSerialInteraction();
 };
 
 

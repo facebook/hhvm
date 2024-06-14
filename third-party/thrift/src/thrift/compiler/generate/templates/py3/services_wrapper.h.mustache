@@ -63,9 +63,9 @@ class {{service:name}}Wrapper : {{!
             }}{{/field:type}} {{field:cppName}}{{#last?}}
     {{/last?}}{{/function:args}}) override;
 {{/service:supportedFunctions}}
-{{#service:interactions}}
+{{#service:supportedInteractions}}
     std::unique_ptr<{{service:name}}If> create{{service:name}}() override;
-{{/service:interactions}}
+{{/service:supportedInteractions}}
 {{#service:lifecycleFunctions}}
 folly::SemiFuture<folly::Unit> semifuture_{{function:cppName}}() override;
 {{/service:lifecycleFunctions}}

@@ -62,9 +62,6 @@ class FactoriesWrapper : virtual public FactoriesSvIf {
     ) override;
     void async_tm_interactFast(apache::thrift::HandlerCallbackPtr<int32_t> callback) override;
     void async_tm_serialize(apache::thrift::HandlerCallbackPtr<apache::thrift::ResponseAndServerStream<int32_t,int32_t>> callback) override;
-    std::unique_ptr<MyInteractionIf> createMyInteraction() override;
-    std::unique_ptr<MyInteractionFastIf> createMyInteractionFast() override;
-    std::unique_ptr<SerialInteractionIf> createSerialInteraction() override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };

@@ -89,9 +89,9 @@ cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:
 
 {{#program:services}}
 from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.clients_wrapper cimport c{{service:name}}AsyncClient, c{{service:name}}ClientWrapper
-{{#service:interactions}}
+{{#service:supportedInteractions}}
 from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.clients_wrapper cimport c{{service:parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper
-{{/service:interactions}}
+{{/service:supportedInteractions}}
 {{#service:extends}}
 {{#service:externalProgram?}}
 from {{#service:py3Namespaces}}{{value}}.{{/service:py3Namespaces}}{{service:programName}}.clients_wrapper cimport c{{service:name}}ClientWrapper
@@ -170,7 +170,7 @@ cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
 
 {{/service:supportedFunctions}}
 
-{{#service:interactions}}
+{{#service:supportedInteractions}}
     def create{{service:name}}(
             {{service:parent_service_name}} self
     ):
@@ -188,7 +188,7 @@ cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
     ):
         return self.create{{service:name}}()
 
-{{/service:interactions}}
+{{/service:supportedInteractions}}
     @classmethod
     def __get_reflection__(cls):
         return _services_reflection.get_reflection__{{service:name}}(for_clients=True)
@@ -203,7 +203,7 @@ cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
     def __get_thrift_name__():
         return "{{program:name}}.{{service:name}}"
 
-{{#service:interactions}}
+{{#service:supportedInteractions}}
 @cython.auto_pickle(False)
 cdef class {{service:parent_service_name}}_{{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
     }}_{{#service:py3Namespaces}}{{value}}_{{/service:py3Namespaces}}{{!
@@ -256,5 +256,5 @@ cdef class {{service:parent_service_name}}_{{service:name}}({{#service:extends}}
 {{^service:supportedFunctions}}
     pass
 {{/service:supportedFunctions}}
-{{/service:interactions}}
+{{/service:supportedInteractions}}
 {{/program:services}}

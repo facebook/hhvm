@@ -66,11 +66,6 @@ func simpleServerOptions(options ...func(*ServerOptions)) *ServerOptions {
 	return opts
 }
 
-// ServerTransport returns the server transport
-func (p *SimpleServer) ServerTransport() ServerTransport {
-	return p.serverTransport
-}
-
 // Listen returns the server transport listener
 func (p *SimpleServer) Listen() (net.Addr, error) {
 	if err := p.serverTransport.Listen(); err != nil {

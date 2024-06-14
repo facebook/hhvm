@@ -23,7 +23,6 @@ import (
 
 // Server is a thrift server
 type Server interface {
-	ServerTransport() ServerTransport
 	Listen() (net.Addr, error)
 	// Serve starts the server
 	Serve() error

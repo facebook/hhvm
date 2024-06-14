@@ -145,6 +145,7 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
       dynPatch_.reset();
     } else {
       dynPatch_ = std::move(v);
+      Base::reset();
       DCHECK(dynPatch_.value().members());
     }
   }

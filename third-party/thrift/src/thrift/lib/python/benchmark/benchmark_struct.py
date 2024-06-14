@@ -26,6 +26,7 @@ NAMESPACES = {
     "py-deprecated": "ttypes",
     "py3": "types",
     "python": "thrift_types",
+    "mutable-python": "thrift_mutable_types",
 }
 
 table = []
@@ -270,6 +271,9 @@ from thrift.py3.serializer import deserialize, serialize
 """,
     "python": """
 from thrift.python.serializer import deserialize, serialize
+""",
+    "mutable-python": """
+from thrift.python.mutable_serializer import deserialize, serialize
 """,
 }
 

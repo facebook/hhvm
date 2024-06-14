@@ -32,6 +32,8 @@ import asyncio
 import ipaddress
 import os
 from socket import SocketKind
+from thrift.python.client.client_wrapper import Client as PythonClient
+from thrift.python.client.async_client_factory import get_client as get_client_python
 
 cdef object proxy_factory = None
 
@@ -178,6 +180,9 @@ def get_client(
     loop = asyncio.get_event_loop()
     # This is to prevent calling get_client at import time at module scope
     assert loop.is_running(), "Eventloop is not running"
+    # TODO (ffrancet) headers
+    if issubclass(clientKlass, PythonClient):
+        return get_client_python(clientKlass, host=host, port=port, path=path, timeout=timeout, client_type=client_type, protocol=protocol, ssl_context=ssl_context, ssl_timeout=ssl_timeout)
     assert issubclass(clientKlass, Client), "Must be a py3 thrift client"
 
     cdef uint32_t _timeout_ms = int(timeout * 1000)

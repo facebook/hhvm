@@ -72,8 +72,11 @@ func (p *SimpleServer) ServerTransport() ServerTransport {
 }
 
 // Listen returns the server transport listener
-func (p *SimpleServer) Listen() error {
-	return p.serverTransport.Listen()
+func (p *SimpleServer) Listen() (net.Addr, error) {
+	if err := p.serverTransport.Listen(); err != nil {
+		return nil, err
+	}
+	return p.serverTransport.Addr(), nil
 }
 
 // acceptLoopContext takes a context that will be decorated with ConnInfo and passed down to new clients.
@@ -117,7 +120,7 @@ func (p *SimpleServer) Serve() error {
 
 // ServeContext behaves like Serve but supports cancellation via context.
 func (p *SimpleServer) ServeContext(ctx context.Context) error {
-	err := p.Listen()
+	_, err := p.Listen()
 	if err != nil {
 		return err
 	}

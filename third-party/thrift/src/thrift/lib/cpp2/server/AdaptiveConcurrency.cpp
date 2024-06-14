@@ -17,11 +17,11 @@
 #include <thrift/lib/cpp2/server/AdaptiveConcurrency.h>
 
 #include <algorithm>
-#include <atomic>
 #include <chrono>
 #include <optional>
 
 #include <folly/Random.h>
+#include <folly/synchronization/RelaxedAtomic.h>
 
 using Clock = std::chrono::steady_clock;
 
@@ -80,12 +80,12 @@ AdaptiveConcurrencyController::AdaptiveConcurrencyController(
       }
     }
     // reset all the state
-    maxRequests_.store(0, std::memory_order_relaxed);
+    maxRequests_.store(0);
     maxRequestsOb_.setValue(std::make_optional<uint32_t>(0));
-    nextRttRecalcStart_.store(kZero, std::memory_order_relaxed);
-    samplingPeriodStart_.store(kZero, std::memory_order_relaxed);
-    latencySamplesIdx_.store(0, std::memory_order_relaxed);
-    latencySamplesCnt_.store(0, std::memory_order_relaxed);
+    nextRttRecalcStart_.store(kZero);
+    samplingPeriodStart_.store(kZero);
+    latencySamplesIdx_.store(0);
+    latencySamplesCnt_.store(0);
     concurrencyLimit_ = snapshot->minConcurrency;
   });
 }
@@ -97,34 +97,34 @@ AdaptiveConcurrencyController::AdaptiveConcurrencyController(
 // this function is only used for rtt recalculation purposes.
 void AdaptiveConcurrencyController::requestStarted(Clock::time_point started) {
   // check if we are in rtt recalculation period
-  auto rttRecalc = rttRecalcStart_.load(std::memory_order_relaxed);
+  auto rttRecalc = rttRecalcStart_.load();
   if (rttRecalc == kZero || started < rttRecalc) {
     return;
   }
 
   // This is to make sure the logic inside the conditional block executes only
   // once across threads.
-  rttRecalc = rttRecalcStart_.exchange(kZero, std::memory_order_relaxed);
+  rttRecalc = rttRecalcStart_.exchange(kZero);
   if (rttRecalc != kZero) {
     // This ensures that a sampling period is not already in progress.
-    DCHECK(samplingPeriodStart_.load(std::memory_order_relaxed) == kZero);
+    DCHECK(samplingPeriodStart_.load() == kZero);
     DCHECK(config().isEnabled());
 
     // tell the server to start enforcing min concurrency
-    maxRequests_.store(config().minConcurrency, std::memory_order_relaxed);
+    maxRequests_.store(config().minConcurrency);
     maxRequestsOb_.setValue(config().minConcurrency);
 
     // reset targetRtt to 0 to indicate that we are computing targetRtt
-    targetRtt_.store({}, std::memory_order_relaxed);
+    targetRtt_.store({});
 
     // and start collecting samples for requests running with this concurrency.
     // requests collected here will be used to compute the target RTT.
-    samplingPeriodStart_.store(Clock::now(), std::memory_order_relaxed);
+    samplingPeriodStart_.store(Clock::now());
 
     if (config().targetRttFixed.count() == 0) {
       // and schedule next rtt recalc, with jitter
       auto dur = jitter(config().recalcInterval, config().recalcPeriodJitter);
-      nextRttRecalcStart_.store(Clock::now() + dur, std::memory_order_relaxed);
+      nextRttRecalcStart_.store(Clock::now() + dur);
     }
   }
 }
@@ -133,7 +133,7 @@ void AdaptiveConcurrencyController::requestStarted(Clock::time_point started) {
 // sampling period
 bool AdaptiveConcurrencyController::inSamplingPeriod(
     Clock::time_point ts) const {
-  auto start = samplingPeriodStart_.load(std::memory_order_relaxed);
+  auto start = samplingPeriodStart_.load();
   return start != kZero && ts > start;
 }
 
@@ -144,7 +144,7 @@ void AdaptiveConcurrencyController::requestFinished(
   }
 
   // we had enough samples
-  auto idx = latencySamplesIdx_.fetch_add(1, std::memory_order_relaxed);
+  auto idx = latencySamplesIdx_.fetch_add(1);
   if (idx >= latencySamples_.size()) {
     return;
   }
@@ -155,27 +155,26 @@ void AdaptiveConcurrencyController::requestFinished(
   bool shouldRecalculate = sampleCount == latencySamples_.size() - 1;
   if (shouldRecalculate) {
     // ends the current sampling period
-    samplingPeriodStart_.store(kZero, std::memory_order_relaxed);
+    samplingPeriodStart_.store(kZero);
     // compute new adaptive concurrency parameters based on the collected
     // latency samples.
     recalculate();
 
     auto now = Clock::now();
-    auto nextRttRecalc = nextRttRecalcStart_.load(std::memory_order_relaxed);
+    auto nextRttRecalc = nextRttRecalcStart_.load();
     if (nextRttRecalc != kZero &&
         now + config().samplingInterval > nextRttRecalc) {
       // start recalibration for requests that will start running in 500ms
       // in other words: if rtt recalculation will start before sampling
       // interval ends, do not start sampling process
-      rttRecalcStart_.store(nextRttRecalc, std::memory_order_relaxed);
+      rttRecalcStart_.store(nextRttRecalc);
     } else {
       // schedule next sampling period. we don't need to collect samples all the
       // time.
-      samplingPeriodStart_.store(
-          now + config().samplingInterval, std::memory_order_relaxed);
+      samplingPeriodStart_.store(now + config().samplingInterval);
     }
-    latencySamplesIdx_.store(0, std::memory_order_relaxed);
-    latencySamplesCnt_.store(0, std::memory_order_relaxed);
+    latencySamplesIdx_.store(0);
+    latencySamplesCnt_.store(0);
   }
 }
 
@@ -193,31 +192,27 @@ void AdaptiveConcurrencyController::recalculate() {
   std::nth_element(
       latencySamples_.begin(), pct, latencySamples_.begin() + sampleCount);
   Duration pctRtt{*pct}; // get the value pointed by pct
-  sampledRtt_.store(pctRtt, std::memory_order_relaxed); // for monitoring
-  minRtt_.store(Clock::duration{cfg.minTargetRtt}, std::memory_order_relaxed);
-  if (targetRtt_.load(std::memory_order_relaxed) == Duration{}) {
+  sampledRtt_.store(pctRtt); // for monitoring
+  minRtt_.store(Clock::duration{cfg.minTargetRtt});
+  if (targetRtt_.load() == Duration{}) {
     if (cfg.targetRttFixed == std::chrono::milliseconds{}) {
       // If a min target RTT latency is specified then ensure that the
       // computed target is not below that minimum threshold.
-      targetRtt_.store(
-          std::max(
-              std::chrono::round<Clock::duration>(cfg.minTargetRtt),
-              std::chrono::round<Clock::duration>(
-                  pctRtt * cfg.targetRttFactor)),
-          std::memory_order_relaxed);
+      targetRtt_.store(std::max(
+          std::chrono::round<Clock::duration>(cfg.minTargetRtt),
+          std::chrono::round<Clock::duration>(pctRtt * cfg.targetRttFactor)));
     } else {
-      targetRtt_.store(
-          Clock::duration{cfg.targetRttFixed}, std::memory_order_relaxed);
+      targetRtt_.store(Clock::duration{cfg.targetRttFixed});
     }
     // reset concurrency limit to what it was before we started rtt calibration
-    maxRequests_.store(concurrencyLimit_, std::memory_order_relaxed);
+    maxRequests_.store(concurrencyLimit_);
     maxRequestsOb_.setValue(concurrencyLimit_);
   } else {
     // The gradient is computed as the ratio between the target RTT latency
     // and the pct RTT latency measured during the sampling period.
     // Sanity check that the pct value isn't zero before computing gradient.
-    double raw_gradient = targetRtt_.load(std::memory_order_relaxed) /
-        std::max(Clock::duration(1), pctRtt);
+    double raw_gradient =
+        targetRtt_.load() / std::max(Clock::duration(1), pctRtt);
     // Cap the gradient between 0.5 and 2.0.
     // TODO: follow up on this range and see if it can be tuned further (or make
     // it configurable).
@@ -232,13 +227,13 @@ void AdaptiveConcurrencyController::recalculate() {
 
     concurrencyLimit_ = std::max(cfg.minConcurrency, upperConcurrencyLimit);
 
-    maxRequests_.store(concurrencyLimit_, std::memory_order_relaxed);
+    maxRequests_.store(concurrencyLimit_);
     maxRequestsOb_.setValue(concurrencyLimit_);
   }
 }
 
 size_t AdaptiveConcurrencyController::getMaxRequests() const {
-  return maxRequests_.load(std::memory_order_relaxed);
+  return maxRequests_.load();
 }
 
 size_t AdaptiveConcurrencyController::getOriginalMaxRequests() const {
@@ -246,34 +241,31 @@ size_t AdaptiveConcurrencyController::getOriginalMaxRequests() const {
 }
 
 Clock::time_point AdaptiveConcurrencyController::samplingPeriodStart() const {
-  return samplingPeriodStart_.load(std::memory_order_relaxed);
+  return samplingPeriodStart_.load();
 }
 void AdaptiveConcurrencyController::samplingPeriodStart(Clock::time_point v) {
-  samplingPeriodStart_.store(v, std::memory_order_relaxed);
+  samplingPeriodStart_.store(v);
 }
 Clock::time_point AdaptiveConcurrencyController::rttRecalcStart() const {
-  return rttRecalcStart_.load(std::memory_order_relaxed);
+  return rttRecalcStart_.load();
 }
 Clock::time_point AdaptiveConcurrencyController::nextRttRecalcStart() const {
-  return nextRttRecalcStart_.load(std::memory_order_relaxed);
+  return nextRttRecalcStart_.load();
 }
 void AdaptiveConcurrencyController::nextRttRecalcStart(Clock::time_point v) {
-  nextRttRecalcStart_.store(v, std::memory_order_relaxed);
+  nextRttRecalcStart_.store(v);
 }
 
 std::chrono::microseconds AdaptiveConcurrencyController::targetRtt() const {
-  return std::chrono::round<std::chrono::microseconds>(
-      targetRtt_.load(std::memory_order_relaxed));
+  return std::chrono::round<std::chrono::microseconds>(targetRtt_.load());
 }
 
 std::chrono::microseconds AdaptiveConcurrencyController::sampledRtt() const {
-  return std::chrono::round<std::chrono::microseconds>(
-      sampledRtt_.load(std::memory_order_relaxed));
+  return std::chrono::round<std::chrono::microseconds>(sampledRtt_.load());
 }
 
 std::chrono::microseconds AdaptiveConcurrencyController::minTargetRtt() const {
-  return std::chrono::round<std::chrono::microseconds>(
-      minRtt_.load(std::memory_order_relaxed));
+  return std::chrono::round<std::chrono::microseconds>(minRtt_.load());
 }
 
 size_t AdaptiveConcurrencyController::getMinConcurrency() const {
@@ -281,7 +273,7 @@ size_t AdaptiveConcurrencyController::getMinConcurrency() const {
 }
 
 size_t AdaptiveConcurrencyController::getConcurrency() const {
-  return concurrencyLimit_.load(std::memory_order_relaxed);
+  return concurrencyLimit_.load();
 }
 
 void AdaptiveConcurrencyController::setConfigUpdateCallback(

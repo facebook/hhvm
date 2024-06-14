@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include <atomic>
 #include <chrono>
 #include <folly/Function.h>
 #include <folly/observer/Observer.h>
+#include <folly/synchronization/RelaxedAtomic.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 
@@ -146,15 +146,17 @@ class AdaptiveConcurrencyController {
 
   // The following two atomics are used in RMW operations
   // Ensure these are on different cachelines to reduce contention
-  std::atomic<size_t> latencySamplesIdx_{0};
+  folly::relaxed_atomic<size_t> latencySamplesIdx_{0};
   alignas(folly::cacheline_align_v) std::atomic<size_t> latencySamplesCnt_{0};
 
   // rttRecalcStart_ is used to indicate the point in time when the next RTT
   // recalculation should occur.
-  std::atomic<Clock::time_point> rttRecalcStart_{Clock::time_point{}};
+  folly::relaxed_atomic<Clock::time_point> rttRecalcStart_{Clock::time_point{}};
 
-  std::atomic<Clock::time_point> nextRttRecalcStart_{Clock::time_point{}};
-  std::atomic<Clock::time_point> samplingPeriodStart_{Clock::time_point{}};
+  folly::relaxed_atomic<Clock::time_point> nextRttRecalcStart_{
+      Clock::time_point{}};
+  folly::relaxed_atomic<Clock::time_point> samplingPeriodStart_{
+      Clock::time_point{}};
 
   folly::observer::Observer<Config> config_;
   folly::observer::Observer<uint32_t> maxRequestsLimit_;
@@ -166,15 +168,15 @@ class AdaptiveConcurrencyController {
       std::nullopt};
   apache::thrift::ThriftServerConfig& thriftServerConfig_;
 
-  std::atomic<Duration> targetRtt_{Duration{}};
-  std::atomic<Duration> minRtt_{Duration{}};
-  std::atomic<Duration> sampledRtt_{Duration{}};
+  folly::relaxed_atomic<Duration> targetRtt_{Duration{}};
+  folly::relaxed_atomic<Duration> minRtt_{Duration{}};
+  folly::relaxed_atomic<Duration> sampledRtt_{Duration{}};
   // the following concurrency limits are related but are not always
   // identical. Both keep track of the concurrency limit for the server.
   // maxRequests_, however, will be set to minRequests during rtt recalibration
   // and will be restored back concurrencyLimit_.
-  std::atomic<size_t> concurrencyLimit_{0};
-  std::atomic<size_t> maxRequests_{0};
+  folly::relaxed_atomic<size_t> concurrencyLimit_{0};
+  folly::relaxed_atomic<size_t> maxRequests_{0};
   size_t originalMaxRequestsLimit_;
 };
 

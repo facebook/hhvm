@@ -27,6 +27,10 @@ import unittest
 
 from testing.clients import TestingService
 from testing.types import Color, easy, I32List
+from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
+from thrift.lib.python.client.test.client_event_handler.helper import (
+    TestHelper as ClientEventHandlerTestHelper,
+)
 
 from thrift.lib.python.client.test.event_handler_helper import (
     client_handler_that_throws,
@@ -39,9 +43,6 @@ from thrift.py3.client import (
 )
 from thrift.py3.common import Priority, RpcOptions, WriteHeaders
 from thrift.py3.exceptions import TransportError
-from thrift.py3.test.client_event_handler.helper import (
-    TestHelper as ClientEventHandlerTestHelper,
-)
 
 
 async def bad_client_connect() -> None:
@@ -57,6 +58,7 @@ class ThriftClientTestProxy:
 
 
 class ClientTests(unittest.TestCase):
+    @brokenInAutoMigrate()  # Service annotations are different in thrift python
     def test_annotations(self) -> None:
         annotations = TestingService.annotations
         self.assertIsInstance(annotations, types.MappingProxyType)
@@ -66,61 +68,34 @@ class ClientTests(unittest.TestCase):
             # You can't set attributes on builtin/extension types
             TestingService.annotations = {}
 
-    def test_client_keyword_arguments(self) -> None:
-        # Create a broken client
-        client = TestingService()
-        # This should not raise an exception
-        # pyre-fixme[6]: For 1st argument expected `Union[Type[Variable[_E (bound to
-        #  BaseException)]], typing.Tuple[Type[Variable[_E (bound to BaseException)]],
-        #  ...]]` but got `Type[InvalidStateError]`.
-        with self.assertRaises(asyncio.InvalidStateError):
-            # pyre-fixme[1001]: `client.complex_action($parameter$first = "foo",
-            #  $parameter$second = "bar", $parameter$third = 9, $parameter$fourth =
-            #  "baz")` is never awaited.
-            client.complex_action(first="foo", second="bar", third=9, fourth="baz")
+    async def test_client_keyword_arguments(self) -> None:
+        async with ClientEventHandlerTestHelper().get_async_client(
+            TestingService, port=1
+        ) as client:
+            await client.complex_action(
+                first="foo", second="bar", third=9, fourth="baz"
+            )
 
-        # pyre-fixme[6]: For 1st argument expected `Union[Type[Variable[_E (bound to
-        #  BaseException)]], typing.Tuple[Type[Variable[_E (bound to BaseException)]],
-        #  ...]]` but got `Type[InvalidStateError]`.
-        with self.assertRaises(asyncio.InvalidStateError):
-            # pyre-fixme[1001]: `client.complex_action("foo", "bar", 9, "baz")` is
-            #  never awaited.
-            client.complex_action("foo", "bar", 9, "baz")
+            await client.complex_action("foo", "bar", 9, "baz")
 
-    def test_none_arguments(self) -> None:
-        client = TestingService()
-        with self.assertRaises(TypeError):
-            # missing argument
-            # pyre-fixme[20]: Argument `what` expected.
-            # pyre-fixme[1001]: `client.take_it_easy(9)` is never awaited.
-            client.take_it_easy(9)
-        with self.assertRaises(TypeError):
-            # Should be an easy type
-            # pyre-fixme[6]: Expected `easy` for 2nd param but got `None`.
-            # pyre-fixme[1001]: `client.take_it_easy(9, None)` is never awaited.
-            client.take_it_easy(9, None)
-        with self.assertRaises(TypeError):
-            # Should not be None
-            # pyre-fixme[6]: Expected `Sequence[int]` for 1st param but got `None`.
-            # pyre-fixme[1001]: `client.takes_a_list(None)` is never awaited.
-            client.takes_a_list(None)
-        with self.assertRaises(TypeError):
-            # Should be a bool
-            # pyre-fixme[6]: Expected `bool` for 1st param but got `None`.
-            # pyre-fixme[1001]: `client.invert(None)` is never awaited.
-            client.invert(None)
-        with self.assertRaises(TypeError):
-            # None is not a Color
-            # pyre-fixme[6]: Expected `Color` for 1st param but got `None`.
-            # pyre-fixme[1001]: `client.pick_a_color(None)` is never awaited.
-            client.pick_a_color(None)
-        with self.assertRaises(TypeError):
-            # None is not an int
-            # pyre-fixme[6]: Expected `int` for 1st param but got `None`.
-            # pyre-fixme[1001]: `client.take_it_easy(None, testing.types.easy())` is
-            #  never awaited.
-            client.take_it_easy(None, easy())
+    async def test_none_arguments(self) -> None:
+        async with ClientEventHandlerTestHelper().get_async_client(
+            TestingService, port=1
+        ) as client:
+            with self.assertRaises(TypeError):
+                await client.take_it_easy(9)  # pyre-ignore[20] testing bad behaviour
+            with self.assertRaises(TypeError):
+                await client.take_it_easy(9, None)  # pyre-ignore[6] testing bad behaviour
+            with self.assertRaises(TypeError):
+                await client.takes_a_list(None)  # pyre-ignore[6] testing bad behaviour
+            with self.assertRaises(TypeError):
+                await client.invert(None)  # pyre-ignore[6] testing bad behaviour
+            with self.assertRaises(TypeError):
+                await client.pick_a_color(None)  # pyre-ignore[6] testing bad behaviour
+            with self.assertRaises(TypeError):
+                await client.take_it_easy(None, easy())  # pyre-ignore[6] testing bad behaviour
 
+    @brokenInAutoMigrate()  # Exceptions aren't unified
     def test_bad_unix_domain_socket_raises_TransportError_on_connection(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir, socket.socket(
             socket.AF_UNIX, socket.SOCK_STREAM
@@ -138,6 +113,7 @@ class ClientTests(unittest.TestCase):
             ex = cm.exception
             self.assertEqual(ex.errno, errno.ECONNREFUSED)
 
+    @brokenInAutoMigrate()  # Exceptions aren't unified
     def test_TransportError(self) -> None:
         """
         Are C++ TTransportException converting properly to py TransportError
@@ -167,80 +143,54 @@ class ClientTests(unittest.TestCase):
 
         loop.run_until_complete(test())
 
-    def test_rpc_container_autoboxing(self) -> None:
-        client = TestingService()
+    async def test_rpc_container_autoboxing(self) -> None:
+        async with ClientEventHandlerTestHelper().get_async_client(
+            TestingService, port=1
+        ) as client:
+            await client.takes_a_list([1, 2, 3])
 
-        # pyre-fixme[6]: For 1st argument expected `Union[Type[Variable[_E (bound to
-        #  BaseException)]], typing.Tuple[Type[Variable[_E (bound to BaseException)]],
-        #  ...]]` but got `Type[InvalidStateError]`.
-        with self.assertRaises(asyncio.InvalidStateError):
-            # pyre-fixme[1001]: `client.takes_a_list([1, 2, 3])` is never awaited.
-            client.takes_a_list([1, 2, 3])
+            await client.takes_a_list(I32List([1, 2, 3]))
 
-        # pyre-fixme[6]: For 1st argument expected `Union[Type[Variable[_E (bound to
-        #  BaseException)]], typing.Tuple[Type[Variable[_E (bound to BaseException)]],
-        #  ...]]` but got `Type[InvalidStateError]`.
-        with self.assertRaises(asyncio.InvalidStateError):
-            # pyre-fixme[1001]: `client.takes_a_list(testing.types.I32List([1, 2,
-            #  3]))` is never awaited.
-            client.takes_a_list(I32List([1, 2, 3]))
+            with self.assertRaises(TypeError):
+                await client.takes_a_list([1, "b", "three"])  # pyre-ignore[6] testing bad behaviour
 
-        loop = asyncio.get_event_loop()
-        with self.assertRaises(TypeError):
-            # This is safe because we do type checks before we touch
-            # state checks
-            loop.run_until_complete(
-                # pyre-fixme[6]: Expected `Sequence[int]` for 1st param but got
-                #  `Sequence[typing.Union[int, str]]`.
-                client.takes_a_list([1, "b", "three"])
-            )
+    async def test_rpc_non_container_types(self) -> None:
+        async with ClientEventHandlerTestHelper().get_async_client(
+            TestingService, port=1
+        ) as client:
+            with self.assertRaises(TypeError):
+                await client.complex_action(b"foo", "bar", "nine", fourth="baz")  # pyre-ignore[6] testing bad behaviour
 
-    def test_rpc_non_container_types(self) -> None:
-        client = TestingService()
-        with self.assertRaises(TypeError):
-            # pyre-fixme[6]: Expected `str` for 1st param but got `bytes`.
-            # pyre-fixme[1001]: `client.complex_action(b"foo", "bar", "nine",
-            #  $parameter$fourth = "baz")` is never awaited.
-            client.complex_action(b"foo", "bar", "nine", fourth="baz")
+    async def test_rpc_enum_args(self) -> None:
+        async with ClientEventHandlerTestHelper().get_async_client(
+            TestingService, port=1
+        ) as client:
+            with self.assertRaises(TypeError):
+                await client.pick_a_color(0)  # pyre-ignore[6] testing bad behaviour
 
-    def test_rpc_enum_args(self) -> None:
-        client = TestingService()
-        loop = asyncio.get_event_loop()
-        with self.assertRaises(TypeError):
-            # pyre-fixme[6]: Expected `Color` for 1st param but got `int`.
-            loop.run_until_complete(client.pick_a_color(0))
+            await client.pick_a_color(Color.red)
 
-        # pyre-fixme[6]: For 1st argument expected `Union[Type[Variable[_E (bound to
-        #  BaseException)]], typing.Tuple[Type[Variable[_E (bound to BaseException)]],
-        #  ...]]` but got `Type[InvalidStateError]`.
-        with self.assertRaises(asyncio.InvalidStateError):
-            loop.run_until_complete(client.pick_a_color(Color.red))
-
-    def test_rpc_int_sizes(self) -> None:
+    async def test_rpc_int_sizes(self) -> None:
         one = 2**7 - 1
         two = 2**15 - 1
         three = 2**31 - 1
         four = 2**63 - 1
-        client = TestingService()
-        loop = asyncio.get_event_loop()
-        # pyre-fixme[6]: For 1st argument expected `Union[Type[Variable[_E (bound to
-        #  BaseException)]], typing.Tuple[Type[Variable[_E (bound to BaseException)]],
-        #  ...]]` but got `Type[InvalidStateError]`.
-        with self.assertRaises(asyncio.InvalidStateError):
-            # means we passed type checks
-            loop.run_until_complete(client.int_sizes(one, two, three, four))
+        async with ClientEventHandlerTestHelper().get_async_client(
+            TestingService, port=1
+        ) as client:
+            await client.int_sizes(one, two, three, four)
 
-        with self.assertRaises(OverflowError):
-            loop.run_until_complete(client.int_sizes(two, two, three, four))
+            with self.assertRaises(OverflowError):
+                await client.int_sizes(two, two, three, four)
 
-        with self.assertRaises(OverflowError):
-            loop.run_until_complete(client.int_sizes(one, three, three, four))
+            with self.assertRaises(OverflowError):
+                await client.int_sizes(one, three, three, four)
 
-        with self.assertRaises(OverflowError):
-            loop.run_until_complete(client.int_sizes(one, two, four, four))
+            with self.assertRaises(OverflowError):
+                await client.int_sizes(one, two, four, four)
 
-        with self.assertRaises(OverflowError):
-            loop.run_until_complete(client.int_sizes(one, two, three, four * 10))
+            with self.assertRaises(OverflowError):
+                await client.int_sizes(one, two, three, four * 10)
 
     def test_proxy_get_set(self) -> None:
         # Should be empty before we assign it
@@ -261,7 +211,7 @@ class ClientTests(unittest.TestCase):
 
         async def test() -> None:
             self.assertFalse(test_helper.is_handler_called())
-            async with test_helper.get_client(TestingService, port=1) as cli:
+            async with test_helper.get_async_client(TestingService, port=1) as cli:
                 try:
                     await cli.getName()
                 except TransportError:

@@ -12,17 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Type
+# pyre-strict
+from typing import overload, Type, TypeVar
 
+from thrift.py3.client import Client as Py3Client
 from thrift.python.client.client_wrapper import Client, TAsyncClient, TSyncClient
 
+TClient = TypeVar("TClient", bound=Py3Client)
+
 class TestHelper:
+    @overload
     def get_async_client(
         self,
         clientKlass: Type[Client[TAsyncClient, TSyncClient]],
         host: str = ...,
         port: int = ...,
     ) -> TAsyncClient: ...
+    @overload
+    def get_async_client(
+        self, clientKlass: Type[TClient], host: str = ..., port: int = ...
+    ) -> TClient: ...
     def get_sync_client(
         self,
         clientKlass: Type[Client[TAsyncClient, TSyncClient]],

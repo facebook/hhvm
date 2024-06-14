@@ -22,6 +22,7 @@ from typing import Sequence
 
 from testing.services import TestingServiceInterface
 from testing.types import Color, easy
+from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.server import getServiceName, SocketAddress, ThriftServer
 from thrift.py3.test.is_overload.helper import OverloadTestHelper
 

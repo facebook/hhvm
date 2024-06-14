@@ -74,4 +74,11 @@ inline size_t findLastOf(folly::StringPiece sp, char c) {
   return pos;
 }
 
+template <typename Tout, typename Tin>
+Tout clamped_downcast(Tin value) {
+  return static_cast<Tout>(
+      std::min(static_cast<uint64_t>(value),
+               static_cast<uint64_t>(std::numeric_limits<Tout>::max())));
+}
+
 } // namespace proxygen

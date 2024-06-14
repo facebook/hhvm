@@ -40,7 +40,7 @@ func NewServerSocketTimeout(listenAddr string, clientTimeout time.Duration) (*Se
 }
 
 func (p *ServerSocket) Listen() error {
-	if p.IsListening() {
+	if p.listener != nil {
 		return nil
 	}
 	l, err := net.Listen(p.addr.Network(), p.addr.String())
@@ -62,11 +62,6 @@ func (p *ServerSocket) Accept() (net.Conn, error) {
 	return NewSocket(SocketConn(conn), SocketTimeout(p.clientTimeout))
 }
 
-// Checks whether the socket is listening.
-func (p *ServerSocket) IsListening() bool {
-	return p.listener != nil
-}
-
 func (p *ServerSocket) Addr() net.Addr {
 	if p.listener != nil {
 		return p.listener.Addr()
@@ -78,7 +73,7 @@ func (p *ServerSocket) Close() error {
 	defer func() {
 		p.listener = nil
 	}()
-	if p.IsListening() {
+	if p.listener != nil {
 		return p.listener.Close()
 	}
 	return nil

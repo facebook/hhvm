@@ -193,6 +193,14 @@ public:
   }
 
   /**
+   * Returns true if post data should be read.
+   */
+  virtual bool shouldReadPostData() {
+    return getMethod() == Transport::Method::POST &&
+      !isStreamTransport();
+  }
+
+  /**
    * POST request's data.
    */
   virtual const void *getPostData(size_t &size) = 0;

@@ -301,8 +301,7 @@ void HttpProtocol::PreparePostVariables(Array& post,
                                         Array& files,
                                         Transport *transport,
                                         const RequestURI& r) {
-  if (transport->getMethod() != Transport::Method::POST ||
-      transport->isStreamTransport()) {
+  if (!transport->shouldReadPostData()) {
     return;
   }
 

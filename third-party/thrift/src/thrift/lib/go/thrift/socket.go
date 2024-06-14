@@ -90,6 +90,10 @@ func NewSocket(options ...SocketOption) (net.Conn, error) {
 		}
 	}
 
+	if _, ok := socket.conn.(*net.UnixConn); ok {
+		return socket, nil
+	}
+
 	if socket.conn.RemoteAddr().String() == "" {
 		return nil, errors.New("must supply either an address or a connection")
 	}

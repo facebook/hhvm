@@ -17,6 +17,7 @@
 package thrift
 
 import (
+	"net"
 	"runtime"
 	"testing"
 )
@@ -36,4 +37,25 @@ func TestNewSocket(t *testing.T) {
 	if addr.String() != "[::1]:1234" {
 		t.Errorf("wrong address: %s", addr)
 	}
+}
+
+func TestNewSocketUnix(t *testing.T) {
+	path := t.TempDir() + "/test.sock"
+
+	l, err := net.Listen("unix", path)
+	if err != nil {
+		t.Fatalf("Cannot listen on unix socket %q: %v", path, err)
+	}
+	defer l.Close()
+
+	conn, err := net.Dial("unix", path)
+	if err != nil {
+		t.Fatalf("Cannot dial unix socket %q: %v", path, err)
+	}
+
+	s, err := NewSocket(SocketConn(conn))
+	if err != nil {
+		t.Fatalf("Cannot create new socket: %v", err)
+	}
+	defer s.Close()
 }

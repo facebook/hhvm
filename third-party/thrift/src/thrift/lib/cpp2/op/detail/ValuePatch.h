@@ -18,6 +18,7 @@
 
 #include <utility>
 
+#include <glog/logging.h>
 #include <folly/json.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
@@ -109,6 +110,7 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
       other.apply(*p);
     } else {
       dynPatch_ = std::move(other.dynPatch_);
+      DCHECK(dynPatch_.value().members());
     }
   }
 
@@ -143,6 +145,7 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
       dynPatch_.reset();
     } else {
       dynPatch_ = std::move(v);
+      DCHECK(dynPatch_.value().members());
     }
   }
 

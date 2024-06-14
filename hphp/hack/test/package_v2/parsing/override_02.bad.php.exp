@@ -1,4 +1,4 @@
-(5,3)-(5,45) Package override must specify exactly one package name.
+(4,3)-(4,45) Package override must specify exactly one package name.
 {
   "kind":"script",
   "script_declarations":{
@@ -96,10 +96,10 @@
                     "kind":"token",
                     "token":{
                       "kind":"name",
-                      "text":"__EnableUnstableFeatures",
+                      "text":"__PackageOverride",
                       "offset":14,
                       "leading_width":2,
-                      "width":24,
+                      "width":17,
                       "trailing_width":0,
                       "leading":[{"kind":"whitespace","text":"  ","offset":14,"width":2}],
                       "trailing":[],
@@ -112,7 +112,7 @@
                   "token":{
                     "kind":"(",
                     "text":"(",
-                    "offset":40,
+                    "offset":33,
                     "leading_width":0,
                     "width":1,
                     "trailing_width":0,
@@ -132,10 +132,44 @@
                           "kind":"token",
                           "token":{
                             "kind":"single_quoted_string_literal",
-                            "text":"'package_v2'",
-                            "offset":41,
+                            "text":"'package_b'",
+                            "offset":34,
                             "leading_width":0,
-                            "width":12,
+                            "width":11,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":4
+                          }
+                        }
+                      },
+                      "list_separator":{
+                        "kind":"token",
+                        "token":{
+                          "kind":",",
+                          "text":",",
+                          "offset":45,
+                          "leading_width":0,
+                          "width":1,
+                          "trailing_width":0,
+                          "leading":[],
+                          "trailing":[],
+                          "line_number":4
+                        }
+                      }
+                    },
+                    {
+                      "kind":"list_item",
+                      "list_item":{
+                        "kind":"literal",
+                        "literal_expression":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"single_quoted_string_literal",
+                            "text":"'package_c'",
+                            "offset":46,
+                            "leading_width":0,
+                            "width":11,
                             "trailing_width":0,
                             "leading":[],
                             "trailing":[],
@@ -152,7 +186,7 @@
                   "token":{
                     "kind":")",
                     "text":")",
-                    "offset":53,
+                    "offset":57,
                     "leading_width":0,
                     "width":1,
                     "trailing_width":0,
@@ -167,138 +201,13 @@
                 "token":{
                   "kind":",",
                   "text":",",
-                  "offset":54,
+                  "offset":58,
                   "leading_width":0,
                   "width":1,
                   "trailing_width":1,
                   "leading":[],
-                  "trailing":[{"kind":"end_of_line","text":"\n","offset":55,"width":1}],
+                  "trailing":[{"kind":"end_of_line","text":"\n","offset":59,"width":1}],
                   "line_number":4
-                }
-              }
-            },
-            {
-              "kind":"list_item",
-              "list_item":{
-                "kind":"constructor_call",
-                "constructor_call_type":{
-                  "kind":"simple_type_specifier",
-                  "simple_type_specifier":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"name",
-                      "text":"__PackageOverride",
-                      "offset":56,
-                      "leading_width":2,
-                      "width":17,
-                      "trailing_width":0,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":56,"width":2}],
-                      "trailing":[],
-                      "line_number":5
-                    }
-                  }
-                },
-                "constructor_call_left_paren":{
-                  "kind":"token",
-                  "token":{
-                    "kind":"(",
-                    "text":"(",
-                    "offset":75,
-                    "leading_width":0,
-                    "width":1,
-                    "trailing_width":0,
-                    "leading":[],
-                    "trailing":[],
-                    "line_number":5
-                  }
-                },
-                "constructor_call_argument_list":{
-                  "kind":"list",
-                  "elements":[
-                    {
-                      "kind":"list_item",
-                      "list_item":{
-                        "kind":"literal",
-                        "literal_expression":{
-                          "kind":"token",
-                          "token":{
-                            "kind":"single_quoted_string_literal",
-                            "text":"'package_b'",
-                            "offset":76,
-                            "leading_width":0,
-                            "width":11,
-                            "trailing_width":0,
-                            "leading":[],
-                            "trailing":[],
-                            "line_number":5
-                          }
-                        }
-                      },
-                      "list_separator":{
-                        "kind":"token",
-                        "token":{
-                          "kind":",",
-                          "text":",",
-                          "offset":87,
-                          "leading_width":0,
-                          "width":1,
-                          "trailing_width":0,
-                          "leading":[],
-                          "trailing":[],
-                          "line_number":5
-                        }
-                      }
-                    },
-                    {
-                      "kind":"list_item",
-                      "list_item":{
-                        "kind":"literal",
-                        "literal_expression":{
-                          "kind":"token",
-                          "token":{
-                            "kind":"single_quoted_string_literal",
-                            "text":"'package_c'",
-                            "offset":88,
-                            "leading_width":0,
-                            "width":11,
-                            "trailing_width":0,
-                            "leading":[],
-                            "trailing":[],
-                            "line_number":5
-                          }
-                        }
-                      },
-                      "list_separator":{"kind":"missing"}
-                    }
-                  ]
-                },
-                "constructor_call_right_paren":{
-                  "kind":"token",
-                  "token":{
-                    "kind":")",
-                    "text":")",
-                    "offset":99,
-                    "leading_width":0,
-                    "width":1,
-                    "trailing_width":0,
-                    "leading":[],
-                    "trailing":[],
-                    "line_number":5
-                  }
-                }
-              },
-              "list_separator":{
-                "kind":"token",
-                "token":{
-                  "kind":",",
-                  "text":",",
-                  "offset":100,
-                  "leading_width":0,
-                  "width":1,
-                  "trailing_width":1,
-                  "leading":[],
-                  "trailing":[{"kind":"end_of_line","text":"\n","offset":101,"width":1}],
-                  "line_number":5
                 }
               }
             }
@@ -309,13 +218,13 @@
           "token":{
             "kind":">>",
             "text":">>",
-            "offset":102,
+            "offset":60,
             "leading_width":0,
             "width":2,
             "trailing_width":1,
             "leading":[],
-            "trailing":[{"kind":"end_of_line","text":"\n","offset":104,"width":1}],
-            "line_number":6
+            "trailing":[{"kind":"end_of_line","text":"\n","offset":62,"width":1}],
+            "line_number":5
           }
         }
       },
@@ -329,13 +238,13 @@
           "token":{
             "kind":"class",
             "text":"class",
-            "offset":105,
+            "offset":63,
             "leading_width":1,
             "width":5,
             "trailing_width":1,
-            "leading":[{"kind":"end_of_line","text":"\n","offset":105,"width":1}],
-            "trailing":[{"kind":"whitespace","text":" ","offset":111,"width":1}],
-            "line_number":8
+            "leading":[{"kind":"end_of_line","text":"\n","offset":63,"width":1}],
+            "trailing":[{"kind":"whitespace","text":" ","offset":69,"width":1}],
+            "line_number":7
           }
         },
         "classish_name":{
@@ -343,13 +252,13 @@
           "token":{
             "kind":"name",
             "text":"C",
-            "offset":112,
+            "offset":70,
             "leading_width":0,
             "width":1,
             "trailing_width":0,
             "leading":[],
             "trailing":[],
-            "line_number":8
+            "line_number":7
           }
         },
         "classish_type_parameters":{"kind":"missing"},
@@ -365,13 +274,13 @@
             "token":{
               "kind":"{",
               "text":"{",
-              "offset":113,
+              "offset":71,
               "leading_width":0,
               "width":1,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
-              "line_number":8
+              "line_number":7
             }
           },
           "classish_body_elements":{"kind":"missing"},
@@ -380,13 +289,13 @@
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":114,
+              "offset":72,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":115,"width":1}],
-              "line_number":8
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":73,"width":1}],
+              "line_number":7
             }
           }
         }
@@ -398,13 +307,13 @@
           "token":{
             "kind":"end_of_file",
             "text":"",
-            "offset":116,
+            "offset":74,
             "leading_width":0,
             "width":0,
             "trailing_width":0,
             "leading":[],
             "trailing":[],
-            "line_number":9
+            "line_number":8
           }
         }
       }

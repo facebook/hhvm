@@ -103,7 +103,6 @@ pub enum UnstableFeatures {
     NewtypeSuperBounds,
     ExpressionTreeBlocks,
     Package,
-    PackageV2,
     CaseTypes,
     ModuleLevelTraits,
     ModuleLevelTraitsExtensions,
@@ -142,7 +141,6 @@ impl UnstableFeatures {
             UnstableFeatures::NewtypeSuperBounds => Unstable,
             UnstableFeatures::ExpressionTreeBlocks => OngoingRelease,
             UnstableFeatures::Package => OngoingRelease,
-            UnstableFeatures::PackageV2 => Unstable,
             UnstableFeatures::CaseTypes => Preview,
             UnstableFeatures::ModuleLevelTraits => OngoingRelease,
             UnstableFeatures::ModuleLevelTraitsExtensions => OngoingRelease,
@@ -5586,7 +5584,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     }
                 }
                 Some(sn::user_attributes::PACKAGE_OVERRIDE) => {
-                    self.check_can_use_feature(node, &UnstableFeatures::PackageV2);
                     if let Some(args) = self.attr_args(node) {
                         let mut count = 0;
                         args.for_each(|_| count += 1);

@@ -4,7 +4,7 @@ error: Typing[4472] Cannot access a public element which belongs to package pkg1
 
 include_paths_bad3.php--bar.php:4:24
 2 | // package pkg2
-3 | <<file: __EnableUnstableFeatures('package_v2'), __PackageOverride('pkg2')>>
+3 | <<file: __PackageOverride('pkg2')>>
 [1] 4 | function bar(): void { foo (); }
 
 include_paths_bad3.php--foo.php:3:10

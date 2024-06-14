@@ -147,7 +147,6 @@ class PyDeprecatedToPy3ConverterTest(unittest.TestCase):
         #  param but got `OptionalDefaultsStruct`.
         self.assertFalse(Struct.isset(converted).sillyColor)
 
-    @brokenInAutoMigrate()
     def test_struct_with_mismatching_field(self) -> None:
         tomayto = py_deprecated_types.Tomayto(
             to=42,
@@ -160,7 +159,6 @@ class PyDeprecatedToPy3ConverterTest(unittest.TestCase):
         self.assertEqual(tomahto.to, 42)
         self.assertEqual(tomahto.mahto, "mahto")
 
-    @brokenInAutoMigrate()
     def test_union_with_mismatching_field(self) -> None:
         po = to_py3_struct(
             py3_types.Potahto,
@@ -353,7 +351,6 @@ class PythonToPy3ConverterTest(unittest.TestCase):
         #  param but got `OptionalDefaultsStruct`.
         self.assertFalse(Struct.isset(converted).sillyColor)
 
-    @brokenInAutoMigrate()
     def test_struct_with_mismatching_field(self) -> None:
         tomayto = python_types.Tomayto(
             to=42,
@@ -366,7 +363,6 @@ class PythonToPy3ConverterTest(unittest.TestCase):
         self.assertEqual(tomahto.to, 42)
         self.assertEqual(tomahto.mahto, "mahto")
 
-    @brokenInAutoMigrate()
     def test_union_with_mismatching_field(self) -> None:
         po = to_py3_struct(
             py3_types.Potahto,

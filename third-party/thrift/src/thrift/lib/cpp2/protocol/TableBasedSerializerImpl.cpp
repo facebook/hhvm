@@ -42,25 +42,27 @@ void setActiveId(void* object, const StructInfo& info, int value) {
   }
 }
 
-// Checks whether if a field value is safe to retrieve. For an optional field,
-// a field is nullable, so it is safe to get the field value if it is
-// explicitly set. An unqualified and terse fields are always safe to retrive
-// their values.
 bool hasFieldValue(
-    const void* object, const FieldInfo& info, const StructInfo& structInfo) {
-  switch (info.qualifier) {
+    const void* object,
+    const FieldInfo& fieldInfo,
+    const StructInfo& structInfo) {
+  switch (fieldInfo.qualifier) {
     case FieldQualifier::Unqualified:
     case FieldQualifier::Terse:
       return true;
     case FieldQualifier::Optional: {
       if (structInfo.getIsset != nullptr) {
-        return structInfo.getIsset(object, info.issetOffset);
+        return structInfo.getIsset(object, fieldInfo.issetOffset);
       }
-      if (info.issetOffset == 0) {
-        return true; // return true for union fields
+      if (fieldInfo.issetOffset == 0) {
+        // return true for union fields
+        // NOTE: In practice this case should never happen, as this function
+        // should not be called for union types, and therefore
+        // `fieldInfo.issetOffset` should never be 0.
+        return true;
       }
       return *reinterpret_cast<const bool*>(
-          static_cast<const char*>(object) + info.issetOffset);
+          static_cast<const char*>(object) + fieldInfo.issetOffset);
     }
   }
   return false;
@@ -300,15 +302,15 @@ bool isFieldNotEmpty(
 }
 
 void markFieldAsSet(
-    void* object, const FieldInfo& info, const StructInfo& structInfo) {
+    void* object, const FieldInfo& fieldInfo, const StructInfo& structInfo) {
   if (structInfo.setIsset != nullptr) {
-    structInfo.setIsset(object, info.issetOffset, true);
+    structInfo.setIsset(object, fieldInfo.issetOffset, true);
     return;
   }
-  if (info.issetOffset == 0) {
+  if (fieldInfo.issetOffset == 0) {
     return;
   }
-  *reinterpret_cast<bool*>(static_cast<char*>(object) + info.issetOffset) =
+  *reinterpret_cast<bool*>(static_cast<char*>(object) + fieldInfo.issetOffset) =
       true;
 }
 

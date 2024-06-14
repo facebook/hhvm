@@ -102,12 +102,19 @@ int getActiveId(const void* object, const StructInfo& info);
 // Sets the active field id for a Thrift union object.
 void setActiveId(void* object, const StructInfo& info, int value);
 
-// Checks whether if a field value is safe to retrieve. For an optional field,
-// a field is nullable, so it is safe to get the field value if it is
-// explicitly set. An unqualified and terse fields are always safe to retrive
-// their values.
+/**
+ * Checks whether if a field value is safe to retrieve. For an optional field,
+ * a field is nullable, so it is safe to get the field value if it is
+ * explicitly set. An unqualified and terse fields are always safe to retrive
+ * their values.
+ *
+ * This should not be called for unions (i.e., `structInfo.unionExt` should be
+ * `nullptr`)
+ */
 bool hasFieldValue(
-    const void* object, const FieldInfo& info, const StructInfo& structInfo);
+    const void* object,
+    const FieldInfo& fieldInfo,
+    const StructInfo& structInfo);
 
 // A helper function to set a field to its intrinsic default value.
 void setToIntrinsicDefault(void* value, const FieldInfo& info);
@@ -131,8 +138,12 @@ bool isFieldNotEmpty(
 // the intrinsic default.
 bool isTerseFieldSet(const ThriftValue& value, const FieldInfo& info);
 
+/**
+ * This should not be called for unions (i.e., `structInfo.unionExt` should be
+ * `nullptr`)
+ */
 void markFieldAsSet(
-    void* object, const FieldInfo& info, const StructInfo& structInfo);
+    void* object, const FieldInfo& fieldInfo, const StructInfo& structInfo);
 
 template <class Protocol_>
 void read(
@@ -705,7 +716,7 @@ size_t write(
 
   size_t written = iprot->writeStructBegin(structInfo.name);
   for (std::int16_t index = 0; index < structInfo.numFields; index++) {
-    const auto& fieldInfo = structInfo.fieldInfos[index];
+    const FieldInfo& fieldInfo = structInfo.fieldInfos[index];
     if (hasFieldValue(object, fieldInfo, structInfo)) {
       if (OptionalThriftValue value =
               getValue(*fieldInfo.typeInfo, getMember(fieldInfo, object))) {

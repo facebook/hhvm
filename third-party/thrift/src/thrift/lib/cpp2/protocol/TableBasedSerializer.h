@@ -103,7 +103,18 @@ struct FieldInfo {
   // Offset into the data member of the field in the struct.
   ptrdiff_t memberOffset;
 
-  // 0 means that the field does not have __isset.
+  /**
+   * If the owning `StructInfo` specifies a `getIsset` and/or `setIsset`
+   * function(s), then this value will be passed as the `offset` argument.
+   *
+   * For either operation, if the owning `StructInfo` does not have a function
+   * pointer set, then this field should hold the offset (in bytes) from the
+   * beginning of the corresponding struct object, of memory that can be
+   * reintepreted as a `bool` holding the "isset" information for this field.
+   *
+   * If the owning `StructInfo` is a union, this field is set to 0 (and, in
+   * practice, never used).
+   */
   ptrdiff_t issetOffset;
 
   const TypeInfo* typeInfo;
@@ -172,7 +183,16 @@ struct StructInfo {
   // This should be set to nullptr when not a union.
   const UnionExt* unionExt = nullptr;
 
+  /**
+   * Returns the value of the "isset" flag at the given `offset` for the given
+   * `object`.
+   *
+   * @param object
+   * @param offset of the isset flag to check for a given field, corresponding
+   *        to the value of `FieldInfo::issetOffset` for that field.
+   */
   bool (*getIsset)(const void* /* object */, ptrdiff_t /* offset */);
+
   void (*setIsset)(void* /* object */, ptrdiff_t /* offset */, bool /*set */);
 
   // Use for other languages to pass in additional information.

@@ -17,6 +17,8 @@
 
 import unittest
 
+import testing.types
+
 from testing.clients import TestingService
 from testing.services import TestingServiceInterface
 from testing.types import (
@@ -25,14 +27,13 @@ from testing.types import (
     HardError,
     I32List,
     Integers,
-    List__i32,
     Messy,
     Runtime,
-    Set__Color,
     SimpleError,
     StrI32ListMap,
     StrStrIntListMapMap,
 )
+from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.reflection import (
     ArgumentSpec,
     inspect,
@@ -45,6 +46,8 @@ from thrift.py3.reflection import (
 
 
 class ReflectionTests(unittest.TestCase):
+    # Fails due to containers not working
+    @brokenInAutoMigrate()
     def test_struct(self) -> None:
         x = easy(val=1, an_int=Integers(small=300), name="foo", val_list=[1, 2, 3, 4])
         self.assertTrue(inspectable(x))
@@ -107,22 +110,26 @@ class ReflectionTests(unittest.TestCase):
         self.assertEqual(r.kind, StructType.EXCEPTION)
         self.assertEqual(r.annotations, {})
 
+    @brokenInAutoMigrate()
     def test_list_element(self) -> None:
-        x = List__i32([1, 2, 3])
+        x = testing.types.List__i32([1, 2, 3])
         self.assertTrue(inspectable(x))
-        self.assertTrue(inspectable(List__i32))
+        self.assertTrue(inspectable(testing.types.List__i32))
         r = inspect(x)
         self.assertEqual(r.value, int)
         self.assertEqual(r.kind, NumberType.I32)
 
+    @brokenInAutoMigrate()
     def test_set_element(self) -> None:
-        x = Set__Color({Color.red, Color.blue})
+        x = testing.types.Set__Color({Color.red, Color.blue})
         self.assertTrue(inspectable(x))
-        self.assertTrue(inspectable(Set__Color))
+        self.assertTrue(inspectable(testing.types.Set__Color))
         r = inspect(x)
         self.assertEqual(r.value, Color)
         self.assertEqual(r.kind, NumberType.NOT_A_NUMBER)
 
+    # Fails because thrift python list values are not inspectible
+    @brokenInAutoMigrate()
     def test_map_key_value(self) -> None:
         x = StrStrIntListMapMap({"a": StrI32ListMap({"b": I32List([7, 8, 9])})})
         self.assertTrue(inspectable(x))
@@ -133,6 +140,8 @@ class ReflectionTests(unittest.TestCase):
         self.assertEqual(r.key_kind, NumberType.NOT_A_NUMBER)
         self.assertEqual(r.value_kind, NumberType.NOT_A_NUMBER)
 
+    # Fails because services reflection doesn't work
+    @brokenInAutoMigrate()
     def test_interface(self) -> None:
         self.assertTrue(inspectable(TestingService))
         self.assertTrue(inspectable(TestingServiceInterface))

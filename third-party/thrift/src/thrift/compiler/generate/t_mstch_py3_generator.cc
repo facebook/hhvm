@@ -1372,12 +1372,16 @@ void t_mstch_py3_generator::generate_file(
 }
 
 void t_mstch_py3_generator::generate_types() {
-  std::vector<std::string> autoMigrateFiles{
+  std::vector<std::string> autoMigrateFilesWithTypeContext{
       "types.py",
       // without auto_migrate, .pxd contains just bindings of cpp thrift types
       "types.pxd",
+  };
+
+  std::vector<std::string> autoMigrateFilesNoTypeContext{
       "metadata.py",
-      "builders.py", // TODO
+      "builders.py",
+      "types_reflection.py",
   };
 
   std::vector<std::string> converterFiles{
@@ -1417,8 +1421,11 @@ void t_mstch_py3_generator::generate_types() {
   // - if auto_migrate is present, generate types.pxd, and types.py
   // - else, just generate normal cython files
   if (has_option("auto_migrate")) {
-    for (const auto& file : autoMigrateFiles) {
+    for (const auto& file : autoMigrateFilesWithTypeContext) {
       generate_file(file, IsTypesFile, generateRootPath_);
+    }
+    for (const auto& file : autoMigrateFilesNoTypeContext) {
+      generate_file(file, NotTypesFile, generateRootPath_);
     }
   } else {
     for (const auto& file : cythonFilesWithTypeContext) {

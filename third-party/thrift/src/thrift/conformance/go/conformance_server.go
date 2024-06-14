@@ -25,7 +25,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/golang/glog"
 
@@ -143,6 +142,11 @@ func main() {
 	if err != nil {
 		glog.Fatalf("failed to start server: %v", err)
 	}
+	addr, err := ts.Listen()
+	if err != nil {
+		glog.Fatalf("failed to start server: %v", err)
+	}
+	fmt.Println(addr.(*net.TCPAddr).Port)
 	go func() {
 		err := ts.Serve()
 		if err != nil {
@@ -150,17 +154,6 @@ func main() {
 		}
 	}()
 
-	// When server is started, it must print the listening port to the standard output console.
-	for i := 1; i < 10; i++ {
-		// Unfortunately there is currently no way to tell
-		// if the server has started listening :(
-		time.Sleep(1 * time.Second)
-		addr := ts.ServerTransport().Addr()
-		if addr != nil {
-			fmt.Println(addr.(*net.TCPAddr).Port)
-			break
-		}
-	}
 	<-sigc
 	os.Exit(0)
 }

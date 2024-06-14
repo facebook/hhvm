@@ -24,7 +24,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"thrift/conformance/rpc"
 	"thrift/lib/go/thrift"
@@ -50,24 +49,17 @@ func main() {
 		glog.Fatalf("failed to start server: %v", err)
 	}
 
+	addr, err := ts.Listen()
+	if err != nil {
+		glog.Fatalf("failed to start server: %v", err)
+	}
+	fmt.Println(addr.(*net.TCPAddr).Port)
 	go func() {
 		err := ts.Serve()
 		if err != nil {
 			glog.Fatalf("failed to start server")
 		}
 	}()
-
-	for i := 1; i < 10; i++ {
-		// Unfortunately there is currently no way to tell
-		// if the server has started listening :(
-		time.Sleep(1 * time.Second)
-		addr := ts.ServerTransport().Addr()
-		if addr != nil {
-			// Print port for the test runner
-			fmt.Println(addr.(*net.TCPAddr).Port)
-			break
-		}
-	}
 
 	<-sigc
 	os.Exit(0)

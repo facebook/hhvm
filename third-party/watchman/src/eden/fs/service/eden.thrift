@@ -1661,6 +1661,14 @@ struct ChangeOwnershipRequest {
 
 struct ChangeOwnershipResponse {}
 
+struct GetBlockedFaultsRequest {
+  1: string keyclass;
+}
+
+struct GetBlockedFaultsResponse {
+  1: list<string> keyValues;
+}
+
 service EdenService extends fb303_core.BaseService {
   list<MountInfo> listMounts() throws (1: EdenError ex);
   void mount(1: MountArgument info) throws (1: EdenError ex);
@@ -2426,6 +2434,10 @@ service EdenService extends fb303_core.BaseService {
    * Returns the number of pending calls that were unblocked
    */
   i64 unblockFault(1: UnblockFaultArg info) throws (1: EdenError ex);
+
+  GetBlockedFaultsResponse getBlockedFaults(
+    1: GetBlockedFaultsRequest request,
+  ) throws (1: EdenError ex);
 
   /**
    * Directly load a BackingStore object identified by id at the given path.

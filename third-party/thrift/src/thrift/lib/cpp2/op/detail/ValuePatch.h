@@ -135,6 +135,11 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
 
   bool empty() const { return !dynPatch_.has_value() && Base::empty(); }
 
+  void reset() {
+    dynPatch_.reset();
+    Base::reset();
+  }
+
  private:
   using Base::data_;
   std::optional<protocol::Object> dynPatch_;

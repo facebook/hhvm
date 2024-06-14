@@ -125,16 +125,16 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class AStruct(thrift.py3.types.Struct):
     def __init__(AStruct self, **kwargs):
-        self._cpp_obj = make_shared[cAStruct]()
-        self._fields_setter = _fbthrift_types_fields.__AStruct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cAStruct]()
+        self._fields_setter = _fbthrift_types_fields.__AStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(AStruct self, **kwargs):
         if not kwargs:
             return self
         cdef AStruct __fbthrift_inst = AStruct.__new__(AStruct)
-        __fbthrift_inst._cpp_obj = make_shared[cAStruct](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__AStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cAStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__AStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -144,18 +144,18 @@ cdef class AStruct(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("AStruct", {
-          "FieldA": deref(self._cpp_obj).FieldA_ref().has_value(),
+          "FieldA": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).FieldA_ref().has_value(),
         })
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAStruct] cpp_obj):
         __fbthrift_inst = <AStruct>AStruct.__new__(AStruct)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline FieldA_impl(self):
 
-        return deref(self._cpp_obj).FieldA_ref().value()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).FieldA_ref().value()
 
     @property
     def FieldA(self):
@@ -174,15 +174,15 @@ cdef class AStruct(thrift.py3.types.Struct):
 
     def __copy__(AStruct self):
         cdef shared_ptr[cAStruct] cpp_obj = make_shared[cAStruct](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return AStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cAStruct](
-            self._cpp_obj,
-            (<AStruct>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<AStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -211,14 +211,14 @@ cdef class AStruct(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(AStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cAStruct](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cAStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(AStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cAStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cAStruct]()
         with nogil:
-            needed = serializer.cdeserialize[cAStruct](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cAStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -241,16 +241,16 @@ cdef class AStruct(thrift.py3.types.Struct):
 @__cython.auto_pickle(False)
 cdef class AStructB(thrift.py3.types.Struct):
     def __init__(AStructB self, **kwargs):
-        self._cpp_obj = make_shared[cAStructB]()
-        self._fields_setter = _fbthrift_types_fields.__AStructB_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cAStructB]()
+        self._fields_setter = _fbthrift_types_fields.__AStructB_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(AStructB self, **kwargs):
         if not kwargs:
             return self
         cdef AStructB __fbthrift_inst = AStructB.__new__(AStructB)
-        __fbthrift_inst._cpp_obj = make_shared[cAStructB](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__AStructB_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cAStructB](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__AStructB_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -265,15 +265,15 @@ cdef class AStructB(thrift.py3.types.Struct):
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAStructB] cpp_obj):
         __fbthrift_inst = <AStructB>AStructB.__new__(AStructB)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline FieldA_impl(self):
 
         if self.__fbthrift_cached_FieldA is None:
-            if not deref(self._cpp_obj).FieldA_ref():
+            if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).FieldA_ref():
                 return None
-            self.__fbthrift_cached_FieldA = AStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj).FieldA_ref()), self._cpp_obj))
+            self.__fbthrift_cached_FieldA = AStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).FieldA_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_FieldA
 
     @property
@@ -293,15 +293,15 @@ cdef class AStructB(thrift.py3.types.Struct):
 
     def __copy__(AStructB self):
         cdef shared_ptr[cAStructB] cpp_obj = make_shared[cAStructB](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return AStructB._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cAStructB](
-            self._cpp_obj,
-            (<AStructB>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<AStructB>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -330,14 +330,14 @@ cdef class AStructB(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(AStructB self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cAStructB](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cAStructB](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(AStructB self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cAStructB]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cAStructB]()
         with nogil:
-            needed = serializer.cdeserialize[cAStructB](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cAStructB](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 

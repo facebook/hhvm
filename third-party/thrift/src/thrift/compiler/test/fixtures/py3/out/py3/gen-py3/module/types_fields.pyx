@@ -224,7 +224,7 @@ cdef class __ComplexStruct_FieldsSetter(__StructFieldsSetter):
                     raise TypeError(f'structOne is a thrift-python struct of type {type(_fbthrift_value) !r} that can not be converted to { _module_types.SimpleStruct !r}.')
             else:
                 raise TypeError(f'structOne is not a { _module_types.SimpleStruct !r}.')
-        deref(self._struct_cpp_obj).structOne_ref().assign(deref((<_module_types.SimpleStruct?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).structOne_ref().assign(deref((<_module_types.SimpleStruct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field structTwo
@@ -238,7 +238,7 @@ cdef class __ComplexStruct_FieldsSetter(__StructFieldsSetter):
                     raise TypeError(f'structTwo is a thrift-python struct of type {type(_fbthrift_value) !r} that can not be converted to { _module_types.SimpleStruct !r}.')
             else:
                 raise TypeError(f'structTwo is not a { _module_types.SimpleStruct !r}.')
-        deref(self._struct_cpp_obj).structTwo_ref().assign(deref((<_module_types.SimpleStruct?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).structTwo_ref().assign(deref((<_module_types.SimpleStruct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field an_integer
@@ -339,5 +339,5 @@ cdef class __BinaryUnionStruct_FieldsSetter(__StructFieldsSetter):
                     raise TypeError(f'u is a thrift-python struct of type {type(_fbthrift_value) !r} that can not be converted to { _module_types.BinaryUnion !r}.')
             else:
                 raise TypeError(f'u is not a { _module_types.BinaryUnion !r}.')
-        deref(self._struct_cpp_obj).u_ref().assign(deref((<_module_types.BinaryUnion?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).u_ref().assign(deref((<_module_types.BinaryUnion?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 

@@ -1476,7 +1476,7 @@ async def ReturnService_mapReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cmap[string,cint64_t]](deref((<_module_types.Map__string_i64?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[cmap[string,cint64_t]](deref((<_module_types.Map__string_i64?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ReturnService_simpleTypedefReturn_coro(
     object self,
@@ -1533,7 +1533,7 @@ async def ReturnService_complexTypedefReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]](deref((<_module_types.List__Map__Empty_MyStruct?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]](deref((<_module_types.List__Map__Empty_MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ReturnService_list_mostComplexTypedefReturn_coro(
     object self,
@@ -1562,7 +1562,7 @@ async def ReturnService_list_mostComplexTypedefReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]](deref((<_module_types.List__List__List__Map__Empty_MyStruct?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]](deref((<_module_types.List__List__List__Map__Empty_MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ReturnService_enumReturn_coro(
     object self,
@@ -1619,7 +1619,7 @@ async def ReturnService_list_EnumReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[_module_types.cMyEnumA]](deref((<_module_types.List__MyEnumA?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[vector[_module_types.cMyEnumA]](deref((<_module_types.List__MyEnumA?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ReturnService_structReturn_coro(
     object self,
@@ -1647,7 +1647,7 @@ async def ReturnService_structReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_types.cMyStruct](deref((<_module_types.MyStruct?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[_module_types.cMyStruct](deref((<_module_types.MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ReturnService_set_StructReturn_coro(
     object self,
@@ -1676,7 +1676,7 @@ async def ReturnService_set_StructReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[_module_types.cMyStruct]](deref((<_module_types.Set__MyStruct?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[cset[_module_types.cMyStruct]](deref((<_module_types.Set__MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ReturnService_unionReturn_coro(
     object self,
@@ -1704,7 +1704,7 @@ async def ReturnService_unionReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_types.cComplexUnion](deref((<_module_types.ComplexUnion?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[_module_types.cComplexUnion](deref((<_module_types.ComplexUnion?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ReturnService_list_UnionReturn_coro(
     object self,
@@ -1733,7 +1733,7 @@ async def ReturnService_list_UnionReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[_module_types.cComplexUnion]](deref((<_module_types.List__ComplexUnion?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[vector[_module_types.cComplexUnion]](deref((<_module_types.List__ComplexUnion?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ReturnService_readDataEb_coro(
     object self,
@@ -2988,7 +2988,7 @@ async def ParamService_map_ret_bool_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cmap[string,cint64_t]](deref((<_module_types.Map__string_i64?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[cmap[string,cint64_t]](deref((<_module_types.Map__string_i64?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ParamService_list_ret_map_setlist_param_coro(
     object self,
@@ -3021,7 +3021,7 @@ async def ParamService_list_ret_map_setlist_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[cbool]](deref((<_module_types.List__bool?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[vector[cbool]](deref((<_module_types.List__bool?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ParamService_mapsetlistmapliststring_ret_listlistlist_param_coro(
     object self,
@@ -3052,7 +3052,7 @@ async def ParamService_mapsetlistmapliststring_ret_listlistlist_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]](deref((<_module_types.Map__Set__List__i32_Map__List__Set__string_string?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]](deref((<_module_types.Map__Set__List__i32_Map__List__Set__string_string?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ParamService_typedef_ret_i32_param_coro(
     object self,
@@ -3113,7 +3113,7 @@ async def ParamService_listtypedef_ret_typedef_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[cint32_t]](deref((<_module_types.List__i32?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[vector[cint32_t]](deref((<_module_types.List__i32?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ParamService_enum_ret_double_param_coro(
     object self,
@@ -3206,7 +3206,7 @@ async def ParamService_listenum_ret_map_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[_module_types.cMyEnumA]](deref((<_module_types.List__MyEnumA?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[vector[_module_types.cMyEnumA]](deref((<_module_types.List__MyEnumA?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ParamService_struct_ret_i16_param_coro(
     object self,
@@ -3236,7 +3236,7 @@ async def ParamService_struct_ret_i16_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_types.cMyStruct](deref((<_module_types.MyStruct?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[_module_types.cMyStruct](deref((<_module_types.MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ParamService_setstruct_ret_set_param_coro(
     object self,
@@ -3267,7 +3267,7 @@ async def ParamService_setstruct_ret_set_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[_module_types.cMyStruct]](deref((<_module_types.Set__MyStruct?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[cset[_module_types.cMyStruct]](deref((<_module_types.Set__MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ParamService_union_ret_i32_i32_param_coro(
     object self,
@@ -3299,7 +3299,7 @@ async def ParamService_union_ret_i32_i32_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_types.cComplexUnion](deref((<_module_types.ComplexUnion?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[_module_types.cComplexUnion](deref((<_module_types.ComplexUnion?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ParamService_listunion_string_param_coro(
     object self,
@@ -3330,7 +3330,7 @@ async def ParamService_listunion_string_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[_module_types.cComplexUnion]](deref((<_module_types.List__ComplexUnion?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[vector[_module_types.cComplexUnion]](deref((<_module_types.List__ComplexUnion?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ParamService_onStartServing_coro(
     object self,

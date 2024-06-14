@@ -127,7 +127,7 @@ cdef extern from "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_types_
 
 
 cdef class Color(thrift.py3.types.Struct):
-    cdef shared_ptr[cColor] _cpp_obj
+    cdef shared_ptr[cColor] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Color_FieldsSetter _fields_setter
     cdef inline object red_impl(self)
     cdef inline object green_impl(self)
@@ -140,7 +140,7 @@ cdef class Color(thrift.py3.types.Struct):
 
 
 cdef class Vehicle(thrift.py3.types.Struct):
-    cdef shared_ptr[cVehicle] _cpp_obj
+    cdef shared_ptr[cVehicle] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Vehicle_FieldsSetter _fields_setter
     cdef inline object color_impl(self)
     cdef inline object licensePlate_impl(self)
@@ -155,7 +155,7 @@ cdef class Vehicle(thrift.py3.types.Struct):
 
 
 cdef class Person(thrift.py3.types.Struct):
-    cdef shared_ptr[cPerson] _cpp_obj
+    cdef shared_ptr[cPerson] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Person_FieldsSetter _fields_setter
     cdef inline object id_impl(self)
     cdef inline object name_impl(self)
@@ -178,14 +178,14 @@ cdef class Person(thrift.py3.types.Struct):
 
 
 cdef class Set__i64(thrift.py3.types.Set):
-    cdef shared_ptr[cset[cint64_t]] _cpp_obj
+    cdef shared_ptr[cset[cint64_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cint64_t]])
 
 cdef shared_ptr[cset[cint64_t]] Set__i64__make_instance(object items) except *
 
 cdef class Map__Animal_string(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[cAnimal,string]] _cpp_obj
+    cdef shared_ptr[cmap[cAnimal,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cAnimal,string]])
     cdef _check_key_type(self, key)
@@ -193,7 +193,7 @@ cdef class Map__Animal_string(thrift.py3.types.Map):
 cdef shared_ptr[cmap[cAnimal,string]] Map__Animal_string__make_instance(object items) except *
 
 cdef class List__Vehicle(thrift.py3.types.List):
-    cdef shared_ptr[vector[cVehicle]] _cpp_obj
+    cdef shared_ptr[vector[cVehicle]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cVehicle]])
     cdef _check_item_type(self, item)

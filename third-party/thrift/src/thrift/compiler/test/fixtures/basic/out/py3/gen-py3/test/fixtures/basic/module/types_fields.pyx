@@ -74,7 +74,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _test_fixtures_basic_module_types.MyDataItem):
             raise TypeError(f'MyDataField is not a { _test_fixtures_basic_module_types.MyDataItem !r}.')
-        deref(self._struct_cpp_obj).MyDataField_ref().assign(deref((<_test_fixtures_basic_module_types.MyDataItem?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).MyDataField_ref().assign(deref((<_test_fixtures_basic_module_types.MyDataItem?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field myEnum
@@ -117,7 +117,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_basic_module_types.cMyStruct](deref(self._struct_cpp_obj), 7)
             return
-        deref(self._struct_cpp_obj).floatSet_ref().assign(deref(_test_fixtures_basic_module_types.Set__float(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).floatSet_ref().assign(deref(_test_fixtures_basic_module_types.Set__float(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_8(self, _fbthrift_value) except *:
         # for field no_hack_codegen_field
@@ -153,21 +153,21 @@ cdef class __Containers_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_basic_module_types.cContainers](deref(self._struct_cpp_obj), 0)
             return
-        deref(self._struct_cpp_obj).I32List_ref().assign(deref(_test_fixtures_basic_module_types.List__i32(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).I32List_ref().assign(deref(_test_fixtures_basic_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field StringSet
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_basic_module_types.cContainers](deref(self._struct_cpp_obj), 1)
             return
-        deref(self._struct_cpp_obj).StringSet_ref().assign(deref(_test_fixtures_basic_module_types.Set__string(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).StringSet_ref().assign(deref(_test_fixtures_basic_module_types.Set__string(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field StringToI64Map
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_basic_module_types.cContainers](deref(self._struct_cpp_obj), 2)
             return
-        deref(self._struct_cpp_obj).StringToI64Map_ref().assign(deref(_test_fixtures_basic_module_types.Map__string_i64(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).StringToI64Map_ref().assign(deref(_test_fixtures_basic_module_types.Map__string_i64(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
 @__cython.auto_pickle(False)

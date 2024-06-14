@@ -503,7 +503,7 @@ async def MyService_ping_coro(
     try:
         result = await self.ping()
     except _module_types.MyException as ex:
-        promise.cPromise.setException(deref((<_module_types.MyException> ex)._cpp_obj))
+        promise.cPromise.setException(deref((<_module_types.MyException> ex)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(

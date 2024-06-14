@@ -84,7 +84,7 @@ cdef extern from "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/mod
 
 
 cdef class Foo(thrift.py3.types.Struct):
-    cdef shared_ptr[cFoo] _cpp_obj
+    cdef shared_ptr[cFoo] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Foo_FieldsSetter _fields_setter
     cdef inline object value_impl(self)
 

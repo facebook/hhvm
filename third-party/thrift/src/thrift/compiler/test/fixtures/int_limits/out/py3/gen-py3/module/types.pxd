@@ -82,7 +82,7 @@ cdef extern from "thrift/compiler/test/fixtures/int_limits/gen-cpp2/module_types
 
 
 cdef class Limits(thrift.py3.types.Struct):
-    cdef shared_ptr[cLimits] _cpp_obj
+    cdef shared_ptr[cLimits] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Limits_FieldsSetter _fields_setter
     cdef inline object max_i64_field_impl(self)
     cdef inline object min_i64_field_impl(self)

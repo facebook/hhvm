@@ -9,61 +9,61 @@
 
 
 cdef shared_ptr[_fbthrift_ctypes.cMyData] MyData_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.MyData?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.MyData?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object MyData_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyData]& c_struct):
     return _fbthrift_ctypes.MyData._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cMyDataWithCustomDefault] MyDataWithCustomDefault_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.MyDataWithCustomDefault?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.MyDataWithCustomDefault?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object MyDataWithCustomDefault_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyDataWithCustomDefault]& c_struct):
     return _fbthrift_ctypes.MyDataWithCustomDefault._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cInnerUnion] InnerUnion_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.InnerUnion?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.InnerUnion?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object InnerUnion_from_cpp(const shared_ptr[_fbthrift_ctypes.cInnerUnion]& c_struct):
     return _fbthrift_ctypes.InnerUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cMyUnion] MyUnion_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.MyUnion?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.MyUnion?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object MyUnion_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyUnion]& c_struct):
     return _fbthrift_ctypes.MyUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cMyStruct] MyStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.MyStruct?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.MyStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyStruct]& c_struct):
     return _fbthrift_ctypes.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cLateDefStruct] LateDefStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.LateDefStruct?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.LateDefStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object LateDefStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cLateDefStruct]& c_struct):
     return _fbthrift_ctypes.LateDefStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cRecursive] Recursive_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.Recursive?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.Recursive?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object Recursive_from_cpp(const shared_ptr[_fbthrift_ctypes.cRecursive]& c_struct):
     return _fbthrift_ctypes.Recursive._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cBar] Bar_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.Bar?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.Bar?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object Bar_from_cpp(const shared_ptr[_fbthrift_ctypes.cBar]& c_struct):
     return _fbthrift_ctypes.Bar._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cLoop] Loop_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.Loop?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.Loop?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object Loop_from_cpp(const shared_ptr[_fbthrift_ctypes.cLoop]& c_struct):
     return _fbthrift_ctypes.Loop._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cRefFields] RefFields_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.RefFields?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.RefFields?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object RefFields_from_cpp(const shared_ptr[_fbthrift_ctypes.cRefFields]& c_struct):

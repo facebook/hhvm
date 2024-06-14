@@ -78,7 +78,7 @@ cdef extern from "thrift/compiler/test/fixtures/req-opt/gen-cpp2/module_types_cu
 
 
 cdef class Foo(thrift.py3.types.Struct):
-    cdef shared_ptr[cFoo] _cpp_obj
+    cdef shared_ptr[cFoo] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Foo_FieldsSetter _fields_setter
     cdef inline object myInteger_impl(self)
     cdef inline object myString_impl(self)
@@ -92,7 +92,7 @@ cdef class Foo(thrift.py3.types.Struct):
 
 
 cdef class List__bool(thrift.py3.types.List):
-    cdef shared_ptr[vector[cbool]] _cpp_obj
+    cdef shared_ptr[vector[cbool]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cbool]])
     cdef _check_item_type(self, item)
@@ -100,7 +100,7 @@ cdef class List__bool(thrift.py3.types.List):
 cdef shared_ptr[vector[cbool]] List__bool__make_instance(object items) except *
 
 cdef class List__i32(thrift.py3.types.List):
-    cdef shared_ptr[vector[cint32_t]] _cpp_obj
+    cdef shared_ptr[vector[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint32_t]])
     cdef _check_item_type(self, item)

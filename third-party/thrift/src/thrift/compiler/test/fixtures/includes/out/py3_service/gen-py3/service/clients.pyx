@@ -123,8 +123,8 @@ cdef class MyService(thrift.py3.client.Client):
         bridgeFutureWith[cFollyUnit](
             self._executor,
             down_cast_ptr[cMyServiceClientWrapper, cClientWrapper](self._client.get()).query(rpc_options._cpp_obj, 
-                deref((<_module_types.MyStruct>s)._cpp_obj),
-                deref((<_includes_types.Included>i)._cpp_obj),
+                deref((<_module_types.MyStruct>s)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
+                deref((<_includes_types.Included>i)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             MyService_query_callback,
             <PyObject *> __userdata
@@ -147,8 +147,8 @@ cdef class MyService(thrift.py3.client.Client):
         bridgeFutureWith[cFollyUnit](
             self._executor,
             down_cast_ptr[cMyServiceClientWrapper, cClientWrapper](self._client.get()).has_arg_docs(rpc_options._cpp_obj, 
-                deref((<_module_types.MyStruct>s)._cpp_obj),
-                deref((<_includes_types.Included>i)._cpp_obj),
+                deref((<_module_types.MyStruct>s)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
+                deref((<_includes_types.Included>i)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             MyService_has_arg_docs_callback,
             <PyObject *> __userdata

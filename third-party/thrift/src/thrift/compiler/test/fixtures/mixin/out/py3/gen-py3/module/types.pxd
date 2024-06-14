@@ -119,7 +119,7 @@ cdef extern from "thrift/compiler/test/fixtures/mixin/gen-cpp2/module_types_cust
 
 
 cdef class Mixin1(thrift.py3.types.Struct):
-    cdef shared_ptr[cMixin1] _cpp_obj
+    cdef shared_ptr[cMixin1] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Mixin1_FieldsSetter _fields_setter
     cdef inline object field1_impl(self)
 
@@ -129,7 +129,7 @@ cdef class Mixin1(thrift.py3.types.Struct):
 
 
 cdef class Mixin2(thrift.py3.types.Struct):
-    cdef shared_ptr[cMixin2] _cpp_obj
+    cdef shared_ptr[cMixin2] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Mixin2_FieldsSetter _fields_setter
     cdef inline object m1_impl(self)
     cdef inline object field2_impl(self)
@@ -142,7 +142,7 @@ cdef class Mixin2(thrift.py3.types.Struct):
 
 
 cdef class Mixin3Base(thrift.py3.types.Struct):
-    cdef shared_ptr[cMixin3Base] _cpp_obj
+    cdef shared_ptr[cMixin3Base] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Mixin3Base_FieldsSetter _fields_setter
     cdef inline object field3_impl(self)
 
@@ -152,7 +152,7 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
 
 
 cdef class Foo(thrift.py3.types.Struct):
-    cdef shared_ptr[cFoo] _cpp_obj
+    cdef shared_ptr[cFoo] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Foo_FieldsSetter _fields_setter
     cdef inline object field4_impl(self)
     cdef inline object m2_impl(self)

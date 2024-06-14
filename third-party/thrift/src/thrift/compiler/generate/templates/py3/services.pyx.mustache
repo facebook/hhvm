@@ -155,7 +155,7 @@ async def runGenerator_{{service:name}}_{{function:name}}(object generator, Prom
     {{#function:stream_exceptions}}
     {{#field:type}}
     except {{> types/cython_python_type}} as ex:
-        promise.cPromise.setException(deref((<{{> types/cython_python_type}}> ex)._cpp_obj))
+        promise.cPromise.setException(deref((<{{> types/cython_python_type}}> ex).{{> types/cpp_obj}}))
     {{/field:type}}
     {{/function:stream_exceptions}}
     except __ApplicationError as ex:

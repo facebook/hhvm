@@ -72,16 +72,16 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class Fields(thrift.py3.types.Struct):
     def __init__(Fields self, **kwargs):
-        self._cpp_obj = make_shared[cFields]()
-        self._fields_setter = _fbthrift_types_fields.__Fields_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFields]()
+        self._fields_setter = _fbthrift_types_fields.__Fields_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(Fields self, **kwargs):
         if not kwargs:
             return self
         cdef Fields __fbthrift_inst = Fields.__new__(Fields)
-        __fbthrift_inst._cpp_obj = make_shared[cFields](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Fields_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFields](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Fields_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -91,18 +91,18 @@ cdef class Fields(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("Fields", {
-          "injected_field": deref(self._cpp_obj).injected_field_ref().has_value(),
+          "injected_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().has_value(),
         })
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFields] cpp_obj):
         __fbthrift_inst = <Fields>Fields.__new__(Fields)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline injected_field_impl(self):
 
-        return (<bytes>deref(self._cpp_obj).injected_field_ref().value()).decode('UTF-8')
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().value()).decode('UTF-8')
 
     @property
     def injected_field(self):
@@ -121,15 +121,15 @@ cdef class Fields(thrift.py3.types.Struct):
 
     def __copy__(Fields self):
         cdef shared_ptr[cFields] cpp_obj = make_shared[cFields](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Fields._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cFields](
-            self._cpp_obj,
-            (<Fields>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<Fields>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -158,14 +158,14 @@ cdef class Fields(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Fields self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cFields](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cFields](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Fields self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cFields]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFields]()
         with nogil:
-            needed = serializer.cdeserialize[cFields](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cFields](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -188,16 +188,16 @@ cdef class Fields(thrift.py3.types.Struct):
 @__cython.auto_pickle(False)
 cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
     def __init__(FieldsInjectedToEmptyStruct self, **kwargs):
-        self._cpp_obj = make_shared[cFieldsInjectedToEmptyStruct]()
-        self._fields_setter = _fbthrift_types_fields.__FieldsInjectedToEmptyStruct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFieldsInjectedToEmptyStruct]()
+        self._fields_setter = _fbthrift_types_fields.__FieldsInjectedToEmptyStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(FieldsInjectedToEmptyStruct self, **kwargs):
         if not kwargs:
             return self
         cdef FieldsInjectedToEmptyStruct __fbthrift_inst = FieldsInjectedToEmptyStruct.__new__(FieldsInjectedToEmptyStruct)
-        __fbthrift_inst._cpp_obj = make_shared[cFieldsInjectedToEmptyStruct](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__FieldsInjectedToEmptyStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFieldsInjectedToEmptyStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__FieldsInjectedToEmptyStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -207,18 +207,18 @@ cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("FieldsInjectedToEmptyStruct", {
-          "injected_field": deref(self._cpp_obj).injected_field_ref().has_value(),
+          "injected_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().has_value(),
         })
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFieldsInjectedToEmptyStruct] cpp_obj):
         __fbthrift_inst = <FieldsInjectedToEmptyStruct>FieldsInjectedToEmptyStruct.__new__(FieldsInjectedToEmptyStruct)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline injected_field_impl(self):
 
-        return (<bytes>deref(self._cpp_obj).injected_field_ref().value()).decode('UTF-8')
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().value()).decode('UTF-8')
 
     @property
     def injected_field(self):
@@ -237,15 +237,15 @@ cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
 
     def __copy__(FieldsInjectedToEmptyStruct self):
         cdef shared_ptr[cFieldsInjectedToEmptyStruct] cpp_obj = make_shared[cFieldsInjectedToEmptyStruct](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return FieldsInjectedToEmptyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cFieldsInjectedToEmptyStruct](
-            self._cpp_obj,
-            (<FieldsInjectedToEmptyStruct>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<FieldsInjectedToEmptyStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -274,14 +274,14 @@ cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(FieldsInjectedToEmptyStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cFieldsInjectedToEmptyStruct](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cFieldsInjectedToEmptyStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(FieldsInjectedToEmptyStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cFieldsInjectedToEmptyStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFieldsInjectedToEmptyStruct]()
         with nogil:
-            needed = serializer.cdeserialize[cFieldsInjectedToEmptyStruct](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cFieldsInjectedToEmptyStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -304,16 +304,16 @@ cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
 @__cython.auto_pickle(False)
 cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
     def __init__(FieldsInjectedToStruct self, **kwargs):
-        self._cpp_obj = make_shared[cFieldsInjectedToStruct]()
-        self._fields_setter = _fbthrift_types_fields.__FieldsInjectedToStruct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFieldsInjectedToStruct]()
+        self._fields_setter = _fbthrift_types_fields.__FieldsInjectedToStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(FieldsInjectedToStruct self, **kwargs):
         if not kwargs:
             return self
         cdef FieldsInjectedToStruct __fbthrift_inst = FieldsInjectedToStruct.__new__(FieldsInjectedToStruct)
-        __fbthrift_inst._cpp_obj = make_shared[cFieldsInjectedToStruct](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__FieldsInjectedToStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFieldsInjectedToStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__FieldsInjectedToStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -323,19 +323,19 @@ cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("FieldsInjectedToStruct", {
-          "string_field": deref(self._cpp_obj).string_field_ref().has_value(),
-          "injected_field": deref(self._cpp_obj).injected_field_ref().has_value(),
+          "string_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().has_value(),
+          "injected_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().has_value(),
         })
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFieldsInjectedToStruct] cpp_obj):
         __fbthrift_inst = <FieldsInjectedToStruct>FieldsInjectedToStruct.__new__(FieldsInjectedToStruct)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline string_field_impl(self):
 
-        return (<bytes>deref(self._cpp_obj).string_field_ref().value()).decode('UTF-8')
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().value()).decode('UTF-8')
 
     @property
     def string_field(self):
@@ -343,7 +343,7 @@ cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
 
     cdef inline injected_field_impl(self):
 
-        return (<bytes>deref(self._cpp_obj).injected_field_ref().value()).decode('UTF-8')
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().value()).decode('UTF-8')
 
     @property
     def injected_field(self):
@@ -362,15 +362,15 @@ cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
 
     def __copy__(FieldsInjectedToStruct self):
         cdef shared_ptr[cFieldsInjectedToStruct] cpp_obj = make_shared[cFieldsInjectedToStruct](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return FieldsInjectedToStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cFieldsInjectedToStruct](
-            self._cpp_obj,
-            (<FieldsInjectedToStruct>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<FieldsInjectedToStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -399,14 +399,14 @@ cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(FieldsInjectedToStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cFieldsInjectedToStruct](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cFieldsInjectedToStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(FieldsInjectedToStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cFieldsInjectedToStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFieldsInjectedToStruct]()
         with nogil:
-            needed = serializer.cdeserialize[cFieldsInjectedToStruct](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cFieldsInjectedToStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -429,16 +429,16 @@ cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
 @__cython.auto_pickle(False)
 cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
     def __init__(FieldsInjectedWithIncludedStruct self, **kwargs):
-        self._cpp_obj = make_shared[cFieldsInjectedWithIncludedStruct]()
-        self._fields_setter = _fbthrift_types_fields.__FieldsInjectedWithIncludedStruct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFieldsInjectedWithIncludedStruct]()
+        self._fields_setter = _fbthrift_types_fields.__FieldsInjectedWithIncludedStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(FieldsInjectedWithIncludedStruct self, **kwargs):
         if not kwargs:
             return self
         cdef FieldsInjectedWithIncludedStruct __fbthrift_inst = FieldsInjectedWithIncludedStruct.__new__(FieldsInjectedWithIncludedStruct)
-        __fbthrift_inst._cpp_obj = make_shared[cFieldsInjectedWithIncludedStruct](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__FieldsInjectedWithIncludedStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFieldsInjectedWithIncludedStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__FieldsInjectedWithIncludedStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -448,21 +448,21 @@ cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("FieldsInjectedWithIncludedStruct", {
-          "string_field": deref(self._cpp_obj).string_field_ref().has_value(),
-          "injected_field": deref(self._cpp_obj).injected_field_ref().has_value(),
-          "injected_structured_annotation_field": deref(self._cpp_obj).injected_structured_annotation_field_ref().has_value(),
-          "injected_unstructured_annotation_field": deref(self._cpp_obj).injected_unstructured_annotation_field_ref().has_value(),
+          "string_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().has_value(),
+          "injected_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().has_value(),
+          "injected_structured_annotation_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_structured_annotation_field_ref().has_value(),
+          "injected_unstructured_annotation_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_unstructured_annotation_field_ref().has_value(),
         })
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFieldsInjectedWithIncludedStruct] cpp_obj):
         __fbthrift_inst = <FieldsInjectedWithIncludedStruct>FieldsInjectedWithIncludedStruct.__new__(FieldsInjectedWithIncludedStruct)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline string_field_impl(self):
 
-        return (<bytes>deref(self._cpp_obj).string_field_ref().value()).decode('UTF-8')
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().value()).decode('UTF-8')
 
     @property
     def string_field(self):
@@ -470,27 +470,27 @@ cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
 
     cdef inline injected_field_impl(self):
 
-        return (<bytes>deref(self._cpp_obj).injected_field_ref().value()).decode('UTF-8')
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().value()).decode('UTF-8')
 
     @property
     def injected_field(self):
         return self.injected_field_impl()
 
     cdef inline injected_structured_annotation_field_impl(self):
-        if not deref(self._cpp_obj).injected_structured_annotation_field_ref().has_value():
+        if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_structured_annotation_field_ref().has_value():
             return None
 
-        return (<bytes>deref(self._cpp_obj).injected_structured_annotation_field_ref().value()).decode('UTF-8')
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_structured_annotation_field_ref().value()).decode('UTF-8')
 
     @property
     def injected_structured_annotation_field(self):
         return self.injected_structured_annotation_field_impl()
 
     cdef inline injected_unstructured_annotation_field_impl(self):
-        if not deref(self._cpp_obj).injected_unstructured_annotation_field_ref().has_value():
+        if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_unstructured_annotation_field_ref().has_value():
             return None
 
-        return (<bytes>deref(self._cpp_obj).injected_unstructured_annotation_field_ref().value()).decode('UTF-8')
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_unstructured_annotation_field_ref().value()).decode('UTF-8')
 
     @property
     def injected_unstructured_annotation_field(self):
@@ -509,15 +509,15 @@ cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
 
     def __copy__(FieldsInjectedWithIncludedStruct self):
         cdef shared_ptr[cFieldsInjectedWithIncludedStruct] cpp_obj = make_shared[cFieldsInjectedWithIncludedStruct](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return FieldsInjectedWithIncludedStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cFieldsInjectedWithIncludedStruct](
-            self._cpp_obj,
-            (<FieldsInjectedWithIncludedStruct>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<FieldsInjectedWithIncludedStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -546,14 +546,14 @@ cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(FieldsInjectedWithIncludedStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cFieldsInjectedWithIncludedStruct](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cFieldsInjectedWithIncludedStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(FieldsInjectedWithIncludedStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cFieldsInjectedWithIncludedStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFieldsInjectedWithIncludedStruct]()
         with nogil:
-            needed = serializer.cdeserialize[cFieldsInjectedWithIncludedStruct](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cFieldsInjectedWithIncludedStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 

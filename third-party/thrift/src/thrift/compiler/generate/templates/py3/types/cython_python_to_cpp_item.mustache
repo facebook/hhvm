@@ -45,10 +45,10 @@ key, include the parallel CythonPythonToCppKey file instead.
 }}{{#type:string?}}item.encode('UTF-8'){{/type:string?}}{{!
 }}{{#type:binary?}}item{{/type:binary?}}{{!
 }}{{#type:struct}}{{!
-  }}deref((<{{> types/cython_python_type}}>item)._cpp_obj){{!
+  }}deref((<{{> types/cython_python_type}}>item).{{> types/cpp_obj}}){{!
 }}{{/type:struct}}{{!
 }}{{#type:container?}}{{!
-  }}deref((<{{> types/cython_python_type}}>item)._cpp_obj){{!
+  }}deref((<{{> types/cython_python_type}}>item).{{> types/cpp_obj}}){{!
 }}{{/type:container?}}{{!
 }}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>item{{/type:enum?}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

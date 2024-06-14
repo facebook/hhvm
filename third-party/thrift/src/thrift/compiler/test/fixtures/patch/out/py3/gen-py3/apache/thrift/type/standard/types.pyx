@@ -257,7 +257,7 @@ cdef class TypeUri(thrift.py3.types.Union):
         bytes typeHashPrefixSha2_256=None,
         str scopedName=None
     ):
-        self._cpp_obj = __to_shared_ptr(cmove(TypeUri._make_instance(
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(TypeUri._make_instance(
           NULL,
           uri,
           typeHashPrefixSha2_256,
@@ -308,7 +308,7 @@ cdef class TypeUri(thrift.py3.types.Union):
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cTypeUri] cpp_obj):
         __fbthrift_inst = <TypeUri>TypeUri.__new__(TypeUri)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         __fbthrift_inst._load_cache()
         return __fbthrift_inst
 
@@ -335,28 +335,28 @@ cdef class TypeUri(thrift.py3.types.Union):
         return  super().__hash__()
 
     cdef _load_cache(TypeUri self):
-        self.type = TypeUri.Type(<int>(deref(self._cpp_obj).getType()))
+        self.type = TypeUri.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
         cdef int type = self.type.value
         if type == 0:    # Empty
             self.value = None
         elif type == 1:
-            self.value = bytes(deref(self._cpp_obj).get_uri()).decode('UTF-8')
+            self.value = bytes(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_uri()).decode('UTF-8')
         elif type == 2:
-            self.value = deref(self._cpp_obj).get_typeHashPrefixSha2_256()
+            self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_typeHashPrefixSha2_256()
         elif type == 3:
-            self.value = bytes(deref(self._cpp_obj).get_scopedName()).decode('UTF-8')
+            self.value = bytes(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_scopedName()).decode('UTF-8')
 
     def __copy__(TypeUri self):
         cdef shared_ptr[cTypeUri] cpp_obj = make_shared[cTypeUri](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cTypeUri](
-            self._cpp_obj,
-            (<TypeUri>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<TypeUri>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -385,14 +385,14 @@ cdef class TypeUri(thrift.py3.types.Union):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(TypeUri self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cTypeUri](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cTypeUri](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(TypeUri self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cTypeUri]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cTypeUri]()
         with nogil:
-            needed = serializer.cdeserialize[cTypeUri](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cTypeUri](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         # force a cache reload since the underlying data's changed
         self._load_cache()
         return needed
@@ -440,7 +440,7 @@ cdef class TypeName(thrift.py3.types.Union):
         Void setType=None,
         Void mapType=None
     ):
-        self._cpp_obj = __to_shared_ptr(cmove(TypeName._make_instance(
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(TypeName._make_instance(
           NULL,
           boolType,
           byteType,
@@ -573,27 +573,27 @@ cdef class TypeName(thrift.py3.types.Union):
         if enumType is not None:
             if any_set:
                 raise TypeError("At most one field may be set when initializing a union")
-            deref(c_inst).set_enumType(deref((<TypeUri?> enumType)._cpp_obj))
+            deref(c_inst).set_enumType(deref((<TypeUri?> enumType)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
             any_set = True
         if typedefType is not None:
             if any_set:
                 raise TypeError("At most one field may be set when initializing a union")
-            deref(c_inst).set_typedefType(deref((<TypeUri?> typedefType)._cpp_obj))
+            deref(c_inst).set_typedefType(deref((<TypeUri?> typedefType)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
             any_set = True
         if structType is not None:
             if any_set:
                 raise TypeError("At most one field may be set when initializing a union")
-            deref(c_inst).set_structType(deref((<TypeUri?> structType)._cpp_obj))
+            deref(c_inst).set_structType(deref((<TypeUri?> structType)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
             any_set = True
         if unionType is not None:
             if any_set:
                 raise TypeError("At most one field may be set when initializing a union")
-            deref(c_inst).set_unionType(deref((<TypeUri?> unionType)._cpp_obj))
+            deref(c_inst).set_unionType(deref((<TypeUri?> unionType)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
             any_set = True
         if exceptionType is not None:
             if any_set:
                 raise TypeError("At most one field may be set when initializing a union")
-            deref(c_inst).set_exceptionType(deref((<TypeUri?> exceptionType)._cpp_obj))
+            deref(c_inst).set_exceptionType(deref((<TypeUri?> exceptionType)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
             any_set = True
         if listType is not None:
             if any_set:
@@ -617,7 +617,7 @@ cdef class TypeName(thrift.py3.types.Union):
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cTypeName] cpp_obj):
         __fbthrift_inst = <TypeName>TypeName.__new__(TypeName)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         __fbthrift_inst._load_cache()
         return __fbthrift_inst
 
@@ -728,56 +728,56 @@ cdef class TypeName(thrift.py3.types.Union):
         return  super().__hash__()
 
     cdef _load_cache(TypeName self):
-        self.type = TypeName.Type(<int>(deref(self._cpp_obj).getType()))
+        self.type = TypeName.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
         cdef int type = self.type.value
         if type == 0:    # Empty
             self.value = None
         elif type == 1:
-            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj).get_boolType())
+            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_boolType())
         elif type == 2:
-            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj).get_byteType())
+            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_byteType())
         elif type == 3:
-            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj).get_i16Type())
+            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_i16Type())
         elif type == 4:
-            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj).get_i32Type())
+            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_i32Type())
         elif type == 5:
-            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj).get_i64Type())
+            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_i64Type())
         elif type == 6:
-            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj).get_floatType())
+            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_floatType())
         elif type == 7:
-            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj).get_doubleType())
+            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_doubleType())
         elif type == 8:
-            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj).get_stringType())
+            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_stringType())
         elif type == 9:
-            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj).get_binaryType())
+            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_binaryType())
         elif type == 10:
-            self.value = TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cTypeUri](deref(self._cpp_obj).get_enumType()))
+            self.value = TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cTypeUri](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_enumType()))
         elif type == 17:
-            self.value = TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cTypeUri](deref(self._cpp_obj).get_typedefType()))
+            self.value = TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cTypeUri](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_typedefType()))
         elif type == 11:
-            self.value = TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cTypeUri](deref(self._cpp_obj).get_structType()))
+            self.value = TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cTypeUri](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_structType()))
         elif type == 12:
-            self.value = TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cTypeUri](deref(self._cpp_obj).get_unionType()))
+            self.value = TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cTypeUri](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_unionType()))
         elif type == 13:
-            self.value = TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cTypeUri](deref(self._cpp_obj).get_exceptionType()))
+            self.value = TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cTypeUri](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_exceptionType()))
         elif type == 14:
-            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj).get_listType())
+            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_listType())
         elif type == 15:
-            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj).get_setType())
+            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_setType())
         elif type == 16:
-            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj).get_mapType())
+            self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_mapType())
 
     def __copy__(TypeName self):
         cdef shared_ptr[cTypeName] cpp_obj = make_shared[cTypeName](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return TypeName._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cTypeName](
-            self._cpp_obj,
-            (<TypeName>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<TypeName>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -806,14 +806,14 @@ cdef class TypeName(thrift.py3.types.Union):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(TypeName self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cTypeName](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cTypeName](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(TypeName self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cTypeName]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cTypeName]()
         with nogil:
-            needed = serializer.cdeserialize[cTypeName](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cTypeName](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         # force a cache reload since the underlying data's changed
         self._load_cache()
         return needed

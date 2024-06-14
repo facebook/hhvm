@@ -70,16 +70,16 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class Foo(thrift.py3.types.Struct):
     def __init__(Foo self, **kwargs):
-        self._cpp_obj = make_shared[cFoo]()
-        self._fields_setter = _fbthrift_types_fields.__Foo_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFoo]()
+        self._fields_setter = _fbthrift_types_fields.__Foo_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(Foo self, **kwargs):
         if not kwargs:
             return self
         cdef Foo __fbthrift_inst = Foo.__new__(Foo)
-        __fbthrift_inst._cpp_obj = make_shared[cFoo](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Foo_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFoo](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Foo_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -89,20 +89,20 @@ cdef class Foo(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("Foo", {
-          "value": deref(self._cpp_obj).value_ref().has_value(),
+          "value": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).value_ref().has_value(),
         })
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFoo] cpp_obj):
         __fbthrift_inst = <Foo>Foo.__new__(Foo)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline value_impl(self):
-        if not deref(self._cpp_obj).value_ref().has_value():
+        if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).value_ref().has_value():
             return None
 
-        return deref(self._cpp_obj).value_ref().value_unchecked()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).value_ref().value_unchecked()
 
     @property
     def value(self):
@@ -121,15 +121,15 @@ cdef class Foo(thrift.py3.types.Struct):
 
     def __copy__(Foo self):
         cdef shared_ptr[cFoo] cpp_obj = make_shared[cFoo](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cFoo](
-            self._cpp_obj,
-            (<Foo>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<Foo>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -158,14 +158,14 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Foo self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cFoo](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cFoo](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Foo self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cFoo]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFoo]()
         with nogil:
-            needed = serializer.cdeserialize[cFoo](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cFoo](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 

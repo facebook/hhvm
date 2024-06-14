@@ -78,7 +78,7 @@ cdef extern from "thrift/compiler/test/fixtures/transitive-deps/gen-cpp2/a_types
 
 
 cdef class A(thrift.py3.types.Struct):
-    cdef shared_ptr[cA] _cpp_obj
+    cdef shared_ptr[cA] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__A_FieldsSetter _fields_setter
     cdef inline object b_impl(self)
     cdef inline object other_impl(self)
@@ -90,7 +90,7 @@ cdef class A(thrift.py3.types.Struct):
 
 
 cdef class List__c_C(thrift.py3.types.List):
-    cdef shared_ptr[vector[_c_types.cC]] _cpp_obj
+    cdef shared_ptr[vector[_c_types.cC]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[_c_types.cC]])
     cdef _check_item_type(self, item)
@@ -98,7 +98,7 @@ cdef class List__c_C(thrift.py3.types.List):
 cdef shared_ptr[vector[_c_types.cC]] List__c_C__make_instance(object items) except *
 
 cdef class List__List__c_C(thrift.py3.types.List):
-    cdef shared_ptr[vector[vector[_c_types.cC]]] _cpp_obj
+    cdef shared_ptr[vector[vector[_c_types.cC]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[vector[_c_types.cC]]])
     cdef _check_item_type(self, item)

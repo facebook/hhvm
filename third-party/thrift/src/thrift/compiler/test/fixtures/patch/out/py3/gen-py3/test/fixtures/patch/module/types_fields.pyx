@@ -249,7 +249,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.MyData):
             raise TypeError(f'structVal is not a { _test_fixtures_patch_module_types.MyData !r}.')
-        deref(self._struct_cpp_obj).structVal_ref().assign(deref((<_test_fixtures_patch_module_types.MyData?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).structVal_ref().assign(deref((<_test_fixtures_patch_module_types.MyData?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_11(self, _fbthrift_value) except *:
         # for field unionVal
@@ -258,7 +258,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.MyUnion):
             raise TypeError(f'unionVal is not a { _test_fixtures_patch_module_types.MyUnion !r}.')
-        deref(self._struct_cpp_obj).unionVal_ref().assign(deref((<_test_fixtures_patch_module_types.MyUnion?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).unionVal_ref().assign(deref((<_test_fixtures_patch_module_types.MyUnion?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_12(self, _fbthrift_value) except *:
         # for field lateStructVal
@@ -267,7 +267,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.LateDefStruct):
             raise TypeError(f'lateStructVal is not a { _test_fixtures_patch_module_types.LateDefStruct !r}.')
-        deref(self._struct_cpp_obj).lateStructVal_ref().assign(deref((<_test_fixtures_patch_module_types.LateDefStruct?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).lateStructVal_ref().assign(deref((<_test_fixtures_patch_module_types.LateDefStruct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_13(self, _fbthrift_value) except *:
         # for field optBoolVal
@@ -370,7 +370,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.MyData):
             raise TypeError(f'optStructVal is not a { _test_fixtures_patch_module_types.MyData !r}.')
-        deref(self._struct_cpp_obj).optStructVal_ref().assign(deref((<_test_fixtures_patch_module_types.MyData?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).optStructVal_ref().assign(deref((<_test_fixtures_patch_module_types.MyData?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_24(self, _fbthrift_value) except *:
         # for field optLateStructVal
@@ -379,42 +379,42 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.LateDefStruct):
             raise TypeError(f'optLateStructVal is not a { _test_fixtures_patch_module_types.LateDefStruct !r}.')
-        deref(self._struct_cpp_obj).optLateStructVal_ref().assign(deref((<_test_fixtures_patch_module_types.LateDefStruct?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).optLateStructVal_ref().assign(deref((<_test_fixtures_patch_module_types.LateDefStruct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_25(self, _fbthrift_value) except *:
         # for field optListVal
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 25)
             return
-        deref(self._struct_cpp_obj).optListVal_ref().assign(deref(_test_fixtures_patch_module_types.List__i16(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).optListVal_ref().assign(deref(_test_fixtures_patch_module_types.List__i16(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_26(self, _fbthrift_value) except *:
         # for field optSetVal
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 26)
             return
-        deref(self._struct_cpp_obj).optSetVal_ref().assign(deref(_test_fixtures_patch_module_types.Set__string(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).optSetVal_ref().assign(deref(_test_fixtures_patch_module_types.Set__string(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_27(self, _fbthrift_value) except *:
         # for field optMapVal
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 27)
             return
-        deref(self._struct_cpp_obj).optMapVal_ref().assign(deref(_test_fixtures_patch_module_types.Map__string_string(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).optMapVal_ref().assign(deref(_test_fixtures_patch_module_types.Map__string_string(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_28(self, _fbthrift_value) except *:
         # for field listMap
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 28)
             return
-        deref(self._struct_cpp_obj).listMap_ref().assign(deref(_test_fixtures_patch_module_types.List__Map__string_i32(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).listMap_ref().assign(deref(_test_fixtures_patch_module_types.List__Map__string_i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_29(self, _fbthrift_value) except *:
         # for field mapMap
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 29)
             return
-        deref(self._struct_cpp_obj).mapMap_ref().assign(deref(_test_fixtures_patch_module_types.Map__string_Map__string_i32(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).mapMap_ref().assign(deref(_test_fixtures_patch_module_types.Map__string_Map__string_i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_30(self, _fbthrift_value) except *:
         # for field i32WithCustomDefault
@@ -433,7 +433,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.MyDataWithCustomDefault):
             raise TypeError(f'structWithCustomDefault is not a { _test_fixtures_patch_module_types.MyDataWithCustomDefault !r}.')
-        deref(self._struct_cpp_obj).structWithCustomDefault_ref().assign(deref((<_test_fixtures_patch_module_types.MyDataWithCustomDefault?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).structWithCustomDefault_ref().assign(deref((<_test_fixtures_patch_module_types.MyDataWithCustomDefault?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_32(self, _fbthrift_value) except *:
         # for field structWithFieldCustomDefault
@@ -442,7 +442,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.MyData):
             raise TypeError(f'structWithFieldCustomDefault is not a { _test_fixtures_patch_module_types.MyData !r}.')
-        deref(self._struct_cpp_obj).structWithFieldCustomDefault_ref().assign(deref((<_test_fixtures_patch_module_types.MyData?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).structWithFieldCustomDefault_ref().assign(deref((<_test_fixtures_patch_module_types.MyData?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
 @__cython.auto_pickle(False)
@@ -484,7 +484,7 @@ cdef class __Recursive_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cRecursive](deref(self._struct_cpp_obj), 0)
             return
-        deref(self._struct_cpp_obj).nodes_ref().assign(deref(_test_fixtures_patch_module_types.Map__string_Recursive(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).nodes_ref().assign(deref(_test_fixtures_patch_module_types.Map__string_Recursive(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
 @__cython.auto_pickle(False)
@@ -511,7 +511,7 @@ cdef class __Bar_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.Loop):
             raise TypeError(f'loop is not a { _test_fixtures_patch_module_types.Loop !r}.')
-        assign_unique_ptr[_test_fixtures_patch_module_types.cLoop](deref(self._struct_cpp_obj).loop_ref(), make_unique[_test_fixtures_patch_module_types.cLoop](deref((<_test_fixtures_patch_module_types.Loop?>_fbthrift_value)._cpp_obj)))
+        assign_unique_ptr[_test_fixtures_patch_module_types.cLoop](deref(self._struct_cpp_obj).loop_ref(), make_unique[_test_fixtures_patch_module_types.cLoop](deref((<_test_fixtures_patch_module_types.Loop?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 
 @__cython.auto_pickle(False)
@@ -538,7 +538,7 @@ cdef class __Loop_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.Bar):
             raise TypeError(f'bar is not a { _test_fixtures_patch_module_types.Bar !r}.')
-        deref(self._struct_cpp_obj).bar_ref().assign(deref((<_test_fixtures_patch_module_types.Bar?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).bar_ref().assign(deref((<_test_fixtures_patch_module_types.Bar?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
 @__cython.auto_pickle(False)
@@ -569,47 +569,47 @@ cdef class __RefFields_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 0)
             return
-        assign_unique_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).unique_ref(), make_unique[vector[cint32_t]](deref(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj)))
+        assign_unique_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).unique_ref(), make_unique[vector[cint32_t]](deref(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field shared_const
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 1)
             return
-        assign_shared_const_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).shared_const_ref(), const_pointer_cast(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj))
+        assign_shared_const_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).shared_const_ref(), const_pointer_cast(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field shared_mustable
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 2)
             return
-        assign_shared_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).shared_mustable_ref(), _test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj)
+        assign_shared_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).shared_mustable_ref(), _test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field opt_unique
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 3)
             return
-        assign_unique_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).opt_unique_ref(), make_unique[vector[cint32_t]](deref(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj)))
+        assign_unique_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).opt_unique_ref(), make_unique[vector[cint32_t]](deref(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
     cdef void _set_field_4(self, _fbthrift_value) except *:
         # for field opt_shared_const
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 4)
             return
-        assign_shared_const_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).opt_shared_const_ref(), const_pointer_cast(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj))
+        assign_shared_const_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).opt_shared_const_ref(), const_pointer_cast(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_5(self, _fbthrift_value) except *:
         # for field opt_shared_mustable
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 5)
             return
-        assign_shared_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).opt_shared_mustable_ref(), _test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj)
+        assign_shared_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).opt_shared_mustable_ref(), _test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
 
     cdef void _set_field_6(self, _fbthrift_value) except *:
         # for field opt_box
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 6)
             return
-        deref(self._struct_cpp_obj).opt_box_ref().assign(deref(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).opt_box_ref().assign(deref(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 

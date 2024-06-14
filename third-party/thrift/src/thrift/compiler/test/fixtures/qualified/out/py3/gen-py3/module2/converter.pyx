@@ -9,13 +9,13 @@
 
 
 cdef shared_ptr[_fbthrift_ctypes.cStruct] Struct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.Struct?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.Struct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object Struct_from_cpp(const shared_ptr[_fbthrift_ctypes.cStruct]& c_struct):
     return _fbthrift_ctypes.Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cBigStruct] BigStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.BigStruct?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.BigStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object BigStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cBigStruct]& c_struct):

@@ -67,12 +67,12 @@ cdef class __Foo_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cFoo](deref(self._struct_cpp_obj), 2)
             return
-        deref(self._struct_cpp_obj).myBools_ref().assign(deref(_module_types.List__bool(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).myBools_ref().assign(deref(_module_types.List__bool(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field myNumbers
         if _fbthrift_value is None:
             __reset_field[_module_types.cFoo](deref(self._struct_cpp_obj), 3)
             return
-        deref(self._struct_cpp_obj).myNumbers_ref().assign(deref(_module_types.List__i32(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).myNumbers_ref().assign(deref(_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 

@@ -35,9 +35,9 @@ keys (conventionally used for sets, lists, and map values).
 }}{{#type:string?}}key.encode('UTF-8'){{/type:string?}}{{!
 }}{{#type:binary?}}key{{/type:binary?}}{{!
 }}{{#type:struct}}{{!
-  }}deref((<{{> types/cython_python_type}}>key)._cpp_obj){{!
+  }}deref((<{{> types/cython_python_type}}>key).{{> types/cpp_obj}}){{!
 }}{{/type:struct}}{{!
 }}{{#type:container?}}{{!
-  }}deref((<{{> types/cython_python_type}}>key)._cpp_obj){{!
+  }}deref((<{{> types/cython_python_type}}>key).{{> types/cpp_obj}}){{!
 }}{{/type:container?}}{{!
 }}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>key{{/type:enum?}}

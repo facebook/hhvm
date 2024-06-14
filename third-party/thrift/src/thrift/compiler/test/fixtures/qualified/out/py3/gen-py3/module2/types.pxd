@@ -91,7 +91,7 @@ cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_types
 
 
 cdef class Struct(thrift.py3.types.Struct):
-    cdef shared_ptr[cStruct] _cpp_obj
+    cdef shared_ptr[cStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Struct_FieldsSetter _fields_setter
     cdef inline object first_impl(self)
     cdef inline object second_impl(self)
@@ -104,7 +104,7 @@ cdef class Struct(thrift.py3.types.Struct):
 
 
 cdef class BigStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cBigStruct] _cpp_obj
+    cdef shared_ptr[cBigStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__BigStruct_FieldsSetter _fields_setter
     cdef inline object s_impl(self)
     cdef inline object id_impl(self)

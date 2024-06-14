@@ -91,7 +91,7 @@ cdef extern from "thrift/compiler/test/fixtures/serialization_field_order/gen-cp
 
 
 cdef class Foo(thrift.py3.types.Struct):
-    cdef shared_ptr[cFoo] _cpp_obj
+    cdef shared_ptr[cFoo] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Foo_FieldsSetter _fields_setter
     cdef inline object field1_impl(self)
     cdef inline object field2_impl(self)
@@ -103,7 +103,7 @@ cdef class Foo(thrift.py3.types.Struct):
 
 
 cdef class Foo2(thrift.py3.types.Struct):
-    cdef shared_ptr[cFoo2] _cpp_obj
+    cdef shared_ptr[cFoo2] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Foo2_FieldsSetter _fields_setter
     cdef inline object field1_impl(self)
     cdef inline object field2_impl(self)

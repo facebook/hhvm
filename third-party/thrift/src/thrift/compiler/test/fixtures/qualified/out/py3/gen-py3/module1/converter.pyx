@@ -9,7 +9,7 @@
 
 
 cdef shared_ptr[_fbthrift_ctypes.cStruct] Struct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.Struct?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.Struct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object Struct_from_cpp(const shared_ptr[_fbthrift_ctypes.cStruct]& c_struct):

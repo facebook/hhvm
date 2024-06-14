@@ -251,7 +251,7 @@ cdef class B(A):
         bridgeFutureWith[cFollyUnit](
             self._executor,
             down_cast_ptr[cBClientWrapper, cClientWrapper](self._client.get()).bar(rpc_options._cpp_obj, 
-                deref((<_module_types.Foo>foo)._cpp_obj),
+                deref((<_module_types.Foo>foo)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             B_bar_callback,
             <PyObject *> __userdata

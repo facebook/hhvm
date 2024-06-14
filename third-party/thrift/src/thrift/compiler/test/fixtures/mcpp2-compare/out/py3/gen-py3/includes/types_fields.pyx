@@ -75,5 +75,5 @@ cdef class __AStructB_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _includes_types.AStruct):
             raise TypeError(f'FieldA is not a { _includes_types.AStruct !r}.')
-        assign_shared_const_ptr[_includes_types.cAStruct](deref(self._struct_cpp_obj).FieldA_ref(), const_pointer_cast((<_includes_types.AStruct?>_fbthrift_value)._cpp_obj))
+        assign_shared_const_ptr[_includes_types.cAStruct](deref(self._struct_cpp_obj).FieldA_ref(), const_pointer_cast((<_includes_types.AStruct?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 

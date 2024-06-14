@@ -147,7 +147,7 @@ cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types_cust
 
 
 cdef class SomeStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cSomeStruct] _cpp_obj
+    cdef shared_ptr[cSomeStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__SomeStruct_FieldsSetter _fields_setter
     cdef inline object reasonable_impl(self)
     cdef inline object fine_impl(self)
@@ -164,7 +164,7 @@ cdef class SomeStruct(thrift.py3.types.Struct):
 
 
 cdef class MyStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyStruct] _cpp_obj
+    cdef shared_ptr[cMyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyStruct_FieldsSetter _fields_setter
     cdef inline object me2_3_impl(self)
     cdef inline object me3_n3_impl(self)
@@ -180,7 +180,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
 
 cdef class Set__i32(thrift.py3.types.Set):
-    cdef shared_ptr[cset[cint32_t]] _cpp_obj
+    cdef shared_ptr[cset[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cint32_t]])
 

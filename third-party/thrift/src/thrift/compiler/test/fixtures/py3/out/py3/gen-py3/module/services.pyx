@@ -1774,7 +1774,7 @@ async def SimpleService_expected_exception_coro(
     try:
         result = await self.expected_exception()
     except _module_types.SimpleException as ex:
-        promise.cPromise.setException(deref((<_module_types.SimpleException> ex)._cpp_obj))
+        promise.cPromise.setException(deref((<_module_types.SimpleException> ex)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -2215,7 +2215,7 @@ async def SimpleService_get_struct_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_types.cSimpleStruct](deref((<_module_types.SimpleStruct?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[_module_types.cSimpleStruct](deref((<_module_types.SimpleStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SimpleService_fib_coro(
     object self,
@@ -2246,7 +2246,7 @@ async def SimpleService_fib_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[cint32_t]](deref((<_module_types.List__i32?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[vector[cint32_t]](deref((<_module_types.List__i32?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SimpleService_unique_words_coro(
     object self,
@@ -2277,7 +2277,7 @@ async def SimpleService_unique_words_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[string]](deref((<_module_types.Set__string?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[cset[string]](deref((<_module_types.Set__string?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SimpleService_words_count_coro(
     object self,
@@ -2308,7 +2308,7 @@ async def SimpleService_words_count_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cmap[string,cint16_t]](deref((<_module_types.Map__string_i16?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[cmap[string,cint16_t]](deref((<_module_types.Map__string_i16?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SimpleService_set_enum_coro(
     object self,
@@ -2371,7 +2371,7 @@ async def SimpleService_list_of_lists_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[vector[cint32_t]]](deref((<_module_types.List__List__i32?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[vector[vector[cint32_t]]](deref((<_module_types.List__List__i32?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SimpleService_word_character_frequency_coro(
     object self,
@@ -2402,7 +2402,7 @@ async def SimpleService_word_character_frequency_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cmap[string,cmap[string,cint32_t]]](deref((<_module_types.Map__string_Map__string_i32?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[cmap[string,cmap[string,cint32_t]]](deref((<_module_types.Map__string_Map__string_i32?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SimpleService_list_of_sets_coro(
     object self,
@@ -2433,7 +2433,7 @@ async def SimpleService_list_of_sets_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[cset[string]]](deref((<_module_types.List__Set__string?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[vector[cset[string]]](deref((<_module_types.List__Set__string?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SimpleService_nested_map_argument_coro(
     object self,
@@ -2524,7 +2524,7 @@ async def SimpleService_get_union_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[cint32_t]](deref((<_module_types.Set__i32?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[cset[cint32_t]](deref((<_module_types.Set__i32?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SimpleService_get_keys_coro(
     object self,
@@ -2555,7 +2555,7 @@ async def SimpleService_get_keys_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[string]](deref((<_module_types.Set__string?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[cset[string]](deref((<_module_types.Set__string?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SimpleService_lookup_double_coro(
     object self,
@@ -2646,7 +2646,7 @@ async def SimpleService_contain_binary_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[string]](deref((<_module_types.Set__binary?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[cset[string]](deref((<_module_types.Set__binary?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SimpleService_contain_enum_coro(
     object self,
@@ -2677,7 +2677,7 @@ async def SimpleService_contain_enum_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[_module_types.cAnEnum]](deref((<_module_types.List__AnEnum?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[vector[_module_types.cAnEnum]](deref((<_module_types.List__AnEnum?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SimpleService_get_binary_union_struct_coro(
     object self,
@@ -2707,7 +2707,7 @@ async def SimpleService_get_binary_union_struct_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_types.cBinaryUnionStruct](deref((<_module_types.BinaryUnionStruct?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[_module_types.cBinaryUnionStruct](deref((<_module_types.BinaryUnionStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SimpleService_onStartServing_coro(
     object self,

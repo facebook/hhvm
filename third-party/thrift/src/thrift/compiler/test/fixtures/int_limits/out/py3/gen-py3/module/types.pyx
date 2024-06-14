@@ -70,16 +70,16 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class Limits(thrift.py3.types.Struct):
     def __init__(Limits self, **kwargs):
-        self._cpp_obj = make_shared[cLimits]()
-        self._fields_setter = _fbthrift_types_fields.__Limits_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cLimits]()
+        self._fields_setter = _fbthrift_types_fields.__Limits_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(Limits self, **kwargs):
         if not kwargs:
             return self
         cdef Limits __fbthrift_inst = Limits.__new__(Limits)
-        __fbthrift_inst._cpp_obj = make_shared[cLimits](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Limits_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cLimits](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Limits_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -89,25 +89,25 @@ cdef class Limits(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("Limits", {
-          "max_i64_field": deref(self._cpp_obj).max_i64_field_ref().has_value(),
-          "min_i64_field": deref(self._cpp_obj).min_i64_field_ref().has_value(),
-          "max_i32_field": deref(self._cpp_obj).max_i32_field_ref().has_value(),
-          "min_i32_field": deref(self._cpp_obj).min_i32_field_ref().has_value(),
-          "max_i16_field": deref(self._cpp_obj).max_i16_field_ref().has_value(),
-          "min_i16_field": deref(self._cpp_obj).min_i16_field_ref().has_value(),
-          "max_byte_field": deref(self._cpp_obj).max_byte_field_ref().has_value(),
-          "min_byte_field": deref(self._cpp_obj).min_byte_field_ref().has_value(),
+          "max_i64_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).max_i64_field_ref().has_value(),
+          "min_i64_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).min_i64_field_ref().has_value(),
+          "max_i32_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).max_i32_field_ref().has_value(),
+          "min_i32_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).min_i32_field_ref().has_value(),
+          "max_i16_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).max_i16_field_ref().has_value(),
+          "min_i16_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).min_i16_field_ref().has_value(),
+          "max_byte_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).max_byte_field_ref().has_value(),
+          "min_byte_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).min_byte_field_ref().has_value(),
         })
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cLimits] cpp_obj):
         __fbthrift_inst = <Limits>Limits.__new__(Limits)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline max_i64_field_impl(self):
 
-        return deref(self._cpp_obj).max_i64_field_ref().value()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).max_i64_field_ref().value()
 
     @property
     def max_i64_field(self):
@@ -115,7 +115,7 @@ cdef class Limits(thrift.py3.types.Struct):
 
     cdef inline min_i64_field_impl(self):
 
-        return deref(self._cpp_obj).min_i64_field_ref().value()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).min_i64_field_ref().value()
 
     @property
     def min_i64_field(self):
@@ -123,7 +123,7 @@ cdef class Limits(thrift.py3.types.Struct):
 
     cdef inline max_i32_field_impl(self):
 
-        return deref(self._cpp_obj).max_i32_field_ref().value()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).max_i32_field_ref().value()
 
     @property
     def max_i32_field(self):
@@ -131,7 +131,7 @@ cdef class Limits(thrift.py3.types.Struct):
 
     cdef inline min_i32_field_impl(self):
 
-        return deref(self._cpp_obj).min_i32_field_ref().value()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).min_i32_field_ref().value()
 
     @property
     def min_i32_field(self):
@@ -139,7 +139,7 @@ cdef class Limits(thrift.py3.types.Struct):
 
     cdef inline max_i16_field_impl(self):
 
-        return deref(self._cpp_obj).max_i16_field_ref().value()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).max_i16_field_ref().value()
 
     @property
     def max_i16_field(self):
@@ -147,7 +147,7 @@ cdef class Limits(thrift.py3.types.Struct):
 
     cdef inline min_i16_field_impl(self):
 
-        return deref(self._cpp_obj).min_i16_field_ref().value()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).min_i16_field_ref().value()
 
     @property
     def min_i16_field(self):
@@ -155,7 +155,7 @@ cdef class Limits(thrift.py3.types.Struct):
 
     cdef inline max_byte_field_impl(self):
 
-        return deref(self._cpp_obj).max_byte_field_ref().value()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).max_byte_field_ref().value()
 
     @property
     def max_byte_field(self):
@@ -163,7 +163,7 @@ cdef class Limits(thrift.py3.types.Struct):
 
     cdef inline min_byte_field_impl(self):
 
-        return deref(self._cpp_obj).min_byte_field_ref().value()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).min_byte_field_ref().value()
 
     @property
     def min_byte_field(self):
@@ -182,15 +182,15 @@ cdef class Limits(thrift.py3.types.Struct):
 
     def __copy__(Limits self):
         cdef shared_ptr[cLimits] cpp_obj = make_shared[cLimits](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Limits._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cLimits](
-            self._cpp_obj,
-            (<Limits>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<Limits>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -219,14 +219,14 @@ cdef class Limits(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Limits self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cLimits](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cLimits](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Limits self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cLimits]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cLimits]()
         with nogil:
-            needed = serializer.cdeserialize[cLimits](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cLimits](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 

@@ -9,19 +9,19 @@
 
 
 cdef shared_ptr[_fbthrift_ctypes.cGeneratePatch] GeneratePatch_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.GeneratePatch?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.GeneratePatch?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object GeneratePatch_from_cpp(const shared_ptr[_fbthrift_ctypes.cGeneratePatch]& c_struct):
     return _fbthrift_ctypes.GeneratePatch._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cGeneratePatchNew] GeneratePatchNew_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.GeneratePatchNew?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.GeneratePatchNew?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object GeneratePatchNew_from_cpp(const shared_ptr[_fbthrift_ctypes.cGeneratePatchNew]& c_struct):
     return _fbthrift_ctypes.GeneratePatchNew._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cAssignOnlyPatch] AssignOnlyPatch_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.AssignOnlyPatch?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.AssignOnlyPatch?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object AssignOnlyPatch_from_cpp(const shared_ptr[_fbthrift_ctypes.cAssignOnlyPatch]& c_struct):

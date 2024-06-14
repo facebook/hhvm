@@ -74,16 +74,16 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class Struct(thrift.py3.types.Struct):
     def __init__(Struct self, **kwargs):
-        self._cpp_obj = make_shared[cStruct]()
-        self._fields_setter = _fbthrift_types_fields.__Struct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cStruct]()
+        self._fields_setter = _fbthrift_types_fields.__Struct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(Struct self, **kwargs):
         if not kwargs:
             return self
         cdef Struct __fbthrift_inst = Struct.__new__(Struct)
-        __fbthrift_inst._cpp_obj = make_shared[cStruct](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Struct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Struct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -93,20 +93,20 @@ cdef class Struct(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("Struct", {
-          "first": deref(self._cpp_obj).first_ref().has_value(),
-          "second": deref(self._cpp_obj).second_ref().has_value(),
+          "first": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).first_ref().has_value(),
+          "second": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).second_ref().has_value(),
         })
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStruct] cpp_obj):
         __fbthrift_inst = <Struct>Struct.__new__(Struct)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline first_impl(self):
 
         if self.__fbthrift_cached_first is None:
-            self.__fbthrift_cached_first = _module0_types.Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).first_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_first = _module0_types.Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).first_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_first
 
     @property
@@ -116,7 +116,7 @@ cdef class Struct(thrift.py3.types.Struct):
     cdef inline second_impl(self):
 
         if self.__fbthrift_cached_second is None:
-            self.__fbthrift_cached_second = _module1_types.Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).second_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_second = _module1_types.Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).second_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_second
 
     @property
@@ -136,15 +136,15 @@ cdef class Struct(thrift.py3.types.Struct):
 
     def __copy__(Struct self):
         cdef shared_ptr[cStruct] cpp_obj = make_shared[cStruct](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cStruct](
-            self._cpp_obj,
-            (<Struct>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<Struct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -173,14 +173,14 @@ cdef class Struct(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Struct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cStruct](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Struct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cStruct]()
         with nogil:
-            needed = serializer.cdeserialize[cStruct](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -203,16 +203,16 @@ cdef class Struct(thrift.py3.types.Struct):
 @__cython.auto_pickle(False)
 cdef class BigStruct(thrift.py3.types.Struct):
     def __init__(BigStruct self, **kwargs):
-        self._cpp_obj = make_shared[cBigStruct]()
-        self._fields_setter = _fbthrift_types_fields.__BigStruct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cBigStruct]()
+        self._fields_setter = _fbthrift_types_fields.__BigStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(BigStruct self, **kwargs):
         if not kwargs:
             return self
         cdef BigStruct __fbthrift_inst = BigStruct.__new__(BigStruct)
-        __fbthrift_inst._cpp_obj = make_shared[cBigStruct](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__BigStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cBigStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__BigStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -222,20 +222,20 @@ cdef class BigStruct(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("BigStruct", {
-          "s": deref(self._cpp_obj).s_ref().has_value(),
-          "id": deref(self._cpp_obj).id_ref().has_value(),
+          "s": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).s_ref().has_value(),
+          "id": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).id_ref().has_value(),
         })
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cBigStruct] cpp_obj):
         __fbthrift_inst = <BigStruct>BigStruct.__new__(BigStruct)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline s_impl(self):
 
         if self.__fbthrift_cached_s is None:
-            self.__fbthrift_cached_s = Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).s_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_s = Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).s_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_s
 
     @property
@@ -244,7 +244,7 @@ cdef class BigStruct(thrift.py3.types.Struct):
 
     cdef inline id_impl(self):
 
-        return deref(self._cpp_obj).id_ref().value()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).id_ref().value()
 
     @property
     def id(self):
@@ -263,15 +263,15 @@ cdef class BigStruct(thrift.py3.types.Struct):
 
     def __copy__(BigStruct self):
         cdef shared_ptr[cBigStruct] cpp_obj = make_shared[cBigStruct](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return BigStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cBigStruct](
-            self._cpp_obj,
-            (<BigStruct>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<BigStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -300,14 +300,14 @@ cdef class BigStruct(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(BigStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cBigStruct](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cBigStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(BigStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cBigStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cBigStruct]()
         with nogil:
-            needed = serializer.cdeserialize[cBigStruct](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cBigStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 

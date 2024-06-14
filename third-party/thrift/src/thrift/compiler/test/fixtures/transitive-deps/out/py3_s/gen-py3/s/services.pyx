@@ -169,7 +169,7 @@ async def TestService_test_coro(
     try:
         result = await self.test()
     except _c_types.E as ex:
-        promise.cPromise.setException(deref((<_c_types.E> ex)._cpp_obj))
+        promise.cPromise.setException(deref((<_c_types.E> ex)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(

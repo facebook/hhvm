@@ -147,7 +147,7 @@ cdef extern from "thrift/compiler/test/fixtures/sink/gen-cpp2/module_types_custo
 
 
 cdef class InitialResponse(thrift.py3.types.Struct):
-    cdef shared_ptr[cInitialResponse] _cpp_obj
+    cdef shared_ptr[cInitialResponse] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__InitialResponse_FieldsSetter _fields_setter
     cdef inline object content_impl(self)
 
@@ -157,7 +157,7 @@ cdef class InitialResponse(thrift.py3.types.Struct):
 
 
 cdef class FinalResponse(thrift.py3.types.Struct):
-    cdef shared_ptr[cFinalResponse] _cpp_obj
+    cdef shared_ptr[cFinalResponse] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__FinalResponse_FieldsSetter _fields_setter
     cdef inline object content_impl(self)
 
@@ -167,7 +167,7 @@ cdef class FinalResponse(thrift.py3.types.Struct):
 
 
 cdef class SinkPayload(thrift.py3.types.Struct):
-    cdef shared_ptr[cSinkPayload] _cpp_obj
+    cdef shared_ptr[cSinkPayload] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__SinkPayload_FieldsSetter _fields_setter
     cdef inline object content_impl(self)
 
@@ -177,7 +177,7 @@ cdef class SinkPayload(thrift.py3.types.Struct):
 
 
 cdef class CompatibleWithKeywordSink(thrift.py3.types.Struct):
-    cdef shared_ptr[cCompatibleWithKeywordSink] _cpp_obj
+    cdef shared_ptr[cCompatibleWithKeywordSink] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__CompatibleWithKeywordSink_FieldsSetter _fields_setter
     cdef inline object sink_impl(self)
 
@@ -187,7 +187,7 @@ cdef class CompatibleWithKeywordSink(thrift.py3.types.Struct):
 
 
 cdef class InitialException(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cInitialException] _cpp_obj
+    cdef shared_ptr[cInitialException] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__InitialException_FieldsSetter _fields_setter
     cdef inline object reason_impl(self)
 
@@ -197,7 +197,7 @@ cdef class InitialException(thrift.py3.exceptions.GeneratedError):
 
 
 cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cSinkException1] _cpp_obj
+    cdef shared_ptr[cSinkException1] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__SinkException1_FieldsSetter _fields_setter
     cdef inline object reason_impl(self)
 
@@ -207,7 +207,7 @@ cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
 
 
 cdef class SinkException2(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cSinkException2] _cpp_obj
+    cdef shared_ptr[cSinkException2] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__SinkException2_FieldsSetter _fields_setter
     cdef inline object reason_impl(self)
 

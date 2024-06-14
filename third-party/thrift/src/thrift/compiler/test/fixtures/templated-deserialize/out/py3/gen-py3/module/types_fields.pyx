@@ -113,14 +113,14 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 1)
             return
-        deref(self._struct_cpp_obj).fieldB_ref().assign(deref(_module_types.Map__string_bool(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).fieldB_ref().assign(deref(_module_types.Map__string_bool(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field fieldC
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 2)
             return
-        deref(self._struct_cpp_obj).fieldC_ref().assign(deref(_module_types.Set__i32(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).fieldC_ref().assign(deref(_module_types.Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field fieldD
@@ -145,21 +145,21 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 5)
             return
-        deref(self._struct_cpp_obj).fieldF_ref().assign(deref(_module_types.List__List__List__i32(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).fieldF_ref().assign(deref(_module_types.List__List__List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_6(self, _fbthrift_value) except *:
         # for field fieldG
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 6)
             return
-        deref(self._struct_cpp_obj).fieldG_ref().assign(deref(_module_types.Map__string_Map__string_Map__string_i32(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).fieldG_ref().assign(deref(_module_types.Map__string_Map__string_Map__string_i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_7(self, _fbthrift_value) except *:
         # for field fieldH
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 7)
             return
-        deref(self._struct_cpp_obj).fieldH_ref().assign(deref(_module_types.List__Set__i32(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).fieldH_ref().assign(deref(_module_types.List__Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_8(self, _fbthrift_value) except *:
         # for field fieldI
@@ -175,49 +175,49 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 9)
             return
-        deref(self._struct_cpp_obj).fieldJ_ref().assign(deref(_module_types.Map__string_List__i32(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).fieldJ_ref().assign(deref(_module_types.Map__string_List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_10(self, _fbthrift_value) except *:
         # for field fieldK
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 10)
             return
-        deref(self._struct_cpp_obj).fieldK_ref().assign(deref(_module_types.List__List__List__List__i32(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).fieldK_ref().assign(deref(_module_types.List__List__List__List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_11(self, _fbthrift_value) except *:
         # for field fieldL
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 11)
             return
-        deref(self._struct_cpp_obj).fieldL_ref().assign(deref(_module_types.Set__Set__Set__bool(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).fieldL_ref().assign(deref(_module_types.Set__Set__Set__bool(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_12(self, _fbthrift_value) except *:
         # for field fieldM
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 12)
             return
-        deref(self._struct_cpp_obj).fieldM_ref().assign(deref(_module_types.Map__Set__List__i32_Map__List__Set__string_string(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).fieldM_ref().assign(deref(_module_types.Map__Set__List__i32_Map__List__Set__string_string(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_13(self, _fbthrift_value) except *:
         # for field fieldN
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 13)
             return
-        deref(self._struct_cpp_obj).fieldN_ref().assign(deref(_module_types.List__Foo__i64(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).fieldN_ref().assign(deref(_module_types.List__Foo__i64(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_14(self, _fbthrift_value) except *:
         # for field fieldO
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 14)
             return
-        deref(self._struct_cpp_obj).fieldO_ref().assign(deref(_module_types.List__Bar__double(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).fieldO_ref().assign(deref(_module_types.List__Bar__double(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_15(self, _fbthrift_value) except *:
         # for field fieldP
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 15)
             return
-        deref(self._struct_cpp_obj).fieldP_ref().assign(deref(_module_types.List__Baz__i32(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).fieldP_ref().assign(deref(_module_types.List__Baz__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_16(self, _fbthrift_value) except *:
         # for field fieldQ
@@ -233,7 +233,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 17)
             return
-        assign_unique_ptr[cmap[string,cbool]](deref(self._struct_cpp_obj).fieldR_ref(), make_unique[cmap[string,cbool]](deref(_module_types.Map__string_bool(_fbthrift_value)._cpp_obj)))
+        assign_unique_ptr[cmap[string,cbool]](deref(self._struct_cpp_obj).fieldR_ref(), make_unique[cmap[string,cbool]](deref(_module_types.Map__string_bool(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
     cdef void _set_field_18(self, _fbthrift_value) except *:
         # for field fieldS
@@ -242,7 +242,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _module_types.SmallStruct):
             raise TypeError(f'fieldS is not a { _module_types.SmallStruct !r}.')
-        assign_unique_ptr[_module_types.cSmallStruct](deref(self._struct_cpp_obj).fieldS_ref(), make_unique[_module_types.cSmallStruct](deref((<_module_types.SmallStruct?>_fbthrift_value)._cpp_obj)))
+        assign_unique_ptr[_module_types.cSmallStruct](deref(self._struct_cpp_obj).fieldS_ref(), make_unique[_module_types.cSmallStruct](deref((<_module_types.SmallStruct?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
     cdef void _set_field_19(self, _fbthrift_value) except *:
         # for field fieldT
@@ -251,7 +251,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _module_types.SmallStruct):
             raise TypeError(f'fieldT is not a { _module_types.SmallStruct !r}.')
-        assign_shared_ptr[_module_types.cSmallStruct](deref(self._struct_cpp_obj).fieldT_ref(), (<_module_types.SmallStruct?>_fbthrift_value)._cpp_obj)
+        assign_shared_ptr[_module_types.cSmallStruct](deref(self._struct_cpp_obj).fieldT_ref(), (<_module_types.SmallStruct?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
 
     cdef void _set_field_20(self, _fbthrift_value) except *:
         # for field fieldU
@@ -260,7 +260,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _module_types.SmallStruct):
             raise TypeError(f'fieldU is not a { _module_types.SmallStruct !r}.')
-        assign_shared_const_ptr[_module_types.cSmallStruct](deref(self._struct_cpp_obj).fieldU_ref(), const_pointer_cast((<_module_types.SmallStruct?>_fbthrift_value)._cpp_obj))
+        assign_shared_const_ptr[_module_types.cSmallStruct](deref(self._struct_cpp_obj).fieldU_ref(), const_pointer_cast((<_module_types.SmallStruct?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_21(self, _fbthrift_value) except *:
         # for field fieldX
@@ -269,5 +269,5 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _module_types.SmallStruct):
             raise TypeError(f'fieldX is not a { _module_types.SmallStruct !r}.')
-        assign_unique_ptr[_module_types.cSmallStruct](deref(self._struct_cpp_obj).fieldX_ref(), make_unique[_module_types.cSmallStruct](deref((<_module_types.SmallStruct?>_fbthrift_value)._cpp_obj)))
+        assign_unique_ptr[_module_types.cSmallStruct](deref(self._struct_cpp_obj).fieldX_ref(), make_unique[_module_types.cSmallStruct](deref((<_module_types.SmallStruct?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 

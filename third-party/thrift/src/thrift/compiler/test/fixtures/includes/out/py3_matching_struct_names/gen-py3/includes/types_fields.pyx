@@ -58,5 +58,5 @@ cdef class __Included_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _transitive_types.Foo):
             raise TypeError(f'MyTransitiveField is not a { _transitive_types.Foo !r}.')
-        deref(self._struct_cpp_obj).MyTransitiveField_ref().assign(deref((<_transitive_types.Foo?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).MyTransitiveField_ref().assign(deref((<_transitive_types.Foo?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 

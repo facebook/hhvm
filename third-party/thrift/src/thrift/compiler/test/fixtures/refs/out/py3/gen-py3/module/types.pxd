@@ -375,7 +375,7 @@ cdef class __MyUnionType(thrift.py3.types.CompiledEnum):
 
 
 cdef class MyUnion(thrift.py3.types.Union):
-    cdef shared_ptr[cMyUnion] _cpp_obj
+    cdef shared_ptr[cMyUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly __MyUnionType type
     cdef readonly object value
     cdef _load_cache(MyUnion self)
@@ -397,7 +397,7 @@ cdef class __NonTriviallyDestructibleUnionType(thrift.py3.types.CompiledEnum):
 
 
 cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
-    cdef shared_ptr[cNonTriviallyDestructibleUnion] _cpp_obj
+    cdef shared_ptr[cNonTriviallyDestructibleUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly __NonTriviallyDestructibleUnionType type
     cdef readonly object value
     cdef _load_cache(NonTriviallyDestructibleUnion self)
@@ -414,7 +414,7 @@ cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
 
 
 cdef class MyField(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyField] _cpp_obj
+    cdef shared_ptr[cMyField] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyField_FieldsSetter _fields_setter
     cdef inline object opt_value_impl(self)
     cdef inline object value_impl(self)
@@ -435,7 +435,7 @@ cdef class MyField(thrift.py3.types.Struct):
 
 
 cdef class MyStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyStruct] _cpp_obj
+    cdef shared_ptr[cMyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyStruct_FieldsSetter _fields_setter
     cdef inline object opt_ref_impl(self)
     cdef inline object ref_impl(self)
@@ -450,7 +450,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
 
 cdef class StructWithUnion(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithUnion] _cpp_obj
+    cdef shared_ptr[cStructWithUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithUnion_FieldsSetter _fields_setter
     cdef inline object u_impl(self)
     cdef inline object aDouble_impl(self)
@@ -464,7 +464,7 @@ cdef class StructWithUnion(thrift.py3.types.Struct):
 
 
 cdef class RecursiveStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cRecursiveStruct] _cpp_obj
+    cdef shared_ptr[cRecursiveStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__RecursiveStruct_FieldsSetter _fields_setter
     cdef inline object mes_impl(self)
     cdef List__RecursiveStruct __fbthrift_cached_mes
@@ -475,7 +475,7 @@ cdef class RecursiveStruct(thrift.py3.types.Struct):
 
 
 cdef class StructWithContainers(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithContainers] _cpp_obj
+    cdef shared_ptr[cStructWithContainers] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithContainers_FieldsSetter _fields_setter
     cdef inline object list_ref_impl(self)
     cdef inline object set_ref_impl(self)
@@ -496,7 +496,7 @@ cdef class StructWithContainers(thrift.py3.types.Struct):
 
 
 cdef class StructWithSharedConst(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithSharedConst] _cpp_obj
+    cdef shared_ptr[cStructWithSharedConst] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithSharedConst_FieldsSetter _fields_setter
     cdef inline object opt_shared_const_impl(self)
     cdef inline object shared_const_impl(self)
@@ -511,7 +511,7 @@ cdef class StructWithSharedConst(thrift.py3.types.Struct):
 
 
 cdef class Empty(thrift.py3.types.Struct):
-    cdef shared_ptr[cEmpty] _cpp_obj
+    cdef shared_ptr[cEmpty] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Empty_FieldsSetter _fields_setter
 
     @staticmethod
@@ -520,7 +520,7 @@ cdef class Empty(thrift.py3.types.Struct):
 
 
 cdef class StructWithRef(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithRef] _cpp_obj
+    cdef shared_ptr[cStructWithRef] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithRef_FieldsSetter _fields_setter
     cdef inline object def_field_impl(self)
     cdef inline object opt_field_impl(self)
@@ -535,7 +535,7 @@ cdef class StructWithRef(thrift.py3.types.Struct):
 
 
 cdef class StructWithBox(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithBox] _cpp_obj
+    cdef shared_ptr[cStructWithBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithBox_FieldsSetter _fields_setter
     cdef inline object a_impl(self)
     cdef inline object b_impl(self)
@@ -549,7 +549,7 @@ cdef class StructWithBox(thrift.py3.types.Struct):
 
 
 cdef class StructWithInternBox(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithInternBox] _cpp_obj
+    cdef shared_ptr[cStructWithInternBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithInternBox_FieldsSetter _fields_setter
     cdef inline object field1_impl(self)
     cdef inline object field2_impl(self)
@@ -562,7 +562,7 @@ cdef class StructWithInternBox(thrift.py3.types.Struct):
 
 
 cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithTerseInternBox] _cpp_obj
+    cdef shared_ptr[cStructWithTerseInternBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithTerseInternBox_FieldsSetter _fields_setter
     cdef inline object field1_impl(self)
     cdef inline object field2_impl(self)
@@ -575,7 +575,7 @@ cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
 
 
 cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
-    cdef shared_ptr[cAdaptedStructWithInternBox] _cpp_obj
+    cdef shared_ptr[cAdaptedStructWithInternBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__AdaptedStructWithInternBox_FieldsSetter _fields_setter
     cdef inline object field1_impl(self)
     cdef inline object field2_impl(self)
@@ -588,7 +588,7 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
 
 
 cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
-    cdef shared_ptr[cAdaptedStructWithTerseInternBox] _cpp_obj
+    cdef shared_ptr[cAdaptedStructWithTerseInternBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__AdaptedStructWithTerseInternBox_FieldsSetter _fields_setter
     cdef inline object field1_impl(self)
     cdef inline object field2_impl(self)
@@ -601,7 +601,7 @@ cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
 
 
 cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithRefTypeUnique] _cpp_obj
+    cdef shared_ptr[cStructWithRefTypeUnique] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithRefTypeUnique_FieldsSetter _fields_setter
     cdef inline object def_field_impl(self)
     cdef inline object opt_field_impl(self)
@@ -616,7 +616,7 @@ cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
 
 
 cdef class StructWithRefTypeShared(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithRefTypeShared] _cpp_obj
+    cdef shared_ptr[cStructWithRefTypeShared] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithRefTypeShared_FieldsSetter _fields_setter
     cdef inline object def_field_impl(self)
     cdef inline object opt_field_impl(self)
@@ -631,7 +631,7 @@ cdef class StructWithRefTypeShared(thrift.py3.types.Struct):
 
 
 cdef class StructWithRefTypeSharedConst(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithRefTypeSharedConst] _cpp_obj
+    cdef shared_ptr[cStructWithRefTypeSharedConst] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithRefTypeSharedConst_FieldsSetter _fields_setter
     cdef inline object def_field_impl(self)
     cdef inline object opt_field_impl(self)
@@ -646,7 +646,7 @@ cdef class StructWithRefTypeSharedConst(thrift.py3.types.Struct):
 
 
 cdef class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithRefAndAnnotCppNoexceptMoveCtor] _cpp_obj
+    cdef shared_ptr[cStructWithRefAndAnnotCppNoexceptMoveCtor] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithRefAndAnnotCppNoexceptMoveCtor_FieldsSetter _fields_setter
     cdef inline object def_field_impl(self)
     cdef Empty __fbthrift_cached_def_field
@@ -657,7 +657,7 @@ cdef class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct):
 
 
 cdef class StructWithString(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithString] _cpp_obj
+    cdef shared_ptr[cStructWithString] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithString_FieldsSetter _fields_setter
     cdef inline object def_unique_string_ref_impl(self)
     cdef inline object def_shared_string_ref_impl(self)
@@ -670,7 +670,7 @@ cdef class StructWithString(thrift.py3.types.Struct):
 
 
 cdef class List__RecursiveStruct(thrift.py3.types.List):
-    cdef shared_ptr[vector[cRecursiveStruct]] _cpp_obj
+    cdef shared_ptr[vector[cRecursiveStruct]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cRecursiveStruct]])
     cdef _check_item_type(self, item)
@@ -678,7 +678,7 @@ cdef class List__RecursiveStruct(thrift.py3.types.List):
 cdef shared_ptr[vector[cRecursiveStruct]] List__RecursiveStruct__make_instance(object items) except *
 
 cdef class List__i32(thrift.py3.types.List):
-    cdef shared_ptr[vector[cint32_t]] _cpp_obj
+    cdef shared_ptr[vector[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint32_t]])
     cdef _check_item_type(self, item)
@@ -686,14 +686,14 @@ cdef class List__i32(thrift.py3.types.List):
 cdef shared_ptr[vector[cint32_t]] List__i32__make_instance(object items) except *
 
 cdef class Set__i32(thrift.py3.types.Set):
-    cdef shared_ptr[cset[cint32_t]] _cpp_obj
+    cdef shared_ptr[cset[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cint32_t]])
 
 cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *
 
 cdef class Map__i32_i32(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[cint32_t,cint32_t]] _cpp_obj
+    cdef shared_ptr[cmap[cint32_t,cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cint32_t,cint32_t]])
     cdef _check_key_type(self, key)
@@ -701,7 +701,7 @@ cdef class Map__i32_i32(thrift.py3.types.Map):
 cdef shared_ptr[cmap[cint32_t,cint32_t]] Map__i32_i32__make_instance(object items) except *
 
 cdef class List__i64(thrift.py3.types.List):
-    cdef shared_ptr[vector[cint64_t]] _cpp_obj
+    cdef shared_ptr[vector[cint64_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint64_t]])
     cdef _check_item_type(self, item)

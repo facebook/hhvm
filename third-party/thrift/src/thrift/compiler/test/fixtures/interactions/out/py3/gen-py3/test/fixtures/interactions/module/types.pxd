@@ -82,7 +82,7 @@ cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_typ
 
 
 cdef class CustomException(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cCustomException] _cpp_obj
+    cdef shared_ptr[cCustomException] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__CustomException_FieldsSetter _fields_setter
     cdef inline object message_impl(self)
 

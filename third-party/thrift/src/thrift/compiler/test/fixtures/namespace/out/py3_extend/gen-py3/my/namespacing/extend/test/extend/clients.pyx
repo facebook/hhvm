@@ -108,7 +108,7 @@ cdef class ExtendTestService(_my_namespacing_test_hsmodule_clients.HsTestService
         bridgeFutureWith[cbool](
             self._executor,
             down_cast_ptr[cExtendTestServiceClientWrapper, cClientWrapper](self._client.get()).check(rpc_options._cpp_obj, 
-                deref((<_my_namespacing_test_hsmodule_types.HsFoo>struct1)._cpp_obj),
+                deref((<_my_namespacing_test_hsmodule_types.HsFoo>struct1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ExtendTestService_check_callback,
             <PyObject *> __userdata

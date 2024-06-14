@@ -9,37 +9,37 @@
 
 
 cdef shared_ptr[_fbthrift_ctypes.cMyStruct] MyStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.MyStruct?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.MyStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyStruct]& c_struct):
     return _fbthrift_ctypes.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cContainers] Containers_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.Containers?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.Containers?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object Containers_from_cpp(const shared_ptr[_fbthrift_ctypes.cContainers]& c_struct):
     return _fbthrift_ctypes.Containers._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cMyDataItem] MyDataItem_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.MyDataItem?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.MyDataItem?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object MyDataItem_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyDataItem]& c_struct):
     return _fbthrift_ctypes.MyDataItem._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cMyUnion] MyUnion_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.MyUnion?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.MyUnion?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object MyUnion_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyUnion]& c_struct):
     return _fbthrift_ctypes.MyUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cReservedKeyword] ReservedKeyword_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.ReservedKeyword?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.ReservedKeyword?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object ReservedKeyword_from_cpp(const shared_ptr[_fbthrift_ctypes.cReservedKeyword]& c_struct):
     return _fbthrift_ctypes.ReservedKeyword._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cUnionToBeRenamed] UnionToBeRenamed_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.UnionToBeRenamed?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.UnionToBeRenamed?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object UnionToBeRenamed_from_cpp(const shared_ptr[_fbthrift_ctypes.cUnionToBeRenamed]& c_struct):

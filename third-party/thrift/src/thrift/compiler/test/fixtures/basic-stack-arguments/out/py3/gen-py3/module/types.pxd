@@ -88,7 +88,7 @@ cdef extern from "thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/m
 
 
 cdef class MyStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyStruct] _cpp_obj
+    cdef shared_ptr[cMyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyStruct_FieldsSetter _fields_setter
     cdef inline object MyIntField_impl(self)
     cdef inline object MyStringField_impl(self)

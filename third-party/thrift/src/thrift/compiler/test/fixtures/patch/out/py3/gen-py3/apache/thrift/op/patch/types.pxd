@@ -100,7 +100,7 @@ cdef extern from "thrift/compiler/test/fixtures/patch/gen-cpp2/patch_types_custo
 
 
 cdef class GeneratePatch(thrift.py3.types.Struct):
-    cdef shared_ptr[cGeneratePatch] _cpp_obj
+    cdef shared_ptr[cGeneratePatch] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__GeneratePatch_FieldsSetter _fields_setter
 
     @staticmethod
@@ -109,7 +109,7 @@ cdef class GeneratePatch(thrift.py3.types.Struct):
 
 
 cdef class GeneratePatchNew(thrift.py3.types.Struct):
-    cdef shared_ptr[cGeneratePatchNew] _cpp_obj
+    cdef shared_ptr[cGeneratePatchNew] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__GeneratePatchNew_FieldsSetter _fields_setter
 
     @staticmethod
@@ -118,7 +118,7 @@ cdef class GeneratePatchNew(thrift.py3.types.Struct):
 
 
 cdef class AssignOnlyPatch(thrift.py3.types.Struct):
-    cdef shared_ptr[cAssignOnlyPatch] _cpp_obj
+    cdef shared_ptr[cAssignOnlyPatch] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__AssignOnlyPatch_FieldsSetter _fields_setter
 
     @staticmethod

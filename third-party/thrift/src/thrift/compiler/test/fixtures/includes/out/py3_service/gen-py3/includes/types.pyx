@@ -72,16 +72,16 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class Included(thrift.py3.types.Struct):
     def __init__(Included self, **kwargs):
-        self._cpp_obj = make_shared[cIncluded]()
-        self._fields_setter = _fbthrift_types_fields.__Included_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cIncluded]()
+        self._fields_setter = _fbthrift_types_fields.__Included_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(Included self, **kwargs):
         if not kwargs:
             return self
         cdef Included __fbthrift_inst = Included.__new__(Included)
-        __fbthrift_inst._cpp_obj = make_shared[cIncluded](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Included_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cIncluded](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Included_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -91,19 +91,19 @@ cdef class Included(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("Included", {
-          "MyIntField": deref(self._cpp_obj).MyIntField_ref().has_value(),
-          "MyTransitiveField": deref(self._cpp_obj).MyTransitiveField_ref().has_value(),
+          "MyIntField": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyIntField_ref().has_value(),
+          "MyTransitiveField": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyTransitiveField_ref().has_value(),
         })
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cIncluded] cpp_obj):
         __fbthrift_inst = <Included>Included.__new__(Included)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline MyIntField_impl(self):
 
-        return deref(self._cpp_obj).MyIntField_ref().value()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyIntField_ref().value()
 
     @property
     def MyIntField(self):
@@ -112,7 +112,7 @@ cdef class Included(thrift.py3.types.Struct):
     cdef inline MyTransitiveField_impl(self):
 
         if self.__fbthrift_cached_MyTransitiveField is None:
-            self.__fbthrift_cached_MyTransitiveField = _transitive_types.Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).MyTransitiveField_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_MyTransitiveField = _transitive_types.Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyTransitiveField_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_MyTransitiveField
 
     @property
@@ -132,15 +132,15 @@ cdef class Included(thrift.py3.types.Struct):
 
     def __copy__(Included self):
         cdef shared_ptr[cIncluded] cpp_obj = make_shared[cIncluded](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Included._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cIncluded](
-            self._cpp_obj,
-            (<Included>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<Included>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -169,14 +169,14 @@ cdef class Included(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Included self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cIncluded](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cIncluded](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Included self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cIncluded]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cIncluded]()
         with nogil:
-            needed = serializer.cdeserialize[cIncluded](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cIncluded](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 

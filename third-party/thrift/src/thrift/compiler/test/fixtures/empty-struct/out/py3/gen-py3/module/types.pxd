@@ -88,7 +88,7 @@ cdef extern from "thrift/compiler/test/fixtures/empty-struct/gen-cpp2/module_typ
 
 
 cdef class Empty(thrift.py3.types.Struct):
-    cdef shared_ptr[cEmpty] _cpp_obj
+    cdef shared_ptr[cEmpty] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Empty_FieldsSetter _fields_setter
 
     @staticmethod
@@ -101,7 +101,7 @@ cdef class __NadaType(thrift.py3.types.CompiledEnum):
 
 
 cdef class Nada(thrift.py3.types.Union):
-    cdef shared_ptr[cNada] _cpp_obj
+    cdef shared_ptr[cNada] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly __NadaType type
     cdef readonly object value
     cdef _load_cache(Nada self)

@@ -1298,7 +1298,7 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[cFollyUnit](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).void_ret_map_param(rpc_options._cpp_obj, 
-                deref((<_module_types.Map__string_i64>param1)._cpp_obj),
+                deref((<_module_types.Map__string_i64>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_void_ret_map_param_callback,
             <PyObject *> __userdata
@@ -1325,8 +1325,8 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[cFollyUnit](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).void_ret_map_setlist_param(rpc_options._cpp_obj, 
-                deref((<_module_types.Map__string_i64>param1)._cpp_obj),
-                deref((<_module_types.Set__List__string>param2)._cpp_obj),
+                deref((<_module_types.Map__string_i64>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
+                deref((<_module_types.Set__List__string>param2)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_void_ret_map_setlist_param_callback,
             <PyObject *> __userdata
@@ -1396,7 +1396,7 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[cFollyUnit](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).void_ret_struct_param(rpc_options._cpp_obj, 
-                deref((<_module_types.MyStruct>param1)._cpp_obj),
+                deref((<_module_types.MyStruct>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_void_ret_struct_param_callback,
             <PyObject *> __userdata
@@ -1420,7 +1420,7 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[cFollyUnit](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).void_ret_listunion_param(rpc_options._cpp_obj, 
-                deref((<_module_types.List__ComplexUnion>param1)._cpp_obj),
+                deref((<_module_types.List__ComplexUnion>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_void_ret_listunion_param_callback,
             <PyObject *> __userdata
@@ -1476,7 +1476,7 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[cbool](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).bool_ret_map_param(rpc_options._cpp_obj, 
-                deref((<_module_types.Map__string_i64>param1)._cpp_obj),
+                deref((<_module_types.Map__string_i64>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_bool_ret_map_param_callback,
             <PyObject *> __userdata
@@ -1498,7 +1498,7 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[cbool](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).bool_ret_union_param(rpc_options._cpp_obj, 
-                deref((<_module_types.ComplexUnion>param1)._cpp_obj),
+                deref((<_module_types.ComplexUnion>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_bool_ret_union_param_callback,
             <PyObject *> __userdata
@@ -1548,7 +1548,7 @@ cdef class ParamService(thrift.py3.client.Client):
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).i64_ret_string_typedef_param(rpc_options._cpp_obj, 
                 param1.encode('UTF-8'),
-                deref((<_module_types.Set__List__List__Map__Empty_MyStruct>param2)._cpp_obj),
+                deref((<_module_types.Set__List__List__Map__Empty_MyStruct>param2)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_i64_ret_string_typedef_param_callback,
             <PyObject *> __userdata
@@ -1622,7 +1622,7 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[double](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).double_ret_setstruct_param(rpc_options._cpp_obj, 
-                deref((<_module_types.Set__MyStruct>param1)._cpp_obj),
+                deref((<_module_types.Set__MyStruct>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_double_ret_setstruct_param_callback,
             <PyObject *> __userdata
@@ -1715,8 +1715,8 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[vector[cbool]](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).list_ret_map_setlist_param(rpc_options._cpp_obj, 
-                deref((<_module_types.Map__i32_List__string>param1)._cpp_obj),
-                deref((<_module_types.List__string>param2)._cpp_obj),
+                deref((<_module_types.Map__i32_List__string>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
+                deref((<_module_types.List__string>param2)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_list_ret_map_setlist_param_callback,
             <PyObject *> __userdata
@@ -1740,7 +1740,7 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).mapsetlistmapliststring_ret_listlistlist_param(rpc_options._cpp_obj, 
-                deref((<_module_types.List__List__List__List__i32>param1)._cpp_obj),
+                deref((<_module_types.List__List__List__List__i32>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_mapsetlistmapliststring_ret_listlistlist_param_callback,
             <PyObject *> __userdata
@@ -1790,7 +1790,7 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[vector[cint32_t]](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).listtypedef_ret_typedef_param(rpc_options._cpp_obj, 
-                deref((<_module_types.List__Map__Empty_MyStruct>param1)._cpp_obj),
+                deref((<_module_types.List__Map__Empty_MyStruct>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_listtypedef_ret_typedef_param_callback,
             <PyObject *> __userdata
@@ -1860,7 +1860,7 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[vector[_module_types.cMyEnumA]](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).listenum_ret_map_param(rpc_options._cpp_obj, 
-                deref((<_module_types.Map__string_i64>param1)._cpp_obj),
+                deref((<_module_types.Map__string_i64>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_listenum_ret_map_param_callback,
             <PyObject *> __userdata
@@ -1910,7 +1910,7 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[cset[_module_types.cMyStruct]](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).setstruct_ret_set_param(rpc_options._cpp_obj, 
-                deref((<_module_types.Set__string>param1)._cpp_obj),
+                deref((<_module_types.Set__string>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_setstruct_ret_set_param_callback,
             <PyObject *> __userdata

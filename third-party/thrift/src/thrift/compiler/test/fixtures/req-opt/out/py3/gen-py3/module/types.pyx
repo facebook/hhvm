@@ -70,16 +70,16 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class Foo(thrift.py3.types.Struct):
     def __init__(Foo self, **kwargs):
-        self._cpp_obj = make_shared[cFoo]()
-        self._fields_setter = _fbthrift_types_fields.__Foo_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFoo]()
+        self._fields_setter = _fbthrift_types_fields.__Foo_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(Foo self, **kwargs):
         if not kwargs:
             return self
         cdef Foo __fbthrift_inst = Foo.__new__(Foo)
-        __fbthrift_inst._cpp_obj = make_shared[cFoo](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Foo_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFoo](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Foo_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -89,31 +89,31 @@ cdef class Foo(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("Foo", {
-          "myInteger": deref(self._cpp_obj).myInteger_ref().has_value(),
-          "myString": deref(self._cpp_obj).myString_ref().has_value(),
-          "myBools": deref(self._cpp_obj).myBools_ref().has_value(),
-          "myNumbers": deref(self._cpp_obj).myNumbers_ref().has_value(),
+          "myInteger": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myInteger_ref().has_value(),
+          "myString": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myString_ref().has_value(),
+          "myBools": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myBools_ref().has_value(),
+          "myNumbers": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myNumbers_ref().has_value(),
         })
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFoo] cpp_obj):
         __fbthrift_inst = <Foo>Foo.__new__(Foo)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline myInteger_impl(self):
 
-        return deref(self._cpp_obj).myInteger_ref().value()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myInteger_ref().value()
 
     @property
     def myInteger(self):
         return self.myInteger_impl()
 
     cdef inline myString_impl(self):
-        if not deref(self._cpp_obj).myString_ref().has_value():
+        if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myString_ref().has_value():
             return None
 
-        return (<bytes>deref(self._cpp_obj).myString_ref().value_unchecked()).decode('UTF-8')
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myString_ref().value_unchecked()).decode('UTF-8')
 
     @property
     def myString(self):
@@ -122,7 +122,7 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef inline myBools_impl(self):
 
         if self.__fbthrift_cached_myBools is None:
-            self.__fbthrift_cached_myBools = List__bool._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).myBools_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_myBools = List__bool._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myBools_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_myBools
 
     @property
@@ -132,7 +132,7 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef inline myNumbers_impl(self):
 
         if self.__fbthrift_cached_myNumbers is None:
-            self.__fbthrift_cached_myNumbers = List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).myNumbers_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_myNumbers = List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myNumbers_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_myNumbers
 
     @property
@@ -152,15 +152,15 @@ cdef class Foo(thrift.py3.types.Struct):
 
     def __copy__(Foo self):
         cdef shared_ptr[cFoo] cpp_obj = make_shared[cFoo](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cFoo](
-            self._cpp_obj,
-            (<Foo>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<Foo>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -189,14 +189,14 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Foo self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cFoo](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cFoo](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Foo self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cFoo]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFoo]()
         with nogil:
-            needed = serializer.cdeserialize[cFoo](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cFoo](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -221,35 +221,35 @@ cdef class Foo(thrift.py3.types.Struct):
 cdef class List__bool(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__bool):
-            self._cpp_obj = (<List__bool> items)._cpp_obj
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<List__bool> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
         else:
-            self._cpp_obj = List__bool__make_instance(items)
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = List__bool__make_instance(items)
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cbool]] c_items):
         __fbthrift_inst = <List__bool>List__bool.__new__(List__bool)
-        __fbthrift_inst._cpp_obj = cmove(c_items)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
         return __fbthrift_inst
 
     def __copy__(List__bool self):
         cdef shared_ptr[vector[cbool]] cpp_obj = make_shared[vector[cbool]](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return List__bool._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
-        return deref(self._cpp_obj).size()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
+        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
         return List__bool._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[vector[cbool]](self._cpp_obj, start, stop, step)
+            __list_slice[vector[cbool]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
         )
 
     cdef _get_single_item(self, size_t index):
         cdef cbool citem = False
-        __list_getitem(self._cpp_obj, index, citem)
+        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
         return citem
 
     cdef _check_item_type(self, item):
@@ -263,9 +263,9 @@ cdef class List__bool(thrift.py3.types.List):
         item = self._check_item_type(item)
         if item is None:
             raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
+        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
         cdef cbool citem = item
-        cdef __optional[size_t] found = __list_index[vector[cbool]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[vector[cbool]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -275,7 +275,7 @@ cdef class List__bool(thrift.py3.types.List):
         if item is None:
             return 0
         cdef cbool citem = item
-        return __list_count[vector[cbool]](self._cpp_obj, citem)
+        return __list_count[vector[cbool]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
 
     @staticmethod
     def __get_reflection__():
@@ -298,35 +298,35 @@ cdef shared_ptr[vector[cbool]] List__bool__make_instance(object items) except *:
 cdef class List__i32(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__i32):
-            self._cpp_obj = (<List__i32> items)._cpp_obj
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<List__i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
         else:
-            self._cpp_obj = List__i32__make_instance(items)
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = List__i32__make_instance(items)
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint32_t]] c_items):
         __fbthrift_inst = <List__i32>List__i32.__new__(List__i32)
-        __fbthrift_inst._cpp_obj = cmove(c_items)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
         return __fbthrift_inst
 
     def __copy__(List__i32 self):
         cdef shared_ptr[vector[cint32_t]] cpp_obj = make_shared[vector[cint32_t]](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
-        return deref(self._cpp_obj).size()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
+        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
         return List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[vector[cint32_t]](self._cpp_obj, start, stop, step)
+            __list_slice[vector[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
         )
 
     cdef _get_single_item(self, size_t index):
         cdef cint32_t citem = 0
-        __list_getitem(self._cpp_obj, index, citem)
+        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
         return citem
 
     cdef _check_item_type(self, item):
@@ -340,9 +340,9 @@ cdef class List__i32(thrift.py3.types.List):
         item = self._check_item_type(item)
         if item is None:
             raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
+        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
         cdef cint32_t citem = item
-        cdef __optional[size_t] found = __list_index[vector[cint32_t]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[vector[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -352,7 +352,7 @@ cdef class List__i32(thrift.py3.types.List):
         if item is None:
             return 0
         cdef cint32_t citem = item
-        return __list_count[vector[cint32_t]](self._cpp_obj, citem)
+        return __list_count[vector[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
 
     @staticmethod
     def __get_reflection__():

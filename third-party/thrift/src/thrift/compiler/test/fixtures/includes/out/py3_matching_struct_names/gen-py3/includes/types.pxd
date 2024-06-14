@@ -77,7 +77,7 @@ cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_types
 
 
 cdef class Included(thrift.py3.types.Struct):
-    cdef shared_ptr[cIncluded] _cpp_obj
+    cdef shared_ptr[cIncluded] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Included_FieldsSetter _fields_setter
     cdef inline object MyIntField_impl(self)
     cdef inline object MyTransitiveField_impl(self)

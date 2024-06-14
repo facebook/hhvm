@@ -54,7 +54,7 @@ to the client.
 }}{{/type:binary?}}{{!
 }}{{#type:struct}}{{!
   }}{{^function:stack_arguments?}}make_unique[{{> types/cython_cpp_type}}]({{/function:stack_arguments?}}{{!
-    }}deref((<{{> types/cython_python_type}}?> result)._cpp_obj){{!
+    }}deref((<{{> types/cython_python_type}}?> result).{{> types/cpp_obj}}){{!
   }}{{^function:stack_arguments?}}){{/function:stack_arguments?}}{{!
 }}{{/type:struct}}{{!
 }}{{#function:stream?}}{{!
@@ -68,7 +68,7 @@ to the client.
 }}{{/function:stream?}}{{!
 }}{{#type:container?}}{{!
   }}{{^function:stack_arguments?}}make_unique[{{> types/cython_cpp_type}}]({{/function:stack_arguments?}}{{!
-    }}deref((<{{> types/cython_python_type}}?> result)._cpp_obj){{!
+    }}deref((<{{> types/cython_python_type}}?> result).{{> types/cpp_obj}}){{!
   }}{{^function:stack_arguments?}}){{/function:stack_arguments?}}{{!
 }}{{/type:container?}}{{!
 }}{{#type:void?}}c_unit{{/type:void?}}{{!

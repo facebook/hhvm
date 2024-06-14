@@ -248,7 +248,7 @@ async def SomeService_bounce_map_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string]](deref((<_apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[_apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string]](deref((<_apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SomeService_binary_keyed_map_coro(
     object self,
@@ -279,7 +279,7 @@ async def SomeService_binary_keyed_map_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cmap[string,cint64_t]](deref((<_apache_thrift_fixtures_types_module_types.Map__binary_i64?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[cmap[string,cint64_t]](deref((<_apache_thrift_fixtures_types_module_types.Map__binary_i64?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SomeService_onStartServing_coro(
     object self,

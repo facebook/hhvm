@@ -235,16 +235,16 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class MyStruct(thrift.py3.types.Struct):
     def __init__(MyStruct self, **kwargs):
-        self._cpp_obj = make_shared[cMyStruct]()
-        self._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyStruct]()
+        self._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(MyStruct self, **kwargs):
         if not kwargs:
             return self
         cdef MyStruct __fbthrift_inst = MyStruct.__new__(MyStruct)
-        __fbthrift_inst._cpp_obj = make_shared[cMyStruct](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -254,20 +254,20 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("MyStruct", {
-          "myEnum": deref(self._cpp_obj).myEnum_ref().has_value(),
-          "myBigEnum": deref(self._cpp_obj).myBigEnum_ref().has_value(),
+          "myEnum": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myEnum_ref().has_value(),
+          "myBigEnum": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myBigEnum_ref().has_value(),
         })
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct] cpp_obj):
         __fbthrift_inst = <MyStruct>MyStruct.__new__(MyStruct)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline myEnum_impl(self):
 
         if self.__fbthrift_cached_myEnum is None:
-            self.__fbthrift_cached_myEnum = translate_cpp_enum_to_python(MyEnum, <int>(deref(self._cpp_obj).myEnum_ref().value()))
+            self.__fbthrift_cached_myEnum = translate_cpp_enum_to_python(MyEnum, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myEnum_ref().value()))
         return self.__fbthrift_cached_myEnum
 
     @property
@@ -277,7 +277,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline myBigEnum_impl(self):
 
         if self.__fbthrift_cached_myBigEnum is None:
-            self.__fbthrift_cached_myBigEnum = translate_cpp_enum_to_python(MyBigEnum, <int>(deref(self._cpp_obj).myBigEnum_ref().value()))
+            self.__fbthrift_cached_myBigEnum = translate_cpp_enum_to_python(MyBigEnum, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myBigEnum_ref().value()))
         return self.__fbthrift_cached_myBigEnum
 
     @property
@@ -297,15 +297,15 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     def __copy__(MyStruct self):
         cdef shared_ptr[cMyStruct] cpp_obj = make_shared[cMyStruct](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cMyStruct](
-            self._cpp_obj,
-            (<MyStruct>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<MyStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -334,14 +334,14 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MyStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cMyStruct](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cMyStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(MyStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cMyStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyStruct]()
         with nogil:
-            needed = serializer.cdeserialize[cMyStruct](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cMyStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -366,24 +366,24 @@ cdef class MyStruct(thrift.py3.types.Struct):
 cdef class Map__MyEnum_string(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__MyEnum_string):
-            self._cpp_obj = (<Map__MyEnum_string> items)._cpp_obj
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<Map__MyEnum_string> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
         else:
-            self._cpp_obj = Map__MyEnum_string__make_instance(items)
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = Map__MyEnum_string__make_instance(items)
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cMyEnum,string]] c_items):
         __fbthrift_inst = <Map__MyEnum_string>Map__MyEnum_string.__new__(Map__MyEnum_string)
-        __fbthrift_inst._cpp_obj = cmove(c_items)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
         return __fbthrift_inst
 
     def __copy__(Map__MyEnum_string self):
         cdef shared_ptr[cmap[cMyEnum,string]] cpp_obj = make_shared[cmap[cMyEnum,string]](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Map__MyEnum_string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
-        return deref(self._cpp_obj).size()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
 
     cdef _check_key_type(self, key):
         if not self or key is None:
@@ -397,19 +397,19 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
         if key is None:
             raise err
         cdef cMyEnum ckey = <cMyEnum><int>key
-        if not __map_contains(self._cpp_obj, ckey):
+        if not __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey):
             raise err
         cdef string citem
-        __map_getitem(self._cpp_obj, ckey, citem)
+        __map_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
         return bytes(citem).decode('UTF-8')
 
     def __iter__(self):
         if not self:
             return
-        cdef __map_iter[cmap[cMyEnum,string]] itr = __map_iter[cmap[cMyEnum,string]](self._cpp_obj)
+        cdef __map_iter[cmap[cMyEnum,string]] itr = __map_iter[cmap[cMyEnum,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         cdef cMyEnum citem
-        for i in range(deref(self._cpp_obj).size()):
-            itr.genNextKey(self._cpp_obj, citem)
+        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
+            itr.genNextKey(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
             yield translate_cpp_enum_to_python(MyEnum, <int> citem)
 
     def __contains__(self, key):
@@ -417,25 +417,25 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
         if key is None:
             return False
         cdef cMyEnum ckey = <cMyEnum><int>key
-        return __map_contains(self._cpp_obj, ckey)
+        return __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey)
 
     def values(self):
         if not self:
             return
-        cdef __map_iter[cmap[cMyEnum,string]] itr = __map_iter[cmap[cMyEnum,string]](self._cpp_obj)
+        cdef __map_iter[cmap[cMyEnum,string]] itr = __map_iter[cmap[cMyEnum,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         cdef string citem
-        for i in range(deref(self._cpp_obj).size()):
-            itr.genNextValue(self._cpp_obj, citem)
+        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
+            itr.genNextValue(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
             yield bytes(citem).decode('UTF-8')
 
     def items(self):
         if not self:
             return
-        cdef __map_iter[cmap[cMyEnum,string]] itr = __map_iter[cmap[cMyEnum,string]](self._cpp_obj)
+        cdef __map_iter[cmap[cMyEnum,string]] itr = __map_iter[cmap[cMyEnum,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         cdef cMyEnum ckey
         cdef string citem
-        for i in range(deref(self._cpp_obj).size()):
-            itr.genNextItem(self._cpp_obj, ckey, citem)
+        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
+            itr.genNextItem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
             yield (translate_cpp_enum_to_python(MyEnum, <int> ckey), bytes(citem).decode('UTF-8'))
 
     @staticmethod

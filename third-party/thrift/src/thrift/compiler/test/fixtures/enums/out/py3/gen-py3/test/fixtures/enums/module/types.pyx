@@ -455,16 +455,16 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class SomeStruct(thrift.py3.types.Struct):
     def __init__(SomeStruct self, **kwargs):
-        self._cpp_obj = make_shared[cSomeStruct]()
-        self._fields_setter = _fbthrift_types_fields.__SomeStruct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cSomeStruct]()
+        self._fields_setter = _fbthrift_types_fields.__SomeStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(SomeStruct self, **kwargs):
         if not kwargs:
             return self
         cdef SomeStruct __fbthrift_inst = SomeStruct.__new__(SomeStruct)
-        __fbthrift_inst._cpp_obj = make_shared[cSomeStruct](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__SomeStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cSomeStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__SomeStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -474,22 +474,22 @@ cdef class SomeStruct(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("SomeStruct", {
-          "reasonable": deref(self._cpp_obj).reasonable_ref().has_value(),
-          "fine": deref(self._cpp_obj).fine_ref().has_value(),
-          "questionable": deref(self._cpp_obj).questionable_ref().has_value(),
-          "tags": deref(self._cpp_obj).tags_ref().has_value(),
+          "reasonable": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).reasonable_ref().has_value(),
+          "fine": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fine_ref().has_value(),
+          "questionable": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).questionable_ref().has_value(),
+          "tags": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).tags_ref().has_value(),
         })
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSomeStruct] cpp_obj):
         __fbthrift_inst = <SomeStruct>SomeStruct.__new__(SomeStruct)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline reasonable_impl(self):
 
         if self.__fbthrift_cached_reasonable is None:
-            self.__fbthrift_cached_reasonable = translate_cpp_enum_to_python(Metasyntactic, <int>(deref(self._cpp_obj).reasonable_ref().value()))
+            self.__fbthrift_cached_reasonable = translate_cpp_enum_to_python(Metasyntactic, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).reasonable_ref().value()))
         return self.__fbthrift_cached_reasonable
 
     @property
@@ -499,7 +499,7 @@ cdef class SomeStruct(thrift.py3.types.Struct):
     cdef inline fine_impl(self):
 
         if self.__fbthrift_cached_fine is None:
-            self.__fbthrift_cached_fine = translate_cpp_enum_to_python(Metasyntactic, <int>(deref(self._cpp_obj).fine_ref().value()))
+            self.__fbthrift_cached_fine = translate_cpp_enum_to_python(Metasyntactic, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fine_ref().value()))
         return self.__fbthrift_cached_fine
 
     @property
@@ -509,7 +509,7 @@ cdef class SomeStruct(thrift.py3.types.Struct):
     cdef inline questionable_impl(self):
 
         if self.__fbthrift_cached_questionable is None:
-            self.__fbthrift_cached_questionable = translate_cpp_enum_to_python(Metasyntactic, <int>(deref(self._cpp_obj).questionable_ref().value()))
+            self.__fbthrift_cached_questionable = translate_cpp_enum_to_python(Metasyntactic, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).questionable_ref().value()))
         return self.__fbthrift_cached_questionable
 
     @property
@@ -519,7 +519,7 @@ cdef class SomeStruct(thrift.py3.types.Struct):
     cdef inline tags_impl(self):
 
         if self.__fbthrift_cached_tags is None:
-            self.__fbthrift_cached_tags = Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).tags_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_tags = Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).tags_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_tags
 
     @property
@@ -539,15 +539,15 @@ cdef class SomeStruct(thrift.py3.types.Struct):
 
     def __copy__(SomeStruct self):
         cdef shared_ptr[cSomeStruct] cpp_obj = make_shared[cSomeStruct](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return SomeStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cSomeStruct](
-            self._cpp_obj,
-            (<SomeStruct>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<SomeStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -576,14 +576,14 @@ cdef class SomeStruct(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(SomeStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cSomeStruct](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cSomeStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(SomeStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cSomeStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cSomeStruct]()
         with nogil:
-            needed = serializer.cdeserialize[cSomeStruct](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cSomeStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -606,16 +606,16 @@ cdef class SomeStruct(thrift.py3.types.Struct):
 @__cython.auto_pickle(False)
 cdef class MyStruct(thrift.py3.types.Struct):
     def __init__(MyStruct self, **kwargs):
-        self._cpp_obj = make_shared[cMyStruct]()
-        self._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyStruct]()
+        self._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(MyStruct self, **kwargs):
         if not kwargs:
             return self
         cdef MyStruct __fbthrift_inst = MyStruct.__new__(MyStruct)
-        __fbthrift_inst._cpp_obj = make_shared[cMyStruct](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -625,22 +625,22 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("MyStruct", {
-          "me2_3": deref(self._cpp_obj).me2_3_ref().has_value(),
-          "me3_n3": deref(self._cpp_obj).me3_n3_ref().has_value(),
-          "me1_t1": deref(self._cpp_obj).me1_t1_ref().has_value(),
-          "me1_t2": deref(self._cpp_obj).me1_t2_ref().has_value(),
+          "me2_3": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me2_3_ref().has_value(),
+          "me3_n3": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me3_n3_ref().has_value(),
+          "me1_t1": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me1_t1_ref().has_value(),
+          "me1_t2": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me1_t2_ref().has_value(),
         })
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct] cpp_obj):
         __fbthrift_inst = <MyStruct>MyStruct.__new__(MyStruct)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline me2_3_impl(self):
 
         if self.__fbthrift_cached_me2_3 is None:
-            self.__fbthrift_cached_me2_3 = translate_cpp_enum_to_python(MyEnum2, <int>(deref(self._cpp_obj).me2_3_ref().value()))
+            self.__fbthrift_cached_me2_3 = translate_cpp_enum_to_python(MyEnum2, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me2_3_ref().value()))
         return self.__fbthrift_cached_me2_3
 
     @property
@@ -650,7 +650,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline me3_n3_impl(self):
 
         if self.__fbthrift_cached_me3_n3 is None:
-            self.__fbthrift_cached_me3_n3 = translate_cpp_enum_to_python(MyEnum3, <int>(deref(self._cpp_obj).me3_n3_ref().value()))
+            self.__fbthrift_cached_me3_n3 = translate_cpp_enum_to_python(MyEnum3, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me3_n3_ref().value()))
         return self.__fbthrift_cached_me3_n3
 
     @property
@@ -660,7 +660,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline me1_t1_impl(self):
 
         if self.__fbthrift_cached_me1_t1 is None:
-            self.__fbthrift_cached_me1_t1 = translate_cpp_enum_to_python(MyEnum1, <int>(deref(self._cpp_obj).me1_t1_ref().value()))
+            self.__fbthrift_cached_me1_t1 = translate_cpp_enum_to_python(MyEnum1, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me1_t1_ref().value()))
         return self.__fbthrift_cached_me1_t1
 
     @property
@@ -670,7 +670,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline me1_t2_impl(self):
 
         if self.__fbthrift_cached_me1_t2 is None:
-            self.__fbthrift_cached_me1_t2 = translate_cpp_enum_to_python(MyEnum1, <int>(deref(self._cpp_obj).me1_t2_ref().value()))
+            self.__fbthrift_cached_me1_t2 = translate_cpp_enum_to_python(MyEnum1, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me1_t2_ref().value()))
         return self.__fbthrift_cached_me1_t2
 
     @property
@@ -690,15 +690,15 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     def __copy__(MyStruct self):
         cdef shared_ptr[cMyStruct] cpp_obj = make_shared[cMyStruct](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cMyStruct](
-            self._cpp_obj,
-            (<MyStruct>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<MyStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -727,14 +727,14 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MyStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cMyStruct](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cMyStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(MyStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cMyStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyStruct]()
         with nogil:
-            needed = serializer.cdeserialize[cMyStruct](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cMyStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -759,40 +759,40 @@ cdef class MyStruct(thrift.py3.types.Struct):
 cdef class Set__i32(thrift.py3.types.Set):
     def __init__(self, items=None):
         if isinstance(items, Set__i32):
-            self._cpp_obj = (<Set__i32> items)._cpp_obj
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<Set__i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
         else:
-            self._cpp_obj = Set__i32__make_instance(items)
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = Set__i32__make_instance(items)
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cint32_t]] c_items):
         __fbthrift_inst = <Set__i32>Set__i32.__new__(Set__i32)
-        __fbthrift_inst._cpp_obj = cmove(c_items)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
         return __fbthrift_inst
 
     def __copy__(Set__i32 self):
         cdef shared_ptr[cset[cint32_t]] cpp_obj = make_shared[cset[cint32_t]](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
-        return deref(self._cpp_obj).size()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
 
     def __contains__(self, item):
         if not self or item is None:
             return False
         if not isinstance(item, int):
             return False
-        return pbool(deref(self._cpp_obj).count(item))
+        return pbool(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).count(item))
 
 
     def __iter__(self):
         if not self:
             return
-        cdef __set_iter[cset[cint32_t]] itr = __set_iter[cset[cint32_t]](self._cpp_obj)
+        cdef __set_iter[cset[cint32_t]] itr = __set_iter[cset[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         cdef cint32_t citem = 0
-        for i in range(deref(self._cpp_obj).size()):
-            itr.genNext(self._cpp_obj, citem)
+        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
+            itr.genNext(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
             yield citem
 
     def __hash__(self):
@@ -802,8 +802,8 @@ cdef class Set__i32(thrift.py3.types.Set):
         if isinstance(other, Set__i32):
             # C level comparisons
             return __setcmp(
-                self._cpp_obj,
-                (<Set__i32> other)._cpp_obj,
+                self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+                (<Set__i32> other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
                 op,
             )
         return self._fbthrift_py_richcmp(other, op)
@@ -813,8 +813,8 @@ cdef class Set__i32(thrift.py3.types.Set):
             other = Set__i32(other)
         cdef shared_ptr[cset[cint32_t]] result
         return Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__set_op[cset[cint32_t]](
-            self._cpp_obj,
-            (<Set__i32>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<Set__i32>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ))
 

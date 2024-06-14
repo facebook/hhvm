@@ -137,7 +137,7 @@ cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/modul
 
 
 cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyStructNestedAnnotation] _cpp_obj
+    cdef shared_ptr[cMyStructNestedAnnotation] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyStructNestedAnnotation_FieldsSetter _fields_setter
     cdef inline object name_impl(self)
 
@@ -147,7 +147,7 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
 
 
 cdef class SecretStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cSecretStruct] _cpp_obj
+    cdef shared_ptr[cSecretStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__SecretStruct_FieldsSetter _fields_setter
     cdef inline object id_impl(self)
     cdef inline object password_impl(self)
@@ -157,7 +157,7 @@ cdef class SecretStruct(thrift.py3.types.Struct):
 
 
 cdef class std_deque_std_string__List__string(thrift.py3.types.List):
-    cdef shared_ptr[std_deque_std_string] _cpp_obj
+    cdef shared_ptr[std_deque_std_string] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[std_deque_std_string])
     cdef _check_item_type(self, item)

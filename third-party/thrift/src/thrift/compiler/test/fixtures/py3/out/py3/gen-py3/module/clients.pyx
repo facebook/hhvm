@@ -748,7 +748,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint32_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).get_value(rpc_options._cpp_obj, 
-                deref((<_module_types.SimpleStruct>simple_struct)._cpp_obj),
+                deref((<_module_types.SimpleStruct>simple_struct)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_get_value_callback,
             <PyObject *> __userdata
@@ -934,7 +934,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint32_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).sum_i16_list(rpc_options._cpp_obj, 
-                deref((<_module_types.List__i16>numbers)._cpp_obj),
+                deref((<_module_types.List__i16>numbers)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_sum_i16_list_callback,
             <PyObject *> __userdata
@@ -958,7 +958,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint32_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).sum_i32_list(rpc_options._cpp_obj, 
-                deref((<_module_types.List__i32>numbers)._cpp_obj),
+                deref((<_module_types.List__i32>numbers)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_sum_i32_list_callback,
             <PyObject *> __userdata
@@ -982,7 +982,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint32_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).sum_i64_list(rpc_options._cpp_obj, 
-                deref((<_module_types.List__i64>numbers)._cpp_obj),
+                deref((<_module_types.List__i64>numbers)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_sum_i64_list_callback,
             <PyObject *> __userdata
@@ -1006,7 +1006,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[string](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).concat_many(rpc_options._cpp_obj, 
-                deref((<_module_types.List__string>words)._cpp_obj),
+                deref((<_module_types.List__string>words)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_concat_many_callback,
             <PyObject *> __userdata
@@ -1030,7 +1030,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint32_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).count_structs(rpc_options._cpp_obj, 
-                deref((<_module_types.List__SimpleStruct>items)._cpp_obj),
+                deref((<_module_types.List__SimpleStruct>items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_count_structs_callback,
             <PyObject *> __userdata
@@ -1054,7 +1054,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint32_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).sum_set(rpc_options._cpp_obj, 
-                deref((<_module_types.Set__i32>numbers)._cpp_obj),
+                deref((<_module_types.Set__i32>numbers)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_sum_set_callback,
             <PyObject *> __userdata
@@ -1079,7 +1079,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cbool](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).contains_word(rpc_options._cpp_obj, 
-                deref((<_module_types.Set__string>words)._cpp_obj),
+                deref((<_module_types.Set__string>words)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
                 word.encode('UTF-8'),
             ),
             SimpleService_contains_word_callback,
@@ -1105,7 +1105,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[string](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).get_map_value(rpc_options._cpp_obj, 
-                deref((<_module_types.Map__string_string>words)._cpp_obj),
+                deref((<_module_types.Map__string_string>words)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
                 key.encode('UTF-8'),
             ),
             SimpleService_get_map_value_callback,
@@ -1130,7 +1130,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint16_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).map_length(rpc_options._cpp_obj, 
-                deref((<_module_types.Map__string_SimpleStruct>items)._cpp_obj),
+                deref((<_module_types.Map__string_SimpleStruct>items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_map_length_callback,
             <PyObject *> __userdata
@@ -1154,7 +1154,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint16_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).sum_map_values(rpc_options._cpp_obj, 
-                deref((<_module_types.Map__string_i16>items)._cpp_obj),
+                deref((<_module_types.Map__string_i16>items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_sum_map_values_callback,
             <PyObject *> __userdata
@@ -1176,7 +1176,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint32_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).complex_sum_i32(rpc_options._cpp_obj, 
-                deref((<_module_types.ComplexStruct>counter)._cpp_obj),
+                deref((<_module_types.ComplexStruct>counter)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_complex_sum_i32_callback,
             <PyObject *> __userdata
@@ -1198,7 +1198,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[string](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).repeat_name(rpc_options._cpp_obj, 
-                deref((<_module_types.ComplexStruct>counter)._cpp_obj),
+                deref((<_module_types.ComplexStruct>counter)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_repeat_name_callback,
             <PyObject *> __userdata
@@ -1268,7 +1268,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cset[string]](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).unique_words(rpc_options._cpp_obj, 
-                deref((<_module_types.List__string>words)._cpp_obj),
+                deref((<_module_types.List__string>words)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_unique_words_callback,
             <PyObject *> __userdata
@@ -1292,7 +1292,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cmap[string,cint16_t]](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).words_count(rpc_options._cpp_obj, 
-                deref((<_module_types.List__string>words)._cpp_obj),
+                deref((<_module_types.List__string>words)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_words_count_callback,
             <PyObject *> __userdata
@@ -1414,7 +1414,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint32_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).nested_map_argument(rpc_options._cpp_obj, 
-                deref((<_module_types.Map__string_List__SimpleStruct>struct_map)._cpp_obj),
+                deref((<_module_types.Map__string_List__SimpleStruct>struct_map)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_nested_map_argument_callback,
             <PyObject *> __userdata
@@ -1438,7 +1438,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[string](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).make_sentence(rpc_options._cpp_obj, 
-                deref((<_module_types.List__List__string>word_chars)._cpp_obj),
+                deref((<_module_types.List__List__string>word_chars)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_make_sentence_callback,
             <PyObject *> __userdata
@@ -1462,7 +1462,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cset[cint32_t]](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).get_union(rpc_options._cpp_obj, 
-                deref((<_module_types.List__Set__i32>sets)._cpp_obj),
+                deref((<_module_types.List__Set__i32>sets)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_get_union_callback,
             <PyObject *> __userdata
@@ -1486,7 +1486,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cset[string]](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).get_keys(rpc_options._cpp_obj, 
-                deref((<_module_types.List__Map__string_string>string_map)._cpp_obj),
+                deref((<_module_types.List__Map__string_string>string_map)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_get_keys_callback,
             <PyObject *> __userdata
@@ -1558,7 +1558,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cset[string]](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).contain_binary(rpc_options._cpp_obj, 
-                deref((<_module_types.List__binary>binaries)._cpp_obj),
+                deref((<_module_types.List__binary>binaries)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_contain_binary_callback,
             <PyObject *> __userdata
@@ -1582,7 +1582,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[vector[_module_types.cAnEnum]](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).contain_enum(rpc_options._cpp_obj, 
-                deref((<_module_types.List__AnEnum>the_enum)._cpp_obj),
+                deref((<_module_types.List__AnEnum>the_enum)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_contain_enum_callback,
             <PyObject *> __userdata
@@ -1604,7 +1604,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[_module_types.cBinaryUnionStruct](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).get_binary_union_struct(rpc_options._cpp_obj, 
-                deref((<_module_types.BinaryUnion>u)._cpp_obj),
+                deref((<_module_types.BinaryUnion>u)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_get_binary_union_struct_callback,
             <PyObject *> __userdata

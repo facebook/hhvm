@@ -220,7 +220,7 @@ cdef class __ComplexUnionType(thrift.py3.types.CompiledEnum):
 
 
 cdef class ComplexUnion(thrift.py3.types.Union):
-    cdef shared_ptr[cComplexUnion] _cpp_obj
+    cdef shared_ptr[cComplexUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly __ComplexUnionType type
     cdef readonly object value
     cdef _load_cache(ComplexUnion self)
@@ -246,7 +246,7 @@ cdef class __ListUnionType(thrift.py3.types.CompiledEnum):
 
 
 cdef class ListUnion(thrift.py3.types.Union):
-    cdef shared_ptr[cListUnion] _cpp_obj
+    cdef shared_ptr[cListUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly __ListUnionType type
     cdef readonly object value
     cdef _load_cache(ListUnion self)
@@ -268,7 +268,7 @@ cdef class __DataUnionType(thrift.py3.types.CompiledEnum):
 
 
 cdef class DataUnion(thrift.py3.types.Union):
-    cdef shared_ptr[cDataUnion] _cpp_obj
+    cdef shared_ptr[cDataUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly __DataUnionType type
     cdef readonly object value
     cdef _load_cache(DataUnion self)
@@ -286,7 +286,7 @@ cdef class DataUnion(thrift.py3.types.Union):
 
 
 cdef class Val(thrift.py3.types.Struct):
-    cdef shared_ptr[cVal] _cpp_obj
+    cdef shared_ptr[cVal] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Val_FieldsSetter _fields_setter
     cdef inline object strVal_impl(self)
     cdef inline object intVal_impl(self)
@@ -303,7 +303,7 @@ cdef class __ValUnionType(thrift.py3.types.CompiledEnum):
 
 
 cdef class ValUnion(thrift.py3.types.Union):
-    cdef shared_ptr[cValUnion] _cpp_obj
+    cdef shared_ptr[cValUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly __ValUnionType type
     cdef readonly object value
     cdef _load_cache(ValUnion self)
@@ -325,7 +325,7 @@ cdef class __VirtualComplexUnionType(thrift.py3.types.CompiledEnum):
 
 
 cdef class VirtualComplexUnion(thrift.py3.types.Union):
-    cdef shared_ptr[cVirtualComplexUnion] _cpp_obj
+    cdef shared_ptr[cVirtualComplexUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly __VirtualComplexUnionType type
     cdef readonly object value
     cdef _load_cache(VirtualComplexUnion self)
@@ -343,7 +343,7 @@ cdef class VirtualComplexUnion(thrift.py3.types.Union):
 
 
 cdef class NonCopyableStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cNonCopyableStruct] _cpp_obj
+    cdef shared_ptr[cNonCopyableStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__NonCopyableStruct_FieldsSetter _fields_setter
     cdef inline object num_impl(self)
 
@@ -357,7 +357,7 @@ cdef class __NonCopyableUnionType(thrift.py3.types.CompiledEnum):
 
 
 cdef class NonCopyableUnion(thrift.py3.types.Union):
-    cdef shared_ptr[cNonCopyableUnion] _cpp_obj
+    cdef shared_ptr[cNonCopyableUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly __NonCopyableUnionType type
     cdef readonly object value
     cdef _load_cache(NonCopyableUnion self)
@@ -373,7 +373,7 @@ cdef class NonCopyableUnion(thrift.py3.types.Union):
 
 
 cdef class List__i64(thrift.py3.types.List):
-    cdef shared_ptr[vector[cint64_t]] _cpp_obj
+    cdef shared_ptr[vector[cint64_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint64_t]])
     cdef _check_item_type(self, item)
@@ -381,7 +381,7 @@ cdef class List__i64(thrift.py3.types.List):
 cdef shared_ptr[vector[cint64_t]] List__i64__make_instance(object items) except *
 
 cdef class List__string(thrift.py3.types.List):
-    cdef shared_ptr[vector[string]] _cpp_obj
+    cdef shared_ptr[vector[string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[string]])
     cdef _check_item_type(self, item)
@@ -389,7 +389,7 @@ cdef class List__string(thrift.py3.types.List):
 cdef shared_ptr[vector[string]] List__string__make_instance(object items) except *
 
 cdef class Map__i16_string(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[cint16_t,string]] _cpp_obj
+    cdef shared_ptr[cmap[cint16_t,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cint16_t,string]])
     cdef _check_key_type(self, key)

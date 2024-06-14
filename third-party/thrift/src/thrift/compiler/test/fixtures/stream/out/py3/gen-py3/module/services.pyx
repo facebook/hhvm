@@ -135,7 +135,7 @@ async def runGenerator_PubSubStreamingService_streamthrows(object generator, Pro
     except StopAsyncIteration:
         promise.cPromise.setValue(optional[cint32_t]())
     except _module_types.FooStreamEx as ex:
-        promise.cPromise.setException(deref((<_module_types.FooStreamEx> ex)._cpp_obj))
+        promise.cPromise.setException(deref((<_module_types.FooStreamEx> ex)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -242,7 +242,7 @@ async def runGenerator_PubSubStreamingService_boththrows(object generator, Promi
     except StopAsyncIteration:
         promise.cPromise.setValue(optional[cint32_t]())
     except _module_types.FooStreamEx as ex:
-        promise.cPromise.setException(deref((<_module_types.FooStreamEx> ex)._cpp_obj))
+        promise.cPromise.setException(deref((<_module_types.FooStreamEx> ex)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -279,7 +279,7 @@ async def runGenerator_PubSubStreamingService_responseandstreamstreamthrows(obje
     except StopAsyncIteration:
         promise.cPromise.setValue(optional[cint32_t]())
     except _module_types.FooStreamEx as ex:
-        promise.cPromise.setException(deref((<_module_types.FooStreamEx> ex)._cpp_obj))
+        promise.cPromise.setException(deref((<_module_types.FooStreamEx> ex)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -351,7 +351,7 @@ async def runGenerator_PubSubStreamingService_responseandstreamboththrows(object
     except StopAsyncIteration:
         promise.cPromise.setValue(optional[cint32_t]())
     except _module_types.FooStreamEx as ex:
-        promise.cPromise.setException(deref((<_module_types.FooStreamEx> ex)._cpp_obj))
+        promise.cPromise.setException(deref((<_module_types.FooStreamEx> ex)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -883,7 +883,7 @@ async def PubSubStreamingService_servicethrows_coro(
         if isinstance(result, AsyncIterator):
             result = ServerStream_cint32_t._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[cint32_t](result, get_executor(), &getNextGenerator_PubSubStreamingService_servicethrows)))
     except _module_types.FooEx as ex:
-        promise.cPromise.setException(deref((<_module_types.FooEx> ex)._cpp_obj))
+        promise.cPromise.setException(deref((<_module_types.FooEx> ex)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -919,9 +919,9 @@ async def PubSubStreamingService_servicethrows2_coro(
         if isinstance(result, AsyncIterator):
             result = ServerStream_cint32_t._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[cint32_t](result, get_executor(), &getNextGenerator_PubSubStreamingService_servicethrows2)))
     except _module_types.FooEx as ex:
-        promise.cPromise.setException(deref((<_module_types.FooEx> ex)._cpp_obj))
+        promise.cPromise.setException(deref((<_module_types.FooEx> ex)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     except _module_types.FooEx2 as ex:
-        promise.cPromise.setException(deref((<_module_types.FooEx2> ex)._cpp_obj))
+        promise.cPromise.setException(deref((<_module_types.FooEx2> ex)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -957,7 +957,7 @@ async def PubSubStreamingService_boththrows_coro(
         if isinstance(result, AsyncIterator):
             result = ServerStream_cint32_t._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[cint32_t](result, get_executor(), &getNextGenerator_PubSubStreamingService_boththrows)))
     except _module_types.FooEx as ex:
-        promise.cPromise.setException(deref((<_module_types.FooEx> ex)._cpp_obj))
+        promise.cPromise.setException(deref((<_module_types.FooEx> ex)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -1031,7 +1031,7 @@ async def PubSubStreamingService_responseandstreamservicethrows_coro(
         if isinstance(result, AsyncIterator):
             result = ServerStream_cint32_t._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[cint32_t](result, get_executor(), &getNextGenerator_PubSubStreamingService_responseandstreamservicethrows)))
     except _module_types.FooEx as ex:
-        promise.cPromise.setException(deref((<_module_types.FooEx> ex)._cpp_obj))
+        promise.cPromise.setException(deref((<_module_types.FooEx> ex)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -1069,7 +1069,7 @@ async def PubSubStreamingService_responseandstreamboththrows_coro(
         if isinstance(result, AsyncIterator):
             result = ServerStream_cint32_t._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[cint32_t](result, get_executor(), &getNextGenerator_PubSubStreamingService_responseandstreamboththrows)))
     except _module_types.FooEx as ex:
-        promise.cPromise.setException(deref((<_module_types.FooEx> ex)._cpp_obj))
+        promise.cPromise.setException(deref((<_module_types.FooEx> ex)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(

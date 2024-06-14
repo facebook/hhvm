@@ -9,25 +9,25 @@
 
 
 cdef shared_ptr[_fbthrift_ctypes.cFields] Fields_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.Fields?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.Fields?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object Fields_from_cpp(const shared_ptr[_fbthrift_ctypes.cFields]& c_struct):
     return _fbthrift_ctypes.Fields._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cFieldsInjectedToEmptyStruct] FieldsInjectedToEmptyStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.FieldsInjectedToEmptyStruct?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.FieldsInjectedToEmptyStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object FieldsInjectedToEmptyStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cFieldsInjectedToEmptyStruct]& c_struct):
     return _fbthrift_ctypes.FieldsInjectedToEmptyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cFieldsInjectedToStruct] FieldsInjectedToStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.FieldsInjectedToStruct?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.FieldsInjectedToStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object FieldsInjectedToStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cFieldsInjectedToStruct]& c_struct):
     return _fbthrift_ctypes.FieldsInjectedToStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cFieldsInjectedWithIncludedStruct] FieldsInjectedWithIncludedStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.FieldsInjectedWithIncludedStruct?>inst)._cpp_obj
+    return (<_fbthrift_ctypes.FieldsInjectedWithIncludedStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
 cdef object FieldsInjectedWithIncludedStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cFieldsInjectedWithIncludedStruct]& c_struct):

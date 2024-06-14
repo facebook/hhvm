@@ -365,7 +365,7 @@ async def A_foo_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_types.cFoo](deref((<_module_types.Foo?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[_module_types.cFoo](deref((<_module_types.Foo?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def A_onStartServing_coro(
     object self,

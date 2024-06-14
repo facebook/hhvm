@@ -180,7 +180,7 @@ cdef class __TypeUriType(thrift.py3.types.CompiledEnum):
 
 
 cdef class TypeUri(thrift.py3.types.Union):
-    cdef shared_ptr[cTypeUri] _cpp_obj
+    cdef shared_ptr[cTypeUri] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly __TypeUriType type
     cdef readonly object value
     cdef _load_cache(TypeUri self)
@@ -203,7 +203,7 @@ cdef class __TypeNameType(thrift.py3.types.CompiledEnum):
 
 
 cdef class TypeName(thrift.py3.types.Union):
-    cdef shared_ptr[cTypeName] _cpp_obj
+    cdef shared_ptr[cTypeName] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly __TypeNameType type
     cdef readonly object value
     cdef _load_cache(TypeName self)

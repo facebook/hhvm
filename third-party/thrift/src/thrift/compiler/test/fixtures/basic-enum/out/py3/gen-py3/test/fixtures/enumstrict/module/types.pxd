@@ -102,7 +102,7 @@ cdef extern from "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_types
 
 
 cdef class MyStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyStruct] _cpp_obj
+    cdef shared_ptr[cMyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyStruct_FieldsSetter _fields_setter
     cdef inline object myEnum_impl(self)
     cdef inline object myBigEnum_impl(self)
@@ -114,7 +114,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
 
 cdef class Map__MyEnum_string(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[cMyEnum,string]] _cpp_obj
+    cdef shared_ptr[cmap[cMyEnum,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cMyEnum,string]])
     cdef _check_key_type(self, key)

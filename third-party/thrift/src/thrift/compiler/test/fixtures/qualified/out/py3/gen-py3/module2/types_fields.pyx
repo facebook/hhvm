@@ -48,7 +48,7 @@ cdef class __Struct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _module0_types.Struct):
             raise TypeError(f'first is not a { _module0_types.Struct !r}.')
-        deref(self._struct_cpp_obj).first_ref().assign(deref((<_module0_types.Struct?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).first_ref().assign(deref((<_module0_types.Struct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field second
@@ -57,7 +57,7 @@ cdef class __Struct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _module1_types.Struct):
             raise TypeError(f'second is not a { _module1_types.Struct !r}.')
-        deref(self._struct_cpp_obj).second_ref().assign(deref((<_module1_types.Struct?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).second_ref().assign(deref((<_module1_types.Struct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
 @__cython.auto_pickle(False)
@@ -85,7 +85,7 @@ cdef class __BigStruct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _module2_types.Struct):
             raise TypeError(f's is not a { _module2_types.Struct !r}.')
-        deref(self._struct_cpp_obj).s_ref().assign(deref((<_module2_types.Struct?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).s_ref().assign(deref((<_module2_types.Struct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field id

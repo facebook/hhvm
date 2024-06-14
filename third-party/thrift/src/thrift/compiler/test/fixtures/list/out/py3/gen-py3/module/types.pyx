@@ -72,35 +72,35 @@ cdef object get_types_reflection():
 cdef class List__string(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__string):
-            self._cpp_obj = (<List__string> items)._cpp_obj
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<List__string> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
         else:
-            self._cpp_obj = List__string__make_instance(items)
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = List__string__make_instance(items)
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[string]] c_items):
         __fbthrift_inst = <List__string>List__string.__new__(List__string)
-        __fbthrift_inst._cpp_obj = cmove(c_items)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
         return __fbthrift_inst
 
     def __copy__(List__string self):
         cdef shared_ptr[vector[string]] cpp_obj = make_shared[vector[string]](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
-        return deref(self._cpp_obj).size()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
+        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
         return List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[vector[string]](self._cpp_obj, start, stop, step)
+            __list_slice[vector[string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
         )
 
     cdef _get_single_item(self, size_t index):
         cdef string citem
-        __list_getitem(self._cpp_obj, index, citem)
+        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
         return bytes(citem).decode('UTF-8')
 
     cdef _check_item_type(self, item):
@@ -114,9 +114,9 @@ cdef class List__string(thrift.py3.types.List):
         item = self._check_item_type(item)
         if item is None:
             raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
+        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
         cdef string citem = item.encode('UTF-8')
-        cdef __optional[size_t] found = __list_index[vector[string]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[vector[string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -126,7 +126,7 @@ cdef class List__string(thrift.py3.types.List):
         if item is None:
             return 0
         cdef string citem = item.encode('UTF-8')
-        return __list_count[vector[string]](self._cpp_obj, citem)
+        return __list_count[vector[string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
 
     @staticmethod
     def __get_reflection__():
@@ -151,24 +151,24 @@ cdef shared_ptr[vector[string]] List__string__make_instance(object items) except
 cdef class Map__i64_List__string(thrift.py3.types.Map):
     def __init__(self, items=None):
         if isinstance(items, Map__i64_List__string):
-            self._cpp_obj = (<Map__i64_List__string> items)._cpp_obj
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<Map__i64_List__string> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
         else:
-            self._cpp_obj = Map__i64_List__string__make_instance(items)
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = Map__i64_List__string__make_instance(items)
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cint64_t,vector[string]]] c_items):
         __fbthrift_inst = <Map__i64_List__string>Map__i64_List__string.__new__(Map__i64_List__string)
-        __fbthrift_inst._cpp_obj = cmove(c_items)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
         return __fbthrift_inst
 
     def __copy__(Map__i64_List__string self):
         cdef shared_ptr[cmap[cint64_t,vector[string]]] cpp_obj = make_shared[cmap[cint64_t,vector[string]]](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Map__i64_List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
-        return deref(self._cpp_obj).size()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
 
     cdef _check_key_type(self, key):
         if not self or key is None:
@@ -182,19 +182,19 @@ cdef class Map__i64_List__string(thrift.py3.types.Map):
         if key is None:
             raise err
         cdef cint64_t ckey = key
-        if not __map_contains(self._cpp_obj, ckey):
+        if not __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey):
             raise err
         cdef shared_ptr[vector[string]] citem
-        __map_getitem(self._cpp_obj, ckey, citem)
+        __map_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
         return List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
 
     def __iter__(self):
         if not self:
             return
-        cdef __map_iter[cmap[cint64_t,vector[string]]] itr = __map_iter[cmap[cint64_t,vector[string]]](self._cpp_obj)
+        cdef __map_iter[cmap[cint64_t,vector[string]]] itr = __map_iter[cmap[cint64_t,vector[string]]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         cdef cint64_t citem = 0
-        for i in range(deref(self._cpp_obj).size()):
-            itr.genNextKey(self._cpp_obj, citem)
+        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
+            itr.genNextKey(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
             yield citem
 
     def __contains__(self, key):
@@ -202,25 +202,25 @@ cdef class Map__i64_List__string(thrift.py3.types.Map):
         if key is None:
             return False
         cdef cint64_t ckey = key
-        return __map_contains(self._cpp_obj, ckey)
+        return __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey)
 
     def values(self):
         if not self:
             return
-        cdef __map_iter[cmap[cint64_t,vector[string]]] itr = __map_iter[cmap[cint64_t,vector[string]]](self._cpp_obj)
+        cdef __map_iter[cmap[cint64_t,vector[string]]] itr = __map_iter[cmap[cint64_t,vector[string]]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         cdef shared_ptr[vector[string]] citem
-        for i in range(deref(self._cpp_obj).size()):
-            itr.genNextValue(self._cpp_obj, citem)
+        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
+            itr.genNextValue(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
             yield List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
 
     def items(self):
         if not self:
             return
-        cdef __map_iter[cmap[cint64_t,vector[string]]] itr = __map_iter[cmap[cint64_t,vector[string]]](self._cpp_obj)
+        cdef __map_iter[cmap[cint64_t,vector[string]]] itr = __map_iter[cmap[cint64_t,vector[string]]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         cdef cint64_t ckey = 0
         cdef shared_ptr[vector[string]] citem
-        for i in range(deref(self._cpp_obj).size()):
-            itr.genNextItem(self._cpp_obj, ckey, citem)
+        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
+            itr.genNextItem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
             yield (ckey, List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
 
     @staticmethod
@@ -241,7 +241,7 @@ cdef shared_ptr[cmap[cint64_t,vector[string]]] Map__i64_List__string__make_insta
             if not isinstance(item, List__string):
                 item = List__string(item)
 
-            deref(c_inst)[key] = deref((<List__string>item)._cpp_obj)
+            deref(c_inst)[key] = deref((<List__string>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
 TEST_MAP = Map__i64_List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(cTEST_MAP()))

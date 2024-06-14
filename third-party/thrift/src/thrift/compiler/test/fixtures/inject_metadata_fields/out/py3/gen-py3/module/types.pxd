@@ -116,7 +116,7 @@ cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/
 
 
 cdef class Fields(thrift.py3.types.Struct):
-    cdef shared_ptr[cFields] _cpp_obj
+    cdef shared_ptr[cFields] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Fields_FieldsSetter _fields_setter
     cdef inline object injected_field_impl(self)
 
@@ -126,7 +126,7 @@ cdef class Fields(thrift.py3.types.Struct):
 
 
 cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cFieldsInjectedToEmptyStruct] _cpp_obj
+    cdef shared_ptr[cFieldsInjectedToEmptyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__FieldsInjectedToEmptyStruct_FieldsSetter _fields_setter
     cdef inline object injected_field_impl(self)
 
@@ -136,7 +136,7 @@ cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
 
 
 cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cFieldsInjectedToStruct] _cpp_obj
+    cdef shared_ptr[cFieldsInjectedToStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__FieldsInjectedToStruct_FieldsSetter _fields_setter
     cdef inline object string_field_impl(self)
     cdef inline object injected_field_impl(self)
@@ -147,7 +147,7 @@ cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
 
 
 cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cFieldsInjectedWithIncludedStruct] _cpp_obj
+    cdef shared_ptr[cFieldsInjectedWithIncludedStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__FieldsInjectedWithIncludedStruct_FieldsSetter _fields_setter
     cdef inline object string_field_impl(self)
     cdef inline object injected_field_impl(self)

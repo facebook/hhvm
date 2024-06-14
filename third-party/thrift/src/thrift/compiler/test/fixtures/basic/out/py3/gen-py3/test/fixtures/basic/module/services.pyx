@@ -546,7 +546,7 @@ async def FB303Service_simple_rpc_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_test_fixtures_basic_module_types.cReservedKeyword](deref((<_test_fixtures_basic_module_types.ReservedKeyword?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[_test_fixtures_basic_module_types.cReservedKeyword](deref((<_test_fixtures_basic_module_types.ReservedKeyword?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def FB303Service_onStartServing_coro(
     object self,
@@ -1067,7 +1067,7 @@ async def MyService_invalid_return_for_hack_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[float]](deref((<_test_fixtures_basic_module_types.Set__float?> result)._cpp_obj)))
+        promise.cPromise.setValue(make_unique[cset[float]](deref((<_test_fixtures_basic_module_types.Set__float?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def MyService_rpc_skipped_codegen_coro(
     object self,

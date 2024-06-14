@@ -46,12 +46,12 @@ cdef class __A_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_a_types.cA](deref(self._struct_cpp_obj), 0)
             return
-        deref(self._struct_cpp_obj).b_ref().assign(deref(_a_types.List__List__c_C(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).b_ref().assign(deref(_a_types.List__List__c_C(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field other
         if _fbthrift_value is None:
             __reset_field[_a_types.cA](deref(self._struct_cpp_obj), 1)
             return
-        deref(self._struct_cpp_obj).other_ref().assign(deref(_a_types.List__c_C(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).other_ref().assign(deref(_a_types.List__c_C(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 

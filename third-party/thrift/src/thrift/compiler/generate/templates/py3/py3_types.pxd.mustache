@@ -78,7 +78,7 @@ cdef class __{{struct:name}}Type(thrift.py3.types.CompiledEnum):
 
 
 cdef class {{struct:name}}({{> types/python_struct_class}}):
-    cdef shared_ptr[c{{struct:name}}] _cpp_obj
+    cdef shared_ptr[c{{struct:name}}] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     {{^struct:union?}}
     cdef _fbthrift_types_fields.__{{struct:name}}_FieldsSetter _fields_setter
     {{#struct:fields_and_mixin_fields}}
@@ -132,7 +132,7 @@ cdef class {{type:flat_name}}(thrift.py3.types.{{!
         }}{{#type:set?}}Set{{/type:set?}}{{!
         }}{{#type:map?}}Map{{/type:map?}}{{!
         }}):
-    cdef shared_ptr[{{> types/cython_cpp_type}}] _cpp_obj
+    cdef shared_ptr[{{> types/cython_cpp_type}}] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/cython_cpp_type}}])
     {{#type:list?}}

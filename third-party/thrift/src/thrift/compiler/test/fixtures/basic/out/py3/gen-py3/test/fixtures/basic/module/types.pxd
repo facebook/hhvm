@@ -182,7 +182,7 @@ cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types_cust
 
 
 cdef class MyStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyStruct] _cpp_obj
+    cdef shared_ptr[cMyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyStruct_FieldsSetter _fields_setter
     cdef inline object MyIntField_impl(self)
     cdef inline object MyStringField_impl(self)
@@ -203,7 +203,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
 
 cdef class Containers(thrift.py3.types.Struct):
-    cdef shared_ptr[cContainers] _cpp_obj
+    cdef shared_ptr[cContainers] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Containers_FieldsSetter _fields_setter
     cdef inline object I32List_impl(self)
     cdef inline object StringSet_impl(self)
@@ -218,7 +218,7 @@ cdef class Containers(thrift.py3.types.Struct):
 
 
 cdef class MyDataItem(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyDataItem] _cpp_obj
+    cdef shared_ptr[cMyDataItem] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyDataItem_FieldsSetter _fields_setter
 
     @staticmethod
@@ -231,7 +231,7 @@ cdef class __MyUnionType(thrift.py3.types.CompiledEnum):
 
 
 cdef class MyUnion(thrift.py3.types.Union):
-    cdef shared_ptr[cMyUnion] _cpp_obj
+    cdef shared_ptr[cMyUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly __MyUnionType type
     cdef readonly object value
     cdef _load_cache(MyUnion self)
@@ -251,7 +251,7 @@ cdef class MyUnion(thrift.py3.types.Union):
 
 
 cdef class ReservedKeyword(thrift.py3.types.Struct):
-    cdef shared_ptr[cReservedKeyword] _cpp_obj
+    cdef shared_ptr[cReservedKeyword] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__ReservedKeyword_FieldsSetter _fields_setter
     cdef inline object reserved_field_impl(self)
 
@@ -265,7 +265,7 @@ cdef class __UnionToBeRenamedType(thrift.py3.types.CompiledEnum):
 
 
 cdef class UnionToBeRenamed(thrift.py3.types.Union):
-    cdef shared_ptr[cUnionToBeRenamed] _cpp_obj
+    cdef shared_ptr[cUnionToBeRenamed] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly __UnionToBeRenamedType type
     cdef readonly object value
     cdef _load_cache(UnionToBeRenamed self)
@@ -281,14 +281,14 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
 
 
 cdef class Set__float(thrift.py3.types.Set):
-    cdef shared_ptr[cset[float]] _cpp_obj
+    cdef shared_ptr[cset[float]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[float]])
 
 cdef shared_ptr[cset[float]] Set__float__make_instance(object items) except *
 
 cdef class List__i32(thrift.py3.types.List):
-    cdef shared_ptr[vector[cint32_t]] _cpp_obj
+    cdef shared_ptr[vector[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint32_t]])
     cdef _check_item_type(self, item)
@@ -296,14 +296,14 @@ cdef class List__i32(thrift.py3.types.List):
 cdef shared_ptr[vector[cint32_t]] List__i32__make_instance(object items) except *
 
 cdef class Set__string(thrift.py3.types.Set):
-    cdef shared_ptr[cset[string]] _cpp_obj
+    cdef shared_ptr[cset[string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[string]])
 
 cdef shared_ptr[cset[string]] Set__string__make_instance(object items) except *
 
 cdef class Map__string_i64(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[string,cint64_t]] _cpp_obj
+    cdef shared_ptr[cmap[string,cint64_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[string,cint64_t]])
     cdef _check_key_type(self, key)
@@ -311,7 +311,7 @@ cdef class Map__string_i64(thrift.py3.types.Map):
 cdef shared_ptr[cmap[string,cint64_t]] Map__string_i64__make_instance(object items) except *
 
 cdef class Map__string_List__i32(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[string,vector[cint32_t]]] _cpp_obj
+    cdef shared_ptr[cmap[string,vector[cint32_t]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[string,vector[cint32_t]]])
     cdef _check_key_type(self, key)

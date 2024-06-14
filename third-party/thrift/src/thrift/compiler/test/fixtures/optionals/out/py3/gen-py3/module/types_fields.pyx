@@ -108,7 +108,7 @@ cdef class __Vehicle_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _module_types.Color):
             raise TypeError(f'color is not a { _module_types.Color !r}.')
-        deref(self._struct_cpp_obj).color_ref().assign(deref((<_module_types.Color?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).color_ref().assign(deref((<_module_types.Color?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field licensePlate
@@ -218,14 +218,14 @@ cdef class __Person_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _module_types.Color):
             raise TypeError(f'favoriteColor is not a { _module_types.Color !r}.')
-        deref(self._struct_cpp_obj).favoriteColor_ref().assign(deref((<_module_types.Color?> _fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).favoriteColor_ref().assign(deref((<_module_types.Color?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_5(self, _fbthrift_value) except *:
         # for field friends
         if _fbthrift_value is None:
             __reset_field[_module_types.cPerson](deref(self._struct_cpp_obj), 5)
             return
-        deref(self._struct_cpp_obj).friends_ref().assign(deref(_module_types.Set__i64(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).friends_ref().assign(deref(_module_types.Set__i64(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_6(self, _fbthrift_value) except *:
         # for field bestFriend
@@ -242,7 +242,7 @@ cdef class __Person_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cPerson](deref(self._struct_cpp_obj), 7)
             return
-        deref(self._struct_cpp_obj).petNames_ref().assign(deref(_module_types.Map__Animal_string(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).petNames_ref().assign(deref(_module_types.Map__Animal_string(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_8(self, _fbthrift_value) except *:
         # for field afraidOfAnimal
@@ -258,5 +258,5 @@ cdef class __Person_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cPerson](deref(self._struct_cpp_obj), 9)
             return
-        deref(self._struct_cpp_obj).vehicles_ref().assign(deref(_module_types.List__Vehicle(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).vehicles_ref().assign(deref(_module_types.List__Vehicle(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 

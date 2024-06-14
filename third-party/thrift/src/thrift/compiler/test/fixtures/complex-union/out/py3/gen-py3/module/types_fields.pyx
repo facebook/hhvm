@@ -66,7 +66,7 @@ cdef class __Val_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cVal](deref(self._struct_cpp_obj), 2)
             return
-        deref(self._struct_cpp_obj).typedefValue_ref().assign(deref(_module_types.Map__i16_string(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).typedefValue_ref().assign(deref(_module_types.Map__i16_string(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
 @__cython.auto_pickle(False)

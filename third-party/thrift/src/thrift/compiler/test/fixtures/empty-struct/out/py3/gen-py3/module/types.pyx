@@ -104,8 +104,8 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class Empty(thrift.py3.types.Struct):
     def __init__(Empty self, **kwargs):
-        self._cpp_obj = make_shared[cEmpty]()
-        self._fields_setter = _fbthrift_types_fields.__Empty_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cEmpty]()
+        self._fields_setter = _fbthrift_types_fields.__Empty_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(Empty self, **kwargs):
@@ -121,7 +121,7 @@ cdef class Empty(thrift.py3.types.Struct):
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cEmpty] cpp_obj):
         __fbthrift_inst = <Empty>Empty.__new__(Empty)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
 
@@ -137,15 +137,15 @@ cdef class Empty(thrift.py3.types.Struct):
 
     def __copy__(Empty self):
         cdef shared_ptr[cEmpty] cpp_obj = make_shared[cEmpty](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Empty._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cEmpty](
-            self._cpp_obj,
-            (<Empty>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<Empty>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -174,14 +174,14 @@ cdef class Empty(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Empty self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cEmpty](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cEmpty](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Empty self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cEmpty]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cEmpty]()
         with nogil:
-            needed = serializer.cdeserialize[cEmpty](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cEmpty](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -210,7 +210,7 @@ cdef class Nada(thrift.py3.types.Union):
     def __init__(
         self, *
     ):
-        self._cpp_obj = __to_shared_ptr(cmove(Nada._make_instance(
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(Nada._make_instance(
           NULL,
         )))
         self._load_cache()
@@ -234,7 +234,7 @@ cdef class Nada(thrift.py3.types.Union):
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cNada] cpp_obj):
         __fbthrift_inst = <Nada>Nada.__new__(Nada)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         __fbthrift_inst._load_cache()
         return __fbthrift_inst
 
@@ -243,22 +243,22 @@ cdef class Nada(thrift.py3.types.Union):
         return  super().__hash__()
 
     cdef _load_cache(Nada self):
-        self.type = Nada.Type(<int>(deref(self._cpp_obj).getType()))
+        self.type = Nada.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
         cdef int type = self.type.value
         if type == 0:    # Empty
             self.value = None
 
     def __copy__(Nada self):
         cdef shared_ptr[cNada] cpp_obj = make_shared[cNada](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Nada._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cNada](
-            self._cpp_obj,
-            (<Nada>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<Nada>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -287,14 +287,14 @@ cdef class Nada(thrift.py3.types.Union):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Nada self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cNada](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cNada](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Nada self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cNada]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cNada]()
         with nogil:
-            needed = serializer.cdeserialize[cNada](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cNada](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         # force a cache reload since the underlying data's changed
         self._load_cache()
         return needed

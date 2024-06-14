@@ -125,16 +125,16 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class Struct(thrift.py3.types.Struct):
     def __init__(Struct self, **kwargs):
-        self._cpp_obj = make_shared[cStruct]()
-        self._fields_setter = _fbthrift_types_fields.__Struct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cStruct]()
+        self._fields_setter = _fbthrift_types_fields.__Struct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     def __call__(Struct self, **kwargs):
         if not kwargs:
             return self
         cdef Struct __fbthrift_inst = Struct.__new__(Struct)
-        __fbthrift_inst._cpp_obj = make_shared[cStruct](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Struct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Struct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -144,19 +144,19 @@ cdef class Struct(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("Struct", {
-          "first": deref(self._cpp_obj).first_ref().has_value(),
-          "second": deref(self._cpp_obj).second_ref().has_value(),
+          "first": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).first_ref().has_value(),
+          "second": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).second_ref().has_value(),
         })
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStruct] cpp_obj):
         __fbthrift_inst = <Struct>Struct.__new__(Struct)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
     cdef inline first_impl(self):
 
-        return deref(self._cpp_obj).first_ref().value()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).first_ref().value()
 
     @property
     def first(self):
@@ -164,7 +164,7 @@ cdef class Struct(thrift.py3.types.Struct):
 
     cdef inline second_impl(self):
 
-        return (<bytes>deref(self._cpp_obj).second_ref().value()).decode('UTF-8')
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).second_ref().value()).decode('UTF-8')
 
     @property
     def second(self):
@@ -183,15 +183,15 @@ cdef class Struct(thrift.py3.types.Struct):
 
     def __copy__(Struct self):
         cdef shared_ptr[cStruct] cpp_obj = make_shared[cStruct](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
         return __richcmp[cStruct](
-            self._cpp_obj,
-            (<Struct>other)._cpp_obj,
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<Struct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
@@ -220,14 +220,14 @@ cdef class Struct(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Struct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cStruct](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Struct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cStruct]()
         with nogil:
-            needed = serializer.cdeserialize[cStruct](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -252,35 +252,35 @@ cdef class Struct(thrift.py3.types.Struct):
 cdef class List__Enum(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__Enum):
-            self._cpp_obj = (<List__Enum> items)._cpp_obj
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<List__Enum> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
         else:
-            self._cpp_obj = List__Enum__make_instance(items)
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = List__Enum__make_instance(items)
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cEnum]] c_items):
         __fbthrift_inst = <List__Enum>List__Enum.__new__(List__Enum)
-        __fbthrift_inst._cpp_obj = cmove(c_items)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
         return __fbthrift_inst
 
     def __copy__(List__Enum self):
         cdef shared_ptr[vector[cEnum]] cpp_obj = make_shared[vector[cEnum]](
-            deref(self._cpp_obj)
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return List__Enum._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
-        return deref(self._cpp_obj).size()
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
+        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
         return List__Enum._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[vector[cEnum]](self._cpp_obj, start, stop, step)
+            __list_slice[vector[cEnum]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
         )
 
     cdef _get_single_item(self, size_t index):
         cdef cEnum citem
-        __list_getitem(self._cpp_obj, index, citem)
+        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
         return translate_cpp_enum_to_python(Enum, <int> citem)
 
     cdef _check_item_type(self, item):
@@ -294,9 +294,9 @@ cdef class List__Enum(thrift.py3.types.List):
         item = self._check_item_type(item)
         if item is None:
             raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
+        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
         cdef cEnum citem = <cEnum><int>item
-        cdef __optional[size_t] found = __list_index[vector[cEnum]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[vector[cEnum]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -306,7 +306,7 @@ cdef class List__Enum(thrift.py3.types.List):
         if item is None:
             return 0
         cdef cEnum citem = <cEnum><int>item
-        return __list_count[vector[cEnum]](self._cpp_obj, citem)
+        return __list_count[vector[cEnum]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
 
     @staticmethod
     def __get_reflection__():

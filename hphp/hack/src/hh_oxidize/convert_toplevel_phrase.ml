@@ -113,6 +113,7 @@ let string_of_module_desc = function
   | Pmod_unpack _ -> "Pmod_unpack"
   | Pmod_extension _ -> "Pmod_extension"
   | Pmod_ident _ -> "Pmod_ident"
+  | Pmod_apply_unit _ -> "Pmod_apply_unit"
 
 let structure_item (env : Env.t) (si : structure_item) : Env.t =
   match si.pstr_desc with

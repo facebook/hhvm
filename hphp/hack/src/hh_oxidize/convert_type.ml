@@ -116,7 +116,8 @@ let rec core_type ?(seen_indirection = false) ~safe_ints (ct : core_type) :
   | Ptyp_var "ty" when is_by_ref ->
     rust_ref (lifetime "a") (rust_type "Ty" [lifetime "a"] [])
   | Ptyp_var name -> convert_type_name name |> rust_type_var
-  | Ptyp_alias (_, name) -> rust_type (convert_type_name name) [] []
+  | Ptyp_alias (_, { txt = name; _ }) ->
+    rust_type (convert_type_name name) [] []
   | Ptyp_tuple tys -> tuple ~safe_ints tys
   | Ptyp_arrow _ -> raise (Skip_type_decl "it contains an arrow type")
   | Ptyp_constr ({ txt = Lident "list"; _ }, [arg]) when is_by_ref ->
@@ -227,6 +228,7 @@ let rec core_type ?(seen_indirection = false) ~safe_ints (ct : core_type) :
   | Ptyp_package _ -> raise (Skip_type_decl "cannot convert type Ptyp_package")
   | Ptyp_extension _ ->
     raise (Skip_type_decl "cannot convert type Ptyp_extension")
+  | Ptyp_open _ -> raise (Skip_type_decl "cannot convert type Ptyp_open")
 
 and tuple ?(seen_indirection = false) ~safe_ints types =
   List.map ~f:(core_type ~seen_indirection ~safe_ints) types

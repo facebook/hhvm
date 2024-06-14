@@ -75,6 +75,16 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
     cdef to_python_value(self, object struct_tuple):
         return self._mutable_struct_class._fbthrift_create(struct_tuple)
 
+    def to_container_value(self, object value not None):
+        """
+        A type checker, called from the Immutable containers, allows mutable
+        types to be part of the process during the constant definition.
+        """
+        if not isinstance(value, self._mutable_struct_class):
+            raise TypeError(f"value {value} is not a {self._mutable_struct_class !r}, is actually of type {type(value)}.")
+
+        return value
+
     def same_as(MutableStructTypeInfo self, other):
         if other is self:
             return True
@@ -136,6 +146,20 @@ cdef class MutableListTypeInfo(TypeInfoBase):
         """
         return MutableList(self.val_info, value)
 
+    def to_container_value(MutableListTypeInfo self, object value not None):
+        """
+        A type checker, called from the Immutable containers, allows mutable
+        types to be part of the process during the constant definition.
+
+        Validates the `value` and returns a `MutableList`
+        """
+        if isinstance(value, MutableList):
+            return value
+
+        return (<TypeInfoBase>self).to_python_value(
+            (<TypeInfoBase>self).to_internal_data(value)
+        )
+
     def same_as(MutableListTypeInfo self, other):
         if other is self:
             return True
@@ -193,6 +217,20 @@ cdef class MutableSetTypeInfo(TypeInfoBase):
             the type info (`self.val_info`) attached.
         """
         return MutableSet(self.val_info, value)
+
+    def to_container_value(MutableSetTypeInfo self, object value not None):
+        """
+        A type checker, called from the Immutable containers, allows mutable
+        types to be part of the process during the constant definition.
+
+        Validates the `value` and returns a `MutableSet`
+        """
+        if isinstance(value, MutableSet):
+            return value
+
+        return (<TypeInfoBase>self).to_python_value(
+            (<TypeInfoBase>self).to_internal_data(value)
+        )
 
     def same_as(MutableSetTypeInfo self, other):
         if other is self:
@@ -252,6 +290,20 @@ cdef class MutableMapTypeInfo(TypeInfoBase):
             the type infos (`self.key_info` and `self.val_info`) attached.
         """
         return MutableMap(self.key_info, self.val_info, value)
+
+    def to_container_value(self, object value not None):
+        """
+        A type checker, called from the Immutable containers, allows mutable
+        types to be part of the process during the constant definition.
+
+        Validates the `value` and returns a `MutableMap`
+        """
+        if isinstance(value, MutableMap):
+            return value
+
+        return (<TypeInfoBase>self).to_python_value(
+            (<TypeInfoBase>self).to_internal_data(value)
+        )
 
     def same_as(MutableMapTypeInfo self, other):
         if other is self:

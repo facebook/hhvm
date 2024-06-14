@@ -1233,7 +1233,7 @@ cdef class Union(StructOrUnion):
 
     def __init__(self, **kwargs):
         if not kwargs:
-            self._fbthrift_union_copy_data_to_attributes()
+            self._fbthrift_update_current_field_attributes()
             return
         # recommend calling with 1 kwarg.
         # ok to call with one not None kwarg and extra None kwargs.
@@ -1260,7 +1260,7 @@ cdef class Union(StructOrUnion):
     def _fbthrift_create(cls, data):
         cdef Union inst = cls.__new__(cls)
         inst._fbthrift_data = data
-        inst._fbthrift_union_copy_data_to_attributes()
+        inst._fbthrift_update_current_field_attributes()
         return inst
 
     @staticmethod
@@ -1304,9 +1304,9 @@ cdef class Union(StructOrUnion):
         PyTuple_SET_ITEM(self._fbthrift_data, 1, value)
         Py_DECREF(old_value)
 
-        self._fbthrift_union_copy_data_to_attributes()
+        self._fbthrift_update_current_field_attributes()
 
-    cdef void _fbthrift_union_copy_data_to_attributes(self) except *:
+    cdef void _fbthrift_update_current_field_attributes(self) except *:
         """
         Updates the `type` and `value` attributes from the internal data tuple
         of this union (`self._fbthrift_data`).
@@ -1330,19 +1330,19 @@ cdef class Union(StructOrUnion):
     cdef uint32_t _deserialize(self, folly.iobuf.IOBuf buf, Protocol proto) except? 0:
         cdef UnionInfo info = self._fbthrift_struct_info
         cdef uint32_t size = cdeserialize(deref(info.cpp_obj), buf._this, self._fbthrift_data, proto)
-        self._fbthrift_union_copy_data_to_attributes()
+        self._fbthrift_update_current_field_attributes()
         return size
 
-    cdef _fbthrift_get_field_value(self, int16_t index):
+    cdef _fbthrift_get_field_value(self, int16_t field_id):
         """
-        Returns the value of the field with the given `index` if it is indeed the field
-        that is (currently) set for this union. Otherwise, raises AttributeError.
+        Returns the value of the field with the given `field_id` if it is indeed the
+        field that is (currently) set for this union. Otherwise, raises AttributeError.
         """
-        if self.type.value != index:
+        if self.type.value != field_id:
             # TODO in python 3.10 update this to use name and obj fields
             raise AttributeError(
                 f'Union contains a value of type {self.type.name}, not '
-                f'{type(self).Type(index).name}')
+                f'{type(self).Type(field_id).name}')
         return self.value
 
     def get_type(self):

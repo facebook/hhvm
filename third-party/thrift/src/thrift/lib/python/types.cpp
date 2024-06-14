@@ -627,15 +627,19 @@ size_t writeMapSorted(
 } // namespace
 
 PyObject* createUnionTuple() {
-  UniquePyObjectPtr tuple{
-      PyTuple_New(2)}; // one for the type and the other for the value
-  if (!tuple) {
+  // Tuple items: (current field enum value, field value)
+  UniquePyObjectPtr tuple{PyTuple_New(2)};
+  if (tuple == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
-  PyTuple_SET_ITEM(
-      tuple.get(), 0, PyLong_FromLong(0)); // init type to __EMPTY__ (0)
-  PyTuple_SET_ITEM(tuple.get(), 1, Py_None); // init value to None
+
+  // Initialize union tuple to "empty" union, i.e. `(0, Py_None)`. Indeed, 0 is
+  // the special enum value corresponding to an empty union, for all thrift
+  // unions.
+  PyTuple_SET_ITEM(tuple.get(), 0, PyLong_FromLong(0));
+  PyTuple_SET_ITEM(tuple.get(), 1, Py_None);
   Py_INCREF(Py_None);
+
   return tuple.release();
 }
 

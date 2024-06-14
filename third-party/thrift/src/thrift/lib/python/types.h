@@ -70,6 +70,17 @@ inline T convInt(V v) {
   LOG(FATAL) << "int out of range";
 }
 
+/**
+ * Creates a new "union tuple" initialized for an empty union.
+ *
+ * The returned tuple has 2 items:
+ *  1. The enum value of the field that is currently set for this union, or
+ *     the special "empty" (with value 0) if the union is empty.
+ *  2. The value of the current field for this enum, or Py_None if the union
+ *     is empty.
+ *
+ * The tuple returned by this function always has values `(0, Py_None)`.
+ */
 PyObject* createUnionTuple();
 
 /***

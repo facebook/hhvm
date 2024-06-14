@@ -87,7 +87,7 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
     cdef inline object message_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cCustomException])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cCustomException])
 
 
 

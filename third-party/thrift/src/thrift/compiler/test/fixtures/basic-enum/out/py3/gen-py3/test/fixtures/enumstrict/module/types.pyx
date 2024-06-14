@@ -259,7 +259,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMyStruct] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct] cpp_obj):
         __fbthrift_inst = <MyStruct>MyStruct.__new__(MyStruct)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -299,7 +299,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         cdef shared_ptr[cMyStruct] cpp_obj = make_shared[cMyStruct](
             deref(self._cpp_obj)
         )
-        return MyStruct._fbthrift_create(cmove(cpp_obj))
+        return MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -371,7 +371,7 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
             self._cpp_obj = Map__MyEnum_string__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[cMyEnum,string]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cMyEnum,string]] c_items):
         __fbthrift_inst = <Map__MyEnum_string>Map__MyEnum_string.__new__(Map__MyEnum_string)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -380,7 +380,7 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
         cdef shared_ptr[cmap[cMyEnum,string]] cpp_obj = make_shared[cmap[cMyEnum,string]](
             deref(self._cpp_obj)
         )
-        return Map__MyEnum_string._fbthrift_create(cmove(cpp_obj))
+        return Map__MyEnum_string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -457,4 +457,4 @@ cdef shared_ptr[cmap[cMyEnum,string]] Map__MyEnum_string__make_instance(object i
     return cmove(c_inst)
 
 kOne = MyEnum(<int> (ckOne()))
-enumNames = Map__MyEnum_string._fbthrift_create(constant_shared_ptr(cenumNames()))
+enumNames = Map__MyEnum_string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(cenumNames()))

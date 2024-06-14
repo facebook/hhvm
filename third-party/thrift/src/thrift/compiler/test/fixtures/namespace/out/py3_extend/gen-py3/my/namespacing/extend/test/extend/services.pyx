@@ -149,7 +149,7 @@ cdef api void call_cy_ExtendTestService_check(
     unique_ptr[_my_namespacing_test_hsmodule_types.cHsFoo] struct1
 ) noexcept:
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
-    arg_struct1 = _my_namespacing_test_hsmodule_types.HsFoo._fbthrift_create(shared_ptr[_my_namespacing_test_hsmodule_types.cHsFoo](struct1.release()))
+    arg_struct1 = _my_namespacing_test_hsmodule_types.HsFoo._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_my_namespacing_test_hsmodule_types.cHsFoo](struct1.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(

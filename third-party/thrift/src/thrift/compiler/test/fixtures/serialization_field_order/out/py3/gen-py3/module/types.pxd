@@ -98,7 +98,7 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef inline object field3_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFoo])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFoo])
 
 
 
@@ -110,7 +110,7 @@ cdef class Foo2(thrift.py3.types.Struct):
     cdef inline object field3_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFoo2])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFoo2])
 
 
 

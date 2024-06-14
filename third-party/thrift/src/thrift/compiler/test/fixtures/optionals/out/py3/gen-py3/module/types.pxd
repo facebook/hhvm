@@ -135,7 +135,7 @@ cdef class Color(thrift.py3.types.Struct):
     cdef inline object alpha_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cColor])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cColor])
 
 
 
@@ -150,7 +150,7 @@ cdef class Vehicle(thrift.py3.types.Struct):
     cdef Color __fbthrift_cached_color
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cVehicle])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cVehicle])
 
 
 
@@ -174,20 +174,20 @@ cdef class Person(thrift.py3.types.Struct):
     cdef List__Vehicle __fbthrift_cached_vehicles
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cPerson])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cPerson])
 
 
 cdef class Set__i64(thrift.py3.types.Set):
     cdef shared_ptr[cset[cint64_t]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cset[cint64_t]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cint64_t]])
 
 cdef shared_ptr[cset[cint64_t]] Set__i64__make_instance(object items) except *
 
 cdef class Map__Animal_string(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cAnimal,string]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[cAnimal,string]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cAnimal,string]])
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[cAnimal,string]] Map__Animal_string__make_instance(object items) except *
@@ -195,7 +195,7 @@ cdef shared_ptr[cmap[cAnimal,string]] Map__Animal_string__make_instance(object i
 cdef class List__Vehicle(thrift.py3.types.List):
     cdef shared_ptr[vector[cVehicle]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[cVehicle]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cVehicle]])
     cdef _check_item_type(self, item)
 
 cdef shared_ptr[vector[cVehicle]] List__Vehicle__make_instance(object items) except *

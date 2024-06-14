@@ -96,7 +96,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline object field_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMyStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct])
 
 
 
@@ -113,13 +113,13 @@ cdef class Combo(thrift.py3.types.Struct):
     cdef List__List__module_MyStruct __fbthrift_cached_listOfTheirMyStructList
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cCombo])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cCombo])
 
 
 cdef class List__MyStruct(thrift.py3.types.List):
     cdef shared_ptr[vector[cMyStruct]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[cMyStruct]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cMyStruct]])
     cdef _check_item_type(self, item)
 
 cdef shared_ptr[vector[cMyStruct]] List__MyStruct__make_instance(object items) except *
@@ -127,7 +127,7 @@ cdef shared_ptr[vector[cMyStruct]] List__MyStruct__make_instance(object items) e
 cdef class List__List__MyStruct(thrift.py3.types.List):
     cdef shared_ptr[vector[vector[cMyStruct]]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[vector[cMyStruct]]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[vector[cMyStruct]]])
     cdef _check_item_type(self, item)
 
 cdef shared_ptr[vector[vector[cMyStruct]]] List__List__MyStruct__make_instance(object items) except *
@@ -135,7 +135,7 @@ cdef shared_ptr[vector[vector[cMyStruct]]] List__List__MyStruct__make_instance(o
 cdef class List__module_MyStruct(thrift.py3.types.List):
     cdef shared_ptr[vector[_module_types.cMyStruct]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[_module_types.cMyStruct]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[_module_types.cMyStruct]])
     cdef _check_item_type(self, item)
 
 cdef shared_ptr[vector[_module_types.cMyStruct]] List__module_MyStruct__make_instance(object items) except *
@@ -143,7 +143,7 @@ cdef shared_ptr[vector[_module_types.cMyStruct]] List__module_MyStruct__make_ins
 cdef class List__List__module_MyStruct(thrift.py3.types.List):
     cdef shared_ptr[vector[vector[_module_types.cMyStruct]]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[vector[_module_types.cMyStruct]]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[vector[_module_types.cMyStruct]]])
     cdef _check_item_type(self, item)
 
 cdef shared_ptr[vector[vector[_module_types.cMyStruct]]] List__List__module_MyStruct__make_instance(object items) except *

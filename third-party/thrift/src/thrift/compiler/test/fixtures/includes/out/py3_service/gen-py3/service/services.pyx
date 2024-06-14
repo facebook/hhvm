@@ -143,8 +143,8 @@ cdef api void call_cy_MyService_query(
     unique_ptr[_includes_types.cIncluded] i
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
-    arg_s = _module_types.MyStruct._fbthrift_create(shared_ptr[_module_types.cMyStruct](s.release()))
-    arg_i = _includes_types.Included._fbthrift_create(shared_ptr[_includes_types.cIncluded](i.release()))
+    arg_s = _module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cMyStruct](s.release()))
+    arg_i = _includes_types.Included._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_includes_types.cIncluded](i.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -164,8 +164,8 @@ cdef api void call_cy_MyService_has_arg_docs(
     unique_ptr[_includes_types.cIncluded] i
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
-    arg_s = _module_types.MyStruct._fbthrift_create(shared_ptr[_module_types.cMyStruct](s.release()))
-    arg_i = _includes_types.Included._fbthrift_create(shared_ptr[_includes_types.cIncluded](i.release()))
+    arg_s = _module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cMyStruct](s.release()))
+    arg_i = _includes_types.Included._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_includes_types.cIncluded](i.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(

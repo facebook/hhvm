@@ -78,21 +78,21 @@ cdef void Raiser_doRaise_callback(
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cBanal]():
         try:
-            exc = _module_types.Banal._fbthrift_create(try_make_shared_exception[_module_types.cBanal](result.exception()))
+            exc = _module_types.Banal._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cBanal](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
             pyfuture.set_exception(exc)
     elif result.hasException[_module_types.cFiery]():
         try:
-            exc = _module_types.Fiery._fbthrift_create(try_make_shared_exception[_module_types.cFiery](result.exception()))
+            exc = _module_types.Fiery._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFiery](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
             pyfuture.set_exception(exc)
     elif result.hasException[_module_types.cSerious]():
         try:
-            exc = _module_types.Serious._fbthrift_create(try_make_shared_exception[_module_types.cSerious](result.exception()))
+            exc = _module_types.Serious._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cSerious](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -125,21 +125,21 @@ cdef void Raiser_get500_callback(
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cFiery]():
         try:
-            exc = _module_types.Fiery._fbthrift_create(try_make_shared_exception[_module_types.cFiery](result.exception()))
+            exc = _module_types.Fiery._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFiery](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
             pyfuture.set_exception(exc)
     elif result.hasException[_module_types.cBanal]():
         try:
-            exc = _module_types.Banal._fbthrift_create(try_make_shared_exception[_module_types.cBanal](result.exception()))
+            exc = _module_types.Banal._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cBanal](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
             pyfuture.set_exception(exc)
     elif result.hasException[_module_types.cSerious]():
         try:
-            exc = _module_types.Serious._fbthrift_create(try_make_shared_exception[_module_types.cSerious](result.exception()))
+            exc = _module_types.Serious._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cSerious](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:

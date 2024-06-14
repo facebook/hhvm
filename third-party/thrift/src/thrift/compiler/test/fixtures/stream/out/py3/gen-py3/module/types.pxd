@@ -107,7 +107,7 @@ cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
     cdef _fbthrift_types_fields.__FooStreamEx_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFooStreamEx])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFooStreamEx])
 
 
 
@@ -116,7 +116,7 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
     cdef _fbthrift_types_fields.__FooEx_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFooEx])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFooEx])
 
 
 
@@ -125,7 +125,7 @@ cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
     cdef _fbthrift_types_fields.__FooEx2_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFooEx2])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFooEx2])
 
 
 

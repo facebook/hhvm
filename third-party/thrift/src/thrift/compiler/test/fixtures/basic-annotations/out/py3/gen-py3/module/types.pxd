@@ -142,7 +142,7 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
     cdef inline object name_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMyStructNestedAnnotation])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStructNestedAnnotation])
 
 
 
@@ -153,13 +153,13 @@ cdef class SecretStruct(thrift.py3.types.Struct):
     cdef inline object password_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cSecretStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSecretStruct])
 
 
 cdef class std_deque_std_string__List__string(thrift.py3.types.List):
     cdef shared_ptr[std_deque_std_string] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[std_deque_std_string])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[std_deque_std_string])
     cdef _check_item_type(self, item)
 
 cdef shared_ptr[std_deque_std_string] std_deque_std_string__List__string__make_instance(object items) except *

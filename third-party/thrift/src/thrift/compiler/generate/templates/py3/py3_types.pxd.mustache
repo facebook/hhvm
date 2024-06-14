@@ -122,7 +122,7 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
     {{/struct:union?}}
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[c{{struct:name}}])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[c{{struct:name}}])
 
 {{/program:filtered_structs}}
 
@@ -134,7 +134,7 @@ cdef class {{type:flat_name}}(thrift.py3.types.{{!
         }}):
     cdef shared_ptr[{{> types/cython_cpp_type}}] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[{{> types/cython_cpp_type}}])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/cython_cpp_type}}])
     {{#type:list?}}
     cdef _check_item_type(self, item)
     {{/type:list?}}{{#type:map?}}

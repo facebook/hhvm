@@ -306,7 +306,7 @@ cdef class TypeUri(thrift.py3.types.Union):
         return cmove(c_inst)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cTypeUri] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cTypeUri] cpp_obj):
         __fbthrift_inst = <TypeUri>TypeUri.__new__(TypeUri)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         __fbthrift_inst._load_cache()
@@ -350,7 +350,7 @@ cdef class TypeUri(thrift.py3.types.Union):
         cdef shared_ptr[cTypeUri] cpp_obj = make_shared[cTypeUri](
             deref(self._cpp_obj)
         )
-        return TypeUri._fbthrift_create(cmove(cpp_obj))
+        return TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -615,7 +615,7 @@ cdef class TypeName(thrift.py3.types.Union):
         return cmove(c_inst)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cTypeName] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cTypeName] cpp_obj):
         __fbthrift_inst = <TypeName>TypeName.__new__(TypeName)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         __fbthrift_inst._load_cache()
@@ -751,15 +751,15 @@ cdef class TypeName(thrift.py3.types.Union):
         elif type == 9:
             self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj).get_binaryType())
         elif type == 10:
-            self.value = TypeUri._fbthrift_create(make_shared[cTypeUri](deref(self._cpp_obj).get_enumType()))
+            self.value = TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cTypeUri](deref(self._cpp_obj).get_enumType()))
         elif type == 17:
-            self.value = TypeUri._fbthrift_create(make_shared[cTypeUri](deref(self._cpp_obj).get_typedefType()))
+            self.value = TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cTypeUri](deref(self._cpp_obj).get_typedefType()))
         elif type == 11:
-            self.value = TypeUri._fbthrift_create(make_shared[cTypeUri](deref(self._cpp_obj).get_structType()))
+            self.value = TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cTypeUri](deref(self._cpp_obj).get_structType()))
         elif type == 12:
-            self.value = TypeUri._fbthrift_create(make_shared[cTypeUri](deref(self._cpp_obj).get_unionType()))
+            self.value = TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cTypeUri](deref(self._cpp_obj).get_unionType()))
         elif type == 13:
-            self.value = TypeUri._fbthrift_create(make_shared[cTypeUri](deref(self._cpp_obj).get_exceptionType()))
+            self.value = TypeUri._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cTypeUri](deref(self._cpp_obj).get_exceptionType()))
         elif type == 14:
             self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj).get_listType())
         elif type == 15:
@@ -771,7 +771,7 @@ cdef class TypeName(thrift.py3.types.Union):
         cdef shared_ptr[cTypeName] cpp_obj = make_shared[cTypeName](
             deref(self._cpp_obj)
         )
-        return TypeName._fbthrift_create(cmove(cpp_obj))
+        return TypeName._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

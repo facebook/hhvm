@@ -88,13 +88,13 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef List__i32 __fbthrift_cached_myNumbers
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFoo])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFoo])
 
 
 cdef class List__bool(thrift.py3.types.List):
     cdef shared_ptr[vector[cbool]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[cbool]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cbool]])
     cdef _check_item_type(self, item)
 
 cdef shared_ptr[vector[cbool]] List__bool__make_instance(object items) except *
@@ -102,7 +102,7 @@ cdef shared_ptr[vector[cbool]] List__bool__make_instance(object items) except *
 cdef class List__i32(thrift.py3.types.List):
     cdef shared_ptr[vector[cint32_t]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[cint32_t]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint32_t]])
     cdef _check_item_type(self, item)
 
 cdef shared_ptr[vector[cint32_t]] List__i32__make_instance(object items) except *

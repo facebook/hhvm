@@ -198,7 +198,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef Set__float __fbthrift_cached_floatSet
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMyStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct])
 
 
 
@@ -213,7 +213,7 @@ cdef class Containers(thrift.py3.types.Struct):
     cdef Map__string_i64 __fbthrift_cached_StringToI64Map
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cContainers])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cContainers])
 
 
 
@@ -222,7 +222,7 @@ cdef class MyDataItem(thrift.py3.types.Struct):
     cdef _fbthrift_types_fields.__MyDataItem_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMyDataItem])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyDataItem])
 
 cdef class __MyUnionType(thrift.py3.types.CompiledEnum):
     pass
@@ -246,7 +246,7 @@ cdef class MyUnion(thrift.py3.types.Union):
     ) except *
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMyUnion])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyUnion])
 
 
 
@@ -256,7 +256,7 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
     cdef inline object reserved_field_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cReservedKeyword])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cReservedKeyword])
 
 cdef class __UnionToBeRenamedType(thrift.py3.types.CompiledEnum):
     pass
@@ -277,20 +277,20 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
     ) except *
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cUnionToBeRenamed])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cUnionToBeRenamed])
 
 
 cdef class Set__float(thrift.py3.types.Set):
     cdef shared_ptr[cset[float]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cset[float]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[float]])
 
 cdef shared_ptr[cset[float]] Set__float__make_instance(object items) except *
 
 cdef class List__i32(thrift.py3.types.List):
     cdef shared_ptr[vector[cint32_t]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[cint32_t]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint32_t]])
     cdef _check_item_type(self, item)
 
 cdef shared_ptr[vector[cint32_t]] List__i32__make_instance(object items) except *
@@ -298,14 +298,14 @@ cdef shared_ptr[vector[cint32_t]] List__i32__make_instance(object items) except 
 cdef class Set__string(thrift.py3.types.Set):
     cdef shared_ptr[cset[string]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cset[string]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[string]])
 
 cdef shared_ptr[cset[string]] Set__string__make_instance(object items) except *
 
 cdef class Map__string_i64(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,cint64_t]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[string,cint64_t]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[string,cint64_t]])
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[string,cint64_t]] Map__string_i64__make_instance(object items) except *
@@ -313,7 +313,7 @@ cdef shared_ptr[cmap[string,cint64_t]] Map__string_i64__make_instance(object ite
 cdef class Map__string_List__i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,vector[cint32_t]]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[string,vector[cint32_t]]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[string,vector[cint32_t]]])
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[string,vector[cint32_t]]] Map__string_List__i32__make_instance(object items) except *

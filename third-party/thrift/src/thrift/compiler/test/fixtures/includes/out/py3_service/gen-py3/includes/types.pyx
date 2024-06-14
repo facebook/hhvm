@@ -96,7 +96,7 @@ cdef class Included(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cIncluded] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cIncluded] cpp_obj):
         __fbthrift_inst = <Included>Included.__new__(Included)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -112,7 +112,7 @@ cdef class Included(thrift.py3.types.Struct):
     cdef inline MyTransitiveField_impl(self):
 
         if self.__fbthrift_cached_MyTransitiveField is None:
-            self.__fbthrift_cached_MyTransitiveField = _transitive_types.Foo._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).MyTransitiveField_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_MyTransitiveField = _transitive_types.Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).MyTransitiveField_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_MyTransitiveField
 
     @property
@@ -134,7 +134,7 @@ cdef class Included(thrift.py3.types.Struct):
         cdef shared_ptr[cIncluded] cpp_obj = make_shared[cIncluded](
             deref(self._cpp_obj)
         )
-        return Included._fbthrift_create(cmove(cpp_obj))
+        return Included._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -196,7 +196,7 @@ cdef class Included(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("includes.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Included, self)
-ExampleIncluded = Included._fbthrift_create(constant_shared_ptr(cExampleIncluded()))
+ExampleIncluded = Included._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(cExampleIncluded()))
 IncludedConstant = 42
 IncludedInt64 = int
 TransitiveFoo = _transitive_types.Foo

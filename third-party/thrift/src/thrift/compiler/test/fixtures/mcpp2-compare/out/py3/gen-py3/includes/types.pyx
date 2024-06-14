@@ -148,7 +148,7 @@ cdef class AStruct(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cAStruct] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAStruct] cpp_obj):
         __fbthrift_inst = <AStruct>AStruct.__new__(AStruct)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -176,7 +176,7 @@ cdef class AStruct(thrift.py3.types.Struct):
         cdef shared_ptr[cAStruct] cpp_obj = make_shared[cAStruct](
             deref(self._cpp_obj)
         )
-        return AStruct._fbthrift_create(cmove(cpp_obj))
+        return AStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -263,7 +263,7 @@ cdef class AStructB(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cAStructB] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAStructB] cpp_obj):
         __fbthrift_inst = <AStructB>AStructB.__new__(AStructB)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -273,7 +273,7 @@ cdef class AStructB(thrift.py3.types.Struct):
         if self.__fbthrift_cached_FieldA is None:
             if not deref(self._cpp_obj).FieldA_ref():
                 return None
-            self.__fbthrift_cached_FieldA = AStruct._fbthrift_create(__reference_shared_ptr(deref(deref(self._cpp_obj).FieldA_ref()), self._cpp_obj))
+            self.__fbthrift_cached_FieldA = AStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj).FieldA_ref()), self._cpp_obj))
         return self.__fbthrift_cached_FieldA
 
     @property
@@ -295,7 +295,7 @@ cdef class AStructB(thrift.py3.types.Struct):
         cdef shared_ptr[cAStructB] cpp_obj = make_shared[cAStructB](
             deref(self._cpp_obj)
         )
-        return AStructB._fbthrift_create(cmove(cpp_obj))
+        return AStructB._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

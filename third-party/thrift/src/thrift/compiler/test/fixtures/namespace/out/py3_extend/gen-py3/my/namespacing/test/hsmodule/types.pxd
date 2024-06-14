@@ -80,7 +80,7 @@ cdef class HsFoo(thrift.py3.types.Struct):
     cdef inline object MyInt_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cHsFoo])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cHsFoo])
 
 
 

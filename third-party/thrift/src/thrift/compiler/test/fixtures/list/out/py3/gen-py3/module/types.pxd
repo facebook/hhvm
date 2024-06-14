@@ -55,7 +55,7 @@ cdef extern from "thrift/compiler/test/fixtures/list/gen-py3/module/types.h":
 cdef class List__string(thrift.py3.types.List):
     cdef shared_ptr[vector[string]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[string]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[string]])
     cdef _check_item_type(self, item)
 
 cdef shared_ptr[vector[string]] List__string__make_instance(object items) except *
@@ -63,7 +63,7 @@ cdef shared_ptr[vector[string]] List__string__make_instance(object items) except
 cdef class Map__i64_List__string(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint64_t,vector[string]]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[cint64_t,vector[string]]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cint64_t,vector[string]]])
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[cint64_t,vector[string]]] Map__i64_List__string__make_instance(object items) except *

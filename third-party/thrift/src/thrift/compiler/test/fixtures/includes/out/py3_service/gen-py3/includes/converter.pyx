@@ -13,4 +13,4 @@ cdef shared_ptr[_fbthrift_ctypes.cIncluded] Included_convert_to_cpp(object inst)
 
 
 cdef object Included_from_cpp(const shared_ptr[_fbthrift_ctypes.cIncluded]& c_struct):
-    return _fbthrift_ctypes.Included._fbthrift_create(c_struct)
+    return _fbthrift_ctypes.Included._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

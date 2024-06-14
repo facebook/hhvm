@@ -98,7 +98,7 @@ cdef class A(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cA] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cA] cpp_obj):
         __fbthrift_inst = <A>A.__new__(A)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -106,7 +106,7 @@ cdef class A(thrift.py3.types.Struct):
     cdef inline b_impl(self):
 
         if self.__fbthrift_cached_b is None:
-            self.__fbthrift_cached_b = List__List__c_C._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).b_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_b = List__List__c_C._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).b_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_b
 
     @property
@@ -116,7 +116,7 @@ cdef class A(thrift.py3.types.Struct):
     cdef inline other_impl(self):
 
         if self.__fbthrift_cached_other is None:
-            self.__fbthrift_cached_other = List__c_C._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).other_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_other = List__c_C._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).other_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_other
 
     @property
@@ -138,7 +138,7 @@ cdef class A(thrift.py3.types.Struct):
         cdef shared_ptr[cA] cpp_obj = make_shared[cA](
             deref(self._cpp_obj)
         )
-        return A._fbthrift_create(cmove(cpp_obj))
+        return A._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -210,7 +210,7 @@ cdef class List__c_C(thrift.py3.types.List):
             self._cpp_obj = List__c_C__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[_c_types.cC]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[_c_types.cC]] c_items):
         __fbthrift_inst = <List__c_C>List__c_C.__new__(List__c_C)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -219,7 +219,7 @@ cdef class List__c_C(thrift.py3.types.List):
         cdef shared_ptr[vector[_c_types.cC]] cpp_obj = make_shared[vector[_c_types.cC]](
             deref(self._cpp_obj)
         )
-        return List__c_C._fbthrift_create(cmove(cpp_obj))
+        return List__c_C._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -227,14 +227,14 @@ cdef class List__c_C(thrift.py3.types.List):
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
         start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
-        return List__c_C._fbthrift_create(
+        return List__c_C._create_FBTHRIFT_ONLY_DO_NOT_USE(
             __list_slice[vector[_c_types.cC]](self._cpp_obj, start, stop, step)
         )
 
     cdef _get_single_item(self, size_t index):
         cdef shared_ptr[_c_types.cC] citem
         __list_getitem(self._cpp_obj, index, citem)
-        return _c_types.C._fbthrift_create(citem)
+        return _c_types.C._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
 
     cdef _check_item_type(self, item):
         if not self or item is None:
@@ -287,7 +287,7 @@ cdef class List__List__c_C(thrift.py3.types.List):
             self._cpp_obj = List__List__c_C__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[vector[_c_types.cC]]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[vector[_c_types.cC]]] c_items):
         __fbthrift_inst = <List__List__c_C>List__List__c_C.__new__(List__List__c_C)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -296,7 +296,7 @@ cdef class List__List__c_C(thrift.py3.types.List):
         cdef shared_ptr[vector[vector[_c_types.cC]]] cpp_obj = make_shared[vector[vector[_c_types.cC]]](
             deref(self._cpp_obj)
         )
-        return List__List__c_C._fbthrift_create(cmove(cpp_obj))
+        return List__List__c_C._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -304,14 +304,14 @@ cdef class List__List__c_C(thrift.py3.types.List):
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
         start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
-        return List__List__c_C._fbthrift_create(
+        return List__List__c_C._create_FBTHRIFT_ONLY_DO_NOT_USE(
             __list_slice[vector[vector[_c_types.cC]]](self._cpp_obj, start, stop, step)
         )
 
     cdef _get_single_item(self, size_t index):
         cdef shared_ptr[vector[_c_types.cC]] citem
         __list_getitem(self._cpp_obj, index, citem)
-        return List__c_C._fbthrift_create(citem)
+        return List__c_C._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
 
     cdef _check_item_type(self, item):
         if not self or item is None:

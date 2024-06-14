@@ -104,7 +104,7 @@ cdef class GeneratePatch(thrift.py3.types.Struct):
     cdef _fbthrift_types_fields.__GeneratePatch_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cGeneratePatch])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cGeneratePatch])
 
 
 
@@ -113,7 +113,7 @@ cdef class GeneratePatchNew(thrift.py3.types.Struct):
     cdef _fbthrift_types_fields.__GeneratePatchNew_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cGeneratePatchNew])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cGeneratePatchNew])
 
 
 
@@ -122,7 +122,7 @@ cdef class AssignOnlyPatch(thrift.py3.types.Struct):
     cdef _fbthrift_types_fields.__AssignOnlyPatch_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cAssignOnlyPatch])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAssignOnlyPatch])
 
 
 

@@ -148,7 +148,7 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMyStructNestedAnnotation] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStructNestedAnnotation] cpp_obj):
         __fbthrift_inst = <MyStructNestedAnnotation>MyStructNestedAnnotation.__new__(MyStructNestedAnnotation)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -176,7 +176,7 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
         cdef shared_ptr[cMyStructNestedAnnotation] cpp_obj = make_shared[cMyStructNestedAnnotation](
             deref(self._cpp_obj)
         )
-        return MyStructNestedAnnotation._fbthrift_create(cmove(cpp_obj))
+        return MyStructNestedAnnotation._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -265,7 +265,7 @@ cdef class SecretStruct(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cSecretStruct] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSecretStruct] cpp_obj):
         __fbthrift_inst = <SecretStruct>SecretStruct.__new__(SecretStruct)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -301,7 +301,7 @@ cdef class SecretStruct(thrift.py3.types.Struct):
         cdef shared_ptr[cSecretStruct] cpp_obj = make_shared[cSecretStruct](
             deref(self._cpp_obj)
         )
-        return SecretStruct._fbthrift_create(cmove(cpp_obj))
+        return SecretStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -373,7 +373,7 @@ cdef class std_deque_std_string__List__string(thrift.py3.types.List):
             self._cpp_obj = std_deque_std_string__List__string__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[std_deque_std_string] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[std_deque_std_string] c_items):
         __fbthrift_inst = <std_deque_std_string__List__string>std_deque_std_string__List__string.__new__(std_deque_std_string__List__string)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -382,7 +382,7 @@ cdef class std_deque_std_string__List__string(thrift.py3.types.List):
         cdef shared_ptr[std_deque_std_string] cpp_obj = make_shared[std_deque_std_string](
             deref(self._cpp_obj)
         )
-        return std_deque_std_string__List__string._fbthrift_create(cmove(cpp_obj))
+        return std_deque_std_string__List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -390,7 +390,7 @@ cdef class std_deque_std_string__List__string(thrift.py3.types.List):
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
         start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
-        return std_deque_std_string__List__string._fbthrift_create(
+        return std_deque_std_string__List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(
             __list_slice[std_deque_std_string](self._cpp_obj, start, stop, step)
         )
 
@@ -442,5 +442,5 @@ cdef shared_ptr[std_deque_std_string] std_deque_std_string__List__string__make_i
             deref(c_inst).push_back(item.encode('UTF-8'))
     return cmove(c_inst)
 
-myStruct = MyStruct._fbthrift_create(constant_shared_ptr(cmyStruct()))
+myStruct = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(cmyStruct()))
 list_string_6884 = std_deque_std_string__List__string

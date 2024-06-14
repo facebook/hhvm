@@ -194,7 +194,7 @@ cdef class TypeUri(thrift.py3.types.Union):
     ) except *
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cTypeUri])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cTypeUri])
 
 cdef class __TypeNameType(thrift.py3.types.CompiledEnum):
     pass
@@ -231,7 +231,7 @@ cdef class TypeName(thrift.py3.types.Union):
     ) except *
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cTypeName])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cTypeName])
 
 
 

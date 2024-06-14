@@ -157,7 +157,7 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[c{{struct:name}}] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[c{{struct:name}}] cpp_obj):
         __fbthrift_inst = <{{struct:name}}>{{struct:name}}.__new__({{struct:name}}{{#struct:exception?}}, (<bytes>deref(cpp_obj).what()).decode('utf-8'){{/struct:exception?}})
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         {{#struct:exception?}}
@@ -343,7 +343,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         return cmove(c_inst)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[c{{struct:name}}] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[c{{struct:name}}] cpp_obj):
         __fbthrift_inst = <{{struct:name}}>{{struct:name}}.__new__({{struct:name}})
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         __fbthrift_inst._load_cache()
@@ -385,7 +385,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         cdef shared_ptr[c{{struct:name}}] cpp_obj = make_shared[c{{struct:name}}](
             deref(self._cpp_obj)
         )
-        return {{struct:name}}._fbthrift_create(cmove(cpp_obj))
+        return {{struct:name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
         {{/struct:cpp_noncopyable?}}
     {{#struct:cpp_noncomparable}}
 
@@ -470,7 +470,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
             thrift.py3.serializer.deserialize will just call __new__ to skip
             all of our runtime type checks. We do it like this because
             thrift.py3.serializer.deserialize does not have enough type information
-            to call the staticmethod ._fbthrift_create()
+            to call the staticmethod ._create_FBTHRIFT_ONLY_DO_NOT_USE()
         }}
         self._cpp_obj = make_shared[c{{struct:name}}]()
         with nogil:
@@ -485,7 +485,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
     @staticmethod
     def from_python(object obj):
         cdef shared_ptr[c{{struct:name}}] cpp_obj = __python_to_py3[c{{struct:name}}](obj)
-        return {{struct:name}}._fbthrift_create(cmove(cpp_obj))
+        return {{struct:name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
     {{/program:python_capi_converter?}}
 
     def _to_python(self):
@@ -526,7 +526,7 @@ cdef class {{type:flat_name}}(thrift.py3.types.{{!
             self._cpp_obj = {{type:flat_name}}__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[{{> types/cython_cpp_type}}] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/cython_cpp_type}}] c_items):
         __fbthrift_inst = <{{type:flat_name}}>{{type:flat_name}}.__new__({{type:flat_name}})
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -535,7 +535,7 @@ cdef class {{type:flat_name}}(thrift.py3.types.{{!
         cdef shared_ptr[{{> types/cython_cpp_type}}] cpp_obj = make_shared[{{> types/cython_cpp_type}}](
             deref(self._cpp_obj)
         )
-        return {{type:flat_name}}._fbthrift_create(cmove(cpp_obj))
+        return {{type:flat_name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -544,7 +544,7 @@ cdef class {{type:flat_name}}(thrift.py3.types.{{!
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
         start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
-        return {{type:flat_name}}._fbthrift_create(
+        return {{type:flat_name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(
             __list_slice[{{> types/cython_cpp_type}}](self._cpp_obj, start, stop, step)
         )
 
@@ -647,7 +647,7 @@ Sequence.register({{type:flat_name}})
         if not isinstance(other, {{type:flat_name}}):
             other = {{type:flat_name}}(other)
         cdef shared_ptr[{{> types/cython_cpp_type}}] result
-        return {{type:flat_name}}._fbthrift_create(__set_op[{{> types/cython_cpp_type}}](
+        return {{type:flat_name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__set_op[{{> types/cython_cpp_type}}](
             self._cpp_obj,
             (<{{type:flat_name}}>other)._cpp_obj,
             op,
@@ -876,7 +876,7 @@ cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
         if {{#program:stream_exceptions}}{{!
         }}result.hasException[{{> types/cython_cpp_type}}]():
             pyfuture.set_exception({{!
-            }}{{> types/cython_python_type}}._fbthrift_create({{!
+            }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
             }}thrift.py3.exceptions.try_make_shared_exception[{{> types/cython_cpp_type}}](result.exception()){{!
             }}))
         elif {{/program:stream_exceptions}}{{!

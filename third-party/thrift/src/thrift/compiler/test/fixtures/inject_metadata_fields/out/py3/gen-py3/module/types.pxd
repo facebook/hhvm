@@ -121,7 +121,7 @@ cdef class Fields(thrift.py3.types.Struct):
     cdef inline object injected_field_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFields])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFields])
 
 
 
@@ -131,7 +131,7 @@ cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
     cdef inline object injected_field_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFieldsInjectedToEmptyStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFieldsInjectedToEmptyStruct])
 
 
 
@@ -142,7 +142,7 @@ cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
     cdef inline object injected_field_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFieldsInjectedToStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFieldsInjectedToStruct])
 
 
 
@@ -155,7 +155,7 @@ cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
     cdef inline object injected_unstructured_annotation_field_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFieldsInjectedWithIncludedStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFieldsInjectedWithIncludedStruct])
 
 
 

@@ -83,7 +83,7 @@ cdef void FB303Service_simple_rpc_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_test_fixtures_basic_module_types.ReservedKeyword._fbthrift_create(make_shared[_test_fixtures_basic_module_types.cReservedKeyword](cmove(result.value()))))
+            pyfuture.set_result(_test_fixtures_basic_module_types.ReservedKeyword._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_basic_module_types.cReservedKeyword](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -200,7 +200,7 @@ cdef void MyService_invalid_return_for_hack_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_test_fixtures_basic_module_types.Set__float._fbthrift_create(make_shared[cset[float]](cmove(result.value()))))
+            pyfuture.set_result(_test_fixtures_basic_module_types.Set__float._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[float]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 

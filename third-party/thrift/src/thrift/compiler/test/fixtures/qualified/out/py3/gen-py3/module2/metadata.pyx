@@ -18,4 +18,4 @@ from module2.metadata cimport cGetThriftModuleMetadata
 def getThriftModuleMetadata():
     cdef shared_ptr[cThriftMetadata] metadata
     metadata = make_shared[cThriftMetadata](cGetThriftModuleMetadata())
-    return ThriftMetadata._fbthrift_create(cmove(metadata))
+    return ThriftMetadata._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(metadata))

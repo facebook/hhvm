@@ -93,7 +93,7 @@ cdef class C(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cC] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cC] cpp_obj):
         __fbthrift_inst = <C>C.__new__(C)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -121,7 +121,7 @@ cdef class C(thrift.py3.types.Struct):
         cdef shared_ptr[cC] cpp_obj = make_shared[cC](
             deref(self._cpp_obj)
         )
-        return C._fbthrift_create(cmove(cpp_obj))
+        return C._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -198,7 +198,7 @@ cdef class E(thrift.py3.exceptions.GeneratedError):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cE] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cE] cpp_obj):
         __fbthrift_inst = <E>E.__new__(E, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
@@ -219,7 +219,7 @@ cdef class E(thrift.py3.exceptions.GeneratedError):
         cdef shared_ptr[cE] cpp_obj = make_shared[cE](
             deref(self._cpp_obj)
         )
-        return E._fbthrift_create(cmove(cpp_obj))
+        return E._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

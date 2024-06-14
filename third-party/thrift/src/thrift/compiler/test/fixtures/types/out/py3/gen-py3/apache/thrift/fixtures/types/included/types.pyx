@@ -77,7 +77,7 @@ cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
             self._cpp_obj = std_unordered_map__Map__i32_string__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[std_unordered_map[cint32_t,string]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[std_unordered_map[cint32_t,string]] c_items):
         __fbthrift_inst = <std_unordered_map__Map__i32_string>std_unordered_map__Map__i32_string.__new__(std_unordered_map__Map__i32_string)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -86,7 +86,7 @@ cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
         cdef shared_ptr[std_unordered_map[cint32_t,string]] cpp_obj = make_shared[std_unordered_map[cint32_t,string]](
             deref(self._cpp_obj)
         )
-        return std_unordered_map__Map__i32_string._fbthrift_create(cmove(cpp_obj))
+        return std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -173,7 +173,7 @@ cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
             self._cpp_obj = List__std_unordered_map__Map__i32_string__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[std_unordered_map[cint32_t,string]]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[std_unordered_map[cint32_t,string]]] c_items):
         __fbthrift_inst = <List__std_unordered_map__Map__i32_string>List__std_unordered_map__Map__i32_string.__new__(List__std_unordered_map__Map__i32_string)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -182,7 +182,7 @@ cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
         cdef shared_ptr[vector[std_unordered_map[cint32_t,string]]] cpp_obj = make_shared[vector[std_unordered_map[cint32_t,string]]](
             deref(self._cpp_obj)
         )
-        return List__std_unordered_map__Map__i32_string._fbthrift_create(cmove(cpp_obj))
+        return List__std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -190,14 +190,14 @@ cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
         start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
-        return List__std_unordered_map__Map__i32_string._fbthrift_create(
+        return List__std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(
             __list_slice[vector[std_unordered_map[cint32_t,string]]](self._cpp_obj, start, stop, step)
         )
 
     cdef _get_single_item(self, size_t index):
         cdef shared_ptr[std_unordered_map[cint32_t,string]] citem
         __list_getitem(self._cpp_obj, index, citem)
-        return std_unordered_map__Map__i32_string._fbthrift_create(citem)
+        return std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
 
     cdef _check_item_type(self, item):
         if not self or item is None:

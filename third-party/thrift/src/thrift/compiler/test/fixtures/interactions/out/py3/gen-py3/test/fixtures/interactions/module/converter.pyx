@@ -13,4 +13,4 @@ cdef shared_ptr[_fbthrift_ctypes.cCustomException] CustomException_convert_to_cp
 
 
 cdef object CustomException_from_cpp(const shared_ptr[_fbthrift_ctypes.cCustomException]& c_struct):
-    return _fbthrift_ctypes.CustomException._fbthrift_create(c_struct)
+    return _fbthrift_ctypes.CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

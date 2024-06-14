@@ -124,7 +124,7 @@ cdef class Mixin1(thrift.py3.types.Struct):
     cdef inline object field1_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMixin1])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMixin1])
 
 
 
@@ -137,7 +137,7 @@ cdef class Mixin2(thrift.py3.types.Struct):
     cdef Mixin1 __fbthrift_cached_m1
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMixin2])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMixin2])
 
 
 
@@ -147,7 +147,7 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
     cdef inline object field3_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMixin3Base])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMixin3Base])
 
 
 
@@ -165,7 +165,7 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef Mixin3Base __fbthrift_cached_m3
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFoo])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFoo])
 
 
 

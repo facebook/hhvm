@@ -237,7 +237,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
     ) except *
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cComplexUnion])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cComplexUnion])
 
 cdef class __ListUnionType(thrift.py3.types.CompiledEnum):
     pass
@@ -259,7 +259,7 @@ cdef class ListUnion(thrift.py3.types.Union):
     ) except *
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cListUnion])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cListUnion])
 
 cdef class __DataUnionType(thrift.py3.types.CompiledEnum):
     pass
@@ -281,7 +281,7 @@ cdef class DataUnion(thrift.py3.types.Union):
     ) except *
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cDataUnion])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cDataUnion])
 
 
 
@@ -294,7 +294,7 @@ cdef class Val(thrift.py3.types.Struct):
     cdef Map__i16_string __fbthrift_cached_typedefValue
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cVal])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cVal])
 
 cdef class __ValUnionType(thrift.py3.types.CompiledEnum):
     pass
@@ -316,7 +316,7 @@ cdef class ValUnion(thrift.py3.types.Union):
     ) except *
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cValUnion])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cValUnion])
 
 cdef class __VirtualComplexUnionType(thrift.py3.types.CompiledEnum):
     pass
@@ -338,7 +338,7 @@ cdef class VirtualComplexUnion(thrift.py3.types.Union):
     ) except *
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cVirtualComplexUnion])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cVirtualComplexUnion])
 
 
 
@@ -348,7 +348,7 @@ cdef class NonCopyableStruct(thrift.py3.types.Struct):
     cdef inline object num_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cNonCopyableStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cNonCopyableStruct])
 
 cdef class __NonCopyableUnionType(thrift.py3.types.CompiledEnum):
     pass
@@ -369,13 +369,13 @@ cdef class NonCopyableUnion(thrift.py3.types.Union):
     ) except *
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cNonCopyableUnion])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cNonCopyableUnion])
 
 
 cdef class List__i64(thrift.py3.types.List):
     cdef shared_ptr[vector[cint64_t]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[cint64_t]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint64_t]])
     cdef _check_item_type(self, item)
 
 cdef shared_ptr[vector[cint64_t]] List__i64__make_instance(object items) except *
@@ -383,7 +383,7 @@ cdef shared_ptr[vector[cint64_t]] List__i64__make_instance(object items) except 
 cdef class List__string(thrift.py3.types.List):
     cdef shared_ptr[vector[string]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[string]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[string]])
     cdef _check_item_type(self, item)
 
 cdef shared_ptr[vector[string]] List__string__make_instance(object items) except *
@@ -391,7 +391,7 @@ cdef shared_ptr[vector[string]] List__string__make_instance(object items) except
 cdef class Map__i16_string(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint16_t,string]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[cint16_t,string]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cint16_t,string]])
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[cint16_t,string]] Map__i16_string__make_instance(object items) except *

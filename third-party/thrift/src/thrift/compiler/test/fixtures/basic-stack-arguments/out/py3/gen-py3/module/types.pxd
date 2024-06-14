@@ -94,7 +94,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline object MyStringField_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMyStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct])
 
 
 

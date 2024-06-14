@@ -129,7 +129,7 @@ cdef void MyService_MyInteraction_frobnicate_callback(
     client, pyfuture, options = <object> userdata  
     if result.hasException[_test_fixtures_interactions_module_types.cCustomException]():
         try:
-            exc = _test_fixtures_interactions_module_types.CustomException._fbthrift_create(try_make_shared_exception[_test_fixtures_interactions_module_types.cCustomException](result.exception()))
+            exc = _test_fixtures_interactions_module_types.CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_test_fixtures_interactions_module_types.cCustomException](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -279,7 +279,7 @@ cdef void Factories_MyInteraction_frobnicate_callback(
     client, pyfuture, options = <object> userdata  
     if result.hasException[_test_fixtures_interactions_module_types.cCustomException]():
         try:
-            exc = _test_fixtures_interactions_module_types.CustomException._fbthrift_create(try_make_shared_exception[_test_fixtures_interactions_module_types.cCustomException](result.exception()))
+            exc = _test_fixtures_interactions_module_types.CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_test_fixtures_interactions_module_types.cCustomException](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -390,7 +390,7 @@ cdef void Perform_MyInteraction_frobnicate_callback(
     client, pyfuture, options = <object> userdata  
     if result.hasException[_test_fixtures_interactions_module_types.cCustomException]():
         try:
-            exc = _test_fixtures_interactions_module_types.CustomException._fbthrift_create(try_make_shared_exception[_test_fixtures_interactions_module_types.cCustomException](result.exception()))
+            exc = _test_fixtures_interactions_module_types.CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_test_fixtures_interactions_module_types.cCustomException](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:

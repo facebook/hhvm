@@ -46,6 +46,6 @@ cdef object {{struct:name}}_from_cpp(const shared_ptr[_fbthrift_ctypes.c{{struct
     return cpp_to_python[_fbthrift_ctypes.c{{struct:name}}](deref(c_struct))
 {{/program:auto_migrate?}}
 {{^program:auto_migrate?}}
-    return _fbthrift_ctypes.{{struct:name}}._fbthrift_create(c_struct)
+    return _fbthrift_ctypes.{{struct:name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 {{/program:auto_migrate?}}
 {{/program:filtered_structs}}

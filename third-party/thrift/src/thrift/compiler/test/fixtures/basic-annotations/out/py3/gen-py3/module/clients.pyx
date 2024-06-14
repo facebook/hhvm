@@ -70,7 +70,7 @@ cdef void MyService_ping_callback(
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cMyException]():
         try:
-            exc = _module_types.MyException._fbthrift_create(try_make_shared_exception[_module_types.cMyException](result.exception()))
+            exc = _module_types.MyException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cMyException](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:

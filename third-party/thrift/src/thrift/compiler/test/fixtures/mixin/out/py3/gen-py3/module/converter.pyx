@@ -13,22 +13,22 @@ cdef shared_ptr[_fbthrift_ctypes.cMixin1] Mixin1_convert_to_cpp(object inst) exc
 
 
 cdef object Mixin1_from_cpp(const shared_ptr[_fbthrift_ctypes.cMixin1]& c_struct):
-    return _fbthrift_ctypes.Mixin1._fbthrift_create(c_struct)
+    return _fbthrift_ctypes.Mixin1._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cMixin2] Mixin2_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.Mixin2?>inst)._cpp_obj
 
 
 cdef object Mixin2_from_cpp(const shared_ptr[_fbthrift_ctypes.cMixin2]& c_struct):
-    return _fbthrift_ctypes.Mixin2._fbthrift_create(c_struct)
+    return _fbthrift_ctypes.Mixin2._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cMixin3Base] Mixin3Base_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.Mixin3Base?>inst)._cpp_obj
 
 
 cdef object Mixin3Base_from_cpp(const shared_ptr[_fbthrift_ctypes.cMixin3Base]& c_struct):
-    return _fbthrift_ctypes.Mixin3Base._fbthrift_create(c_struct)
+    return _fbthrift_ctypes.Mixin3Base._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cFoo] Foo_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.Foo?>inst)._cpp_obj
 
 
 cdef object Foo_from_cpp(const shared_ptr[_fbthrift_ctypes.cFoo]& c_struct):
-    return _fbthrift_ctypes.Foo._fbthrift_create(c_struct)
+    return _fbthrift_ctypes.Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

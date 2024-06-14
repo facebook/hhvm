@@ -84,7 +84,7 @@ cdef class Fields(thrift.py3.types.Struct):
     cdef inline object injected_unstructured_annotation_field_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFields])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFields])
 
 
 

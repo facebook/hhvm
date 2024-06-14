@@ -219,7 +219,7 @@ cdef class MyData(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMyData] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyData] cpp_obj):
         __fbthrift_inst = <MyData>MyData.__new__(MyData)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -255,7 +255,7 @@ cdef class MyData(thrift.py3.types.Struct):
         cdef shared_ptr[cMyData] cpp_obj = make_shared[cMyData](
             deref(self._cpp_obj)
         )
-        return MyData._fbthrift_create(cmove(cpp_obj))
+        return MyData._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -342,7 +342,7 @@ cdef class MyDataWithCustomDefault(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMyDataWithCustomDefault] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyDataWithCustomDefault] cpp_obj):
         __fbthrift_inst = <MyDataWithCustomDefault>MyDataWithCustomDefault.__new__(MyDataWithCustomDefault)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -378,7 +378,7 @@ cdef class MyDataWithCustomDefault(thrift.py3.types.Struct):
         cdef shared_ptr[cMyDataWithCustomDefault] cpp_obj = make_shared[cMyDataWithCustomDefault](
             deref(self._cpp_obj)
         )
-        return MyDataWithCustomDefault._fbthrift_create(cmove(cpp_obj))
+        return MyDataWithCustomDefault._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -481,7 +481,7 @@ cdef class InnerUnion(thrift.py3.types.Union):
         return cmove(c_inst)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cInnerUnion] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cInnerUnion] cpp_obj):
         __fbthrift_inst = <InnerUnion>InnerUnion.__new__(InnerUnion)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         __fbthrift_inst._load_cache()
@@ -509,7 +509,7 @@ cdef class InnerUnion(thrift.py3.types.Union):
         cdef shared_ptr[cInnerUnion] cpp_obj = make_shared[cInnerUnion](
             deref(self._cpp_obj)
         )
-        return InnerUnion._fbthrift_create(cmove(cpp_obj))
+        return InnerUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -644,7 +644,7 @@ cdef class MyUnion(thrift.py3.types.Union):
         return cmove(c_inst)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMyUnion] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyUnion] cpp_obj):
         __fbthrift_inst = <MyUnion>MyUnion.__new__(MyUnion)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         __fbthrift_inst._load_cache()
@@ -682,13 +682,13 @@ cdef class MyUnion(thrift.py3.types.Union):
         elif type == 2:
             self.value = deref(self._cpp_obj).get_option2()
         elif type == 3:
-            self.value = InnerUnion._fbthrift_create(make_shared[cInnerUnion](deref(self._cpp_obj).get_option3()))
+            self.value = InnerUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cInnerUnion](deref(self._cpp_obj).get_option3()))
 
     def __copy__(MyUnion self):
         cdef shared_ptr[cMyUnion] cpp_obj = make_shared[cMyUnion](
             deref(self._cpp_obj)
         )
-        return MyUnion._fbthrift_create(cmove(cpp_obj))
+        return MyUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -792,7 +792,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMyStruct] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct] cpp_obj):
         __fbthrift_inst = <MyStruct>MyStruct.__new__(MyStruct)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -884,7 +884,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline structVal_impl(self):
 
         if self.__fbthrift_cached_structVal is None:
-            self.__fbthrift_cached_structVal = MyData._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).structVal_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_structVal = MyData._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).structVal_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_structVal
 
     @property
@@ -894,7 +894,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline unionVal_impl(self):
 
         if self.__fbthrift_cached_unionVal is None:
-            self.__fbthrift_cached_unionVal = MyUnion._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).unionVal_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_unionVal = MyUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).unionVal_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_unionVal
 
     @property
@@ -904,7 +904,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline lateStructVal_impl(self):
 
         if self.__fbthrift_cached_lateStructVal is None:
-            self.__fbthrift_cached_lateStructVal = LateDefStruct._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).lateStructVal_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_lateStructVal = LateDefStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).lateStructVal_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_lateStructVal
 
     @property
@@ -1020,7 +1020,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
             return None
 
         if self.__fbthrift_cached_optStructVal is None:
-            self.__fbthrift_cached_optStructVal = MyData._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).optStructVal_ref().ref_unchecked(), self._cpp_obj))
+            self.__fbthrift_cached_optStructVal = MyData._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).optStructVal_ref().ref_unchecked(), self._cpp_obj))
         return self.__fbthrift_cached_optStructVal
 
     @property
@@ -1032,7 +1032,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
             return None
 
         if self.__fbthrift_cached_optLateStructVal is None:
-            self.__fbthrift_cached_optLateStructVal = LateDefStruct._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).optLateStructVal_ref().ref_unchecked(), self._cpp_obj))
+            self.__fbthrift_cached_optLateStructVal = LateDefStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).optLateStructVal_ref().ref_unchecked(), self._cpp_obj))
         return self.__fbthrift_cached_optLateStructVal
 
     @property
@@ -1044,7 +1044,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
             return None
 
         if self.__fbthrift_cached_optListVal is None:
-            self.__fbthrift_cached_optListVal = List__i16._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).optListVal_ref().ref_unchecked(), self._cpp_obj))
+            self.__fbthrift_cached_optListVal = List__i16._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).optListVal_ref().ref_unchecked(), self._cpp_obj))
         return self.__fbthrift_cached_optListVal
 
     @property
@@ -1056,7 +1056,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
             return None
 
         if self.__fbthrift_cached_optSetVal is None:
-            self.__fbthrift_cached_optSetVal = Set__string._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).optSetVal_ref().ref_unchecked(), self._cpp_obj))
+            self.__fbthrift_cached_optSetVal = Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).optSetVal_ref().ref_unchecked(), self._cpp_obj))
         return self.__fbthrift_cached_optSetVal
 
     @property
@@ -1068,7 +1068,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
             return None
 
         if self.__fbthrift_cached_optMapVal is None:
-            self.__fbthrift_cached_optMapVal = Map__string_string._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).optMapVal_ref().ref_unchecked(), self._cpp_obj))
+            self.__fbthrift_cached_optMapVal = Map__string_string._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).optMapVal_ref().ref_unchecked(), self._cpp_obj))
         return self.__fbthrift_cached_optMapVal
 
     @property
@@ -1078,7 +1078,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline listMap_impl(self):
 
         if self.__fbthrift_cached_listMap is None:
-            self.__fbthrift_cached_listMap = List__Map__string_i32._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).listMap_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_listMap = List__Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).listMap_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_listMap
 
     @property
@@ -1088,7 +1088,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline mapMap_impl(self):
 
         if self.__fbthrift_cached_mapMap is None:
-            self.__fbthrift_cached_mapMap = Map__string_Map__string_i32._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).mapMap_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_mapMap = Map__string_Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).mapMap_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_mapMap
 
     @property
@@ -1106,7 +1106,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline structWithCustomDefault_impl(self):
 
         if self.__fbthrift_cached_structWithCustomDefault is None:
-            self.__fbthrift_cached_structWithCustomDefault = MyDataWithCustomDefault._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).structWithCustomDefault_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_structWithCustomDefault = MyDataWithCustomDefault._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).structWithCustomDefault_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_structWithCustomDefault
 
     @property
@@ -1116,7 +1116,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline structWithFieldCustomDefault_impl(self):
 
         if self.__fbthrift_cached_structWithFieldCustomDefault is None:
-            self.__fbthrift_cached_structWithFieldCustomDefault = MyData._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).structWithFieldCustomDefault_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_structWithFieldCustomDefault = MyData._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).structWithFieldCustomDefault_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_structWithFieldCustomDefault
 
     @property
@@ -1138,7 +1138,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         cdef shared_ptr[cMyStruct] cpp_obj = make_shared[cMyStruct](
             deref(self._cpp_obj)
         )
-        return MyStruct._fbthrift_create(cmove(cpp_obj))
+        return MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -1218,7 +1218,7 @@ cdef class LateDefStruct(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cLateDefStruct] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cLateDefStruct] cpp_obj):
         __fbthrift_inst = <LateDefStruct>LateDefStruct.__new__(LateDefStruct)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -1238,7 +1238,7 @@ cdef class LateDefStruct(thrift.py3.types.Struct):
         cdef shared_ptr[cLateDefStruct] cpp_obj = make_shared[cLateDefStruct](
             deref(self._cpp_obj)
         )
-        return LateDefStruct._fbthrift_create(cmove(cpp_obj))
+        return LateDefStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -1325,7 +1325,7 @@ cdef class Recursive(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cRecursive] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cRecursive] cpp_obj):
         __fbthrift_inst = <Recursive>Recursive.__new__(Recursive)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -1333,7 +1333,7 @@ cdef class Recursive(thrift.py3.types.Struct):
     cdef inline nodes_impl(self):
 
         if self.__fbthrift_cached_nodes is None:
-            self.__fbthrift_cached_nodes = Map__string_Recursive._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).nodes_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_nodes = Map__string_Recursive._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).nodes_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_nodes
 
     @property
@@ -1355,7 +1355,7 @@ cdef class Recursive(thrift.py3.types.Struct):
         cdef shared_ptr[cRecursive] cpp_obj = make_shared[cRecursive](
             deref(self._cpp_obj)
         )
-        return Recursive._fbthrift_create(cmove(cpp_obj))
+        return Recursive._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -1442,7 +1442,7 @@ cdef class Bar(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cBar] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cBar] cpp_obj):
         __fbthrift_inst = <Bar>Bar.__new__(Bar)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -1452,7 +1452,7 @@ cdef class Bar(thrift.py3.types.Struct):
         if self.__fbthrift_cached_loop is None:
             if not deref(self._cpp_obj).loop_ref():
                 return None
-            self.__fbthrift_cached_loop = Loop._fbthrift_create(__reference_shared_ptr(deref(deref(self._cpp_obj).loop_ref()), self._cpp_obj))
+            self.__fbthrift_cached_loop = Loop._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj).loop_ref()), self._cpp_obj))
         return self.__fbthrift_cached_loop
 
     @property
@@ -1474,7 +1474,7 @@ cdef class Bar(thrift.py3.types.Struct):
         cdef shared_ptr[cBar] cpp_obj = make_shared[cBar](
             deref(self._cpp_obj)
         )
-        return Bar._fbthrift_create(cmove(cpp_obj))
+        return Bar._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -1561,7 +1561,7 @@ cdef class Loop(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cLoop] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cLoop] cpp_obj):
         __fbthrift_inst = <Loop>Loop.__new__(Loop)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -1569,7 +1569,7 @@ cdef class Loop(thrift.py3.types.Struct):
     cdef inline bar_impl(self):
 
         if self.__fbthrift_cached_bar is None:
-            self.__fbthrift_cached_bar = Bar._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).bar_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_bar = Bar._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).bar_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_bar
 
     @property
@@ -1591,7 +1591,7 @@ cdef class Loop(thrift.py3.types.Struct):
         cdef shared_ptr[cLoop] cpp_obj = make_shared[cLoop](
             deref(self._cpp_obj)
         )
-        return Loop._fbthrift_create(cmove(cpp_obj))
+        return Loop._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -1679,7 +1679,7 @@ cdef class RefFields(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cRefFields] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cRefFields] cpp_obj):
         __fbthrift_inst = <RefFields>RefFields.__new__(RefFields)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -1689,7 +1689,7 @@ cdef class RefFields(thrift.py3.types.Struct):
         if self.__fbthrift_cached_unique is None:
             if not deref(self._cpp_obj).unique_ref():
                 return None
-            self.__fbthrift_cached_unique = List__i32._fbthrift_create(__reference_shared_ptr(deref(deref(self._cpp_obj).unique_ref()), self._cpp_obj))
+            self.__fbthrift_cached_unique = List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj).unique_ref()), self._cpp_obj))
         return self.__fbthrift_cached_unique
 
     @property
@@ -1701,7 +1701,7 @@ cdef class RefFields(thrift.py3.types.Struct):
         if self.__fbthrift_cached_shared_const is None:
             if not deref(self._cpp_obj).shared_const_ref():
                 return None
-            self.__fbthrift_cached_shared_const = List__i32._fbthrift_create(__reference_shared_ptr(deref(deref(self._cpp_obj).shared_const_ref()), self._cpp_obj))
+            self.__fbthrift_cached_shared_const = List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj).shared_const_ref()), self._cpp_obj))
         return self.__fbthrift_cached_shared_const
 
     @property
@@ -1713,7 +1713,7 @@ cdef class RefFields(thrift.py3.types.Struct):
         if self.__fbthrift_cached_shared_mustable is None:
             if not deref(self._cpp_obj).shared_mustable_ref():
                 return None
-            self.__fbthrift_cached_shared_mustable = List__i32._fbthrift_create(__reference_shared_ptr(deref(deref(self._cpp_obj).shared_mustable_ref()), self._cpp_obj))
+            self.__fbthrift_cached_shared_mustable = List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj).shared_mustable_ref()), self._cpp_obj))
         return self.__fbthrift_cached_shared_mustable
 
     @property
@@ -1725,7 +1725,7 @@ cdef class RefFields(thrift.py3.types.Struct):
         if self.__fbthrift_cached_opt_unique is None:
             if not deref(self._cpp_obj).opt_unique_ref():
                 return None
-            self.__fbthrift_cached_opt_unique = List__i32._fbthrift_create(__reference_shared_ptr(deref(deref(self._cpp_obj).opt_unique_ref()), self._cpp_obj))
+            self.__fbthrift_cached_opt_unique = List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj).opt_unique_ref()), self._cpp_obj))
         return self.__fbthrift_cached_opt_unique
 
     @property
@@ -1737,7 +1737,7 @@ cdef class RefFields(thrift.py3.types.Struct):
         if self.__fbthrift_cached_opt_shared_const is None:
             if not deref(self._cpp_obj).opt_shared_const_ref():
                 return None
-            self.__fbthrift_cached_opt_shared_const = List__i32._fbthrift_create(__reference_shared_ptr(deref(deref(self._cpp_obj).opt_shared_const_ref()), self._cpp_obj))
+            self.__fbthrift_cached_opt_shared_const = List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj).opt_shared_const_ref()), self._cpp_obj))
         return self.__fbthrift_cached_opt_shared_const
 
     @property
@@ -1749,7 +1749,7 @@ cdef class RefFields(thrift.py3.types.Struct):
         if self.__fbthrift_cached_opt_shared_mustable is None:
             if not deref(self._cpp_obj).opt_shared_mustable_ref():
                 return None
-            self.__fbthrift_cached_opt_shared_mustable = List__i32._fbthrift_create(__reference_shared_ptr(deref(deref(self._cpp_obj).opt_shared_mustable_ref()), self._cpp_obj))
+            self.__fbthrift_cached_opt_shared_mustable = List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj).opt_shared_mustable_ref()), self._cpp_obj))
         return self.__fbthrift_cached_opt_shared_mustable
 
     @property
@@ -1761,7 +1761,7 @@ cdef class RefFields(thrift.py3.types.Struct):
             return None
 
         if self.__fbthrift_cached_opt_box is None:
-            self.__fbthrift_cached_opt_box = List__i32._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).opt_box_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_opt_box = List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).opt_box_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_opt_box
 
     @property
@@ -1783,7 +1783,7 @@ cdef class RefFields(thrift.py3.types.Struct):
         cdef shared_ptr[cRefFields] cpp_obj = make_shared[cRefFields](
             deref(self._cpp_obj)
         )
-        return RefFields._fbthrift_create(cmove(cpp_obj))
+        return RefFields._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -1855,7 +1855,7 @@ cdef class List__i16(thrift.py3.types.List):
             self._cpp_obj = List__i16__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[cint16_t]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint16_t]] c_items):
         __fbthrift_inst = <List__i16>List__i16.__new__(List__i16)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -1864,7 +1864,7 @@ cdef class List__i16(thrift.py3.types.List):
         cdef shared_ptr[vector[cint16_t]] cpp_obj = make_shared[vector[cint16_t]](
             deref(self._cpp_obj)
         )
-        return List__i16._fbthrift_create(cmove(cpp_obj))
+        return List__i16._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -1872,7 +1872,7 @@ cdef class List__i16(thrift.py3.types.List):
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
         start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
-        return List__i16._fbthrift_create(
+        return List__i16._create_FBTHRIFT_ONLY_DO_NOT_USE(
             __list_slice[vector[cint16_t]](self._cpp_obj, start, stop, step)
         )
 
@@ -1933,7 +1933,7 @@ cdef class Set__string(thrift.py3.types.Set):
             self._cpp_obj = Set__string__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cset[string]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[string]] c_items):
         __fbthrift_inst = <Set__string>Set__string.__new__(Set__string)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -1942,7 +1942,7 @@ cdef class Set__string(thrift.py3.types.Set):
         cdef shared_ptr[cset[string]] cpp_obj = make_shared[cset[string]](
             deref(self._cpp_obj)
         )
-        return Set__string._fbthrift_create(cmove(cpp_obj))
+        return Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -1981,7 +1981,7 @@ cdef class Set__string(thrift.py3.types.Set):
         if not isinstance(other, Set__string):
             other = Set__string(other)
         cdef shared_ptr[cset[string]] result
-        return Set__string._fbthrift_create(__set_op[cset[string]](
+        return Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__set_op[cset[string]](
             self._cpp_obj,
             (<Set__string>other)._cpp_obj,
             op,
@@ -2015,7 +2015,7 @@ cdef class Map__string_string(thrift.py3.types.Map):
             self._cpp_obj = Map__string_string__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[string,string]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[string,string]] c_items):
         __fbthrift_inst = <Map__string_string>Map__string_string.__new__(Map__string_string)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -2024,7 +2024,7 @@ cdef class Map__string_string(thrift.py3.types.Map):
         cdef shared_ptr[cmap[string,string]] cpp_obj = make_shared[cmap[string,string]](
             deref(self._cpp_obj)
         )
-        return Map__string_string._fbthrift_create(cmove(cpp_obj))
+        return Map__string_string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -2110,7 +2110,7 @@ cdef class Map__string_i32(thrift.py3.types.Map):
             self._cpp_obj = Map__string_i32__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[string,cint32_t]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[string,cint32_t]] c_items):
         __fbthrift_inst = <Map__string_i32>Map__string_i32.__new__(Map__string_i32)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -2119,7 +2119,7 @@ cdef class Map__string_i32(thrift.py3.types.Map):
         cdef shared_ptr[cmap[string,cint32_t]] cpp_obj = make_shared[cmap[string,cint32_t]](
             deref(self._cpp_obj)
         )
-        return Map__string_i32._fbthrift_create(cmove(cpp_obj))
+        return Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -2206,7 +2206,7 @@ cdef class List__Map__string_i32(thrift.py3.types.List):
             self._cpp_obj = List__Map__string_i32__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[cmap[string,cint32_t]]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cmap[string,cint32_t]]] c_items):
         __fbthrift_inst = <List__Map__string_i32>List__Map__string_i32.__new__(List__Map__string_i32)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -2215,7 +2215,7 @@ cdef class List__Map__string_i32(thrift.py3.types.List):
         cdef shared_ptr[vector[cmap[string,cint32_t]]] cpp_obj = make_shared[vector[cmap[string,cint32_t]]](
             deref(self._cpp_obj)
         )
-        return List__Map__string_i32._fbthrift_create(cmove(cpp_obj))
+        return List__Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -2223,14 +2223,14 @@ cdef class List__Map__string_i32(thrift.py3.types.List):
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
         start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
-        return List__Map__string_i32._fbthrift_create(
+        return List__Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(
             __list_slice[vector[cmap[string,cint32_t]]](self._cpp_obj, start, stop, step)
         )
 
     cdef _get_single_item(self, size_t index):
         cdef shared_ptr[cmap[string,cint32_t]] citem
         __list_getitem(self._cpp_obj, index, citem)
-        return Map__string_i32._fbthrift_create(citem)
+        return Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
 
     cdef _check_item_type(self, item):
         if not self or item is None:
@@ -2289,7 +2289,7 @@ cdef class Map__string_Map__string_i32(thrift.py3.types.Map):
             self._cpp_obj = Map__string_Map__string_i32__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[string,cmap[string,cint32_t]]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[string,cmap[string,cint32_t]]] c_items):
         __fbthrift_inst = <Map__string_Map__string_i32>Map__string_Map__string_i32.__new__(Map__string_Map__string_i32)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -2298,7 +2298,7 @@ cdef class Map__string_Map__string_i32(thrift.py3.types.Map):
         cdef shared_ptr[cmap[string,cmap[string,cint32_t]]] cpp_obj = make_shared[cmap[string,cmap[string,cint32_t]]](
             deref(self._cpp_obj)
         )
-        return Map__string_Map__string_i32._fbthrift_create(cmove(cpp_obj))
+        return Map__string_Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -2319,7 +2319,7 @@ cdef class Map__string_Map__string_i32(thrift.py3.types.Map):
             raise err
         cdef shared_ptr[cmap[string,cint32_t]] citem
         __map_getitem(self._cpp_obj, ckey, citem)
-        return Map__string_i32._fbthrift_create(citem)
+        return Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
 
     def __iter__(self):
         if not self:
@@ -2344,7 +2344,7 @@ cdef class Map__string_Map__string_i32(thrift.py3.types.Map):
         cdef shared_ptr[cmap[string,cint32_t]] citem
         for i in range(deref(self._cpp_obj).size()):
             itr.genNextValue(self._cpp_obj, citem)
-            yield Map__string_i32._fbthrift_create(citem)
+            yield Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
 
     def items(self):
         if not self:
@@ -2354,7 +2354,7 @@ cdef class Map__string_Map__string_i32(thrift.py3.types.Map):
         cdef shared_ptr[cmap[string,cint32_t]] citem
         for i in range(deref(self._cpp_obj).size()):
             itr.genNextItem(self._cpp_obj, ckey, citem)
-            yield (ckey.data().decode('UTF-8'), Map__string_i32._fbthrift_create(citem))
+            yield (ckey.data().decode('UTF-8'), Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
 
     @staticmethod
     def __get_reflection__():
@@ -2386,7 +2386,7 @@ cdef class Map__string_Recursive(thrift.py3.types.Map):
             self._cpp_obj = Map__string_Recursive__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[string,cRecursive]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[string,cRecursive]] c_items):
         __fbthrift_inst = <Map__string_Recursive>Map__string_Recursive.__new__(Map__string_Recursive)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -2395,7 +2395,7 @@ cdef class Map__string_Recursive(thrift.py3.types.Map):
         cdef shared_ptr[cmap[string,cRecursive]] cpp_obj = make_shared[cmap[string,cRecursive]](
             deref(self._cpp_obj)
         )
-        return Map__string_Recursive._fbthrift_create(cmove(cpp_obj))
+        return Map__string_Recursive._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -2416,7 +2416,7 @@ cdef class Map__string_Recursive(thrift.py3.types.Map):
             raise err
         cdef shared_ptr[cRecursive] citem
         __map_getitem(self._cpp_obj, ckey, citem)
-        return Recursive._fbthrift_create(citem)
+        return Recursive._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
 
     def __iter__(self):
         if not self:
@@ -2441,7 +2441,7 @@ cdef class Map__string_Recursive(thrift.py3.types.Map):
         cdef shared_ptr[cRecursive] citem
         for i in range(deref(self._cpp_obj).size()):
             itr.genNextValue(self._cpp_obj, citem)
-            yield Recursive._fbthrift_create(citem)
+            yield Recursive._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
 
     def items(self):
         if not self:
@@ -2451,7 +2451,7 @@ cdef class Map__string_Recursive(thrift.py3.types.Map):
         cdef shared_ptr[cRecursive] citem
         for i in range(deref(self._cpp_obj).size()):
             itr.genNextItem(self._cpp_obj, ckey, citem)
-            yield (ckey.data().decode('UTF-8'), Recursive._fbthrift_create(citem))
+            yield (ckey.data().decode('UTF-8'), Recursive._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
 
     @staticmethod
     def __get_reflection__():
@@ -2481,7 +2481,7 @@ cdef class List__i32(thrift.py3.types.List):
             self._cpp_obj = List__i32__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[cint32_t]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint32_t]] c_items):
         __fbthrift_inst = <List__i32>List__i32.__new__(List__i32)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -2490,7 +2490,7 @@ cdef class List__i32(thrift.py3.types.List):
         cdef shared_ptr[vector[cint32_t]] cpp_obj = make_shared[vector[cint32_t]](
             deref(self._cpp_obj)
         )
-        return List__i32._fbthrift_create(cmove(cpp_obj))
+        return List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -2498,7 +2498,7 @@ cdef class List__i32(thrift.py3.types.List):
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
         start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
-        return List__i32._fbthrift_create(
+        return List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(
             __list_slice[vector[cint32_t]](self._cpp_obj, start, stop, step)
         )
 

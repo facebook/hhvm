@@ -152,7 +152,7 @@ cdef class InitialResponse(thrift.py3.types.Struct):
     cdef inline object content_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cInitialResponse])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cInitialResponse])
 
 
 
@@ -162,7 +162,7 @@ cdef class FinalResponse(thrift.py3.types.Struct):
     cdef inline object content_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFinalResponse])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFinalResponse])
 
 
 
@@ -172,7 +172,7 @@ cdef class SinkPayload(thrift.py3.types.Struct):
     cdef inline object content_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cSinkPayload])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSinkPayload])
 
 
 
@@ -182,7 +182,7 @@ cdef class CompatibleWithKeywordSink(thrift.py3.types.Struct):
     cdef inline object sink_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cCompatibleWithKeywordSink])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cCompatibleWithKeywordSink])
 
 
 
@@ -192,7 +192,7 @@ cdef class InitialException(thrift.py3.exceptions.GeneratedError):
     cdef inline object reason_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cInitialException])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cInitialException])
 
 
 
@@ -202,7 +202,7 @@ cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
     cdef inline object reason_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cSinkException1])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSinkException1])
 
 
 
@@ -212,7 +212,7 @@ cdef class SinkException2(thrift.py3.exceptions.GeneratedError):
     cdef inline object reason_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cSinkException2])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSinkException2])
 
 
 

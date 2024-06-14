@@ -106,7 +106,7 @@ cdef class AStruct(thrift.py3.types.Struct):
     cdef inline object FieldA_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cAStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAStruct])
 
 
 
@@ -117,7 +117,7 @@ cdef class AStructB(thrift.py3.types.Struct):
     cdef AStruct __fbthrift_cached_FieldA
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cAStructB])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAStructB])
 
 
 

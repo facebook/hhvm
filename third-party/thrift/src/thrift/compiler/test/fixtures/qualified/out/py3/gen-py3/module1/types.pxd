@@ -94,13 +94,13 @@ cdef class Struct(thrift.py3.types.Struct):
     cdef inline object second_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStruct])
 
 
 cdef class List__Enum(thrift.py3.types.List):
     cdef shared_ptr[vector[cEnum]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[cEnum]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cEnum]])
     cdef _check_item_type(self, item)
 
 cdef shared_ptr[vector[cEnum]] List__Enum__make_instance(object items) except *

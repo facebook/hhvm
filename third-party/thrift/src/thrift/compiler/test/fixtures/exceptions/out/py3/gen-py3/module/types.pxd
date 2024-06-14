@@ -155,7 +155,7 @@ cdef class Fiery(thrift.py3.exceptions.GeneratedError):
     cdef inline object message_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFiery])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFiery])
 
 
 
@@ -165,7 +165,7 @@ cdef class Serious(thrift.py3.exceptions.GeneratedError):
     cdef inline object sonnet_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cSerious])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSerious])
 
 
 
@@ -176,7 +176,7 @@ cdef class ComplexFieldNames(thrift.py3.exceptions.GeneratedError):
     cdef inline object internal_error_message_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cComplexFieldNames])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cComplexFieldNames])
 
 
 
@@ -187,7 +187,7 @@ cdef class CustomFieldNames(thrift.py3.exceptions.GeneratedError):
     cdef inline object internal_error_message_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cCustomFieldNames])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cCustomFieldNames])
 
 
 
@@ -198,7 +198,7 @@ cdef class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError):
     cdef inline object error_code_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cExceptionWithPrimitiveField])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cExceptionWithPrimitiveField])
 
 
 
@@ -209,7 +209,7 @@ cdef class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedErro
     cdef inline object error_code_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cExceptionWithStructuredAnnotation])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cExceptionWithStructuredAnnotation])
 
 
 
@@ -218,7 +218,7 @@ cdef class Banal(thrift.py3.exceptions.GeneratedError):
     cdef _fbthrift_types_fields.__Banal_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cBanal])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cBanal])
 
 
 

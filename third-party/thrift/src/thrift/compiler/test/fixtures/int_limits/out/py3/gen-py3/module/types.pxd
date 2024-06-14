@@ -94,7 +94,7 @@ cdef class Limits(thrift.py3.types.Struct):
     cdef inline object min_byte_field_impl(self)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cLimits])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cLimits])
 
 
 

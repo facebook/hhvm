@@ -13,10 +13,10 @@ cdef shared_ptr[_fbthrift_ctypes.cC] C_convert_to_cpp(object inst) except*:
 
 
 cdef object C_from_cpp(const shared_ptr[_fbthrift_ctypes.cC]& c_struct):
-    return _fbthrift_ctypes.C._fbthrift_create(c_struct)
+    return _fbthrift_ctypes.C._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cE] E_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.E?>inst)._cpp_obj
 
 
 cdef object E_from_cpp(const shared_ptr[_fbthrift_ctypes.cE]& c_struct):
-    return _fbthrift_ctypes.E._fbthrift_create(c_struct)
+    return _fbthrift_ctypes.E._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

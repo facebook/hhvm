@@ -110,13 +110,13 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef object __fbthrift_cached_myBigEnum
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMyStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct])
 
 
 cdef class Map__MyEnum_string(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cMyEnum,string]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[cMyEnum,string]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cMyEnum,string]])
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[cMyEnum,string]] Map__MyEnum_string__make_instance(object items) except *

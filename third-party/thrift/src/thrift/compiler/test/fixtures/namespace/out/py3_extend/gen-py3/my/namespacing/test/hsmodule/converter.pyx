@@ -13,4 +13,4 @@ cdef shared_ptr[_fbthrift_ctypes.cHsFoo] HsFoo_convert_to_cpp(object inst) excep
 
 
 cdef object HsFoo_from_cpp(const shared_ptr[_fbthrift_ctypes.cHsFoo]& c_struct):
-    return _fbthrift_ctypes.HsFoo._fbthrift_create(c_struct)
+    return _fbthrift_ctypes.HsFoo._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

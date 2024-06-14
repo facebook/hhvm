@@ -1897,7 +1897,7 @@ cdef api void call_cy_ParamService_void_ret_map_param(
     unique_ptr[cmap[string,cint64_t]] param1
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.Map__string_i64._fbthrift_create(__to_shared_ptr(cmove(param1)))
+    arg_param1 = _module_types.Map__string_i64._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1916,8 +1916,8 @@ cdef api void call_cy_ParamService_void_ret_map_setlist_param(
     unique_ptr[cset[vector[string]]] param2
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.Map__string_i64._fbthrift_create(__to_shared_ptr(cmove(param1)))
-    arg_param2 = _module_types.Set__List__string._fbthrift_create(__to_shared_ptr(cmove(param2)))
+    arg_param1 = _module_types.Map__string_i64._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
+    arg_param2 = _module_types.Set__List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param2)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1972,7 +1972,7 @@ cdef api void call_cy_ParamService_void_ret_struct_param(
     unique_ptr[_module_types.cMyStruct] param1
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.MyStruct._fbthrift_create(shared_ptr[_module_types.cMyStruct](param1.release()))
+    arg_param1 = _module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cMyStruct](param1.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1990,7 +1990,7 @@ cdef api void call_cy_ParamService_void_ret_listunion_param(
     unique_ptr[vector[_module_types.cComplexUnion]] param1
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.List__ComplexUnion._fbthrift_create(__to_shared_ptr(cmove(param1)))
+    arg_param1 = _module_types.List__ComplexUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -2029,7 +2029,7 @@ cdef api void call_cy_ParamService_bool_ret_map_param(
     unique_ptr[cmap[string,cint64_t]] param1
 ) noexcept:
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.Map__string_i64._fbthrift_create(__to_shared_ptr(cmove(param1)))
+    arg_param1 = _module_types.Map__string_i64._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -2047,7 +2047,7 @@ cdef api void call_cy_ParamService_bool_ret_union_param(
     unique_ptr[_module_types.cComplexUnion] param1
 ) noexcept:
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.ComplexUnion._fbthrift_create(shared_ptr[_module_types.cComplexUnion](param1.release()))
+    arg_param1 = _module_types.ComplexUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cComplexUnion](param1.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -2088,7 +2088,7 @@ cdef api void call_cy_ParamService_i64_ret_string_typedef_param(
 ) noexcept:
     cdef Promise_cint64_t __promise = Promise_cint64_t._fbthrift_create(cmove(cPromise))
     arg_param1 = (deref(param1)).data().decode('UTF-8')
-    arg_param2 = _module_types.Set__List__List__Map__Empty_MyStruct._fbthrift_create(__to_shared_ptr(cmove(param2)))
+    arg_param2 = _module_types.Set__List__List__Map__Empty_MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param2)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -2137,7 +2137,7 @@ cdef api void call_cy_ParamService_double_ret_setstruct_param(
     unique_ptr[cset[_module_types.cMyStruct]] param1
 ) noexcept:
     cdef Promise_double __promise = Promise_double._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.Set__MyStruct._fbthrift_create(__to_shared_ptr(cmove(param1)))
+    arg_param1 = _module_types.Set__MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -2210,8 +2210,8 @@ cdef api void call_cy_ParamService_list_ret_map_setlist_param(
     unique_ptr[vector[string]] param2
 ) noexcept:
     cdef Promise_vector__cbool __promise = Promise_vector__cbool._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.Map__i32_List__string._fbthrift_create(__to_shared_ptr(cmove(param1)))
-    arg_param2 = _module_types.List__string._fbthrift_create(__to_shared_ptr(cmove(param2)))
+    arg_param1 = _module_types.Map__i32_List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
+    arg_param2 = _module_types.List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param2)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -2230,7 +2230,7 @@ cdef api void call_cy_ParamService_mapsetlistmapliststring_ret_listlistlist_para
     unique_ptr[vector[vector[vector[vector[cint32_t]]]]] param1
 ) noexcept:
     cdef Promise_cmap__cset__vector__cint32_t_cmap__vector__cset__string_string __promise = Promise_cmap__cset__vector__cint32_t_cmap__vector__cset__string_string._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.List__List__List__List__i32._fbthrift_create(__to_shared_ptr(cmove(param1)))
+    arg_param1 = _module_types.List__List__List__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -2266,7 +2266,7 @@ cdef api void call_cy_ParamService_listtypedef_ret_typedef_param(
     unique_ptr[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]] param1
 ) noexcept:
     cdef Promise_vector__cint32_t __promise = Promise_vector__cint32_t._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.List__Map__Empty_MyStruct._fbthrift_create(__to_shared_ptr(cmove(param1)))
+    arg_param1 = _module_types.List__Map__Empty_MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -2323,7 +2323,7 @@ cdef api void call_cy_ParamService_listenum_ret_map_param(
     unique_ptr[cmap[string,cint64_t]] param1
 ) noexcept:
     cdef Promise_vector___module_types_cMyEnumA __promise = Promise_vector___module_types_cMyEnumA._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.Map__string_i64._fbthrift_create(__to_shared_ptr(cmove(param1)))
+    arg_param1 = _module_types.Map__string_i64._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -2359,7 +2359,7 @@ cdef api void call_cy_ParamService_setstruct_ret_set_param(
     unique_ptr[cset[string]] param1
 ) noexcept:
     cdef Promise_cset___module_types_cMyStruct __promise = Promise_cset___module_types_cMyStruct._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.Set__string._fbthrift_create(__to_shared_ptr(cmove(param1)))
+    arg_param1 = _module_types.Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(

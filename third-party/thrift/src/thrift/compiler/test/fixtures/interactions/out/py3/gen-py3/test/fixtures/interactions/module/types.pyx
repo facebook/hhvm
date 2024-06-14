@@ -85,7 +85,7 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cCustomException] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cCustomException] cpp_obj):
         __fbthrift_inst = <CustomException>CustomException.__new__(CustomException, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
@@ -114,7 +114,7 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
         cdef shared_ptr[cCustomException] cpp_obj = make_shared[cCustomException](
             deref(self._cpp_obj)
         )
-        return CustomException._fbthrift_create(cmove(cpp_obj))
+        return CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

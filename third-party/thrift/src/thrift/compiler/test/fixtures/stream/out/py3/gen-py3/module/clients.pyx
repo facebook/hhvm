@@ -92,7 +92,7 @@ cdef void PubSubStreamingService_servicethrows_callback(
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cFooEx]():
         try:
-            exc = _module_types.FooEx._fbthrift_create(try_make_shared_exception[_module_types.cFooEx](result.exception()))
+            exc = _module_types.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFooEx](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -112,14 +112,14 @@ cdef void PubSubStreamingService_servicethrows2_callback(
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cFooEx]():
         try:
-            exc = _module_types.FooEx._fbthrift_create(try_make_shared_exception[_module_types.cFooEx](result.exception()))
+            exc = _module_types.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFooEx](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
             pyfuture.set_exception(exc)
     elif result.hasException[_module_types.cFooEx2]():
         try:
-            exc = _module_types.FooEx2._fbthrift_create(try_make_shared_exception[_module_types.cFooEx2](result.exception()))
+            exc = _module_types.FooEx2._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFooEx2](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -139,7 +139,7 @@ cdef void PubSubStreamingService_boththrows_callback(
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cFooEx]():
         try:
-            exc = _module_types.FooEx._fbthrift_create(try_make_shared_exception[_module_types.cFooEx](result.exception()))
+            exc = _module_types.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFooEx](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -172,7 +172,7 @@ cdef void PubSubStreamingService_responseandstreamservicethrows_callback(
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cFooEx]():
         try:
-            exc = _module_types.FooEx._fbthrift_create(try_make_shared_exception[_module_types.cFooEx](result.exception()))
+            exc = _module_types.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFooEx](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -192,7 +192,7 @@ cdef void PubSubStreamingService_responseandstreamboththrows_callback(
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cFooEx]():
         try:
-            exc = _module_types.FooEx._fbthrift_create(try_make_shared_exception[_module_types.cFooEx](result.exception()))
+            exc = _module_types.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFooEx](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:

@@ -430,7 +430,7 @@ cdef api void call_cy_B_bar(
     unique_ptr[_module_types.cFoo] foo
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
-    arg_foo = _module_types.Foo._fbthrift_create(shared_ptr[_module_types.cFoo](foo.release()))
+    arg_foo = _module_types.Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cFoo](foo.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(

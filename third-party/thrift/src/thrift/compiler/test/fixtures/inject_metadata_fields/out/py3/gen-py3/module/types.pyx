@@ -95,7 +95,7 @@ cdef class Fields(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFields] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFields] cpp_obj):
         __fbthrift_inst = <Fields>Fields.__new__(Fields)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -123,7 +123,7 @@ cdef class Fields(thrift.py3.types.Struct):
         cdef shared_ptr[cFields] cpp_obj = make_shared[cFields](
             deref(self._cpp_obj)
         )
-        return Fields._fbthrift_create(cmove(cpp_obj))
+        return Fields._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -211,7 +211,7 @@ cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFieldsInjectedToEmptyStruct] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFieldsInjectedToEmptyStruct] cpp_obj):
         __fbthrift_inst = <FieldsInjectedToEmptyStruct>FieldsInjectedToEmptyStruct.__new__(FieldsInjectedToEmptyStruct)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -239,7 +239,7 @@ cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
         cdef shared_ptr[cFieldsInjectedToEmptyStruct] cpp_obj = make_shared[cFieldsInjectedToEmptyStruct](
             deref(self._cpp_obj)
         )
-        return FieldsInjectedToEmptyStruct._fbthrift_create(cmove(cpp_obj))
+        return FieldsInjectedToEmptyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -328,7 +328,7 @@ cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFieldsInjectedToStruct] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFieldsInjectedToStruct] cpp_obj):
         __fbthrift_inst = <FieldsInjectedToStruct>FieldsInjectedToStruct.__new__(FieldsInjectedToStruct)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -364,7 +364,7 @@ cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
         cdef shared_ptr[cFieldsInjectedToStruct] cpp_obj = make_shared[cFieldsInjectedToStruct](
             deref(self._cpp_obj)
         )
-        return FieldsInjectedToStruct._fbthrift_create(cmove(cpp_obj))
+        return FieldsInjectedToStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -455,7 +455,7 @@ cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFieldsInjectedWithIncludedStruct] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFieldsInjectedWithIncludedStruct] cpp_obj):
         __fbthrift_inst = <FieldsInjectedWithIncludedStruct>FieldsInjectedWithIncludedStruct.__new__(FieldsInjectedWithIncludedStruct)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -511,7 +511,7 @@ cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
         cdef shared_ptr[cFieldsInjectedWithIncludedStruct] cpp_obj = make_shared[cFieldsInjectedWithIncludedStruct](
             deref(self._cpp_obj)
         )
-        return FieldsInjectedWithIncludedStruct._fbthrift_create(cmove(cpp_obj))
+        return FieldsInjectedWithIncludedStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

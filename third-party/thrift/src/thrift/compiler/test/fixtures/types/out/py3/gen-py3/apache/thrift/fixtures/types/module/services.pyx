@@ -168,7 +168,7 @@ cdef api void call_cy_SomeService_bounce_map(
     unique_ptr[_apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string]] m
 ) noexcept:
     cdef Promise__apache_thrift_fixtures_types_module_types_std_unordered_map__cint32_t_string __promise = Promise__apache_thrift_fixtures_types_module_types_std_unordered_map__cint32_t_string._fbthrift_create(cmove(cPromise))
-    arg_m = _apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string._fbthrift_create(__to_shared_ptr(cmove(m)))
+    arg_m = _apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(m)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -186,7 +186,7 @@ cdef api void call_cy_SomeService_binary_keyed_map(
     unique_ptr[vector[cint64_t]] r
 ) noexcept:
     cdef Promise_cmap__binary_cint64_t __promise = Promise_cmap__binary_cint64_t._fbthrift_create(cmove(cPromise))
-    arg_r = _apache_thrift_fixtures_types_module_types.List__i64._fbthrift_create(__to_shared_ptr(cmove(r)))
+    arg_r = _apache_thrift_fixtures_types_module_types.List__i64._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(r)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(

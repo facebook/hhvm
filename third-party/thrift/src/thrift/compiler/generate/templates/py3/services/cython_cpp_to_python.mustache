@@ -36,9 +36,9 @@ to be converted from unicode to binary representation.
 }}{{#type:float?}}{{field:py_name}}{{/type:float?}}{{!
 }}{{#type:string?}}(deref({{field:py_name}})).data().decode('UTF-8'){{/type:string?}}{{!
 }}{{#type:binary?}}(deref({{field:py_name}})){{/type:binary?}}{{!
-}}{{#type:struct?}}{{> types/cython_python_type}}._fbthrift_create({{!
+}}{{#type:struct?}}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}shared_ptr[{{> types/cython_cpp_type}}]({{field:py_name}}.release())){{/type:struct?}}{{!
-}}{{#type:container?}}{{> types/cython_python_type}}._fbthrift_create({{!
+}}{{#type:container?}}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}__to_shared_ptr(cmove({{field:py_name}}))){{/type:container?}}{{!
 }}{{#type:enum?}}{{> types/cython_python_type}}(<int> {{field:py_name}}){{/type:enum?}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

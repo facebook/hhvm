@@ -93,7 +93,7 @@ cdef class InitialResponse(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cInitialResponse] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cInitialResponse] cpp_obj):
         __fbthrift_inst = <InitialResponse>InitialResponse.__new__(InitialResponse)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -121,7 +121,7 @@ cdef class InitialResponse(thrift.py3.types.Struct):
         cdef shared_ptr[cInitialResponse] cpp_obj = make_shared[cInitialResponse](
             deref(self._cpp_obj)
         )
-        return InitialResponse._fbthrift_create(cmove(cpp_obj))
+        return InitialResponse._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -209,7 +209,7 @@ cdef class FinalResponse(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFinalResponse] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFinalResponse] cpp_obj):
         __fbthrift_inst = <FinalResponse>FinalResponse.__new__(FinalResponse)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -237,7 +237,7 @@ cdef class FinalResponse(thrift.py3.types.Struct):
         cdef shared_ptr[cFinalResponse] cpp_obj = make_shared[cFinalResponse](
             deref(self._cpp_obj)
         )
-        return FinalResponse._fbthrift_create(cmove(cpp_obj))
+        return FinalResponse._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -325,7 +325,7 @@ cdef class SinkPayload(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cSinkPayload] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSinkPayload] cpp_obj):
         __fbthrift_inst = <SinkPayload>SinkPayload.__new__(SinkPayload)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -353,7 +353,7 @@ cdef class SinkPayload(thrift.py3.types.Struct):
         cdef shared_ptr[cSinkPayload] cpp_obj = make_shared[cSinkPayload](
             deref(self._cpp_obj)
         )
-        return SinkPayload._fbthrift_create(cmove(cpp_obj))
+        return SinkPayload._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -441,7 +441,7 @@ cdef class CompatibleWithKeywordSink(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cCompatibleWithKeywordSink] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cCompatibleWithKeywordSink] cpp_obj):
         __fbthrift_inst = <CompatibleWithKeywordSink>CompatibleWithKeywordSink.__new__(CompatibleWithKeywordSink)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -469,7 +469,7 @@ cdef class CompatibleWithKeywordSink(thrift.py3.types.Struct):
         cdef shared_ptr[cCompatibleWithKeywordSink] cpp_obj = make_shared[cCompatibleWithKeywordSink](
             deref(self._cpp_obj)
         )
-        return CompatibleWithKeywordSink._fbthrift_create(cmove(cpp_obj))
+        return CompatibleWithKeywordSink._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -547,7 +547,7 @@ cdef class InitialException(thrift.py3.exceptions.GeneratedError):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cInitialException] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cInitialException] cpp_obj):
         __fbthrift_inst = <InitialException>InitialException.__new__(InitialException, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
@@ -576,7 +576,7 @@ cdef class InitialException(thrift.py3.exceptions.GeneratedError):
         cdef shared_ptr[cInitialException] cpp_obj = make_shared[cInitialException](
             deref(self._cpp_obj)
         )
-        return InitialException._fbthrift_create(cmove(cpp_obj))
+        return InitialException._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -654,7 +654,7 @@ cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cSinkException1] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSinkException1] cpp_obj):
         __fbthrift_inst = <SinkException1>SinkException1.__new__(SinkException1, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
@@ -683,7 +683,7 @@ cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
         cdef shared_ptr[cSinkException1] cpp_obj = make_shared[cSinkException1](
             deref(self._cpp_obj)
         )
-        return SinkException1._fbthrift_create(cmove(cpp_obj))
+        return SinkException1._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -761,7 +761,7 @@ cdef class SinkException2(thrift.py3.exceptions.GeneratedError):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cSinkException2] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSinkException2] cpp_obj):
         __fbthrift_inst = <SinkException2>SinkException2.__new__(SinkException2, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
@@ -790,7 +790,7 @@ cdef class SinkException2(thrift.py3.exceptions.GeneratedError):
         cdef shared_ptr[cSinkException2] cpp_obj = make_shared[cSinkException2](
             deref(self._cpp_obj)
         )
-        return SinkException2._fbthrift_create(cmove(cpp_obj))
+        return SinkException2._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

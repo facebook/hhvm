@@ -26,7 +26,7 @@ it in the self.value variable.
 else:
     {{! Use an aliasing constructor since the object we're returning is still
         managed by the top-level object, possible via a unique_ptr }}
-    self.value = {{> types/cython_python_type}}._fbthrift_create(__reference_shared_ptr({{!
+    self.value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
       }}deref(__get_union_field_value[{{> types/cython_cpp_type}}](deref(self._cpp_obj).{{field:py_name}}_ref())), self._cpp_obj)){{!
 }}{{/field:reference?}}{{!
 }}{{^field:reference?}}{{!
@@ -69,12 +69,12 @@ else:
     }}<int>deref(self._cpp_obj).{{field:py_name}}_ref().value()){{!
 }}{{/type:enum}}{{!
 }}{{#type:struct?}}{{!
-}}self.value = {{> types/cython_python_type}}._fbthrift_create({{!
+}}self.value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}deref(self._cpp_obj).{{field:py_name}}_ref().value())){{!
 }}{{/type:struct?}}{{!
 }}{{#type:container?}}{{!
-}}self.value = {{> types/cython_python_type}}._fbthrift_create({{!
+}}self.value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}deref(self._cpp_obj).{{field:py_name}}_ref().value())){{!
 }}{{/type:container?}}{{!
@@ -87,7 +87,7 @@ else:
 else:
     {{! Use an aliasing constructor since the object we're returning is still
         managed by the top-level object, possible via a unique_ptr }}
-    self.value = {{> types/cython_python_type}}._fbthrift_create(__reference_shared_ptr({{!
+    self.value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
       }}deref(deref(self._cpp_obj).get_{{field:py_name}}()), self._cpp_obj)){{!
 }}{{/field:reference?}}{{!
 }}{{^field:reference?}}{{!
@@ -130,12 +130,12 @@ else:
     }}<int>deref(self._cpp_obj).get_{{field:py_name}}()){{!
 }}{{/type:enum}}{{!
 }}{{#type:struct?}}{{!
-}}self.value = {{> types/cython_python_type}}._fbthrift_create({{!
+}}self.value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}deref(self._cpp_obj).get_{{field:py_name}}())){{!
 }}{{/type:struct?}}{{!
 }}{{#type:container?}}{{!
-}}self.value = {{> types/cython_python_type}}._fbthrift_create({{!
+}}self.value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}deref(self._cpp_obj).get_{{field:py_name}}())){{!
 }}{{/type:container?}}{{!

@@ -149,7 +149,7 @@ cdef class Struct(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cStruct] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStruct] cpp_obj):
         __fbthrift_inst = <Struct>Struct.__new__(Struct)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -185,7 +185,7 @@ cdef class Struct(thrift.py3.types.Struct):
         cdef shared_ptr[cStruct] cpp_obj = make_shared[cStruct](
             deref(self._cpp_obj)
         )
-        return Struct._fbthrift_create(cmove(cpp_obj))
+        return Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -257,7 +257,7 @@ cdef class List__Enum(thrift.py3.types.List):
             self._cpp_obj = List__Enum__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[cEnum]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cEnum]] c_items):
         __fbthrift_inst = <List__Enum>List__Enum.__new__(List__Enum)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -266,7 +266,7 @@ cdef class List__Enum(thrift.py3.types.List):
         cdef shared_ptr[vector[cEnum]] cpp_obj = make_shared[vector[cEnum]](
             deref(self._cpp_obj)
         )
-        return List__Enum._fbthrift_create(cmove(cpp_obj))
+        return List__Enum._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -274,7 +274,7 @@ cdef class List__Enum(thrift.py3.types.List):
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
         start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
-        return List__Enum._fbthrift_create(
+        return List__Enum._create_FBTHRIFT_ONLY_DO_NOT_USE(
             __list_slice[vector[cEnum]](self._cpp_obj, start, stop, step)
         )
 
@@ -324,5 +324,5 @@ cdef shared_ptr[vector[cEnum]] List__Enum__make_instance(object items) except *:
             deref(c_inst).push_back(<cEnum><int>item)
     return cmove(c_inst)
 
-c0 = Struct._fbthrift_create(constant_shared_ptr(cc0()))
-e0s = List__Enum._fbthrift_create(constant_shared_ptr(ce0s()))
+c0 = Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(cc0()))
+e0s = List__Enum._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(ce0s()))

@@ -89,7 +89,7 @@ cdef class GeneratePatch(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cGeneratePatch] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cGeneratePatch] cpp_obj):
         __fbthrift_inst = <GeneratePatch>GeneratePatch.__new__(GeneratePatch)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -109,7 +109,7 @@ cdef class GeneratePatch(thrift.py3.types.Struct):
         cdef shared_ptr[cGeneratePatch] cpp_obj = make_shared[cGeneratePatch](
             deref(self._cpp_obj)
         )
-        return GeneratePatch._fbthrift_create(cmove(cpp_obj))
+        return GeneratePatch._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -189,7 +189,7 @@ cdef class GeneratePatchNew(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cGeneratePatchNew] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cGeneratePatchNew] cpp_obj):
         __fbthrift_inst = <GeneratePatchNew>GeneratePatchNew.__new__(GeneratePatchNew)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -209,7 +209,7 @@ cdef class GeneratePatchNew(thrift.py3.types.Struct):
         cdef shared_ptr[cGeneratePatchNew] cpp_obj = make_shared[cGeneratePatchNew](
             deref(self._cpp_obj)
         )
-        return GeneratePatchNew._fbthrift_create(cmove(cpp_obj))
+        return GeneratePatchNew._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -289,7 +289,7 @@ cdef class AssignOnlyPatch(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cAssignOnlyPatch] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAssignOnlyPatch] cpp_obj):
         __fbthrift_inst = <AssignOnlyPatch>AssignOnlyPatch.__new__(AssignOnlyPatch)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -309,7 +309,7 @@ cdef class AssignOnlyPatch(thrift.py3.types.Struct):
         cdef shared_ptr[cAssignOnlyPatch] cpp_obj = make_shared[cAssignOnlyPatch](
             deref(self._cpp_obj)
         )
-        return AssignOnlyPatch._fbthrift_create(cmove(cpp_obj))
+        return AssignOnlyPatch._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

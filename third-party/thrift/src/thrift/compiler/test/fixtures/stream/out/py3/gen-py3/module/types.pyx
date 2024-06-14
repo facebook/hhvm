@@ -84,7 +84,7 @@ cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFooStreamEx] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFooStreamEx] cpp_obj):
         __fbthrift_inst = <FooStreamEx>FooStreamEx.__new__(FooStreamEx, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
@@ -105,7 +105,7 @@ cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
         cdef shared_ptr[cFooStreamEx] cpp_obj = make_shared[cFooStreamEx](
             deref(self._cpp_obj)
         )
-        return FooStreamEx._fbthrift_create(cmove(cpp_obj))
+        return FooStreamEx._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -182,7 +182,7 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFooEx] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFooEx] cpp_obj):
         __fbthrift_inst = <FooEx>FooEx.__new__(FooEx, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
@@ -203,7 +203,7 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
         cdef shared_ptr[cFooEx] cpp_obj = make_shared[cFooEx](
             deref(self._cpp_obj)
         )
-        return FooEx._fbthrift_create(cmove(cpp_obj))
+        return FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -280,7 +280,7 @@ cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFooEx2] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFooEx2] cpp_obj):
         __fbthrift_inst = <FooEx2>FooEx2.__new__(FooEx2, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
@@ -301,7 +301,7 @@ cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
         cdef shared_ptr[cFooEx2] cpp_obj = make_shared[cFooEx2](
             deref(self._cpp_obj)
         )
-        return FooEx2._fbthrift_create(cmove(cpp_obj))
+        return FooEx2._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -381,7 +381,7 @@ cdef class ClientBufferedStream__i32(ClientBufferedStream):
         cdef cint32_t _value
         stream, pyfuture, rpc_options = <object> userdata
         if result.hasException[cFooStreamEx]():
-            pyfuture.set_exception(FooStreamEx._fbthrift_create(thrift.py3.exceptions.try_make_shared_exception[cFooStreamEx](result.exception())))
+            pyfuture.set_exception(FooStreamEx._create_FBTHRIFT_ONLY_DO_NOT_USE(thrift.py3.exceptions.try_make_shared_exception[cFooStreamEx](result.exception())))
         elif result.hasException():
             pyfuture.set_exception(
                 thrift.python.exceptions.create_py_exception(result.exception(), <__RpcOptions>rpc_options)

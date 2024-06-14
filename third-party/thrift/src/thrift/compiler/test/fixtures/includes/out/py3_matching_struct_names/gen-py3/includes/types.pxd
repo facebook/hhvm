@@ -84,7 +84,7 @@ cdef class Included(thrift.py3.types.Struct):
     cdef _transitive_types.Foo __fbthrift_cached_MyTransitiveField
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cIncluded])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cIncluded])
 
 
 

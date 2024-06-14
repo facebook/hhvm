@@ -87,7 +87,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef _includes_types.Included __fbthrift_cached_MyOtherIncludedField
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMyStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct])
 
 
 

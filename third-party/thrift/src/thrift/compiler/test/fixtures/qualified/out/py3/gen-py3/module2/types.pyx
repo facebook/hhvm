@@ -98,7 +98,7 @@ cdef class Struct(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cStruct] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStruct] cpp_obj):
         __fbthrift_inst = <Struct>Struct.__new__(Struct)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -106,7 +106,7 @@ cdef class Struct(thrift.py3.types.Struct):
     cdef inline first_impl(self):
 
         if self.__fbthrift_cached_first is None:
-            self.__fbthrift_cached_first = _module0_types.Struct._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).first_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_first = _module0_types.Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).first_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_first
 
     @property
@@ -116,7 +116,7 @@ cdef class Struct(thrift.py3.types.Struct):
     cdef inline second_impl(self):
 
         if self.__fbthrift_cached_second is None:
-            self.__fbthrift_cached_second = _module1_types.Struct._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).second_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_second = _module1_types.Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).second_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_second
 
     @property
@@ -138,7 +138,7 @@ cdef class Struct(thrift.py3.types.Struct):
         cdef shared_ptr[cStruct] cpp_obj = make_shared[cStruct](
             deref(self._cpp_obj)
         )
-        return Struct._fbthrift_create(cmove(cpp_obj))
+        return Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -227,7 +227,7 @@ cdef class BigStruct(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cBigStruct] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cBigStruct] cpp_obj):
         __fbthrift_inst = <BigStruct>BigStruct.__new__(BigStruct)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -235,7 +235,7 @@ cdef class BigStruct(thrift.py3.types.Struct):
     cdef inline s_impl(self):
 
         if self.__fbthrift_cached_s is None:
-            self.__fbthrift_cached_s = Struct._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).s_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_s = Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).s_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_s
 
     @property
@@ -265,7 +265,7 @@ cdef class BigStruct(thrift.py3.types.Struct):
         cdef shared_ptr[cBigStruct] cpp_obj = make_shared[cBigStruct](
             deref(self._cpp_obj)
         )
-        return BigStruct._fbthrift_create(cmove(cpp_obj))
+        return BigStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -327,6 +327,6 @@ cdef class BigStruct(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module2.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.BigStruct, self)
-c2 = Struct._fbthrift_create(constant_shared_ptr(cc2()))
-c3 = Struct._fbthrift_create(constant_shared_ptr(cc3()))
-c4 = Struct._fbthrift_create(constant_shared_ptr(cc4()))
+c2 = Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(cc2()))
+c3 = Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(cc3()))
+c4 = Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(cc4()))

@@ -197,7 +197,7 @@ cdef void SimpleService_expected_exception_callback(
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cSimpleException]():
         try:
-            exc = _module_types.SimpleException._fbthrift_create(try_make_shared_exception[_module_types.cSimpleException](result.exception()))
+            exc = _module_types.SimpleException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cSimpleException](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -388,7 +388,7 @@ cdef void SimpleService_get_struct_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.SimpleStruct._fbthrift_create(make_shared[_module_types.cSimpleStruct](cmove(result.value()))))
+            pyfuture.set_result(_module_types.SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_types.cSimpleStruct](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -401,7 +401,7 @@ cdef void SimpleService_fib_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__i32._fbthrift_create(make_shared[vector[cint32_t]](cmove(result.value()))))
+            pyfuture.set_result(_module_types.List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[cint32_t]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -414,7 +414,7 @@ cdef void SimpleService_unique_words_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Set__string._fbthrift_create(make_shared[cset[string]](cmove(result.value()))))
+            pyfuture.set_result(_module_types.Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[string]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -427,7 +427,7 @@ cdef void SimpleService_words_count_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Map__string_i16._fbthrift_create(make_shared[cmap[string,cint16_t]](cmove(result.value()))))
+            pyfuture.set_result(_module_types.Map__string_i16._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cmap[string,cint16_t]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -453,7 +453,7 @@ cdef void SimpleService_list_of_lists_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__List__i32._fbthrift_create(make_shared[vector[vector[cint32_t]]](cmove(result.value()))))
+            pyfuture.set_result(_module_types.List__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[vector[cint32_t]]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -466,7 +466,7 @@ cdef void SimpleService_word_character_frequency_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Map__string_Map__string_i32._fbthrift_create(make_shared[cmap[string,cmap[string,cint32_t]]](cmove(result.value()))))
+            pyfuture.set_result(_module_types.Map__string_Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cmap[string,cmap[string,cint32_t]]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -479,7 +479,7 @@ cdef void SimpleService_list_of_sets_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__Set__string._fbthrift_create(make_shared[vector[cset[string]]](cmove(result.value()))))
+            pyfuture.set_result(_module_types.List__Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[cset[string]]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -518,7 +518,7 @@ cdef void SimpleService_get_union_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Set__i32._fbthrift_create(make_shared[cset[cint32_t]](cmove(result.value()))))
+            pyfuture.set_result(_module_types.Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[cint32_t]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -531,7 +531,7 @@ cdef void SimpleService_get_keys_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Set__string._fbthrift_create(make_shared[cset[string]](cmove(result.value()))))
+            pyfuture.set_result(_module_types.Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[string]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -570,7 +570,7 @@ cdef void SimpleService_contain_binary_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Set__binary._fbthrift_create(make_shared[cset[string]](cmove(result.value()))))
+            pyfuture.set_result(_module_types.Set__binary._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[string]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -583,7 +583,7 @@ cdef void SimpleService_contain_enum_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__AnEnum._fbthrift_create(make_shared[vector[_module_types.cAnEnum]](cmove(result.value()))))
+            pyfuture.set_result(_module_types.List__AnEnum._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[_module_types.cAnEnum]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -596,7 +596,7 @@ cdef void SimpleService_get_binary_union_struct_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.BinaryUnionStruct._fbthrift_create(make_shared[_module_types.cBinaryUnionStruct](cmove(result.value()))))
+            pyfuture.set_result(_module_types.BinaryUnionStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_types.cBinaryUnionStruct](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 

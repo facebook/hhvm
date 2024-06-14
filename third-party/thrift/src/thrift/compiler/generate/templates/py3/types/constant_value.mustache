@@ -64,11 +64,11 @@ file.
     but we *promise* in the thrift-py3 api to never change objects.
 }}
 {{#type:struct?}}
-{{constant:name}} = {{> types/cython_python_type}}._fbthrift_create(constant_shared_ptr({{!
+{{constant:name}} = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
     }}c{{constant:name}}()))
 {{/type:struct?}}
 {{#type:container?}}
-{{constant:name}} = {{> types/cython_python_type}}._fbthrift_create(constant_shared_ptr({{!
+{{constant:name}} = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
     }}c{{constant:name}}()))
 {{/type:container?}}
 {{#type:enum}}

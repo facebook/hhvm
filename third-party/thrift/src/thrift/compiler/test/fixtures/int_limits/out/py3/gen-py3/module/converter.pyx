@@ -13,4 +13,4 @@ cdef shared_ptr[_fbthrift_ctypes.cLimits] Limits_convert_to_cpp(object inst) exc
 
 
 cdef object Limits_from_cpp(const shared_ptr[_fbthrift_ctypes.cLimits]& c_struct):
-    return _fbthrift_ctypes.Limits._fbthrift_create(c_struct)
+    return _fbthrift_ctypes.Limits._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

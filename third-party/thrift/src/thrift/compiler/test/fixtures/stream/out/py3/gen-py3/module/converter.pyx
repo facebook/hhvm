@@ -13,16 +13,16 @@ cdef shared_ptr[_fbthrift_ctypes.cFooStreamEx] FooStreamEx_convert_to_cpp(object
 
 
 cdef object FooStreamEx_from_cpp(const shared_ptr[_fbthrift_ctypes.cFooStreamEx]& c_struct):
-    return _fbthrift_ctypes.FooStreamEx._fbthrift_create(c_struct)
+    return _fbthrift_ctypes.FooStreamEx._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cFooEx] FooEx_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.FooEx?>inst)._cpp_obj
 
 
 cdef object FooEx_from_cpp(const shared_ptr[_fbthrift_ctypes.cFooEx]& c_struct):
-    return _fbthrift_ctypes.FooEx._fbthrift_create(c_struct)
+    return _fbthrift_ctypes.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cFooEx2] FooEx2_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.FooEx2?>inst)._cpp_obj
 
 
 cdef object FooEx2_from_cpp(const shared_ptr[_fbthrift_ctypes.cFooEx2]& c_struct):
-    return _fbthrift_ctypes.FooEx2._fbthrift_create(c_struct)
+    return _fbthrift_ctypes.FooEx2._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

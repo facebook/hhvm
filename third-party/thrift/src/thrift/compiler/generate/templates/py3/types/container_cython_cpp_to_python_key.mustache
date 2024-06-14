@@ -34,7 +34,7 @@ ckey.
 }}{{#type:string?}}ckey.data().decode('UTF-8'){{/type:string?}}{{!
 }}{{#type:binary?}}ckey{{/type:binary?}}{{!
 }}{{^type:base?}}{{^type:enum?}}{{!
-    }}{{> types/cython_python_type}}._fbthrift_create(ckey){{!
+    }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(ckey){{!
 }}{{/type:enum?}}{{/type:base?}}{{!
 }}{{#type:enum}}translate_cpp_enum_to_python({{!
     }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{enum:name}}, {{!

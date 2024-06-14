@@ -93,7 +93,7 @@ cdef class Mixin1(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMixin1] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMixin1] cpp_obj):
         __fbthrift_inst = <Mixin1>Mixin1.__new__(Mixin1)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -121,7 +121,7 @@ cdef class Mixin1(thrift.py3.types.Struct):
         cdef shared_ptr[cMixin1] cpp_obj = make_shared[cMixin1](
             deref(self._cpp_obj)
         )
-        return Mixin1._fbthrift_create(cmove(cpp_obj))
+        return Mixin1._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -210,7 +210,7 @@ cdef class Mixin2(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMixin2] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMixin2] cpp_obj):
         __fbthrift_inst = <Mixin2>Mixin2.__new__(Mixin2)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -218,7 +218,7 @@ cdef class Mixin2(thrift.py3.types.Struct):
     cdef inline m1_impl(self):
 
         if self.__fbthrift_cached_m1 is None:
-            self.__fbthrift_cached_m1 = Mixin1._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).m1_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_m1 = Mixin1._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).m1_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_m1
 
     @property
@@ -258,7 +258,7 @@ cdef class Mixin2(thrift.py3.types.Struct):
         cdef shared_ptr[cMixin2] cpp_obj = make_shared[cMixin2](
             deref(self._cpp_obj)
         )
-        return Mixin2._fbthrift_create(cmove(cpp_obj))
+        return Mixin2._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -346,7 +346,7 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cMixin3Base] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMixin3Base] cpp_obj):
         __fbthrift_inst = <Mixin3Base>Mixin3Base.__new__(Mixin3Base)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -374,7 +374,7 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
         cdef shared_ptr[cMixin3Base] cpp_obj = make_shared[cMixin3Base](
             deref(self._cpp_obj)
         )
-        return Mixin3Base._fbthrift_create(cmove(cpp_obj))
+        return Mixin3Base._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -464,7 +464,7 @@ cdef class Foo(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFoo] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFoo] cpp_obj):
         __fbthrift_inst = <Foo>Foo.__new__(Foo)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
@@ -480,7 +480,7 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef inline m2_impl(self):
 
         if self.__fbthrift_cached_m2 is None:
-            self.__fbthrift_cached_m2 = Mixin2._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).m2_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_m2 = Mixin2._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).m2_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_m2
 
     @property
@@ -490,7 +490,7 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef inline m3_impl(self):
 
         if self.__fbthrift_cached_m3 is None:
-            self.__fbthrift_cached_m3 = Mixin3Base._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).m3_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_m3 = Mixin3Base._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).m3_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_m3
 
     @property
@@ -500,7 +500,7 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef inline m1_impl(self):
 
         if self.__fbthrift_cached_m1 is None:
-            self.__fbthrift_cached_m1 = Mixin1._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).m1_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_m1 = Mixin1._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj).m1_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_m1
 
     @property
@@ -548,7 +548,7 @@ cdef class Foo(thrift.py3.types.Struct):
         cdef shared_ptr[cFoo] cpp_obj = make_shared[cFoo](
             deref(self._cpp_obj)
         )
-        return Foo._fbthrift_create(cmove(cpp_obj))
+        return Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

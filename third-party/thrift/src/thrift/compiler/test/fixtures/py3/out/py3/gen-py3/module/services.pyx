@@ -788,7 +788,7 @@ cdef api void call_cy_SimpleService_get_value(
     unique_ptr[_module_types.cSimpleStruct] simple_struct
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_simple_struct = _module_types.SimpleStruct._fbthrift_create(shared_ptr[_module_types.cSimpleStruct](simple_struct.release()))
+    arg_simple_struct = _module_types.SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cSimpleStruct](simple_struct.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -926,7 +926,7 @@ cdef api void call_cy_SimpleService_sum_i16_list(
     unique_ptr[vector[cint16_t]] numbers
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_numbers = _module_types.List__i16._fbthrift_create(__to_shared_ptr(cmove(numbers)))
+    arg_numbers = _module_types.List__i16._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(numbers)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -944,7 +944,7 @@ cdef api void call_cy_SimpleService_sum_i32_list(
     unique_ptr[vector[cint32_t]] numbers
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_numbers = _module_types.List__i32._fbthrift_create(__to_shared_ptr(cmove(numbers)))
+    arg_numbers = _module_types.List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(numbers)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -962,7 +962,7 @@ cdef api void call_cy_SimpleService_sum_i64_list(
     unique_ptr[vector[cint64_t]] numbers
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_numbers = _module_types.List__i64._fbthrift_create(__to_shared_ptr(cmove(numbers)))
+    arg_numbers = _module_types.List__i64._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(numbers)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -980,7 +980,7 @@ cdef api void call_cy_SimpleService_concat_many(
     unique_ptr[vector[string]] words
 ) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
-    arg_words = _module_types.List__string._fbthrift_create(__to_shared_ptr(cmove(words)))
+    arg_words = _module_types.List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(words)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -998,7 +998,7 @@ cdef api void call_cy_SimpleService_count_structs(
     unique_ptr[vector[_module_types.cSimpleStruct]] items
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_items = _module_types.List__SimpleStruct._fbthrift_create(__to_shared_ptr(cmove(items)))
+    arg_items = _module_types.List__SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(items)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1016,7 +1016,7 @@ cdef api void call_cy_SimpleService_sum_set(
     unique_ptr[cset[cint32_t]] numbers
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_numbers = _module_types.Set__i32._fbthrift_create(__to_shared_ptr(cmove(numbers)))
+    arg_numbers = _module_types.Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(numbers)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1035,7 +1035,7 @@ cdef api void call_cy_SimpleService_contains_word(
     unique_ptr[string] word
 ) noexcept:
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
-    arg_words = _module_types.Set__string._fbthrift_create(__to_shared_ptr(cmove(words)))
+    arg_words = _module_types.Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(words)))
     arg_word = (deref(word)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1056,7 +1056,7 @@ cdef api void call_cy_SimpleService_get_map_value(
     unique_ptr[string] key
 ) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
-    arg_words = _module_types.Map__string_string._fbthrift_create(__to_shared_ptr(cmove(words)))
+    arg_words = _module_types.Map__string_string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(words)))
     arg_key = (deref(key)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1076,7 +1076,7 @@ cdef api void call_cy_SimpleService_map_length(
     unique_ptr[cmap[string,_module_types.cSimpleStruct]] items
 ) noexcept:
     cdef Promise_cint16_t __promise = Promise_cint16_t._fbthrift_create(cmove(cPromise))
-    arg_items = _module_types.Map__string_SimpleStruct._fbthrift_create(__to_shared_ptr(cmove(items)))
+    arg_items = _module_types.Map__string_SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(items)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1094,7 +1094,7 @@ cdef api void call_cy_SimpleService_sum_map_values(
     unique_ptr[cmap[string,cint16_t]] items
 ) noexcept:
     cdef Promise_cint16_t __promise = Promise_cint16_t._fbthrift_create(cmove(cPromise))
-    arg_items = _module_types.Map__string_i16._fbthrift_create(__to_shared_ptr(cmove(items)))
+    arg_items = _module_types.Map__string_i16._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(items)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1112,7 +1112,7 @@ cdef api void call_cy_SimpleService_complex_sum_i32(
     unique_ptr[_module_types.cComplexStruct] counter
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_counter = _module_types.ComplexStruct._fbthrift_create(shared_ptr[_module_types.cComplexStruct](counter.release()))
+    arg_counter = _module_types.ComplexStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cComplexStruct](counter.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1130,7 +1130,7 @@ cdef api void call_cy_SimpleService_repeat_name(
     unique_ptr[_module_types.cComplexStruct] counter
 ) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
-    arg_counter = _module_types.ComplexStruct._fbthrift_create(shared_ptr[_module_types.cComplexStruct](counter.release()))
+    arg_counter = _module_types.ComplexStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cComplexStruct](counter.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1181,7 +1181,7 @@ cdef api void call_cy_SimpleService_unique_words(
     unique_ptr[vector[string]] words
 ) noexcept:
     cdef Promise_cset__string __promise = Promise_cset__string._fbthrift_create(cmove(cPromise))
-    arg_words = _module_types.List__string._fbthrift_create(__to_shared_ptr(cmove(words)))
+    arg_words = _module_types.List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(words)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1199,7 +1199,7 @@ cdef api void call_cy_SimpleService_words_count(
     unique_ptr[vector[string]] words
 ) noexcept:
     cdef Promise_cmap__string_cint16_t __promise = Promise_cmap__string_cint16_t._fbthrift_create(cmove(cPromise))
-    arg_words = _module_types.List__string._fbthrift_create(__to_shared_ptr(cmove(words)))
+    arg_words = _module_types.List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(words)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1292,7 +1292,7 @@ cdef api void call_cy_SimpleService_nested_map_argument(
     unique_ptr[cmap[string,vector[_module_types.cSimpleStruct]]] struct_map
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_struct_map = _module_types.Map__string_List__SimpleStruct._fbthrift_create(__to_shared_ptr(cmove(struct_map)))
+    arg_struct_map = _module_types.Map__string_List__SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(struct_map)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1310,7 +1310,7 @@ cdef api void call_cy_SimpleService_make_sentence(
     unique_ptr[vector[vector[string]]] word_chars
 ) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
-    arg_word_chars = _module_types.List__List__string._fbthrift_create(__to_shared_ptr(cmove(word_chars)))
+    arg_word_chars = _module_types.List__List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(word_chars)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1328,7 +1328,7 @@ cdef api void call_cy_SimpleService_get_union(
     unique_ptr[vector[cset[cint32_t]]] sets
 ) noexcept:
     cdef Promise_cset__cint32_t __promise = Promise_cset__cint32_t._fbthrift_create(cmove(cPromise))
-    arg_sets = _module_types.List__Set__i32._fbthrift_create(__to_shared_ptr(cmove(sets)))
+    arg_sets = _module_types.List__Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(sets)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1346,7 +1346,7 @@ cdef api void call_cy_SimpleService_get_keys(
     unique_ptr[vector[cmap[string,string]]] string_map
 ) noexcept:
     cdef Promise_cset__string __promise = Promise_cset__string._fbthrift_create(cmove(cPromise))
-    arg_string_map = _module_types.List__Map__string_string._fbthrift_create(__to_shared_ptr(cmove(string_map)))
+    arg_string_map = _module_types.List__Map__string_string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(string_map)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1400,7 +1400,7 @@ cdef api void call_cy_SimpleService_contain_binary(
     unique_ptr[vector[string]] binaries
 ) noexcept:
     cdef Promise_cset__binary __promise = Promise_cset__binary._fbthrift_create(cmove(cPromise))
-    arg_binaries = _module_types.List__binary._fbthrift_create(__to_shared_ptr(cmove(binaries)))
+    arg_binaries = _module_types.List__binary._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(binaries)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1418,7 +1418,7 @@ cdef api void call_cy_SimpleService_contain_enum(
     unique_ptr[vector[_module_types.cAnEnum]] the_enum
 ) noexcept:
     cdef Promise_vector___module_types_cAnEnum __promise = Promise_vector___module_types_cAnEnum._fbthrift_create(cmove(cPromise))
-    arg_the_enum = _module_types.List__AnEnum._fbthrift_create(__to_shared_ptr(cmove(the_enum)))
+    arg_the_enum = _module_types.List__AnEnum._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(the_enum)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1436,7 +1436,7 @@ cdef api void call_cy_SimpleService_get_binary_union_struct(
     unique_ptr[_module_types.cBinaryUnion] u
 ) noexcept:
     cdef Promise__module_types_cBinaryUnionStruct __promise = Promise__module_types_cBinaryUnionStruct._fbthrift_create(cmove(cPromise))
-    arg_u = _module_types.BinaryUnion._fbthrift_create(shared_ptr[_module_types.cBinaryUnion](u.release()))
+    arg_u = _module_types.BinaryUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cBinaryUnion](u.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(

@@ -77,7 +77,7 @@ cdef class List__string(thrift.py3.types.List):
             self._cpp_obj = List__string__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[string]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[string]] c_items):
         __fbthrift_inst = <List__string>List__string.__new__(List__string)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -86,7 +86,7 @@ cdef class List__string(thrift.py3.types.List):
         cdef shared_ptr[vector[string]] cpp_obj = make_shared[vector[string]](
             deref(self._cpp_obj)
         )
-        return List__string._fbthrift_create(cmove(cpp_obj))
+        return List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -94,7 +94,7 @@ cdef class List__string(thrift.py3.types.List):
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
         start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
-        return List__string._fbthrift_create(
+        return List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(
             __list_slice[vector[string]](self._cpp_obj, start, stop, step)
         )
 
@@ -156,7 +156,7 @@ cdef class Map__i64_List__string(thrift.py3.types.Map):
             self._cpp_obj = Map__i64_List__string__make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[cint64_t,vector[string]]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cint64_t,vector[string]]] c_items):
         __fbthrift_inst = <Map__i64_List__string>Map__i64_List__string.__new__(Map__i64_List__string)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
@@ -165,7 +165,7 @@ cdef class Map__i64_List__string(thrift.py3.types.Map):
         cdef shared_ptr[cmap[cint64_t,vector[string]]] cpp_obj = make_shared[cmap[cint64_t,vector[string]]](
             deref(self._cpp_obj)
         )
-        return Map__i64_List__string._fbthrift_create(cmove(cpp_obj))
+        return Map__i64_List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
@@ -186,7 +186,7 @@ cdef class Map__i64_List__string(thrift.py3.types.Map):
             raise err
         cdef shared_ptr[vector[string]] citem
         __map_getitem(self._cpp_obj, ckey, citem)
-        return List__string._fbthrift_create(citem)
+        return List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
 
     def __iter__(self):
         if not self:
@@ -211,7 +211,7 @@ cdef class Map__i64_List__string(thrift.py3.types.Map):
         cdef shared_ptr[vector[string]] citem
         for i in range(deref(self._cpp_obj).size()):
             itr.genNextValue(self._cpp_obj, citem)
-            yield List__string._fbthrift_create(citem)
+            yield List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
 
     def items(self):
         if not self:
@@ -221,7 +221,7 @@ cdef class Map__i64_List__string(thrift.py3.types.Map):
         cdef shared_ptr[vector[string]] citem
         for i in range(deref(self._cpp_obj).size()):
             itr.genNextItem(self._cpp_obj, ckey, citem)
-            yield (ckey, List__string._fbthrift_create(citem))
+            yield (ckey, List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
 
     @staticmethod
     def __get_reflection__():
@@ -244,4 +244,4 @@ cdef shared_ptr[cmap[cint64_t,vector[string]]] Map__i64_List__string__make_insta
             deref(c_inst)[key] = deref((<List__string>item)._cpp_obj)
     return cmove(c_inst)
 
-TEST_MAP = Map__i64_List__string._fbthrift_create(constant_shared_ptr(cTEST_MAP()))
+TEST_MAP = Map__i64_List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(cTEST_MAP()))

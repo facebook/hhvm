@@ -1462,8 +1462,8 @@ int HTTP1xCodec::onMessageCompleteCB(http_parser* parser) {
   }
 }
 
-bool HTTP1xCodec::supportsNextProtocol(const std::string& npn) {
-  return npn.length() == 8 && (npn == "http/1.0" || npn == "http/1.1");
+bool HTTP1xCodec::supportsNextProtocol(folly::StringPiece alpn) {
+  return alpn.size() == 8 && (alpn == "http/1.0" || alpn == "http/1.1");
 }
 
 HTTP1xCodec HTTP1xCodec::makeResponseCodec(bool mayChunkEgress) {

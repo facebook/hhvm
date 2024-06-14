@@ -10,6 +10,7 @@
 
 #include <cstdint>
 #include <folly/Optional.h>
+#include <folly/Range.h>
 #include <proxygen/lib/utils/Export.h>
 #include <string>
 
@@ -31,13 +32,13 @@ extern const std::string& getCodecProtocolString(CodecProtocol);
 /**
  * Check if given debugging name refers to a valid protocol.
  */
-extern bool isValidCodecProtocolStr(const std::string& protocolStr);
+extern bool isValidCodecProtocolStr(folly::StringPiece protocolStr);
 
 /**
  * Get the protocol from the given debugging name.
  * If it's an invalid string, return the default protocol.
  */
-extern CodecProtocol getCodecProtocolFromStr(const std::string& protocolStr);
+extern CodecProtocol getCodecProtocolFromStr(folly::StringPiece protocolStr);
 
 /**
  * Check if the given protocol is HTTP2.

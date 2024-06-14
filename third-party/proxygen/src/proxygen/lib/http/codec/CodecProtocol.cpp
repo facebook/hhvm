@@ -25,6 +25,7 @@ static const std::string hq = "hq";
 static const std::string h3 = "h3";
 static const std::string http_binary = "bhttp";
 static const std::string empty = "";
+} // namespace
 
 extern CodecProtocol getCodecProtocolFromStr(folly::StringPiece protocolStr) {
   if (protocolStr == http_1_1) {
@@ -44,8 +45,6 @@ extern CodecProtocol getCodecProtocolFromStr(folly::StringPiece protocolStr) {
   }
 }
 
-} // namespace
-
 extern const std::string& getCodecProtocolString(CodecProtocol proto) {
   switch (proto) {
     case CodecProtocol::HTTP_1_1:
@@ -63,15 +62,11 @@ extern const std::string& getCodecProtocolString(CodecProtocol proto) {
   return empty;
 }
 
-extern bool isValidCodecProtocolStr(const std::string& protocolStr) {
+extern bool isValidCodecProtocolStr(folly::StringPiece protocolStr) {
   return protocolStr == http_1_1 || protocolStr == http2::kProtocolString ||
          protocolStr == http2::kProtocolCleartextString ||
          protocolStr == http_2 || protocolStr == hq ||
          protocolStr == http_binary;
-}
-
-extern CodecProtocol getCodecProtocolFromStr(const std::string& protocolStr) {
-  return getCodecProtocolFromStr(folly::StringPiece(protocolStr));
 }
 
 extern bool isHTTP2CodecProtocol(CodecProtocol protocol) {

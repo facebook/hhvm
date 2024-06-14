@@ -8,10 +8,20 @@
 
 #include <proxygen/lib/http/codec/DefaultHTTPCodecFactory.h>
 
+#include <folly/String.h>
 #include <proxygen/lib/http/codec/CodecProtocol.h>
 #include <proxygen/lib/http/codec/HTTP1xCodec.h>
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
 #include <proxygen/lib/http/codec/HTTP2Constants.h>
+
+namespace {
+folly::StringPiece trimTrailingNulls(folly::StringPiece sp) {
+  while (!sp.empty() && sp.back() == '\0') {
+    sp.pop_back();
+  }
+  return sp;
+}
+} // namespace
 
 namespace proxygen {
 
@@ -20,9 +30,12 @@ DefaultHTTPCodecFactory::DefaultHTTPCodecFactory(CodecConfig config)
 }
 
 std::unique_ptr<HTTPCodec> DefaultHTTPCodecFactory::getCodec(
-    const std::string& chosenProto, TransportDirection direction, bool isTLS) {
+    const std::string& inChosenProto,
+    TransportDirection direction,
+    bool isTLS) {
 
   auto config = configFn_();
+  auto chosenProto = trimTrailingNulls(folly::trimWhitespace(inChosenProto));
   auto codecProtocol = getCodecProtocolFromStr(chosenProto);
   switch (codecProtocol) {
     case CodecProtocol::HTTP_2: {

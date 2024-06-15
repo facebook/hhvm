@@ -185,11 +185,11 @@ class ServerAcceptor : public Acceptor,
   }
 
   void read(Context*, AcceptPipelineType conn) override {
-    if (conn.type() != typeid(ConnInfo&)) {
+    if (!std::holds_alternative<ConnInfo*>(conn)) {
       return;
     }
 
-    auto connInfo = boost::get<ConnInfo&>(conn);
+    auto& connInfo = *std::get<ConnInfo*>(conn);
     folly::AsyncTransport::UniquePtr transport(connInfo.sock);
 
     // Setup local and remote addresses
@@ -231,7 +231,7 @@ class ServerAcceptor : public Acceptor,
         nextProtocolName,
         secureTransportType,
         tinfo};
-    acceptPipeline_->read(connInfo);
+    acceptPipeline_->read(&connInfo);
   }
 
   // notify the acceptors in the acceptPipeline to drain & drop conns

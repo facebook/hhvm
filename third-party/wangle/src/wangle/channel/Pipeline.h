@@ -16,7 +16,8 @@
 
 #pragma once
 
-#include <boost/variant.hpp>
+#include <variant>
+
 #include <folly/ExceptionWrapper.h>
 #include <folly/Memory.h>
 #include <folly/Optional.h>
@@ -288,10 +289,10 @@ enum class ConnEvent {
   CONN_REMOVED,
 };
 
-using AcceptPipelineType = boost::variant<
+using AcceptPipelineType = std::variant<
     folly::IOBuf*,
     folly::AsyncTransport*,
-    ConnInfo&,
+    ConnInfo*,
     ConnEvent,
     std::tuple<
         folly::IOBuf*,

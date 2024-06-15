@@ -22,13 +22,13 @@ template <typename Pipeline, typename R>
 void AcceptRoutingHandler<Pipeline, R>::read(
     Context*,
     AcceptPipelineType conn) {
-  if (conn.type() != typeid(ConnInfo&)) {
+  if (!std::holds_alternative<ConnInfo*>(conn)) {
     return;
   }
 
   populateAcceptors();
 
-  const auto& connInfo = boost::get<ConnInfo&>(conn);
+  const auto& connInfo = *std::get<ConnInfo*>(conn);
   auto socket = std::shared_ptr<folly::AsyncTransport>(
       connInfo.sock, folly::DelayedDestruction::Destructor());
 

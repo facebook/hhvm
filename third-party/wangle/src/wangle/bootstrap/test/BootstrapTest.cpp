@@ -290,8 +290,8 @@ std::atomic<int> connections{0};
 class TestHandlerPipeline : public InboundHandler<AcceptPipelineType> {
  public:
   void read(Context* ctx, AcceptPipelineType conn) override {
-    if (conn.type() == typeid(ConnEvent)) {
-      auto connEvent = boost::get<ConnEvent>(conn);
+    if (std::holds_alternative<ConnEvent>(conn)) {
+      auto connEvent = std::get<ConnEvent>(conn);
       if (connEvent == ConnEvent::CONN_ADDED) {
         connections++;
       }

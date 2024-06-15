@@ -30,6 +30,9 @@ trait ClassContextDefs {
   public static function getContext()[zoned]: Base {
     return parent::get() as nonnull;
   }
+  public static function exists()[zoned]: bool {
+    return parent::exists() as bool;
+  }
 }
 
 abstract final class ClassContext extends HH\ImplicitContext {

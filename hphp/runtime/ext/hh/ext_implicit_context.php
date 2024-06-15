@@ -96,6 +96,15 @@ function get_implicit_context(string $key)[zoned]: mixed;
 function get_whole_implicit_context()[zoned]: ImplicitContextData;
 
 /**
+ * Returns True if the key is present in the IC
+ * False otherwise
+ *
+ * Does not affect the state of the IC
+ */
+<<__Native>>
+function has_key(string $key)[zoned]: bool;
+
+/**
  * Creates implicit context $context keyed by $key.
  */
 <<__Native>>
@@ -159,6 +168,10 @@ abstract class ImplicitContext {
     } finally {
       ImplicitContext\_Private\set_implicit_context_by_value($prev);
     }
+  }
+
+  protected static function exists()[zoned]: bool {
+    return ImplicitContext\_Private\has_key(nameof static);
   }
 
   protected static function get()[zoned]: ?this::T {

@@ -85,6 +85,15 @@ Object create_new_IC() {
 }
 } // namespace
 
+bool HHVM_FUNCTION(has_key, StringArg keyArg) {
+  assertx(*ImplicitContext::activeCtx);
+  auto key = keyArg.get();
+  if (key->size() == 0) { return false; }
+  auto const obj = *ImplicitContext::activeCtx;
+  auto const context = Native::data<ImplicitContext>(obj);
+  return context->m_map.find(key) != context->m_map.end();
+}
+
 bool HHVM_FUNCTION(is_inaccessible) {
   assertx(*ImplicitContext::activeCtx);
   return (*ImplicitContext::activeCtx) == (*ImplicitContext::emptyCtx);
@@ -268,6 +277,8 @@ static struct HHImplicitContext final : Extension {
                   HHVM_FN(get_implicit_context_memo_key));
     HHVM_NAMED_FE(HH\\ImplicitContext\\is_inaccessible,
                   HHVM_FN(is_inaccessible));
+    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\has_key,
+                  HHVM_FN(has_key));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_debug_info,
                   HHVM_FN(get_implicit_context_debug_info));
     HHVM_NAMED_FE(HH\\Coeffects\\_Private\\enter_zoned_with,

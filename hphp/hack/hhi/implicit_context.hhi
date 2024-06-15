@@ -49,6 +49,7 @@ namespace HH {
     )[zoned, ctx $f]: Tout;
 
     protected static function get()[zoned]: ?this::T;
+    protected static function exists()[zoned]: bool;
   }
 
   /**

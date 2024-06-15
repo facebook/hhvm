@@ -16,7 +16,8 @@
 
 #include <wangle/ssl/TLSCredProcessor.h>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
+
 #include <folly/File.h>
 #include <folly/FileUtil.h>
 #include <folly/Range.h>
@@ -28,7 +29,7 @@
 using namespace folly;
 using namespace wangle;
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 class ProcessTicketTest : public testing::Test {
  public:
@@ -89,9 +90,7 @@ TEST_F(ProcessTicketTest, handleAbsentFile) {
 
 void updateModifiedTime(const std::string& fileName, int elapsed) {
   auto previous = fs::last_write_time(fileName);
-  auto newTime = std::chrono::system_clock::to_time_t(
-      std::chrono::system_clock::from_time_t(previous) +
-      std::chrono::seconds(elapsed));
+  auto newTime = previous + std::chrono::seconds(elapsed);
   fs::last_write_time(fileName, newTime);
 }
 

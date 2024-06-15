@@ -192,18 +192,19 @@ SSATmp* is_a_impl(IRGS& env, const ParamPrep& params, bool subclassOnly) {
   auto const nparams = params.size();
   if (nparams != 2 && nparams != 3) return nullptr;
 
-  auto const obj = params[0].value;
+  auto const cls_or_obj = params[0].value;
   auto const cls = params[1].value;
-  auto const allowClass = nparams == 3 ? params[2].value : cns(env, false);
+  // Note: is_a's default value for $allowString = false while
+  // is_subclass_of's default value for $allowString = true
+  auto const allowClass = nparams == 3 ? params[2].value : cns(env, subclassOnly);
 
-  if (!obj->type().subtypeOfAny(TCls, TObj) ||
+  if (!cls_or_obj->type().subtypeOfAny(TCls, TObj) ||
       !cls->type().subtypeOfAny(TCls, TLazyCls, TStr) ||
       !allowClass->isA(TBool)) {
     return nullptr;
   }
 
-  auto const lhs = obj->isA(TObj) ? gen(env, LdObjClass, obj) : obj;
-  auto const rhs = [&] {
+  auto const lookupRhs = [&] {
     if (cls->isA(TStr)) {
       return gen(env, LookupCls, cls);
     }
@@ -212,30 +213,55 @@ SSATmp* is_a_impl(IRGS& env, const ParamPrep& params, bool subclassOnly) {
       return gen(env, LookupCls, cname);
     }
     return cls;
-  }();
+  };
 
-  return cond(
-    env,
-    [&](Block* taken) {
-      return gen(env, CheckNonNull, taken, rhs);
-    },
-    [&](SSATmp* rhs) {
-      // is_a() finishes here.
-      if (!subclassOnly) return gen(env, InstanceOf, lhs, rhs);
+  auto const is_a = [&](SSATmp* lhs, SSATmp* rhsOpt) {
+    return cond(
+      env,
+      [&](Block* taken) {
+        // Note: is_a always returns false for traits
+        auto const data = AttrData { AttrTrait };
 
-      // is_subclass_of() also needs to check that LHS and RHS don't match.
-      return cond(
-        env,
-        [&](Block* match) {
-          auto const eq = gen(env, EqCls, lhs, rhs);
-          gen(env, JmpNZero, match, eq);
-        },
-        [&]{ return gen(env, InstanceOf, lhs, rhs); },
-        [&]{ return cns(env, false); }
-      );
-    },
-    [&]{ return cns(env, false); }
-  );
+        if (!cls_or_obj->isA(TObj)) {
+          gen(env, JmpNZero, taken, gen(env, ClassHasAttr, data, lhs)); 
+        }
+
+        auto const rhs = gen(env, CheckNonNull, taken, rhsOpt);
+        gen(env, JmpNZero, taken, gen(env, ClassHasAttr, data, rhs));
+
+        // is_subclass_of() also needs to check that LHS and RHS don't match.
+        if (subclassOnly) gen(env, JmpNZero, taken, gen(env, EqCls, lhs, rhs));
+
+        return rhs;
+      },
+      [&](SSATmp* rhs) { return gen(env, InstanceOf, lhs, rhs); },
+      [&]{ return cns(env, false); }
+    );
+  };
+
+  if (cls_or_obj->isA(TObj)) {
+    auto const lhs = gen(env, LdObjClass, cls_or_obj);
+    auto const rhsOpt = lookupRhs();
+    return is_a(lhs, rhsOpt);
+  } else {
+    assertx(cls_or_obj->isA(TCls));
+    // is_a always returns false if the first argument is not an object and
+    // $allow_string is false
+    return cond(
+      env,
+      [&](Block* taken) {
+        gen(env, JmpZero, taken, allowClass);
+      },
+      [&] {
+        // TODO(T168044199) admit TStr and TLazyCls and call ldCls
+        auto const lhs = cls_or_obj;
+
+        auto const rhsOpt = lookupRhs();
+        return is_a(lhs, rhsOpt);
+      },
+      [&] { return cns(env, false); }
+    );
+  }
 }
 
 SSATmp* opt_is_a(IRGS& env, const ParamPrep& params) {

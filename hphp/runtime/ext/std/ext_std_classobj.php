@@ -137,14 +137,15 @@ function interface_exists(string $interface_name,
  * Checks if the object is of this class or has this class as one of its
  * parents
  *
- * @param object $object - The tested object
+ * @param object $object - A class name or an object instance
  * @param string $class_name - The class name
- * @param bool $allow_string - If this parameter set to FALSE, string
- *   class name as object is not allowed. This also prevents from calling
- *   autoloader if the class doesn't exist.
+ * @param bool $allow_string - If this parameter set to `false`, this function
+ *   will always `return` false when the $object parameter is a string class
+ *   name.
  *
- * @return bool - Returns TRUE if the object is of this class or has this
- *   class as one of its parents, FALSE otherwise.
+ * @return bool - Returns `true` if $class_name is either a superclass or the
+ *   same class as $object's class, `false` otherwise. NOTE: if either $object
+ *   or $class_name is a trait name, this function returns `false`.
  */
 <<__Native>>
 function is_a(readonly mixed $object,
@@ -152,7 +153,9 @@ function is_a(readonly mixed $object,
               bool $allow_string = false)[]: bool;
 
 /**
- * Checks if the object has this class as one of its parents
+ * Checks if the object has this class as one of its parents. This function
+ * is identical to `is_a` except that it returns `false` if $object's class
+ * is the same as $class_name.
  *
  * @param mixed $object - A class name or an object instance
  * @param string $class_name - The class name
@@ -160,8 +163,9 @@ function is_a(readonly mixed $object,
  *   class name as object is not allowed. This also prevents from calling
  *   autoloader if the class doesn't exist.
  *
- * @return bool - This function returns TRUE if the object object,
- *   belongs to a class which is a subclass of class_name, FALSE otherwise.
+ * @return bool - Returns `true` if $class_name a superclass of $object's
+ *   class, `false` otherwise. NOTE: if either $object or $class_name is a
+ *   trait name, this function returns `false`.
  */
 <<__Native>>
 function is_subclass_of(readonly mixed $object,

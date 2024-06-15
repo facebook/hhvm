@@ -195,6 +195,8 @@ Outer:                                 | Inner:
 
 namespace HPHP::jit::irgen {
 
+TRACE_SET_MOD(hhir);  
+
 bool isInlining(const IRGS& env) {
   return !env.inlineState.frames.empty();
 }

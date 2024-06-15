@@ -39,7 +39,6 @@
 
 namespace HPHP::jit::irgen {
 
-TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 // Convenient short-hand state accessors
@@ -514,7 +513,7 @@ inline SSATmp* pop(IRGS& env, GuardConstraint gc = DataTypeSpecific) {
   auto const knownType = env.irb->stack(offset, gc).type;
   auto value = gen(env, LdStk, knownType, IRSPRelOffsetData{offset}, sp(env));
   env.irb->fs().decBCSPDepth();
-  FTRACE(2, "popping {}\n", *value->inst());
+  FTRACE_MOD(Trace::hhir, 2, "popping {}\n", *value->inst());
   return value;
 }
 
@@ -553,7 +552,7 @@ inline void popDecRef(IRGS& env,
 }
 
 inline SSATmp* push(IRGS& env, SSATmp* tmp) {
-  FTRACE(2, "pushing {}\n", *tmp->inst());
+  FTRACE_MOD(Trace::hhir, 2, "pushing {}\n", *tmp->inst());
   env.irb->fs().incBCSPDepth();
   auto const offset = offsetFromIRSP(env, BCSPRelOffset{0});
   gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), tmp);
@@ -580,7 +579,7 @@ inline void allocActRec(IRGS& env) {
 
 inline Type topType(IRGS& env, BCSPRelOffset idx = BCSPRelOffset{0},
                     GuardConstraint gc = DataTypeSpecific) {
-  FTRACE(5, "Asking for type of stack elem {}\n", idx.offset);
+  FTRACE_MOD(Trace::hhir, 5, "Asking for type of stack elem {}\n", idx.offset);
   return env.irb->stack(offsetFromIRSP(env, idx), gc).type;
 }
 
@@ -610,7 +609,7 @@ inline SSATmp* apparate(IRGS& env, Type type) {
 
 inline BCMarker makeMarker(IRGS& env, SrcKey sk) {
   auto const stackOff = spOffBCFromStackBase(env);
-  FTRACE(2, "makeMarker: sk {} sp {}\n", showShort(sk), stackOff.offset);
+  FTRACE_MOD(Trace::hhir, 2, "makeMarker: sk {} sp {}\n", showShort(sk), stackOff.offset);
 
   return BCMarker {
     sk,

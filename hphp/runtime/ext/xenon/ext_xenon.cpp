@@ -33,6 +33,10 @@
 #include "hphp/util/timer.h"
 
 #include <chrono>
+#include "hphp/runtime/server/xbox-server.h"
+#include "hphp/runtime/server/pagelet-server.h"
+#include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/server/cli-server.h"
 #include <time.h>
 
 #include <folly/Random.h>
@@ -92,7 +96,11 @@ const StaticString
   s_stack("stack"),
   s_time_ns("timeNano"),
   s_lastTriggerTime("lastTriggerTimeNano"),
-  s_unwinder("Unwinder");
+  s_unwinder("Unwinder"),
+  s_pagelets_workers("PageletWorkers"),
+  s_xbox_workers("XboxWorkers"),
+  s_http_workers("HttpWorkers"),
+  s_cli_workers("CliWorkers");
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -224,7 +232,11 @@ Array XenonRequestLocalData::createResponse() {
       s_lastTriggerTime, frame[s_lastTriggerTime],
       s_stack, frame[s_stack].toArray(),
       s_isWait, frame[s_isWait],
-      s_sourceType, frame[s_sourceType]
+      s_sourceType, frame[s_sourceType],
+      s_xbox_workers, frame[s_xbox_workers],
+      s_pagelets_workers, frame[s_pagelets_workers],
+      s_http_workers, frame[s_http_workers],
+      s_cli_workers, frame[s_cli_workers]
     ));
   }
   return stacks.toArray();
@@ -261,7 +273,15 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
     s_lastTriggerTime, triggerTime,
     s_stack, bt,
     s_sourceType, show(sourceType),
-    s_isWait, !Xenon::isCPUTime(t)
+    s_pagelets_workers, 
+    RuntimeOption::XenonTrackActiveWorkers ? PageletServer::GetActiveWorker() : -1,
+    s_xbox_workers, 
+    RuntimeOption::XenonTrackActiveWorkers ? XboxServer::GetActiveWorkers() : -1,
+    s_http_workers, 
+    RuntimeOption::XenonTrackActiveWorkers ? 
+      (HttpServer::Server ? HttpServer::Server->getSatelliteRequestCount().first : 0) : -1,
+    s_cli_workers, 
+    RuntimeOption::XenonTrackActiveWorkers ? cli_server_active_workers() : -1
   ));
 }
 

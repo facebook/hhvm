@@ -487,6 +487,10 @@ struct CLIServer final : folly::AsyncServerSocket::AcceptCallback {
     Logger::Warning("Error accepting connection: %s", ex.what());
   }
 
+  int getActiveWorkers() const {
+    return m_dispatcher ? m_dispatcher->getActiveWorker() : 0;
+  }
+
 private:
   enum class State { UNINIT, READY, RUNNING, STOPPED };
   using JobQueue = JobQueueDispatcher<CLIWorker>;
@@ -512,6 +516,7 @@ private:
     lock.unlock();
     m_stateCV.notify_all();
   }
+
   State getState() const { return m_state.load(std::memory_order_acquire); }
 
   folly::EventBase* m_ev{nullptr};
@@ -2191,6 +2196,10 @@ bool is_cli_server_mode() {
 
 bool is_any_cli_mode() {
   return is_cli_server_mode() || !RuntimeOption::ServerExecutionMode();
+}
+
+int cli_server_active_workers() {
+  return s_cliServer ? s_cliServer->getActiveWorkers() : 0;
 }
 
 uint64_t cli_server_api_version() {

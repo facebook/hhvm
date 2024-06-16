@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <latch>
+
 #include "Mocks.h"
 
 using namespace folly;
@@ -180,7 +182,7 @@ TEST_F(AcceptRoutingHandlerTest, ParseRoutingDataSuccess) {
           }));
 
   // Downstream pipeline is created, and its handler receives events
-  boost::barrier barrier(2);
+  std::latch barrier(2);
   EXPECT_CALL(*downstreamHandler_, transportActive(_));
   EXPECT_CALL(*downstreamHandler_, read(_, _))
       .WillOnce(Invoke([&](MockBytesToBytesHandler::Context* /*ctx*/,
@@ -191,14 +193,14 @@ TEST_F(AcceptRoutingHandlerTest, ParseRoutingDataSuccess) {
       .WillOnce(Invoke([&](MockBytesToBytesHandler::Context* ctx) {
         VLOG(4) << "Downstream EOF";
         ctx->fireClose();
-        barrier.wait();
+        barrier.arrive_and_wait();
       }));
   EXPECT_CALL(*downstreamHandler_, transportInactive(_));
 
   // Send client request that triggers server processing
   clientConnectAndCleanClose();
 
-  barrier.wait();
+  barrier.arrive_and_wait();
 
   // Routing pipeline has been erased
   EXPECT_EQ(0, acceptRoutingHandler_->getRoutingPipelineCount());
@@ -206,14 +208,14 @@ TEST_F(AcceptRoutingHandlerTest, ParseRoutingDataSuccess) {
 
 TEST_F(AcceptRoutingHandlerTest, SocketErrorInRoutingPipeline) {
   // Server receives data, and parses routing data
-  boost::barrier barrierConnect(2);
+  std::latch barrierConnect(2);
   EXPECT_CALL(*routingDataHandler_, transportActive(_));
   EXPECT_CALL(*routingDataHandler_, parseRoutingData(_, _))
       .WillOnce(
           Invoke([&](folly::IOBufQueue& /*bufQueue*/,
                      MockRoutingDataHandler::RoutingData& /*routingData*/) {
             VLOG(4) << "Need more data to be parse.";
-            barrierConnect.wait();
+            barrierConnect.arrive_and_wait();
             return false;
           }));
 
@@ -221,8 +223,8 @@ TEST_F(AcceptRoutingHandlerTest, SocketErrorInRoutingPipeline) {
   auto futureClientPipeline = clientConnectAndWrite();
 
   // Socket exception after routing pipeline had been created
-  barrierConnect.wait();
-  boost::barrier barrierException(2);
+  barrierConnect.arrive_and_wait();
+  std::latch barrierException(2);
   std::move(futureClientPipeline)
       .thenValue([](DefaultPipeline* clientPipeline) {
         clientPipeline->getTransport()->getEventBase()->runInEventBaseThread(
@@ -236,9 +238,9 @@ TEST_F(AcceptRoutingHandlerTest, SocketErrorInRoutingPipeline) {
                            folly::exception_wrapper ex) {
         VLOG(4) << "Routing data handler Exception";
         acceptRoutingHandler_->onError(kConnId0, ex);
-        barrierException.wait();
+        barrierException.arrive_and_wait();
       }));
-  barrierException.wait();
+  barrierException.arrive_and_wait();
 
   // Downstream pipeline is not created
   EXPECT_CALL(*downstreamHandler_, transportActive(_)).Times(0);
@@ -257,23 +259,24 @@ TEST_F(AcceptRoutingHandlerTest, OnNewConnectionWithBadSocket) {
   delete downstreamHandler_;
 
   // Send client request that triggers server processing
-  boost::barrier barrierConnect(2);
+  std::latch barrierConnect(2);
   EXPECT_CALL(*routingDataHandler_, transportActive(_))
       .WillOnce(Invoke([&](MockBytesToBytesHandler::Context* /*ctx*/) {
-        barrierConnect.wait();
+        barrierConnect.arrive_and_wait();
       }));
   auto futureClientPipeline = justClientConnect();
-  barrierConnect.wait();
+  barrierConnect.arrive_and_wait();
   futureClientPipeline.wait();
 
   // Expect an exception on the routing data handler
-  boost::barrier barrierException(2);
+  std::latch barrierException(2);
   EXPECT_CALL(*routingDataHandler_, readException(_, _))
-      .WillOnce(Invoke(
-          [&](MockBytesToBytesHandler::Context* /*ctx*/,
-              folly::exception_wrapper /*ex*/) { barrierException.wait(); }));
+      .WillOnce(Invoke([&](MockBytesToBytesHandler::Context* /*ctx*/,
+                           folly::exception_wrapper /*ex*/) {
+        barrierException.arrive_and_wait();
+      }));
   sendClientException(futureClientPipeline.value());
-  barrierException.wait();
+  barrierException.arrive_and_wait();
 
   // Routing pipeline has been added
   EXPECT_EQ(1, acceptRoutingHandler_->getRoutingPipelineCount());

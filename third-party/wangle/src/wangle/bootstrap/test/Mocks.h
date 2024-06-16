@@ -23,7 +23,6 @@
 #include <wangle/channel/Pipeline.h>
 #include <wangle/channel/test/MockHandler.h>
 
-#include <boost/thread.hpp>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+#include <latch>
+
 #include "wangle/bootstrap/ClientBootstrap.h"
 #include "wangle/bootstrap/ServerBootstrap.h"
 #include "wangle/channel/Handler.h"
 
-#include <boost/thread.hpp>
 #include <folly/experimental/TestUtil.h>
 #include <folly/portability/GTest.h>
 #include <glog/logging.h>
@@ -166,15 +167,15 @@ TEST(Bootstrap, ServerAcceptGroupTest) {
   SocketAddress address;
   server.getSockets()[0]->getAddress(&address);
 
-  boost::barrier barrier(2);
+  std::latch barrier(2);
   auto thread = std::thread([&]() {
     TestClient client;
     client.pipelineFactory(std::make_shared<TestClientPipelineFactory>());
     client.connect(address);
     EventBaseManager::get()->getEventBase()->loop();
-    barrier.wait();
+    barrier.arrive_and_wait();
   });
-  barrier.wait();
+  barrier.arrive_and_wait();
   server.stop();
   thread.join();
   server.join();

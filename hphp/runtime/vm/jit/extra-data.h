@@ -1453,31 +1453,23 @@ struct ProfileSubClsCnsData : IRExtraData {
 };
 
 struct FuncNameData : IRExtraData {
-  FuncNameData(const StringData* name, const Class* context)
+  explicit FuncNameData(const StringData* name)
     : name(name)
-    , context(context)
   {}
 
-  std::string show() const {
-    return folly::to<std::string>(
-      name->data(), ",", context ? context->name()->data() : "{no context}");
+  std::string show() const { 
+    return name->toCppString();
   }
 
   size_t hash() const { return name->hash(); }
 
-  size_t stableHash() const {
-    return folly::hash::hash_combine(
-      name->hash(),
-      context ? context->stableHash() : 0
-    );
-  }
+  size_t stableHash() const { return name->hash(); }
 
   bool equals(const FuncNameData& o) const {
-    return name == o.name && context == o.context;
+    return name == o.name;
   }
 
   const StringData* name;
-  const Class* context;
 };
 
 struct FuncNameCtxData : IRExtraData {

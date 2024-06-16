@@ -287,11 +287,11 @@ void implLdCached(IRLS& env, const IRInstruction* inst,
 template<Opcode opc>
 void ldFuncCachedHelper(IRLS& env, const IRInstruction* inst,
                         const CallSpec& call) {
-  auto const extra = inst->extra<opc>();
+  auto const funcName = inst->extra<opc>()->name;
 
-  implLdCached<Func>(env, inst, extra->name, [&] (Vout& v, rds::Handle) {
+  implLdCached<Func>(env, inst, funcName, [&] (Vout& v, rds::Handle) {
     auto const ptr = v.makeReg();
-    auto const args = argGroup(env, inst).immPtr(extra->name);
+    auto const args = argGroup(env, inst).immPtr(funcName);
     cgCallHelper(v, env, call, callDest(ptr), SyncOptions::Sync, args);
     return ptr;
   });

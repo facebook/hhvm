@@ -10,22 +10,21 @@
 
 use std::path::PathBuf;
 
-use structopt::StructOpt;
+use clap::Parser;
 use watchman_client::prelude::*;
 
-#[derive(Debug, StructOpt)]
-#[structopt(about = "Query files changed since a timestamp")]
-struct Opt {
-    #[structopt()]
-    /// Specifies the clock. Use `watchman clock <PATH>` to retrieve the current clock of a watched
-    /// directory
+/// Query files changed since a timestamp
+#[derive(Debug, Parser)]
+struct Cli {
+    /// Specifies the clock. Use `watchman clock <PATH>` to retrieve the current
+    /// clock of a watched directory
     clock: String,
 
-    #[structopt(short, long)]
+    #[arg(short, long)]
     /// [not recommended] Uses Unix timestamp as clock
     unix_timestamp: bool,
 
-    #[structopt(short, long, default_value = ".")]
+    #[arg(short, long, default_value = ".")]
     /// Specifies the path to watched directory
     path: PathBuf,
 }
@@ -41,7 +40,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let opt = Opt::from_args();
+    let opt = Cli::parse();
     let client = Connector::new().connect().await?;
     let resolved = client
         .resolve_root(CanonicalPath::canonicalize(opt.path)?)

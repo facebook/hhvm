@@ -9,13 +9,13 @@
 //! file changes as they are reported
 use std::path::PathBuf;
 
-use structopt::StructOpt;
+use clap::Parser;
 use watchman_client::prelude::*;
 
-#[derive(Debug, StructOpt)]
-#[structopt(about = "Subscribe to watchman and stream file changes for a path")]
-struct Opt {
-    #[structopt(default_value = ".")]
+/// Subscribe to watchman and stream file changes for a path
+#[derive(Debug, Parser)]
+struct Cli {
+    #[arg(default_value = ".")]
     path: PathBuf,
 }
 
@@ -29,7 +29,7 @@ async fn main() {
 }
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let opt = Opt::from_args();
+    let opt = Cli::parse();
     let client = Connector::new().connect().await?;
     let resolved = client
         .resolve_root(CanonicalPath::canonicalize(opt.path)?)

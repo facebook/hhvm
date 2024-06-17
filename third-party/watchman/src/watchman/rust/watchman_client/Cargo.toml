@@ -20,8 +20,8 @@ thiserror = "1.0"
 tokio = { version = "1.7.1", features = ["full", "test-util"] }
 tokio-util = { version = "0.6", features = ["full"] }
 
-[dev-dependencies]
-structopt = "0.3"
-
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["handleapi", "winuser"] }
+
+[dev-dependencies]
+clap = { version = "4.5.7", features = ["derive"] }

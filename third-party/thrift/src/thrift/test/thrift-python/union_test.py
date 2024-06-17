@@ -46,6 +46,21 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         ):
             u2.int_field
 
+        with self.assertRaisesRegex(
+            TypeError, "got an unexpected keyword argument 'field_does_not_exist'"
+        ):
+            TestUnionImmutable(field_does_not_exist=123)
+
+        with self.assertRaisesRegex(
+            TypeError, "union may only take one keyword argument"
+        ):
+            TestUnionImmutable(string_field="hello", int_field=42)
+
+        with self.assertRaisesRegex(
+            TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
+        ):
+            TestUnionImmutable(int_field="hello!")
+
     def test_class_field_enum(self) -> None:
         # The "Type" class attribute is an enumeration type
         self.assertTrue(hasattr(TestUnionImmutable, "Type"))
@@ -69,13 +84,13 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
 
         self.assertIs(fields_enum_type(0), fields_enum_type.EMPTY)
 
-        names_and_values = {
+        enum_names_and_values = {
             member.name: member.value
             for member in fields_enum_type.__members__.values()
         }
 
         self.assertEqual(
-            names_and_values,
+            enum_names_and_values,
             {"EMPTY": 0, "string_field": 1, "int_field": 2, "struct_field": 3},
         )
 

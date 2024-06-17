@@ -29,12 +29,15 @@
 
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
+#include <folly/portability/GFlags.h>
 #include <thrift/lib/cpp/Thrift.h>
 #include <thrift/lib/cpp/protocol/TProtocol.h>
 #include <thrift/lib/cpp/protocol/TProtocolException.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp2/CloneableIOBuf.h>
 #include <thrift/lib/cpp2/protocol/ProtocolReaderWireTypeInfo.h>
+
+FOLLY_GFLAGS_DECLARE_int32(thrift_protocol_max_depth);
 
 /**
  * Protocol Readers and Writers are ducktyped in cpp2.
@@ -159,7 +162,11 @@ invalid:
 
 /* forward declaration */
 template <class Protocol_, class WireType>
-void skip_n(Protocol_& prot, uint32_t n, std::initializer_list<WireType> types);
+void skip_n(
+    Protocol_& prot,
+    uint32_t n,
+    std::initializer_list<WireType> types,
+    int depth = 0);
 
 /**
  * Helper template for implementing Protocol::skip().
@@ -167,9 +174,19 @@ void skip_n(Protocol_& prot, uint32_t n, std::initializer_list<WireType> types);
  * Templatized to avoid having to make virtual function calls. Protocols with
  * their own opinions about skipping implementation can specialize, although
  * currently none do.
+ *
+ * depth (int): Current depth of the nested fields.
+ *
+ * It first checks if the current depth exceeds a predefined maximum depth
+ * (FLAGS_thrift_protocol_max_depth). If the depth is exceeded, it throws a
+ * `TProtocolException` to prevent stack overflow.
  */
 template <class Protocol_, class WireType>
-void skip(Protocol_& prot, WireType arg_type) {
+void skip(Protocol_& prot, WireType arg_type, int depth = 0) {
+  if (depth >= FLAGS_thrift_protocol_max_depth) {
+    protocol::TProtocolException::throwExceededDepthLimit();
+  }
+
   switch (arg_type) {
     case TType::T_BOOL: {
       bool boolv;
@@ -226,7 +243,7 @@ void skip(Protocol_& prot, WireType arg_type) {
         if (ftype == TType::T_STOP) {
           break;
         }
-        apache::thrift::skip(prot, ftype);
+        apache::thrift::skip(prot, ftype, depth + 1);
         prot.readFieldEnd();
       }
       prot.readStructEnd();
@@ -237,7 +254,7 @@ void skip(Protocol_& prot, WireType arg_type) {
       TType valType;
       uint32_t size;
       prot.readMapBegin(keyType, valType, size);
-      skip_n(prot, size, {keyType, valType});
+      skip_n(prot, size, {keyType, valType}, depth + 1);
       prot.readMapEnd();
       return;
     }
@@ -245,7 +262,7 @@ void skip(Protocol_& prot, WireType arg_type) {
       TType elemType;
       uint32_t size;
       prot.readSetBegin(elemType, size);
-      skip_n(prot, size, {elemType});
+      skip_n(prot, size, {elemType}, depth + 1);
       prot.readSetEnd();
       return;
     }
@@ -253,7 +270,7 @@ void skip(Protocol_& prot, WireType arg_type) {
       TType elemType;
       uint32_t size;
       prot.readListBegin(elemType, size);
-      skip_n(prot, size, {elemType});
+      skip_n(prot, size, {elemType}, depth + 1);
       prot.readListEnd();
       return;
     }
@@ -288,10 +305,22 @@ inline bool canReadNElements(
  * Skip n tuples - used for skipping lists, sets, maps.
  *
  * As with skip(), protocols can specialize.
+ *
+ * depth (int): Current depth of the nested fields.
+ *
+ * It first checks if the current depth exceeds a predefined maximum depth
+ * (FLAGS_thrift_protocol_max_depth). If the depth is exceeded, it throws a
+ * `TProtocolException` to prevent stack overflow.
  */
 template <class Protocol_, class WireType>
 void skip_n(
-    Protocol_& prot, uint32_t n, std::initializer_list<WireType> types) {
+    Protocol_& prot,
+    uint32_t n,
+    std::initializer_list<WireType> types,
+    int depth) {
+  if (depth >= FLAGS_thrift_protocol_max_depth) {
+    protocol::TProtocolException::throwExceededDepthLimit();
+  }
   size_t sum = 0;
   bool allFixedSizes = true;
   for (auto type : types) {
@@ -306,7 +335,7 @@ void skip_n(
 
   for (uint32_t i = 0; i < n; i++) {
     for (auto type : types) {
-      apache::thrift::skip(prot, type);
+      apache::thrift::skip(prot, type, depth + 1);
     }
   }
 }

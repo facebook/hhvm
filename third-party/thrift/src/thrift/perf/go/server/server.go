@@ -18,7 +18,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"apache/thrift/test/load"
@@ -50,10 +49,6 @@ func newServer(processor thrift.ProcessorContext, addr string) (thrift.Server, e
 	if err != nil {
 		return nil, err
 	}
-	if err = socket.Listen(); err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("failed listen on %s", addr))
-	}
-
 	return thrift.NewSimpleServer(processor, socket, thrift.TransportIDHeader), nil
 }
 

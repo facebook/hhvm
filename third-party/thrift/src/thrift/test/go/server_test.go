@@ -38,11 +38,6 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (*thrift.SimpleServer
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to open test socket: %s", err)
 	}
-
-	err = transport.Listen()
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to listen on socket: %s", err)
-	}
 	taddr := transport.Addr()
 
 	server := thrift.NewSimpleServer(processor, transport, thrift.TransportIDHeader)

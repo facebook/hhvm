@@ -18,25 +18,19 @@ package thrift
 
 import (
 	"net"
-	"time"
 )
 
 type ServerSocket struct {
-	listener      net.Listener
-	addr          net.Addr
-	clientTimeout time.Duration
+	listener net.Listener
+	addr     net.Addr
 }
 
 func NewServerSocket(listenAddr string) (*ServerSocket, error) {
-	return NewServerSocketTimeout(listenAddr, 0)
-}
-
-func NewServerSocketTimeout(listenAddr string, clientTimeout time.Duration) (*ServerSocket, error) {
 	addr, err := net.ResolveTCPAddr("tcp", listenAddr)
 	if err != nil {
 		return nil, err
 	}
-	return &ServerSocket{addr: addr, clientTimeout: clientTimeout}, nil
+	return &ServerSocket{addr: addr}, nil
 }
 
 func (p *ServerSocket) Listen() error {
@@ -59,7 +53,7 @@ func (p *ServerSocket) Accept() (net.Conn, error) {
 	if err != nil {
 		return nil, NewTransportExceptionFromError(err)
 	}
-	return NewSocket(SocketConn(conn), SocketTimeout(p.clientTimeout))
+	return NewSocket(SocketConn(conn))
 }
 
 func (p *ServerSocket) Addr() net.Addr {

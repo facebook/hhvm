@@ -38,6 +38,12 @@ func NewCompactDeserializer() *Deserializer {
 	return &Deserializer{transport, protocol}
 }
 
+func deserializeCompact(data []byte, msg Struct) error {
+	buffer := NewMemoryBufferWithData(data)
+	format := NewCompactProtocol(buffer)
+	return msg.Read(format)
+}
+
 // NewJSONDeserializer creates a new deserializer using the JSON protocol
 func NewJSONDeserializer() *Deserializer {
 	transport := NewMemoryBufferLen(1024)

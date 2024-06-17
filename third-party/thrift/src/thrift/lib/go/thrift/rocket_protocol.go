@@ -184,9 +184,9 @@ func (p *rocketProtocol) open() error {
 					if !ok {
 						panic("no metadata in metadata push")
 					}
-					metadata := &ServerPushMetadata{}
-					compactDeserializer := NewCompactDeserializer()
-					if err = compactDeserializer.Read(metadata, metadataBytes); err != nil {
+					// Use ServerPushMetadata{} and do not use &ServerPushMetadata{} to ensure stack and avoid heap allocation.
+					metadata := ServerPushMetadata{}
+					if err := deserializeCompact(metadataBytes, &metadata); err != nil {
 						panic(fmt.Errorf("unable to deserialize metadata push into ServerPushMetadata %w", err))
 					}
 					if metadata.SetupResponse != nil {
@@ -242,8 +242,7 @@ func (p *rocketProtocol) ReadMessageBegin() (string, MessageType, int32, error) 
 	metadataBytes, ok := resp.Metadata()
 	if ok {
 		metadata := &ResponseRpcMetadata{}
-		compactDeserializer := NewCompactDeserializer()
-		if err = compactDeserializer.Read(metadata, metadataBytes); err != nil {
+		if err = deserializeCompact(metadataBytes, metadata); err != nil {
 			return name, EXCEPTION, p.seqID, err
 		}
 		p.respMetadata = metadata

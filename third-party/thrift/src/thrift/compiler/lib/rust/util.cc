@@ -79,28 +79,33 @@ rust_crate_map load_crate_map(const std::string& path) {
   std::string line;
   while (std::getline(in, line)) {
     std::istringstream iss(line);
-    std::string thrift_name, crate_name, label;
-    iss >> thrift_name >> crate_name >> label;
-    sources[crate_name].label = label;
-    sources[crate_name].thrift_names.push_back(thrift_name);
+    std::string thrift_name, dependency_path, label;
+    iss >> thrift_name >> dependency_path >> label;
+    sources[dependency_path].label = label;
+    sources[dependency_path].thrift_names.push_back(thrift_name);
   }
 
   for (const auto& source : sources) {
-    auto crate_name = source.first;
+    auto dependency_path = source.first;
     auto label = source.second.label;
     auto thrift_names = source.second.thrift_names;
     auto multifile = thrift_names.size() > 1;
 
     // Look out for our own crate in the cratemap. It will require paths that
     // begin with `crate::module` rather than `::depenency::module`.
-    if (crate_name == "crate") {
+    if (dependency_path == "crate") {
       ret.multifile_mode = multifile;
       ret.label = label;
     }
 
-    if (multifile || crate_name != "crate") {
+    if (dependency_path.find("->") != std::string::npos) {
+      // TODO(dtolnay) Process transitive dependencies.
+      continue;
+    }
+
+    if (multifile || dependency_path != "crate") {
       for (const auto& thrift_name : thrift_names) {
-        ret.cratemap[thrift_name].name = crate_name;
+        ret.cratemap[thrift_name].name = dependency_path;
         ret.cratemap[thrift_name].multifile = multifile;
         ret.cratemap[thrift_name].label = label;
       }

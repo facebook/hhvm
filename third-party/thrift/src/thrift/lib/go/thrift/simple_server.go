@@ -31,7 +31,7 @@ var ErrServerClosed = errors.New("thrift: Server closed")
 
 // SimpleServer is a functional but unoptimized server that is easy to
 // understand.  In its accept loop, it performs an accept on an
-// underlying socket, wraps the socket in the ServerTransport, and
+// underlying socket, wraps the socket in the net.Listener, and
 // then spins up a gofunc to process requests.
 //
 // There is one gofunc per active connection that handles all requests

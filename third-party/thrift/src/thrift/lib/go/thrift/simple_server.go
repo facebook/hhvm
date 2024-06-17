@@ -40,7 +40,7 @@ var ErrServerClosed = errors.New("thrift: Server closed")
 // the request, processes it, and writes the response serially
 type SimpleServer struct {
 	processorContext ProcessorContext
-	serverTransport  ServerTransport
+	listener         net.Listener
 	newProtocol      func(net.Conn) (Protocol, error)
 	quit             chan struct{}
 	log              *log.Logger
@@ -48,14 +48,14 @@ type SimpleServer struct {
 }
 
 // NewSimpleServer creates a new server that only supports Header Transport.
-func NewSimpleServer(processor ProcessorContext, serverTransport ServerTransport, transportType TransportID, options ...func(*ServerOptions)) *SimpleServer {
+func NewSimpleServer(processor ProcessorContext, listener net.Listener, transportType TransportID, options ...func(*ServerOptions)) *SimpleServer {
 	if transportType != TransportIDHeader {
 		panic(fmt.Sprintf("SimpleServer only supports Header Transport and not %d", transportType))
 	}
 	return &SimpleServer{
 		quit:             make(chan struct{}, 1),
 		processorContext: processor,
-		serverTransport:  serverTransport,
+		listener:         listener,
 		newProtocol:      NewHeaderProtocol,
 		log:              log.New(os.Stderr, "", log.LstdFlags),
 		ServerOptions:    simpleServerOptions(options...),
@@ -72,16 +72,13 @@ func simpleServerOptions(options ...func(*ServerOptions)) *ServerOptions {
 
 // Listen returns the server transport listener
 func (p *SimpleServer) Listen() (net.Addr, error) {
-	if err := p.serverTransport.Listen(); err != nil {
-		return nil, err
-	}
-	return p.serverTransport.Addr(), nil
+	return p.listener.Addr(), nil
 }
 
 // acceptLoopContext takes a context that will be decorated with ConnInfo and passed down to new clients.
 func (p *SimpleServer) acceptLoopContext(ctx context.Context) error {
 	for {
-		client, err := p.serverTransport.Accept()
+		client, err := p.listener.Accept()
 		if err != nil {
 			select {
 			case <-p.quit:
@@ -137,7 +134,7 @@ func (p *SimpleServer) ServeContext(ctx context.Context) error {
 // Stop stops the server
 func (p *SimpleServer) Stop() error {
 	p.quit <- struct{}{}
-	p.serverTransport.Close()
+	p.listener.Close()
 	return nil
 }
 

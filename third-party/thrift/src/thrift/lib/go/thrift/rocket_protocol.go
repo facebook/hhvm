@@ -62,7 +62,7 @@ func NewRocketProtocol(conn net.Conn) (Protocol, error) {
 		persistentHeaders: make(map[string]string),
 		buf:               NewMemoryBuffer(),
 		conn:              conn,
-		zstd:              true,
+		zstd:              false, // zstd adds a performance overhead, so we default to false
 	}
 	if err := p.resetProtocol(); err != nil {
 		return nil, err
@@ -190,12 +190,15 @@ func (p *rocketProtocol) open() error {
 						panic(fmt.Errorf("unable to deserialize metadata push into ServerPushMetadata %w", err))
 					}
 					if metadata.SetupResponse != nil {
-						if metadata.SetupResponse.ZstdSupported != nil {
-							p.zstd = *metadata.SetupResponse.ZstdSupported
+						// If zstdSupported is not set (or if false) client SHOULD not use ZSTD compression.
+						if metadata.SetupResponse.ZstdSupported == nil {
+							p.zstd = false
+						} else {
+							p.zstd = p.zstd && *metadata.SetupResponse.ZstdSupported
 						}
 						if metadata.SetupResponse.Version != nil {
 							if *metadata.SetupResponse.Version != 8 {
-								panic(fmt.Errorf("unsupported protocol version %d received in metadata push", *metadata.SetupResponse.Version))
+								panic(fmt.Errorf("unsupported protocol version received in metadata push: %d", *metadata.SetupResponse.Version))
 							}
 						}
 					} else if metadata.StreamHeadersPush != nil {

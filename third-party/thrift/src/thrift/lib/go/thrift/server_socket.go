@@ -30,45 +30,25 @@ func NewServerSocket(listenAddr string) (*ServerSocket, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ServerSocket{addr: addr}, nil
+	l, err := net.Listen(addr.Network(), addr.String())
+	if err != nil {
+		return nil, err
+	}
+	return &ServerSocket{addr: addr, listener: l}, nil
 }
 
 func (p *ServerSocket) Listen() error {
-	if p.listener != nil {
-		return nil
-	}
-	l, err := net.Listen(p.addr.Network(), p.addr.String())
-	if err != nil {
-		return err
-	}
-	p.listener = l
 	return nil
 }
 
 func (p *ServerSocket) Accept() (net.Conn, error) {
-	if p.listener == nil {
-		return nil, NewTransportException(NOT_OPEN, "No underlying server socket")
-	}
-	conn, err := p.listener.Accept()
-	if err != nil {
-		return nil, NewTransportExceptionFromError(err)
-	}
-	return conn, nil
+	return p.listener.Accept()
 }
 
 func (p *ServerSocket) Addr() net.Addr {
-	if p.listener != nil {
-		return p.listener.Addr()
-	}
-	return p.addr
+	return p.listener.Addr()
 }
 
 func (p *ServerSocket) Close() error {
-	defer func() {
-		p.listener = nil
-	}()
-	if p.listener != nil {
-		return p.listener.Close()
-	}
-	return nil
+	return p.listener.Close()
 }

@@ -20,7 +20,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"net"
+	"os"
 	"runtime/debug"
 )
 
@@ -41,19 +43,21 @@ type SimpleServer struct {
 	serverTransport  ServerTransport
 	newProtocol      func(net.Conn) (Protocol, error)
 	quit             chan struct{}
+	log              *log.Logger
 	*ServerOptions
 }
 
 // NewSimpleServer creates a new server that only supports Header Transport.
 func NewSimpleServer(processor ProcessorContext, serverTransport ServerTransport, transportType TransportID, options ...func(*ServerOptions)) *SimpleServer {
 	if transportType != TransportIDHeader {
-		panic(fmt.Sprintf("SimpleServer only supports Header Transport and not %s", transportType))
+		panic(fmt.Sprintf("SimpleServer only supports Header Transport and not %d", transportType))
 	}
 	return &SimpleServer{
 		quit:             make(chan struct{}, 1),
 		processorContext: processor,
 		serverTransport:  serverTransport,
 		newProtocol:      NewHeaderProtocol,
+		log:              log.New(os.Stderr, "", log.LstdFlags),
 		ServerOptions:    simpleServerOptions(options...),
 	}
 }

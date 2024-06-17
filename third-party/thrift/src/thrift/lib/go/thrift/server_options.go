@@ -16,22 +16,9 @@
 
 package thrift
 
-import (
-	"log"
-	"os"
-)
-
 // ServerOptions is options needed to run a thrift server
 type ServerOptions struct {
-	log         *log.Logger
 	interceptor Interceptor
-}
-
-// Logger sets the logger used for the server
-func Logger(log *log.Logger) func(*ServerOptions) {
-	return func(server *ServerOptions) {
-		server.log = log
-	}
 }
 
 // WithInterceptor sets the interceptor for the server
@@ -42,7 +29,5 @@ func WithInterceptor(interceptor Interceptor) func(*ServerOptions) {
 }
 
 func defaultServerOptions() *ServerOptions {
-	return &ServerOptions{
-		log: log.New(os.Stderr, "", log.LstdFlags),
-	}
+	return &ServerOptions{}
 }

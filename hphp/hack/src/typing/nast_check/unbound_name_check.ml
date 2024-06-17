@@ -345,6 +345,19 @@ let handler ctx =
               | _ -> ())
             ua_params
       in
+      let () =
+        if
+          String.equal
+            (snd ua_name)
+            Naming_special_names.UserAttributes.uaPackageOverride
+        then
+          List.iter
+            ~f:(function
+              | (_, pos, Aast.String pkg_name) ->
+                check_package_name env (pos, pkg_name)
+              | _ -> ())
+            ua_params
+      in
       env
 
     method! at_class_id env (_, _, ci) =

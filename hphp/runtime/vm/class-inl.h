@@ -764,35 +764,38 @@ inline Class* Class::lookup(const StringData* name) {
   return get(name, false);
 }
 
-/*
- * Check whether a class is can be trusted in the given context.
- * We can trust a class if:
- * (1) Its persistent. It will not change.
- * (2) We are currently jitting a translation for a class that is
- *     a non-strict subtype of cls. If cls changes, ctx will be
- *     re-loaded and re-jitted anyways, so we can trust cls.
+ /*
+ * Check whether a Class* can be trusted to not change in the given context.
+ * We can use a Class* if:
+ * (1) Its persistent. It will never change.
+ * (2) We are currently jitting a translation that will be invalidated
+ *     whenever the Class* changes.
+ *     For method translations, we need to check that loading class ctx
+ *         will also load cls. see Class::avail()
+ *     For function translations, these are only invalidated when the unit
+ *         they are defined in changes. Therefore, we'd need to ensure that
+ *         all classes loaded as a result of loading cls are contained inside 
+ *         the unit. 
+ *     As a conservative approximation of this, we are currently just checking
+ *     if ctx is a subtype of cls, but we can certainly do better.
  */
-inline const Class* Class::lookupUniqueInContext(const Class* cls,
-                                                 const Class* ctx,
-                                                 const Unit* unit) {
+inline const Class* Class::lookupKnown(const Class* cls,
+                                       const Class* ctx) {
   if (UNLIKELY(cls == nullptr)) return nullptr;
   if (cls->attrs() & AttrPersistent) return cls;
-  if (unit && cls->preClass()->unit() == unit) return cls;
   if (!ctx) return nullptr;
   return ctx->classof(cls) ? cls : nullptr;
 }
 
-inline const Class* Class::lookupUniqueInContext(const NamedType* ne,
-                                                 const Class* ctx,
-                                                 const Unit* unit) {
+inline const Class* Class::lookupKnown(const NamedType* ne,
+                                       const Class* ctx) {
   Class* cls = ne->clsList();
-  return lookupUniqueInContext(cls, ctx, unit);
+  return lookupKnown(cls, ctx);
 }
 
-inline const Class* Class::lookupUniqueInContext(const StringData* name,
-                                                 const Class* ctx,
-                                                 const Unit* unit) {
-  return lookupUniqueInContext(NamedType::getOrCreate(name), ctx, unit);
+inline const Class* Class::lookupKnown(const StringData* name,
+                                       const Class* ctx) {
+  return lookupKnown(NamedType::getOrCreate(name), ctx);
 }
 
 inline Class* Class::load(const StringData* name) {

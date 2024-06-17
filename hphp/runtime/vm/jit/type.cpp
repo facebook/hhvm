@@ -903,8 +903,7 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
   #define NAME_SPEC(type, spec)                                         \
     [&] {                                                               \
       assertx(ty.name() != nullptr);                                    \
-      auto const cls =                                                  \
-        Class::lookupUniqueInContext(ty.name(), ctx, nullptr);          \
+      auto const cls = Class::lookupKnown(ty.name(), ctx);              \
       return cls ? Type::spec(cls) : type;                              \
     }()                                                                 \
 
@@ -1037,7 +1036,7 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
       // Don't try to be clever with magic interfaces.
       if (interface_supports_non_objects(tc.clsName())) return TInitCell;
 
-      auto const cls = Class::lookupUniqueInContext(tc.clsName(), ctx, nullptr);
+      auto const cls = Class::lookupKnown(tc.clsName(), ctx);
       if (!cls) return TObj;
       assertx(!isEnum(cls));
       return Type::SubObj(cls);
@@ -1046,7 +1045,7 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
     assertx(tc.isUnresolved());
     if (interface_supports_non_objects(tc.typeName())) return TInitCell;
 
-    auto const cls = Class::lookupUniqueInContext(tc.typeName(), ctx, nullptr);
+    auto const cls = Class::lookupKnown(tc.typeName(), ctx);
     if (cls) {
       if (isEnum(cls)) {
         assertx(tc.isUnresolved());

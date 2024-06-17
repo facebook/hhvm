@@ -504,7 +504,7 @@ Type newColReturn(const IRInstruction* inst) {
   assertx(inst->is(NewCol, NewPair, NewColFromArray));
   auto getColClassType = [&](CollectionType ct) -> Type {
     auto name = collections::typeToString(ct);
-    auto cls = Class::lookupUniqueInContext(name, inst->ctx(), nullptr);
+    auto cls = Class::lookupKnown(name, inst->ctx());
     if (cls == nullptr) return TObj;
     return Type::ExactObj(cls);
   };

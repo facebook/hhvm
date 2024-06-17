@@ -70,7 +70,7 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
   }
 
   auto knownCls = checkCls->hasConstVal(TCls) ? checkCls->clsVal() : nullptr;
-  assertx(IMPLIES(knownCls, classIsTrusted(env, knownCls)));
+  assertx(IMPLIES(knownCls, lookupKnown(env, knownCls)));
   assertx(IMPLIES(knownCls, knownCls->name()->tsame(className)));
 
   auto const srcType = src->type();
@@ -379,7 +379,7 @@ void verifyTypeImpl(IRGS& env,
     auto const clsName = tc.isSubObject() ? tc.clsName() : tc.typeName();
     if (cls->name()->same(clsName)) return AnnotAction::Pass;
 
-    if (auto const knownCls = lookupUniqueClass(env, clsName)) {
+    if (auto const knownCls = lookupKnown(env, clsName)) {
       // Subclass of a unique class.
       if (cls->classof(knownCls)) return AnnotAction::Pass;
     }
@@ -977,7 +977,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
   auto const classnameForResolvedClass = [&](const ArrayData* arr) -> const StringData* {
     auto const clsname = get_ts_classname(arr);
     if (arr->exists(s_generic_types)) {
-      auto cls = lookupUniqueClass(env, clsname);
+      auto cls = lookupKnown(env, clsname);
       if ((cls && cls->hasReifiedGenerics()) || !isTSAllWildcards(arr)) {
         // If it is a reified class or has non wildcard generics,
         // we need to bail

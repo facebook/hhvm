@@ -8,6 +8,7 @@
 //! This module defines the request and response PDU types used by the
 //! watchman protocol.
 
+use std::fmt;
 use std::path::PathBuf;
 
 use serde::Deserialize;
@@ -144,9 +145,9 @@ impl From<std::time::Duration> for SettleDurationMs {
     }
 }
 
-impl Into<i64> for SettleDurationMs {
-    fn into(self) -> i64 {
-        self.0.as_millis() as i64
+impl From<SettleDurationMs> for i64 {
+    fn from(val: SettleDurationMs) -> Self {
+        val.0.as_millis() as i64
     }
 }
 
@@ -203,9 +204,9 @@ impl From<std::time::Duration> for SyncTimeout {
     }
 }
 
-impl Into<i64> for SyncTimeout {
-    fn into(self) -> i64 {
-        match self {
+impl From<SyncTimeout> for i64 {
+    fn from(val: SyncTimeout) -> Self {
+        match val {
             // This is only really here because the `ClockRequestParams` PDU
             // treats a missing sync_timeout as `DisableCookie`, whereas
             // the `QueryRequestCommon` PDU treats it as `Default`.
@@ -215,9 +216,9 @@ impl Into<i64> for SyncTimeout {
             // default behavior, we use the current default sync timeout here.
             // We're honestly not likely to change this, so this should be fine.
             // The server uses 1 minute; the value here is expressed in milliseconds.
-            Self::Default => 60_000,
-            Self::DisableCookie => 0,
-            Self::Duration(d) => d.as_millis() as i64,
+            SyncTimeout::Default => 60_000,
+            SyncTimeout::DisableCookie => 0,
+            SyncTimeout::Duration(d) => d.as_millis() as i64,
         }
     }
 }
@@ -657,11 +658,11 @@ impl ClockSpec {
     }
 }
 
-impl Into<Value> for ClockSpec {
-    fn into(self) -> Value {
-        match self {
-            Self::StringClock(st) => Value::Utf8String(st),
-            Self::UnixTimestamp(ts) => Value::Integer(ts),
+impl From<ClockSpec> for Value {
+    fn from(val: ClockSpec) -> Self {
+        match val {
+            ClockSpec::StringClock(st) => Value::Utf8String(st),
+            ClockSpec::UnixTimestamp(ts) => Value::Integer(ts),
         }
     }
 }
@@ -755,9 +756,9 @@ pub enum FileType {
     Unknown,
 }
 
-impl std::string::ToString for FileType {
-    fn to_string(&self) -> String {
-        (*self).into()
+impl fmt::Display for FileType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        f.write_str(&String::from(*self))
     }
 }
 
@@ -778,18 +779,18 @@ impl From<String> for FileType {
     }
 }
 
-impl Into<String> for FileType {
-    fn into(self) -> String {
-        match self {
-            Self::BlockSpecial => "b",
-            Self::CharSpecial => "c",
-            Self::Directory => "d",
-            Self::Regular => "f",
-            Self::Fifo => "p",
-            Self::Symlink => "l",
-            Self::Socket => "s",
-            Self::SolarisDoor => "D",
-            Self::Unknown => "?",
+impl From<FileType> for String {
+    fn from(val: FileType) -> Self {
+        match val {
+            FileType::BlockSpecial => "b",
+            FileType::CharSpecial => "c",
+            FileType::Directory => "d",
+            FileType::Regular => "f",
+            FileType::Fifo => "p",
+            FileType::Symlink => "l",
+            FileType::Socket => "s",
+            FileType::SolarisDoor => "D",
+            FileType::Unknown => "?",
         }
         .to_string()
     }

@@ -220,11 +220,10 @@ impl Connector {
             let watchman_path = self
                 .watchman_cli_path
                 .as_ref()
-                .map(|p| p.as_ref())
-                .unwrap_or_else(|| Path::new("watchman"));
+                .map_or_else(|| Path::new("watchman"), |p| p.as_ref());
 
             let mut cmd = Command::new(watchman_path);
-            cmd.args(&["--output-encoding", "bser-v2", "get-sockname"]);
+            cmd.args(["--output-encoding", "bser-v2", "get-sockname"]);
 
             #[cfg(windows)]
             cmd.creation_flags(winapi::um::winbase::CREATE_NO_WINDOW);
@@ -630,7 +629,7 @@ fn bunser<T>(buf: &[u8]) -> Result<T, Error>
 where
     T: serde::de::DeserializeOwned,
 {
-    let response: T = serde_bser::from_slice(&buf).map_err(|source| Error::Deserialize {
+    let response: T = serde_bser::from_slice(buf).map_err(|source| Error::Deserialize {
         source: source.into(),
         data: buf.to_vec(),
     })?;
@@ -1191,7 +1190,7 @@ mod tests {
 
             let reader = StreamReader::new(stream::iter(chunks));
 
-            let decoded = FramedRead::new(reader, BserSplitter)
+            FramedRead::new(reader, BserSplitter)
                 .map_err(TaskError::from)
                 .and_then(|bytes| async move {
                     // We unwrap this since a) this is a test and b) serde_bser's errors aren't
@@ -1201,9 +1200,7 @@ mod tests {
                 })
                 .try_collect()
                 .await
-                .unwrap();
-
-            decoded
+                .unwrap()
         }
 
         let msgs = vec![

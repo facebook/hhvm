@@ -151,7 +151,7 @@ where
             BSER_INT8 => self.next_i8()? as i64,
             BSER_INT16 => self.next_i16()? as i64,
             BSER_INT32 => self.next_i32()? as i64,
-            BSER_INT64 => self.next_i64()? as i64,
+            BSER_INT64 => self.next_i64()?,
             ch => {
                 return Err(Error::DeInvalidStartByte {
                     kind: "integer".into(),

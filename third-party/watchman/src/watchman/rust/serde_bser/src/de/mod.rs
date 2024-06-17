@@ -180,7 +180,7 @@ where
         match self
             .bunser
             .read_bytes(len)?
-            .map_result(|x| str::from_utf8(x))
+            .map_result(str::from_utf8)
             .map_err(Error::de_reader_error)?
         {
             Reference::Borrowed(s) => visitor.visit_borrowed_str(s),
@@ -277,12 +277,10 @@ where
                 }
                 visitor.visit_enum(variant::VariantAccess::new(self, &guard))
             }
-            ch => {
-                return Err(Error::DeInvalidStartByte {
-                    kind: format!("enum '{}'", name),
-                    byte: ch,
-                });
-            }
+            ch => Err(Error::DeInvalidStartByte {
+                kind: format!("enum '{}'", name),
+                byte: ch,
+            }),
         }
     }
 

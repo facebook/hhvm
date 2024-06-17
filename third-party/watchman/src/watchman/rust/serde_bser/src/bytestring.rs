@@ -189,7 +189,7 @@ impl TryInto<ByteString> for PathBuf {
     type Error = &'static str;
 
     fn try_into(self) -> Result<ByteString, Self::Error> {
-        Ok(self.into_os_string().try_into()?)
+        self.into_os_string().try_into()
     }
 }
 

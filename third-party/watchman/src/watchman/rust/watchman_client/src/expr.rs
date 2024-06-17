@@ -85,32 +85,32 @@ pub enum Expr {
     FileType(FileType),
 }
 
-impl Into<Value> for Expr {
-    fn into(self) -> Value {
-        match self {
-            Self::True => "true".into(),
-            Self::False => "false".into(),
-            Self::Not(expr) => Value::Array(vec!["not".into(), (*expr).into()]),
-            Self::All(expr) => {
+impl From<Expr> for Value {
+    fn from(val: Expr) -> Self {
+        match val {
+            Expr::True => "true".into(),
+            Expr::False => "false".into(),
+            Expr::Not(expr) => Value::Array(vec!["not".into(), (*expr).into()]),
+            Expr::All(expr) => {
                 let mut expr: Vec<Value> = expr.into_iter().map(Into::into).collect();
                 expr.insert(0, "allof".into());
                 Value::Array(expr)
             }
-            Self::Any(expr) => {
+            Expr::Any(expr) => {
                 let mut expr: Vec<Value> = expr.into_iter().map(Into::into).collect();
                 expr.insert(0, "anyof".into());
                 Value::Array(expr)
             }
-            Self::DirName(term) => {
+            Expr::DirName(term) => {
                 let mut expr: Vec<Value> = vec!["dirname".into(), term.path.try_into().unwrap()];
                 if let Some(depth) = term.depth {
                     expr.push(depth.into_term("depth"));
                 }
                 expr.into()
             }
-            Self::Empty => "empty".into(),
-            Self::Exists => "exists".into(),
-            Self::Match(term) => vec![
+            Expr::Empty => "empty".into(),
+            Expr::Exists => "exists".into(),
+            Expr::Match(term) => vec![
                 "match".into(),
                 term.glob.into(),
                 if term.wholename {
@@ -125,7 +125,7 @@ impl Into<Value> for Expr {
                 }),
             ]
             .into(),
-            Self::Name(term) => vec![
+            Expr::Name(term) => vec![
                 "name".into(),
                 Value::Array(
                     term.paths
@@ -141,7 +141,7 @@ impl Into<Value> for Expr {
                 .into(),
             ]
             .into(),
-            Self::Pcre(term) => vec![
+            Expr::Pcre(term) => vec![
                 "pcre".into(),
                 term.pattern.into(),
                 if term.wholename {
@@ -152,7 +152,7 @@ impl Into<Value> for Expr {
                 .into(),
             ]
             .into(),
-            Self::Since(term) => match term {
+            Expr::Since(term) => match term {
                 SinceTerm::ObservedClock(c) => {
                     vec!["since".into(), c.into(), "oclock".into()].into()
                 }
@@ -166,13 +166,13 @@ impl Into<Value> for Expr {
                     vec!["since".into(), c.to_string().into(), "ctime".into()].into()
                 }
             },
-            Self::Size(term) => term.into_term("size"),
-            Self::Suffix(term) => vec![
+            Expr::Size(term) => term.into_term("size"),
+            Expr::Suffix(term) => vec![
                 "suffix".into(),
                 Value::Array(term.into_iter().map(|p| p.try_into().unwrap()).collect()),
             ]
             .into(),
-            Self::FileType(term) => vec!["type".into(), term.to_string().into()].into(),
+            Expr::FileType(term) => vec!["type".into(), term.to_string().into()].into(),
         }
     }
 }

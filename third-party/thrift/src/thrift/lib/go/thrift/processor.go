@@ -22,78 +22,33 @@ import (
 	"strings"
 )
 
-// Processor exposes access to processor functions which
+// ProcessorContext exposes access to processor functions which
 // manage I/O and processing of a input message for a specific
 // server function
-type Processor interface {
-	// GetProcessorFunction is given the name of a thrift function and
+type ProcessorContext interface {
+	// GetProcessorFunctionContext is given the name of a thrift function and
 	// the type of the inbound thrift message.  It is expected to return
-	// a non-nil ProcessorFunction when the function can be successfully
+	// a non-nil GetProcessorFunctionContext when the function can be successfully
 	// found.
 	//
 	// If an error is returned, it will be wrapped in an application level
 	// thrift exception and returned.
 	//
-	// If ProcessorFunction and error are both nil, a generic error will be
+	// If ProcessorFunctionContext and error are both nil, a generic error will be
 	// sent which explains that no processor function exists with the specified
 	// name on this server.
-	GetProcessorFunction(name string) (ProcessorFunction, error)
-}
-
-// ProcessorFunction is the interface that must be implemented in
-// order to perform io and message processing
-type ProcessorFunction interface {
-	// Read a serializable message from the protocol.
-	Read(prot Format) (Struct, Exception)
-	// Process a message handing it to the client handler.
-	Run(args Struct) (WritableStruct, ApplicationException)
-	// Write a serializable responsne
-	Write(seqID int32, result WritableStruct, prot Format) Exception
-}
-
-// ProcessorContext is a Processor that supports contexts.
-type ProcessorContext interface {
 	GetProcessorFunctionContext(name string) (ProcessorFunctionContext, error)
 }
 
-// NewProcessorContextAdapter creates a ProcessorContext from a regular Processor.
-func NewProcessorContextAdapter(p Processor) ProcessorContext {
-	return &ctxProcessorAdapter{p}
-}
-
-type ctxProcessorAdapter struct {
-	Processor
-}
-
-func (p ctxProcessorAdapter) GetProcessorFunctionContext(name string) (ProcessorFunctionContext, error) {
-	f, err := p.Processor.GetProcessorFunction(name)
-	if err != nil {
-		return nil, err
-	}
-	if f == nil {
-		return nil, nil
-	}
-	return NewProcessorFunctionContextAdapter(f), nil
-}
-
-// ProcessorFunctionContext is a ProcessorFunction that supports contexts.
+// ProcessorFunctionContext is the interface that must be implemented in
+// order to perform io and message processing
 type ProcessorFunctionContext interface {
+	// Read a serializable message from the protocol.
 	Read(prot Format) (Struct, Exception)
+	// RunContext processes a message handing it to the client handler.
 	RunContext(ctx context.Context, args Struct) (WritableStruct, ApplicationException)
+	// Write a serializable response
 	Write(seqID int32, result WritableStruct, prot Format) Exception
-}
-
-// NewProcessorFunctionContextAdapter creates a ProcessorFunctionContext from a regular ProcessorFunction.
-func NewProcessorFunctionContextAdapter(p ProcessorFunction) ProcessorFunctionContext {
-	return &ctxProcessorFunctionAdapter{p}
-}
-
-type ctxProcessorFunctionAdapter struct {
-	ProcessorFunction
-}
-
-func (p ctxProcessorFunctionAdapter) RunContext(ctx context.Context, args Struct) (WritableStruct, ApplicationException) {
-	return p.ProcessorFunction.Run(args)
 }
 
 func errorType(err error) string {

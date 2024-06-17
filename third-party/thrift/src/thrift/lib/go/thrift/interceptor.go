@@ -27,51 +27,6 @@ import (
 // The interceptor is expected to be concurrency safe.
 type Interceptor func(ctx context.Context, methodName string, pfunc ProcessorFunctionContext, args Struct) (WritableStruct, ApplicationException)
 
-type interceptorProcessor struct {
-	interceptor Interceptor
-	Processor
-}
-
-// WrapInterceptor wraps an interceptor around the Processor p
-// such as when running the method returned by that processor it will execute
-// the interceptor instead. The interceptor is executed with
-// context.Background() as its context.
-func WrapInterceptor(interceptor Interceptor, p Processor) Processor {
-	if interceptor == nil {
-		return p
-	}
-	return &interceptorProcessor{
-		interceptor: interceptor,
-		Processor:   p,
-	}
-}
-
-func (p *interceptorProcessor) GetProcessorFunction(name string) (ProcessorFunction, error) {
-	pf, err := p.Processor.GetProcessorFunction(name)
-	if err != nil {
-		return nil, err
-	}
-	if pf == nil {
-		return nil, nil
-	}
-	return &interceptorProcessorFunction{
-		interceptor:       p.interceptor,
-		methodName:        name,
-		ProcessorFunction: pf,
-	}, nil
-}
-
-type interceptorProcessorFunction struct {
-	interceptor Interceptor
-	methodName  string
-	ProcessorFunction
-}
-
-func (pf *interceptorProcessorFunction) Run(args Struct) (WritableStruct, ApplicationException) {
-	ctxPf := NewProcessorFunctionContextAdapter(pf.ProcessorFunction)
-	return pf.interceptor(context.Background(), pf.methodName, ctxPf, args)
-}
-
 type interceptorProcessorContext struct {
 	interceptor Interceptor
 	ProcessorContext

@@ -55,9 +55,8 @@ TEST_F(GoUtilTest, test_munge_ident) {
   EXPECT_EQ(go::munge_ident("UrlBar", true, false), "URLBar");
   EXPECT_EQ(go::munge_ident("Url_Bar", true, false), "URL_Bar");
   EXPECT_EQ(go::munge_ident("url_bar", true, false), "URLBar");
-  // Legacy substr bug
   EXPECT_EQ(
-      go::munge_ident("cluster_id_to_name", true, true), "ClusterIdToName");
+      go::munge_ident("cluster_id_to_name", true, true), "ClusterIDToName");
   EXPECT_EQ(go::munge_ident("service_id", true, true), "ServiceID");
 
   // Reserved idents

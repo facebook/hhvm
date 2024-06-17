@@ -17,9 +17,128 @@
 package thrift
 
 import (
+	"context"
 	"testing"
 )
 
-func TestNothing(t *testing.T) {
+// TestSimpleServer is a simple tests that simple sends an empty message to a server and receives an empty result.
+func TestSimpleServer(t *testing.T) {
+	socket, err := NewServerSocket("[::]:0")
+	if err != nil {
+		t.Fatalf("could not create server socket: %s", err)
+	}
+	if err := socket.Listen(); err != nil {
+		t.Fatalf("could not listen on server socket: %s", err)
+	}
+	addr := socket.Addr()
+	handler := &testProcessor{}
+	server := NewSimpleServer(handler, socket, TransportIDHeader)
+	errChan := make(chan error)
+	go func() {
+		err := server.Serve()
+		errChan <- err
+		close(errChan)
+	}()
+	conn, err := NewSocket(SocketAddr(addr.String()))
+	if err != nil {
+		t.Fatalf("could not create client socket: %s", err)
+	}
+	proto, err := NewHeaderProtocol(conn)
+	if err != nil {
+		t.Fatalf("could not create client protocol: %s", err)
+	}
+	client := NewSerialChannel(proto)
+	if err := client.Call(context.Background(), "test", &MyTestStruct{}, &MyTestStruct{}); err != nil {
+		t.Fatalf("could not send message: %s", err)
+	}
+	if err := server.Stop(); err != nil {
+		t.Fatalf("could not stop server: %s", err)
+	}
+	<-errChan
+}
 
+type testProcessor struct {
+}
+
+func (t *testProcessor) GetProcessorFunctionContext(name string) (ProcessorFunctionContext, error) {
+	return &testProcessorFunction{}, nil
+}
+
+type testProcessorFunction struct{}
+
+func (p *testProcessorFunction) Read(prot Format) (Struct, Exception) {
+	args := NewMyTestStruct()
+	if err := args.Read(prot); err != nil {
+		return nil, err
+	}
+	prot.ReadMessageEnd()
+	return args, nil
+}
+
+func (p *testProcessorFunction) Write(seqID int32, result WritableStruct, oprot Format) (err Exception) {
+	var err2 error
+	messageType := REPLY
+	switch result.(type) {
+	case ApplicationException:
+		messageType = EXCEPTION
+	}
+
+	if err2 = oprot.WriteMessageBegin("test", messageType, seqID); err2 != nil {
+		err = err2
+	}
+	if err2 = result.Write(oprot); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.Flush(); err == nil && err2 != nil {
+		err = err2
+	}
+	return err
+}
+
+func (p *testProcessorFunction) RunContext(ctx context.Context, reqStruct Struct) (WritableStruct, ApplicationException) {
+	return &MyTestStruct{}, nil
+}
+
+// This tests that S425600 does not happen again.
+// The client is allowed to set a serializaton format to the non default and the server should adjust accordingly.
+func TestSimpleServerClientSetsDifferentProtocol(t *testing.T) {
+	socket, err := NewServerSocket("[::]:0")
+	if err != nil {
+		t.Fatalf("could not create server socket: %s", err)
+	}
+	if err := socket.Listen(); err != nil {
+		t.Fatalf("could not listen on server socket: %s", err)
+	}
+	addr := socket.Addr()
+	handler := &testProcessor{}
+	server := NewSimpleServer(handler, socket, TransportIDHeader)
+	errChan := make(chan error)
+	go func() {
+		err := server.Serve()
+		errChan <- err
+		close(errChan)
+	}()
+	conn, err := NewSocket(SocketAddr(addr.String()))
+	if err != nil {
+		t.Fatalf("could not create client socket: %s", err)
+	}
+	proto, err := NewHeaderProtocol(conn)
+	if err != nil {
+		t.Fatalf("could not create client protocol: %s", err)
+	}
+	// Sets the client serialization format to a non default.
+	if err := proto.SetProtocolID(ProtocolIDBinary); err != nil {
+		t.Fatal(err)
+	}
+	client := NewSerialChannel(proto)
+	if err := client.Call(context.Background(), "test", &MyTestStruct{}, &MyTestStruct{}); err != nil {
+		t.Fatalf("could not send message: %s", err)
+	}
+	if err := server.Stop(); err != nil {
+		t.Fatalf("could not stop server: %s", err)
+	}
+	<-errChan
 }

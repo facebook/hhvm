@@ -602,7 +602,7 @@ int64_t HHVM_FUNCTION(facts_schema_version) {
 }
 
 Variant HHVM_FUNCTION(facts_type_to_path, const String& typeName) {
-  auto fileRes = Facts::getFactsOrThrow().getTypeFile(typeName);
+  auto fileRes = Facts::getFactsOrThrow().getTypeFileRelative(typeName);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
   } else {
@@ -622,7 +622,8 @@ Variant HHVM_FUNCTION(facts_type_to_path_relative, const String& typeName) {
 Variant HHVM_FUNCTION(
     facts_type_or_type_alias_to_path,
     const String& typeName) {
-  auto fileRes = Facts::getFactsOrThrow().getTypeOrTypeAliasFile(typeName);
+  auto fileRes =
+      Facts::getFactsOrThrow().getTypeOrTypeAliasFileRelative(typeName);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
   } else {
@@ -643,7 +644,7 @@ Variant HHVM_FUNCTION(
 }
 
 Variant HHVM_FUNCTION(facts_function_to_path, const String& functionName) {
-  auto fileRes = Facts::getFactsOrThrow().getFunctionFile(functionName);
+  auto fileRes = Facts::getFactsOrThrow().getFunctionFileRelative(functionName);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
   } else {
@@ -663,7 +664,7 @@ Variant HHVM_FUNCTION(
 }
 
 Variant HHVM_FUNCTION(facts_constant_to_path, const String& constantName) {
-  auto fileRes = Facts::getFactsOrThrow().getConstantFile(constantName);
+  auto fileRes = Facts::getFactsOrThrow().getConstantFileRelative(constantName);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
   } else {
@@ -683,7 +684,7 @@ Variant HHVM_FUNCTION(
 }
 
 Variant HHVM_FUNCTION(facts_module_to_path, const String& moduleName) {
-  auto fileRes = Facts::getFactsOrThrow().getModuleFile(moduleName);
+  auto fileRes = Facts::getFactsOrThrow().getModuleFileRelative(moduleName);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
   } else {
@@ -701,7 +702,8 @@ Variant HHVM_FUNCTION(facts_module_to_path_relative, const String& moduleName) {
 }
 
 Variant HHVM_FUNCTION(facts_type_alias_to_path, const String& typeAliasName) {
-  auto fileRes = Facts::getFactsOrThrow().getTypeAliasFile(typeAliasName);
+  auto fileRes =
+      Facts::getFactsOrThrow().getTypeAliasFileRelative(typeAliasName);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
   } else {

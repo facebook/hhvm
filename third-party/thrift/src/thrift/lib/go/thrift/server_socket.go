@@ -53,7 +53,7 @@ func (p *ServerSocket) Accept() (net.Conn, error) {
 	if err != nil {
 		return nil, NewTransportExceptionFromError(err)
 	}
-	return NewSocket(SocketConn(conn))
+	return conn, nil
 }
 
 func (p *ServerSocket) Addr() net.Addr {

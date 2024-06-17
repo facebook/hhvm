@@ -26,22 +26,18 @@ func TestSocketIsntListeningAfterInterrupt(t *testing.T) {
 	port := 9090
 	addr := fmt.Sprintf("%s:%d", host, port)
 
-	socket := CreateServerSocket(t, addr)
-	socket.Listen()
-	socket.Close()
-
-	newSocket := CreateServerSocket(t, addr)
-	err := newSocket.Listen()
-	defer newSocket.Close()
-	if err != nil {
-		t.Fatalf("Failed to rebinds: %s", err)
-	}
-}
-
-func CreateServerSocket(t *testing.T, addr string) *ServerSocket {
 	socket, err := NewServerSocket(addr)
 	if err != nil {
 		t.Fatalf("Failed to create server socket: %s", err)
 	}
-	return socket
+	socket.Close()
+
+	newSocket, err := NewServerSocket(addr)
+	if err != nil {
+		t.Fatalf("Failed to create server socket: %s", err)
+	}
+	defer newSocket.Close()
+	if err != nil {
+		t.Fatalf("Failed to rebinds: %s", err)
+	}
 }

@@ -27,9 +27,6 @@ func TestSimpleServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create server socket: %s", err)
 	}
-	if err := socket.Listen(); err != nil {
-		t.Fatalf("could not listen on server socket: %s", err)
-	}
 	addr := socket.Addr()
 	handler := &testProcessor{}
 	server := NewSimpleServer(handler, socket, TransportIDHeader)
@@ -108,9 +105,6 @@ func TestSimpleServerClientSetsDifferentProtocol(t *testing.T) {
 	socket, err := NewServerSocket("[::]:0")
 	if err != nil {
 		t.Fatalf("could not create server socket: %s", err)
-	}
-	if err := socket.Listen(); err != nil {
-		t.Fatalf("could not listen on server socket: %s", err)
 	}
 	addr := socket.Addr()
 	handler := &testProcessor{}

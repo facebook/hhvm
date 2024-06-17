@@ -20,12 +20,8 @@ import (
 	"net"
 )
 
-type ServerSocket struct {
-	listener net.Listener
-	addr     net.Addr
-}
-
-func NewServerSocket(listenAddr string) (*ServerSocket, error) {
+// NewServerSocket creates a new net.Listener bound to the given address.
+func NewServerSocket(listenAddr string) (net.Listener, error) {
 	addr, err := net.ResolveTCPAddr("tcp", listenAddr)
 	if err != nil {
 		return nil, err
@@ -34,21 +30,5 @@ func NewServerSocket(listenAddr string) (*ServerSocket, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ServerSocket{addr: addr, listener: l}, nil
-}
-
-func (p *ServerSocket) Listen() error {
-	return nil
-}
-
-func (p *ServerSocket) Accept() (net.Conn, error) {
-	return p.listener.Accept()
-}
-
-func (p *ServerSocket) Addr() net.Addr {
-	return p.listener.Addr()
-}
-
-func (p *ServerSocket) Close() error {
-	return p.listener.Close()
+	return l, nil
 }

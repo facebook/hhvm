@@ -343,6 +343,7 @@ add_dependencies(
 target_link_libraries(
   thriftcpp2
   PUBLIC
+    fmt::fmt
     thrift
     rpcmetadata
     thriftannotation

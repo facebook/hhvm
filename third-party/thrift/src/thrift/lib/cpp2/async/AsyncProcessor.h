@@ -208,6 +208,8 @@ class AsyncProcessorFactory {
           interactionName(other.interactionName),
           createsInteraction(other.createsInteraction) {}
 
+    std::string describeFields() const;
+
    public:
     virtual ~MethodMetadata() = default;
 
@@ -222,6 +224,8 @@ class AsyncProcessorFactory {
       isWildcard_.compare_exchange_strong(expected, status);
       return status == WildcardStatus::YES;
     }
+
+    virtual std::string describe() const;
 
     const ExecutorType executorType{ExecutorType::UNKNOWN};
     const InteractionType interactionType{InteractionType::UNKNOWN};
@@ -248,6 +252,8 @@ class AsyncProcessorFactory {
     WildcardMethodMetadata() : WildcardMethodMetadata(ExecutorType::UNKNOWN) {}
     WildcardMethodMetadata(const WildcardMethodMetadata&) = delete;
     WildcardMethodMetadata& operator=(const WildcardMethodMetadata&) = delete;
+
+    std::string describe() const override;
   };
 
   /**
@@ -258,6 +264,9 @@ class AsyncProcessorFactory {
    */
   using MethodMetadataMap =
       folly::F14FastMap<std::string, std::shared_ptr<const MethodMetadata>>;
+
+  static std::string describe(const MethodMetadataMap&);
+
   /**
    * A marker struct indicating that the AsyncProcessor supports any method, or
    * a list of methods that is not enumerable. This applies to AsyncProcessor
@@ -273,8 +282,13 @@ class AsyncProcessorFactory {
     MethodMetadataMap knownMethods;
   };
 
+  static std::string describe(const WildcardMethodMetadataMap&);
+
   using CreateMethodMetadataResult =
       std::variant<MethodMetadataMap, WildcardMethodMetadataMap>;
+
+  static std::string describe(const CreateMethodMetadataResult&);
+
   /**
    * This function enumerates the list of methods supported by the
    * AsyncProcessor returned by getProcessor(), if possible. The return value

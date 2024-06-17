@@ -86,6 +86,25 @@ std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
 
 } // namespace
 
+TEST(AsyncProcessorMetadataTest, MethodMetadataDescribe) {
+  apache::thrift::ServiceHandler<Parent> service;
+  auto createMethodMetadataResult = service.createMethodMetadata();
+  auto desc = AsyncProcessorFactory::describe(createMethodMetadataResult);
+
+  auto beg = "CreateMethodMetadataResult(MethodMetadataMap(";
+  auto par1 =
+      "parentMethod1=MethodMetadata(executorType=ANY interactionType=NONE rpcKind=SINGLE_REQUEST_SINGLE_RESPONSE priority=NORMAL interactionName=NONE createsInteraction=false isWildcard=false)";
+  auto par2 =
+      "parentMethod2=MethodMetadata(executorType=ANY interactionType=NONE rpcKind=SINGLE_REQUEST_STREAMING_RESPONSE priority=NORMAL interactionName=NONE createsInteraction=false isWildcard=false)";
+  auto par3 =
+      "parentMethod3=MethodMetadata(executorType=ANY interactionType=NONE rpcKind=SINGLE_REQUEST_SINGLE_RESPONSE priority=NORMAL interactionName=NONE createsInteraction=false isWildcard=false)";
+
+  EXPECT_THAT(desc, ::testing::StartsWith(beg));
+  EXPECT_THAT(desc, ::testing::HasSubstr(par1));
+  EXPECT_THAT(desc, ::testing::HasSubstr(par2));
+  EXPECT_THAT(desc, ::testing::HasSubstr(par3));
+}
+
 TEST(AsyncProcessorMetadataTest, ParentMetadata) {
   apache::thrift::ServiceHandler<Parent> service;
   auto createMethodMetadataResult = service.createMethodMetadata();

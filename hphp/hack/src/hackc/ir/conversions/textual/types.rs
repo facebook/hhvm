@@ -23,6 +23,8 @@ pub(crate) fn convert_ty(ty: &EnforceableType) -> textual::Ty {
     modifiers -= TypeConstraintFlags::TypeVar;
 
     // All textual boxed types are nullable.
+    // TODO: the above statement is not entirely accurate, be more nuanced and
+    // don't just throw this information away (see also DisplayNullable)
     modifiers -= TypeConstraintFlags::Nullable;
 
     if modifiers.contains(TypeConstraintFlags::TypeConstant) {

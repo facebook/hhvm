@@ -46,6 +46,7 @@ pub fn textual_writer(
         .into_iter()
         .map(Thing::Class)
         .chain(unit.functions.into_iter().map(Thing::Func))
+        .chain(unit.typedefs.into_iter().map(Thing::Typedef))
         .collect_vec();
     things.sort_by(Thing::cmp);
 
@@ -53,6 +54,7 @@ pub fn textual_writer(
         match thing {
             Thing::Class(cls) => crate::class::write_class(&mut txf, cls)?,
             Thing::Func(func) => crate::func::write_function(&mut txf, func)?,
+            Thing::Typedef(typedef) => txf.declare_alias(typedef)?,
         }
     }
 
@@ -104,6 +106,7 @@ fn check_fatal(path: &Path, fatal: Option<&ir::Fatal>) -> Result<()> {
 enum Thing {
     Class(ir::Class),
     Func(ir::Function),
+    Typedef(ir::Typedef),
 }
 
 impl Thing {
@@ -111,6 +114,7 @@ impl Thing {
         match self {
             Thing::Class(c) => c.span.line_begin as usize,
             Thing::Func(f) => f.body.span.line_begin as usize,
+            Thing::Typedef(t) => t.span.line_begin as usize,
         }
     }
 
@@ -118,6 +122,7 @@ impl Thing {
         match self {
             Thing::Class(c) => c.name.as_string_id(),
             Thing::Func(f) => f.name.as_string_id(),
+            Thing::Typedef(t) => t.name.as_string_id(),
         }
     }
 
@@ -125,6 +130,7 @@ impl Thing {
         match self {
             Thing::Class(_) => 0,
             Thing::Func(f) => f.body.repr.params.len(),
+            Thing::Typedef(_) => 0,
         }
     }
 

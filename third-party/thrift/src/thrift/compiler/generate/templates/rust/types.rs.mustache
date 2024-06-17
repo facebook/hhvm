@@ -112,3 +112,15 @@ pub fn init_registry(registry: &mut ::fbthrift_conformance::AnyRegistry) -> ::an
 pub(crate) mod r#impl {{>lib/block}}{{>lib/mod.impl}}}
 {{!
 }}{{#program:has_default_tests?}}{{>lib/adapter/default_test}}{{/program:has_default_tests?}}
+{{#program:direct_dependencies?}}
+
+#[doc(hidden)]
+#[deprecated]
+pub mod __dependencies {
+    {{#program:direct_dependencies}}
+    #[doc(hidden)]
+    #[deprecated{{#dependency:label}} = "Please use `{{.}}` directly"{{/dependency:label}}]
+    pub extern crate {{dependency:name}};
+    {{/program:direct_dependencies}}
+}
+{{/program:direct_dependencies?}}

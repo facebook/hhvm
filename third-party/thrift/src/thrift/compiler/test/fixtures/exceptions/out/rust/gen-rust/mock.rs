@@ -96,8 +96,6 @@
 
 pub(crate) use :: as types;
 pub(crate) use :: as client;
-#[allow(deprecated)]
-pub(crate) use ::::dependencies;
 pub(crate) use ::::errors;
 
 pub fn new<'mock, Client>() -> Client::Mock<'mock>

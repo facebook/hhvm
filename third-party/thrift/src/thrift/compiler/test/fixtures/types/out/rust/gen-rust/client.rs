@@ -15,15 +15,6 @@ pub mod errors;
 pub(crate) use crate as client;
 pub(crate) use ::::services;
 
-// Used by Thrift-generated code to implement service inheritance.
-#[doc(hidden)]
-#[deprecated]
-pub mod dependencies {
-    pub mod included {
-        pub use included__clients::*;
-    }
-}
-
 
 /// Client definitions for `SomeService`.
 pub struct SomeServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {

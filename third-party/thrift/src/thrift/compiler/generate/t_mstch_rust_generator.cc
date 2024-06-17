@@ -37,7 +37,6 @@
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/ast_validator.h>
 #include <thrift/compiler/sema/diagnostic_context.h>
-#include <thrift/compiler/sema/explicit_include_validator.h>
 
 namespace apache {
 namespace thrift {
@@ -218,7 +217,7 @@ std::string get_types_import_name(
   auto crate = options.crate_index.find(program);
   if (!crate) {
     return program->name() + "__types";
-  } else if (crate->name == "crate") {
+  } else if (crate->dependency_path.empty()) {
     return crate->import_name(program) + "::types";
   } else {
     return crate->import_name(program);
@@ -234,16 +233,21 @@ std::string get_client_import_name(
   auto crate = options.crate_index.find(program);
   if (!crate) {
     return program->name() + "__clients";
-  } else if (crate->name == "crate") {
+  } else if (crate->dependency_path.empty()) {
     return crate->import_name(program) + "::client";
   }
 
-  std::string absolute_crate_name = "::" + crate->name + "_clients";
-  if (crate->multifile) {
-    return absolute_crate_name + "::" + multifile_module_name(program);
-  } else {
-    return absolute_crate_name;
+  std::string path;
+  for (const auto& dep : crate->dependency_path) {
+    path += path.empty() ? "::" : "::__dependencies::";
+    path += dep + "_clients";
   }
+
+  if (crate->multifile) {
+    path += "::" + multifile_module_name(program);
+  }
+
+  return path;
 }
 
 std::string get_server_import_name(
@@ -255,16 +259,21 @@ std::string get_server_import_name(
   auto crate = options.crate_index.find(program);
   if (!crate) {
     return program->name() + "__services";
-  } else if (crate->name == "crate") {
+  } else if (crate->dependency_path.empty()) {
     return crate->import_name(program);
   }
 
-  std::string absolute_crate_name = "::" + crate->name + "_services";
-  if (crate->multifile) {
-    return absolute_crate_name + "::" + multifile_module_name(program);
-  } else {
-    return absolute_crate_name;
+  std::string path;
+  for (const auto& dep : crate->dependency_path) {
+    path += path.empty() ? "::" : "::__dependencies::";
+    path += dep + "_services";
   }
+
+  if (crate->multifile) {
+    path += "::" + multifile_module_name(program);
+  }
+
+  return path;
 }
 
 std::string get_mock_import_name(
@@ -276,16 +285,21 @@ std::string get_mock_import_name(
   auto crate = options.crate_index.find(program);
   if (!crate) {
     return program->name() + "__mocks";
-  } else if (crate->name == "crate") {
+  } else if (crate->dependency_path.empty()) {
     return crate->import_name(program);
   }
 
-  std::string absolute_crate_name = "::" + crate->name + "_mocks";
-  if (crate->multifile) {
-    return absolute_crate_name + "::" + multifile_module_name(program);
-  } else {
-    return absolute_crate_name;
+  std::string path;
+  for (const auto& dep : crate->dependency_path) {
+    path += path.empty() ? "::" : "::__dependencies::";
+    path += dep + "_mocks";
   }
+
+  if (crate->multifile) {
+    path += "::" + multifile_module_name(program);
+  }
+
+  return path;
 }
 
 // Path to the crate root of the given service's mocks crate. Unlike
@@ -300,11 +314,16 @@ std::string get_mock_crate(
   auto crate = options.crate_index.find(program);
   if (!crate) {
     return program->name() + "__mocks";
-  } else if (crate->name == "crate") {
+  } else if (crate->dependency_path.empty()) {
     return "crate";
-  } else {
-    return "::" + crate->name + "_mocks";
   }
+
+  std::string path;
+  for (const auto& dep : crate->dependency_path) {
+    path += path.empty() ? "::" : "::__dependencies::";
+    path += dep + "_mocks";
+  }
+  return path;
 }
 
 bool node_is_boxed(const t_named& node) {
@@ -621,6 +640,10 @@ class rust_mstch_program : public mstch_program {
     register_cached_methods(
         this,
         {
+            {"program:direct_dependencies?",
+             &rust_mstch_program::rust_has_direct_dependencies},
+            {"program:direct_dependencies",
+             &rust_mstch_program::rust_direct_dependencies},
             {"program:types", &rust_mstch_program::rust_types},
             {"program:clients", &rust_mstch_program::rust_clients},
             {"program:nonexhaustiveStructs?",
@@ -634,7 +657,6 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_client_package},
             {"program:includes", &rust_mstch_program::rust_includes},
             {"program:label", &rust_mstch_program::rust_label},
-            {"program:namespace", &rust_mstch_program::rust_namespace},
             {"program:nonstandardTypes",
              &rust_mstch_program::rust_nonstandard_types},
             {"program:nonstandardFields",
@@ -671,6 +693,23 @@ class rust_mstch_program : public mstch_program {
     register_has_option(
         "program:deprecated_default_enum_min_i32?",
         "deprecated_default_enum_min_i32");
+  }
+
+  mstch::node rust_has_direct_dependencies() {
+    return !options_.crate_index.direct_dependencies().empty();
+  }
+
+  mstch::node rust_direct_dependencies() {
+    mstch::array direct_dependencies;
+    for (auto crate : options_.crate_index.direct_dependencies()) {
+      mstch::map dependency;
+      dependency["dependency:name"] =
+          mangle_crate_name(crate->dependency_path[0]);
+      dependency["dependency:name_unmangled"] = crate->dependency_path[0];
+      dependency["dependency:label"] = crate->label;
+      direct_dependencies.push_back(std::move(dependency));
+    }
+    return direct_dependencies;
   }
 
   mstch::node rust_types() {
@@ -736,13 +775,6 @@ class rust_mstch_program : public mstch_program {
       return crate->label;
     }
     return false;
-  }
-  mstch::node rust_namespace() {
-    auto crate = options_.crate_index.find(program_);
-    if (crate) {
-      return crate->name;
-    }
-    return program_->name();
   }
   template <typename F>
   void foreach_field(F&& f) const {
@@ -980,8 +1012,6 @@ class rust_mstch_service : public mstch_service {
          {"service:requestContext?", &rust_mstch_service::rust_request_context},
          {"service:extendedClients",
           &rust_mstch_service::rust_extended_clients},
-         {"service:extendedServers",
-          &rust_mstch_service::rust_extended_servers},
          {"service:docs?", &rust_mstch_service::rust_has_doc},
          {"service:docs", &rust_mstch_service::rust_doc},
          {"service:program_name", &rust_mstch_service::program_name}});
@@ -1022,27 +1052,13 @@ class rust_mstch_service : public mstch_service {
         service_->find_structured_annotation_or_null(kRustRequestContextUri);
   }
   mstch::node rust_extended_clients() {
-    return rust_extended_services(get_client_import_name);
-  }
-  mstch::node rust_extended_servers() {
-    return rust_extended_services(get_server_import_name);
-  }
-  mstch::node rust_extended_services(std::string (*get_import_name)(
-      const t_program*, const rust_codegen_options&)) {
     mstch::array extended_services;
     const t_service* service = service_;
-    std::string type_prefix = get_import_name(service_->program(), options_);
     std::string as_ref_impl = "&self.parent";
-    while (true) {
-      const t_service* parent_service = service->get_extends();
-      if (parent_service == nullptr) {
-        break;
-      }
-      if (parent_service->program() != service->program()) {
-        type_prefix += "::dependencies::" + parent_service->program()->name();
-      }
+    while (const t_service* parent_service = service->get_extends()) {
       mstch::map node;
-      node["extendedService:packagePrefix"] = type_prefix;
+      node["extendedService:packagePrefix"] =
+          get_client_import_name(parent_service->program(), options_);
       node["extendedService:asRefImpl"] = as_ref_impl;
       node["extendedService:service"] =
           make_mstch_extended_service_cached(parent_service);
@@ -2533,7 +2549,6 @@ void t_mstch_rust_generator::fill_validator_visitors(
       options_));
   validator.add_enum_visitor(validate_enum_annotations);
   validator.add_program_visitor(validate_program_annotations);
-  add_explicit_include_validators(validator, diagnostic_level::error);
 }
 
 THRIFT_REGISTER_GENERATOR(

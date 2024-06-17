@@ -15,12 +15,6 @@ pub mod errors;
 pub(crate) use crate as client;
 pub(crate) use ::::services;
 
-// Used by Thrift-generated code to implement service inheritance.
-#[doc(hidden)]
-#[deprecated]
-pub mod dependencies {
-}
-
 
 /// Client definitions for `MyService`.
 pub struct MyServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {
@@ -1448,7 +1442,7 @@ where
 }
 
 #[allow(deprecated)]
-impl<P, T, S> ::std::convert::AsRef<dyn crate::MyServicePrioParent + 'static> for MyServicePrioChildImpl<P, T, S>
+impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyServicePrioParent + 'static> for MyServicePrioChildImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -1457,14 +1451,14 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::MyServicePrioParent + 'static)
+    fn as_ref(&self) -> &(dyn crate::client::MyServicePrioParent + 'static)
     {
         &self.parent
     }
 }
 
 #[allow(deprecated)]
-impl<P, T, S> ::std::convert::AsRef<dyn crate::MyServicePrioParentExt<T> + 'static> for MyServicePrioChildImpl<P, T, S>
+impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyServicePrioParentExt<T> + 'static> for MyServicePrioChildImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -1473,7 +1467,7 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::MyServicePrioParentExt<T> + 'static)
+    fn as_ref(&self) -> &(dyn crate::client::MyServicePrioParentExt<T> + 'static)
     {
         &self.parent
     }
@@ -1557,7 +1551,7 @@ where
 impl<'a, S> MyServicePrioChild for S
 where
     S: ::std::convert::AsRef<dyn MyServicePrioChild + 'a>,
-    S: crate::MyServicePrioParent,
+    S: crate::client::MyServicePrioParent,
     S: ::std::marker::Send,
 {
     fn pang(
@@ -1573,8 +1567,8 @@ impl<S, T> MyServicePrioChildExt<T> for S
 where
     S: ::std::convert::AsRef<dyn MyServicePrioChild + 'static>,
     S: ::std::convert::AsRef<dyn MyServicePrioChildExt<T> + 'static>,
-    S: crate::MyServicePrioParent,
-    S: crate::MyServicePrioParentExt<T>,
+    S: crate::client::MyServicePrioParent,
+    S: crate::client::MyServicePrioParentExt<T>,
     S: ::std::marker::Send,
     T: ::fbthrift::Transport,
 {

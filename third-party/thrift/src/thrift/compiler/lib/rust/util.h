@@ -19,6 +19,7 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_struct.h>
@@ -30,7 +31,7 @@ namespace compiler {
 namespace rust {
 
 struct rust_crate {
-  std::string name;
+  std::vector<std::string> dependency_path;
   bool multifile = false;
   std::string label;
 
@@ -50,15 +51,20 @@ class rust_crate_index {
       const t_program* current_program,
       std::map<std::string, rust_crate> cratemap);
   const rust_crate* find(const t_program* program) const;
+  std::vector<const rust_crate*> direct_dependencies() const;
 
  private:
-  std::string directory_of_current_program;
+  void compute_absolute_paths_of_includes(
+      const t_program* program, const std::string& absolute_path);
+
   std::map<std::string, rust_crate> cratemap;
+  std::map<const t_program*, std::string> thrift_file_absolute_paths;
 };
 
 rust_crate_map load_crate_map(const std::string& path);
 
 std::string mangle(const std::string& name);
+std::string mangle_crate_name(const std::string& name);
 std::string mangle_type(const std::string& name);
 std::string snakecase(const std::string& name);
 std::string camelcase(const std::string& name);

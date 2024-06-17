@@ -42,18 +42,6 @@ pub mod errors;
 pub(crate) use {{program:crate}} as client;
 pub(crate) use {{program:types}}::services;
 
-// Used by Thrift-generated code to implement service inheritance.
-#[doc(hidden)]
-#[deprecated]
-pub mod dependencies {{>lib/block}}{{!
-    }}{{#program:includes}}{{!
-    }}{{#program:label}}
-    #[deprecated = "use `{{.}}` ({{program:namespace}})"]{{/program:label}}
-    pub mod {{program:name}} {
-        pub use {{program:client_package}}::*;
-    }{{/program:includes}}
-}
-
 {{#program:services}}{{>lib/client}}{{!
 }}{{/program:services}}
 {{/program:services?}}
@@ -66,4 +54,15 @@ pub mod dependencies {{>lib/block}}{{!
 pub use {{program:types}} as types;
 pub(crate) use {{program:crate}} as client;
 {{/program:services?}}
-{{!newline}}
+{{#program:direct_dependencies?}}
+
+#[doc(hidden)]
+#[deprecated]
+pub mod __dependencies {
+    {{#program:direct_dependencies}}
+    #[doc(hidden)]
+    #[deprecated{{#dependency:label}} = "Please use `{{.}}-clients` directly"{{/dependency:label}}]
+    pub extern crate {{dependency:name_unmangled}}_clients;
+    {{/program:direct_dependencies}}
+}
+{{/program:direct_dependencies?}}

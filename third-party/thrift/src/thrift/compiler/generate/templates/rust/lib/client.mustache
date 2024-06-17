@@ -208,7 +208,7 @@ where
     {{/service:rustFunctions}}
 }
 
-{{#service:extendedServers}}
+{{#service:extendedClients}}
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
 impl<P, T, S> {{!
     }}{{#extendedService:service}}{{!
@@ -257,7 +257,7 @@ where
     }
 }
 
-{{/service:extendedServers}}
+{{/service:extendedClients}}
 {{#service:docs?}}
 #[doc = {{service:docs}}]
 {{/service:docs?}}
@@ -432,11 +432,11 @@ where
 impl<'a, S> {{service:rust_name}} for S
 where
     S: ::std::convert::AsRef<dyn {{service:rust_name}} + 'a>,
-    {{#service:extendedServers}}
+    {{#service:extendedClients}}
     {{#extendedService:service}}
     S: {{extendedService:packagePrefix}}::{{service:rust_name}},
     {{/extendedService:service}}
-    {{/service:extendedServers}}
+    {{/service:extendedClients}}
     S: ::std::marker::Send,
 {
     {{#service:rustFunctions}}
@@ -469,12 +469,12 @@ impl<S, T> {{service:rust_name}}Ext<T> for S
 where
     S: ::std::convert::AsRef<dyn {{service:rust_name}} + 'static>,
     S: ::std::convert::AsRef<dyn {{service:rust_name}}Ext<T> + 'static>,
-    {{#service:extendedServers}}
+    {{#service:extendedClients}}
     {{#extendedService:service}}
     S: {{extendedService:packagePrefix}}::{{service:rust_name}},
     S: {{extendedService:packagePrefix}}::{{service:rust_name}}Ext<T>,
     {{/extendedService:service}}
-    {{/service:extendedServers}}
+    {{/service:extendedClients}}
     S: ::std::marker::Send,
     T: ::fbthrift::Transport,
 {

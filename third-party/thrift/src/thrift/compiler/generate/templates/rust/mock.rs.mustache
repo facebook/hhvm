@@ -120,8 +120,6 @@
 
 pub(crate) use {{program:types}} as types;
 pub(crate) use {{program:clients}} as client;
-#[allow(deprecated)]
-pub(crate) use {{program:clients}}::dependencies;
 pub(crate) use {{program:clients}}::errors;
 
 {{^program:multifile?}}
@@ -364,4 +362,15 @@ pub mod r#impl {{>lib/block}}{{!
 
 pub(crate) use {{program:types}} as types;
 {{/program:services?}}
-{{!newline}}
+{{#program:direct_dependencies?}}
+
+#[doc(hidden)]
+#[deprecated]
+pub mod __dependencies {
+    {{#program:direct_dependencies}}
+    #[doc(hidden)]
+    #[deprecated{{#dependency:label}} = "Please use `{{.}}-mocks` directly"{{/dependency:label}}]
+    pub extern crate {{dependency:name_unmangled}}_mocks;
+    {{/program:direct_dependencies}}
+}
+{{/program:direct_dependencies?}}

@@ -61,4 +61,15 @@ pub(crate) use {{program:types}}::services;
 #[doc(inline)]
 pub use {{program:types}} as types;
 {{/program:services?}}
-{{!newline}}
+{{#program:direct_dependencies?}}
+
+#[doc(hidden)]
+#[deprecated]
+pub mod __dependencies {
+    {{#program:direct_dependencies}}
+    #[doc(hidden)]
+    #[deprecated{{#dependency:label}} = "Please use `{{.}}-services` directly"{{/dependency:label}}]
+    pub extern crate {{dependency:name_unmangled}}_services;
+    {{/program:direct_dependencies}}
+}
+{{/program:direct_dependencies?}}

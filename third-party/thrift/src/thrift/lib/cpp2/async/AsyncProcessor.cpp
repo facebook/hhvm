@@ -491,12 +491,14 @@ void GeneratedAsyncProcessorBase::terminateInteraction(
   eb.dcheckIsInEventBaseThread();
 
   if (auto tile = conn.removeTile(id)) {
-    Tile::onTermination(std::move(tile), eb);
     auto ctxStack = getContextStackForNonPerRequestCallbacks(
         handlers_, getServiceName(), "#terminateInteraction", &conn);
     if (ctxStack) {
-      ctxStack->onInteractionTerminate(id);
+      tile->onDestroy([id, ctxStack = std::move(ctxStack)] {
+        ctxStack->onInteractionTerminate(id);
+      });
     }
+    Tile::onTermination(std::move(tile), eb);
   }
 }
 

@@ -19,6 +19,13 @@
 namespace apache {
 namespace thrift {
 
+Tile::~Tile() {
+  DCHECK_EQ(refCount_, 0);
+  if (onDestroy_) {
+    onDestroy_();
+  }
+}
+
 bool Tile::maybeEnqueue(
     std::unique_ptr<concurrency::Runnable>&&,
     const concurrency::ThreadManager::ExecutionScope&) {

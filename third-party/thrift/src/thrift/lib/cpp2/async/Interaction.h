@@ -89,7 +89,7 @@ class TilePtr;
 
 class Tile {
  public:
-  virtual ~Tile() { DCHECK_EQ(refCount_, 0); }
+  virtual ~Tile();
 
 #if FOLLY_HAS_COROUTINES
   // Called as soon as termination signal is received
@@ -97,6 +97,8 @@ class Tile {
   // Not called if connection closes before termination received
   virtual folly::coro::Task<void> co_onTermination();
 #endif
+
+  void onDestroy(folly::Function<void()> cb) { onDestroy_ = std::move(cb); }
 
  private:
   // Only moves in arg when it returns true
@@ -117,6 +119,7 @@ class Tile {
   size_t refCount_{0};
   folly::Executor::KeepAlive<concurrency::ThreadManager> tm_;
   folly::Executor::KeepAlive<> executor_{}; // Used only for ResourcePools
+  folly::Function<void()> onDestroy_;
   friend class TilePromise;
   friend class TilePtr;
   friend class TileStreamGuard;

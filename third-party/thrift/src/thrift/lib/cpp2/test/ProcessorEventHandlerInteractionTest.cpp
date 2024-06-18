@@ -35,56 +35,73 @@ class TestEventHandler : public TProcessorEventHandler {
   // An interaction ID must be unique per connection
   using UniqueInteractionId = std::pair<folly::SocketAddress, int64_t>;
 
+  struct EventHandlerContext {
+    const Cpp2RequestContext* requestContext;
+    folly::SocketAddress peerAddress;
+    explicit EventHandlerContext(const TConnectionContext* connContext) {
+      CHECK(connContext);
+      CHECK(connContext->getPeerAddress());
+      requestContext = dynamic_cast<const Cpp2RequestContext*>(connContext);
+      peerAddress = *connContext->getPeerAddress();
+    }
+  };
+
  public:
   void* getServiceContext(
       const char* service_name,
       const char* fn_name,
-      TConnectionContext* conn) override {
+      TConnectionContext* ctx) override {
     LOG(INFO) << fmt::format(
         "getServiceContext(\"{}\", \"{}\")", service_name, fn_name);
-    return conn;
+    return new EventHandlerContext(ctx);
   }
 
-  void freeContext(void*, const char* fn_name) override {
+  void freeContext(void* _ctx, const char* fn_name) override {
     LOG(INFO) << fmt::format("freeContext(\"{}\")", fn_name);
+    ASSERT_TRUE(_ctx);
+    delete static_cast<EventHandlerContext*>(_ctx);
   }
 
   void onReadData(
-      void* ctx, const char* fn_name, const SerializedMessage&) override {
+      void* _ctx, const char* fn_name, const SerializedMessage&) override {
     LOG(INFO) << fmt::format("onReadData(\"{}\")", fn_name);
-    ASSERT_TRUE(ctx);
-    auto* reqCtx = dynamic_cast<Cpp2RequestContext*>((TConnectionContext*)ctx);
-    ASSERT_TRUE(reqCtx);
-    ASSERT_GT(reqCtx->getInteractionId(), 0);
-    UniqueInteractionId uniqueId{
-        *reqCtx->getPeerAddress(), reqCtx->getInteractionId()};
-    if (reqCtx->getInteractionCreate()) {
+    ASSERT_TRUE(_ctx);
+    const auto* ctx = static_cast<EventHandlerContext*>(_ctx);
+    const auto* req = ctx->requestContext;
+    ASSERT_TRUE(req);
+    ASSERT_FALSE(ctx->peerAddress.empty());
+    ASSERT_GT(req->getInteractionId(), 0);
+    UniqueInteractionId uniqueId{ctx->peerAddress, req->getInteractionId()};
+    if (req->getInteractionCreate()) {
       auto [_, added] = ids_.wlock()->emplace(uniqueId);
       ASSERT_TRUE(added);
     } else {
       ASSERT_TRUE(ids_.rlock()->count(uniqueId));
     }
     if (std::string_view{"Calculator.Addition.noop"} == fn_name) {
-      ASSERT_EQ(reqCtx->getRpcKind(), RpcKind::SINGLE_REQUEST_NO_RESPONSE);
+      ASSERT_EQ(req->getRpcKind(), RpcKind::SINGLE_REQUEST_NO_RESPONSE);
     } else {
-      ASSERT_EQ(reqCtx->getRpcKind(), RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+      ASSERT_EQ(req->getRpcKind(), RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
     }
   }
 
   bool wantNonPerRequestCallbacks() const override {
     return wantNonPerRequestCallbacks_.load();
   }
-  void onInteractionTerminate(void* ctx, int64_t id) override {
+
+  void onInteractionTerminate(void* _ctx, int64_t id) override {
     LOG(INFO) << fmt::format("onInteractionTerminate({})", id);
-    ASSERT_TRUE(ctx);
-    auto* conn = dynamic_cast<Cpp2ConnContext*>((TConnectionContext*)ctx);
-    ASSERT_TRUE(conn);
+    ASSERT_TRUE(_ctx);
+    const auto* ctx = static_cast<EventHandlerContext*>(_ctx);
+    ASSERT_FALSE(ctx->requestContext); // no request context available here
+    ASSERT_FALSE(ctx->peerAddress.empty());
     ASSERT_GT(id, 0);
-    UniqueInteractionId uniqueId{*conn->getPeerAddress(), id};
+    UniqueInteractionId uniqueId{ctx->peerAddress, id};
     ASSERT_EQ(1, ids_.wlock()->erase(uniqueId));
   }
 
   size_t countInteractions() const { return ids_.rlock()->size(); }
+
   void setWantNonPerRequestCallbacks(bool val) {
     wantNonPerRequestCallbacks_.store(val);
   }
@@ -237,7 +254,9 @@ TEST(TProcessorEventHandlerTest, RpcKind) {
     ScopedServerInterfaceThread runner(std::make_shared<TestHandler>());
     auto client = runner.newClient<apache::thrift::Client<test::Calculator>>();
     auto add = client->sync_newAddition();
-    add.sync_noop();
+    for (auto n = 100; n--;) {
+      add.sync_noop();
+    }
   }
   EXPECT_EQ(eventHandler->countInteractions(), 0);
 }

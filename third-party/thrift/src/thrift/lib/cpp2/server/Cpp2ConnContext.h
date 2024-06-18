@@ -678,7 +678,7 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
 
   void setInteractionId(int64_t id) { interactionId_ = id; }
 
-  int64_t getInteractionId() { return interactionId_; }
+  int64_t getInteractionId() const { return interactionId_; }
 
   void setFrameworkMetadata(folly::IOBuf frameworkMetadata) {
     frameworkMetadata_ = std::move(frameworkMetadata);
@@ -691,6 +691,10 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   }
 
   folly::Optional<InteractionCreate>& getInteractionCreate() {
+    return interactionCreate_;
+  }
+
+  const folly::Optional<InteractionCreate>& getInteractionCreate() const {
     return interactionCreate_;
   }
 

@@ -15,6 +15,7 @@
 import enum
 import importlib
 import unittest
+from datetime import datetime
 
 from thrift.test.thrift_python.union_test.thrift_mutable_types import (  # @manual=//thrift/test/thrift-python:union_test_thrift-python-types
     TestUnion as TestUnionMutable,
@@ -23,6 +24,7 @@ from thrift.test.thrift_python.union_test.thrift_mutable_types import (  # @manu
 from thrift.test.thrift_python.union_test.thrift_types import (
     TestStruct as TestStructImmutable,
     TestUnion as TestUnionImmutable,
+    TestUnionAdaptedTypes as TestUnionAdaptedTypesImmutable,
     TestUnionAmbiguousFromValueBoolInt as TestUnionAmbiguousFromValueBoolIntImmutable,
     TestUnionAmbiguousFromValueFloatInt as TestUnionAmbiguousFromValueFloatIntImmutable,
     TestUnionAmbiguousFromValueIntBool as TestUnionAmbiguousFromValueIntBoolImmutable,
@@ -224,6 +226,63 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
             TestUnionImmutable(int_field=41),
             TestUnionImmutable(int_field=42),
         )
+
+    def test_adapted_types(self) -> None:
+        u1 = TestUnionAdaptedTypesImmutable()
+        self.assertIs(u1.type, TestUnionAdaptedTypesImmutable.Type.EMPTY)
+        self.assertIsNone(u1.value)
+
+        with self.assertRaisesRegex(
+            AttributeError, "'int' object has no attribute 'timestamp'"
+        ):
+            TestUnionAdaptedTypesImmutable(adapted_i32_to_datetime=123)
+
+        u2 = TestUnionAdaptedTypesImmutable(
+            adapted_i32_to_datetime=datetime.fromtimestamp(1718728839)
+        )
+        self.assertIs(
+            u2.type, TestUnionAdaptedTypesImmutable.Type.adapted_i32_to_datetime
+        )
+
+        # BAD: The following assertions demonstrate the fact that (immutable) Thrift
+        # unions do not properly convert adapted fields on access. Indeed, u2.value
+        # should be a datetime instance, but instead is the underlying (int) value.
+        self.assertNotIsInstance(u2.value, datetime)
+        self.assertNotEqual(u2.value, datetime.fromtimestamp(1718728839))
+        self.assertIsInstance(u2.value, int)
+        self.assertEqual(u2.value, 1718728839)
+        self.assertIsNot(u2.value, u2.adapted_i32_to_datetime)
+
+        # Note that the behavior above differs when the field is accessed directly
+        # (instead of the auto-provided "value" attribute): the field value is then
+        # adapted (i.e., datetime instead of the underlying int value).
+        self.assertIsInstance(u2.adapted_i32_to_datetime, datetime)
+        self.assertEqual(u2.adapted_i32_to_datetime, datetime.fromtimestamp(1718728839))
+        self.assertNotIsInstance(u2.adapted_i32_to_datetime, int)
+        self.assertNotEqual(u2.adapted_i32_to_datetime, 1718728839)
+
+        # BAD: more "fromValue()" ambiguity: calling it with a datetime sets the
+        # adapted field, but calling it with an integer (or string) raises an error
+        # instead of setting one of the other fields.
+        self.assertEqual(
+            TestUnionAdaptedTypesImmutable.fromValue(
+                datetime.fromtimestamp(1718728839)
+            ),
+            u2,
+        )
+        with self.assertRaisesRegex(
+            AttributeError, "'int' object has no attribute 'timestamp'"
+        ):
+            TestUnionAdaptedTypesImmutable.fromValue(1718728839)
+        with self.assertRaisesRegex(
+            AttributeError, "'str' object has no attribute 'timestamp'"
+        ):
+            TestUnionAdaptedTypesImmutable.fromValue("1718728839"),
+
+        u3 = TestUnionAdaptedTypesImmutable(non_adapted_i32=1718728839)
+        self.assertIs(u3.type, TestUnionAdaptedTypesImmutable.Type.non_adapted_i32)
+        self.assertIs(u3.value, u3.non_adapted_i32)
+        self.assertEqual(u3.non_adapted_i32, 1718728839)
 
 
 class ThriftPython_MutableUnion_Test(unittest.TestCase):

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/python.thrift"
+
 namespace py3 thrift.test.thrift_python
 
 struct TestStruct {
@@ -66,3 +68,19 @@ union TestUnionAmbiguousValueFieldName {
 # union TestUnionWithEmptyFieldName {
 #   1: i32 EMPTY;
 # }
+
+union TestUnionAdaptedTypes {
+  @python.Adapter{
+    name = "thrift.python.test.adapters.datetime.DatetimeAdapter",
+    typeHint = "datetime.datetime",
+  }
+  1: i32 adapted_i32_to_datetime;
+
+  @python.Adapter{
+    name = "thrift.python.test.adapters.atoi.AtoiAdapter",
+    typeHint = "int",
+  }
+  2: string adapted_string_to_i32;
+
+  3: i32 non_adapted_i32;
+}

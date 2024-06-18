@@ -29,7 +29,7 @@ jobs:
           tags: ${{ format('ghcr.io/{0}/watchman-build-env:latest', github.repository) }}
 
   clone-and-build-and-package-ubuntu:
-    needs: docker
+    needs: docker-ubuntu
     runs-on: ubuntu-latest
     container:
       image: ${{ format('ghcr.io/{0}/watchman-build-env:latest', github.repository) }}

@@ -371,7 +371,8 @@ class ConformanceVerificationServer
 void createClient(
     std::string_view serviceName, std::string ipAddress, std::string port) {
   auto client = create_rpc_conformance_setup_service_client_(serviceName);
-  client->semifuture_createRPCConformanceServiceClient(ipAddress, port);
+  folly::coro::blockingWait(
+      client->co_createRPCConformanceServiceClient(ipAddress, port));
 }
 
 class RPCClientConformanceTest : public testing::Test {
@@ -450,7 +451,7 @@ class RPCClientConformanceTest : public testing::Test {
 
     // End test if client was unable to fetch test case
     if (!getTestReceived) {
-      return testing::AssertionFailure();
+      return testing::AssertionFailure() << "client failed to fetch test case";
     }
 
     // Wait for result from client
@@ -459,7 +460,7 @@ class RPCClientConformanceTest : public testing::Test {
 
     // End test if result was not received
     if (actualClientResult.hasException()) {
-      return testing::AssertionFailure();
+      return testing::AssertionFailure() << actualClientResult.exception();
     }
 
     auto& expectedClientResult = *testCase_.rpc_ref()->clientTestResult();

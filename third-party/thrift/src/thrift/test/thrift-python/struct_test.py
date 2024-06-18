@@ -377,15 +377,18 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertNotIn(w_mutable, (w_mutable2,))
 
     def test_ordering(self) -> None:
-        # DO_BEFORE(aristidis, 20240515): ordering for mutable thrift-python
-        with self.assertRaisesRegex(
-            TypeError,
-            "'<' not supported between instances of 'TestStruct' and 'TestStruct'",
-        ):
-            self.assertLess(
-                TestStructMutable(unqualified_string="a"),
-                TestStructMutable(unqualified_string="b"),
-            )
+        self.assertLess(
+            TestStructMutable(unqualified_string="a"),
+            TestStructMutable(unqualified_string="b"),
+        )
+        self.assertLess(
+            TestStructMutable(unqualified_string="a", optional_string="z"),
+            TestStructMutable(unqualified_string="b", optional_string="a"),
+        )
+        self.assertGreater(
+            TestStructMutable(unqualified_string="b", optional_string="z"),
+            TestStructMutable(unqualified_string="b", optional_string="a"),
+        )
 
     def test_subclass(self) -> None:
         with self.assertRaisesRegex(

@@ -190,17 +190,14 @@ class ListTests(unittest.TestCase):
         self.assertEqual(a, b)
         self.assertEqual(a, d)
         self.assertNotEqual(a, c)
-        # DO_BEFORE(alperyoney,20240701): Implement __lt__, __le__ for MutableStruct
-        # pyre-ignore[16]: has no attribute `containers_types`
-        if self.containers_types.__name__.endswith("immutable_types"):
-            self.assertLess(a, c)
-            self.assertGreater(c, e)
-            self.assertLess(d, e)
-            self.assertGreater(e, d)
-            self.assertLessEqual(a, b)
-            self.assertGreaterEqual(a, d)
-            self.assertLessEqual(a, c)
-            self.assertGreaterEqual(c, e)
+        self.assertLess(a, c)
+        self.assertGreater(c, e)
+        self.assertLess(d, e)
+        self.assertGreater(e, d)
+        self.assertLessEqual(a, b)
+        self.assertGreaterEqual(a, d)
+        self.assertLessEqual(a, c)
+        self.assertGreaterEqual(c, e)
 
     def test_struct_with_list_fields(self) -> None:
         s = self.Lists(

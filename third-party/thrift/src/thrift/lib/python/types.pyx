@@ -945,6 +945,20 @@ cdef api object _get_fbthrift_data(object struct_or_union):
 cdef api object _get_exception_fbthrift_data(object generated_error):
     return (<GeneratedError> generated_error)._fbthrift_data
 
+cdef _fbthrift_compare_struct_less(lhs, rhs, return_if_same_type):
+    if type(lhs) != type(rhs):
+        return NotImplemented
+    for name, lhs_value in lhs:
+        rhs_value = getattr(rhs, name)
+        if lhs_value == rhs_value:
+            continue
+        if lhs_value is None:
+            return True
+        if rhs_value is None:
+            return False
+        return lhs_value < rhs_value
+    return return_if_same_type
+
 cdef class Struct(StructOrUnion):
     """
     Base class for all generated classes corresponding to a Thrift struct in
@@ -1030,25 +1044,11 @@ cdef class Struct(StructOrUnion):
                 return False
         return True
 
-    def __fbthrift_compare_less(self, other, return_if_same_type):
-        if type(self) != type(other):
-            return NotImplemented
-        for name, value in self:
-            other_value = getattr(other, name)
-            if value == other_value:
-                continue
-            if value is None:
-                return True
-            if other_value is None:
-                return False
-            return value < other_value
-        return return_if_same_type
-
     def __lt__(self, other):
-        return self.__fbthrift_compare_less(other, False)
+        return _fbthrift_compare_struct_less(self, other, False)
 
     def __le__(self, other):
-        return self.__fbthrift_compare_less(other, True)
+        return _fbthrift_compare_struct_less(self, other, True)
 
     def __hash__(Struct self):
         value_tuple = tuple(v for _, v in self)

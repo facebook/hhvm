@@ -36,6 +36,7 @@ from thrift.python.types cimport (
     TypeInfoBase,
     getCTypeInfo,
     set_struct_field,
+    _fbthrift_compare_struct_less,
 )
 
 from cython.operator cimport dereference as deref
@@ -259,6 +260,12 @@ cdef class MutableStruct(MutableStructOrUnion):
                 return False
 
         return True
+
+    def __lt__(self, other):
+        return _fbthrift_compare_struct_less(self, other, False)
+
+    def __le__(self, other):
+        return _fbthrift_compare_struct_less(self, other, True)
 
     def __iter__(self):
         cdef MutableStructInfo info = self._fbthrift_mutable_struct_info

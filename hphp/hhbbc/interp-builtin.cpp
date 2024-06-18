@@ -69,6 +69,29 @@ TypeOrReduced builtin_get_class(ISS& env, const php::Func* func,
   return sval(d.cls().name());
 }
 
+TypeOrReduced builtin_class_to_classname(ISS& env, const php::Func* func,
+                                         const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  auto const ty = getArg(env, func, fca, 0);
+
+  if (!ty.couldBe(BCls | BLazyCls | BStr)) return NoReduced{};
+
+  if (ty.subtypeOf(BCls)) {
+    reduce(env, bc::ClassName {});
+    return Reduced{};
+  } else if (ty.subtypeOf(BLazyCls)) {
+    if (is_specialized_lazycls(ty)) {
+      reduce(env, bc::PopC {}, bc::String { lazyclsval_of(ty) });
+      return Reduced{};
+    }
+    return TSStr;
+  } else if (ty.subtypeOf(BStr)) {
+    reduce(env);
+    return Reduced{};
+  }
+  return TStr;
+}
+
 TypeOrReduced builtin_abs(ISS& env, const php::Func* func,
                           const FCallArgs& fca) {
   assertx(fca.numArgs() == 1);
@@ -554,6 +577,7 @@ TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
   X(ceil, ceil)                                                         \
   X(floor, floor)                                                       \
   X(get_class, get_class)                                               \
+  X(class_to_classname, HH\\class_to_classname)                         \
   X(max2, max2)                                                         \
   X(min2, min2)                                                         \
   X(strlen, strlen)                                                     \

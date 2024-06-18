@@ -20,9 +20,18 @@ from __future__ import annotations
 
 import copy
 import unittest
-from typing import AbstractSet, Sequence, Tuple
+from typing import AbstractSet, Sequence, Tuple, Type
+
+import thrift.python.test.containers.thrift_mutable_types as mutable_containers_types
+import thrift.python.test.containers.thrift_types as immutable_containers_types
+
+import thrift.python.test.sets.thrift_mutable_types as immutable_sets_types
+import thrift.python.test.sets.thrift_types as mutable_sets_types
 
 from folly.iobuf import IOBuf
+
+from parameterized import parameterized_class
+
 from thrift.python.test.containers.thrift_types import Foo, Sets
 from thrift.python.test.sets.thrift_types import (
     easy,
@@ -33,10 +42,28 @@ from thrift.python.test.sets.thrift_types import (
 )
 
 
+@parameterized_class(
+    ("containers_types", "sets_types"),
+    [
+        (immutable_containers_types, immutable_sets_types),
+        (mutable_containers_types, mutable_sets_types),
+    ],
+)
 class SetTests(unittest.TestCase):
+    def setUp(self) -> None:
+        # pyre-ignore[16]: has no attribute `sets_types`
+        self.easy: Type[easy] = self.sets_types.easy
+        self.EasySet: Type[EasySet] = self.sets_types.EasySet
+        self.SetI32: Type[SetI32] = self.sets_types.SetI32
+        self.SetI32Lists: Type[SetI32Lists] = self.sets_types.SetI32Lists
+        self.SetSetI32Lists: Type[SetSetI32Lists] = self.sets_types.SetSetI32Lists
+        # pyre-ignore[16]: has no attribute `containers_types`
+        self.Foo: Type[Foo] = self.containers_types.Foo
+        self.Sets: Type[Sets] = self.containers_types.Sets
+
     def test_and(self) -> None:
-        x = SetI32({1, 3, 4, 5})
-        y = SetI32({1, 2, 4, 6})
+        x = self.SetI32({1, 3, 4, 5})
+        y = self.SetI32({1, 2, 4, 6})
         z = {1, 2, 4, 6}
         self.assertEqual(x & y, set(x) & set(y))
         self.assertEqual(y & x, set(y) & set(x))
@@ -45,8 +72,8 @@ class SetTests(unittest.TestCase):
         self.assertEqual(x.intersection(y), set(x) & set(y))
 
     def test_or(self) -> None:
-        x = SetI32({1, 3, 4, 5})
-        y = SetI32({1, 2, 4, 6})
+        x = self.SetI32({1, 3, 4, 5})
+        y = self.SetI32({1, 2, 4, 6})
         z = {1, 3, 4, 5}
         self.assertEqual(x | y, set(x) | set(y))
         self.assertEqual(y | x, set(y) | set(x))
@@ -55,8 +82,8 @@ class SetTests(unittest.TestCase):
         self.assertEqual(x.union(y), set(x) | set(y))
 
     def test_xor(self) -> None:
-        x = SetI32({1, 3, 4, 5})
-        y = SetI32({1, 2, 4, 6})
+        x = self.SetI32({1, 3, 4, 5})
+        y = self.SetI32({1, 2, 4, 6})
         z = {1, 2, 4, 6}
         self.assertEqual(x ^ y, set(x) ^ set(y))
         self.assertEqual(y ^ x, set(y) ^ set(x))
@@ -65,8 +92,8 @@ class SetTests(unittest.TestCase):
         self.assertEqual(x.symmetric_difference(y), set(x) ^ set(y))
 
     def test_sub(self) -> None:
-        x = SetI32({1, 3, 4, 5})
-        y = SetI32({1, 2, 4, 6})
+        x = self.SetI32({1, 3, 4, 5})
+        y = self.SetI32({1, 2, 4, 6})
         z = {1, 2, 4, 6}
         self.assertEqual(x - y, set(x) - set(y))
         self.assertEqual(y - x, set(y) - set(x))
@@ -75,8 +102,8 @@ class SetTests(unittest.TestCase):
         self.assertEqual(x.difference(y), set(x) - set(y))
 
     def test_comparisons(self) -> None:
-        x = SetI32({1, 2, 3, 4})
-        y = SetI32({1, 2, 3})
+        x = self.SetI32({1, 2, 3, 4})
+        y = self.SetI32({1, 2, 3})
         x2 = copy.copy(x)
         y2 = {1, 2, 3}
 
@@ -133,10 +160,52 @@ class SetTests(unittest.TestCase):
     def test_None(self) -> None:
         with self.assertRaises(TypeError):
             # pyre-ignore[6]: purposely use a wrong type to raise a TypeError
-            SetI32Lists({None})
+            self.SetI32Lists({None})
         with self.assertRaises(TypeError):
             # pyre-ignore[6]: purposely use a wrong type to raise a TypeError
-            SetSetI32Lists({{None}})
+            self.SetSetI32Lists({{None}})
+
+    def test_struct_with_set_fields(self) -> None:
+        # pyre-ignore[16]: has no attribute `lists_types`
+        is_immutable = self.sets_types.__name__.endswith("immutable_types")
+
+        s = self.Sets(
+            boolSet={True, False},
+            byteSet={1, 2, 3},
+            i16Set={4, 5, 6},
+            i64Set={7, 8, 9},
+            doubleSet={1.23, 4.56},
+            floatSet={7.89, 10.11},
+            stringSet={"foo", "bar"},
+            binarySet={b"foo", b"bar"},
+            iobufSet={IOBuf(b"foo"), IOBuf(b"bar")},
+            structSet=(
+                {self.Foo(value=1), self.Foo(value=2)} if is_immutable else set()
+            ),
+        )
+        self.assertEqual(s.boolSet, {True, False})
+        self.assertEqual(s.byteSet, {1, 2, 3})
+        self.assertEqual(s.i16Set, {4, 5, 6})
+        self.assertEqual(s.i64Set, {7, 8, 9})
+        self.assertEqual(s.doubleSet, {1.23, 4.56})
+        self.assertEqual(s.floatSet, {7.89, 10.11})
+        self.assertEqual(s.stringSet, {"foo", "bar"})
+        self.assertEqual(s.binarySet, {b"foo", b"bar"})
+        self.assertEqual(s.iobufSet, {IOBuf(b"foo"), IOBuf(b"bar")})
+        if is_immutable:
+            self.assertEqual(s.structSet, {Foo(value=1), Foo(value=2)})
+            # test reaccess the set element won't have to recreating the struct
+            structs1 = list(s.structSet)
+            structs2 = list(s.structSet)
+            self.assertIs(structs1[0], structs2[0])
+            self.assertIs(structs1[1], structs2[1])
+
+
+class ImmutableSetTests(unittest.TestCase):
+    """
+    These tests run only for immutable types because mutable types are not
+    hashable.
+    """
 
     def test_empty(self) -> None:
         SetI32Lists(set())
@@ -185,32 +254,3 @@ class SetTests(unittest.TestCase):
         self.assertLessEqual(a, f)
         self.assertGreaterEqual(a, d)
         self.assertGreaterEqual(f, a)
-
-    def test_struct_with_set_fields(self) -> None:
-        s = Sets(
-            boolSet={True, False},
-            byteSet={1, 2, 3},
-            i16Set={4, 5, 6},
-            i64Set={7, 8, 9},
-            doubleSet={1.23, 4.56},
-            floatSet={7.89, 10.11},
-            stringSet={"foo", "bar"},
-            binarySet={b"foo", b"bar"},
-            iobufSet={IOBuf(b"foo"), IOBuf(b"bar")},
-            structSet={Foo(value=1), Foo(value=2)},
-        )
-        self.assertEqual(s.boolSet, {True, False})
-        self.assertEqual(s.byteSet, {1, 2, 3})
-        self.assertEqual(s.i16Set, {4, 5, 6})
-        self.assertEqual(s.i64Set, {7, 8, 9})
-        self.assertEqual(s.doubleSet, {1.23, 4.56})
-        self.assertEqual(s.floatSet, {7.89, 10.11})
-        self.assertEqual(s.stringSet, {"foo", "bar"})
-        self.assertEqual(s.binarySet, {b"foo", b"bar"})
-        self.assertEqual(s.iobufSet, {IOBuf(b"foo"), IOBuf(b"bar")})
-        self.assertEqual(s.structSet, {Foo(value=1), Foo(value=2)})
-        # test reaccess the set element won't have to recreating the struct
-        structs1 = list(s.structSet)
-        structs2 = list(s.structSet)
-        self.assertIs(structs1[0], structs2[0])
-        self.assertIs(structs1[1], structs2[1])

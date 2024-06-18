@@ -137,3 +137,17 @@ struct TestStructWithTypedefField {
   2: TestStructEmpty empty_struct;
   3: TestStructEmptyAlias empty_struct_alias;
 }
+
+struct TestStructNested_2 {
+  1: i32 i32_field;
+}
+
+struct TestStructNested_1 {
+  1: i32 i32_field;
+  2: TestStructNested_2 nested_2;
+}
+
+struct TestStructNested_0 {
+  1: i32 i32_field;
+  2: TestStructNested_1 nested_1;
+}

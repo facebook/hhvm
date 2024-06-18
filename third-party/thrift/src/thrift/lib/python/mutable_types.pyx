@@ -95,7 +95,7 @@ class _MutableStructField:
 
 
 cdef is_cacheable_non_primitive(ThriftIdlType idl_type):
-    return idl_type == ThriftIdlType.String
+    return idl_type in (ThriftIdlType.String, ThriftIdlType.Struct)
 
 
 class _MutableStructCachedField:

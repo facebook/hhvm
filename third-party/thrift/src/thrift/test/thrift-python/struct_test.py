@@ -56,6 +56,9 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable,
     TestStructEmpty as TestStructEmptyMutable,
     TestStructEmptyAlias as TestStructEmptyAliasMutable,
+    TestStructNested_0 as TestStructNested_0_Mutable,
+    TestStructNested_1 as TestStructNested_1_Mutable,
+    TestStructNested_2 as TestStructNested_2_Mutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
     TestStructWithTypedefField as TestStructWithTypedefFieldMutable,
 )
@@ -1207,3 +1210,52 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             unqualified_map_string_i32=map_constant
         )
         self.assertEqual({"foo": 1, "bar": 2}, s.unqualified_map_string_i32)
+
+    def test_nested_structs_init(self) -> None:
+        """
+        struct TestStructNested_2 {
+          1: i32 i32_field;
+        }
+
+        struct TestStructNested_1 {
+          1: i32 i32_field;
+          2: TestStructNested_2 nested_2;
+        }
+
+        struct TestStructNested_0 {
+          1: i32 i32_field;
+          2: TestStructNested_1 nested_1;
+        }
+        """
+        s2 = TestStructNested_2_Mutable(i32_field=2)
+        s1 = TestStructNested_1_Mutable(i32_field=3, nested_2=s2)
+        s0 = TestStructNested_0_Mutable(i32_field=5, nested_1=s1)
+
+        self.assertEqual(s2, s0.nested_1.nested_2)
+        self.assertEqual(s1, s0.nested_1)
+
+        self.assertEqual(2, s0.nested_1.nested_2.i32_field)
+        self.assertEqual(3, s0.nested_1.i32_field)
+
+        # Update on `s2` updates both `s1` and `s2`
+        self.assertEqual(2, s0.nested_1.nested_2.i32_field)
+        self.assertEqual(2, s1.nested_2.i32_field)
+        s2.i32_field = 7
+        self.assertEqual(7, s0.nested_1.nested_2.i32_field)
+        self.assertEqual(7, s1.nested_2.i32_field)
+
+        # Accessing the same field returns the same instances
+        my_s2_var1 = s0.nested_1.nested_2
+        my_s2_var2 = s0.nested_1.nested_2
+
+        self.assertIs(my_s2_var1, my_s2_var2)
+
+        # Update on `my_s2_var1` or `my_s2_var2` updates all references
+        my_s2_var1.i32_field = 11
+        self.assertEqual(11, s0.nested_1.nested_2.i32_field)
+        self.assertEqual(11, s1.nested_2.i32_field)
+        self.assertEqual(11, s2.i32_field)
+
+        # Unfortunately, this is not intuitive, `my_s2_var1` is not `s1`
+        self.assertIs(my_s2_var1, my_s2_var2)
+        self.assertIsNot(s1, my_s2_var2)

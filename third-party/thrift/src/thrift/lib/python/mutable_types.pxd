@@ -111,3 +111,5 @@ cdef class MutableUnion(MutableStructOrUnion):
 
     cdef object _fbthrift_convert_field_python_value_to_internal_data(
             self, int field_id, object field_python_value)
+
+    cdef object _fbthrift_get_field_value(self, int16_t field_id)

@@ -245,13 +245,13 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
             TestUnionMutable.FbThriftUnionFieldEnum.string_field,
         )
         self.assertEqual(u2.fbthrift_current_value, "Hello, world!")
-        # DO_BEFORE(aristidis,20240620): Add field accessors to mutable unions
+        self.assertEqual(u2.string_field, "Hello, world!")
         with self.assertRaisesRegex(
-            AttributeError, "object has no attribute 'string_field'"
-        ):
-            self.assertEqual(u2.string_field, "Hello, world!")
-        with self.assertRaisesRegex(
-            AttributeError, "object has no attribute 'int_field'"
+            AttributeError,
+            (
+                r"Error retrieving Thrift union \(TestUnion\) field: requested "
+                "'int_field', but currently holds 'string_field'."
+            ),
         ):
             u2.int_field
 

@@ -727,10 +727,58 @@ cdef class MutableUnion(MutableStructOrUnion):
         return type_info.to_python_value(field_internal_data)
 
 
+    cdef object _fbthrift_get_field_value(self, int16_t field_id):
+        """
+        Returns the value of the field with the given `field_id` if it is indeed the
+        field that is (currently) set for this union. Otherwise, raises AttributeError.
+        """
+        current_field_enum = self.fbthrift_current_field
+        cdef int current_field_enum_value = current_field_enum.value
+        if (current_field_enum_value == field_id):
+            return self.fbthrift_current_value
+
+        # ERROR: Requested field_id does not match current field.
+        union_class = type(self)
+        requested_field_enum = union_class.FbThriftUnionFieldEnum(field_id)
+        raise AttributeError(
+            f"Error retrieving Thrift union ({union_class.__name__}) field: requested "
+            f"'{requested_field_enum.name}', but currently holds "
+            f"'{current_field_enum.name}'."
+        )
+
+
 def _gen_mutable_union_field_enum_members(field_infos):
     yield ("FBTHRIFT_UNION_EMPTY", 0)
     for f in field_infos:
         yield (f.py_name, f.id)
+
+
+cdef _make_fget_union(field_id, adapter_info):
+    """
+    Returns a function that takes a `Union` instance and returns the value of the field
+    with the given `field_id`.
+
+    If `adapter_info` is not None, the corresponding adapter will be called with the
+    field value prior to returning.
+
+    Args:
+        field_id (int)
+        adapter_info (typing.Optional[object])
+    """
+    if adapter_info:
+        adapter_class, transitive_annotation = adapter_info
+        return property(
+            lambda self: adapter_class.from_thrift_field(
+                (<MutableUnion>self)._fbthrift_get_field_value(field_id),
+                field_id,
+                self,
+                transitive_annotation=transitive_annotation(),
+            ),
+        )
+    else:
+        return property(
+            lambda self: (<MutableUnion>self)._fbthrift_get_field_value(field_id)
+        )
 
 
 class MutableUnionMeta(type):
@@ -757,6 +805,11 @@ class MutableUnionMeta(type):
             f"FbThriftUnionFieldEnum_{union_name}",
             _gen_mutable_union_field_enum_members(field_infos)
         )
+
+        for field_info in field_infos:
+            union_class_namespace[field_info.py_name] = _make_fget_union(
+                field_info.id, field_info.adapter_info
+            )
 
         return super().__new__(cls, union_name, (MutableUnion,), union_class_namespace)
 

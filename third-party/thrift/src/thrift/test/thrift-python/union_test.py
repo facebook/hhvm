@@ -232,8 +232,52 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         self.maxDiff = None
 
     def test_creation_and_read(self) -> None:
-        with self.assertRaises(NotImplementedError):
-            TestUnionMutable()
+        u = TestUnionMutable()
+        self.assertIs(
+            u.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.FBTHRIFT_UNION_EMPTY,
+        )
+        self.assertIsNone(u.fbthrift_current_value)
+
+        u2 = TestUnionMutable(string_field="Hello, world!")
+        self.assertIs(
+            u2.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.string_field,
+        )
+        self.assertEqual(u2.fbthrift_current_value, "Hello, world!")
+        # DO_BEFORE(aristidis,20240620): Add field accessors to mutable unions
+        with self.assertRaisesRegex(
+            AttributeError, "object has no attribute 'string_field'"
+        ):
+            self.assertEqual(u2.string_field, "Hello, world!")
+        with self.assertRaisesRegex(
+            AttributeError, "object has no attribute 'int_field'"
+        ):
+            u2.int_field
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            (
+                r"Cannot initialize Thrift union \(TestUnion\): unknown field "
+                r"\(field_does_not_exist\)."
+            ),
+        ):
+            TestUnionMutable(field_does_not_exist=123)
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            (
+                r"Cannot initialize Thrift union \(TestUnion\) with more than one "
+                r"keyword argument \(got non-None value for int_field, but already "
+                r"had one for string_field\)."
+            ),
+        ):
+            TestUnionMutable(string_field="hello", int_field=42)
+
+        with self.assertRaisesRegex(
+            TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
+        ):
+            TestUnionMutable(int_field="hello!")
 
     def test_class_field_enum(self) -> None:
         # NOTE: in the immutable version, this attribute is using the

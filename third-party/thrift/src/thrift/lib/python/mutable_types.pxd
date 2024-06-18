@@ -63,6 +63,8 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
     cdef void resetFieldToStandardDefault(object, const cStructInfo& structInfo, int index) except+
     cdef void setStructIsset(object, int index, bint set) except+
 
+    cdef object createUnionTuple() except+
+
 cdef class MutableStructOrUnion:
     cdef tuple _fbthrift_data
     cdef IOBuf _fbthrift_serialize(MutableStructOrUnion self, Protocol proto)
@@ -93,3 +95,19 @@ cdef class MutableUnionInfo:
     cdef tuple fields
     cdef dict name_to_index
     cdef void _fill_mutable_union_info(self) except *
+
+cdef class MutableUnion(MutableStructOrUnion):
+    cdef readonly object fbthrift_current_field
+    cdef readonly object fbthrift_current_value
+    cdef void _fbthrift_update_current_field_attributes(self) except *
+
+    cdef object _fbthrift_get_current_field_python_value(
+        self, int current_field_enum_value
+    )
+
+    cdef void _fbthrift_set_mutable_union_value(
+        self, int field_id, object field_python_value
+    ) except *
+
+    cdef object _fbthrift_convert_field_python_value_to_internal_data(
+            self, int field_id, object field_python_value)

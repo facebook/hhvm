@@ -10,7 +10,7 @@ function getLazyClass() :mixed{
   return __hhvm_intrinsics\launder_value(foo::class);
 }
 function getClass() :mixed{
-  return __hhvm_intrinsics\launder_value(__hhvm_intrinsics\create_class_pointer("foo"));
+  return __hhvm_intrinsics\launder_value(HH\classname_to_class("foo"));
 }
 
 function wrap($fun) :mixed{
@@ -45,7 +45,7 @@ function getTestcases() : vec<mixed>{
     1.0,
     "foo",
     foo::class,
-    __hhvm_intrinsics\create_class_pointer("foo"),
+    HH\classname_to_class("foo"),
     darray(vec['foo']),
     vec['foo'],
     vec['foo'],

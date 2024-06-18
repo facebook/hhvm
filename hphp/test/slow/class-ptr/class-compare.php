@@ -9,7 +9,7 @@ class StrObj {
 class Wrapper { public function __construct(private mixed $w)[] {} }
 
 function LV($x)  :mixed{ return __hhvm_intrinsics\launder_value($x); }
-function CLS($c) :mixed{ return __hhvm_intrinsics\create_class_pointer($c); }
+function CLS($c) :mixed{ return HH\classname_to_class($c); }
 
 function vLV($x) :mixed{ return LV(vec[$x]); }
 function wLV($x) :mixed{ return LV(new Wrapper($x)); }

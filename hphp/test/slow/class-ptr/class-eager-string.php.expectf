@@ -10,4 +10,4 @@ string(2) "sm"
 int(10)
 string(1) "m"
 
-Fatal error: Cls: Expected string or object, got null in %s/class-ptr/class-eager-string.php on line 32
+Fatal error: Cls: Expected string or object, got null in %s/class-ptr/class-eager-string.php on line 42

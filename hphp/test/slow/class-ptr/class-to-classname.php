@@ -13,7 +13,7 @@ function main(): void {
   $y = HH\class_to_classname($y);
   __hhvm_intrinsics\debug_var_dump_lazy_class($y);
 
-  $z = __hhvm_intrinsics\create_class_pointer(C::class);
+  $z = HH\classname_to_class(C::class);
   $z = HH\class_to_classname($z);
   __hhvm_intrinsics\debug_var_dump_lazy_class($z);
 

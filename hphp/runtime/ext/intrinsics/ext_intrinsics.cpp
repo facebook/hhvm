@@ -357,23 +357,6 @@ int64_t HHVM_FUNCTION(dummy_int_upper_bound) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(create_class_pointer, TypedValue name) {
-  auto const cls = [&] {
-    switch (name.m_type) {
-      case KindOfString:
-      case KindOfPersistentString:
-        return Class::load(name.m_data.pstr);
-      case KindOfLazyClass:
-        return Class::load(name.m_data.plazyclass.name());
-      case KindOfClass:
-        return name.m_data.pclass;
-      default:
-        return static_cast<Class*>(nullptr);
-    }
-  }();
-  return cls ? Variant{cls} : init_null();
-}
-
 Variant HHVM_FUNCTION(create_clsmeth_pointer, StringArg cls, StringArg meth) {
   if (RuntimeOption::RepoAuthoritative) {
     raise_error("You can't use %s() in RepoAuthoritative mode", __FUNCTION__+2);
@@ -530,7 +513,6 @@ static struct IntrinsicsExtension final : Extension {
     HHVM_FALIAS(__hhvm_intrinsics\\hhbbc_fail_verification,
                 hhbbc_fail_verification);
 
-    HHVM_FALIAS(__hhvm_intrinsics\\create_class_pointer, create_class_pointer);
     HHVM_FALIAS(__hhvm_intrinsics\\create_clsmeth_pointer,
                 create_clsmeth_pointer);
     HHVM_FALIAS(__hhvm_intrinsics\\is_lazy_class, is_lazy_class);

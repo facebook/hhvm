@@ -35,7 +35,7 @@ function json_serde($val) :mixed{
 
 <<__EntryPoint>>
 function main() :mixed{
-  $cls = __hhvm_intrinsics\create_class_pointer('A');
+  $cls = HH\classname_to_class('A');
 
   print_r($cls);
   print "\n";

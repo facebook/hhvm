@@ -16,7 +16,7 @@ class APublic {
   }
 
   public static function in_ptr(): classname<AInternal> {
-    return __hhvm_intrinsics\create_class_pointer(AInternal::class);
+    return HH\classname_to_class(AInternal::class);
   }
 }
 

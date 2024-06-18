@@ -19,7 +19,7 @@ function main(): void {
   );
   __hhvm_intrinsics\debug_var_dump_lazy_class($y);
 
-  $z = __hhvm_intrinsics\create_class_pointer(C::class);
+  $z = HH\classname_to_class(C::class);
   $z = HH\class_to_classname(
     __hhvm_intrinsics\launder_value($z)
   );

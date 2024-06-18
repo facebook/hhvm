@@ -1,7 +1,7 @@
 <?hh
 
-class Foo {}
-class Bar {
+<<__DynamicallyReferenced>> class Foo {}
+<<__DynamicallyReferenced>> class Bar {
   const FOO = Foo::class;
   public static function sm() :mixed{
     var_dump("sm");
@@ -14,13 +14,19 @@ class Bar {
 
 <<__EntryPoint>>
 function main() :mixed{
-  $c = __hhvm_intrinsics\create_class_pointer("Bar");
+  $c = HH\classname_to_class("Bar");
   var_dump($c);
   var_dump(is_scalar($c));
-  var_dump(HH\class_get_class_name($c));
+  var_dump(HH\class_to_classname($c));
+  $v0 = HH\classname_to_class("Bar");
+  try {
+    $v1 = HH\classname_to_class("Fizz");
+  } catch (InvalidArgumentException $e) {
+    $v1 = null;
+  }
   $v = vec[
-    __hhvm_intrinsics\create_class_pointer("Bar"),
-    __hhvm_intrinsics\create_class_pointer("Fizz")
+    $v0,
+    $v1
   ]; // Fizz is not a class
   var_dump($v);
   var_dump($c::FOO);
@@ -28,6 +34,10 @@ function main() :mixed{
   var_dump($c::$sp);
   $o = new $c;
   $o->m();
-  $f = __hhvm_intrinsics\create_class_pointer("Fizz");
+  try {
+    $f = HH\classname_to_class("Fizz");
+  } catch (InvalidArgumentException $e) {
+    $f = null;
+  }
   $o = new $f;  // should error as Fizz is not a class
 }

@@ -356,16 +356,6 @@ String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v) {
   }
 }
 
-String HHVM_FUNCTION(HH_class_get_class_name, TypedValue v) {
-  if (!tvIsClass(v) && !tvIsLazyClass(v)) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Argument 1 passed to {}() must be a class",
-      __FUNCTION__+5));
-  }
-  return tvIsClass(v) ? val(v).pclass->nameStr() :
-                        StrNR {val(v).plazyclass.name()};
-}
-
 bool HHVM_FUNCTION(HH_module_exists, const String& module_name,
                    bool autoload /* = true */) {
   if (autoload) return Module::load(module_name.get()) != nullptr;
@@ -503,7 +493,6 @@ void StandardExtension::registerNativeClassobj() {
   HHVM_FALIAS(HH\\class_meth_get_method, HH_class_meth_get_method);
   HHVM_FALIAS(HH\\meth_caller_get_class, HH_meth_caller_get_class);
   HHVM_FALIAS(HH\\meth_caller_get_method, HH_meth_caller_get_method);
-  HHVM_FALIAS(HH\\class_get_class_name, HH_class_get_class_name);
   HHVM_FALIAS(HH\\module_exists, HH_module_exists);
 }
 

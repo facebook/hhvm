@@ -8,5 +8,5 @@ function main() :mixed{
   set_error_handler(($_n, $str) ==> { echo "Warning: $str\n"; return true; });
 
   (new ReflectionFunction('t'))->invoke();
-  var_dump(__hhvm_intrinsics\create_class_pointer(__hhvm_intrinsics\create_class_pointer('X')));
+  var_dump(HH\classname_to_class(HH\classname_to_class('X')));
 }

@@ -16,7 +16,7 @@ class CPublic {
   }
 
   public static function in_ptr(): classname<CInternal> {
-    return __hhvm_intrinsics\create_class_pointer(CInternal::class);
+    return HH\classname_to_class(CInternal::class);
   }
 }
 

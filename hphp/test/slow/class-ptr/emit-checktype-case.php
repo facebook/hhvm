@@ -6,10 +6,10 @@ class C {
 
 <<__EntryPoint>>
 function main(): void {
-  $x = __hhvm_intrinsics\create_class_pointer("C");
+  $x = HH\classname_to_class("C");
   echo "hello\n";
   $x::f();
 
-  $y = __hhvm_intrinsics\create_class_pointer("C");
+  $y = HH\classname_to_class("C");
   $y::f();
 }

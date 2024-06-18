@@ -34,11 +34,11 @@ function bar($f) :mixed{
 }
 
 function baz(): string {
-  return __hhvm_intrinsics\create_class_pointer('baz');
+  return HH\classname_to_class('baz');
 }
 
 function buz() :mixed{
-  return __hhvm_intrinsics\create_class_pointer('buz');
+  return HH\classname_to_class('buz');
 }
 
 function io(inout string $a, inout $b): string {
@@ -49,10 +49,10 @@ function io(inout string $a, inout $b): string {
 
 function main() :mixed{
   foo("hello");
-  foo(__hhvm_intrinsics\create_class_pointer('foo'));
+  foo(HH\classname_to_class('foo'));
 
   bar("hello");
-  bar(__hhvm_intrinsics\create_class_pointer('bar'));
+  bar(HH\classname_to_class('bar'));
 
   var_dump(baz(), is_string(baz()), baz() is string, baz() as string);
   var_dump(buz(), is_string(buz()), buz() is string, buz() as string);
@@ -60,10 +60,10 @@ function main() :mixed{
   wrap(() ==> (new Props)->a = buz());
   wrap(() ==> Props::$b = buz());
 
-  $x = __hhvm_intrinsics\create_class_pointer('foo');             var_dump(io(inout $x, inout $x));
+  $x = HH\classname_to_class('foo');             var_dump(io(inout $x, inout $x));
   $y = 'foo';                     var_dump(io(inout $y, inout $y));
-  $x = __hhvm_intrinsics\create_class_pointer('foo'); $y = 'foo'; var_dump(io(inout $x, inout $y));
-  $x = __hhvm_intrinsics\create_class_pointer('foo'); $y = 'foo'; var_dump(io(inout $y, inout $x));
+  $x = HH\classname_to_class('foo'); $y = 'foo'; var_dump(io(inout $x, inout $y));
+  $x = HH\classname_to_class('foo'); $y = 'foo'; var_dump(io(inout $y, inout $x));
   var_dump($x, $y);
 }
 <<__EntryPoint>>

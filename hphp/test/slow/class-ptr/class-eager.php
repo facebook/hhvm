@@ -14,13 +14,19 @@ class Bar {
 
 <<__EntryPoint>>
 function main() :mixed{
-  $c = __hhvm_intrinsics\create_class_pointer(Bar::class);
+  $c = HH\classname_to_class(Bar::class);
   var_dump($c);
   var_dump(is_scalar($c));
-  var_dump(HH\class_get_class_name($c));
+  var_dump(HH\class_to_classname($c));
+  $v0 = HH\classname_to_class(Bar::class);
+  try {
+    $v1 = HH\classname_to_class(Fizz::class);
+  } catch (InvalidArgumentException $e) {
+    $v1 = null;
+  }
   $v = vec[
-    __hhvm_intrinsics\create_class_pointer(Bar::class),
-    __hhvm_intrinsics\create_class_pointer(Fizz::class)
+    $v0,
+    $v1
   ]; // Fizz is not a class
   var_dump($v);
   var_dump($c::FOO);
@@ -28,6 +34,10 @@ function main() :mixed{
   var_dump($c::$sp);
   $o = new $c;
   $o->m();
-  $f = __hhvm_intrinsics\create_class_pointer(Fizz::class);
+  try {
+    $f = HH\classname_to_class(Fizz::class);
+  } catch (InvalidArgumentException $e) {
+    $f = null;
+  }
   $o = new $f;  // should error as Fizz is not a class
 }

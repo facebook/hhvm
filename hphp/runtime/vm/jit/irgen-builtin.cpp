@@ -491,18 +491,6 @@ SSATmp* opt_get_class(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
-SSATmp* opt_class_get_class_name(IRGS& env, const ParamPrep& params) {
-  if (params.size() != 1) return nullptr;
-  auto const value = params[0].value;
-  if (value->type() <= TCls) {
-    return gen(env, LdClsName, value);
-  }
-  if (value->type() <= TLazyCls) {
-    return gen(env, LdLazyClsName, value);
-  }
-  return nullptr;
-}
-
 SSATmp* opt_sqrt(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
 
@@ -1331,7 +1319,6 @@ const hphp_fast_string_fmap<OptEmitFn> s_opt_emit_fns{
   {"HH\\fun_get_function", opt_fun_get_function},
   {"HH\\class_meth_get_class", opt_class_meth_get_class},
   {"HH\\class_meth_get_method", opt_class_meth_get_method},
-  {"HH\\class_get_class_name", opt_class_get_class_name},
   {"HH\\BuiltinEnum::getNames", opt_enum_names},
   {"HH\\BuiltinEnum::getValues", opt_enum_values},
   {"HH\\BuiltinEnum::coerce", opt_enum_coerce},

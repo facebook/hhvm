@@ -586,6 +586,7 @@ impl ClientTask {
         use serde::Deserialize;
         #[derive(Deserialize, Debug)]
         pub struct Unilateral {
+            #[allow(unused)]
             pub unilateral: bool,
             pub subscription: String,
             #[serde(default)]

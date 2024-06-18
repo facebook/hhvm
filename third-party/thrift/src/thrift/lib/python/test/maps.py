@@ -23,8 +23,9 @@ import unittest
 from enum import Enum
 
 from folly.iobuf import IOBuf
+from thrift.python.test.containers.thrift_types import Foo, Maps
 
-from testing.thrift_types import (
+from thrift.python.test.maps.thrift_types import (
     easy,
     F14MapFollyString,
     LocationMap,
@@ -34,7 +35,6 @@ from testing.thrift_types import (
     StrStrIntListMapMap,
     StrStrMap,
 )
-from thrift.python.test.containers.thrift_types import Foo, Maps
 
 
 class MyStringEnum(str, Enum):

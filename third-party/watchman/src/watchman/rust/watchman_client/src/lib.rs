@@ -33,7 +33,7 @@
 //!     Ok(())
 //! }
 //! ```
-#![deny(warnings)]
+#![cfg_attr(fbcode_build, deny(warnings))]
 
 pub mod expr;
 pub mod fields;

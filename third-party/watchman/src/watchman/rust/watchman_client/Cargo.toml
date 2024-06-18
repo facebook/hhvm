@@ -1,6 +1,6 @@
 [package]
 name = "watchman_client"
-version = "0.8.0"
+version = "0.9.0"
 authors = ["Wez Furlong"]
 edition = "2021"
 description = "a client for the Watchman file watching service"

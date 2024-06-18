@@ -1034,7 +1034,6 @@ public:
   static double XenonPeriodSeconds;
   static uint32_t XenonRequestFreq;
   static bool XenonForceAlwaysOn;
-  static bool XenonTrackActiveWorkers;
 
   // Strobelight options
   static bool StrobelightEnabled;

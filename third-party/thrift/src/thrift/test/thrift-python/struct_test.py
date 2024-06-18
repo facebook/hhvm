@@ -38,6 +38,17 @@ from thrift.python.types import (
 )
 
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @manual=//thrift/test/thrift-python:struct_test_thrift-python-types
+    bool_constant,
+    byte_constant,
+    double_constant,
+    float_constant,
+    i16_constant,
+    i32_constant,
+    i64_constant,
+    list_constant,
+    map_constant,
+    set_constant,
+    string_constant,
     TestStruct as TestStructMutable,
     TestStructAdaptedTypes as MutableTestStructAdaptedTypes,
     TestStructAllThriftContainerTypes as MutableTestStructAllThriftContainerTypes,
@@ -1142,3 +1153,54 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual({}, s.unqualified_map_string_i32)
         self.assertEqual({}, map1)
         self.assertEqual({}, map2)
+
+    def test_constants(self) -> None:
+        s = TestStructAllThriftPrimitiveTypesMutable()
+
+        self.assertEqual(False, s.unqualified_bool)
+        s.unqualified_bool = bool_constant
+        self.assertEqual(True, s.unqualified_bool)
+
+        self.assertEqual(0, s.unqualified_byte)
+        s.unqualified_byte = byte_constant
+        self.assertEqual(-10, s.unqualified_byte)
+
+        self.assertEqual(0, s.unqualified_i16)
+        s.unqualified_i16 = i16_constant
+        self.assertEqual(200, s.unqualified_i16)
+
+        self.assertEqual(0, s.unqualified_i32)
+        s.unqualified_i32 = i32_constant
+        self.assertEqual(0xFA12EE, s.unqualified_i32)
+
+        self.assertEqual(0, s.unqualified_i64)
+        s.unqualified_i64 = i64_constant
+        self.assertEqual(0xFFFFFFFFFF, s.unqualified_i64)
+
+        self.assertEqual(0, s.unqualified_float)
+        s.unqualified_float = float_constant
+        self.assertEqual(2.718281828459, s.unqualified_float)
+
+        self.assertEqual(0, s.unqualified_double)
+        s.unqualified_double = double_constant
+        self.assertEqual(2.718281828459, s.unqualified_double)
+
+        self.assertEqual("", s.unqualified_string)
+        s.unqualified_string = string_constant
+        self.assertEqual("June 28, 2017", s.unqualified_string)
+
+        s = MutableTestStructAllThriftContainerTypes()
+
+        self.assertEqual([], s.unqualified_list_i32)
+        s.unqualified_list_i32.extend(list_constant)
+        self.assertEqual([2, 3, 5, 7], s.unqualified_list_i32)
+
+        s = MutableTestStructAllThriftContainerTypes(
+            unqualified_set_string=set_constant
+        )
+        self.assertEqual({"foo", "bar", "baz"}, s.unqualified_set_string)
+
+        s = MutableTestStructAllThriftContainerTypes(
+            unqualified_map_string_i32=map_constant
+        )
+        self.assertEqual({"foo": 1, "bar": 2}, s.unqualified_map_string_i32)

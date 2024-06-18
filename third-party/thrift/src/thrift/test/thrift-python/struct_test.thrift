@@ -18,6 +18,21 @@ include "thrift/annotation/python.thrift"
 
 namespace py3 thrift.test.thrift_python
 
+const bool bool_constant = true;
+const byte byte_constant = -10; // byte is an 8-bit signed integer
+const i16 i16_constant = 200;
+const i32 i32_constant = 0xFA12EE;
+const i64 i64_constant = 0xFFFFFFFFFF;
+const float float_constant = 2.718281828459;
+const double double_constant = 2.718281828459;
+const string string_constant = "June 28, 2017";
+
+const list<i32> list_constant = [2, 3, 5, 7];
+
+const set<string> set_constant = ["foo", "bar", "baz"];
+
+const map<string, i32> map_constant = {"foo": 1, "bar": 2};
+
 struct TestStruct {
   1: string unqualified_string;
   2: optional string optional_string;

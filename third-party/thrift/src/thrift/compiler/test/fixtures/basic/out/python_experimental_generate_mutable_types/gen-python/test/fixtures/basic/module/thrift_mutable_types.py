@@ -407,6 +407,25 @@ _fbthrift_all_enums = [
     HackEnum,
 ]
 
+
+FLAG = True
+
+OFFSET = -10
+
+COUNT = 200
+
+MASK = 16388846
+
+E = float(2.718281828459)
+
+DATE = "June 28, 2017"
+
+AList = _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_i32, (2, 3, 5, 7, ))
+
+ASet = _fbthrift_python_types.Set(_fbthrift_python_types.typeinfo_string, ("foo", "bar", "baz", ))
+
+AMap = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_i32), { "foo": _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_i32, (1, 2, 3, 4, )), "bar": _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_i32, (10, 32, 54, ))})
+
 MyEnumAlias = MyEnum
 MyDataItemAlias = MyDataItem
 

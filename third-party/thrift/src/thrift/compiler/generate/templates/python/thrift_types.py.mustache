@@ -143,26 +143,7 @@ _fbthrift_all_structs = [
 {{#program:structs?}}
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 {{/program:structs?}}
-{{#program:constants?}}
-
-{{#program:constants}}
-
-{{#constant:has_adapter?}}_fbthrift_unadapted_{{/constant:has_adapter?}}{{constant:name}} = {{#constant:value}}{{> types/constant_value}}{{/constant:value}}
-{{#constant:has_adapter?}}
-{{constant:name}} = {{constant:adapter_name}}.from_thrift(
-    _fbthrift_unadapted_{{constant:name}},
-    transitive_annotation={{#constant:is_adapter_transitive?}}{{!
-        }}{{#constant:transitive_adapter_annotation}}{{> types/constant_value }}{{/constant:transitive_adapter_annotation}}{{!
-    }}{{/constant:is_adapter_transitive?}}{{!
-    }}{{^constant:is_adapter_transitive?}}{{!
-        }}None
-    }}{{/constant:is_adapter_transitive?}},
-    constant_uri={{#constant:uri}}"{{constant:uri}}"{{/constant:uri}}{{!
-        }}{{^constant:uri}}None{{/constant:uri}},
-)
-{{/constant:has_adapter?}}
-{{/program:constants}}
-{{/program:constants?}}
+{{> common/constants }}
 {{> common/typedef }}
 {{#program:services?}}
 {{#program:services}}

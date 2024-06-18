@@ -13,6 +13,7 @@ use std::path::PathBuf;
 
 use serde::Deserialize;
 use serde::Serialize;
+use serde::Serializer;
 use serde_bser::value::Value;
 
 use crate::expr::Expr;
@@ -558,6 +559,121 @@ pub struct SubscribeResponse {
     /// the save state storage engine.
     #[serde(rename = "saved-state-info")]
     pub saved_state_info: Option<Value>,
+}
+
+/// The `trigger` command request.
+///
+/// The fields are explained in detail here:
+/// <https://facebook.github.io/watchman/docs/cmd/trigger#extended-syntax>
+#[derive(Deserialize, Serialize, Default, Clone, Debug)]
+pub struct TriggerRequest {
+    /// Defines the name of the trigger.
+    pub name: String,
+
+    /// Specifies the command to invoke.
+    pub command: Vec<String>,
+
+    /// It true, matching files (up to system limits) will be added to the
+    /// command's execution args.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub append_files: bool,
+
+    /// Specifies the expression used to filter candidate matches.
+    #[serde(skip_serializing_if = "Option::is_none", skip_deserializing)]
+    pub expression: Option<Expr>,
+
+    /// Configure the way `stdin` is configured for the executed trigger.
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        serialize_with = "TriggerStdinConfig::serialize",
+        skip_deserializing
+    )]
+    pub stdin: Option<TriggerStdinConfig>,
+
+    /// Specifies a file to write the output stream to.  Prefix with `>` to
+    /// overwrite and `>>` to append.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stdout: Option<String>,
+
+    /// Specifies a file to write the error stream to.  Prefix with `>` to
+    /// overwrite and `>>` to append.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stderr: Option<String>,
+
+    /// Specifies a limit on the number of files reported on stdin when stdin is
+    /// set to hold the set of matched files.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_files_stdin: Option<u64>,
+
+    /// Specifies the working directory that will be set prior to spawning the
+    /// process. The default is to set the working directory to the watched
+    /// root. The value of this property is a string that will be interpreted
+    /// relative to the watched root.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub chdir: Option<String>,
+
+    /// Since 3.4. Evaluates triggers with respect to a path within a watched root.
+    ///
+    /// See <https://facebook.github.io/watchman/docs/cmd/trigger#relative-roots>
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub relative_root: Option<PathBuf>,
+}
+
+#[derive(Clone, Debug)]
+pub enum TriggerStdinConfig {
+    DevNull,
+    FieldNames(Vec<String>),
+    NamePerLine,
+}
+
+impl Default for TriggerStdinConfig {
+    fn default() -> Self {
+        Self::DevNull
+    }
+}
+
+impl TriggerStdinConfig {
+    fn serialize<S>(this: &Option<Self>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match this {
+            Some(Self::DevNull) => serializer.serialize_str("/dev/null"),
+            Some(Self::FieldNames(names)) => serializer.collect_seq(names.iter()),
+            Some(Self::NamePerLine) => serializer.serialize_str("NAME_PER_LINE"),
+            None => serializer.serialize_none(),
+        }
+    }
+}
+
+#[derive(Serialize, Clone, Debug)]
+pub struct TriggerCommand(pub &'static str, pub PathBuf, pub TriggerRequest);
+
+#[derive(Deserialize, Debug)]
+pub struct TriggerResponse {
+    pub version: String,
+    pub disposition: String,
+    pub triggerid: String,
+}
+
+#[derive(Serialize, Clone, Debug)]
+pub struct TriggerDelCommand(pub &'static str, pub PathBuf, pub String);
+
+#[derive(Deserialize, Debug)]
+pub struct TriggerDelResponse {
+    pub version: String,
+    pub deleted: bool,
+    pub trigger: String,
+}
+
+#[derive(Serialize, Clone, Debug)]
+pub struct TriggerListCommand(pub &'static str, pub PathBuf);
+
+#[derive(Deserialize, Debug)]
+pub struct TriggerListResponse {
+    pub version: String,
+    pub triggers: Vec<TriggerRequest>,
 }
 
 #[derive(Serialize, Debug)]

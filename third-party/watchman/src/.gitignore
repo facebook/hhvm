@@ -81,8 +81,6 @@ libtool
 ltmain.sh
 cppclient/watchmanclient.pc
 /website/.jekyll-metadata
-/rust/**/Cargo.lock
-/rust/**/target/
 /CMakeCache.txt
 /CMakeFiles
 /*.cmake

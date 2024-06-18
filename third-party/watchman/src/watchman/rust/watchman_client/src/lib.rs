@@ -1156,6 +1156,42 @@ impl Client {
             .await?;
         Ok(response.config)
     }
+
+    /// Registers a trigger.
+    pub async fn register_trigger(
+        &self,
+        root: &ResolvedRoot,
+        request: TriggerRequest,
+    ) -> Result<TriggerResponse, Error> {
+        let response: TriggerResponse = self
+            .generic_request(TriggerCommand("trigger", root.root.clone(), request))
+            .await?;
+        Ok(response)
+    }
+
+    /// Removes a registered trigger.
+    pub async fn remove_trigger(
+        &self,
+        root: &ResolvedRoot,
+        name: &str,
+    ) -> Result<TriggerDelResponse, Error> {
+        let response: TriggerDelResponse = self
+            .generic_request(TriggerDelCommand(
+                "trigger-del",
+                root.root.clone(),
+                name.into(),
+            ))
+            .await?;
+        Ok(response)
+    }
+
+    /// Lists registered triggers.
+    pub async fn list_triggers(&self, root: &ResolvedRoot) -> Result<TriggerListResponse, Error> {
+        let response: TriggerListResponse = self
+            .generic_request(TriggerListCommand("trigger-list", root.root.clone()))
+            .await?;
+        Ok(response)
+    }
 }
 
 #[cfg(test)]

@@ -383,6 +383,15 @@ module.exports = {
             },
             items: ['fb/server/resource-pools/api'],
           },
+          {
+            type: 'category',
+            label: 'Quota Management',
+            link: {
+              type: 'doc',
+              id: 'fb/server/quota-management/index',
+            },
+            items: [],
+          },
         ],
       },
       {

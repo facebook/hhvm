@@ -212,9 +212,15 @@ pub fn desugar(
         Expr_::mk_lfun(visitor_fun_, vec![]),
     );
 
+    let spliced_await = env.in_async && state.contains_spliced_await;
+
     // Create assignment of the extracted expressions to temporary variables
     // `$0splice0 = spliced_expr0;`
-    let splice_assignments: Vec<Stmt> = create_temp_statements(state.splices, temp_splice_lvar);
+    let splice_assignments: Vec<Stmt> = if spliced_await {
+        create_temp_statement_parallel(&et_literal_pos, state.splices, temp_splice_lvar)
+    } else {
+        create_temp_statements(state.splices, temp_splice_lvar)
+    };
     // `$0fp0 = foo<>;`
     let function_pointer_assignments: Vec<Stmt> =
         create_temp_statements(state.global_function_pointers, temp_function_pointer_lvar);
@@ -250,12 +256,7 @@ pub fn desugar(
             _ => vec![],
         };
 
-        immediately_invoked_lambda(
-            env.in_async && state.contains_spliced_await,
-            &et_literal_pos,
-            body,
-            lambda_args,
-        )
+        immediately_invoked_lambda(spliced_await, &et_literal_pos, body, lambda_args)
     };
 
     let expr = Expr::new(
@@ -553,6 +554,33 @@ fn merge_positions(positions: &[&Pos]) -> Pos {
             None => Some((*pos).clone()),
         })
         .unwrap_or(Pos::NONE)
+}
+
+fn create_temp_statement_parallel(
+    pos: &Pos,
+    exprs: Vec<Expr>,
+    mk_lvar: fn(&Pos, usize) -> Expr,
+) -> Vec<Stmt> {
+    if exprs.len() < 2 {
+        return create_temp_statements(exprs, mk_lvar);
+    }
+    let lhss = exprs
+        .iter()
+        .enumerate()
+        .map(|(i, expr)| (mk_lvar(&expr.1, i)))
+        .collect();
+    vec![Stmt::new(
+        pos.clone(),
+        Stmt_::Expr(Box::new(Expr::new(
+            (),
+            pos.clone(),
+            Expr_::Binop(Box::new(aast::Binop {
+                bop: Bop::Eq(None),
+                lhs: Expr::new((), pos.clone(), Expr_::List(lhss)),
+                rhs: Expr::new((), pos.clone(), Expr_::Tuple(exprs)),
+            })),
+        ))),
+    )]
 }
 
 fn create_temp_statements(exprs: Vec<Expr>, mk_lvar: fn(&Pos, usize) -> Expr) -> Vec<Stmt> {

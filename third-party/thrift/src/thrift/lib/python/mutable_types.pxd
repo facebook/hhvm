@@ -85,3 +85,11 @@ cdef class MutableStructInfo:
     cdef dict name_to_index
     cdef void fill(self) except *
     cdef void _initialize_default_values(self) except *
+
+cdef class MutableUnionInfo:
+    cdef unique_ptr[cDynamicStructInfo] cpp_obj
+    cdef dict type_infos
+    cdef dict id_to_adapter_info
+    cdef tuple fields
+    cdef dict name_to_index
+    cdef void _fill_mutable_union_info(self) except *

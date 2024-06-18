@@ -16,6 +16,10 @@ import enum
 import importlib
 import unittest
 
+from thrift.test.thrift_python.union_test.thrift_mutable_types import (  # @manual=//thrift/test/thrift-python:union_test_thrift-python-types
+    TestUnion as TestUnionMutable,
+)
+
 from thrift.test.thrift_python.union_test.thrift_types import (
     TestStruct as TestStructImmutable,
     TestUnion as TestUnionImmutable,
@@ -227,8 +231,45 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         # Disable maximum printed diff length.
         self.maxDiff = None
 
-    def test_import_fails_not_implemented_yet(self) -> None:
+    def test_creation_and_read(self) -> None:
         with self.assertRaises(NotImplementedError):
-            importlib.import_module(
-                "thrift.test.thrift_python.union_test.thrift_mutable_types"
-            )
+            TestUnionMutable()
+
+    def test_class_field_enum(self) -> None:
+        # NOTE: in the immutable version, this attribute is using the
+        # (unreserved) "Type" name.
+        self.assertTrue(hasattr(TestUnionMutable, "FbThriftUnionFieldEnum"))
+        fields_enum_type = TestUnionMutable.FbThriftUnionFieldEnum
+        self.assertTrue(issubclass(fields_enum_type, enum.Enum))
+        self.assertIsInstance(fields_enum_type, enum.EnumMeta)
+
+        # NOTE: Name differs from immutable version
+        self.assertEqual(fields_enum_type.__name__, "FbThriftUnionFieldEnum_TestUnion")
+
+        # NOTE: "empty" value for mutable is different from immutable.
+        self.assertCountEqual(
+            [
+                "string_field",
+                "int_field",
+                "struct_field",
+                "FBTHRIFT_UNION_EMPTY",
+            ],
+            fields_enum_type.__members__.keys(),
+        )
+
+        self.assertIs(fields_enum_type(0), fields_enum_type.FBTHRIFT_UNION_EMPTY)
+
+        enum_names_and_values = {
+            member.name: member.value
+            for member in fields_enum_type.__members__.values()
+        }
+
+        self.assertEqual(
+            enum_names_and_values,
+            {
+                "FBTHRIFT_UNION_EMPTY": 0,
+                "string_field": 1,
+                "int_field": 2,
+                "struct_field": 3,
+            },
+        )

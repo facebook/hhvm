@@ -21,6 +21,8 @@ from cpython.ref cimport Py_INCREF, Py_DECREF
 from cpython.tuple cimport PyTuple_New, PyTuple_SET_ITEM
 from cpython.unicode cimport PyUnicode_AsUTF8String
 
+import enum
+
 from thrift.python.mutable_serializer cimport cserialize, cdeserialize
 from thrift.python.mutable_typeinfos cimport (
     MutableListTypeInfo,
@@ -513,6 +515,48 @@ class MutableStructMeta(type):
             yield name, None
 
 
+cdef class MutableUnionInfo:
+    def __cinit__(self, union_name: str, field_infos: tuple[FieldInfo, ...]):
+        self.fields = field_infos
+        self.cpp_obj = make_unique[cDynamicStructInfo](
+            PyUnicode_AsUTF8(union_name),
+            len(field_infos),
+            True, # isUnion
+        )
+        self.type_infos = {}
+        self.id_to_adapter_info = {}
+        self.name_to_index = {}
+
+    cdef void _fill_mutable_union_info(self) except *:
+        cdef cDynamicStructInfo* dynamic_struct_info = self.cpp_obj.get()
+        for idx, field_info in enumerate(self.fields):
+            # type_info can be a lambda function so types with dependencies
+            # won't need to be defined in order
+            if callable(field_info.type_info):
+                field_info.type_info = field_info.type_info()
+            self.type_infos[field_info.id] = field_info.type_info
+            self.id_to_adapter_info[field_info.id] = field_info.adapter_info
+            self.name_to_index[field_info.py_name] = idx
+            dynamic_struct_info.addFieldInfo(
+                field_info.id,
+                field_info.qualifier,
+                PyUnicode_AsUTF8(field_info.name),
+                getCTypeInfo(field_info.type_info)
+            )
+
+cdef class MutableUnion(MutableStructOrUnion):
+    def __cinit__(self):
+        raise NotImplementedError(
+            "Cannot instantiate: mutable thrift-python Unions are not implemented yet."
+        )
+
+
+def _gen_mutable_union_field_enum_members(field_infos):
+    yield ("FBTHRIFT_UNION_EMPTY", 0)
+    for f in field_infos:
+        yield (f.py_name, f.id)
+
+
 class MutableUnionMeta(type):
     """Metaclass for all generated (mutable) thrift-python Union types."""
 
@@ -520,6 +564,25 @@ class MutableUnionMeta(type):
         """
         Returns a new Thrift Union class with the given name and members.
         """
-        raise NotImplementedError(
-            "Mutable thrift-python Unions are not implemented yet."
+        if bases:
+            raise TypeError(
+                "Inheriting from thrift-python data types is forbidden: "
+                f"'{union_name}' cannot inherit from '{bases[0].__name__}'"
+            )
+
+        field_infos = union_class_namespace.pop('_fbthrift_SPEC')
+        num_fields = len(field_infos)
+
+        union_class_namespace["_fbthrift_struct_info"] = MutableUnionInfo(
+            union_name, field_infos
         )
+
+        union_class_namespace["FbThriftUnionFieldEnum"] = enum.Enum(
+            f"FbThriftUnionFieldEnum_{union_name}",
+            _gen_mutable_union_field_enum_members(field_infos)
+        )
+
+        return super().__new__(cls, union_name, (MutableUnion,), union_class_namespace)
+
+    def _fbthrift_fill_spec(cls):
+        (<MutableUnionInfo>cls._fbthrift_struct_info)._fill_mutable_union_info()

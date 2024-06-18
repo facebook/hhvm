@@ -152,6 +152,10 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * Gets the file name from a user-defined function. Warning: This function
    * is currently not documented; only its argument list is available.
    *
+   * Warning: if this is a method defined in a trait, getFileName() might return
+   * a filename of the class using the trait instead of a filename of the trait,
+   * if the trait was flattened (e.g. in repo mode by hhbbc).
+   *
    * @return     mixed   The file name.
    */
   <<__Native>>
@@ -450,6 +454,9 @@ abstract class ReflectionFunctionAbstract implements Reflector {
  * ( excerpt from http://php.net/manual/en/class.reflectionfunction.php )
  *
  * The ReflectionFunction class reports information about a function.
+ *
+ * The purpose of reflection is to enable tooling for introspection of the
+ * codebase, not to drive execution of the business logic.
  */
 class ReflectionFunction extends ReflectionFunctionAbstract {
 
@@ -637,6 +644,9 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
  * ( excerpt from http://php.net/manual/en/class.reflectionmethod.php )
  *
  * The ReflectionMethod class reports information about a method.
+ *
+ * The purpose of reflection is to enable tooling for introspection of the
+ * codebase, not to drive execution of the business logic.
  */
 class ReflectionMethod extends ReflectionFunctionAbstract {
 
@@ -1066,6 +1076,9 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
  * ( excerpt from http://php.net/manual/en/class.reflectionclass.php )
  *
  * The ReflectionClass class reports information about a class.
+ *
+ * The purpose of reflection is to enable tooling for introspection of the
+ * codebase, not to drive execution of the business logic.
  */
 <<__NativeData>>
 class ReflectionClass implements Reflector {
@@ -2203,6 +2216,8 @@ class ReflectionClass implements Reflector {
  *
  * The ReflectionObject class reports information about an object.
  *
+ * The purpose of reflection is to enable tooling for introspection of the
+ * codebase, not to drive execution of the business logic.
  */
 class ReflectionObject extends ReflectionClass {
 
@@ -2253,6 +2268,8 @@ class ReflectionObject extends ReflectionClass {
 /**
  * The ReflectionTypeConstant class reports information about an object.
  *
+ * The purpose of reflection is to enable tooling for introspection of the
+ * codebase, not to drive execution of the business logic.
  */
 <<__NativeData>>
 class ReflectionTypeConstant implements Reflector {
@@ -2370,8 +2387,12 @@ class ReflectionTypeConstant implements Reflector {
 ///////////////////////////////////////////////////////////////////////////////
 // type aliases
 
-/** The ReflectionTypeAlias class reports information about a type
+/**
+ * The ReflectionTypeAlias class reports information about a type
  * alias.
+ *
+ * The purpose of reflection is to enable tooling for introspection of the
+ * codebase, not to drive execution of the business logic.
  */
 <<__NativeData>>
 class ReflectionTypeAlias implements Reflector {

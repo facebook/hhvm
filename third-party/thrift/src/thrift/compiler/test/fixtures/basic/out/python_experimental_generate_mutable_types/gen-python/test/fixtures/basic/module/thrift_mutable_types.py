@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import dataclasses
 
+import folly.iobuf as _fbthrift_iobuf
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 import thrift.python.types as _fbthrift_python_types

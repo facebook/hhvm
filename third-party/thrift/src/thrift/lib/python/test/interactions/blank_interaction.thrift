@@ -16,12 +16,9 @@
 
 namespace cpp2 interactions.test.thrift
 
-include "thrift/annotation/cpp.thrift"
-
 interaction Blank {
 }
 
-@cpp.Name{value = "BlankServiceRenamed"}
 service BlankService {
   performs Blank;
-}
+} (cpp.name = "BlankServiceRenamed")

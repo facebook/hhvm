@@ -32,9 +32,9 @@ namespace {
   function get_class_methods(HH\FIXME\MISSING_PARAM_TYPE $class_or_object)[]: ?varray_or_darray<string>;
   <<__PHPStdLib>>
   function get_class_vars(string $class_name): \HH\FIXME\MISSING_RETURN_TYPE;
-  function get_class(
-    readonly HH\FIXME\MISSING_PARAM_TYPE $object,
-  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
+  function get_class<T /* as HH\object */>(
+    readonly T $object,
+  )[]: classname<T>;
   function get_parent_class(
     HH\FIXME\MISSING_PARAM_TYPE $object,
   )[]: \HH\FIXME\MISSING_RETURN_TYPE;

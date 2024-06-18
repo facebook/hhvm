@@ -730,7 +730,15 @@ cdef class MutableUnion(MutableStructOrUnion):
     cdef object _fbthrift_get_field_value(self, int16_t field_id):
         """
         Returns the value of the field with the given `field_id` if it is indeed the
-        field that is (currently) set for this union. Otherwise, raises AttributeError.
+        field that is (currently) set for this union.
+
+        Raises:
+            ValueError if `field_id` does not correspond to a valid field id for this
+                Thrift union.
+
+            AttributeError if this union does not currently hold a value for the given
+                `field_id` (i.e., it either holds a value for another field, or is
+                empty).
         """
         current_field_enum = self.fbthrift_current_field
         cdef int current_field_enum_value = current_field_enum.value

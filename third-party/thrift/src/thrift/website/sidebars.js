@@ -311,6 +311,7 @@ module.exports = {
         items: [
           'fb/server/howto',
           'fb/server/server-lifecycle',
+          'fb/server/server-modules',
           'fb/server/background-tasks',
           'fb/server/flavors-of-main',
           'fb/server/components',

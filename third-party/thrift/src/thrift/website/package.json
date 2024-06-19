@@ -65,7 +65,7 @@
     "json5": "^2.2.2",
     "http-cache-semantics": "^4.1.1",
     "loader-utils": "^2.0.3",
-    "mermaid": "^9.1.2",
+    "mermaid": "^10.9.1",
     "minimatch": "^3.0.5",
     "trim": "^0.0.3",
     "ua-parser-js": "^0.7.33",

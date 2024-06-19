@@ -311,6 +311,9 @@ module Subtype_env = struct
     in_transitive_closure: bool;
         (** This is a subtype check from within transitive closure
           e.g. string <: #1 <: int doing string <: int *)
+    ignore_likes: bool;
+        (** We're ignoring likes because we had a goal of the form `t <: ~u`
+            for t <:D dynamic *)
   }
 
   let set_on_error t on_error = { t with on_error }
@@ -339,6 +342,7 @@ module Subtype_env = struct
       ?(coerce = None)
       ?(is_coeffect = false)
       ?(in_transitive_closure = false)
+      ?(ignore_likes = false)
       ~(log_level : int)
       on_error =
     {
@@ -354,6 +358,7 @@ module Subtype_env = struct
       tparam_constraints = [];
       log_level;
       in_transitive_closure;
+      ignore_likes;
     }
 
   let possibly_add_violated_constraint subtype_env ~r_sub ~r_super =
@@ -770,6 +775,7 @@ end = struct
         flag " sub_supportdyn" (Option.is_some sub_supportdyn)
         ^ flag " super_supportdyn" super_supportdyn
         ^ flag " super_like" super_like
+        ^ flag " ignore_likes" subtype_env.Subtype_env.ignore_likes
         ^ flag " require_soundness" subtype_env.Subtype_env.require_soundness
         ^ flag
             " require_completeness"
@@ -1338,7 +1344,8 @@ end = struct
                     }
                   env
                 &&& simplify
-                      ~subtype_env
+                      ~subtype_env:
+                        { subtype_env with Subtype_env.ignore_likes = true }
                       ~this_ty
                       ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
                       ~rhs:
@@ -2872,6 +2879,14 @@ end = struct
         subtype_env
         ~ty_sub:(LoclType ty_sub)
         ~ty_super:(LoclType ty_super)
+    in
+    let ty_sub =
+      if subtype_env.Subtype_env.ignore_likes then
+        Option.value
+          ~default:ty_sub
+          (Typing_utils.try_strip_dynamic ~accept_intersections:true env ty_sub)
+      else
+        ty_sub
     in
     match (deref ty_sub, deref ty_super) with
     (* -- C-Var-R ----------------------------------------------------------- *)

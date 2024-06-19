@@ -4,3 +4,9 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "expected_type_error.bad.php", line 19, characters 27-32:
   But got `string`
+ERROR: File "expected_type_error.bad.php", line 26, characters 16-22:
+Invalid argument (Typing[4110])
+  File "expected_type_error.bad.php", line 14, characters 39-44:
+  Expected `~Box<_>`
+  File "expected_type_error.bad.php", line 19, characters 22-33:
+  But got `~Box<string>`

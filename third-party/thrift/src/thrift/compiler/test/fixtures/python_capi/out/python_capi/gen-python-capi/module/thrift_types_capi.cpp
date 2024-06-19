@@ -17,7 +17,6 @@
 #include "thrift/compiler/test/fixtures/python_capi/src/gen-python-capi/serialized_dep/thrift_types_capi.h"
 #include "thrift/compiler/test/fixtures/python_capi/src/gen-python-capi/thrift_dep/thrift_types_capi.h"
 #include "thrift/lib/thrift/gen-python-capi/id/thrift_types_capi.h"
-#include "thrift/lib/thrift/gen-python-capi/patch/thrift_types_capi.h"
 #include "thrift/lib/thrift/gen-python-capi/schema/thrift_types_capi.h"
 
 namespace apache {
@@ -569,10 +568,10 @@ Extractor<::test::fixtures::python_capi::VapidStruct>::operator()(PyObject* obj)
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a VapidStruct");
+        PyErr_SetString(PyExc_TypeError, "Not a EmptyStruct");
       }
       return extractorError<::test::fixtures::python_capi::VapidStruct>(
-          "Marshal error: VapidStruct");
+          "Marshal error: EmptyStruct");
   }
   return ::test::fixtures::python_capi::VapidStruct{};
 }
@@ -592,10 +591,10 @@ int Extractor<::test::fixtures::python_capi::VapidStruct>::typeCheck(PyObject* o
       "Module test.fixtures.python_capi.module import error");
   }
   int result =
-      can_extract__test__fixtures__python_capi__module__VapidStruct(obj);
+      can_extract__test__fixtures__python_capi__module__EmptyStruct(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
-      "Unexpected type check error: VapidStruct");
+      "Unexpected type check error: EmptyStruct");
   }
   return result;
 }
@@ -613,7 +612,7 @@ PyObject* Constructor<::test::fixtures::python_capi::VapidStruct>::operator()(
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__test__fixtures__python_capi__module__VapidStruct(*fbthrift_data);
+  return init__test__fixtures__python_capi__module__EmptyStruct(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
@@ -1921,7 +1920,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       break;
     case 10:
       Extractor<::apache::thrift::python::capi::AdaptedThrift<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, int64_t>>{}.extractInto(
-          cpp.adaptedInt_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+          cpp.adapted_int_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
   }
   if (error) {
@@ -2004,7 +2003,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     case 10:
       py_val = StrongRef(
           Constructor<::apache::thrift::python::capi::AdaptedThrift<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, int64_t>>{}
-          .constructFrom(val.adaptedInt_ref()));
+          .constructFrom(val.adapted_int_ref()));
       break;
   }
   if (!py_val) {

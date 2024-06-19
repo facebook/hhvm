@@ -3858,8 +3858,9 @@ void Shallot::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_SET)) {
           this->intSet_ref().emplace();
           _readState.beforeSubobject(iprot);
-          value_.intSet = ::std::set<::std::int64_t>();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>>::readWithContext(*iprot, value_.intSet, _readState);
+          auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>>();
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>>::readWithContext(*iprot, *ptr, _readState);
+          value_.intSet = std::move(ptr);
           _readState.afterSubobject(iprot);
           
         } else {
@@ -3883,8 +3884,9 @@ void Shallot::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST)) {
           this->doubleList_ref().emplace();
           _readState.beforeSubobject(iprot);
-          value_.doubleList = ::std::vector<double>();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, value_.doubleList, _readState);
+          auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::std::vector<double>>>();
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, *ptr, _readState);
+          value_.doubleList = std::move(ptr);
           _readState.afterSubobject(iprot);
           
         } else {
@@ -3897,8 +3899,9 @@ void Shallot::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_MAP)) {
           this->strMap_ref().emplace();
           _readState.beforeSubobject(iprot);
-          value_.strMap = ::std::map<::std::string, ::std::string>();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::readWithContext(*iprot, value_.strMap, _readState);
+          auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::map<::std::string, ::std::string>>>();
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::readWithContext(*iprot, *ptr, _readState);
+          value_.strMap = std::move(ptr);
           _readState.afterSubobject(iprot);
           
         } else {
@@ -3909,8 +3912,8 @@ void Shallot::readNoXfer(Protocol_* iprot) {
       case 10:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I64)) {
-          this->adaptedInt_ref().emplace();
-          ::apache::thrift::op::decode<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, ::apache::thrift::type::i64_t>>(*iprot, value_.adaptedInt);
+          this->adapted_int_ref().emplace();
+          ::apache::thrift::op::decode<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, ::apache::thrift::type::i64_t>>(*iprot, value_.adapted_int);
           
         } else {
           _readState.skip(iprot);
@@ -3952,7 +3955,12 @@ uint32_t Shallot::serializedSize(Protocol_ const* prot_) const {
     case Shallot::Type::intSet:
     {
       xfer += prot_->serializedFieldSize("intSet", apache::thrift::protocol::T_SET, 6);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>>::serializedSize<false>(*prot_, value_.intSet);
+      if (value_.intSet) {
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>>::serializedSize<false>(*prot_, *value_.intSet);
+      } else {
+        xfer += prot_->serializedSizeSetBegin(apache::thrift::protocol::T_I64, 0);
+        xfer += prot_->serializedSizeSetEnd();
+      }
       break;
     }
     case Shallot::Type::myString:
@@ -3964,19 +3972,29 @@ uint32_t Shallot::serializedSize(Protocol_ const* prot_) const {
     case Shallot::Type::doubleList:
     {
       xfer += prot_->serializedFieldSize("doubleList", apache::thrift::protocol::T_LIST, 8);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::serializedSize<false>(*prot_, value_.doubleList);
+      if (value_.doubleList) {
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::serializedSize<false>(*prot_, *value_.doubleList);
+      } else {
+        xfer += prot_->serializedSizeListBegin(apache::thrift::protocol::T_DOUBLE, 0);
+        xfer += prot_->serializedSizeListEnd();
+      }
       break;
     }
     case Shallot::Type::strMap:
     {
       xfer += prot_->serializedFieldSize("strMap", apache::thrift::protocol::T_MAP, 9);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::serializedSize<false>(*prot_, value_.strMap);
+      if (value_.strMap) {
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::serializedSize<false>(*prot_, *value_.strMap);
+      } else {
+        xfer += prot_->serializedSizeMapBegin(apache::thrift::protocol::T_STRING, apache::thrift::protocol::T_STRING, 0);
+        xfer += prot_->serializedSizeMapEnd();
+      }
       break;
     }
-    case Shallot::Type::adaptedInt:
+    case Shallot::Type::adapted_int:
     {
-      xfer += prot_->serializedFieldSize("adaptedInt", apache::thrift::protocol::T_I64, 10);
-      xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, ::apache::thrift::type::i64_t>>(*prot_, value_.adaptedInt);
+      xfer += prot_->serializedFieldSize("adapted_int", apache::thrift::protocol::T_I64, 10);
+      xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, ::apache::thrift::type::i64_t>>(*prot_, value_.adapted_int);
       break;
     }
     case Shallot::Type::__EMPTY__:;
@@ -4005,7 +4023,12 @@ uint32_t Shallot::serializedSizeZC(Protocol_ const* prot_) const {
     case Shallot::Type::intSet:
     {
       xfer += prot_->serializedFieldSize("intSet", apache::thrift::protocol::T_SET, 6);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>>::serializedSize<false>(*prot_, value_.intSet);
+      if (value_.intSet) {
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>>::serializedSize<false>(*prot_, *value_.intSet);
+      } else {
+        xfer += prot_->serializedSizeSetBegin(apache::thrift::protocol::T_I64, 0);
+        xfer += prot_->serializedSizeSetEnd();
+      }
       break;
     }
     case Shallot::Type::myString:
@@ -4017,19 +4040,29 @@ uint32_t Shallot::serializedSizeZC(Protocol_ const* prot_) const {
     case Shallot::Type::doubleList:
     {
       xfer += prot_->serializedFieldSize("doubleList", apache::thrift::protocol::T_LIST, 8);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::serializedSize<false>(*prot_, value_.doubleList);
+      if (value_.doubleList) {
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::serializedSize<false>(*prot_, *value_.doubleList);
+      } else {
+        xfer += prot_->serializedSizeListBegin(apache::thrift::protocol::T_DOUBLE, 0);
+        xfer += prot_->serializedSizeListEnd();
+      }
       break;
     }
     case Shallot::Type::strMap:
     {
       xfer += prot_->serializedFieldSize("strMap", apache::thrift::protocol::T_MAP, 9);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::serializedSize<false>(*prot_, value_.strMap);
+      if (value_.strMap) {
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::serializedSize<false>(*prot_, *value_.strMap);
+      } else {
+        xfer += prot_->serializedSizeMapBegin(apache::thrift::protocol::T_STRING, apache::thrift::protocol::T_STRING, 0);
+        xfer += prot_->serializedSizeMapEnd();
+      }
       break;
     }
-    case Shallot::Type::adaptedInt:
+    case Shallot::Type::adapted_int:
     {
-      xfer += prot_->serializedFieldSize("adaptedInt", apache::thrift::protocol::T_I64, 10);
-      xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, ::apache::thrift::type::i64_t>>(*prot_, value_.adaptedInt);
+      xfer += prot_->serializedFieldSize("adapted_int", apache::thrift::protocol::T_I64, 10);
+      xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, ::apache::thrift::type::i64_t>>(*prot_, value_.adapted_int);
       break;
     }
     case Shallot::Type::__EMPTY__:;
@@ -4063,7 +4096,12 @@ uint32_t Shallot::write(Protocol_* prot_) const {
     {
       constexpr int16_t kPrevFieldId = 2;
       xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_SET, 6, kPrevFieldId>(*prot_, "intSet", false);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>>::write(*prot_, value_.intSet);
+      if (value_.intSet) {
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>>::write(*prot_, *value_.intSet);
+      } else {
+        xfer += prot_->writeSetBegin(apache::thrift::protocol::T_I64, 0);
+        xfer += prot_->writeSetEnd();
+      }
       xfer += prot_->writeFieldEnd();
       break;
     }
@@ -4079,7 +4117,12 @@ uint32_t Shallot::write(Protocol_* prot_) const {
     {
       constexpr int16_t kPrevFieldId = 4;
       xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 8, kPrevFieldId>(*prot_, "doubleList", false);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::write(*prot_, value_.doubleList);
+      if (value_.doubleList) {
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::write(*prot_, *value_.doubleList);
+      } else {
+        xfer += prot_->writeListBegin(apache::thrift::protocol::T_DOUBLE, 0);
+        xfer += prot_->writeListEnd();
+      }
       xfer += prot_->writeFieldEnd();
       break;
     }
@@ -4087,15 +4130,20 @@ uint32_t Shallot::write(Protocol_* prot_) const {
     {
       constexpr int16_t kPrevFieldId = 8;
       xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_MAP, 9, kPrevFieldId>(*prot_, "strMap", false);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::write(*prot_, value_.strMap);
+      if (value_.strMap) {
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::write(*prot_, *value_.strMap);
+      } else {
+        xfer += prot_->writeMapBegin(apache::thrift::protocol::T_STRING, apache::thrift::protocol::T_STRING, 0);
+        xfer += prot_->writeMapEnd();
+      }
       xfer += prot_->writeFieldEnd();
       break;
     }
-    case Shallot::Type::adaptedInt:
+    case Shallot::Type::adapted_int:
     {
       constexpr int16_t kPrevFieldId = 9;
-      xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I64, 10, kPrevFieldId>(*prot_, "adaptedInt", false);
-      xfer += ::apache::thrift::op::encode<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, ::apache::thrift::type::i64_t>>(*prot_, value_.adaptedInt);
+      xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I64, 10, kPrevFieldId>(*prot_, "adapted_int", false);
+      xfer += ::apache::thrift::op::encode<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, ::apache::thrift::type::i64_t>>(*prot_, value_.adapted_int);
       xfer += prot_->writeFieldEnd();
       break;
     }

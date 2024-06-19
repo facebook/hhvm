@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
+
 import thrift.test.python_capi.serialized_dep.thrift_types as thrift_types
 
 def make_serialized_struct(is_set: bool) -> thrift_types.SerializedStruct: ...

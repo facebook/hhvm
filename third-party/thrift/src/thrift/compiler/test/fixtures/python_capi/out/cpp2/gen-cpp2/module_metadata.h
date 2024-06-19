@@ -10,7 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_types.h"
-#include "thrift/lib/thrift/gen-cpp2/patch_metadata.h"
 #include "thrift/compiler/test/fixtures/python_capi/src/gen-cpp2/thrift_dep_metadata.h"
 #include "thrift/compiler/test/fixtures/python_capi/src/gen-cpp2/serialized_dep_metadata.h"
 #include "thrift/lib/thrift/gen-cpp2/id_metadata.h"

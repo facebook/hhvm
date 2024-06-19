@@ -2081,8 +2081,8 @@ void Shallot::__fbthrift_destruct() {
     case Type::strMap:
       ::std::destroy_at(::std::addressof(value_.strMap));
       break;
-    case Type::adaptedInt:
-      ::std::destroy_at(::std::addressof(value_.adaptedInt));
+    case Type::adapted_int:
+      ::std::destroy_at(::std::addressof(value_.adapted_int));
       break;
     default:
       assert(false);
@@ -2114,19 +2114,20 @@ bool Shallot::__fbthrift_is_empty() const {
         set_myStruct(rhs.value_.myStruct);
         break;
       case Type::intSet:
-        set_intSet(rhs.value_.intSet);
+        set_intSet(*rhs.value_.intSet);
         break;
       case Type::myString:
         set_myString(rhs.value_.myString);
         break;
       case Type::doubleList:
-        set_doubleList(rhs.value_.doubleList);
+        set_doubleList(*rhs.value_.doubleList);
         break;
       case Type::strMap:
-        set_strMap(rhs.value_.strMap);
+        set_strMap(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>>(rhs.value_.strMap));
         break;
-      case Type::adaptedInt:
-        set_adaptedInt(rhs.value_.adaptedInt);
+      case Type::adapted_int:
+        set_adapted_int(rhs.value_.adapted_int);
         break;
       default:
         assert(false);
@@ -2146,19 +2147,20 @@ bool Shallot::__fbthrift_is_empty() const {
         set_myStruct(rhs.value_.myStruct);
         break;
       case Type::intSet:
-        set_intSet(rhs.value_.intSet);
+        set_intSet(*rhs.value_.intSet);
         break;
       case Type::myString:
         set_myString(rhs.value_.myString);
         break;
       case Type::doubleList:
-        set_doubleList(rhs.value_.doubleList);
+        set_doubleList(*rhs.value_.doubleList);
         break;
       case Type::strMap:
-        set_strMap(rhs.value_.strMap);
+        set_strMap(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>>(rhs.value_.strMap));
         break;
-      case Type::adaptedInt:
-        set_adaptedInt(rhs.value_.adaptedInt);
+      case Type::adapted_int:
+        set_adapted_int(rhs.value_.adapted_int);
         break;
       default:
         __fbthrift_clear();
@@ -2174,6 +2176,51 @@ bool Shallot::operator==(const Shallot& rhs) const {
 
 bool Shallot::operator<([[maybe_unused]] const Shallot& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+}
+
+::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>& Shallot::set_intSet(::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>> t) {
+  __fbthrift_destruct();
+  type_ = folly::to_underlying(Type::intSet);
+  ::new (std::addressof(value_.intSet)) ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>(std::move(t));
+  return value_.intSet;
+}
+
+::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>& Shallot::set_intSet(::std::set<::std::int64_t> const &t) {
+  return set_intSet(::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>(::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>::element_type(t)));
+}
+
+::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>& Shallot::set_intSet(::std::set<::std::int64_t>&& t) {
+  return set_intSet(::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>(::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>::element_type(std::move(t))));
+}
+
+::std::shared_ptr<const ::std::vector<double>>& Shallot::set_doubleList(::std::shared_ptr<const ::std::vector<double>> t) {
+  __fbthrift_destruct();
+  type_ = folly::to_underlying(Type::doubleList);
+  ::new (std::addressof(value_.doubleList)) ::std::shared_ptr<const ::std::vector<double>>(std::move(t));
+  return value_.doubleList;
+}
+
+::std::shared_ptr<const ::std::vector<double>>& Shallot::set_doubleList(::std::vector<double> const &t) {
+  return set_doubleList(::std::shared_ptr<const ::std::vector<double>>(new ::std::shared_ptr<const ::std::vector<double>>::element_type(t)));
+}
+
+::std::shared_ptr<const ::std::vector<double>>& Shallot::set_doubleList(::std::vector<double>&& t) {
+  return set_doubleList(::std::shared_ptr<const ::std::vector<double>>(new ::std::shared_ptr<const ::std::vector<double>>::element_type(std::move(t))));
+}
+
+::std::unique_ptr<::std::map<::std::string, ::std::string>>& Shallot::set_strMap(::std::unique_ptr<::std::map<::std::string, ::std::string>> t) {
+  __fbthrift_destruct();
+  type_ = folly::to_underlying(Type::strMap);
+  ::new (std::addressof(value_.strMap)) ::std::unique_ptr<::std::map<::std::string, ::std::string>>(std::move(t));
+  return value_.strMap;
+}
+
+::std::unique_ptr<::std::map<::std::string, ::std::string>>& Shallot::set_strMap(::std::map<::std::string, ::std::string> const &t) {
+  return set_strMap(::std::unique_ptr<::std::map<::std::string, ::std::string>>(new ::std::unique_ptr<::std::map<::std::string, ::std::string>>::element_type(t)));
+}
+
+::std::unique_ptr<::std::map<::std::string, ::std::string>>& Shallot::set_strMap(::std::map<::std::string, ::std::string>&& t) {
+  return set_strMap(::std::unique_ptr<::std::map<::std::string, ::std::string>>(new ::std::unique_ptr<::std::map<::std::string, ::std::string>>::element_type(std::move(t))));
 }
 
 void swap(Shallot& a, Shallot& b) {

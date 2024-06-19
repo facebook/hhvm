@@ -18,8 +18,8 @@ cdef extern from "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_type
         cDoubledPair()
     cdef cppclass cStringPair "::test::fixtures::python_capi::StringPair":
         cStringPair()
-    cdef cppclass cVapidStruct "::test::fixtures::python_capi::VapidStruct":
-        cVapidStruct()
+    cdef cppclass cEmptyStruct "::test::fixtures::python_capi::VapidStruct":
+        cEmptyStruct()
     cdef cppclass cPrimitiveStruct "::test::fixtures::python_capi::PrimitiveStruct":
         cPrimitiveStruct()
     cdef cppclass cAdaptedFields "::test::fixtures::python_capi::AdaptedFields":
@@ -55,8 +55,8 @@ cdef object DoubledPair_from_cpp(const cDoubledPair& c_struct)
 cdef cStringPair StringPair_convert_to_cpp(object inst) except*
 cdef object StringPair_from_cpp(const cStringPair& c_struct)
 
-cdef cVapidStruct VapidStruct_convert_to_cpp(object inst) except*
-cdef object VapidStruct_from_cpp(const cVapidStruct& c_struct)
+cdef cEmptyStruct EmptyStruct_convert_to_cpp(object inst) except*
+cdef object EmptyStruct_from_cpp(const cEmptyStruct& c_struct)
 
 cdef cPrimitiveStruct PrimitiveStruct_convert_to_cpp(object inst) except*
 cdef object PrimitiveStruct_from_cpp(const cPrimitiveStruct& c_struct)

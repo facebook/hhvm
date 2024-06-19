@@ -15,8 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
-include "thrift/annotation/python.thrift"
-include "thrift/lib/thrift/patch.thrift"
+include "thrift/annotation/thrift.thrift"
 include "thrift/compiler/test/fixtures/python_capi/src/thrift_dep.thrift"
 include "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift"
 include "thrift/lib/thrift/id.thrift"
@@ -56,7 +55,8 @@ struct MyStruct {
   2: string stringy;
   3: MyDataItem myItemy;
   4: MyEnum myEnumy;
-  5: bool booly (cpp.name = "boulet");
+  @cpp.Name{value = "boulet"}
+  5: bool booly;
   6: list<float> floatListy;
   7: map<binary, string> strMappy;
   8: set<i32> intSetty;
@@ -83,7 +83,6 @@ struct StringPair {
 }
 
 @cpp.Name{value = "VapidStruct"}
-@python.Name{name = "VapidStruct"}
 struct EmptyStruct {}
 
 typedef byte signed_byte
@@ -95,8 +94,9 @@ typedef binary IOBufPtr
 struct PrimitiveStruct {
   1: bool booly;
   2: signed_byte charry;
+  @cpp.Name{value = "shortay"}
   @cpp.Type{name = "uint16_t"}
-  3: i16 shorty (cpp.name = "shortay");
+  3: i16 shorty;
   5: i32 inty;
   @cpp.Type{name = "uint64_t"}
   7: i64 longy;
@@ -195,9 +195,12 @@ struct ComposeStruct {
 union Onion {
   1: MyEnum myEnum;
   2: PrimitiveStruct myStruct;
+  @thrift.Box
   6: set<i64> intSet;
   4: string myString;
+  @cpp.Ref{type = cpp.RefType.Shared}
   8: list<double> doubleList;
+  @cpp.Ref{type = cpp.RefType.Unique}
   9: map<binary, string> strMap;
-  10: id.ProtocolId adaptedInt;
+  10: id.ProtocolId adapted_int;
 }

@@ -176,7 +176,7 @@ struct ForEachField<::test::fixtures::python_capi::Shallot> {
     f(3, static_cast<T&&>(t).myString_ref()...);
     f(4, static_cast<T&&>(t).doubleList_ref()...);
     f(5, static_cast<T&&>(t).strMap_ref()...);
-    f(6, static_cast<T&&>(t).adaptedInt_ref()...);
+    f(6, static_cast<T&&>(t).adapted_int_ref()...);
   }
 };
 } // namespace detail

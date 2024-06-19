@@ -42,11 +42,11 @@ cdef cStringPair StringPair_convert_to_cpp(object inst) except *:
 cdef object StringPair_from_cpp(const cStringPair& c_struct):
     return cpp_to_python[cStringPair](c_struct)
 
-cdef cVapidStruct VapidStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cVapidStruct](inst))
+cdef cEmptyStruct EmptyStruct_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cEmptyStruct](inst))
 
-cdef object VapidStruct_from_cpp(const cVapidStruct& c_struct):
-    return cpp_to_python[cVapidStruct](c_struct)
+cdef object EmptyStruct_from_cpp(const cEmptyStruct& c_struct):
+    return cpp_to_python[cEmptyStruct](c_struct)
 
 cdef cPrimitiveStruct PrimitiveStruct_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cPrimitiveStruct](inst))

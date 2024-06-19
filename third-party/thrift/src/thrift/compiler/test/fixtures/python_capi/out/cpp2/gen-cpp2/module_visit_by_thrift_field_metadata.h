@@ -301,7 +301,7 @@ struct VisitByFieldId<::test::fixtures::python_capi::Shallot> {
     case 9:
       return f(5, static_cast<T&&>(t).strMap_ref());
     case 10:
-      return f(6, static_cast<T&&>(t).adaptedInt_ref());
+      return f(6, static_cast<T&&>(t).adapted_int_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::python_capi::Shallot");
     }

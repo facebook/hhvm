@@ -1926,7 +1926,7 @@ cdef class MapTypeFactory:
 
 cdef class Map(Container):
     """
-    A immutable container used to prepresent a Thrift map. It has compatible
+    A immutable container used to represent a Thrift map. It has compatible
     API with a Python map but has additional API to interact with other Python
     iterators
     """

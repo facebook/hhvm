@@ -16,7 +16,6 @@
 
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_types.tcc"
 
-#include "thrift/lib/thrift/gen-cpp2/patch_types_custom_protocol.h"
 #include "thrift/compiler/test/fixtures/python_capi/src/gen-cpp2/thrift_dep_types_custom_protocol.h"
 #include "thrift/compiler/test/fixtures/python_capi/src/gen-cpp2/serialized_dep_types_custom_protocol.h"
 #include "thrift/lib/thrift/gen-cpp2/id_types_custom_protocol.h"

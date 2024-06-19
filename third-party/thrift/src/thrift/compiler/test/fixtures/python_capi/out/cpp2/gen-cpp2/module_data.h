@@ -48,7 +48,7 @@ template <> struct TEnumDataStorage<::test::fixtures::python_capi::Shallot::Type
       type::myString,
       type::doubleList,
       type::strMap,
-      type::adaptedInt,
+      type::adapted_int,
   }};
   static constexpr std::array<std::string_view, size> names = { {
       "myEnum"sv,
@@ -57,7 +57,7 @@ template <> struct TEnumDataStorage<::test::fixtures::python_capi::Shallot::Type
       "myString"sv,
       "doubleList"sv,
       "strMap"sv,
-      "adaptedInt"sv,
+      "adapted_int"sv,
   }};
 };
 

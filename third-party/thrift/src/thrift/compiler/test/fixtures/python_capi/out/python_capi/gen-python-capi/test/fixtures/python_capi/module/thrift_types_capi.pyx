@@ -54,12 +54,12 @@ cdef api int can_extract__test__fixtures__python_capi__module__StringPair(object
 cdef api object init__test__fixtures__python_capi__module__StringPair(object data):
     return __thrift_types.StringPair._fbthrift_create(data)
 
-cdef api int can_extract__test__fixtures__python_capi__module__VapidStruct(object __obj) except -1:
-    return 1 if isinstance(__obj, __thrift_types.VapidStruct) else 0
+cdef api int can_extract__test__fixtures__python_capi__module__EmptyStruct(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.EmptyStruct) else 0
 
 
-cdef api object init__test__fixtures__python_capi__module__VapidStruct(object data):
-    return __thrift_types.VapidStruct._fbthrift_create(data)
+cdef api object init__test__fixtures__python_capi__module__EmptyStruct(object data):
+    return __thrift_types.EmptyStruct._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__python_capi__module__PrimitiveStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.PrimitiveStruct) else 0

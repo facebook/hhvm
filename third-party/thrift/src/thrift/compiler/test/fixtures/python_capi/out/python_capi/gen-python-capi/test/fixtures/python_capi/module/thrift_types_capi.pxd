@@ -38,10 +38,10 @@ cdef api int can_extract__test__fixtures__python_capi__module__StringPair(object
 
 cdef api object init__test__fixtures__python_capi__module__StringPair(object data)
 
-cdef api int can_extract__test__fixtures__python_capi__module__VapidStruct(object) except -1
+cdef api int can_extract__test__fixtures__python_capi__module__EmptyStruct(object) except -1
 
 
-cdef api object init__test__fixtures__python_capi__module__VapidStruct(object data)
+cdef api object init__test__fixtures__python_capi__module__EmptyStruct(object data)
 
 cdef api int can_extract__test__fixtures__python_capi__module__PrimitiveStruct(object) except -1
 

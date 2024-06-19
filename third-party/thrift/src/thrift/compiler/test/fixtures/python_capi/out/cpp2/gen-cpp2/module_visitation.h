@@ -5,7 +5,6 @@
  *  @generated @nocommit
  */
 #pragma once
-#include "thrift/lib/thrift/gen-cpp2/patch_visitation.h"
 #include "thrift/compiler/test/fixtures/python_capi/src/gen-cpp2/thrift_dep_visitation.h"
 #include "thrift/compiler/test/fixtures/python_capi/src/gen-cpp2/serialized_dep_visitation.h"
 #include "thrift/lib/thrift/gen-cpp2/id_visitation.h"

@@ -12,16 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
 
+
+import typing
 import unittest
 
 import thrift.test.python_capi.parity as parity
 
+from thrift.python.exceptions import GeneratedError
 from thrift.python.serializer import deserialize, Protocol, serialize
+from thrift.python.types import StructOrUnion
+
+sT = typing.TypeVar("sT", bound=typing.Union[StructOrUnion, GeneratedError])
 
 
 class ParityFixture(unittest.TestCase):
-    def assert_proto_equal(self, serial: object, marshal: object) -> None:
+    def assert_proto_equal(self, serial: sT, marshal: sT) -> None:
         for proto in [Protocol.COMPACT, Protocol.BINARY, Protocol.JSON]:
             serialized_marshal = serialize(marshal, proto)
             self.assertEqual(serialized_marshal, serialize(serial, proto))

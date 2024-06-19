@@ -530,7 +530,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::te
   "myString"sv,
   "doubleList"sv,
   "strMap"sv,
-  "adaptedInt"sv,
+  "adapted_int"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::python_capi::Shallot>::fields_ids = { {
   1,
@@ -557,16 +557,16 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::te
   "myString"sv,
   "doubleList"sv,
   "strMap"sv,
-  "adaptedInt"sv,
+  "adapted_int"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::python_capi::Shallot>::isset_indexes = { {
   0,
   1,
+  -1,
   2,
+  -1,
+  -1,
   3,
-  4,
-  5,
-  6,
 }};
 
 } // namespace thrift

@@ -15,7 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
-include "thrift/lib/thrift/patch.thrift"
+include "thrift/annotation/thrift.thrift"
 include "thrift/test/python_capi/thrift_dep.thrift"
 include "thrift/test/python_capi/serialized_dep.thrift"
 include "thrift/lib/thrift/id.thrift"

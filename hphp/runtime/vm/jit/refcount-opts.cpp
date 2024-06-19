@@ -1498,6 +1498,17 @@ DEBUG_ONLY bool check_state(const RCState& state) {
     auto const asetID = state.support_map[id];
     if (asetID != -1) {
       always_assert_flog(
+        asetID >= 0, 
+        "asetID {} must be non-negative",
+        asetID
+      );
+      always_assert_flog(
+        asetID < state.asets.size(),
+        "aset ID {} is out of bounds of state.asets size {}",
+        asetID,
+        state.asets.size()
+      );
+      always_assert_flog(
         state.asets[asetID].memory_support[id],
         "expected aset {} to have support in location {}",
         asetID,

@@ -65,7 +65,7 @@ struct Xtruct3 {
 struct Insanity {
   1: map<Numberz, UserId> userMap;
   2: list<Xtruct> xtructs;
-  3: map<string, string> (cpp.template = 'std::unordered_map') str2str;
+  3: map_string_string_917 str2str;
 }
 
 struct CrazyNesting {
@@ -213,3 +213,8 @@ struct WithAnnotations {
     }
   ",
 )
+
+// The following were automatically generated and may benefit from renaming.
+typedef map<string, string> (
+  cpp.template = "std::unordered_map",
+) map_string_string_917

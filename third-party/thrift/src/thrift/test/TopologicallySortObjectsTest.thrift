@@ -29,21 +29,17 @@ struct IncompleteMap {
 struct IncompleteMapDep {}
 
 struct CompleteMap {
-  1: optional map<i32, CompleteMapDep> (
-    cpp2.template = "std::unordered_map",
-  ) field;
+  1: optional map_i32_CompleteMapDep_4031 field;
 }
 struct CompleteMapDep {}
 
 struct IncompleteList {
-  1: optional list<IncompleteListDep> (cpp.template = "::std::list") field;
+  1: optional list_IncompleteListDep_5764 field;
 }
 struct IncompleteListDep {}
 
 struct CompleteList {
-  1: optional list<CompleteListDep> (
-    cpp2.template = "folly::small_vector",
-  ) field;
+  1: optional list_CompleteListDep_2043 field;
 }
 struct CompleteListDep {}
 
@@ -66,3 +62,14 @@ struct DependentAdaptedListDep {
   @thrift.Box
   1: optional i16 field;
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef list<CompleteListDep> (
+  cpp2.template = "folly::small_vector",
+) list_CompleteListDep_2043
+typedef list<IncompleteListDep> (
+  cpp.template = "::std::list",
+) list_IncompleteListDep_5764
+typedef map<i32, CompleteMapDep> (
+  cpp2.template = "std::unordered_map",
+) map_i32_CompleteMapDep_4031

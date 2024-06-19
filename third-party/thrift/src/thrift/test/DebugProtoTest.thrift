@@ -64,9 +64,7 @@ struct OneOfEach {
   13: list<i16> i16_list = [1, 2, 3];
   14: list<i64> i64_list = [1, 2, 3];
   15: map<string, string> string_string_map;
-  16: map<string, string> (
-    cpp.template = 'std::unordered_map',
-  ) string_string_hash_map;
+  16: map_string_string_2491 string_string_hash_map;
   17: float float_precision;
   18: map<i64, float> rank_map;
   19: TwoInts two_ints_uninit;
@@ -78,7 +76,7 @@ struct OneOfEach {
     {"a": 3, "b": 4},
   ];
   24: set<string> string_set;
-  25: set<string> (cpp.template = 'std::unordered_set') string_hash_set;
+  25: set_string_5791 string_hash_set;
 }
 
 struct Constant1 {
@@ -116,7 +114,7 @@ struct HolyMoley {
   1: list<OneOfEach> big;
   2: set<list<string>> contain;
   3: map<string, list<Bonk>> bonks;
-  4: map<string, list<Bonk>> (cpp.template = 'std::unordered_map') bonkers;
+  4: map_string_list_Bonk_852 bonkers;
 }
 
 struct Backwards {
@@ -185,14 +183,14 @@ struct CompactProtoTestStruct {
   26: set<binary> binary_set;
   27: set<bool> boolean_set;
   28: set<Empty> struct_set;
-  60: set<byte> (cpp.template = 'std::unordered_set') byte_hash_set;
-  61: set<i16> (cpp.template = 'std::unordered_set') i16_hash_set;
-  62: set<i32> (cpp.template = 'std::unordered_set') i32_hash_set;
-  63: set<i64> (cpp.template = 'std::unordered_set') i64_hash_set;
-  64: set<double> (cpp.template = 'std::unordered_set') double_hash_set;
-  65: set<string> (cpp.template = 'std::unordered_set') string_hash_set;
-  66: set<binary> (cpp.template = 'std::unordered_set') binary_hash_set;
-  67: set<bool> (cpp.template = 'std::unordered_set') boolean_hash_set;
+  60: set_byte_5505 byte_hash_set;
+  61: set_i16_4545 i16_hash_set;
+  62: set_i32_8261 i32_hash_set;
+  63: set_i64_5224 i64_hash_set;
+  64: set_double_7024 double_hash_set;
+  65: set_string_5791 string_hash_set;
+  66: set_binary_9394 binary_hash_set;
+  67: set_bool_8062 boolean_hash_set;
 
   // maps
   // primitives as keys
@@ -204,22 +202,14 @@ struct CompactProtoTestStruct {
   34: map<string, byte> string_byte_map;
   35: map<binary, byte> binary_byte_map;
   36: map<bool, byte> boolean_byte_map;
-  50: map<byte, byte> (cpp.template = 'std::unordered_map') byte_byte_hash_map;
-  51: map<i16, byte> (cpp.template = 'std::unordered_map') i16_byte_hash_map;
-  52: map<i32, byte> (cpp.template = 'std::unordered_map') i32_byte_hash_map;
-  53: map<i64, byte> (cpp.template = 'std::unordered_map') i64_byte_hash_map;
-  54: map<double, byte> (
-    cpp.template = 'std::unordered_map',
-  ) double_byte_hash_map;
-  55: map<string, byte> (
-    cpp.template = 'std::unordered_map',
-  ) string_byte_hash_map;
-  56: map<binary, byte> (
-    cpp.template = 'std::unordered_map',
-  ) binary_byte_hash_map;
-  57: map<bool, byte> (
-    cpp.template = 'std::unordered_map',
-  ) boolean_byte_hash_map;
+  50: map_byte_byte_7773 byte_byte_hash_map;
+  51: map_i16_byte_1780 i16_byte_hash_map;
+  52: map_i32_byte_4822 i32_byte_hash_map;
+  53: map_i64_byte_8738 i64_byte_hash_map;
+  54: map_double_byte_8301 double_byte_hash_map;
+  55: map_string_byte_2102 string_byte_hash_map;
+  56: map_binary_byte_3546 binary_byte_hash_map;
+  57: map_bool_byte_2237 boolean_byte_hash_map;
   // primitives as values
   37: map<byte, i16> byte_i16_map;
   38: map<byte, i32> byte_i32_map;
@@ -412,3 +402,33 @@ struct Nested {
 struct NotNested {
   2: i32 bar;
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef map<binary, byte> (
+  cpp.template = "std::unordered_map",
+) map_binary_byte_3546
+typedef map<bool, byte> (cpp.template = "std::unordered_map") map_bool_byte_2237
+typedef map<byte, byte> (cpp.template = "std::unordered_map") map_byte_byte_7773
+typedef map<double, byte> (
+  cpp.template = "std::unordered_map",
+) map_double_byte_8301
+typedef map<i16, byte> (cpp.template = "std::unordered_map") map_i16_byte_1780
+typedef map<i32, byte> (cpp.template = "std::unordered_map") map_i32_byte_4822
+typedef map<i64, byte> (cpp.template = "std::unordered_map") map_i64_byte_8738
+typedef map<string, byte> (
+  cpp.template = "std::unordered_map",
+) map_string_byte_2102
+typedef map<string, list<Bonk>> (
+  cpp.template = "std::unordered_map",
+) map_string_list_Bonk_852
+typedef map<string, string> (
+  cpp.template = "std::unordered_map",
+) map_string_string_2491
+typedef set<binary> (cpp.template = "std::unordered_set") set_binary_9394
+typedef set<bool> (cpp.template = "std::unordered_set") set_bool_8062
+typedef set<byte> (cpp.template = "std::unordered_set") set_byte_5505
+typedef set<double> (cpp.template = "std::unordered_set") set_double_7024
+typedef set<i16> (cpp.template = "std::unordered_set") set_i16_4545
+typedef set<i32> (cpp.template = "std::unordered_set") set_i32_8261
+typedef set<i64> (cpp.template = "std::unordered_set") set_i64_5224
+typedef set<string> (cpp.template = "std::unordered_set") set_string_5791

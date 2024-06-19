@@ -50,7 +50,12 @@ struct StructB {
   5: folly_set fieldE;
   6: folly_map fieldF;
   7: list<list<list<i32>>> fieldG;
-  8: set<folly_set_set> (cpp.template = "folly::sorted_vector_set") fieldH;
+  8: set_folly_set_set_4532 fieldH;
   9: folly_map_map fieldI;
   10: folly_list_set_map fieldJ;
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef set<folly_set_set> (
+  cpp.template = "folly::sorted_vector_set",
+) set_folly_set_set_4532

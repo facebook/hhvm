@@ -17,6 +17,12 @@
 namespace cpp2 apache.thrift.test
 
 struct foo {
-  1: map<i32, i32> (cpp.template = 'std::unordered_map') bar;
-  2: map<string, i32> (cpp.template = 'std::unordered_map') baz;
+  1: map_i32_i32_7733 bar;
+  2: map_string_i32_6307 baz;
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef map<i32, i32> (cpp.template = "std::unordered_map") map_i32_i32_7733
+typedef map<string, i32> (
+  cpp.template = "std::unordered_map",
+) map_string_i32_6307

@@ -17,6 +17,10 @@
 namespace cpp2 apache.thrift.test
 
 struct foo {
-  1: set<i32> (cpp.template = 'std::unordered_set') bar;
-  2: set<string> (cpp.template = 'std::unordered_set') baz;
+  1: set_i32_4564 bar;
+  2: set_string_8797 baz;
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef set<i32> (cpp.template = "std::unordered_set") set_i32_4564
+typedef set<string> (cpp.template = "std::unordered_set") set_string_8797

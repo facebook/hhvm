@@ -51,8 +51,8 @@ let write_file referenced output_file =
 
 let write_facts_file out_dir num_tasts json_chunks =
   let (_out_file, channel) =
-    Stdlib.Filename.open_temp_file
-      ~temp_dir:out_dir
+    Filename_unix.open_temp_file
+      ~in_dir:out_dir
       "glean_symbol_info_chunk_"
       ".json"
   in

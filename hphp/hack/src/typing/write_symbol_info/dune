@@ -29,6 +29,7 @@
   parser
   procs_procs
   server_services
+  core_unix.filename_unix
   utils_core
   base64
   uutf)

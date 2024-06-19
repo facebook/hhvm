@@ -1,11 +1,10 @@
 #!/bin/bash
 
-export OCAML_VERSION="4.14.0+options"
+export OCAML_VERSION="5.2.0+options"
 
 export HACK_OPAM_DEPS=(
   base.v0.16.3
   base64.3.5.0
-  camlp4.4.14+1
   camlp-streams.5.0.1
   cmdliner.1.1.1
   core_kernel.v0.16.0
@@ -16,11 +15,11 @@ export HACK_OPAM_DEPS=(
   fmt.0.9.0
   landmarks-ppx.1.4
   lru.0.3.1
-  lwt.5.6.1
+  lwt.5.7.0
   lwt_log.1.1.2
   lwt_ppx.2.1.0
   memtrace.0.2.3
-  merlin.4.6-414
+  merlin.5.0-502
   mtime.1.4.0
   ocp-indent.1.8.1
   ounit2.2.2.6
@@ -38,7 +37,7 @@ export HACK_OPAM_DEPS=(
   wtf8.1.0.2
   yojson.2.0.2
   ocaml-option-flambda
-  ocamlbuild.0.14.2 # stupid ocaml wants the win32 version for some reason..
+  ocamlbuild.0.14.3
 )
 
 # The rest of the file exports variables based on the above configuration.

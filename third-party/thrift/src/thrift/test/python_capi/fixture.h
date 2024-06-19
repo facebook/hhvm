@@ -21,6 +21,7 @@
 #include <thrift/lib/python/capi/extractor.h>
 #include <thrift/lib/python/capi/iobuf.h>
 
+#include <thrift/test/python_capi/gen-python-capi/containers/thrift_types_capi.h>
 #include <thrift/test/python_capi/gen-python-capi/module/thrift_types_capi.h>
 #include <thrift/test/python_capi/gen-python-capi/serialized_dep/thrift_types_capi.h>
 
@@ -63,6 +64,21 @@ PyObject* __shim__gen_SerializedStruct(int64_t len) {
   s.s_ref() = std::string(len, '1');
   return python::capi::Constructor<
       ::thrift::test::python_capi::SerializedStruct>{}(s);
+}
+
+std::string serializeTemplateLists() noexcept;
+PyObject* constructTemplateLists() noexcept;
+
+template <typename T>
+std::string extractAndSerialize(PyObject* obj) {
+  auto cpp = python::capi::Extractor<T>{}(obj);
+  if (!cpp.hasValue()) {
+    return "";
+  }
+  auto iobuf_ptr = python::capi::detail::serialize_to_iobuf(*cpp);
+  std::string ret;
+  iobuf_ptr->appendTo(ret);
+  return ret;
 }
 
 } // namespace apache::thrift::test

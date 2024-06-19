@@ -23,8 +23,9 @@ import thrift.python_capi.fixture as fixture
 
 from folly.iobuf import IOBuf
 from thrift.python.exceptions import GeneratedError
-from thrift.python.serializer import Protocol, serialize, serialize_iobuf
+from thrift.python.serializer import deserialize, Protocol, serialize, serialize_iobuf
 from thrift.python.types import StructOrUnion
+from thrift.test.python_capi.containers.thrift_types import TemplateLists
 from thrift.test.python_capi.module.thrift_types import (
     AdaptedFields,
     AnnoyingEnum,
@@ -543,3 +544,32 @@ class PythonCapiSerializeParity(PythonCapiFixture):
             ValueError, "TProtocolException: .* exceeds size limit"
         ):
             fixture.gen_SerializedStruct(2**31)
+
+
+class PythonCapiContainerTemplateParity(PythonCapiFixture):
+    def serialize(self, s: StructOrUnion) -> IOBuf:
+        return serialize_iobuf(s, protocol=Protocol.BINARY)
+
+    def deserialize(self, kls: typing.Type[sT], buf: bytes) -> sT:
+        return deserialize(kls, buf, protocol=Protocol.BINARY)
+
+    def test_template_list_construct(self) -> None:
+        from_serialized = self.deserialize(
+            TemplateLists,
+            fixture.serialize_template_lists(),
+        )
+        for fld_name, fld_val in from_serialized:
+            self.assertEqual(len(fld_val), 3, f"{fld_name} not populated")
+            for item in fld_val:
+                self.assertGreaterEqual(
+                    len(item), 3, f"{item} of {fld_name} not populated"
+                )
+        self.assertEqual(from_serialized, fixture.construct_template_lists())
+
+    def test_template_list_extract(self) -> None:
+        expected_serialized = fixture.serialize_template_lists()
+        from_serialized = self.deserialize(TemplateLists, expected_serialized)
+        self.assertEqual(
+            expected_serialized,
+            fixture.extract_template_lists(from_serialized),
+        )

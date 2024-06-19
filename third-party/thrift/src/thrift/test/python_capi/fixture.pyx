@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from libcpp cimport bool as cbool
+from libcpp.string cimport string
 from libc.stdint cimport int64_t
 
 
@@ -31,6 +32,9 @@ cdef extern from "thrift/test/python_capi/gen-cpp2/module_types.h" namespace "th
     cppclass StringPair
     cppclass VapidStruct
 
+cdef extern from "thrift/test/python_capi/gen-cpp2/containers_types.h" namespace "thrift::test::python_capi":
+    cppclass TemplateLists
+
 cdef extern from "thrift/test/python_capi/gen-cpp2/serialized_dep_types.h" namespace "thrift::test::python_capi":
     cppclass SerializedStruct
 
@@ -40,6 +44,9 @@ cdef extern from "thrift/test/python_capi/fixture.h" namespace "apache::thrift::
     cdef object __shim__marshal_to_iobuf[T](object)
     cdef object __shim__serialize_to_iobuf[T](object obj)
     cdef object __shim__gen_SerializedStruct(int64_t)
+    cdef string serializeTemplateLists() noexcept
+    cdef object constructTemplateLists()
+    cdef string extractAndSerialize[T](object obj)
 
 
 def roundtrip_MyStruct(object x):
@@ -162,3 +169,14 @@ def extract_and_serialize_ComposeStruct(object x):
 
 def deserialize_and_serialize_ComposeStruct(object x):
     return __shim__serialize_to_iobuf[ComposeStruct](x)
+
+# for testing template overrides
+
+def serialize_template_lists():
+    return serializeTemplateLists()
+
+def construct_template_lists():
+    return constructTemplateLists()
+
+def extract_template_lists(obj):
+    return extractAndSerialize[TemplateLists](obj)

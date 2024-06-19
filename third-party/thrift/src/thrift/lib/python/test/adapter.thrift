@@ -15,6 +15,7 @@
  */
 
 package "thrift.com/python/test"
+namespace py3 python_test
 
 include "thrift/annotation/python.thrift"
 include "thrift/annotation/scope.thrift"

@@ -17,7 +17,7 @@
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
 
-package "thrift.com/python/test"
+namespace py3 python_test
 
 const map<i16, map<i16, i16>> LocationMap = {1: {1: 1}};
 typedef list<i32> I32List

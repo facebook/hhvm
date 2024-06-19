@@ -16,7 +16,7 @@
 
 include "thrift/annotation/python.thrift"
 
-package "thrift.com/python/test"
+namespace py3 python_test
 
 typedef list<i32> I32List
 typedef set<easy> EasySet

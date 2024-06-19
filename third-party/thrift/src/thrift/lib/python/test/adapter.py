@@ -33,7 +33,7 @@ DatetimeAdapter.from_thrift_field = DatetimeAdapter_from_thrift_field
 DatetimeAdapter_to_thrift_field = MagicMock(wraps=DatetimeAdapter.to_thrift_field)
 DatetimeAdapter.to_thrift_field = DatetimeAdapter_to_thrift_field
 
-from thrift.python.test.adapter.thrift_types import (
+from python_test.adapter.thrift_types import (
     AdaptedInt,
     Bar,
     Baz,
@@ -44,7 +44,7 @@ from thrift.python.test.adapter.thrift_types import (
 from thrift.python.test.adapters.noop import Wrapped
 
 # @manual=//thrift/lib/python/test:adapter_thrift-python-types
-from thrift.python.test.adapter.thrift_types import (
+from python_test.adapter.thrift_types import (
     _fbthrift_unadapted_AsDatetime,
     _fbthrift_unadapted_Baz,
     _fbthrift_unadapted_NINETEEN_EIGHTY_FOUR,

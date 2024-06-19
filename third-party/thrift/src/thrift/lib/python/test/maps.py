@@ -23,9 +23,9 @@ import unittest
 from enum import Enum
 
 from folly.iobuf import IOBuf
-from thrift.python.test.containers.thrift_types import Foo, Maps
+from python_test.containers.thrift_types import Foo, Maps
 
-from thrift.python.test.maps.thrift_types import (
+from python_test.maps.thrift_types import (
     easy,
     F14MapFollyString,
     LocationMap,

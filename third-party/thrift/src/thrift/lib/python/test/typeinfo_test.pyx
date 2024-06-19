@@ -49,7 +49,7 @@ from thrift.python.mutable_containers cimport (
     MutableMap,
     MutableSet,
 )
-from thrift.python.test.containers.thrift_types import (
+from python_test.containers.thrift_types import (
     Foo,
     Bar,
     OtherFoo,

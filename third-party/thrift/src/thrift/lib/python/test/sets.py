@@ -22,18 +22,18 @@ import copy
 import unittest
 from typing import AbstractSet, Sequence, Tuple, Type
 
-import thrift.python.test.containers.thrift_mutable_types as mutable_containers_types
-import thrift.python.test.containers.thrift_types as immutable_containers_types
+import python_test.containers.thrift_mutable_types as mutable_containers_types
+import python_test.containers.thrift_types as immutable_containers_types
 
-import thrift.python.test.sets.thrift_mutable_types as immutable_sets_types
-import thrift.python.test.sets.thrift_types as mutable_sets_types
+import python_test.sets.thrift_mutable_types as immutable_sets_types
+import python_test.sets.thrift_types as mutable_sets_types
 
 from folly.iobuf import IOBuf
 
 from parameterized import parameterized_class
 
-from thrift.python.test.containers.thrift_types import Foo, Sets
-from thrift.python.test.sets.thrift_types import (
+from python_test.containers.thrift_types import Foo, Sets
+from python_test.sets.thrift_types import (
     easy,
     EasySet,
     SetI32,

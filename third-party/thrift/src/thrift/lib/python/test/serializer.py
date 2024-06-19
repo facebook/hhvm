@@ -38,6 +38,7 @@ from apache.thrift.test.terse_write.terse_write.thrift_types import (
     TerseStructWithCustomDefault,
 )
 from folly.iobuf import IOBuf
+from python_test.containers.thrift_types import Foo, Lists, Maps, Sets
 from testing.thrift_types import (
     Color,
     ColorGroups,
@@ -69,7 +70,6 @@ from thrift.python.serializer import (
     serialize,
     serialize_iobuf,
 )
-from thrift.python.test.containers.thrift_types import Foo, Lists, Maps, Sets
 from thrift.python.types import StructOrUnion
 
 

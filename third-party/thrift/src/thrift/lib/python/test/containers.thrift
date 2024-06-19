@@ -16,7 +16,7 @@
 
 include "thrift/annotation/cpp.thrift"
 
-namespace py3 thrift.python.test
+namespace py3 python_test
 
 @cpp.Type{name = "folly::IOBuf"}
 typedef binary IOBuf

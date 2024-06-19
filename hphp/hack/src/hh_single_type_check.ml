@@ -1453,22 +1453,41 @@ module File_deps = struct
 
   type 'a deps = {
     hierarchy: 'a;
+    regular: 'a * 'a;
+  }
+
+  type 'a file_deps = {
+    hierarchy: 'a;
     regular: 'a;
   }
 
   let scrape_class_names (ast : Nast.program) : SSet.t deps =
     (* Visitor that collects class names from AST *)
     let name_collector () =
+      let open Aast in
       object
-        inherit [_] Aast.iter
+        inherit [_] Aast.iter as super
 
-        val names = HashSet.create ()
+        val class_names = HashSet.create ()
+
+        val function_names = HashSet.create ()
 
         (* Note that the unit is not strictly required here, however, this way it's more in line
            with regular OCaml. *)
-        method names () = HashSet.fold names ~init:SSet.empty ~f:SSet.add
+        method class_names () =
+          HashSet.fold class_names ~init:SSet.empty ~f:SSet.add
 
-        method! on_class_name _ (_p, id) = HashSet.add names id
+        method function_names () =
+          HashSet.fold function_names ~init:SSet.empty ~f:SSet.add
+
+        method! on_class_name _ (_p, id) = HashSet.add class_names id
+
+        method! on_Call env call =
+          let { func = (_, _, expr); _ } = call in
+          (match expr with
+          | Id (_, name) -> HashSet.add function_names name
+          | _ -> ());
+          super#on_Call env call
       end
     in
     (* Visitor that invokes [name_collector] on elements of a class hierarchy
@@ -1500,32 +1519,45 @@ module File_deps = struct
     all_names_collector#on_program () ast;
     let hierarchy_names_collector = name_collector () in
     (class_hierarchy_visitor hierarchy_names_collector)#on_program () ast;
-    let hierarchy_names = hierarchy_names_collector#names () in
-    let regular_names =
-      SSet.diff (all_names_collector#names ()) hierarchy_names
+    let hierarchy_class_names = hierarchy_names_collector#class_names () in
+    let regular_class_names =
+      SSet.diff (all_names_collector#class_names ()) hierarchy_class_names
     in
-    { hierarchy = hierarchy_names; regular = regular_names }
+    let function_names = all_names_collector#function_names () in
+    {
+      hierarchy = hierarchy_class_names;
+      regular = (regular_class_names, function_names);
+    }
 
   (** Collect files that the given [file] depend on based on used class names. *)
   let collect_some_file_dependencies ctx (file : Relative_path.t) :
-      Relative_path.Set.t deps =
+      Relative_path.Set.t file_deps =
     let open Hh_prelude in
     let nast = Ast_provider.get_ast ctx ~full:true file in
     let names =
       Errors.ignore_ (fun () -> Naming.program ctx nast) |> scrape_class_names
     in
-    let resolve_to_path names =
+    let resolve_to_path names ~resolve =
       SSet.fold
-        (fun class_name files ->
-          match Naming_provider.get_class_path ctx class_name with
+        (fun name files ->
+          match resolve ctx name with
           | None -> files
           | Some file -> Relative_path.Set.add files file)
         names
         Relative_path.Set.empty
     in
+    let (regular_class_names, function_names) = names.regular in
+    let regular_files =
+      Relative_path.Set.union
+        (resolve_to_path
+           ~resolve:Naming_provider.get_class_path
+           regular_class_names)
+        (resolve_to_path ~resolve:Naming_provider.get_fun_path function_names)
+    in
     {
-      hierarchy = resolve_to_path names.hierarchy;
-      regular = resolve_to_path names.regular;
+      hierarchy =
+        resolve_to_path ~resolve:Naming_provider.get_class_path names.hierarchy;
+      regular = regular_files;
     }
 
   (** Recursively collect names in files and return the files where those names

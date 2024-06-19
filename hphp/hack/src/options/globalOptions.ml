@@ -186,6 +186,7 @@ type t = {
   preexisting_warnings: bool;
   re_no_cache: bool;
   hh_distc_should_disable_trace_store: bool;
+  tco_enable_abstract_method_optional_parameters: bool;
 }
 [@@deriving eq, show]
 
@@ -294,6 +295,7 @@ let default =
     preexisting_warnings = false;
     re_no_cache = false;
     hh_distc_should_disable_trace_store = false;
+    tco_enable_abstract_method_optional_parameters = false;
   }
 
 let set
@@ -400,6 +402,7 @@ let set
     ?preexisting_warnings
     ?re_no_cache
     ?hh_distc_should_disable_trace_store
+    ?tco_enable_abstract_method_optional_parameters
     options =
   let setting setting option =
     match setting with
@@ -671,6 +674,10 @@ let set
       setting
         hh_distc_should_disable_trace_store
         options.hh_distc_should_disable_trace_store;
+    tco_enable_abstract_method_optional_parameters =
+      setting
+        tco_enable_abstract_method_optional_parameters
+        options.tco_enable_abstract_method_optional_parameters;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

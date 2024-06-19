@@ -463,6 +463,8 @@ let load_config config options =
     ?re_no_cache:(bool_opt "re_no_cache" config)
     ?hh_distc_should_disable_trace_store:
       (bool_opt "hh_distc_should_disable_trace_store" config)
+    ?tco_enable_abstract_method_optional_parameters:
+      (bool_opt "enable_abstract_method_optional_parameters" config)
     options
 
 let load ~silent options : t * ServerLocalConfig.t =

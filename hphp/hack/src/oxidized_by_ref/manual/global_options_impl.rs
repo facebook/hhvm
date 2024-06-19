@@ -141,6 +141,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_allowed_files_for_module_declarations: vec![],
     tco_package_v2: false,
     tco_package_v2_bypass_package_check_for_class_const: false,
+    tco_enable_abstract_method_optional_parameters: false,
 };
 
 impl GlobalOptions<'static> {

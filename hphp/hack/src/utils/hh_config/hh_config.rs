@@ -431,6 +431,7 @@ impl HhConfig {
             re_no_cache: hhconfig.get_bool_or("re_no_cache", default.re_no_cache)?,
             hh_distc_should_disable_trace_store: hhconfig.get_bool_or(
                     "hh_distc_should_disable_trace_store", default.hh_distc_should_disable_trace_store)?,
+            tco_enable_abstract_method_optional_parameters: hhconfig.get_bool_or("enable_abstract_method_optional_parameters", default.tco_enable_abstract_method_optional_parameters)?,
         };
         let mut c = Self {
             local_config,

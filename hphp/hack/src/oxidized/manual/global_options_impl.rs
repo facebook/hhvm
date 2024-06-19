@@ -143,6 +143,7 @@ impl Default for GlobalOptions {
             preexisting_warnings: false,
             re_no_cache: false,
             hh_distc_should_disable_trace_store: false,
+            tco_enable_abstract_method_optional_parameters: false,
         }
     }
 }

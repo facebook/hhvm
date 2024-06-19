@@ -321,6 +321,9 @@ let yolo_extended_reasons t =
       | GlobalOptions.Yolo -> true
       | _ -> false)
 
+let enable_abstract_method_optional_parameters t =
+  t.GlobalOptions.tco_enable_abstract_method_optional_parameters
+
 let hack_warnings t = t.GlobalOptions.hack_warnings
 
 let package_v2 t = t.GlobalOptions.tco_package_v2

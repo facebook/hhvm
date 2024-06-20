@@ -7474,18 +7474,6 @@ class :el {
                     "diagnostics": [
                         {
                             "range": {
-                                "start": {"line": 18, "character": 1},
-                                "end": {"line": 18, "character": 3},
-                            },
-                            "severity": 1,
-                            "code": 2049,
-                            "source": "Hack",
-                            "message": "Unbound name: el (an object type)",
-                            "relatedInformation": [],
-                            "relatedLocations": [],
-                        },
-                        {
-                            "range": {
                                 "start": {"line": 9, "character": 5},
                                 "end": {"line": 9, "character": 19},
                             },

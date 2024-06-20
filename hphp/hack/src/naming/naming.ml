@@ -183,8 +183,7 @@ let ( elab_core_program,
       elab_core_fun_def,
       elab_core_module_def,
       elab_core_gconst,
-      elab_core_typedef,
-      elab_core_stmt ) =
+      elab_core_typedef ) =
   Naming_phase_pass.mk_visitor passes
 
 let elab_elem
@@ -252,12 +251,6 @@ module Rust_elab_core = struct
     (unit, unit) Aast.typedef ->
     Nast.typedef * Naming_phase_error.t list = "hh_elab_typedef"
 
-  external elab_stmt :
-    TypecheckerOptions.t ->
-    Relative_path.t ->
-    (unit, unit) Aast.stmt ->
-    Nast.stmt * Naming_phase_error.t list = "hh_elab_stmt"
-
   let add_errors elab_x tcopt filename x =
     let (x, errs) = elab_x tcopt filename x in
     errs
@@ -276,8 +269,6 @@ module Rust_elab_core = struct
   let elab_gconst = add_errors elab_gconst
 
   let elab_typedef = add_errors elab_typedef
-
-  let elab_stmt = add_errors elab_stmt
 end
 
 let fun_def ctx fd =
@@ -375,39 +366,32 @@ let typedef ctx td =
       ~elab_core
       td
 
+let emit_toplevel_stmt_errors positions =
+  positions
+  |> List.map ~f:(fun pos ->
+         Naming_phase_error.naming (Naming_error.Toplevel_statement pos))
+  |> List.fold ~init:Naming_phase_error.empty ~f:Naming_phase_error.add
+  |> Naming_phase_error.emit
+
 let fun_def_of_stmts ctx stmts : Nast.fun_def option =
+  let popt = Provider_context.get_popt ctx in
   let stmts =
     List.filter stmts ~f:(function
         | (_, Aast.Markup _) -> false
         | _ -> true)
   in
+  let () =
+    let positions = List.map ~f:fst stmts in
+    emit_toplevel_stmt_errors positions
+  in
   match stmts with
   | [] -> None
   | (pos, _) :: tail ->
     let pos = tail |> List.map ~f:fst |> List.fold ~init:pos ~f:Pos.merge in
-    let stmts =
-      let tcopt = Provider_context.get_tcopt ctx in
-      let filename = Pos.filename pos in
-      let elab_stmt stmt : Nast.stmt =
-        if TypecheckerOptions.rust_elab tcopt then
-          Rust_elab_core.elab_stmt tcopt filename stmt
-        else
-          let elab_ns =
-            let popt = Provider_context.get_popt ctx in
-            unstage (Naming_elaborate_namespaces_endo.elaborate_stmt popt)
-          and elab_capture = Naming_captures.elab_stmt
-          and elab_typed_locals = Naming_typed_locals.elab_stmt
-          and validate_await = Naming_validate_await.validate_stmt on_error
-          and elab_core = elab_core_stmt (mk_env filename tcopt) in
-          elab_elem
-            ~elab_ns
-            ~elab_capture
-            ~elab_typed_locals
-            ~validate_await
-            ~elab_core
-            stmt
-      in
-      List.map stmts ~f:elab_stmt
+    let ns_ns_uses =
+      popt.ParserOptions.auto_namespace_map
+      |> SMap.of_list
+      |> SMap.union Namespace_env.(empty_with_default.ns_ns_uses)
     in
     Some
       Aast.
@@ -415,7 +399,14 @@ let fun_def_of_stmts ctx stmts : Nast.fun_def option =
           fd_name =
             (pos, "")
             (* An empty function name is appropriate, as the AST can already include empty function names due to parse errors *);
-          fd_namespace = Namespace_env.empty_with_default;
+          fd_namespace =
+            Namespace_env.
+              {
+                empty_with_default with
+                ns_ns_uses;
+                ns_disable_xhp_element_mangling =
+                  popt.ParserOptions.disable_xhp_element_mangling;
+              };
           fd_file_attributes = [];
           fd_mode = FileInfo.Mstrict;
           fd_fun =

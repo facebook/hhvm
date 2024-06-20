@@ -27,8 +27,8 @@ let method_info_create (m : Tast.method_) : T.method_info =
     |> Option.value ~default:false
   in
   let is_normal_param p =
-    (not p.param_is_variadic)
-    && Option.is_none p.param_expr
+    (not (Aast_utils.is_param_variadic p))
+    && Option.is_none (Aast_utils.get_param_default p)
     && List.is_empty p.param_user_attributes
     &&
     match p.param_callconv with

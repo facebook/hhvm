@@ -12,6 +12,7 @@ use hhbc::Local;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 use oxidized::aast::FunParam;
+use oxidized::aast::FunParamInfo;
 use oxidized::pos::Pos;
 use scope::create_try_catch;
 
@@ -50,7 +51,12 @@ pub fn check_memoize_possible<Ex, En>(
     params: &[FunParam<Ex, En>],
     is_method: bool,
 ) -> Result<()> {
-    if !is_method && params.iter().any(|param| param.is_variadic) {
+    if !is_method
+        && params.iter().any(|param| match param.info {
+            FunParamInfo::ParamVariadic => true,
+            FunParamInfo::ParamRequired | FunParamInfo::ParamOptional(_) => false,
+        })
+    {
         return Err(Error::fatal_runtime(
             pos,
             String::from("<<__Memoize>> cannot be used on functions with variable arguments"),

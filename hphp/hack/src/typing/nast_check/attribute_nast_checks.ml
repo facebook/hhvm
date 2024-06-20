@@ -145,7 +145,7 @@ let handler =
 
     method! at_fun_ env f =
       let variadic_param =
-        List.find_opt (fun p -> p.param_is_variadic) f.f_params
+        List.find_opt Aast_utils.is_param_variadic f.f_params
       in
       (* Ban arguments on functions with the __EntryPoint attribute. *)
       if has_attribute SN.UserAttributes.uaEntryPoint f.f_user_attributes then begin
@@ -217,7 +217,7 @@ let handler =
 
     method! at_method_ env m =
       let variadic_param =
-        List.find_opt (fun p -> p.param_is_variadic) m.m_params
+        List.find_opt Aast_utils.is_param_variadic m.m_params
       in
       check_attribute_arity
         m.m_user_attributes

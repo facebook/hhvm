@@ -69,9 +69,9 @@ Errors:
          f_readonly_ret = None; f_ret = ((), (Some ([7:43-47], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([7:36-37], (Happly (([7:36-37], "\\A"), []))))); 
-            param_is_variadic = false; param_pos = [7:38-40]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_pos = [7:38-40]; param_name = "$x"; param_info = Param_required; 
+            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
+            param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

@@ -23,6 +23,7 @@ aast_defs::DefaultCase
 aast_defs::Expr_
 aast_defs::FunctionPtrId
 aast_defs::FunVariadicity
+aast_defs::FunParamInfo
 aast_defs::GenCase
 aast_defs::HoleSource
 aast_defs::MdNameKind

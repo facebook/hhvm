@@ -887,18 +887,29 @@ fn print_fparam(
     if param.callconv.is_pinout() {
         w.write_all(b"inout ")?;
     }
-    if param.is_variadic {
-        w.write_all(b"...")?;
+    match param.info {
+        ast::FunParamInfo::ParamVariadic => {
+            w.write_all(b"...")?;
+        }
+        ast::FunParamInfo::ParamOptional(None) => {
+            w.write_all(b"optional ")?;
+        }
+        ast::FunParamInfo::ParamRequired | ast::FunParamInfo::ParamOptional(Some(_)) => {}
     }
     write::option(w, &(param.type_hint).1, |w, h| {
         print_hint(w, true, h)?;
         w.write_all(b" ")
     })?;
     w.write_all(fixup_name(&param.name).as_bytes())?;
-    write::option(w, &param.expr, |w, e| {
-        w.write_all(b" = ")?;
-        print_expr(ctx, w, env, e)
-    })
+    match &param.info {
+        ast::FunParamInfo::ParamOptional(Some(expr)) => {
+            w.write_all(b" = ")?;
+            print_expr(ctx, w, env, expr)
+        }
+        ast::FunParamInfo::ParamOptional(None)
+        | ast::FunParamInfo::ParamRequired
+        | ast::FunParamInfo::ParamVariadic => Ok(()),
+    }
 }
 
 fn print_bop(w: &mut dyn Write, bop: &ast_defs::Bop) -> Result<()> {

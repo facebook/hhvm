@@ -49,9 +49,9 @@
          f_readonly_ret = None; f_ret = ((), (Some ([8:43-47], (Hprim Tbool))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([8:32-37], (Happly (([8:32-37], "\\AAAAA"), []))))); 
-            param_is_variadic = false; param_pos = [8:38-40]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_pos = [8:38-40]; param_name = "$x"; param_info = Param_required; 
+            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
+            param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

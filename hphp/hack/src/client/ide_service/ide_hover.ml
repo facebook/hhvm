@@ -125,13 +125,13 @@ let nth_param_name (params : ('a, 'b) Aast.fun_param list) (n : int) :
   let param =
     if n >= List.length params then
       match List.last params with
-      | Some param when param.Aast.param_is_variadic -> Some param
+      | Some param when Aast_utils.is_param_variadic param -> Some param
       | _ -> None
     else
       List.nth params n
   in
   Option.map param ~f:(fun param ->
-      if param.Aast.param_is_variadic then
+      if Aast_utils.is_param_variadic param then
         "..." ^ param.Aast.param_name
       else
         param.Aast.param_name)

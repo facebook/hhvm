@@ -45,6 +45,7 @@ use oxidized::ast::Expr_;
 use oxidized::ast::FunDef;
 use oxidized::ast::FunKind;
 use oxidized::ast::FunParam;
+use oxidized::ast::FunParamInfo;
 use oxidized::ast::Fun_;
 use oxidized::ast::FuncBody;
 use oxidized::ast::Hint;
@@ -721,10 +722,13 @@ pub fn make_fn_param(pos: Pos, lid: &LocalId, is_variadic: bool, is_inout: bool)
     FunParam {
         annotation: (),
         type_hint: TypeHint((), None),
-        is_variadic,
         pos: pos.clone(),
         name: local_id::get_name(lid).clone(),
-        expr: None,
+        info: if is_variadic {
+            FunParamInfo::ParamVariadic
+        } else {
+            FunParamInfo::ParamRequired
+        },
         callconv: if is_inout {
             ParamKind::Pinout(pos)
         } else {

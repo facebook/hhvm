@@ -51,7 +51,10 @@ impl Pass for ValidateUserAttributeMemoizePass {
 }
 
 fn check_variadic_param(params: &[FunParam], env: &Env) {
-    if let Some(param) = params.iter().find(|fp| fp.is_variadic) {
+    if let Some(param) = params.iter().find(|fp| match fp.info {
+        nast::FunParamInfo::ParamVariadic => true,
+        _ => false,
+    }) {
         env.emit_error(NastCheckError::VariadicMemoize(param.pos.clone()))
     }
 }

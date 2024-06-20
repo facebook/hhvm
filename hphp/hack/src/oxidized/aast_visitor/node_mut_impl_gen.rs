@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e22e5f56cc659d17d045664bebbe4690>>
+// @generated SignedSource<<1b5f5a8177b87bd54050ebda5d1a6928>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1210,14 +1210,33 @@ impl<P: Params> NodeMut<P> for FunParam<P::Ex, P::En> {
     ) -> Result<(), P::Error> {
         v.visit_ex(c, &mut self.annotation)?;
         self.type_hint.accept(c, v)?;
-        self.is_variadic.accept(c, v)?;
         self.pos.accept(c, v)?;
         self.name.accept(c, v)?;
-        self.expr.accept(c, v)?;
+        self.info.accept(c, v)?;
         self.readonly.accept(c, v)?;
         self.callconv.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
         self.visibility.accept(c, v)
+    }
+}
+impl<P: Params> NodeMut<P> for FunParamInfo<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_fun_param_info(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            FunParamInfo::ParamOptional(a0) => a0.accept(c, v),
+            FunParamInfo::ParamRequired => Ok(()),
+            FunParamInfo::ParamVariadic => Ok(()),
+        }
     }
 }
 impl<P: Params> NodeMut<P> for Fun_<P::Ex, P::En> {

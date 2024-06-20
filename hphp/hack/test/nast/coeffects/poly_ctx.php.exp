@@ -22,9 +22,9 @@
                              hf_is_readonly_return = None }))
                         ]
                       )))));
-           param_is_variadic = false; param_pos = [4:29-31]; param_name = "$f"; 
-           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None };
+           param_pos = [4:29-31]; param_name = "$f"; param_info = Param_required; 
+           param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
+           param_visibility = None };
           { param_annotation = ();
             param_type_hint =
             ((),
@@ -41,9 +41,9 @@
                                   hf_is_readonly_return = None }))
                              ]
                            )))))));
-            param_is_variadic = false; param_pos = [5:33-36]; param_name = "$nf"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_pos = [5:33-36]; param_name = "$nf"; param_info = Param_required; 
+            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
+            param_visibility = None }
           ];
         f_ctxs = (Some ([6:2-19], [([6:3-9], (Hfun_context "$f")); ([6:11-18], (Hfun_context "$nf"))]));
         f_unsafe_ctxs = (Some ([6:2-19], [([6:3-9], (Hfun_context "$f")); ([6:11-18], (Hfun_context "$nf"))])); 

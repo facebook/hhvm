@@ -10,9 +10,9 @@
         f_params =
         [{ param_annotation = (KeyedContainer<arraykey, int>);
            param_type_hint = ((KeyedContainer<arraykey, int>), (Some ([3:46-74], (Happly (([3:46-60], "\\HH\\KeyedContainer"), [([3:61-69], (Hprim Tarraykey)); ([3:70-73], (Hprim Tint))])))));
-           param_is_variadic = false; param_pos = [3:75-77]; param_name = "$x"; 
-           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+           param_pos = [3:75-77]; param_name = "$x"; param_info = Param_required; 
+           param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
+           param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =

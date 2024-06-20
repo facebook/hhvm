@@ -60,12 +60,14 @@ let signature
         name = Util.make_name p.param_name;
         type_ = Option.map ~f:(fun x -> Type.Key x) ty;
         default_value =
-          Option.map p.param_expr ~f:(Pretty.expr_to_string source_text);
+          Option.map
+            (Aast_utils.get_param_default p)
+            ~f:(Pretty.expr_to_string source_text);
         is_inout =
           (match p.param_callconv with
           | Pinout _ -> true
           | Pnormal -> false);
-        is_variadic = p.param_is_variadic;
+        is_variadic = Aast_utils.is_param_variadic p;
         attributes = attributes source_text p.param_user_attributes;
         type_info = Option.map ~f:(fun x -> TypeInfo.Id x) type_xref;
         readonly =

@@ -27,8 +27,11 @@ impl Pass for ValidateUserAttributeEntryPointPass {
                     env.emit_error(NastCheckError::EntrypointArguments(param.pos.clone()))
                 }
             }
-            if let Some(param) = elem.fun.params.iter().find(|p| p.is_variadic) {
-                env.emit_error(NastCheckError::EntrypointArguments(param.pos.clone()))
+            if let Some(param) = elem.fun.params.iter().find(|p| match p.info {
+                nast::FunParamInfo::ParamVariadic => true,
+                _ => false,
+            }) {
+                env.emit_error(NastCheckError::EntrypointArguments(param.pos.clone()));
             }
             match elem.tparams.as_slice() {
                 [] => (),

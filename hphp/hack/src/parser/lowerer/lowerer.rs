@@ -1726,10 +1726,9 @@ fn p_lambda_expression<'a>(
                 vec![ast::FunParam {
                     annotation: (),
                     type_hint: ast::TypeHint((), None),
-                    is_variadic: false,
                     pos: p,
                     name: n,
-                    expr: None,
+                    info: ast::FunParamInfo::ParamRequired,
                     callconv: ast::ParamKind::Pnormal,
                     readonly: None,
                     user_attributes: Default::default(),
@@ -3764,12 +3763,18 @@ fn rewrite_effect_polymorphism<'a>(
         _ => raise_parsing_error_pos(&hint.0, env, &syntax_error::ctx_var_invalid_type_hint(name)),
     };
 
-    let mut hint_by_param: HashMap<&str, (&mut Option<ast::Hint>, &Pos, aast::IsVariadic)> =
-        HashMap::default();
+    let mut hint_by_param: HashMap<&str, (&mut Option<ast::Hint>, &Pos, bool)> = HashMap::default();
     for param in params.iter_mut() {
         hint_by_param.insert(
             param.name.as_ref(),
-            (&mut param.type_hint.1, &param.pos, param.is_variadic),
+            (
+                &mut param.type_hint.1,
+                &param.pos,
+                match param.info {
+                    ast::FunParamInfo::ParamVariadic => true,
+                    _ => false,
+                },
+            ),
         );
     }
 
@@ -3913,10 +3918,9 @@ fn param_template<'a>(node: S<'a>, env: &Env<'_>) -> ast::FunParam {
     ast::FunParam {
         annotation: (),
         type_hint: ast::TypeHint((), None),
-        is_variadic: false,
         pos,
         name: text(node, env),
-        expr: None,
+        info: ast::FunParamInfo::ParamRequired,
         callconv: ast::ParamKind::Pnormal,
         readonly: None,
         user_attributes: Default::default(),
@@ -3952,15 +3956,22 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
                     &syntax_error::no_attributes_on_variadic_parameter,
                 );
             }
+            let expr = p_fun_param_default_value(default_value, env)?;
+            let callconv = p_param_kind(call_convention, env)?;
+            let info = match expr {
+                _ if is_variadic => ast::FunParamInfo::ParamVariadic,
+                Some(_) => ast::FunParamInfo::ParamOptional(expr),
+                _ => ast::FunParamInfo::ParamRequired,
+            };
+
             Ok(ast::FunParam {
                 annotation: (),
                 type_hint: ast::TypeHint((), hint),
                 user_attributes,
-                is_variadic,
                 pos,
                 name,
-                expr: p_fun_param_default_value(default_value, env)?,
-                callconv: p_param_kind(call_convention, env)?,
+                info,
+                callconv,
                 readonly: map_optional(readonly, env, p_readonly)?,
                 /* implicit field via constructor parameter.
                  * This is always None except for constructors and the modifier
@@ -3971,7 +3982,7 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
         }
         Token(_) if text_str(node, env) == "..." => {
             let mut param = param_template(node, env);
-            param.is_variadic = true;
+            param.info = ast::FunParamInfo::ParamVariadic;
             Ok(param)
         }
         _ => missing_syntax("function parameter", node, env),
@@ -5034,15 +5045,15 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
             let classvar_init = |param: &ast::FunParam| -> (ast::Stmt, ast::ClassVar) {
                 let cvname = drop_prefix(&param.name, '$');
                 let p = &param.pos;
-                let span = match &param.expr {
-                    Some(ast::Expr(_, pos_end, _)) => {
+                let span = match &param.info {
+                    ast::FunParamInfo::ParamOptional(Some(ast::Expr(_, pos_end, _))) => {
                         Pos::btw(p, pos_end).unwrap_or_else(|_| p.clone())
                     }
                     _ => p.clone(),
                 };
                 let e = |expr_: Expr_| -> ast::Expr { ast::Expr::new((), p.clone(), expr_) };
-                let prop_type_hint = match &param.type_hint.1 {
-                    Some(h) if param.is_variadic => ast::TypeHint(
+                let prop_type_hint = match (&param.type_hint.1, &param.info) {
+                    (Some(h), ast::FunParamInfo::ParamVariadic) => ast::TypeHint(
                         (),
                         Some(ast::Hint::new(
                             param.pos.clone(),

@@ -11,9 +11,9 @@
          m_name = ([4:19-20], "k"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = (ImmVector<int>); param_type_hint = ((ImmVector<int>), (Some ([4:21-35], (Happly (([4:21-30], "\\HH\\ImmVector"), [([4:31-34], (Hprim Tint))])))));
-            param_is_variadic = false; param_pos = [4:36-38]; param_name = "$k"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_pos = [4:36-38]; param_name = "$k"; param_info = Param_required; 
+            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
+            param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -39,9 +39,9 @@
          f_readonly_ret = None; f_ret = ((void), (Some ([7:32-36], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (ImmVector<int>); param_type_hint = ((ImmVector<int>), (Some ([7:12-26], (Happly (([7:12-21], "\\HH\\ImmVector"), [([7:22-25], (Hprim Tint))])))));
-            param_is_variadic = false; param_pos = [7:27-29]; param_name = "$k"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_pos = [7:27-29]; param_name = "$k"; param_info = Param_required; 
+            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
+            param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
@@ -58,9 +58,9 @@
          f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (ImmVector<float>); param_type_hint = ((ImmVector<float>), (Some ([10:3-19], (Happly (([10:3-12], "\\HH\\ImmVector"), [([10:13-18], (Hprim Tfloat))])))));
-            param_is_variadic = false; param_pos = [10:20-22]; param_name = "$k"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_pos = [10:20-22]; param_name = "$k"; param_info = Param_required; 
+            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
+            param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
@@ -104,9 +104,9 @@
          f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (ImmVector<float>); param_type_hint = ((ImmVector<float>), (Some ([22:3-19], (Happly (([22:3-12], "\\HH\\ImmVector"), [([22:13-18], (Hprim Tfloat))])))));
-            param_is_variadic = false; param_pos = [22:20-22]; param_name = "$k"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_pos = [22:20-22]; param_name = "$k"; param_info = Param_required; 
+            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
+            param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
@@ -169,9 +169,9 @@
           m_name = ([4:19-20], "k"); m_tparams = []; m_where_constraints = [];
           m_params =
           [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([4:21-35], (Happly (([4:21-30], "\\HH\\ImmVector"), [([4:31-34], (Hprim Tint))]))))); 
-             param_is_variadic = false; param_pos = [4:36-38]; param_name = "$k"; 
-             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-             param_user_attributes = []; param_visibility = None }
+             param_pos = [4:36-38]; param_name = "$k"; param_info = Param_required; 
+             param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
+             param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -197,9 +197,9 @@
          f_readonly_ret = None; f_ret = ((dynamic), (Some ([7:32-36], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([7:12-26], (Happly (([7:12-21], "\\HH\\ImmVector"), [([7:22-25], (Hprim Tint))]))))); 
-            param_is_variadic = false; param_pos = [7:27-29]; param_name = "$k"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_pos = [7:27-29]; param_name = "$k"; param_info = Param_required; 
+            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
+            param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
@@ -216,9 +216,9 @@
          f_readonly_ret = None; f_ret = ((dynamic), (Some ([23:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([22:3-19], (Happly (([22:3-12], "\\HH\\ImmVector"), [([22:13-18], (Hprim Tfloat))]))))); 
-            param_is_variadic = false; param_pos = [22:20-22]; param_name = "$k"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_pos = [22:20-22]; param_name = "$k"; param_info = Param_required; 
+            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
+            param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

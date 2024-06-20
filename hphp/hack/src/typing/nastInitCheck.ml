@@ -332,7 +332,7 @@ let rec constructor env cstr =
   | Some cstr ->
     let check_param_initializer e = ignore (expr env S.empty e) in
     List.iter cstr.m_params ~f:(fun p ->
-        Option.iter p.param_expr ~f:check_param_initializer);
+        Option.iter (Aast_utils.get_param_default p) ~f:check_param_initializer);
     let b = cstr.m_body in
     toplevel env S.empty b.fb_ast
 
@@ -664,9 +664,9 @@ and afield env acc = function
     acc
 
 and fun_param env acc param =
-  match param.param_expr with
-  | None -> acc
+  match Aast_utils.get_param_default param with
   | Some x -> expr env acc x
+  | None -> acc
 
 and fun_paraml env acc l = List.fold_left ~f:(fun_param env) ~init:acc l
 

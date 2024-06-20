@@ -42,12 +42,12 @@ let make_param_ty env param =
       (hint_of_type_hint param.param_type_hint)
   in
   let ty =
-    match get_node ty with
-    | t when param.param_is_variadic ->
+    if Aast_utils.is_param_variadic param then
       (* When checking a call f($a, $b) to a function f(C ...$args),
        * both $a and $b must be of type C *)
-      mk (Reason.var_param_from_decl param_pos, t)
-    | _ -> ty
+      mk (Reason.var_param_from_decl param_pos, get_node ty)
+    else
+      ty
   in
   let mode = get_param_mode param.param_callconv in
   {
@@ -64,7 +64,7 @@ let make_param_ty env param =
         ~mode
         ~accept_disposable:
           (has_accept_disposable_attribute param.param_user_attributes)
-        ~has_default:(Option.is_some param.param_expr)
+        ~has_default:(Option.is_some (Aast_utils.get_param_default param))
         ~readonly:(Option.is_some param.param_readonly)
         ~ignore_readonly_error:
           (has_ignore_readonly_error_attribute param.param_user_attributes);
@@ -120,18 +120,20 @@ let check_params paraml =
     match paraml with
     | [] -> None
     | param :: rl ->
-      if param.param_is_variadic then
+      if Aast_utils.is_param_variadic param then
         None
       (* Assume that a variadic parameter is the last one we need
             to check. We've already given a parse error if the variadic
             parameter is not last. *)
-      else if seen_default && Option.is_none param.param_expr then
+      else if
+        seen_default && Option.is_none (Aast_utils.get_param_default param)
+      then
         Some Typing_error.(primary @@ Primary.Previous_default param.param_pos)
       (* We've seen at least one required parameter, and there's an
           optional parameter after it.  Given an error, and then stop looking
           for more errors in this parameter list. *)
       else
-        loop (Option.is_some param.param_expr) rl
+        loop (Option.is_some (Aast_utils.get_param_default param)) rl
   in
   loop false paraml
 

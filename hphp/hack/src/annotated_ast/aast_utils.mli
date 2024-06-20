@@ -45,3 +45,8 @@ val get_fun_expr : ('a, 'b) Aast_defs.expr -> ('a, 'b) Aast_defs.fun_ option
 (** True iff the expression is definitely not going to have any side effects.
     This is a conservative syntactic check only, so calls always return false. *)
 val is_const_expr : ('a, 'b) Aast_defs.expr -> bool
+
+val is_param_variadic : ('a, 'b) Aast_defs.fun_param -> bool
+
+val get_param_default :
+  ('a, 'b) Aast_defs.fun_param -> ('a, 'b) Aast_defs.expr option

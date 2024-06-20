@@ -193,7 +193,10 @@ let summarize_param param =
       ~default:pos
   in
   let param_end =
-    Option.value_map param.param_expr ~f:(fun (_, p, _) -> p) ~default:pos
+    Option.value_map
+      (Aast_utils.get_param_default param)
+      ~f:(fun (_, p, _) -> p)
+      ~default:pos
   in
   let modifiers = modifier_of_param_kind [] param.param_callconv in
   let modifiers =

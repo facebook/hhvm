@@ -31,7 +31,7 @@ let check_param_has_hint env param =
   let prim_err_opt =
     if Option.is_none (hint_of_type_hint param.param_type_hint) then
       Some
-        (if param.param_is_variadic then
+        (if Aast_utils.is_param_variadic param then
           Typing_error.Primary.Expecting_type_hint_variadic param.param_pos
         else
           Typing_error.Primary.Expecting_type_hint param.param_pos)
@@ -91,7 +91,7 @@ let make_param_local_ty ~dynamic_mode ~no_auto_likes env decl_hint param =
       let (et_enforced, ty) =
         Typing_enforceability.compute_enforced_and_pessimize_ty
           ~this_class:(Env.get_self_class env |> Decl_entry.to_option)
-          ~explicitly_untrusted:param.param_is_variadic
+          ~explicitly_untrusted:(Aast_utils.is_param_variadic param)
           env
           hint
       in
@@ -137,14 +137,14 @@ let make_param_local_ty ~dynamic_mode ~no_auto_likes env decl_hint param =
     in
     Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
     let ty =
-      match get_node ty with
-      | t when param.param_is_variadic ->
+      if Aast_utils.is_param_variadic param then
         (* when checking the body of a function with a variadic
          * argument, "f(C ...$args)", $args is a vec<C> *)
         let r = Reason.var_param param.param_pos in
-        let arr_values = mk (r, t) in
+        let arr_values = mk (r, get_node ty) in
         MakeType.vec r arr_values
-      | _ -> ty
+      else
+        ty
     in
     (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
     let prim_err_opt = enforce_param_not_disposable env param ty in

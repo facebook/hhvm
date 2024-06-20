@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ca22bd6ca23fe21ab0a89348fbde5900>>
+// @generated SignedSource<<cb2a0bb3a37225c1bf2ef2c2d0773140>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1731,7 +1731,39 @@ pub enum XhpAttribute<'a, Ex, En> {
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for XhpAttribute<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(XhpAttribute<'arena, Ex, En>);
 
-pub use oxidized::aast_defs::IsVariadic;
+/// Param_optional None = `optional int $i`
+/// Param_optional (Some e) = `int $i = e`
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(
+    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+#[rust_to_ocaml(and)]
+#[repr(C, u8)]
+pub enum FunParamInfo<'a, Ex, En> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Param_optional")]
+    ParamOptional(Option<&'a Expr<'a, Ex, En>>),
+    #[rust_to_ocaml(name = "Param_required")]
+    ParamRequired,
+    #[rust_to_ocaml(name = "Param_variadic")]
+    ParamVariadic,
+}
+impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for FunParamInfo<'a, Ex, En> {}
+arena_deserializer::impl_deserialize_in_arena!(FunParamInfo<'arena, Ex, En>);
 
 #[derive(
     Clone,
@@ -1759,14 +1791,12 @@ pub struct FunParam<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub type_hint: &'a TypeHint<'a, Ex>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub is_variadic: &'a oxidized::aast_defs::IsVariadic,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub pos: &'a Pos<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: &'a str,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub expr: Option<&'a Expr<'a, Ex, En>>,
+    pub info: FunParamInfo<'a, Ex, En>,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub readonly: Option<oxidized::ast_defs::ReadonlyKind>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

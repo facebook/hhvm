@@ -39,9 +39,9 @@ val array_get :
   array_pos:pos ->
   expr_pos:pos ->
   expr_ty:locl_ty ->
-  ?lhs_of_null_coalesce:is_variadic ->
+  ?lhs_of_null_coalesce:bool ->
   ?ignore_error:bool ->
-  is_variadic ->
+  bool ->
   Typing_env_types.env ->
   locl_ty ->
   ('a, 'b) Aast.expr ->

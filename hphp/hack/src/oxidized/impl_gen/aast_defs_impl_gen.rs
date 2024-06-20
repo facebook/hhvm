@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c274927c67dbf247f62b779098fb7537>>
+// @generated SignedSource<<03e895d494776242c95ed973b19d6174>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2680,6 +2680,53 @@ impl<Ex, En> XhpAttribute<Ex, En> {
     pub fn as_xhp_spread_into(self) -> Option<Expr<Ex, En>> {
         match self {
             XhpAttribute::XhpSpread(p0) => Some(p0),
+            _ => None,
+        }
+    }
+}
+impl<Ex, En> FunParamInfo<Ex, En> {
+    pub fn mk_param_optional(p0: Option<Expr<Ex, En>>) -> Self {
+        FunParamInfo::ParamOptional(p0)
+    }
+    pub fn mk_param_required() -> Self {
+        FunParamInfo::ParamRequired
+    }
+    pub fn mk_param_variadic() -> Self {
+        FunParamInfo::ParamVariadic
+    }
+    pub fn is_param_optional(&self) -> bool {
+        match self {
+            FunParamInfo::ParamOptional(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_param_required(&self) -> bool {
+        match self {
+            FunParamInfo::ParamRequired => true,
+            _ => false,
+        }
+    }
+    pub fn is_param_variadic(&self) -> bool {
+        match self {
+            FunParamInfo::ParamVariadic => true,
+            _ => false,
+        }
+    }
+    pub fn as_param_optional(&self) -> Option<&Option<Expr<Ex, En>>> {
+        match self {
+            FunParamInfo::ParamOptional(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_param_optional_mut(&mut self) -> Option<&mut Option<Expr<Ex, En>>> {
+        match self {
+            FunParamInfo::ParamOptional(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_param_optional_into(self) -> Option<Option<Expr<Ex, En>>> {
+        match self {
+            FunParamInfo::ParamOptional(p0) => Some(p0),
             _ => None,
         }
     }

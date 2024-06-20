@@ -63,20 +63,13 @@ let mk_param_decl_info_internal ~context_id ~is_variadic pos callconv =
 
 let mk_param_decl_info
     ~context_id
-    Aast.
-      {
-        param_pos;
-        param_callconv;
-        param_type_hint = (ty, _);
-        param_is_variadic;
-        _;
-      } =
+    (Aast.{ param_pos; param_callconv; param_type_hint = (ty, _); _ } as par) =
   let bad_type = Typing_defs.is_any ty in
   if bad_type then
     let param_decl_info =
       mk_param_decl_info_internal
         ~context_id
-        ~is_variadic:param_is_variadic
+        ~is_variadic:(Aast_utils.is_param_variadic par)
         param_pos
         param_callconv
     in

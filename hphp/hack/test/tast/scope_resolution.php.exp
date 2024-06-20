@@ -231,9 +231,9 @@ Errors:
          f_readonly_ret = None; f_ret = ((void), (Some ([20:35-39], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([20:22-29], Hdynamic))); 
-            param_is_variadic = false; param_pos = [20:30-32]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_pos = [20:30-32]; param_name = "$x"; param_info = Param_required; 
+            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
+            param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
@@ -413,9 +413,9 @@ Errors:
          f_readonly_ret = None; f_ret = ((void), (Some ([107:33-37], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([107:20-27], Hdynamic))); 
-            param_is_variadic = false; param_pos = [107:28-30]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_pos = [107:28-30]; param_name = "$x"; param_info = Param_required; 
+            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
+            param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

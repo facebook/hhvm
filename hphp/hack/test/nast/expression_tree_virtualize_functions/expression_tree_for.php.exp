@@ -199,10 +199,9 @@
                                                               f_params =
                                                               [{ param_annotation = (); 
                                                                  param_type_hint = ((), (Some ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), []))))); 
-                                                                 param_is_variadic = false; 
                                                                  param_pos = [4:3-13]; 
                                                                  param_name = "$0v"; 
-                                                                 param_expr = None; 
+                                                                 param_info = Param_required; 
                                                                  param_readonly = None; 
                                                                  param_callconv = Pnormal; 
                                                                  param_user_attributes = []; 

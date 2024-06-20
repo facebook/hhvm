@@ -758,11 +758,10 @@ let fun_param : Env.t -> variance -> Nast.fun_param -> unit =
  fun env variance param ->
   let {
     Aast.param_type_hint = (_, h);
-    param_is_variadic = _;
     param_pos = _;
     param_name = _;
     param_annotation = _;
-    param_expr = _;
+    param_info = _;
     param_readonly = _;
     param_callconv;
     param_user_attributes = _;
@@ -986,12 +985,11 @@ let props_from_constructors : Nast.method_ list -> Nast.class_var list =
       |> List.filter_map ~f:(fun param ->
              let {
                Aast.param_type_hint;
-               param_is_variadic = _;
                param_pos;
                param_name;
                param_annotation = ();
-               param_expr;
                param_readonly;
+               param_info = _;
                param_callconv = _;
                param_user_attributes;
                param_visibility;
@@ -1008,7 +1006,7 @@ let props_from_constructors : Nast.method_ list -> Nast.class_var list =
                  cv_readonly = Option.is_some param_readonly;
                  cv_type = param_type_hint;
                  cv_id = (param_pos, param_name);
-                 cv_expr = param_expr;
+                 cv_expr = Aast_utils.get_param_default param;
                  cv_user_attributes = param_user_attributes;
                  cv_doc_comment = None;
                  cv_is_static = false;

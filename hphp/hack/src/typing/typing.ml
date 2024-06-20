@@ -8456,8 +8456,8 @@ and Lambda : sig
 
   val bind_params :
     env ->
-    ?can_read_globals:is_variadic ->
-    no_auto_likes:is_variadic ->
+    ?can_read_globals:bool ->
+    no_auto_likes:bool ->
     contexts option ->
     locl_ty option list ->
     Nast.fun_param list ->
@@ -8494,7 +8494,7 @@ end = struct
       ?(no_auto_likes = false)
       (opt_ty1, param) =
     let (env, param_te, ty1) =
-      match param.param_expr with
+      match Aast_utils.get_param_default param with
       | None -> begin
         match opt_ty1 with
         | None ->
@@ -8590,6 +8590,7 @@ end = struct
         in
         (env, Some te, ty1)
     in
+
     (* Update the reason to record the flow from the parameter hint into the parameter *)
     let ty1 =
       Prov.(
@@ -8607,10 +8608,13 @@ end = struct
       {
         Aast.param_annotation = Tast.make_expr_annotation param.param_pos ty1;
         Aast.param_type_hint = (ty1, hint_of_type_hint param.param_type_hint);
-        Aast.param_is_variadic = param.param_is_variadic;
         Aast.param_pos = param.param_pos;
         Aast.param_name = param.param_name;
-        Aast.param_expr = param_te;
+        Aast.param_info =
+          (match param.param_info with
+          | Param_required -> Param_required
+          | Param_variadic -> Param_variadic
+          | Param_optional _ -> Param_optional param_te);
         Aast.param_callconv = param.param_callconv;
         Aast.param_readonly = param.param_readonly;
         Aast.param_user_attributes = user_attributes;
@@ -8745,7 +8749,7 @@ end = struct
     (env, t_variadic)
 
   and closure_bind_opt_param env param : env =
-    match param.param_expr with
+    match Aast_utils.get_param_default param with
     | None ->
       let (env, _) = bind_param env (None, param) in
       env
@@ -9072,7 +9076,7 @@ end = struct
     in
     let (env, t_variadic_params) =
       match
-        ( List.find f.f_params ~f:(fun p -> p.param_is_variadic),
+        ( List.find f.f_params ~f:Aast_utils.is_param_variadic,
           get_ft_variadic ft )
       with
       | (Some arg, true) ->
@@ -9081,7 +9085,7 @@ end = struct
       | (_, _) -> (env, [])
     in
     let non_variadic_params =
-      List.filter f.f_params ~f:(fun p -> not p.param_is_variadic)
+      List.filter f.f_params ~f:(fun p -> not (Aast_utils.is_param_variadic p))
     in
     let params = ref non_variadic_params in
     let (env, t_params) =
@@ -9615,10 +9619,10 @@ and Class_id : sig
   *     <expr>  CIexpr expr  expression that evaluates to an object or classname
   *)
   val class_expr :
-    ?check_targs_well_kinded:is_variadic ->
-    ?is_attribute_param:is_variadic ->
+    ?check_targs_well_kinded:bool ->
+    ?is_attribute_param:bool ->
     ?exact:exact ->
-    ?check_explicit_targs:is_variadic ->
+    ?check_explicit_targs:bool ->
     ?inside_nameof:bool ->
     ?is_const:bool ->
     env ->

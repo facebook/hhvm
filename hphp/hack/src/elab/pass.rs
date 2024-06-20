@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7b352ff28582f14d8348ba2910e42d6d>>
+// @generated SignedSource<<fa97ff6e1b3226f26c740652ef7cf705>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -412,6 +412,22 @@ pub trait Pass: PassClone {
         &mut self,
         env: &Env,
         elem: &mut XhpAttribute<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_fun_param_info_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut FunParamInfo<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_fun_param_info_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut FunParamInfo<Ex, En>,
     ) -> ControlFlow<()> {
         Continue(())
     }
@@ -1826,6 +1842,28 @@ impl Pass for Passes {
     ) -> ControlFlow<()> {
         for pass in &mut self.passes {
             pass.on_ty_xhp_attribute_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_fun_param_info_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut FunParamInfo<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_fun_param_info_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_fun_param_info_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut FunParamInfo<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_fun_param_info_bottom_up(env, elem)?;
         }
         Continue(())
     }

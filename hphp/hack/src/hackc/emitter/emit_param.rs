@@ -96,15 +96,20 @@ fn from_ast<'a, 'd>(
     scope: &Scope<'a>,
     param: &a::FunParam,
 ) -> Result<Option<(Param, Option<(Label, a::Expr)>)>> {
-    if param.is_variadic && param.name == "..." {
+    let is_variadic = match param.info {
+        a::FunParamInfo::ParamVariadic => true,
+        a::FunParamInfo::ParamRequired => false,
+        a::FunParamInfo::ParamOptional(_) => false,
+    };
+    if is_variadic && param.name == "..." {
         return Ok(None);
-    };
-    if param.is_variadic {
+    }
+    if is_variadic {
         tparams.push("array");
-    };
+    }
     let type_info = {
-        let param_type_hint = if param.is_variadic {
-            Some(Hint(
+        let param_type_hint = match param.info {
+            a::FunParamInfo::ParamVariadic => Some(Hint(
                 Pos::NONE,
                 Box::new(Hint_::mk_happly(
                     Id(Pos::NONE, "array".to_string()),
@@ -114,9 +119,10 @@ fn from_ast<'a, 'd>(
                         .as_ref()
                         .map_or(vec![], |h| vec![h.clone()]),
                 )),
-            ))
-        } else {
-            param.type_hint.get_hint().clone()
+            )),
+            a::FunParamInfo::ParamRequired | a::FunParamInfo::ParamOptional(_) => {
+                param.type_hint.get_hint().clone()
+            }
         };
         if let Some(h) = param_type_hint {
             Some(hint_to_type_info(
@@ -130,9 +136,14 @@ fn from_ast<'a, 'd>(
             None
         }
     };
+    let expr = match &param.info {
+        a::FunParamInfo::ParamOptional(Some(expr)) => Some(expr),
+        a::FunParamInfo::ParamOptional(None)
+        | a::FunParamInfo::ParamRequired
+        | a::FunParamInfo::ParamVariadic => None,
+    };
     // Do the type check for default value type and hint type
-    if let Some(err_msg) = default_type_check(&param.name, type_info.as_ref(), param.expr.as_ref())
-    {
+    if let Some(err_msg) = default_type_check(&param.name, type_info.as_ref(), expr) {
         return Err(Error::fatal_parse(&param.pos, err_msg));
     }
     aast_visitor::visit(
@@ -141,14 +152,11 @@ fn from_ast<'a, 'd>(
             phantom_d: PhantomData,
         },
         &mut Ctx { emitter, scope },
-        &param.expr,
+        &expr,
     )
     .unwrap();
     let default_value = if generate_defaults {
-        param
-            .expr
-            .as_ref()
-            .map(|expr| (emitter.label_gen_mut().next_regular(), expr.clone()))
+        expr.map(|expr| (emitter.label_gen_mut().next_regular(), expr.clone()))
     } else {
         None
     };
@@ -160,7 +168,7 @@ fn from_ast<'a, 'd>(
     Ok(Some((
         Param {
             name: hhbc::intern(&param.name),
-            is_variadic: param.is_variadic,
+            is_variadic,
             is_inout: param.callconv.is_pinout(),
             is_readonly,
             user_attributes: attrs.into(),

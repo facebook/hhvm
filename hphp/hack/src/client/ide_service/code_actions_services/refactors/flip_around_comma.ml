@@ -97,7 +97,7 @@ let visitor ~(cursor : Pos.t) =
   let find_in_positions_params params =
     let is_easy_to_flip param =
       Aast_defs.(
-        (not param.param_is_variadic)
+        (not (Aast_utils.is_param_variadic param))
         && Option.is_none param.param_readonly
         && Option.is_none param.param_visibility
         && (match param.param_callconv with
@@ -107,7 +107,7 @@ let visitor ~(cursor : Pos.t) =
     in
     let pos_of_expr_opt = function
       | Some (_, pos, _) -> pos
-      | None -> Pos.none
+      | _ -> Pos.none
     in
     if List.for_all params ~f:is_easy_to_flip then
       params
@@ -119,7 +119,7 @@ let visitor ~(cursor : Pos.t) =
                    ~init:param.param_pos
                    ~f:Pos.merge
                    [
-                     pos_of_expr_opt param.param_expr;
+                     pos_of_expr_opt (Aast_utils.get_param_default param);
                      pos_of_type_hint param.param_type_hint;
                    ])
       |> find_in_positions

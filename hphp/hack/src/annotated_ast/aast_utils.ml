@@ -208,3 +208,15 @@ and is_const_afield afield =
   match afield with
   | AFvalue expr -> is_const_expr expr
   | AFkvalue (e1, e2) -> is_const_expr e1 && is_const_expr e2
+
+let is_param_variadic param =
+  match param.param_info with
+  | Param_variadic -> true
+  | Param_required -> false
+  | Param_optional _ -> false
+
+let get_param_default param =
+  match param.param_info with
+  | Param_variadic -> None
+  | Param_required -> None
+  | Param_optional e -> e

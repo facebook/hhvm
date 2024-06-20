@@ -196,10 +196,9 @@ pub fn desugar(
                 )),
             )),
         ),
-        is_variadic: false,
         pos: visitor_pos.clone(),
         name: visitor_variable(),
-        expr: None,
+        info: ast::FunParamInfo::ParamRequired,
         callconv: ParamKind::Pnormal,
         readonly: None,
         user_attributes: Default::default(),
@@ -1278,12 +1277,15 @@ impl RewriteState {
 
                 let mut param_names = Vec::with_capacity(fun_.params.len());
                 for param in &fun_.params {
-                    if param.expr.is_some() {
-                        self.errors.push((
-                            param.pos.clone(),
-                            "Expression trees do not support parameters with default values."
-                                .into(),
-                        ));
+                    match param.info {
+                        ast::FunParamInfo::ParamOptional(Some(_)) => {
+                            self.errors.push((
+                                param.pos.clone(),
+                                "Expression trees do not support parameters with default values."
+                                    .into(),
+                            ));
+                        }
+                        _ => {}
                     }
                     param_names.push(string_literal(param.pos.clone(), &param.name));
                 }
@@ -1816,10 +1818,9 @@ fn immediately_invoked_lambda(
             ast::FunParam {
                 annotation: (),
                 type_hint: ast::TypeHint((), None),
-                is_variadic: false,
                 pos,
                 name,
-                expr: None,
+                info: ast::FunParamInfo::ParamRequired,
                 callconv: ParamKind::Pnormal,
                 readonly: None,
                 user_attributes: Default::default(),

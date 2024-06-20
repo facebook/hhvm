@@ -151,10 +151,9 @@ Program(
                                     ),
                                 ),
                             ),
-                            is_variadic: false,
                             pos: |tuple_hints.php(12:24-26),
                             name: "$x",
-                            expr: None,
+                            info: ParamRequired,
                             readonly: None,
                             callconv: Pnormal,
                             user_attributes: UserAttributes(

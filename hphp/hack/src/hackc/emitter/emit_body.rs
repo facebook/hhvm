@@ -520,7 +520,12 @@ pub fn emit_method_prolog<'a, 'd>(
 
     let ast_params = ast_params
         .iter()
-        .filter(|p| !(p.is_variadic && p.name == "..."))
+        .filter(|p| {
+            !(match &p.info {
+                ast::FunParamInfo::ParamVariadic if p.name == "..." => true,
+                _ => false,
+            })
+        })
         .collect::<Vec<_>>();
     if params.len() != ast_params.len() {
         return Err(Error::unrecoverable("length mismatch"));

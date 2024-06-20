@@ -9,9 +9,8 @@
         f_readonly_ret = None; f_ret = ((), (Some ([3:58-62], (Hprim Tint))));
         f_params =
         [{ param_annotation = (); param_type_hint = ((), (Some ([3:49-52], (Hprim Tint)))); 
-           param_is_variadic = false; param_pos = [3:53-55]; param_name = "$x"; 
-           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-           param_user_attributes = [{ ua_name = ([3:40-46], "__Soft"); ua_params = [] }]; 
+           param_pos = [3:53-55]; param_name = "$x"; param_info = Param_required; 
+           param_readonly = None; param_callconv = Pnormal; param_user_attributes = [{ ua_name = ([3:40-46], "__Soft"); ua_params = [] }]; 
            param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;

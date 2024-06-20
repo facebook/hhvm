@@ -9,9 +9,9 @@
         f_readonly_ret = None; f_ret = ((void), (Some ([3:56-60], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (~int); param_type_hint = ((~int), (Some ([3:36-49], (Hunion [([3:37-40], (Hprim Tint)); ([3:41-48], Hdynamic)])))); 
-           param_is_variadic = false; param_pos = [3:50-53]; param_name = "$xs"; 
-           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+           param_pos = [3:50-53]; param_name = "$xs"; param_info = Param_required; 
+           param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
+           param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =

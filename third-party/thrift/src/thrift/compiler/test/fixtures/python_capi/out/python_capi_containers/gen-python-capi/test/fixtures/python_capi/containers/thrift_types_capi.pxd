@@ -20,9 +20,6 @@ cdef api object init__test__fixtures__python_capi__containers__TemplateLists(obj
 
 cdef api int can_extract__test__fixtures__python_capi__containers__TemplateSets(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__python_capi__containers__TemplateSets(object) except NULL
-
-cdef api object construct__test__fixtures__python_capi__containers__TemplateSets(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__python_capi__containers__TemplateSets(object data)
 

@@ -198,8 +198,8 @@ SSATmp* is_a_impl(IRGS& env, const ParamPrep& params, bool subclassOnly) {
   // is_subclass_of's default value for $allowString = true
   auto const allowClass = nparams == 3 ? params[2].value : cns(env, subclassOnly);
 
-  if (!cls_or_obj->type().subtypeOfAny(TCls, TObj) ||
-      !cls->type().subtypeOfAny(TCls, TLazyCls, TStr) ||
+  if (!cls_or_obj->type().subtypeOfAny(TObj, TStr, TLazyCls, TCls) ||
+      !cls->type().subtypeOfAny(TStr, TLazyCls, TCls) || 
       !allowClass->isA(TBool)) {
     return nullptr;
   }
@@ -244,18 +244,21 @@ SSATmp* is_a_impl(IRGS& env, const ParamPrep& params, bool subclassOnly) {
     auto const rhsOpt = lookupRhs();
     return is_a(lhs, rhsOpt);
   } else {
-    assertx(cls_or_obj->isA(TCls));
+    assertx(cls_or_obj->isA(TStr|TLazyCls|TCls));
     // is_a always returns false if the first argument is not an object and
     // $allow_string is false
     return cond(
       env,
       [&](Block* taken) {
         gen(env, JmpZero, taken, allowClass);
-      },
-      [&] {
-        // TODO(T168044199) admit TStr and TLazyCls and call ldCls
-        auto const lhs = cls_or_obj;
 
+        // Note: is_a does Class::load for lhs and Class::lookup for rhs
+        auto const lhsOpt = cls_or_obj->isA(TCls)
+          ? cls_or_obj
+          : ldCls(env, cls_or_obj, LdClsFallback::Silent);
+        return gen(env, CheckNonNull, taken, lhsOpt);
+      },
+      [&](SSATmp* lhs) {
         auto const rhsOpt = lookupRhs();
         return is_a(lhs, rhsOpt);
       },

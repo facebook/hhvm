@@ -34,6 +34,7 @@ cdef extern from "thrift/test/python_capi/gen-cpp2/module_types.h" namespace "th
 
 cdef extern from "thrift/test/python_capi/gen-cpp2/containers_types.h" namespace "thrift::test::python_capi":
     cppclass TemplateLists
+    cppclass TemplateMaps
     cppclass TemplateSets
 
 cdef extern from "thrift/test/python_capi/gen-cpp2/serialized_dep_types.h" namespace "thrift::test::python_capi":
@@ -47,6 +48,8 @@ cdef extern from "thrift/test/python_capi/fixture.h" namespace "apache::thrift::
     cdef object __shim__gen_SerializedStruct(int64_t)
     cdef string serializeTemplateLists() noexcept
     cdef object constructTemplateLists()
+    cdef string serializeTemplateMaps() noexcept
+    cdef object constructTemplateMaps()
     cdef string serializeTemplateSets() noexcept
     cdef object constructTemplateSets()
     cdef string extractAndSerialize[T](object obj)
@@ -192,3 +195,12 @@ def construct_template_sets():
 
 def extract_template_sets(obj):
     return extractAndSerialize[TemplateSets](obj)
+
+def serialize_template_maps():
+    return serializeTemplateMaps()
+
+def construct_template_maps():
+    return constructTemplateMaps()
+
+def extract_template_maps(obj):
+    return extractAndSerialize[TemplateMaps](obj)

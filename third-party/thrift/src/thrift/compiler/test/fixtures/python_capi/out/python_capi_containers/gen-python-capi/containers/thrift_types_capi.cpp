@@ -338,6 +338,87 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
+ExtractorResult<::test::fixtures::python_capi::TemplateMaps>
+Extractor<::test::fixtures::python_capi::TemplateMaps>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::python_capi::TemplateMaps>(
+      "Module test.fixtures.python_capi.containers import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__python_capi__containers__TemplateMaps(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::python_capi::TemplateMaps>(
+        "Thrift serialize error: TemplateMaps");
+  }
+  return detail::deserialize_iobuf<::test::fixtures::python_capi::TemplateMaps>(std::move(val));
+}
+
+
+ExtractorResult<::test::fixtures::python_capi::TemplateMaps>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::python_capi::TemplateMaps>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::python_capi::TemplateMaps>(
+      "Module test.fixtures.python_capi.containers import error");
+  }
+  auto obj = StrongRef(init__test__fixtures__python_capi__containers__TemplateMaps(fbthrift_data));
+  if (!obj) {
+      return extractorError<::test::fixtures::python_capi::TemplateMaps>(
+          "Init from fbthrift error: TemplateMaps");
+  }
+  return Extractor<::test::fixtures::python_capi::TemplateMaps>{}(*obj);
+}
+
+int Extractor<::test::fixtures::python_capi::TemplateMaps>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.python_capi.containers import error");
+  }
+  int result =
+      can_extract__test__fixtures__python_capi__containers__TemplateMaps(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: TemplateMaps");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::python_capi::TemplateMaps>::operator()(
+    const ::test::fixtures::python_capi::TemplateMaps& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__test__fixtures__python_capi__containers__TemplateMaps(std::move(serialized));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::TemplateMaps>>::operator()(
+    const ::test::fixtures::python_capi::TemplateMaps& val) {
+  auto obj = StrongRef(Constructor<::test::fixtures::python_capi::TemplateMaps>{}(val));
+  if (!obj) {
+    return nullptr;
+  }
+  return getThriftData(*obj);
+}
+
 } // namespace capi
 } // namespace python
 } // namespace thrift

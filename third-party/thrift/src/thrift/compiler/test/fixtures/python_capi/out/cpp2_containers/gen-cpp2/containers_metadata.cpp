@@ -72,6 +72,29 @@ StructMetadata<::test::fixtures::python_capi::TemplateSets>::gen(ThriftMetadata&
   }
   return res.first->second;
 }
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::python_capi::TemplateMaps>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("containers.TemplateMaps", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& containers_TemplateMaps = res.first->second;
+  containers_TemplateMaps.name() = "containers.TemplateMaps";
+  containers_TemplateMaps.is_union() = false;
+  static const auto* const
+  containers_TemplateMaps_fields = new std::array<EncodedThriftField, 7>{ {
+    { 1, "std_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::map") } }).cv_struct_ref(), }},    { 2, "std_unordered", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::unordered_map") } }).cv_struct_ref(), }},    { 3, "folly_fast", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14FastMap") } }).cv_struct_ref(), }},    { 4, "folly_node", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14NodeMap") } }).cv_struct_ref(), }},    { 5, "folly_value", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14ValueMap") } }).cv_struct_ref(), }},    { 6, "folly_vector", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14VectorMap") } }).cv_struct_ref(), }},    { 7, "folly_sorted_vector", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::sorted_vector_map") } }).cv_struct_ref(), }},  }};
+  for (const auto& f : *containers_TemplateMaps_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    containers_TemplateMaps.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
 
 } // namespace md
 } // namespace detail

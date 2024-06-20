@@ -94,6 +94,30 @@ void fill_set_field(const std::string& prefix, FieldRef set) {
   return s;
 }
 
+template <typename Container>
+void fill_map(const std::string& prefix, Container& map) {
+  for (auto view : {"foo", "bar", "baz"}) {
+    map.insert({prefix + "__" + view + "_key", prefix + "__" + view + "_val"});
+  }
+}
+
+template <typename FieldRef>
+void fill_map_field(const std::string& prefix, FieldRef set) {
+  fill_map(prefix, set.ensure());
+}
+
+::thrift::test::python_capi::TemplateMaps fillTemplateMap() noexcept {
+  ::thrift::test::python_capi::TemplateMaps s;
+  fill_map_field("std_map", s.std_map());
+  fill_map_field("std_unordered", s.std_unordered());
+  fill_map_field("folly_F14FastMap", s.folly_fast());
+  fill_map_field("folly_F14NodeMap", s.folly_node());
+  fill_map_field("folly_F14ValueMap", s.folly_value());
+  fill_map_field("folly_F14VectorMap", s.folly_vector());
+  fill_map_field("folly_sorted_vector_map", s.folly_sorted_vector());
+  return s;
+}
+
 template <typename S>
 std::string serializeStruct(const S& s) noexcept {
   auto iobuf_ptr = python::capi::detail::serialize_to_iobuf(s);
@@ -122,6 +146,13 @@ std::string serializeTemplateSets() noexcept {
 }
 PyObject* constructTemplateSets() noexcept {
   return constructStruct(fillTemplateSet());
+}
+
+std::string serializeTemplateMaps() noexcept {
+  return serializeStruct(fillTemplateMap());
+}
+PyObject* constructTemplateMaps() noexcept {
+  return constructStruct(fillTemplateMap());
 }
 
 } // namespace apache::thrift::test

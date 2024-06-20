@@ -38,6 +38,20 @@ struct ForEachField<::test::fixtures::python_capi::TemplateSets> {
     f(6, static_cast<T&&>(t).folly_sorted_vector_ref()...);
   }
 };
+
+template <>
+struct ForEachField<::test::fixtures::python_capi::TemplateMaps> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).std_map_ref()...);
+    f(1, static_cast<T&&>(t).std_unordered_ref()...);
+    f(2, static_cast<T&&>(t).folly_fast_ref()...);
+    f(3, static_cast<T&&>(t).folly_node_ref()...);
+    f(4, static_cast<T&&>(t).folly_value_ref()...);
+    f(5, static_cast<T&&>(t).folly_vector_ref()...);
+    f(6, static_cast<T&&>(t).folly_sorted_vector_ref()...);
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

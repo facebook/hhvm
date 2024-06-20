@@ -10,5 +10,6 @@
 namespace test::fixtures::python_capi {
 class TemplateLists;
 class TemplateSets;
+class TemplateMaps;
 } // namespace test::fixtures::python_capi
 // END forward_declare

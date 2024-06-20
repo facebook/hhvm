@@ -70,6 +70,8 @@ std::string serializeTemplateLists() noexcept;
 PyObject* constructTemplateLists() noexcept;
 std::string serializeTemplateSets() noexcept;
 PyObject* constructTemplateSets() noexcept;
+std::string serializeTemplateMaps() noexcept;
+PyObject* constructTemplateMaps() noexcept;
 
 template <typename T>
 std::string extractAndSerialize(PyObject* obj) {

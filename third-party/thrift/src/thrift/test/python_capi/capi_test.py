@@ -25,7 +25,11 @@ from folly.iobuf import IOBuf
 from thrift.python.exceptions import GeneratedError
 from thrift.python.serializer import deserialize, Protocol, serialize, serialize_iobuf
 from thrift.python.types import Struct as PythonStruct, StructOrUnion
-from thrift.test.python_capi.containers.thrift_types import TemplateLists, TemplateSets
+from thrift.test.python_capi.containers.thrift_types import (
+    TemplateLists,
+    TemplateMaps,
+    TemplateSets,
+)
 from thrift.test.python_capi.module.thrift_types import (
     AdaptedFields,
     AnnoyingEnum,
@@ -600,5 +604,23 @@ class PythonCapiContainerTemplateParity(PythonCapiFixture):
             from_serialized,
             self.deserialize(
                 TemplateSets, fixture.extract_template_sets(from_serialized)
+            ),
+        )
+
+    def test_template_map_construct(self) -> None:
+        from_serialized = self.deserialize(
+            TemplateMaps,
+            fixture.serialize_template_maps(),
+        )
+        self.validate_not_empty(from_serialized)
+        self.assertEqual(from_serialized, fixture.construct_template_maps())
+
+    def test_template_map_extract(self) -> None:
+        expected_serialized = fixture.serialize_template_maps()
+        from_serialized = self.deserialize(TemplateMaps, expected_serialized)
+        self.assertEqual(
+            from_serialized,
+            self.deserialize(
+                TemplateMaps, fixture.extract_template_maps(from_serialized)
             ),
         )

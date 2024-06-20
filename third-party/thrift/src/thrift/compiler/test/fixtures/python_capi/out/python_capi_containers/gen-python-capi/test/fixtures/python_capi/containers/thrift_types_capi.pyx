@@ -33,3 +33,20 @@ cdef api int can_extract__test__fixtures__python_capi__containers__TemplateSets(
 cdef api object init__test__fixtures__python_capi__containers__TemplateSets(object data):
     return __thrift_types.TemplateSets._fbthrift_create(data)
 
+cdef api int can_extract__test__fixtures__python_capi__containers__TemplateMaps(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.TemplateMaps) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__python_capi__containers__TemplateMaps(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__python_capi__containers__TemplateMaps(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.TemplateMaps,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__python_capi__containers__TemplateMaps(object data):
+    return __thrift_types.TemplateMaps._fbthrift_create(data)
+

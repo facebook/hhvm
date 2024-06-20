@@ -204,6 +204,112 @@ class TemplateSets(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("containers.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.TemplateSets, self)
 
+
+class TemplateMaps(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "std_map",  # name
+            "std_map",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "std_unordered",  # name
+            "std_unordered",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "folly_fast",  # name
+            "folly_fast",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            4,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "folly_node",  # name
+            "folly_node",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            5,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "folly_value",  # name
+            "folly_value",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            6,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "folly_vector",  # name
+            "folly_vector",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "folly_sorted_vector",  # name
+            "folly_sorted_vector",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "containers.TemplateMaps"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/python_capi/TemplateMaps"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_TemplateMaps()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.python_capi.containers.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.TemplateMaps, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("containers.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.TemplateMaps, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("containers.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.TemplateMaps, self)
+
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.python_capi.containers.thrift_metadata
 
@@ -219,9 +325,14 @@ def _fbthrift_metadata__struct_TemplateSets():
     return test.fixtures.python_capi.containers.thrift_metadata.gen_metadata_struct_TemplateSets()
 
 
+def _fbthrift_metadata__struct_TemplateMaps():
+    return test.fixtures.python_capi.containers.thrift_metadata.gen_metadata_struct_TemplateMaps()
+
+
 _fbthrift_all_structs = [
     TemplateLists,
     TemplateSets,
+    TemplateMaps,
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 

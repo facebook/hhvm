@@ -86,6 +86,45 @@ class TemplateSets(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Temp
     def _to_py3(self) -> "test.fixtures.python_capi.containers.types.TemplateSets": ...  # type: ignore
     def _to_py_deprecated(self) -> "containers.ttypes.TemplateSets": ...  # type: ignore
 
+
+class _fbthrift_compatible_with_TemplateMaps:
+    pass
+
+
+class TemplateMaps(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TemplateMaps):
+    std_map: _typing.Final[_typing.Mapping[str, str]] = ...
+    std_unordered: _typing.Final[_typing.Mapping[str, str]] = ...
+    folly_fast: _typing.Final[_typing.Mapping[str, str]] = ...
+    folly_node: _typing.Final[_typing.Mapping[str, str]] = ...
+    folly_value: _typing.Final[_typing.Mapping[str, str]] = ...
+    folly_vector: _typing.Final[_typing.Mapping[str, str]] = ...
+    folly_sorted_vector: _typing.Final[_typing.Mapping[str, str]] = ...
+    def __init__(
+        self, *,
+        std_map: _typing.Optional[_typing.Mapping[str, str]]=...,
+        std_unordered: _typing.Optional[_typing.Mapping[str, str]]=...,
+        folly_fast: _typing.Optional[_typing.Mapping[str, str]]=...,
+        folly_node: _typing.Optional[_typing.Mapping[str, str]]=...,
+        folly_value: _typing.Optional[_typing.Mapping[str, str]]=...,
+        folly_vector: _typing.Optional[_typing.Mapping[str, str]]=...,
+        folly_sorted_vector: _typing.Optional[_typing.Mapping[str, str]]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        std_map: _typing.Optional[_typing.Mapping[str, str]]=...,
+        std_unordered: _typing.Optional[_typing.Mapping[str, str]]=...,
+        folly_fast: _typing.Optional[_typing.Mapping[str, str]]=...,
+        folly_node: _typing.Optional[_typing.Mapping[str, str]]=...,
+        folly_value: _typing.Optional[_typing.Mapping[str, str]]=...,
+        folly_vector: _typing.Optional[_typing.Mapping[str, str]]=...,
+        folly_sorted_vector: _typing.Optional[_typing.Mapping[str, str]]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Mapping[str, str], _typing.Mapping[str, str], _typing.Mapping[str, str], _typing.Mapping[str, str], _typing.Mapping[str, str], _typing.Mapping[str, str], _typing.Mapping[str, str]]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.python_capi.containers.types.TemplateMaps": ...  # type: ignore
+    def _to_py_deprecated(self) -> "containers.ttypes.TemplateMaps": ...  # type: ignore
+
 IOBuf = _fbthrift_iobuf.IOBuf
 small_vector_iobuf = _typing.List[_fbthrift_iobuf.IOBuf]
 fbvector_string = _typing.List[str]

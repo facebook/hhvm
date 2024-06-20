@@ -78,3 +78,20 @@ struct TemplateSets {
   @cpp.Type{template = "folly::sorted_vector_set"}
   7: set<string> folly_sorted_vector;
 }
+
+struct TemplateMaps {
+  @cpp.Type{template = "std::map"}
+  1: map<string, string> std_map;
+  @cpp.Type{template = "std::unordered_map"}
+  2: map<string, string> std_unordered;
+  @cpp.Type{template = "folly::F14FastMap"}
+  3: map<string, string> folly_fast;
+  @cpp.Type{template = "folly::F14NodeMap"}
+  4: map<string, string> folly_node;
+  @cpp.Type{template = "folly::F14ValueMap"}
+  5: map<string, string> folly_value;
+  @cpp.Type{template = "folly::F14VectorMap"}
+  6: map<string, string> folly_vector;
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  7: map<string, string> folly_sorted_vector;
+}

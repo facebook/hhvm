@@ -364,6 +364,199 @@ template uint32_t TemplateSets::serializedSizeZC<>(apache::thrift::CompactProtoc
 
 } // namespace test::fixtures::python_capi
 
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::python_capi::TemplateMaps>::translateFieldName(
+    std::string_view _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::python_capi::TemplateMaps>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test::fixtures::python_capi {
+
+const char* TemplateMaps::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/python_capi/TemplateMaps";
+}
+
+std::string_view TemplateMaps::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<TemplateMaps>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view TemplateMaps::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<TemplateMaps>::name;
+}
+
+TemplateMaps::TemplateMaps(const TemplateMaps&) = default;
+TemplateMaps& TemplateMaps::operator=(const TemplateMaps&) = default;
+TemplateMaps::TemplateMaps() {
+}
+
+
+TemplateMaps::~TemplateMaps() {}
+
+TemplateMaps::TemplateMaps([[maybe_unused]] TemplateMaps&& other) noexcept :
+    __fbthrift_field_std_map(std::move(other.__fbthrift_field_std_map)),
+    __fbthrift_field_std_unordered(std::move(other.__fbthrift_field_std_unordered)),
+    __fbthrift_field_folly_fast(std::move(other.__fbthrift_field_folly_fast)),
+    __fbthrift_field_folly_node(std::move(other.__fbthrift_field_folly_node)),
+    __fbthrift_field_folly_value(std::move(other.__fbthrift_field_folly_value)),
+    __fbthrift_field_folly_vector(std::move(other.__fbthrift_field_folly_vector)),
+    __fbthrift_field_folly_sorted_vector(std::move(other.__fbthrift_field_folly_sorted_vector)),
+    __isset(other.__isset) {
+}
+
+TemplateMaps& TemplateMaps::operator=([[maybe_unused]] TemplateMaps&& other) noexcept {
+    this->__fbthrift_field_std_map = std::move(other.__fbthrift_field_std_map);
+    this->__fbthrift_field_std_unordered = std::move(other.__fbthrift_field_std_unordered);
+    this->__fbthrift_field_folly_fast = std::move(other.__fbthrift_field_folly_fast);
+    this->__fbthrift_field_folly_node = std::move(other.__fbthrift_field_folly_node);
+    this->__fbthrift_field_folly_value = std::move(other.__fbthrift_field_folly_value);
+    this->__fbthrift_field_folly_vector = std::move(other.__fbthrift_field_folly_vector);
+    this->__fbthrift_field_folly_sorted_vector = std::move(other.__fbthrift_field_folly_sorted_vector);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+TemplateMaps::TemplateMaps(apache::thrift::FragileConstructor, std::map<::std::string, ::std::string> std_map__arg, std::unordered_map<::std::string, ::std::string> std_unordered__arg, folly::F14FastMap<::std::string, ::std::string> folly_fast__arg, folly::F14NodeMap<::std::string, ::std::string> folly_node__arg, folly::F14ValueMap<::std::string, ::std::string> folly_value__arg, folly::F14VectorMap<::std::string, ::std::string> folly_vector__arg, folly::sorted_vector_map<::std::string, ::std::string> folly_sorted_vector__arg) :
+    __fbthrift_field_std_map(std::move(std_map__arg)),
+    __fbthrift_field_std_unordered(std::move(std_unordered__arg)),
+    __fbthrift_field_folly_fast(std::move(folly_fast__arg)),
+    __fbthrift_field_folly_node(std::move(folly_node__arg)),
+    __fbthrift_field_folly_value(std::move(folly_value__arg)),
+    __fbthrift_field_folly_vector(std::move(folly_vector__arg)),
+    __fbthrift_field_folly_sorted_vector(std::move(folly_sorted_vector__arg)) { 
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+  __isset.set(folly::index_constant<4>(), true);
+  __isset.set(folly::index_constant<5>(), true);
+  __isset.set(folly::index_constant<6>(), true);
+}
+
+
+void TemplateMaps::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_std_map.clear();
+  this->__fbthrift_field_std_unordered.clear();
+  this->__fbthrift_field_folly_fast.clear();
+  this->__fbthrift_field_folly_node.clear();
+  this->__fbthrift_field_folly_value.clear();
+  this->__fbthrift_field_folly_vector.clear();
+  this->__fbthrift_field_folly_sorted_vector.clear();
+  __isset = {};
+}
+
+void TemplateMaps::__fbthrift_clear_terse_fields() {
+}
+
+bool TemplateMaps::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool TemplateMaps::operator==([[maybe_unused]] const TemplateMaps& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool TemplateMaps::operator<([[maybe_unused]] const TemplateMaps& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const std::map<::std::string, ::std::string>& TemplateMaps::get_std_map() const& {
+  return __fbthrift_field_std_map;
+}
+
+std::map<::std::string, ::std::string> TemplateMaps::get_std_map() && {
+  return std::move(__fbthrift_field_std_map);
+}
+
+const std::unordered_map<::std::string, ::std::string>& TemplateMaps::get_std_unordered() const& {
+  return __fbthrift_field_std_unordered;
+}
+
+std::unordered_map<::std::string, ::std::string> TemplateMaps::get_std_unordered() && {
+  return std::move(__fbthrift_field_std_unordered);
+}
+
+const folly::F14FastMap<::std::string, ::std::string>& TemplateMaps::get_folly_fast() const& {
+  return __fbthrift_field_folly_fast;
+}
+
+folly::F14FastMap<::std::string, ::std::string> TemplateMaps::get_folly_fast() && {
+  return std::move(__fbthrift_field_folly_fast);
+}
+
+const folly::F14NodeMap<::std::string, ::std::string>& TemplateMaps::get_folly_node() const& {
+  return __fbthrift_field_folly_node;
+}
+
+folly::F14NodeMap<::std::string, ::std::string> TemplateMaps::get_folly_node() && {
+  return std::move(__fbthrift_field_folly_node);
+}
+
+const folly::F14ValueMap<::std::string, ::std::string>& TemplateMaps::get_folly_value() const& {
+  return __fbthrift_field_folly_value;
+}
+
+folly::F14ValueMap<::std::string, ::std::string> TemplateMaps::get_folly_value() && {
+  return std::move(__fbthrift_field_folly_value);
+}
+
+const folly::F14VectorMap<::std::string, ::std::string>& TemplateMaps::get_folly_vector() const& {
+  return __fbthrift_field_folly_vector;
+}
+
+folly::F14VectorMap<::std::string, ::std::string> TemplateMaps::get_folly_vector() && {
+  return std::move(__fbthrift_field_folly_vector);
+}
+
+const folly::sorted_vector_map<::std::string, ::std::string>& TemplateMaps::get_folly_sorted_vector() const& {
+  return __fbthrift_field_folly_sorted_vector;
+}
+
+folly::sorted_vector_map<::std::string, ::std::string> TemplateMaps::get_folly_sorted_vector() && {
+  return std::move(__fbthrift_field_folly_sorted_vector);
+}
+
+
+void swap([[maybe_unused]] TemplateMaps& a, [[maybe_unused]] TemplateMaps& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_std_map, b.__fbthrift_field_std_map);
+  swap(a.__fbthrift_field_std_unordered, b.__fbthrift_field_std_unordered);
+  swap(a.__fbthrift_field_folly_fast, b.__fbthrift_field_folly_fast);
+  swap(a.__fbthrift_field_folly_node, b.__fbthrift_field_folly_node);
+  swap(a.__fbthrift_field_folly_value, b.__fbthrift_field_folly_value);
+  swap(a.__fbthrift_field_folly_vector, b.__fbthrift_field_folly_vector);
+  swap(a.__fbthrift_field_folly_sorted_vector, b.__fbthrift_field_folly_sorted_vector);
+  swap(a.__isset, b.__isset);
+}
+
+template void TemplateMaps::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t TemplateMaps::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t TemplateMaps::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t TemplateMaps::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void TemplateMaps::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t TemplateMaps::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t TemplateMaps::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t TemplateMaps::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+} // namespace test::fixtures::python_capi
+
 namespace test::fixtures::python_capi { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }

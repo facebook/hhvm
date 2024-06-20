@@ -23,7 +23,10 @@ import (
 
 // Server is a thrift server
 type Server interface {
+	// Deprecated: Listen is replaced by Addr method
 	Listen() (net.Addr, error)
+	// Addr returns the address the server is listening on.
+	Addr() net.Addr
 	// Serve starts the server
 	Serve() error
 	// ServeContext starts the server, and stops it when the context is cancelled

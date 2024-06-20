@@ -70,9 +70,14 @@ func simpleServerOptions(options ...func(*ServerOptions)) *ServerOptions {
 	return opts
 }
 
-// Listen returns the server transport listener
+// Deprecated: Listen does not listen, to get Addr use Addr method.
 func (p *SimpleServer) Listen() (net.Addr, error) {
 	return p.listener.Addr(), nil
+}
+
+// Addr returns the server listener's Addr
+func (p *SimpleServer) Addr() net.Addr {
+	return p.listener.Addr()
 }
 
 // acceptLoopContext takes a context that will be decorated with ConnInfo and passed down to new clients.

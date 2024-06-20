@@ -23,24 +23,28 @@ import (
 
 // TestSimpleServer is a simple tests that simple sends an empty message to a server and receives an empty result.
 func TestSimpleServer(t *testing.T) {
-	socket, err := NewServerSocket("[::]:0")
+	serverSocket, err := NewServerSocket("[::]:0")
 	if err != nil {
 		t.Fatalf("could not create server socket: %s", err)
 	}
-	addr := socket.Addr()
+	addr := serverSocket.Addr()
 	handler := &testProcessor{}
-	server := NewSimpleServer(handler, socket, TransportIDHeader)
+	server := NewSimpleServer(handler, serverSocket, TransportIDHeader)
 	errChan := make(chan error)
 	go func() {
 		err := server.Serve()
 		errChan <- err
 		close(errChan)
 	}()
-	conn, err := NewSocket(SocketAddr(addr.String()))
+	conn, err := DialHostPort(addr.String())
 	if err != nil {
 		t.Fatalf("could not create client socket: %s", err)
 	}
-	proto, err := NewHeaderProtocol(conn)
+	clientSocket, err := NewSocket(SocketConn(conn))
+	if err != nil {
+		t.Fatalf("could not create client socket: %s", err)
+	}
+	proto, err := NewHeaderProtocol(clientSocket)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
@@ -102,24 +106,28 @@ func (p *testProcessorFunction) RunContext(ctx context.Context, reqStruct Struct
 // This tests that S425600 does not happen again.
 // The client is allowed to set a serializaton format to the non default and the server should adjust accordingly.
 func TestSimpleServerClientSetsDifferentProtocol(t *testing.T) {
-	socket, err := NewServerSocket("[::]:0")
+	serverSocket, err := NewServerSocket("[::]:0")
 	if err != nil {
 		t.Fatalf("could not create server socket: %s", err)
 	}
-	addr := socket.Addr()
+	addr := serverSocket.Addr()
 	handler := &testProcessor{}
-	server := NewSimpleServer(handler, socket, TransportIDHeader)
+	server := NewSimpleServer(handler, serverSocket, TransportIDHeader)
 	errChan := make(chan error)
 	go func() {
 		err := server.Serve()
 		errChan <- err
 		close(errChan)
 	}()
-	conn, err := NewSocket(SocketAddr(addr.String()))
+	conn, err := DialHostPort(addr.String())
 	if err != nil {
 		t.Fatalf("could not create client socket: %s", err)
 	}
-	proto, err := NewHeaderProtocol(conn)
+	clientSocket, err := NewSocket(SocketConn(conn))
+	if err != nil {
+		t.Fatalf("could not create client socket: %s", err)
+	}
+	proto, err := NewHeaderProtocol(clientSocket)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}

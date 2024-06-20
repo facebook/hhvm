@@ -49,24 +49,23 @@ func resolveAddr(hostPort string) (net.Addr, error) {
 	return addr, nil
 }
 
-// SocketAddr sets the socket address
-func SocketAddr(hostPort string) SocketOption {
-	return func(socket *socket) error {
-		addr, err := resolveAddr(hostPort)
-		if err != nil {
-			return err
-		}
-		if len(addr.Network()) == 0 {
-			return NewTransportException(NOT_OPEN, "Cannot open bad network name.")
-		}
-		if len(addr.String()) == 0 {
-			return NewTransportException(NOT_OPEN, "Cannot open bad address.")
-		}
-		if socket.conn, err = net.Dial(addr.Network(), addr.String()); err != nil {
-			return NewTransportException(NOT_OPEN, err.Error())
-		}
-		return nil
+// DialHostPort creates a net.Conn, given a host and port combination, for example "127.0.0.1:8080".
+func DialHostPort(hostPort string) (net.Conn, error) {
+	addr, err := resolveAddr(hostPort)
+	if err != nil {
+		return nil, err
 	}
+	if len(addr.Network()) == 0 {
+		return nil, NewTransportException(NOT_OPEN, "Cannot open bad network name.")
+	}
+	if len(addr.String()) == 0 {
+		return nil, NewTransportException(NOT_OPEN, "Cannot open bad address.")
+	}
+	conn, err := net.Dial(addr.Network(), addr.String())
+	if err != nil {
+		return nil, NewTransportException(NOT_OPEN, err.Error())
+	}
+	return conn, nil
 }
 
 // SocketConn sets the socket connection

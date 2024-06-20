@@ -63,7 +63,11 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (*thrift.SimpleServer
 func connectTestHeaderServer(
 	addr net.Addr,
 ) (*thrifttest.ThriftTestClient, error) {
-	socket, err := thrift.NewSocket(thrift.SocketAddr(addr.String()), thrift.SocketTimeout(localConnTimeout))
+	conn, err := thrift.DialHostPort(addr.String())
+	if err != nil {
+		return nil, err
+	}
+	socket, err := thrift.NewSocket(thrift.SocketConn(conn), thrift.SocketTimeout(localConnTimeout))
 	if err != nil {
 		return nil, err
 	}

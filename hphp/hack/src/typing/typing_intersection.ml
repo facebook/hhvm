@@ -273,35 +273,36 @@ let rec intersect env ~r ty1 ty2 =
             | ((_, Tprim Aast.Tnum), (_, Tprim Aast.Tarraykey))
             | ((_, Tprim Aast.Tarraykey), (_, Tprim Aast.Tnum)) ->
               (env, MkType.int r)
-            | ( (_, Tneg (Neg_predicate (IsInt | IsArraykey))),
-                (_, Tprim Aast.Tnum) )
-            | ( (_, Tprim Aast.Tnum),
-                (_, Tneg (Neg_predicate (IsInt | IsArraykey))) ) ->
-              (env, MkType.float r)
-            | ((_, Tneg (Neg_predicate IsFloat)), (_, Tprim Aast.Tnum))
-            | ((_, Tprim Aast.Tnum), (_, Tneg (Neg_predicate IsFloat))) ->
-              (env, MkType.int r)
-            | ((_, Tneg (Neg_predicate IsString)), ty_ak)
-            | (ty_ak, (_, Tneg (Neg_predicate IsString))) ->
-              if
-                (* Ocaml warns about ambiguous or-pattern variables under guard if this is in a when clause*)
-                Utils.is_sub_type_for_union
-                  env
-                  (mk ty_ak)
-                  (MkType.arraykey Reason.none)
-              then
-                intersect env ~r (mk ty_ak) (MkType.int r)
-              else
-                make_intersection env r [ty1; ty2]
-            | ((_, Tneg (Neg_predicate (IsInt | IsNum))), ty_ak)
-            | (ty_ak, (_, Tneg (Neg_predicate (IsInt | IsNum)))) ->
-              if
-                Utils.is_sub_type_for_union
-                  env
-                  (mk ty_ak)
-                  (MkType.arraykey Reason.none)
-              then
-                intersect env ~r (mk ty_ak) (MkType.string r)
+            | ((neg_reason, Tneg (Neg_predicate predicate)), ty)
+            | (ty, (neg_reason, Tneg (Neg_predicate predicate))) ->
+              let partition =
+                Typing_refinement.partition_ty env (mk ty) predicate
+              in
+              if List.is_empty partition.Typing_refinement.span then
+                if List.is_empty partition.Typing_refinement.left then
+                  (* This is logically the same result as the else case handling
+                     would produce but may be simpler *)
+                  (env, mk ty)
+                else
+                  let (env, intersections) =
+                    List.fold_left
+                      partition.Typing_refinement.right
+                      ~init:(env, [])
+                      ~f:(fun (env, acc) tys ->
+                        (* recursion here should be safe since, while the type
+                           may not be structurally smaller, it should be
+                           logically smaller and we shouldn't repeat !predicate
+                        *)
+                        let (env, intersection) =
+                          intersect_list env neg_reason tys
+                        in
+                        (env, intersection :: acc))
+                  in
+                  let (env, right_ty) =
+                    Utils.simplify_unions env
+                    @@ MkType.union neg_reason intersections
+                  in
+                  (env, right_ty)
               else
                 make_intersection env r [ty1; ty2]
             | _ -> make_intersection env r [ty1; ty2]

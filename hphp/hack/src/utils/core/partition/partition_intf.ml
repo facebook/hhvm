@@ -64,6 +64,19 @@ module type S = sig
       is definitely within the right side of the partition *)
   val right : t -> dnf
 
+  (** Given a product function from sets to a set and a list of partitions,
+      Returns a new partition that is the "product" of the given partitions
+      such that:
+      A set in the new partition is a set obtained by taking one set from each
+      given partition and combining them using the given product function.
+      There is a set in the new partition for every such combination.
+      Combinations of sets only from the left side of the input partitions are
+      on the left of the new partition.
+      Combinations of sets containing at least one set from the right side of
+      an input partition are on the right of the new partition.
+      All other combinations of sets are in the span of the new partition. *)
+  val product : (set list -> set) -> t list -> t
+
   module Infix_ops : sig
     val ( ||| ) : t -> t -> t
 
@@ -72,6 +85,9 @@ module type S = sig
 end
 
 module type Partition = sig
+  (* Compute the cartesian product of lists *)
+  val cartesian : 'a list list -> 'a list list
+
   module type S = S
 
   (* Constructs a partition representation over the given [AtomicSet] *)

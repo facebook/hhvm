@@ -8,6 +8,29 @@
 
 include Partition_intf
 
+let cartesian xss =
+  let rec aux xss ~k =
+    match xss with
+    (* Product of the empty list is a single empty list   *)
+    | [] -> k [[]]
+    | xs :: xss ->
+      (* Get the cartesian product of the tail lists *)
+      aux xss ~k:(fun xss ->
+          (* Then, for each element in the head list,
+             we cons to each list in the product of the tail
+             e.g. if we had [1;2] :: [3] :: []  then we find the cartesian product
+             of [3] :: [] === [[3]] then map over the head list ([1;2]) prepending it
+             to that product, i.e. [[1;3];[2;3]]
+          *)
+          k @@ auxs xs xss [])
+  and auxs xs xss acc =
+    match xs with
+    | [] -> List.rev acc
+    | x :: xs ->
+      auxs xs xss @@ List.fold_left (fun acc xs -> (x :: xs) :: acc) acc xss
+  in
+  aux xss ~k:(fun x -> x)
+
 module Make (AtomicSet : sig
   type t
 
@@ -83,6 +106,46 @@ end) : S with type set := AtomicSet.t = struct
       | Or ands ->
         List.map (fun list -> SetSet.elements list)
         @@ ConjunctionSet.elements ands
+
+    (** This function computes a product of N-lattices by pushing the product
+        operation through the DNF such that the resulting lattice
+        is a DNF of N-ary product of atoms
+        (and each product of atoms is converted into an atom via product_f).
+
+        This pushing and conversion is done by the N-ary extrapolation of the
+        following:
+
+        A = a_0 | a_1 | ... | a_n
+          a_i = a_i_0 & a_i_1 & ... & a_i_xi
+        B = b_0 | b_1 | ... | b_m
+          b_i = b_i_0 & b_i_1 & ... & b_i_yi
+
+        A x B = or(for all i=0..n, j=0..m : a_i x b_j)
+          a_i x b_j = and(for all k=0..xi, l=0..yi : product_f [a_i_k; b_j_l])
+    *)
+    let product product_f (tl : t list) =
+      let product_of_setsets (setset_l : SetSet.t list) =
+        let product_elts =
+          setset_l
+          |> List.map SetSet.elements
+          |> cartesian
+          |> List.map product_f
+        in
+        let sets = List.map singleton product_elts in
+        List.fold_left meet top sets
+      in
+      let product_of_csets (cset_l : ConjunctionSet.t list) =
+        let product_elts =
+          cartesian @@ List.map ConjunctionSet.elements cset_l
+        in
+        List.fold_left join bottom @@ List.map product_of_setsets product_elts
+      in
+      let to_cset t =
+        match t with
+        | And setset -> ConjunctionSet.singleton setset
+        | Or cset -> cset
+      in
+      product_of_csets @@ List.map to_cset tl
   end
 
   (* [left] is disjoint from [right], while [span] contains sets
@@ -188,6 +251,62 @@ end) : S with type set := AtomicSet.t = struct
   let span t = Lattice.to_list t.span
 
   let right t = Lattice.to_list t.right
+
+  (*
+    A := Al | As | Ar
+    B := Bl | Bs | Br
+    c := Cl | Cs | Cr
+
+    When computing A x B x C we have:
+
+    left = Al x Bl x Cl
+    span = (As x (Bl | Bs) x (Cl | Cs)) |
+           ((Al | As) x Bs x (Cl | Cs)) |
+           ((Al | As) x (Bl | Bs) x Cs)
+    right = (Ar x B x C) | (A x Br x C) | (A x B x Cr)
+  *)
+  let product product_f tl =
+    let left_lattices = List.map (fun t -> t.left) tl in
+    let span_lattices = List.map (fun t -> t.span) tl in
+    let left_or_span_lattices =
+      List.map (fun t -> Lattice.join t.left t.span) tl
+    in
+    let right_lattices = List.map (fun t -> t.right) tl in
+    let full_lattices =
+      List.map (fun t -> Lattice.Infix_ops.(t.left ||| t.span ||| t.right)) tl
+    in
+    let left = Lattice.product product_f left_lattices in
+    (* Given
+       befores @ current_and_afters = [(a0, b0), (a1, b1) .. (an, bn)]
+       Return
+       [product(a0, b1 .. bn), product(b0, a1, b2 .. bn) .. product(b0, b1 .. bn-1, an)]
+    *)
+    let rec helper befores current_and_afters =
+      match current_and_afters with
+      | [] -> []
+      | ((curr, _other) as pair) :: afters ->
+        let parts =
+          List.map (fun (_curr, other) -> other) befores
+          @ [curr]
+          @ List.map (fun (_curr, other) -> other) afters
+        in
+        if List.exists Lattice.is_bottom parts then
+          helper (List.rev (pair :: befores)) afters
+        else
+          Lattice.product product_f parts
+          :: helper (List.rev (pair :: befores)) afters
+    in
+    let span =
+      List.fold_left Lattice.join Lattice.bottom
+      @@ helper []
+      @@ List.combine span_lattices left_or_span_lattices
+    in
+    let right =
+      List.fold_left Lattice.join Lattice.bottom
+      @@ helper []
+      @@ List.combine right_lattices full_lattices
+    in
+    { left; span; right }
 
   module Infix_ops = struct
     let ( ||| ) = join

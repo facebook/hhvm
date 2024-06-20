@@ -47,6 +47,16 @@ bool operand_one(Env& env, Vreg op) {
   return true;
 }
 
+bool operand_zero(Env& env, Vreg op) {
+  auto const op_it = env.unit.regToConst.find(op);
+  if (op_it == env.unit.regToConst.end()) return false;
+
+  auto const op_const = op_it->second;
+  if (op_const.isUndef) return false;
+  if (op_const.val != 0) return false;
+  return true;
+}
+
 // Reduce use of immediate one possibly removing def as dead code.
 // Specific to ARM using hard-coded zero register.
 template <typename Out, typename Inst>
@@ -108,6 +118,22 @@ bool simplify(Env& env, const loadb& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool simplify(Env& env, const ldimmb& inst, Vlabel b, size_t i) {
+  // ldimmb{N, d}; movzbq{s, d} --> ldimmb{N, d}
+  return if_inst<Vinstr::movzbq>(env, b, i + 1, [&](const movzbq& mov) {
+    if (!(inst.s.l() >= 0 && inst.s.l() <= 255 &&
+          env.use_counts[inst.d] == 1 &&
+          inst.d == mov.s)) return false;
+
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << ldimmb{inst.s.l(), inst.d};
+      return 2;
+    });
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 bool simplify(Env& env, const ldimmq& inst, Vlabel b, size_t i) {
   return if_inst<Vinstr::lea>(env, b, i + 1, [&] (const lea& ea) {
     // ldimmq{s, index}; lea{base[index], d} -> lea{base[s],d}
@@ -138,6 +164,41 @@ bool simplify(Env& env, const movzbl& inst, Vlabel b, size_t i) {
     return simplify_impl(env, b, i, [&] (Vout& v) {
       v << copy{inst.s, inst.d};
       v << ubfmli{2, 7, inst.d, sh.d};
+      return 2;
+    });
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool simplify(Env& env, const movzbq& inst, Vlabel b, size_t i) {
+  if (operand_zero(env, inst.s)) {
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << copy{PhysReg(vixl::wzr), inst.d,};
+      return 1;
+    });
+  }
+
+  auto const def_op = env.def_insts[inst.s];
+  // instructions known to clear upper 32-bits of register
+  if (!(def_op == Vinstr::setcc ||
+        def_op == Vinstr::loadb ||
+        def_op == Vinstr::loadtqb ||
+        def_op == Vinstr::loadzbl ||
+        def_op == Vinstr::loadzbq)) return false;
+
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    v << copy{inst.s, inst.d};
+    return 1;
+  });
+
+  // movzbq{s, d}; copy{s, d} --> movzbq{s, d}
+  return if_inst<Vinstr::copy>(env, b, i + 1, [&](const copy& cpy) {
+    if (!(env.use_counts[inst.d] == 1 &&
+          inst.d == cpy.s)) return false;
+
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << movzbq{inst.s, cpy.d};
       return 2;
     });
   });

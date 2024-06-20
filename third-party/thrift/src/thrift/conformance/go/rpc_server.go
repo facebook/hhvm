@@ -49,11 +49,7 @@ func main() {
 		glog.Fatalf("failed to start server: %v", err)
 	}
 
-	addr, err := ts.Listen()
-	if err != nil {
-		glog.Fatalf("failed to start server: %v", err)
-	}
-	fmt.Println(addr.(*net.TCPAddr).Port)
+	fmt.Println(ts.Addr().(*net.TCPAddr).Port)
 	go func() {
 		err := ts.Serve()
 		if err != nil {

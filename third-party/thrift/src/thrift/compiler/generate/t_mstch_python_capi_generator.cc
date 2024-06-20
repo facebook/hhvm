@@ -53,16 +53,22 @@ std::string_view remove_leading_scope(std::string_view symbol) {
 bool is_supported_template(std::string_view symbol) {
   symbol = remove_leading_scope(symbol);
   static const std::unordered_set<std::string_view> kSupportedTemplates = {
+      "folly::F14FastMap",
       "folly::F14FastSet",
+      "folly::F14NodeMap",
       "folly::F14NodeSet",
+      "folly::F14ValueMap",
       "folly::F14ValueSet",
+      "folly::F14VectorMap",
       "folly::F14VectorSet",
       "folly::fbvector",
       "folly::small_vector",
+      "folly::sorted_vector_map",
       "folly::sorted_vector_set",
       "std::deque",
       "std::map",
       "std::set",
+      "std::unordered_map",
       "std::unordered_set",
       "std::vector",
   };

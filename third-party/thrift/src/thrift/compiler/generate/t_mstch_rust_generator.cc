@@ -1035,13 +1035,13 @@ class rust_mstch_service : public mstch_service {
     if (service_->has_annotation("rust.mod")) {
       return service_->get_annotation("rust.mod");
     } else if (
-        const t_const* annot =
+        const t_const* annot_mod =
             service_->find_structured_annotation_or_null(kRustModUri)) {
-      return get_annotation_property_string(annot, "name");
+      return get_annotation_property_string(annot_mod, "name");
     } else if (
-        const t_const* annot =
+        const t_const* annot_name =
             service_->find_structured_annotation_or_null(kRustNameUri)) {
-      return snakecase(get_annotation_property_string(annot, "name"));
+      return snakecase(get_annotation_property_string(annot_name, "name"));
     } else if (service_->has_annotation("rust.name")) {
       return snakecase(service_->get_annotation("rust.name"));
     } else {

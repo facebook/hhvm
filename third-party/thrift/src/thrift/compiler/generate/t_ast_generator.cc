@@ -28,6 +28,7 @@
 #include <thrift/compiler/lib/const_util.h>
 #include <thrift/compiler/lib/schematizer.h>
 
+#include <thrift/lib/cpp2/op/Sha256Hasher.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
@@ -138,8 +139,11 @@ void t_ast_generator::generate_program() {
                           t_program* = nullptr) {
     auto value = const_to_value(*val);
     if (schema_opts_.use_hash) {
-      auto hash = op::hash<type::struct_t<protocol::Value>>(value);
-      auto key = static_cast<type::ValueKey>(hash);
+      auto hash = op::hash<
+          type::struct_t<protocol::Value>,
+          apache::thrift::op::Sha256Hasher>(value);
+      type::ValueKey key;
+      memcpy(&key, hash.data(), sizeof(key));
       if (ast.valuesMap()->count(key)) {
         if (ast.valuesMap()->at(key) != value) {
           throw std::runtime_error(fmt::format(
@@ -148,7 +152,7 @@ void t_ast_generator::generate_program() {
       } else {
         ast.valuesMap()->insert({key, std::move(value)});
       }
-      return static_cast<t_program::value_id>(hash);
+      return static_cast<t_program::value_id>(key);
     }
 
     auto& values = ast.values().value();

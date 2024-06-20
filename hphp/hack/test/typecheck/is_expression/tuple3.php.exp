@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
   File "tuple3.php", line 3, characters 12-29:
   Expected `(int, int, string)`
   File "tuple3.php", line 6, characters 13-25:
-  But got `(int, string)`
+  But got `(int, string)` from this `is` expression test

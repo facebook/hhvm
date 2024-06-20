@@ -27,17 +27,91 @@ type ty_partition = {
   right: dnf_ty;
 }
 
-let rec split_ty
-    ~(expansions : SSet.t)
-    (env : env)
-    (ty : locl_ty)
-    ~(partition_f : env -> DataType.t -> locl_ty -> TyPartition.t) =
+let rec split_ty ~(expansions : SSet.t) (env : env) (ty : locl_ty) ~predicate =
+  let predicate_datatype = DataType.of_predicate env predicate in
+  let predicate_complement_datatype = DataType.complement predicate_datatype in
+  let partition_tuple_by_tuple ty_reason tuple_tyl sub_predicates =
+    let predicate_ty_pairs = List.zip sub_predicates tuple_tyl in
+    begin
+      match predicate_ty_pairs with
+      | List.Or_unequal_lengths.Unequal_lengths ->
+        TyPartition.mk_right ty (* mismatch arity *)
+      | List.Or_unequal_lengths.Ok predicate_ty_pairs ->
+        (* split each tuple element ty by its respective predicate *)
+        let sub_splits =
+          List.map predicate_ty_pairs ~f:(fun (predicate, ty) ->
+              split_ty ~expansions env ty ~predicate)
+        in
+        TyPartition.product (Typing_make_type.tuple ty_reason) sub_splits
+    end
+  in
+  let partition_f env ty_datatype ty =
+    if DataType.are_disjoint env ty_datatype predicate_datatype then
+      (* We use the DataType as a quick check but for some types the DataType is
+         insufficiently precise.
+         If either DataType is an underapproximation, then the disjointness
+         check may not be valid.
+         When we convert a type or predicate to a DataType, this will usually be
+         an overapproximation, but if the type is negative or we otherwise
+         complement the DataType, this becomes an underapproximation.
+         Here, ty_datatype may have come from a negation and will be an
+         underapproximation if the type was a negative of a predicate for which
+         the negated predicate's datatype (before negation) is an
+         overapproximation. This is true for the following negated predicates:
+
+         - (only, for now) IsTupleOf -- in this case, the disjointness check
+           will not hold if predicate is also IsTupleOf; and so we span
+      *)
+      match get_node ty with
+      | Tneg neg -> begin
+        match neg with
+        (* we'll over-approximate the DataType for IsTupleOf *)
+        | Neg_predicate (IsTupleOf _np_predicates) -> begin
+          match predicate with
+          | IsTupleOf _predicates -> TyPartition.mk_span ty
+          | _ -> TyPartition.mk_right ty
+        end
+        (* The DataType for these are precise *)
+        | Neg_predicate
+            ( IsBool | IsInt | IsString | IsArraykey | IsFloat | IsNum
+            | IsResource | IsNull )
+        (* We don't have a class-predicate right now *)
+        | Neg_class _ ->
+          TyPartition.mk_right ty
+      end
+      | _ -> TyPartition.mk_right ty
+    else if DataType.are_disjoint env ty_datatype predicate_complement_datatype
+    then
+      (* Similar to above, here, predicate_complement_datatype may be an
+         underapproximation if predicate is:
+
+         - (only, for now) IsTupleOf -- in this case, if ty is a Ttuple, we can
+           do a deeper split
+      *)
+      match predicate with
+      | IsTupleOf predicates -> begin
+        match get_node ty with
+        | Ttuple tyl -> partition_tuple_by_tuple (get_reason ty) tyl predicates
+        | _ -> TyPartition.mk_span ty
+      end
+      | IsBool
+      | IsInt
+      | IsString
+      | IsArraykey
+      | IsFloat
+      | IsNum
+      | IsResource
+      | IsNull ->
+        TyPartition.mk_left ty
+    else
+      TyPartition.mk_span ty
+  in
   let split_union ~expansions (tys : locl_ty list) =
-    let partitions = List.map ~f:(split_ty ~expansions ~partition_f env) tys in
+    let partitions = List.map ~f:(split_ty ~expansions ~predicate env) tys in
     List.fold ~init:TyPartition.mk_bottom ~f:TyPartition.join partitions
   in
   let split_intersection ~init ~expansions (tys : locl_ty list) =
-    let partitions = List.map ~f:(split_ty ~expansions ~partition_f env) tys in
+    let partitions = List.map ~f:(split_ty ~expansions ~predicate env) tys in
     List.fold ~init ~f:TyPartition.meet partitions
   in
   let (env, ety) = Env.expand_type env ty in
@@ -95,15 +169,15 @@ let rec split_ty
       split_union ~expansions [Typing_make_type.null (get_reason ty); ty_opt]
     (* Types we need to split across an intersection *)
     | Tintersection [] ->
-      split_ty ~expansions ~partition_f env
+      split_ty ~expansions ~predicate env
       @@ Typing_make_type.mixed (get_reason ty)
     | Tintersection (ty :: tyl) ->
-      let init = split_ty ~expansions ~partition_f env ty in
+      let init = split_ty ~expansions ~predicate env ty in
       split_intersection ~init ~expansions tyl
     (* Below are types of the form T <: U. We treat these as T & U *)
     | Tdependent (_, super_ty) ->
       TyPartition.(
-        meet (mk_span ty) @@ split_ty ~expansions ~partition_f env super_ty)
+        meet (mk_span ty) @@ split_ty ~expansions ~predicate env super_ty)
     | Tgeneric (name, _)
     | Tnewtype (name, _, _)
       when SSet.mem name expansions ->
@@ -159,18 +233,7 @@ let rec split_ty
   TyPartition.simplify partition ty
 
 let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
-  let predicate_datatype = DataType.of_predicate env predicate in
-  let complement_datatype = DataType.complement predicate_datatype in
-  let partition_f env datatype =
-    if DataType.are_disjoint env datatype predicate_datatype then
-      TyPartition.mk_right
-    else if DataType.are_disjoint env datatype complement_datatype then
-      TyPartition.mk_left
-    else
-      TyPartition.mk_span
-  in
-
-  let partition = split_ty ~expansions:SSet.empty ~partition_f env ty in
+  let partition = split_ty ~expansions:SSet.empty ~predicate env ty in
   {
     predicate;
     left = TyPartition.left partition;
@@ -179,7 +242,7 @@ let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
   }
 
 module TyPredicate = struct
-  let of_ty env ty =
+  let rec of_ty env ty =
     match get_node ty with
     | Tprim Aast.Tbool -> Some (env, IsBool)
     | Tprim Aast.Tint -> Some (env, IsInt)
@@ -189,9 +252,26 @@ module TyPredicate = struct
     | Tprim Aast.Tnum -> Some (env, IsNum)
     | Tprim Aast.Tresource -> Some (env, IsResource)
     | Tprim Aast.Tnull -> Some (env, IsNull)
+    | Ttuple tys -> begin
+      match
+        List.fold_left
+          tys
+          ~init:(Some (env, []))
+          ~f:(fun acc ty ->
+            match acc with
+            | None -> None
+            | Some (env, predicates) -> begin
+              match of_ty env ty with
+              | Some (env, predicate) -> Some (env, predicate :: predicates)
+              | None -> None
+            end)
+      with
+      | None -> None
+      | Some (env, predicates) -> Some (env, IsTupleOf (List.rev predicates))
+    end
     | _ -> None
 
-  let to_ty reason predicate =
+  let rec to_ty reason predicate =
     match predicate with
     | IsBool -> Typing_make_type.bool reason
     | IsInt -> Typing_make_type.int reason
@@ -201,4 +281,6 @@ module TyPredicate = struct
     | IsNum -> Typing_make_type.num reason
     | IsResource -> Typing_make_type.resource reason
     | IsNull -> Typing_make_type.null reason
+    | IsTupleOf predicates ->
+      Typing_make_type.tuple reason (List.map predicates ~f:(to_ty reason))
 end

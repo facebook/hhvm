@@ -260,10 +260,19 @@ end) : S with type set := AtomicSet.t = struct
     When computing A x B x C we have:
 
     left = Al x Bl x Cl
-    span = (As x (Bl | Bs) x (Cl | Cs)) |
+    span = (As x (B - Br) x (C - Cr)) |
+           ((A - Ar) x Bs x (C - Cr)) |
+           ((A - Ar) x (B - Br) x Cs)
+         = (As x (Bl | Bs) x (Cl | Cs)) |
            ((Al | As) x Bs x (Cl | Cs)) |
            ((Al | As) x (Bl | Bs) x Cs)
     right = (Ar x B x C) | (A x Br x C) | (A x B x Cr)
+
+    This is:
+    - "left if ALL parts are left"
+    - "right if ANY parts are right"
+    - "span otherwise" which is
+      "span if no parts are right and at least one part is not left"
   *)
   let product product_f tl =
     let left_lattices = List.map (fun t -> t.left) tl in

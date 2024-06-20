@@ -508,6 +508,7 @@ module DataType = struct
     | IsNum -> Set.of_list ~reason [IntData; FloatData]
     | IsResource -> Set.singleton ~reason ResourceData
     | IsNull -> Set.singleton ~reason NullData
+    | IsTupleOf _ -> Set.singleton ~reason VecData
 
   let rec fromTy ~trail (env : env) (ty : locl_ty) : 'phase t =
     let open Tag in
@@ -819,6 +820,7 @@ module AtomicDataTypes = struct
     | IsNum -> of_ty env (Primitive Aast.Tnum)
     | IsResource -> of_ty env (Primitive Aast.Tresource)
     | IsNull -> of_ty env (Primitive Aast.Tnull)
+    | IsTupleOf _ -> of_ty env Tuple
 
   let complement dt = DataType.Set.diff mixed dt
 

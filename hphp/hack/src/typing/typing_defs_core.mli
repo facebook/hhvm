@@ -193,6 +193,7 @@ type type_predicate =
   | IsNum
   | IsResource
   | IsNull
+  | IsTupleOf of type_predicate list
 [@@deriving eq, ord, hash, show]
 
 (** Negation types represent the type of values that fail an `is` test

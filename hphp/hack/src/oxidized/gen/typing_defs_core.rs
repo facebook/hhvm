@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<084ebf56bdfb0b293db5f5268204b3e4>>
+// @generated SignedSource<<5c39afe165bf253f35879c65288e8771>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -515,13 +515,11 @@ pub struct FunType {
 
 #[derive(
     Clone,
-    Copy,
     Debug,
     Deserialize,
     Eq,
     EqModuloPos,
     FromOcamlRep,
-    FromOcamlRepIn,
     Hash,
     NoPosHash,
     Ord,
@@ -531,7 +529,7 @@ pub struct FunType {
     ToOcamlRep
 )]
 #[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
-#[repr(u8)]
+#[repr(C, u8)]
 pub enum TypePredicate {
     IsBool,
     IsInt,
@@ -541,9 +539,8 @@ pub enum TypePredicate {
     IsNum,
     IsResource,
     IsNull,
+    IsTupleOf(Vec<TypePredicate>),
 }
-impl TrivialDrop for TypePredicate {}
-arena_deserializer::impl_deserialize_in_arena!(TypePredicate);
 
 #[derive(
     Clone,

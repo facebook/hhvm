@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d12b07a6c63275704847656bc81d9438>>
+// @generated SignedSource<<fd132be8d4c45fde5c86f482ec0f90ba>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -453,7 +453,38 @@ pub struct FunType<'a> {
 impl<'a> TrivialDrop for FunType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(FunType<'arena>);
 
-pub use oxidized::typing_defs_core::TypePredicate;
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
+#[repr(C, u8)]
+pub enum TypePredicate<'a> {
+    IsBool,
+    IsInt,
+    IsString,
+    IsArraykey,
+    IsFloat,
+    IsNum,
+    IsResource,
+    IsNull,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    IsTupleOf(&'a [TypePredicate<'a>]),
+}
+impl<'a> TrivialDrop for TypePredicate<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(TypePredicate<'arena>);
 
 #[derive(
     Clone,
@@ -479,7 +510,7 @@ pub enum NegType<'a> {
     NegClass(&'a PosId<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Neg_predicate")]
-    NegPredicate(&'a oxidized::typing_defs_core::TypePredicate),
+    NegPredicate(&'a TypePredicate<'a>),
 }
 impl<'a> TrivialDrop for NegType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(NegType<'arena>);

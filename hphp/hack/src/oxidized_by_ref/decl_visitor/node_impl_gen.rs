@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9a9c09edfea7abbd436e70d6e3d6a3e7>>
+// @generated SignedSource<<fe2368310b987cb4187053256ad627b9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -575,6 +575,24 @@ impl<'a> Node<'a> for FunType<'a> {
                 }
                 { __binding_6.accept(v) }
             }
+        }
+    }
+}
+impl<'a> Node<'a> for TypePredicate<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_type_predicate(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            TypePredicate::IsBool => {}
+            TypePredicate::IsInt => {}
+            TypePredicate::IsString => {}
+            TypePredicate::IsArraykey => {}
+            TypePredicate::IsFloat => {}
+            TypePredicate::IsNum => {}
+            TypePredicate::IsResource => {}
+            TypePredicate::IsNull => {}
+            TypePredicate::IsTupleOf(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -1323,23 +1341,6 @@ impl<'a> Node<'a> for ClassConstKind {
         match self {
             ClassConstKind::CCAbstract(ref __binding_0) => __binding_0.accept(v),
             ClassConstKind::CCConcrete => {}
-        }
-    }
-}
-impl<'a> Node<'a> for TypePredicate {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_type_predicate(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            TypePredicate::IsBool => {}
-            TypePredicate::IsInt => {}
-            TypePredicate::IsString => {}
-            TypePredicate::IsArraykey => {}
-            TypePredicate::IsFloat => {}
-            TypePredicate::IsNum => {}
-            TypePredicate::IsResource => {}
-            TypePredicate::IsNull => {}
         }
     }
 }

@@ -1168,7 +1168,7 @@ module Full = struct
       (fuel, access_doc)
 
   and type_predicate ~fuel ~negate predicate =
-    let predicate_doc =
+    let rec predicate_doc predicate =
       match predicate with
       | IsBool -> text "bool"
       | IsInt -> text "int"
@@ -1178,6 +1178,10 @@ module Full = struct
       | IsNum -> text "num"
       | IsResource -> text "resource"
       | IsNull -> text "null"
+      | IsTupleOf predicates ->
+        let texts = List.map predicates ~f:predicate_doc in
+        Concat
+          ([text "("] @ List.intersperse texts ~sep:(text ", ") @ [text ")"])
     in
     let doc =
       Concat
@@ -1188,7 +1192,7 @@ module Full = struct
             "not "
           else
             "is ");
-          predicate_doc;
+          predicate_doc predicate;
         ]
     in
     (fuel, doc)
@@ -1529,7 +1533,7 @@ module ErrorString = struct
     | Taccess (_ty, _id) -> (fuel, "a type constant")
     | Tneg (Neg_class (_, c)) -> (fuel, "anything but a " ^ strip_ns c)
     | Tneg (Neg_predicate predicate) ->
-      let str =
+      let rec str predicate =
         match predicate with
         | IsBool -> "a bool"
         | IsInt -> "an int"
@@ -1539,8 +1543,11 @@ module ErrorString = struct
         | IsNum -> "a num"
         | IsResource -> "a resource"
         | IsNull -> "null"
+        | IsTupleOf predicates ->
+          let strings = List.map predicates ~f:str in
+          "(" ^ String.concat ~sep:", " strings ^ ")"
       in
-      (fuel, "is not " ^ str)
+      (fuel, "is not " ^ str predicate)
 
   and dependent dep =
     let x = strip_ns @@ DependentKind.to_string dep in
@@ -1721,7 +1728,7 @@ module Json = struct
       obj @@ kind p "primitive" @ name (Aast_defs.string_of_tprim tp)
     | (p, Tneg (Neg_class (_, c))) -> obj @@ kind p "negation" @ name c
     | (p, Tneg (Neg_predicate predicate)) ->
-      let predicate_json =
+      let rec predicate_json predicate =
         match predicate with
         | IsBool -> name "isbool"
         | IsInt -> name "isint"
@@ -1731,8 +1738,13 @@ module Json = struct
         | IsNum -> name "isnum"
         | IsResource -> name "isresource"
         | IsNull -> name "isnull"
+        | IsTupleOf predicates ->
+          let predicates_json =
+            List.map predicates ~f:(fun p -> obj @@ predicate_json p)
+          in
+          name "istuple" @ [("args", JSON_Array predicates_json)]
       in
-      obj @@ kind p "negation" @ predicate_json
+      obj @@ kind p "negation" @ predicate_json predicate
     | (p, Tclass ((_, cid), e, tys)) ->
       obj @@ kind p "class" @ name cid @ args tys @ refs e
     | (p, Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fl })

@@ -252,6 +252,7 @@ type type_predicate =
   | IsNum
   | IsResource
   | IsNull
+  | IsTupleOf of type_predicate list
 [@@deriving eq, ord, hash, show { with_path = false }]
 
 type neg_type =

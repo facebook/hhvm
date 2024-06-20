@@ -168,8 +168,6 @@ let passes =
         - `allowed_files_for_module_declarations`
        typechecker options *)
     Naming_validate_module.pass on_error;
-    (* Validate that there are no top-level statements *)
-    Naming_validate_toplevel_statement.pass on_error;
     (* Validate use of `optional` in function type hints *)
     Naming_validate_function_hint_optional_parameters.pass on_error;
     (* Validate that return type of __clone is void *)

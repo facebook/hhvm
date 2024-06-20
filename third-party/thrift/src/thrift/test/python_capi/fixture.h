@@ -68,6 +68,8 @@ PyObject* __shim__gen_SerializedStruct(int64_t len) {
 
 std::string serializeTemplateLists() noexcept;
 PyObject* constructTemplateLists() noexcept;
+std::string serializeTemplateSets() noexcept;
+PyObject* constructTemplateSets() noexcept;
 
 template <typename T>
 std::string extractAndSerialize(PyObject* obj) {

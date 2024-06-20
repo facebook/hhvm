@@ -18,3 +18,9 @@ cdef cTemplateLists TemplateLists_convert_to_cpp(object inst) except *:
 cdef object TemplateLists_from_cpp(const cTemplateLists& c_struct):
     return cpp_to_python[cTemplateLists](c_struct)
 
+cdef cTemplateSets TemplateSets_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cTemplateSets](inst))
+
+cdef object TemplateSets_from_cpp(const cTemplateSets& c_struct):
+    return cpp_to_python[cTemplateSets](c_struct)
+

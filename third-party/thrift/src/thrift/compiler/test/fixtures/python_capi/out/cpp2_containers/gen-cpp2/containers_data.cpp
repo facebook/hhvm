@@ -70,5 +70,52 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures:
   4,
 }};
 
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::TemplateSets>::name = "TemplateSets";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::python_capi::TemplateSets>::fields_names = { {
+  "std_set"sv,
+  "std_unordered"sv,
+  "folly_fast"sv,
+  "folly_node"sv,
+  "folly_value"sv,
+  "folly_vector"sv,
+  "folly_sorted_vector"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::python_capi::TemplateSets>::fields_ids = { {
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::python_capi::TemplateSets>::fields_types = { {
+  TType::T_SET,
+  TType::T_SET,
+  TType::T_SET,
+  TType::T_SET,
+  TType::T_SET,
+  TType::T_SET,
+  TType::T_SET,
+}};
+THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::python_capi::TemplateSets>::storage_names = { {
+  "__fbthrift_field_std_set"sv,
+  "__fbthrift_field_std_unordered"sv,
+  "__fbthrift_field_folly_fast"sv,
+  "__fbthrift_field_folly_node"sv,
+  "__fbthrift_field_folly_value"sv,
+  "__fbthrift_field_folly_vector"sv,
+  "__fbthrift_field_folly_sorted_vector"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::python_capi::TemplateSets>::isset_indexes = { {
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+}};
+
 } // namespace thrift
 } // namespace apache

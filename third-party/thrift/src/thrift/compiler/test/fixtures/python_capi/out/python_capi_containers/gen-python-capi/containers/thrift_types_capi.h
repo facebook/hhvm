@@ -47,6 +47,35 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
   PyObject* operator()(const ::test::fixtures::python_capi::TemplateLists& val);
 };
 
+template <>
+struct Extractor<::test::fixtures::python_capi::TemplateSets>
+    : public BaseExtractor<::test::fixtures::python_capi::TemplateSets> {
+  ExtractorResult<::test::fixtures::python_capi::TemplateSets> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::TemplateSets>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::TemplateSets>> {
+  ExtractorResult<::test::fixtures::python_capi::TemplateSets> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::python_capi::TemplateSets>
+    : public BaseConstructor<::test::fixtures::python_capi::TemplateSets> {
+  PyObject* operator()(const ::test::fixtures::python_capi::TemplateSets& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::TemplateSets>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::TemplateSets>> {
+  PyObject* operator()(const ::test::fixtures::python_capi::TemplateSets& val);
+};
+
 } // namespace capi
 } // namespace python
 } // namespace thrift

@@ -34,7 +34,7 @@ void fill_list(const std::string& prefix, Container& list) {
 }
 
 template <typename FieldRef>
-void fill_field(const std::string& prefix, FieldRef list) {
+void fill_list_field(const std::string& prefix, FieldRef list) {
   fill_list(prefix, list.ensure());
 }
 
@@ -62,11 +62,35 @@ void fill_tensor_list_field(const std::string& prefix, FieldRef list) {
 
 ::thrift::test::python_capi::TemplateLists fillTemplateList() noexcept {
   ::thrift::test::python_capi::TemplateLists s;
-  fill_field("std_vector", s.std_string());
-  fill_field("std_deque", s.deque_string());
-  fill_field("folly_small_vector", s.small_vector_iobuf());
+  fill_list_field("std_vector", s.std_string());
+  fill_list_field("std_deque", s.deque_string());
+  fill_list_field("folly_small_vector", s.small_vector_iobuf());
   fill_nested_list_field("folly_fbvector_fbvector", s.nested_small_vector());
   fill_tensor_list_field("folly_fbvector_fbvector", s.small_vector_tensor());
+  return s;
+}
+
+template <typename Container>
+void fill_set(const std::string& prefix, Container& set) {
+  for (auto view : {"foo", "bar", "baz"}) {
+    set.insert(prefix + "__" + view);
+  }
+}
+
+template <typename FieldRef>
+void fill_set_field(const std::string& prefix, FieldRef set) {
+  fill_set(prefix, set.ensure());
+}
+
+::thrift::test::python_capi::TemplateSets fillTemplateSet() noexcept {
+  ::thrift::test::python_capi::TemplateSets s;
+  fill_set_field("std_set", s.std_set());
+  fill_set_field("std_unordered", s.std_unordered());
+  fill_set_field("folly_F14FastSet", s.folly_fast());
+  fill_set_field("folly_F14NodeSet", s.folly_node());
+  fill_set_field("folly_F14ValueSet", s.folly_value());
+  fill_set_field("folly_F14VectorSet", s.folly_vector());
+  fill_set_field("folly_sorted_vector_set", s.folly_sorted_vector());
   return s;
 }
 
@@ -91,6 +115,13 @@ std::string serializeTemplateLists() noexcept {
 }
 PyObject* constructTemplateLists() noexcept {
   return constructStruct(fillTemplateList());
+}
+
+std::string serializeTemplateSets() noexcept {
+  return serializeStruct(fillTemplateSet());
+}
+PyObject* constructTemplateSets() noexcept {
+  return constructStruct(fillTemplateSet());
 }
 
 } // namespace apache::thrift::test

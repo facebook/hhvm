@@ -19,9 +19,10 @@ include "thrift/annotation/cpp.thrift"
 cpp_include "<deque>"
 cpp_include "<unordered_map>"
 cpp_include "<unordered_set>"
-cpp_include "<folly/container/F14Set.h>"
 cpp_include "<folly/FBString.h>"
 cpp_include "<folly/container/F14Map.h>"
+cpp_include "<folly/container/F14Set.h>"
+cpp_include "<folly/container/sorted_vector_types.h>"
 cpp_include "<folly/small_vector.h>"
 
 package "thrift.biz/test/python_capi"
@@ -61,3 +62,20 @@ struct TemplateLists {
 // @cpp.Type{template = "std::list"}
 // 6: list<string> list_string;
 } (cpp.noncomparable)
+
+struct TemplateSets {
+  @cpp.Type{template = "std::set"}
+  1: set<string> std_set;
+  @cpp.Type{template = "std::unordered_set"}
+  2: set<string> std_unordered;
+  @cpp.Type{template = "folly::F14FastSet"}
+  3: set<string> folly_fast;
+  @cpp.Type{template = "folly::F14NodeSet"}
+  4: set<string> folly_node;
+  @cpp.Type{template = "folly::F14ValueSet"}
+  5: set<string> folly_value;
+  @cpp.Type{template = "folly::F14VectorSet"}
+  6: set<string> folly_vector;
+  @cpp.Type{template = "folly::sorted_vector_set"}
+  7: set<string> folly_sorted_vector;
+}

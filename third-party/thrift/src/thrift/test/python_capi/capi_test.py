@@ -24,8 +24,8 @@ import thrift.python_capi.fixture as fixture
 from folly.iobuf import IOBuf
 from thrift.python.exceptions import GeneratedError
 from thrift.python.serializer import deserialize, Protocol, serialize, serialize_iobuf
-from thrift.python.types import StructOrUnion
-from thrift.test.python_capi.containers.thrift_types import TemplateLists
+from thrift.python.types import Struct as PythonStruct, StructOrUnion
+from thrift.test.python_capi.containers.thrift_types import TemplateLists, TemplateSets
 from thrift.test.python_capi.module.thrift_types import (
     AdaptedFields,
     AnnoyingEnum,
@@ -547,23 +547,27 @@ class PythonCapiSerializeParity(PythonCapiFixture):
 
 
 class PythonCapiContainerTemplateParity(PythonCapiFixture):
-    def serialize(self, s: StructOrUnion) -> IOBuf:
-        return serialize_iobuf(s, protocol=Protocol.BINARY)
+    def serialize(self, s: StructOrUnion) -> bytes:
+        return bytes(serialize_iobuf(s, protocol=Protocol.BINARY))
 
     def deserialize(self, kls: typing.Type[sT], buf: bytes) -> sT:
         return deserialize(kls, buf, protocol=Protocol.BINARY)
+
+    def validate_not_empty(self, struct: PythonStruct) -> None:
+        for fld_name, fld_val in struct:
+            self.assertEqual(len(fld_val), 3, f"{fld_name} not populated")
+            for item in fld_val:
+                self.assertIsNotNone(item, f"{fld_name} has empty item")
+                self.assertGreaterEqual(
+                    len(item), 3, f"{item} of {fld_name} not populated"
+                )
 
     def test_template_list_construct(self) -> None:
         from_serialized = self.deserialize(
             TemplateLists,
             fixture.serialize_template_lists(),
         )
-        for fld_name, fld_val in from_serialized:
-            self.assertEqual(len(fld_val), 3, f"{fld_name} not populated")
-            for item in fld_val:
-                self.assertGreaterEqual(
-                    len(item), 3, f"{item} of {fld_name} not populated"
-                )
+        self.validate_not_empty(from_serialized)
         self.assertEqual(from_serialized, fixture.construct_template_lists())
 
     def test_template_list_extract(self) -> None:
@@ -572,4 +576,29 @@ class PythonCapiContainerTemplateParity(PythonCapiFixture):
         self.assertEqual(
             expected_serialized,
             fixture.extract_template_lists(from_serialized),
+        )
+
+    def assert_set_equal(self, a: PythonStruct, b: PythonStruct) -> None:
+        self.assertEqual(len(a), len(b))
+        for field_name, a_val in a:
+            b_fld = getattr(b, field_name)
+            for k in a_val:
+                self.assertIn(k, b_fld)
+
+    def test_template_set_construct(self) -> None:
+        from_serialized = self.deserialize(
+            TemplateSets,
+            fixture.serialize_template_sets(),
+        )
+        self.validate_not_empty(from_serialized)
+        self.assertEqual(from_serialized, fixture.construct_template_sets())
+
+    def test_template_set_extract(self) -> None:
+        expected_serialized = fixture.serialize_template_sets()
+        from_serialized = self.deserialize(TemplateSets, expected_serialized)
+        self.assertEqual(
+            from_serialized,
+            self.deserialize(
+                TemplateSets, fixture.extract_template_sets(from_serialized)
+            ),
         )

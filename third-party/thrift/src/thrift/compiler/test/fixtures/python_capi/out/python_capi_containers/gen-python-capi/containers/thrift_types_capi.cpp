@@ -172,6 +172,87 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
+ExtractorResult<::test::fixtures::python_capi::TemplateSets>
+Extractor<::test::fixtures::python_capi::TemplateSets>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::python_capi::TemplateSets>(
+      "Module test.fixtures.python_capi.containers import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__python_capi__containers__TemplateSets(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::python_capi::TemplateSets>(
+        "Thrift serialize error: TemplateSets");
+  }
+  return detail::deserialize_iobuf<::test::fixtures::python_capi::TemplateSets>(std::move(val));
+}
+
+
+ExtractorResult<::test::fixtures::python_capi::TemplateSets>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::python_capi::TemplateSets>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::python_capi::TemplateSets>(
+      "Module test.fixtures.python_capi.containers import error");
+  }
+  auto obj = StrongRef(init__test__fixtures__python_capi__containers__TemplateSets(fbthrift_data));
+  if (!obj) {
+      return extractorError<::test::fixtures::python_capi::TemplateSets>(
+          "Init from fbthrift error: TemplateSets");
+  }
+  return Extractor<::test::fixtures::python_capi::TemplateSets>{}(*obj);
+}
+
+int Extractor<::test::fixtures::python_capi::TemplateSets>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.python_capi.containers import error");
+  }
+  int result =
+      can_extract__test__fixtures__python_capi__containers__TemplateSets(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: TemplateSets");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::python_capi::TemplateSets>::operator()(
+    const ::test::fixtures::python_capi::TemplateSets& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__test__fixtures__python_capi__containers__TemplateSets(std::move(serialized));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::TemplateSets>>::operator()(
+    const ::test::fixtures::python_capi::TemplateSets& val) {
+  auto obj = StrongRef(Constructor<::test::fixtures::python_capi::TemplateSets>{}(val));
+  if (!obj) {
+    return nullptr;
+  }
+  return getThriftData(*obj);
+}
+
 } // namespace capi
 } // namespace python
 } // namespace thrift

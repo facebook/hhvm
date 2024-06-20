@@ -61,3 +61,20 @@ struct TemplateLists {
 // @cpp.Type{template = "std::list"}
 // 6: list<string> list_string;
 } (cpp.noncomparable)
+
+struct TemplateSets {
+  @cpp.Type{template = "std::set"}
+  1: set<string> std_set;
+  @cpp.Type{template = "std::unordered_set"}
+  2: set<string> std_unordered;
+  @cpp.Type{template = "folly::F14FastSet"}
+  3: set<string> folly_fast;
+  @cpp.Type{template = "folly::F14NodeSet"}
+  4: set<string> folly_node;
+  @cpp.Type{template = "folly::F14ValueSet"}
+  5: set<string> folly_value;
+  @cpp.Type{template = "folly::F14VectorSet"}
+  6: set<string> folly_vector;
+  @cpp.Type{template = "folly::sorted_vector_set"}
+  7: set<string> folly_sorted_vector;
+}

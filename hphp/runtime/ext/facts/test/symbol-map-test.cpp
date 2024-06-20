@@ -635,7 +635,7 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
       bool useManualExecutor = false,
       std::vector<std::string> indexedMethodAttributesVec = {}) {
     auto dbOpener = [&db]() -> std::shared_ptr<AutoloadDB> { return db; };
-    return make(root, dbOpener, false, indexedMethodAttributesVec);
+    return make(root, dbOpener, useManualExecutor, indexedMethodAttributesVec);
   }
 
   std::unique_ptr<folly::test::TemporaryDirectory> m_tmpdir;

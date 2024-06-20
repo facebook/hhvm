@@ -54,8 +54,8 @@ jobs:
           update-alternatives --remove-all c++
         fi
         
-        update-alternatives --install /usr/bin/cc cc /usr/bin/clang++-${CLANG_VERSION} 500
-        update-alternatives --set cc /usr/bin/clang++-${CLANG_VERSION}
+        update-alternatives --install /usr/bin/cc cc /usr/bin/clang-${CLANG_VERSION} 500
+        update-alternatives --set cc /usr/bin/clang-${CLANG_VERSION}
         update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-${CLANG_VERSION} 500
         update-alternatives --set c++ /usr/bin/clang++-${CLANG_VERSION}
     - name: Fetching HHVM and its submodules

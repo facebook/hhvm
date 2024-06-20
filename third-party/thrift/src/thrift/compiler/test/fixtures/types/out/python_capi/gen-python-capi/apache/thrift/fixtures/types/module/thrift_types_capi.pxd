@@ -155,9 +155,6 @@ cdef api object init__apache__thrift__fixtures__types__module__IncompleteListDep
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__CompleteList(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__CompleteList(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__CompleteList(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__CompleteList(object data)
 

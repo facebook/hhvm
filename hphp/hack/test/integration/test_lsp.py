@@ -7641,9 +7641,11 @@ class :el {
         )
         self.run_spec(spec, variables, lsp_extra_args=["--notebook-mode"])
 
-        # When `--notebook-mode` is passed to `hh lsp` and the notebook
-        # is stopped at a breakpoint:
-        # There should be NO undefined variable errors
+    def test_notebook_mode_at_breakpoint(self) -> None:
+        """
+        When `--notebook-mode` is passed to `hh lsp` **and HHVM is paused at a breakpoint**:
+        - There should be no errors for undefined vars
+        """
         os.makedirs(os.path.dirname(_HHVM_IS_PAUSED_FILE), exist_ok=True)
         with open(_HHVM_IS_PAUSED_FILE, "w") as f:
             pass
@@ -7652,6 +7654,9 @@ echo $undefined_var_1; // no error
 echo $undefined_var_2; // no error
 1 * true;              // should error
 """
+        variables = self.write_hhconf_and_naming_table()
+        file_base_name = "notebook_mode.php"
+        php_file_uri = self.repo_file_uri(file_base_name)
         variables.update({"php_file_uri": php_file_uri, "contents": contents})
         spec = (
             self.initialize_spec(LspTestSpec("notebook_mode"))

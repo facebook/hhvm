@@ -130,8 +130,6 @@ let passes =
     Naming_elab_shape_field_name.bottom_up_pass on_error;
     Naming_elab_this_hint.pass on_error;
     Naming_elab_haccess_hint.pass on_error;
-    (* Replace empty `Tuple`s with invalid expression marker *)
-    Naming_elab_tuple.pass on_error;
     (* Validate / replace invalid uses of dynamic classes in `New` and `Class_get`
        expressions *)
     Naming_elab_dynamic_class_name.pass on_error;

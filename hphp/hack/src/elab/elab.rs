@@ -338,9 +338,6 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
         // Replace invalid `Haccess` root hints with `Herr`
         Box::<passes::elab_hint_haccess::ElabHintHaccessPass>::default(),
 
-        // Replace empty `Tuple`s with invalid expression marker
-        Box::<passes::elab_expr_tuple::ElabExprTuplePass>::default(),
-
         // Validate / replace invalid uses of dynamic classes in `New` and `Class_get`
         // expressions
         Box::<passes::elab_dynamic_class_name::ElabDynamicClassNamePass>::default(),

@@ -44,6 +44,7 @@ from thrift.python.mutable_typeinfos cimport (
     MutableListTypeInfo,
     MutableSetTypeInfo,
     MutableMapTypeInfo,
+    MutableStructTypeInfo,
 )
 from thrift.python.mutable_containers cimport (
     MutableMap,
@@ -54,6 +55,10 @@ from python_test.containers.thrift_types import (
     Bar,
     OtherFoo,
     OtherBar,
+)
+from python_test.containers.thrift_mutable_types import (
+    Foo as FooMutable,
+    OtherFoo as OtherFooMutable,
 )
 from thrift.python.test.adapters.atoi import AtoiAdapter
 from thrift.python.test.adapters.datetime import DatetimeAdapter
@@ -394,3 +399,24 @@ cdef class TypeInfoTests():
         self.ut.assertTrue(MutableMapTypeInfo(typeinfo_string, typeinfo_i64).same_as(map_type_info))
         self.ut.assertFalse(MutableMapTypeInfo(typeinfo_string, typeinfo_i32).same_as(map_type_info))
         self.ut.assertFalse(MutableMapTypeInfo(typeinfo_i32, typeinfo_i64).same_as(map_type_info))
+
+    def test_MutableStructTypeInfo(self) -> None:
+        struct_type_info = MutableStructTypeInfo(FooMutable)
+        self.ut.assertIsInstance(struct_type_info, TypeInfoBase)
+
+        with self.ut.assertRaises(TypeError):
+            struct_type_info.to_internal_data(None)
+
+        data = struct_type_info.to_internal_data(FooMutable(value=11))
+        self.ut.assertEqual(
+                struct_type_info.to_python_value(data),
+                FooMutable(value=11))
+
+        self.assertEqual(
+            &(<MutableStructTypeInfo>struct_type_info).cpp_obj,
+            getCTypeInfo(struct_type_info),
+        )
+
+        self.ut.assertTrue(struct_type_info.same_as(struct_type_info))
+        self.ut.assertTrue(MutableStructTypeInfo(FooMutable).same_as(struct_type_info))
+        self.ut.assertFalse(MutableStructTypeInfo(OtherFooMutable).same_as(struct_type_info))

@@ -123,3 +123,6 @@ class TypeInfoTests(unittest.TestCase):
 
     def test_MutableMapTypeInfo(self) -> None:
         CTests(self).test_MutableMapTypeInfo()
+
+    def test_MutableStructTypeInfo(self) -> None:
+        CTests(self).test_MutableStructTypeInfo()

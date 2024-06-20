@@ -17,7 +17,7 @@ if sys.version_info[0] >= 3:
   long = int
 
 
-from .ttypes import UTF8STRINGS, MyEnum, HackEnum, MyStruct, Containers, MyDataItem, MyUnion, ReservedKeyword, UnionToBeRenamed, MyEnumAlias, MyDataItemAlias
+from .ttypes import UTF8STRINGS, MyEnum, HackEnum, MyStruct, Containers, MyDataItem, MyUnion, MyException, ReservedKeyword, UnionToBeRenamed, MyEnumAlias, MyDataItemAlias
 
 FLAG = True
 

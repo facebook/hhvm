@@ -68,6 +68,11 @@ class StructMetadata<::test::fixtures::basic::MyUnion> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::test::fixtures::basic::MyException> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class StructMetadata<::test::fixtures::basic::ReservedKeyword> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
@@ -76,6 +81,11 @@ template <>
 class StructMetadata<::test::fixtures::basic::UnionToBeRenamed> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class ExceptionMetadata<::test::fixtures::basic::MyException> {
+ public:
+  static void gen(ThriftMetadata& metadata);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>> {

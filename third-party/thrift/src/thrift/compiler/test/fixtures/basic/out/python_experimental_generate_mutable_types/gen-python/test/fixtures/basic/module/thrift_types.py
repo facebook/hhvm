@@ -317,6 +317,82 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyUnion, self)
 
 
+class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "MyIntField",  # name
+            "MyIntField",  # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_i64,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            True, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "MyStringField",  # name
+            "MyStringField",  # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "myStruct",  # name
+            "myStruct",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.StructTypeInfo(MyStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+        _fbthrift_python_types.FieldInfo(
+            4,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "myUnion",  # name
+            "myUnion",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.StructTypeInfo(MyUnion),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyException"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic/MyException"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__exception_MyException()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.MyException, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyException, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyException, self)
+
+
 class ReservedKeyword(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -487,6 +563,10 @@ def _fbthrift_metadata__struct_MyUnion():
     return test.fixtures.basic.module.thrift_metadata.gen_metadata_struct_MyUnion()
 
 
+def _fbthrift_metadata__exception_MyException():
+    return test.fixtures.basic.module.thrift_metadata.gen_metadata_exception_MyException()
+
+
 def _fbthrift_metadata__struct_ReservedKeyword():
     return test.fixtures.basic.module.thrift_metadata.gen_metadata_struct_ReservedKeyword()
 
@@ -500,6 +580,7 @@ _fbthrift_all_structs = [
     Containers,
     MyDataItem,
     MyUnion,
+    MyException,
     ReservedKeyword,
     UnionToBeRenamed,
 ]

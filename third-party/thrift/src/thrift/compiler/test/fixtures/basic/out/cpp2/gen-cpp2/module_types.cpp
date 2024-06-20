@@ -603,6 +603,154 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::test::fixtures::basic::MyException>::translateFieldName(
+    std::string_view _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic::MyException>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test::fixtures::basic {
+
+const char* MyException::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic/MyException";
+}
+
+std::string_view MyException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyException>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view MyException::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyException>::name;
+}
+
+MyException::MyException(const MyException&) = default;
+MyException& MyException::operator=(const MyException&) = default;
+MyException::MyException() :
+      __fbthrift_field_MyIntField() {
+}
+
+
+MyException::~MyException() {}
+
+MyException::MyException([[maybe_unused]] MyException&& other) noexcept :
+    __fbthrift_field_MyIntField(std::move(other.__fbthrift_field_MyIntField)),
+    __fbthrift_field_MyStringField(std::move(other.__fbthrift_field_MyStringField)),
+    __fbthrift_field_myStruct(std::move(other.__fbthrift_field_myStruct)),
+    __fbthrift_field_myUnion(std::move(other.__fbthrift_field_myUnion)),
+    __isset(other.__isset) {
+}
+
+MyException& MyException::operator=([[maybe_unused]] MyException&& other) noexcept {
+    this->__fbthrift_field_MyIntField = std::move(other.__fbthrift_field_MyIntField);
+    this->__fbthrift_field_MyStringField = std::move(other.__fbthrift_field_MyStringField);
+    this->__fbthrift_field_myStruct = std::move(other.__fbthrift_field_myStruct);
+    this->__fbthrift_field_myUnion = std::move(other.__fbthrift_field_myUnion);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+MyException::MyException(apache::thrift::FragileConstructor, ::std::int64_t MyIntField__arg, ::std::string MyStringField__arg, ::test::fixtures::basic::MyStruct myStruct__arg, ::test::fixtures::basic::MyUnion myUnion__arg) :
+    __fbthrift_field_MyIntField(std::move(MyIntField__arg)),
+    __fbthrift_field_MyStringField(std::move(MyStringField__arg)),
+    __fbthrift_field_myStruct(std::move(myStruct__arg)),
+    __fbthrift_field_myUnion(std::move(myUnion__arg)) { 
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+}
+
+
+void MyException::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_MyIntField = ::std::int64_t();
+  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  ::apache::thrift::clear(this->__fbthrift_field_myStruct);
+  ::apache::thrift::clear(this->__fbthrift_field_myUnion);
+  __isset = {};
+}
+
+void MyException::__fbthrift_clear_terse_fields() {
+}
+
+bool MyException::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool MyException::operator==([[maybe_unused]] const MyException& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool MyException::operator<([[maybe_unused]] const MyException& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::test::fixtures::basic::MyStruct& MyException::get_myStruct() const& {
+  return __fbthrift_field_myStruct;
+}
+
+::test::fixtures::basic::MyStruct MyException::get_myStruct() && {
+  return std::move(__fbthrift_field_myStruct);
+}
+
+const ::test::fixtures::basic::MyUnion& MyException::get_myUnion() const& {
+  return __fbthrift_field_myUnion;
+}
+
+::test::fixtures::basic::MyUnion MyException::get_myUnion() && {
+  return std::move(__fbthrift_field_myUnion);
+}
+
+
+void swap([[maybe_unused]] MyException& a, [[maybe_unused]] MyException& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_MyIntField, b.__fbthrift_field_MyIntField);
+  swap(a.__fbthrift_field_MyStringField, b.__fbthrift_field_MyStringField);
+  swap(a.__fbthrift_field_myStruct, b.__fbthrift_field_myStruct);
+  swap(a.__fbthrift_field_myUnion, b.__fbthrift_field_myUnion);
+  swap(a.__isset, b.__isset);
+}
+
+template void MyException::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyException::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyException::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyException::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyException,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic::MyStruct>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyException,
+        ::apache::thrift::type_class::variant,
+        ::test::fixtures::basic::MyUnion>,
+    "inconsistent use of json option");
+
+} // namespace test::fixtures::basic
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::test::fixtures::basic::ReservedKeyword>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,

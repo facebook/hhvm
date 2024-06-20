@@ -33,6 +33,11 @@ cdef api int can_extract__test__fixtures__basic__module__MyUnion(object) except 
 
 cdef api object init__test__fixtures__basic__module__MyUnion(object data)
 
+cdef api int can_extract__test__fixtures__basic__module__MyException(object) except -1
+
+
+cdef api object init__test__fixtures__basic__module__MyException(object data)
+
 cdef api int can_extract__test__fixtures__basic__module__ReservedKeyword(object) except -1
 
 

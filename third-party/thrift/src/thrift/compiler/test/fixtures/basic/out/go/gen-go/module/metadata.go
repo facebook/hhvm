@@ -80,6 +80,10 @@ var (
         metadata.NewThriftStructType().
             SetName("module.MyStruct"),
             )
+    premadeThriftType_module_MyUnion = metadata.NewThriftType().SetTUnion(
+        metadata.NewThriftUnionType().
+            SetName("module.MyUnion"),
+            )
     premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
             )
@@ -224,6 +228,32 @@ var structMetadatas = []*metadata.ThriftStruct{
 }
 
 var exceptionMetadatas = []*metadata.ThriftException{
+    metadata.NewThriftException().
+    SetName("module.MyException").
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("MyIntField").
+    SetIsOptional(false).
+    SetType(premadeThriftType_i64),
+            metadata.NewThriftField().
+    SetId(2).
+    SetName("MyStringField").
+    SetIsOptional(false).
+    SetType(premadeThriftType_string),
+            metadata.NewThriftField().
+    SetId(3).
+    SetName("myStruct").
+    SetIsOptional(false).
+    SetType(premadeThriftType_module_MyStruct),
+            metadata.NewThriftField().
+    SetId(4).
+    SetName("myUnion").
+    SetIsOptional(false).
+    SetType(premadeThriftType_module_MyUnion),
+        },
+    ),
 }
 
 var enumMetadatas = []*metadata.ThriftEnum{

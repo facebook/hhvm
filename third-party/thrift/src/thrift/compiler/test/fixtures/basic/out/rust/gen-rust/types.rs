@@ -68,6 +68,37 @@ pub enum MyUnion {
     UnknownField(::std::primitive::i32),
 }
 
+#[derive(Clone, PartialEq)]
+pub struct MyException {
+    pub MyIntField: ::std::primitive::i64,
+    pub MyStringField: ::std::string::String,
+    pub myStruct: crate::types::MyStruct,
+    pub myUnion: crate::types::MyUnion,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+impl ::fbthrift::ExceptionInfo for MyException {
+    fn exn_value(&self) -> String {
+        format!("{:?}", self)
+    }
+
+    #[inline]
+    fn exn_is_declared(&self) -> bool { true }
+}
+
+impl ::std::error::Error for MyException {}
+
+impl ::std::fmt::Display for MyException {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ReservedKeyword {
     pub reserved_field: ::std::primitive::i32,
@@ -899,6 +930,142 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
         None
     }
 }
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::MyException {
+    fn default() -> Self {
+        Self {
+            MyIntField: ::std::default::Default::default(),
+            MyStringField: ::std::default::Default::default(),
+            myStruct: ::std::default::Default::default(),
+            myUnion: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::MyException {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("MyException")
+            .field("MyIntField", &self.MyIntField)
+            .field("MyStringField", &self.MyStringField)
+            .field("myStruct", &self.myStruct)
+            .field("myUnion", &self.myUnion)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::MyException {}
+unsafe impl ::std::marker::Sync for self::MyException {}
+impl ::std::marker::Unpin for self::MyException {}
+impl ::std::panic::RefUnwindSafe for self::MyException {}
+impl ::std::panic::UnwindSafe for self::MyException {}
+
+impl ::fbthrift::GetTType for self::MyException {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::MyException {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/basic/MyException"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::MyException
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("MyException");
+        p.write_field_begin("MyIntField", ::fbthrift::TType::I64, 1);
+        ::fbthrift::Serialize::write(&self.MyIntField, p);
+        p.write_field_end();
+        p.write_field_begin("MyStringField", ::fbthrift::TType::String, 2);
+        ::fbthrift::Serialize::write(&self.MyStringField, p);
+        p.write_field_end();
+        p.write_field_begin("myStruct", ::fbthrift::TType::Struct, 3);
+        ::fbthrift::Serialize::write(&self.myStruct, p);
+        p.write_field_end();
+        p.write_field_begin("myUnion", ::fbthrift::TType::Struct, 4);
+        ::fbthrift::Serialize::write(&self.myUnion, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::MyException
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("MyIntField", ::fbthrift::TType::I64, 1),
+            ::fbthrift::Field::new("MyStringField", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("myStruct", ::fbthrift::TType::Struct, 3),
+            ::fbthrift::Field::new("myUnion", ::fbthrift::TType::Struct, 4),
+        ];
+        let mut field_MyIntField = ::std::option::Option::None;
+        let mut field_MyStringField = ::std::option::Option::None;
+        let mut field_myStruct = ::std::option::Option::None;
+        let mut field_myUnion = ::std::option::Option::None;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyException")?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 2) => field_MyStringField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 3) => field_myStruct = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 4) => field_myUnion = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            MyIntField: field_MyIntField.unwrap_or_default(),
+            MyStringField: field_MyStringField.unwrap_or_default(),
+            myStruct: field_myStruct.unwrap_or_default(),
+            myUnion: field_myUnion.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for MyException {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+            },
+            2 => {
+            },
+            3 => {
+            },
+            4 => {
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
 
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::ReservedKeyword {

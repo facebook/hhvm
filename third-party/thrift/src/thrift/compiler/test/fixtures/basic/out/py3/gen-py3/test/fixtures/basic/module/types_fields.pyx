@@ -188,6 +188,64 @@ cdef class __MyDataItem_FieldsSetter(__StructFieldsSetter):
 
 
 @__cython.auto_pickle(False)
+cdef class __MyException_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __MyException_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cMyException* struct_cpp_obj):
+        cdef __MyException_FieldsSetter __fbthrift_inst = __MyException_FieldsSetter.__new__(__MyException_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"MyIntField")] = __MyException_FieldsSetter._set_field_0
+        __fbthrift_inst._setters[__cstring_view(<const char*>"MyStringField")] = __MyException_FieldsSetter._set_field_1
+        __fbthrift_inst._setters[__cstring_view(<const char*>"myStruct")] = __MyException_FieldsSetter._set_field_2
+        __fbthrift_inst._setters[__cstring_view(<const char*>"myUnion")] = __MyException_FieldsSetter._set_field_3
+        return __fbthrift_inst
+
+    cdef void set_field(__MyException_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __MyException_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field MyIntField
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_basic_module_types.cMyException](deref(self._struct_cpp_obj), 0)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'MyIntField is not a { int !r}.')
+        _fbthrift_value = <cint64_t> _fbthrift_value
+        deref(self._struct_cpp_obj).MyIntField_ref().assign(_fbthrift_value)
+
+    cdef void _set_field_1(self, _fbthrift_value) except *:
+        # for field MyStringField
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_basic_module_types.cMyException](deref(self._struct_cpp_obj), 1)
+            return
+        if not isinstance(_fbthrift_value, str):
+            raise TypeError(f'MyStringField is not a { str !r}.')
+        deref(self._struct_cpp_obj).MyStringField_ref().assign(cmove(bytes_to_string(_fbthrift_value.encode('utf-8'))))
+
+    cdef void _set_field_2(self, _fbthrift_value) except *:
+        # for field myStruct
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_basic_module_types.cMyException](deref(self._struct_cpp_obj), 2)
+            return
+        if not isinstance(_fbthrift_value, _test_fixtures_basic_module_types.MyStruct):
+            raise TypeError(f'myStruct is not a { _test_fixtures_basic_module_types.MyStruct !r}.')
+        deref(self._struct_cpp_obj).myStruct_ref().assign(deref((<_test_fixtures_basic_module_types.MyStruct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+
+    cdef void _set_field_3(self, _fbthrift_value) except *:
+        # for field myUnion
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_basic_module_types.cMyException](deref(self._struct_cpp_obj), 3)
+            return
+        if not isinstance(_fbthrift_value, _test_fixtures_basic_module_types.MyUnion):
+            raise TypeError(f'myUnion is not a { _test_fixtures_basic_module_types.MyUnion !r}.')
+        deref(self._struct_cpp_obj).myUnion_ref().assign(deref((<_test_fixtures_basic_module_types.MyUnion?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+
+
+@__cython.auto_pickle(False)
 cdef class __ReservedKeyword_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod

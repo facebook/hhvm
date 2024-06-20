@@ -135,6 +135,35 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::test::fixtures::basic::MyException>
+    : public BaseExtractor<::test::fixtures::basic::MyException> {
+  ExtractorResult<::test::fixtures::basic::MyException> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::MyException>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::MyException>> {
+  ExtractorResult<::test::fixtures::basic::MyException> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::basic::MyException>
+    : public BaseConstructor<::test::fixtures::basic::MyException> {
+  PyObject* operator()(const ::test::fixtures::basic::MyException& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::MyException>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::MyException>> {
+  PyObject* operator()(const ::test::fixtures::basic::MyException& val);
+};
+
+template <>
 struct Extractor<::test::fixtures::basic::ReservedKeyword>
     : public BaseExtractor<::test::fixtures::basic::ReservedKeyword> {
   ExtractorResult<::test::fixtures::basic::ReservedKeyword> operator()(PyObject* obj);

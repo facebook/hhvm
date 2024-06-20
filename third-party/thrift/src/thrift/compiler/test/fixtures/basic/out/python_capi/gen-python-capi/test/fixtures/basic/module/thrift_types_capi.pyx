@@ -47,6 +47,13 @@ cdef api int can_extract__test__fixtures__basic__module__MyUnion(object __obj) e
 cdef api object init__test__fixtures__basic__module__MyUnion(object data):
     return __thrift_types.MyUnion._fbthrift_create(data)
 
+cdef api int can_extract__test__fixtures__basic__module__MyException(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyException) else 0
+
+
+cdef api object init__test__fixtures__basic__module__MyException(object data):
+    return __thrift_types.MyException._fbthrift_create(data)
+
 cdef api int can_extract__test__fixtures__basic__module__ReservedKeyword(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ReservedKeyword) else 0
 

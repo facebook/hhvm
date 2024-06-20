@@ -132,6 +132,29 @@ StructMetadata<::test::fixtures::basic::MyUnion>::gen(ThriftMetadata& metadata) 
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.MyException", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_MyException = res.first->second;
+  module_MyException.name() = "module.MyException";
+  module_MyException.is_union() = false;
+  static const auto* const
+  module_MyException_fields = new std::array<EncodedThriftField, 4>{ {
+    { 1, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "MyStringField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "myStruct", false, std::make_unique<Struct<::test::fixtures::basic::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{ }},    { 4, "myUnion", false, std::make_unique<Union<::test::fixtures::basic::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{ }},  }};
+  for (const auto& f : *module_MyException_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_MyException.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::ReservedKeyword>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.ReservedKeyword", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
@@ -180,6 +203,25 @@ StructMetadata<::test::fixtures::basic::UnionToBeRenamed>::gen(ThriftMetadata& m
   return res.first->second;
 }
 
+void ExceptionMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.exceptions()->emplace("module.MyException", ::apache::thrift::metadata::ThriftException{});
+  if (!res.second) {
+    return;
+  }
+  ::apache::thrift::metadata::ThriftException& module_MyException = res.first->second;
+  module_MyException.name() = "module.MyException";
+  static const auto* const
+  module_MyException_fields = new std::array<EncodedThriftField, 4>{ {
+    { 1, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "MyStringField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "myStruct", false, std::make_unique<Struct<::test::fixtures::basic::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{ }},    { 4, "myUnion", false, std::make_unique<Union<::test::fixtures::basic::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{ }},  }};
+  for (const auto& f : *module_MyException_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    module_MyException.fields()->push_back(std::move(field));
+  }
+}
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>>::gen_simple_rpc([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "simple_rpc";

@@ -22,6 +22,9 @@ cdef object MyDataItem_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyDataItem]& 
 cdef shared_ptr[_fbthrift_ctypes.cMyUnion] MyUnion_convert_to_cpp(object inst) except*
 cdef object MyUnion_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyUnion]& c_struct)
 
+cdef shared_ptr[_fbthrift_ctypes.cMyException] MyException_convert_to_cpp(object inst) except*
+cdef object MyException_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyException]& c_struct)
+
 cdef shared_ptr[_fbthrift_ctypes.cReservedKeyword] ReservedKeyword_convert_to_cpp(object inst) except*
 cdef object ReservedKeyword_from_cpp(const shared_ptr[_fbthrift_ctypes.cReservedKeyword]& c_struct)
 

@@ -51,7 +51,7 @@ class ThriftEnumWrapper(int):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'MyEnum', 'HackEnum', 'MyStruct', 'Containers', 'MyDataItem', 'MyUnion', 'ReservedKeyword', 'UnionToBeRenamed', 'MyEnumAlias', 'MyDataItemAlias']
+__all__ = ['UTF8STRINGS', 'MyEnum', 'HackEnum', 'MyStruct', 'Containers', 'MyDataItem', 'MyUnion', 'MyException', 'ReservedKeyword', 'UnionToBeRenamed', 'MyEnumAlias', 'MyDataItemAlias']
 
 class MyEnum:
   MyValue1 = 0
@@ -886,6 +886,180 @@ class MyUnion(object):
   def _to_py_deprecated(self):
     return self
 
+class MyException(TException):
+  r"""
+  Attributes:
+   - MyIntField
+   - MyStringField
+   - myStruct
+   - myUnion
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I64:
+          self.MyIntField = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.MyStringField = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRUCT:
+          self.myStruct = MyStruct()
+          self.myStruct.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRUCT:
+          self.myUnion = MyUnion()
+          self.myUnion.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('MyException')
+    if self.MyIntField != None:
+      oprot.writeFieldBegin('MyIntField', TType.I64, 1)
+      oprot.writeI64(self.MyIntField)
+      oprot.writeFieldEnd()
+    if self.MyStringField != None:
+      oprot.writeFieldBegin('MyStringField', TType.STRING, 2)
+      oprot.writeString(self.MyStringField.encode('utf-8')) if UTF8STRINGS and not isinstance(self.MyStringField, bytes) else oprot.writeString(self.MyStringField)
+      oprot.writeFieldEnd()
+    if self.myStruct != None:
+      oprot.writeFieldBegin('myStruct', TType.STRUCT, 3)
+      self.myStruct.write(oprot)
+      oprot.writeFieldEnd()
+    if self.myUnion != None:
+      oprot.writeFieldBegin('myUnion', TType.STRUCT, 4)
+      self.myUnion.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'MyIntField' in json_obj and json_obj['MyIntField'] is not None:
+      self.MyIntField = long(json_obj['MyIntField'])
+    if 'MyStringField' in json_obj and json_obj['MyStringField'] is not None:
+      self.MyStringField = json_obj['MyStringField']
+    if 'myStruct' in json_obj and json_obj['myStruct'] is not None:
+      self.myStruct = MyStruct()
+      self.myStruct.readFromJson(json_obj['myStruct'], is_text=False, **kwargs)
+    if 'myUnion' in json_obj and json_obj['myUnion'] is not None:
+      self.myUnion = MyUnion()
+      self.myUnion.readFromJson(json_obj['myUnion'], is_text=False, **kwargs)
+
+  def __str__(self):
+    return repr(self)
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.MyIntField is not None:
+      value = pprint.pformat(self.MyIntField, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    MyIntField=%s' % (value))
+    if self.MyStringField is not None:
+      value = pprint.pformat(self.MyStringField, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    MyStringField=%s' % (value))
+    if self.myStruct is not None:
+      value = pprint.pformat(self.myStruct, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    myStruct=%s' % (value))
+    if self.myUnion is not None:
+      value = pprint.pformat(self.myUnion, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    myUnion=%s' % (value))
+    if 'message' not in self.__dict__:
+      message = getattr(self, 'message', None)
+      if message:
+        L.append('message=%r' % message)
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'MyIntField',
+      'MyStringField',
+      'myStruct',
+      'myUnion',
+    )
+
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.MyException, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("test.fixtures.basic.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.MyException, self)
+
+  def _to_py_deprecated(self):
+    return self
+
 class ReservedKeyword:
   r"""
   Attributes:
@@ -1251,6 +1425,37 @@ def MyUnion__init__(self, myEnum=None, myStruct=None, myDataItem=None, floatSet=
     self.value = floatSet
 
 MyUnion.__init__ = MyUnion__init__
+
+all_structs.append(MyException)
+MyException.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+  (1, TType.I64, 'MyIntField', None, None, 2, ), # 1
+  (2, TType.STRING, 'MyStringField', True, None, 2, ), # 2
+  (3, TType.STRUCT, 'myStruct', [MyStruct, MyStruct.thrift_spec, False], None, 2, ), # 3
+  (4, TType.STRUCT, 'myUnion', [MyUnion, MyUnion.thrift_spec, True], None, 2, ), # 4
+)))
+
+MyException.thrift_struct_annotations = {
+}
+MyException.thrift_field_annotations = {
+}
+
+def MyException__init__(self, MyIntField=None, MyStringField=None, myStruct=None, myUnion=None,):
+  self.MyIntField = MyIntField
+  self.MyStringField = MyStringField
+  self.myStruct = myStruct
+  self.myUnion = myUnion
+
+MyException.__init__ = MyException__init__
+
+def MyException__setstate__(self, state):
+  state.setdefault('MyIntField', None)
+  state.setdefault('MyStringField', None)
+  state.setdefault('myStruct', None)
+  state.setdefault('myUnion', None)
+  self.__dict__ = state
+
+MyException.__getstate__ = lambda self: self.__dict__.copy()
+MyException.__setstate__ = MyException__setstate__
 
 all_structs.append(ReservedKeyword)
 ReservedKeyword.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((

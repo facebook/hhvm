@@ -36,6 +36,12 @@ cdef cMyUnion MyUnion_convert_to_cpp(object inst) except *:
 cdef object MyUnion_from_cpp(const cMyUnion& c_struct):
     return cpp_to_python[cMyUnion](c_struct)
 
+cdef cMyException MyException_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cMyException](inst))
+
+cdef object MyException_from_cpp(const cMyException& c_struct):
+    return cpp_to_python[cMyException](c_struct)
+
 cdef cReservedKeyword ReservedKeyword_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cReservedKeyword](inst))
 

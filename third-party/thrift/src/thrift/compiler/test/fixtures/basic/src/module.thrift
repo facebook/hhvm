@@ -75,6 +75,13 @@ union MyUnion {
   4: set<float> floatSet;
 }
 
+exception MyException {
+  1: i64 MyIntField;
+  2: string MyStringField;
+  3: MyStruct myStruct;
+  4: MyUnion myUnion;
+}
+
 @hack.Name{name = "MyRenamedStruct"}
 struct ReservedKeyword {
   @hack.Name{name = "renamed_field"}

@@ -85,6 +85,20 @@ cdef class __MyDataItem_FieldsSetter(__StructFieldsSetter):
     cdef __MyDataItem_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cMyDataItem* struct_cpp_obj)
 
 
+ctypedef void (*__MyException_FieldsSetterFunc)(__MyException_FieldsSetter, object) except *
+
+cdef class __MyException_FieldsSetter(__StructFieldsSetter):
+    cdef _test_fixtures_basic_module_types.cMyException* _struct_cpp_obj
+    cdef cumap[__cstring_view, __MyException_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __MyException_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cMyException* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+    cdef void _set_field_1(self, _fbthrift_value) except *
+    cdef void _set_field_2(self, _fbthrift_value) except *
+    cdef void _set_field_3(self, _fbthrift_value) except *
+
+
 ctypedef void (*__ReservedKeyword_FieldsSetterFunc)(__ReservedKeyword_FieldsSetter, object) except *
 
 cdef class __ReservedKeyword_FieldsSetter(__StructFieldsSetter):

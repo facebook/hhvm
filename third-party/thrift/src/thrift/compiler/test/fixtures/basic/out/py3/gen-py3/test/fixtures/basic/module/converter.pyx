@@ -32,6 +32,12 @@ cdef shared_ptr[_fbthrift_ctypes.cMyUnion] MyUnion_convert_to_cpp(object inst) e
 
 cdef object MyUnion_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyUnion]& c_struct):
     return _fbthrift_ctypes.MyUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+cdef shared_ptr[_fbthrift_ctypes.cMyException] MyException_convert_to_cpp(object inst) except*:
+    return (<_fbthrift_ctypes.MyException?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+
+
+cdef object MyException_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyException]& c_struct):
+    return _fbthrift_ctypes.MyException._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cReservedKeyword] ReservedKeyword_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.ReservedKeyword?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 

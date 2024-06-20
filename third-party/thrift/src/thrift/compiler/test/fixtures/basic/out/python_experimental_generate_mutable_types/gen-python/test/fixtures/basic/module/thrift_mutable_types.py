@@ -436,6 +436,7 @@ _fbthrift_all_structs = [
     Containers,
     MyDataItem,
     MyUnion,
+    MyException,
     ReservedKeyword,
     UnionToBeRenamed,
 ]

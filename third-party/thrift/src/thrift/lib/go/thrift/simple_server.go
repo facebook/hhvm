@@ -70,11 +70,6 @@ func simpleServerOptions(options ...func(*ServerOptions)) *ServerOptions {
 	return opts
 }
 
-// Deprecated: Listen does not listen, to get Addr use Addr method.
-func (p *SimpleServer) Listen() (net.Addr, error) {
-	return p.listener.Addr(), nil
-}
-
 // Addr returns the server listener's Addr
 func (p *SimpleServer) Addr() net.Addr {
 	return p.listener.Addr()
@@ -121,15 +116,11 @@ func (p *SimpleServer) Serve() error {
 
 // ServeContext behaves like Serve but supports cancellation via context.
 func (p *SimpleServer) ServeContext(ctx context.Context) error {
-	_, err := p.Listen()
-	if err != nil {
-		return err
-	}
 	go func() {
 		<-ctx.Done()
 		p.Stop()
 	}()
-	err = p.acceptLoopContext(ctx)
+	err := p.acceptLoopContext(ctx)
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}

@@ -1601,27 +1601,22 @@ void SymbolMap::Data::updatePath(
       // Remove method attributes not in the allowlist if the allowlist exists
       auto& attrs = method.attributes;
       if (!indexedMethodAttrs.empty()) {
-        size_t j = 0;
-        for (size_t i = 0; i < attrs.size(); ++i) {
-          // XXX interning every queried attribute name
-          if (indexedMethodAttrs.count(
-                  Symbol<SymKind::Type>{as_slice(attrs[i].name)})) {
-            if (j < i) {
-              attrs[j] = std::move(attrs[i]);
-            }
-            j++;
-          }
-        }
-        if (j < attrs.size()) {
-          attrs.truncate(j);
+        auto iter = std::partition(attrs.begin(), attrs.end(), [&](auto& attr) {
+          return std::find(
+                     indexedMethodAttrs.begin(),
+                     indexedMethodAttrs.end(),
+                     Symbol<SymKind::Type>{as_slice(attr.name)}) !=
+              indexedMethodAttrs.end();
+        });
+        if (iter != attrs.end()) {
+          attrs.truncate(std::distance(attrs.begin(), iter));
         }
       }
-      if (!attrs.empty()) {
-        MethodDecl methodDecl{
-            .m_type = {.m_name = typeName, .m_path = path},
-            .m_method = Symbol<SymKind::Method>{as_slice(method.name)}};
-        m_methodAttrs.setAttributes(methodDecl, std::move(attrs));
-      }
+
+      MethodDecl methodDecl{
+          .m_type = {.m_name = typeName, .m_path = path},
+          .m_method = Symbol<SymKind::Method>{as_slice(method.name)}};
+      m_methodAttrs.setAttributes(methodDecl, std::move(attrs));
     }
   }
 

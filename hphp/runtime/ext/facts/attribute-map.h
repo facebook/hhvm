@@ -78,6 +78,9 @@ struct AttributeMap {
   void setAttributes(Key key, rust::Vec<AttrFacts> attrVec) {
     Attrs attrs;
     attrs.reserve(attrVec.size());
+
+    // Erase any exising attribute arguments and then repopulate them.
+    m_attrArgs.erase(key);
     for (auto& attr : attrVec) {
       auto attrSym = Symbol<SymKind::Type>{as_slice(attr.name)};
       attrs.push_back(attrSym);
@@ -88,6 +91,7 @@ struct AttributeMap {
       }
       m_attrArgs.setAttributeArgs(key, attrSym, std::move(args));
     }
+
     m_attrMap.setValuesForKey(std::move(key), std::move(attrs));
   }
 

@@ -2092,6 +2092,99 @@ TEST_F(SymbolMapTest, GetAttributesOfRenamedMethod) {
   }
 }
 
+TEST_F(SymbolMapTest, ClearedAttributesGetRemoved) {
+  auto m1 = make("/var/www");
+
+  // Create method `C1::m1`
+  FileFacts ff1{
+      .types =
+          {TypeFacts{
+               .name = "C1",
+               .kind = TypeKind::Class,
+               .attributes = {{.name = "T1", .args = {"T1_1"}}},
+               .methods =
+                   {
+                       MethodFacts{
+                           .name = "m1",
+                           .attributes = {{.name = "A1", .args = {"1"}}}},
+                   }},
+           TypeFacts{
+               .name = "C2",
+               .kind = TypeKind::TypeAlias,
+               .attributes = {{.name = "TA1", .args = {"TA1_1"}}}}},
+      .file_attributes = {{.name = "F1", .args = {"F1_1"}}}};
+  fs::path p1{"some/path1.php"};
+  update(m1, "", "1", {p1}, {}, {ff1});
+  m1.drain();
+  m1.waitForDBUpdate();
+  ASSERT_EQ(m1.getClock().m_clock, "1");
+
+  auto check_populated = [p1](SymbolMap& m) {
+    EXPECT_THAT(
+        m.getFilesWithAttribute("F1"), UnorderedElementsAre(p1.native()));
+    EXPECT_THAT(
+        m.getFilesWithAttributeAndAnyValue("F1", "F1_1"),
+        UnorderedElementsAre(p1.native()));
+    EXPECT_THAT(m.getAttributesOfFile(Path{p1}), UnorderedElementsAre("F1"));
+    EXPECT_THAT(m.getFileAttributeArgs(Path{p1}, "F1"), ElementsAre("F1_1"));
+
+    EXPECT_THAT(m.getTypesWithAttribute("T1"), UnorderedElementsAre("C1"));
+    EXPECT_THAT(m.getAttributesOfType("C1"), UnorderedElementsAre("T1"));
+    EXPECT_THAT(m.getTypeAttributeArgs("C1", "T1"), ElementsAre("T1_1"));
+
+    EXPECT_THAT(
+        m.getTypeAliasesWithAttribute("TA1"), UnorderedElementsAre("C2"));
+    EXPECT_THAT(m.getAttributesOfTypeAlias("C2"), UnorderedElementsAre("TA1"));
+    EXPECT_THAT(m.getTypeAliasAttributeArgs("C2", "TA1"), ElementsAre("TA1_1"));
+
+    auto methods = m.getMethodsWithAttribute("A1");
+    ASSERT_EQ(methods.size(), 1);
+    EXPECT_EQ(methods[0].m_type.m_name.slice(), "C1");
+    EXPECT_EQ(methods[0].m_method.m_name.slice(), "m1");
+    EXPECT_THAT(m.getAttributesOfMethod("C1", "m1"), ElementsAre("A1"));
+    EXPECT_THAT(m.getMethodAttributeArgs("C1", "m1", "A1"), ElementsAre("1"));
+  };
+  check_populated(m1);
+
+  auto m2 = make("/var/www");
+  check_populated(m2);
+
+  FileFacts ff2{
+      .types = {
+          {.name = "C1",
+           .methods = {MethodFacts{
+               .name = "m1",
+               .attributes = {},
+           }}}}};
+  update(m1, "1", "2", {p1}, {}, {ff2});
+  m1.drain();
+  m1.waitForDBUpdate();
+  ASSERT_EQ(m1.getClock().m_clock, "2");
+
+  auto check_empty = [p1](SymbolMap& m) {
+    EXPECT_THAT(m.getFilesWithAttribute("F1"), IsEmpty());
+    EXPECT_THAT(m.getFilesWithAttributeAndAnyValue("F1", "F1_1"), IsEmpty());
+    EXPECT_THAT(m.getAttributesOfFile(Path{p1}), IsEmpty());
+    EXPECT_THAT(m.getFileAttributeArgs(Path{p1}, "F1"), IsEmpty());
+
+    EXPECT_THAT(m.getTypesWithAttribute("T1"), IsEmpty());
+    EXPECT_THAT(m.getAttributesOfType("C1"), IsEmpty());
+    EXPECT_THAT(m.getTypeAttributeArgs("C1", "T1"), IsEmpty());
+
+    EXPECT_THAT(m.getTypeAliasesWithAttribute("TA1"), IsEmpty());
+    EXPECT_THAT(m.getAttributesOfTypeAlias("C2"), IsEmpty());
+    EXPECT_THAT(m.getTypeAliasAttributeArgs("C2", "TA1"), IsEmpty());
+
+    EXPECT_THAT(m.getMethodsWithAttribute("A1"), IsEmpty());
+    EXPECT_THAT(m.getAttributesOfMethod("C1", "m1"), IsEmpty());
+    EXPECT_THAT(m.getMethodAttributeArgs("C1", "m1", "A1"), IsEmpty());
+  };
+  check_empty(m1);
+
+  auto m3 = make("/var/www");
+  check_empty(m3);
+}
+
 TEST_F(SymbolMapTest, OnlyIndexCertainMethodAttrs) {
   // Index A2 but not A1
   auto m1 = make("/var/www", /* useManualExecutor = */ false, {"A2"});

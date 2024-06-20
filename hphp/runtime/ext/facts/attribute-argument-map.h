@@ -18,22 +18,26 @@ namespace Facts {
 template <typename Key>
 struct AttributeArgumentMap {
   using ArgKey = std::tuple<Key, Symbol<SymKind::Type>>;
+  using AttributeToArgumentsMap =
+      hphp_hash_map<Symbol<SymKind::Type>, std::vector<folly::dynamic>>;
+  using KeyToArgMap = hphp_hash_map<Key, AttributeToArgumentsMap>;
 
   void setAttributeArgs(
       Key key,
       Symbol<SymKind::Type> attr,
       std::vector<folly::dynamic> args) {
-    m_attrArgs.insert_or_assign({key, attr}, std::move(args));
+    m_attrArgs[key].insert_or_assign(attr, std::move(args));
   }
 
   const std::vector<folly::dynamic>* getAttributeArgs(
       Key key,
       Symbol<SymKind::Type> attr) const {
-    ArgKey argKey{key, attr};
-
-    auto const it = m_attrArgs.find(argKey);
-    if (it != m_attrArgs.end()) {
-      return &it->second;
+    auto const attr_iter = m_attrArgs.find(key);
+    if (attr_iter != m_attrArgs.end()) {
+      auto const arg_iter = attr_iter->second.find(attr);
+      if (arg_iter != attr_iter->second.end()) {
+        return &arg_iter->second;
+      }
     }
     return nullptr;
   }
@@ -42,18 +46,23 @@ struct AttributeArgumentMap {
       Key key,
       Symbol<SymKind::Type> attr,
       const std::vector<folly::dynamic>& argsFromDB) {
-    ArgKey argKey{key, attr};
-
-    auto it = m_attrArgs.find(argKey);
-    if (it != m_attrArgs.end()) {
-      return it->second;
+    auto const attr_iter = m_attrArgs.find(key);
+    if (attr_iter != m_attrArgs.end()) {
+      auto const arg_iter = attr_iter->second.find(attr);
+      if (arg_iter != attr_iter->second.end()) {
+        return arg_iter->second;
+      }
     }
+    auto [iter, _] = m_attrArgs[key].try_emplace(std::move(attr), argsFromDB);
+    return iter->second;
+  }
 
-    return m_attrArgs.try_emplace(std::move(argKey), argsFromDB).first->second;
+  void erase(Key key) {
+    m_attrArgs.erase(key);
   }
 
  private:
-  hphp_hash_map<ArgKey, std::vector<folly::dynamic>> m_attrArgs;
+  KeyToArgMap m_attrArgs;
 };
 
 } // namespace Facts

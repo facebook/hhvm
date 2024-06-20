@@ -23,8 +23,8 @@ namespace apache {
 namespace thrift {
 namespace op {
 
-template <typename Tag>
-using Hash = detail::Hash<Tag>;
+template <typename Tag, typename Hasher = void>
+using Hash = detail::Hash<Tag, Hasher>;
 
 // Hash the given value. Same hash result will be produced for thrift values
 // that are identical to, or equal to each other. Default hash algorithm,
@@ -33,8 +33,9 @@ using Hash = detail::Hash<Tag>;
 // For example:
 //   hash<i32_t>(myInt) // returns hash of myInt.
 //   hash<set<i32_t>>(myIntSet) // returns hash of myIntSet
-template <typename Tag>
-inline constexpr Hash<Tag> hash{};
+//   hash<i32_t, Sha256Hasher>(myInt) // returns SHA-256 hash of myInt
+template <typename Tag, typename Hasher = void>
+inline constexpr Hash<Tag, Hasher> hash{};
 
 } // namespace op
 } // namespace thrift

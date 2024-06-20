@@ -90,13 +90,6 @@ auto hashStruct(const Struct& input) {
   return op::hash<type::struct_t<Struct>>(input);
 }
 
-template <typename Tag, typename T = type::native_type<Tag>>
-auto debugHash(const T& input) {
-  auto accumulator = makeDeterministicAccumulator<DebugHasher>();
-  op::hash<Tag>(input, accumulator);
-  return std::move(accumulator.result()).getResult();
-}
-
 TEST(HashTest, HashType) {
   using Tag = type::struct_t<test::OneOfEach>;
   test::OneOfEach value;
@@ -135,15 +128,16 @@ TEST(HashTest, HashDouble) {
 
 TEST(HashTest, HashAccumulation) {
   test::OneOfEach value;
-  EXPECT_EQ(debugHash<type::i32_t>(*value.myI32()), "[100017]");
+  EXPECT_EQ((hash<type::i32_t, DebugHasher>(*value.myI32())), "[100017]");
   EXPECT_EQ(
-      debugHash<type::list<type::string_t>>(*value.myList()),
+      (hash<type::list<type::string_t>, DebugHasher>(*value.myList())),
       "[3,3foo,3bar,3baz]");
   EXPECT_EQ(
-      debugHash<type::set<type::string_t>>(*value.mySet()),
+      (hash<type::set<type::string_t>, DebugHasher>(*value.mySet())),
       "[3,[[3bar],[3baz],[3foo]]]");
   EXPECT_EQ(
-      (debugHash<type::map<type::string_t, type::i64_t>>(*value.myMap())),
+      (hash<type::map<type::string_t, type::i64_t>, DebugHasher>(
+          *value.myMap())),
       "[3,[[3bar,17],[3baz,19],[3foo,13]]]");
 }
 
@@ -159,7 +153,7 @@ class DeterministicProtocolTest : public ::testing::Test {
 struct HasherMode {
   template <typename Struct>
   static auto hash(const Struct& input) {
-    return debugHash<type::struct_t<Struct>>(input);
+    return op::hash<type::struct_t<Struct>, DebugHasher>(input);
   }
 };
 

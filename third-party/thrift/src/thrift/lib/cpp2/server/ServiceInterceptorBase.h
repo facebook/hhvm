@@ -60,6 +60,11 @@ class ServiceInterceptorBase {
   };
   virtual folly::coro::Task<void> internal_onResponse(
       ConnectionInfo, ResponseInfo) = 0;
+
+  static constexpr std::size_t kMaxRequestStateSize =
+      detail::ServiceInterceptorOnRequestStorage::max_size();
+  static constexpr std::size_t kMaxConnectionStateSize =
+      detail::ServiceInterceptorOnConnectionStorage::max_size();
 };
 
 #endif // FOLLY_HAS_COROUTINES

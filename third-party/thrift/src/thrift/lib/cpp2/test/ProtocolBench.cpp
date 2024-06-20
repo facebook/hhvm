@@ -89,14 +89,21 @@ void writeBench(size_t iters, Counter&&) {
   }
   susp.dismiss();
 
+  IOBufQueue q;
   while (iters--) {
     if constexpr (kSerializerMethod == SerializerMethod::Object) {
-      auto q = protocol::serializeObject<GetWriter<Serializer>>(obj);
+      protocol::serializeObject<GetWriter<Serializer>>(obj, q);
       folly::doNotOptimizeAway(q);
     } else {
-      IOBufQueue q;
       Serializer::serialize(strct, &q);
       folly::doNotOptimizeAway(q);
+    }
+
+    // Reuse the queue across iterations to avoid allocating a new buffer for
+    // each struct (which would dominate the measurement), but keep only the
+    // tail to avoid unbounded growth.
+    if (auto head = q.front(); head && head->isChained()) {
+      q.append(q.move()->prev()->unlink());
     }
   }
   susp.rehire();

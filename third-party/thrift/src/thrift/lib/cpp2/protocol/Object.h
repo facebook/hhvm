@@ -108,11 +108,16 @@ MaskedDecodeResult parseObject(
 // val: Value to be serialized Serialized output is same as schema based
 // serialization except when struct contains an empty list, set or map
 template <class Protocol>
-std::unique_ptr<folly::IOBuf> serializeValue(const Value& val) {
+void serializeValue(const Value& val, folly::IOBufQueue& queue) {
   Protocol prot;
-  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
   prot.setOutput(&queue);
   detail::serializeValue(prot, val);
+}
+
+template <class Protocol>
+std::unique_ptr<folly::IOBuf> serializeValue(const Value& val) {
+  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
+  serializeValue<Protocol>(val, queue);
   return queue.move();
 }
 
@@ -121,11 +126,16 @@ std::unique_ptr<folly::IOBuf> serializeValue(const Value& val) {
 // obj: object to be serialized Serialized output is same as schema based
 // serialization except when struct contains an empty list, set or map
 template <class Protocol>
-std::unique_ptr<folly::IOBuf> serializeObject(const Object& val) {
+void serializeObject(const Object& val, folly::IOBufQueue& queue) {
   Protocol prot;
-  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
   prot.setOutput(&queue);
   detail::serializeObject(prot, val);
+}
+
+template <class Protocol>
+std::unique_ptr<folly::IOBuf> serializeObject(const Object& val) {
+  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
+  serializeObject<Protocol>(val, queue);
   return queue.move();
 }
 

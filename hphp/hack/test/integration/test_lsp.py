@@ -7426,7 +7426,7 @@ function expect_type_errors_inside(): void {
         variables = self.write_hhconf_and_naming_table()
         file_base_name = "notebook_mode.php"
         php_file_uri = self.repo_file_uri(file_base_name)
-        contents = """<?hh
+        contents = r"""<?hh
 
 async function gen_bool(): Awaitable<bool> {
     return true;
@@ -7436,6 +7436,16 @@ $s + 3;                 // Error, expected num but got string
 $i = await gen_bool();  // OK top-level await, because we pass '--notebook-mode' to the LSP
 $i + 3;                 // Error, expected num but got bool
 echo $undefined_var;
+class :el {
+  public function __construct(
+    public darray<string,mixed> $x, // Attributes
+    public varray<mixed> $y, // Children
+    public string $z, // Filename
+    public int $s, // Line number
+  ) {}
+}
+<el />;
+
 """
         variables.update({"php_file_uri": php_file_uri, "contents": contents})
         spec = (
@@ -7462,6 +7472,18 @@ echo $undefined_var;
                 params={
                     "uri": "${php_file_uri}",
                     "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 18, "character": 1},
+                                "end": {"line": 18, "character": 3},
+                            },
+                            "severity": 1,
+                            "code": 2049,
+                            "source": "Hack",
+                            "message": "Unbound name: el (an object type)",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
                         {
                             "range": {
                                 "start": {"line": 9, "character": 5},
@@ -7708,7 +7730,7 @@ echo $undefined_var_2; // no error
                                     "message": "But got bool",
                                 },
                             ],
-                        }
+                        },
                     ],
                 },
             )

@@ -1,6 +1,6 @@
 error: Typing[4472] Cannot access a public element which belongs to package pkg2 from package pkg1 [1]
--> This is from //hphp/hack/test/package/v2/package_access/include_paths_bad5.php--foo.php, which belongs to package pkg2 [2]
--> But //hphp/hack/test/package/v2/package_access/include_paths_bad5.php--bar.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
+-> This is from package_access/include_paths_bad5.php--foo.php, which belongs to package pkg2 [2]
+-> But package_access/include_paths_bad5.php--bar.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
 
 include_paths_bad5.php--bar.php:4:14
 2 | // package pkg1

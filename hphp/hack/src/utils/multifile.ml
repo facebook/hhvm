@@ -56,7 +56,7 @@ let split_multifile_content content : (string * content) list =
   and make a Relative_path out of the result. *)
 let full_path (real_filename : string) (sub_filename : string) : Relative_path.t
     =
-  Relative_path.create Relative_path.Dummy (real_filename ^ "--" ^ sub_filename)
+  Relative_path.create_detect_prefix (real_filename ^ "--" ^ sub_filename)
 
 (* We have some hacky "syntax extensions" to have one file contain multiple
  * files, which can be located at arbitrary paths. This is useful e.g. for
@@ -96,9 +96,7 @@ let file_to_file_list file =
       try Str.matched_group 3 first_line with
       | Stdlib.Not_found -> abs_fn
     in
-    let file =
-      Relative_path.create Relative_path.Dummy (join_path dir file_name)
-    in
+    let file = Relative_path.create_detect_prefix (join_path dir file_name) in
     let content = String.concat ~sep:"\n" (List.tl_exn contentl) in
     [(file, content)]
   ) else
@@ -115,9 +113,9 @@ let read_file_from_multifile path : string list =
   if ix >= 0 then
     let abs_fn =
       String_utils.string_before path (ix + String.length ".php")
-      |> Relative_path.create Relative_path.Dummy
+      |> Relative_path.create_detect_prefix
     in
-    let rel_path = Relative_path.create Relative_path.Dummy path in
+    let rel_path = Relative_path.create_detect_prefix path in
     let files = file_to_files abs_fn in
     match Relative_path.Map.find_opt files rel_path with
     | None -> []
@@ -217,8 +215,7 @@ module States = struct
         | None -> None
         | Some sub_fn ->
           Some
-            ( Relative_path.create Relative_path.Dummy (path ^ "--" ^ sub_fn),
-              content ))
+            (Relative_path.create_detect_prefix (path ^ "--" ^ sub_fn), content))
     |> Relative_path.Map.of_list
 
   (** Get the base files from a multifile, simarly to {!file_to_files),

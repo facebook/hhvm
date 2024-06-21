@@ -2376,6 +2376,20 @@ TEST_P(HQUpstreamSessionTestWebTransport, PairOfUnisReset) {
   closeWTSession();
 }
 
+TEST_P(HQUpstreamSessionTestWebTransport, Datagrams) {
+  InSequence enforceOrder;
+  EXPECT_TRUE(wt_->sendDatagram(makeBuf(10)));
+  EXPECT_EQ(socketDriver_->outDatagrams_.size(), 1);
+  EXPECT_EQ(socketDriver_->outDatagrams_[0].chainLength(), 11);
+  socketDriver_->addDatagram(getH3Datagram(0, makeBuf(10), folly::none));
+  socketDriver_->addDatagramsAvailableReadEvent();
+  EXPECT_CALL(*handler_, _onDatagram(testing::_)).WillOnce(Invoke([](auto dg) {
+    EXPECT_EQ(dg->computeChainDataLength(), 10);
+  }));
+  eventBase_.loopOnce();
+  closeWTSession();
+}
+
 /**
  * Instantiate the Parametrized test cases
  */

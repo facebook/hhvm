@@ -364,7 +364,9 @@ class HQSessionTest
   }
 
   std::unique_ptr<folly::IOBuf> getH3Datagram(
-      uint64_t streamId, std::unique_ptr<folly::IOBuf> datagram) {
+      uint64_t streamId,
+      std::unique_ptr<folly::IOBuf> datagram,
+      folly::Optional<uint64_t> ctxId = 0) {
     // Prepend the H3 Datagram header to the datagram payload
     // HTTP/3 Datagram {
     //   Quarter Stream ID (i),
@@ -379,11 +381,12 @@ class HQSessionTest
     if (streamIdRes.hasError()) {
       return nullptr;
     }
-    // Always use context-id = 0 for now
-    auto ctxIdRes =
-        quic::encodeQuicInteger(0, [&](auto val) { appender.writeBE(val); });
-    if (ctxIdRes.hasError()) {
-      return nullptr;
+    if (ctxId) {
+      auto ctxIdRes = quic::encodeQuicInteger(
+          *ctxId, [&](auto val) { appender.writeBE(val); });
+      if (ctxIdRes.hasError()) {
+        return nullptr;
+      }
     }
     quic::BufQueue queue(std::move(headerBuf));
     queue.append(std::move(datagram));

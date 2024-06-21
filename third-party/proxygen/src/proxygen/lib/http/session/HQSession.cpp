@@ -3705,26 +3705,26 @@ void HQSession::onDatagramsAvailable() noexcept {
           kErrorConnection);
       break;
     }
-    // TODO: draft 8 and rfc don't include context ID
-    auto ctxId = quic::decodeQuicInteger(cursor);
-    if (!ctxId) {
-      dropConnectionAsync(
-          quic::QuicError(HTTP3::ErrorCode::HTTP_GENERAL_PROTOCOL_ERROR,
-                          "H3_DATAGRAM: error decoding context-id"),
-          kErrorConnection);
-    }
-
-    quic::BufQueue datagramQ;
-    datagramQ.append(std::move(datagram));
-    datagramQ.trimStart(quarterStreamId->second + ctxId->second);
-
     auto streamId = quarterStreamId->first * 4;
     auto stream = findNonDetachedStream(streamId);
+    folly::Optional<std::pair<uint64_t, size_t>> ctxId;
+    if (!stream || !stream->txn_.isWebTransportConnectStream()) {
+      // TODO: draft 8 and rfc don't include context ID
+      ctxId = quic::decodeQuicInteger(cursor);
+      if (!ctxId) {
+        dropConnectionAsync(
+            quic::QuicError(HTTP3::ErrorCode::HTTP_GENERAL_PROTOCOL_ERROR,
+                            "H3_DATAGRAM: error decoding context-id"),
+            kErrorConnection);
+      }
+    }
+    quic::BufQueue datagramQ;
+    datagramQ.append(std::move(datagram));
+    datagramQ.trimStart(quarterStreamId->second + (ctxId ? ctxId->second : 0));
 
     if (!stream || !stream->hasHeaders_) {
       VLOG(4) << "Stream cannot receive datagrams yet. streamId=" << streamId
-              << " ctx=" << ctxId->first << " len=" << datagramQ.chainLength()
-              << " sess=" << *this;
+              << " len=" << datagramQ.chainLength() << " sess=" << *this;
       // TODO: a possible optimization would be to discard datagrams destined
       // to streams that were already closed
       auto itr = datagramsBuffer_.find(streamId);
@@ -3741,9 +3741,9 @@ void HQSession::onDatagramsAvailable() noexcept {
       continue;
     }
 
-    VLOG(4) << "Received datagram for streamId=" << streamId
-            << " ctx=" << ctxId->first << " len=" << datagramQ.chainLength()
-            << " sess=" << *this;
+    VLOG(4) << "Received datagram for streamId=" << streamId << " ctx="
+            << (ctxId ? folly::to<std::string>(ctxId->first) : std::string())
+            << " len=" << datagramQ.chainLength() << " sess=" << *this;
     stream->txn_.onDatagram(datagramQ.move());
   }
 }
@@ -3778,11 +3778,13 @@ bool HQSession::HQStreamTransport::sendDatagram(
   if (streamIdRes.hasError()) {
     return false;
   }
-  // Always use context-id = 0 for now
-  auto ctxIdRes =
-      quic::encodeQuicInteger(0, [&](auto val) { appender.writeBE(val); });
-  if (ctxIdRes.hasError()) {
-    return false;
+  if (!txn_.isWebTransportConnectStream()) {
+    // Always use context-id = 0 for now
+    auto ctxIdRes =
+        quic::encodeQuicInteger(0, [&](auto val) { appender.writeBE(val); });
+    if (ctxIdRes.hasError()) {
+      return false;
+    }
   }
   VLOG(4) << "Sending datagram for streamId=" << streamId_.value()
           << " len=" << datagram->computeChainDataLength()

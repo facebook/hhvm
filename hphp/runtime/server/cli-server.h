@@ -205,6 +205,11 @@ bool cli_mkstemp(char* buf);
 bool cli_supports_clone();
 
 /*
+ * Returns the number of workers currently running the CLI server.
+*/
+int cli_server_active_workers();
+
+/*
  * Explicitly open a file via the CLI-server client.
  *
  * WARNING: use of this function should be considered a last resort, it's
@@ -236,4 +241,3 @@ void cli_invoke(
 CLIContext cli_clone_context();
 
 }
-

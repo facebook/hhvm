@@ -36,6 +36,15 @@ async function fa0($a) :Awaitable<mixed>{
 function main($a) :mixed{
   return \HH\Asio\join(fa0($a));
 }
+
+function VS($x, $y) {
+  var_dump($x === $y);
+  if ($x !== $y) {
+    echo "Failed: $y\n"; echo "Got: $x\n";
+    var_dump(debug_backtrace());
+  }
+}
+
 <<__EntryPoint>>
 function entrypoint_xenon_init(): void {
 
@@ -69,5 +78,9 @@ function entrypoint_xenon_init(): void {
     'HH\array_mark_legacy',
   ];
 
+  VS($stacks[0]['ioWaitSample'] != null, true);
+  VS($stacks[0]['lastTriggerTimeNano'] != null, true);
+  VS($stacks[0]['sourceType'] != null, true);
+  VS($stacks[0]['timeNano'] != null, true);
   verifyTestRun($stacks, $required_functions, $optional_functions);
 }

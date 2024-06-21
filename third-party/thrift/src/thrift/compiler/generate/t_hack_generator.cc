@@ -5815,7 +5815,7 @@ void t_hack_generator::generate_process_function(
     }
     ++exc_num;
   }
-  f_service_ << indent() << "} catch (\\Exception) {\n"
+  f_service_ << indent() << "} catch (\\Exception $ex) {\n"
              << indent() << "  $reply_type = \\TMessageType::EXCEPTION;\n"
              << indent()
              << "  $this->eventHandler_->handlerError($handler_ctx, '"
@@ -6937,7 +6937,7 @@ void t_hack_generator::_generate_sendImpl(
   scope_down(out);
 
   indent_down();
-  indent(out) << "} catch (\\THandlerShortCircuitException) {\n";
+  indent(out) << "} catch (\\THandlerShortCircuitException $ex) {\n";
   indent_up();
   out << indent() << "switch ($ex->resultType) {\n"
       << indent() << "  case \\THandlerShortCircuitException::R_EXPECTED_EX:\n"
@@ -6953,7 +6953,7 @@ void t_hack_generator::_generate_sendImpl(
       << indent() << "    return $currentseqid;\n"
       << indent() << "}\n";
   indent_down();
-  indent(out) << "} catch (\\Exception) {\n";
+  indent(out) << "} catch (\\Exception $ex) {\n";
   indent_up();
   out << indent() << "$this->eventHandler_->sendError('" << rpc_function_name
       << "', $args, $currentseqid, $ex);\n"

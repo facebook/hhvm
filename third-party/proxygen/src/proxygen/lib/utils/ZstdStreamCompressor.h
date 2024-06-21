@@ -15,8 +15,11 @@
 
 namespace folly {
 class IOBuf;
-namespace io {
+namespace compression {
 class StreamCodec;
+}
+namespace io {
+using folly::compression::StreamCodec;
 }
 } // namespace folly
 

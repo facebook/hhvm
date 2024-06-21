@@ -1,5 +1,5 @@
 <?hh
-
+<<file:__EnableUnstableFeatures('class_const_default')>>
 function expect_string(string $s): void {}
 function expect_nstring(?string $s): void {}
 
@@ -47,4 +47,12 @@ function concat(): void {
   "abcd".C::class;
   $x = "abcd";
   $x .= C::class;
+}
+
+abstract class A {
+  const string S = self::class;
+  abstract const string T = self::class;
+}
+enum class E: mixed {
+  string A = E::class;
 }

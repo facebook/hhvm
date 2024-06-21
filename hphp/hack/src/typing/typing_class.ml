@@ -1147,9 +1147,12 @@ let class_const_def ~in_enum_class c cls env cc =
     let env = check env ty' in
     (env, te, ty')
   in
+  let check_class env p e ty =
+    Typing_class_pointers.check_string_coercion_point env ~flag:"const" p e ty
+  in
   let ((env, ty_err_opt), kind, ty) =
     match k with
-    | CCConcrete ((_, e_pos, _) as e) when in_enum_class ->
+    | CCConcrete ((_, e_pos, e_expr) as e) when in_enum_class ->
       let (env, cap, unsafe_cap) =
         (* Enum class constant initializers are restricted to be `write_props` *)
         let make_hint pos s = (pos, Aast.Happly ((pos, s), [])) in
@@ -1165,8 +1168,9 @@ let class_const_def ~in_enum_class c cls env cc =
       in
       let (te, ty') =
         match deref hint_ty with
-        | (r, Tnewtype (memberof, [enum_name; _], _))
+        | (r, Tnewtype (memberof, [enum_name; _], def_ty))
           when String.equal memberof SN.Classes.cMemberOf ->
+          check_class env e_pos e_expr def_ty;
           let lift r ty = mk (r, Tnewtype (memberof, [enum_name; ty], ty)) in
           let (te_ty, p, te) = te in
           let te = (lift (get_reason te_ty) te_ty, p, te) in
@@ -1182,10 +1186,12 @@ let class_const_def ~in_enum_class c cls env cc =
        * about checking the value and simply pass it through *)
       let (env, te, _ty) = Typing.expr env e in
       ((env, None), CCConcrete te, hint_ty)
-    | CCConcrete e ->
+    | CCConcrete ((_, e_pos, e_expr) as e) ->
+      check_class env e_pos e_expr hint_ty;
       let (env, te, ty') = type_and_check env e in
       (env, Aast.CCConcrete te, ty')
-    | CCAbstract (Some default) ->
+    | CCAbstract (Some ((_, e_pos, e_expr) as default)) ->
+      check_class env e_pos e_expr hint_ty;
       let (env, tdefault, ty') = type_and_check env default in
       (env, CCAbstract (Some tdefault), ty')
     | CCAbstract None -> ((env, None), CCAbstract None, hint_ty)

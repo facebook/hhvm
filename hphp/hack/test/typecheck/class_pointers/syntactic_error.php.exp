@@ -16,3 +16,9 @@ ERROR: File "syntactic_error.php", line 47, characters 10-17:
 Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
 ERROR: File "syntactic_error.php", line 49, characters 9-16:
 Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
+ERROR: File "syntactic_error.php", line 53, characters 20-30:
+Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` (Typing[4482])
+ERROR: File "syntactic_error.php", line 54, characters 29-39:
+Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` (Typing[4482])
+ERROR: File "syntactic_error.php", line 57, characters 14-21:
+Using `E::class` in this position will trigger an implicit runtime conversion to string, please use `nameof E` (Typing[4482])

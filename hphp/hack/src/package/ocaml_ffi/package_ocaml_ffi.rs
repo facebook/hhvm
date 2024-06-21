@@ -10,9 +10,10 @@ use oxidized::package_info_impl::Errors;
 
 ocaml_ffi! {
     fn extract_packages_from_text_ffi(
+        root: String,
         filename: String,
     ) -> Result<Vec<Package>, Errors> {
-        let info = match package::PackageInfo::from_text(&filename) {
+        let info = match package::PackageInfo::from_text(&root, &filename) {
             Ok(info) => info,
             // TODO(T148525961): Send a proper error when packages.toml fails to parse
             Err(_) => return Ok(vec![]),

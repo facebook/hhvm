@@ -62,22 +62,19 @@ let get_package_for_module (info : t) (md : string) : Package.t option =
 
 let get_package_for_file (info : t) (file : Relative_path.t) : Package.t option
     =
-  let file_abs_path = Relative_path.to_absolute file in
+  let filepath = Relative_path.suffix file in
   let candidates : string SMap.t =
     SMap.filter_map
       (fun _ pkg ->
         List.filter_map pkg.Package.include_paths ~f:(fun (_, path) ->
-            let abs_path =
-              Relative_path.(to_absolute @@ create_detect_prefix path)
-            in
             let prefix =
-              if String.is_suffix ~suffix:"*" abs_path then
-                String.sub abs_path ~pos:0 ~len:(String.length abs_path - 1)
+              if String.is_suffix ~suffix:"*" path then
+                String.sub path ~pos:0 ~len:(String.length path - 1)
               else
-                abs_path
+                path
             in
-            if String.is_prefix ~prefix file_abs_path then
-              Some abs_path
+            if String.is_prefix ~prefix filepath then
+              Some path
             else
               None)
         |> List.sort ~compare:(fun s1 s2 -> ~-(String.compare s1 s2))
@@ -87,13 +84,11 @@ let get_package_for_file (info : t) (file : Relative_path.t) : Package.t option
   let (_strictest_matching_path, package_with_strictest_matching_path) =
     SMap.fold
       (fun pkg path ((path', _) as acc) ->
-        (* By construction all candidate paths are at most as long as `file_abs_path`.
-           If there is a candidate that's an exact match as `file_abs_path`, it'll win
+        (* By construction all candidate paths are at most as long as `filepath`.
+           If there is a candidate that's an exact match as `filepath`, it'll win
            as the strictest matching path; otherwise, we want to find the longest path
-           that's a prefix glob of `file_abs_path`. *)
-        if
-          (not @@ String.equal path' file_abs_path)
-          && String.compare path path' > 0
+           that's a prefix glob of `filepath`. *)
+        if (not @@ String.equal path' filepath) && String.compare path path' > 0
         then
           (path, Some pkg)
         else

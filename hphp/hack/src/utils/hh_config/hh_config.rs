@@ -63,7 +63,7 @@ impl HhConfig {
     pub fn from_root(root: impl AsRef<Path>, overrides: &ConfigFile) -> Result<Self> {
         let hhconfig_path = root.as_ref().join(FILE_PATH_RELATIVE_TO_ROOT);
         let hh_conf_path = system_config_path();
-        Self::from_files(hhconfig_path, hh_conf_path, overrides)
+        Self::from_files(root, hhconfig_path, hh_conf_path, overrides)
     }
 
     pub fn create_packages_path(hhconfig_path: &Path) -> PathBuf {
@@ -81,6 +81,7 @@ impl HhConfig {
     }
 
     pub fn from_files(
+        root: impl AsRef<Path>,
         hhconfig_path: impl AsRef<Path>,
         hh_conf_path: impl AsRef<Path>,
         overrides: &ConfigFile,
@@ -99,9 +100,11 @@ impl HhConfig {
         } else {
             String::new()
         };
-        let package_info: PackageInfo =
-            PackageInfo::from_text(package_config_pathbuf.to_str().unwrap_or_default())
-                .unwrap_or_default();
+        let package_info: PackageInfo = PackageInfo::from_text(
+            root.as_ref().to_str().unwrap_or_default(),
+            package_config_pathbuf.to_str().unwrap_or_default(),
+        )
+        .unwrap_or_default();
         let custom_error_contents: String = if custom_error_config_path.exists() {
             let ctxt = || custom_error_config_path.as_path().display().to_string();
             let bytes = std::fs::read(&custom_error_config_path).with_context(ctxt)?;
@@ -152,9 +155,11 @@ impl HhConfig {
         let custom_error_config = CustomErrorConfig::from_path(custom_error_config_path)?;
         let package_config_pathbuf = Self::create_packages_path(hhconfig_path.as_path());
         let package_config_path = package_config_pathbuf.as_path();
-        let package_info: PackageInfo =
-            PackageInfo::from_text(package_config_path.to_str().unwrap_or_default())
-                .unwrap_or_default();
+        let package_info: PackageInfo = PackageInfo::from_text(
+            root.as_ref().to_str().unwrap_or_default(),
+            package_config_path.to_str().unwrap_or_default(),
+        )
+        .unwrap_or_default();
 
         Ok((
             hh_conf_file,

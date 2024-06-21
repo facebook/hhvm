@@ -10,7 +10,7 @@ open Hh_prelude
 type errors = (Pos.t * string * (Pos.t * string) list) list
 
 external extract_packages_from_text :
-  string -> string -> (Package.t list, errors) result
+  string -> string -> string -> (Package.t list, errors) result
   = "extract_packages_from_text_ffi"
 
 let pkgs_config_path_relative_to_repo_root = "PACKAGES.toml"
@@ -23,7 +23,8 @@ let log_debug (msg : ('a, unit, string, string, string, unit) format6) : 'a =
 
 let parse (path : string) =
   let contents = Sys_utils.cat path in
-  match extract_packages_from_text path contents with
+  let root = Relative_path.(path_of_prefix Root) in
+  match extract_packages_from_text root path contents with
   | Error errors ->
     let error_list =
       List.map errors ~f:(fun (pos, msg, reasons) ->

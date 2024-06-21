@@ -26,7 +26,14 @@ pub struct PackageInfo {
 }
 
 impl PackageInfo {
-    pub fn from_text(filename: &str) -> Result<PackageInfo> {
+    pub fn from_text(root: &str, filename: &str) -> Result<PackageInfo> {
+        let root = if !root.is_empty() {
+            Path::new(root)
+                .canonicalize()
+                .with_context(|| format!("Failed to canonicalize root path: {}", root))?
+        } else {
+            PathBuf::new()
+        };
         let contents = std::fs::read_to_string(filename)
             .with_context(|| format!("Failed to read config file with path: {}", filename))?;
         let mut config: Config = toml::from_str(&contents)
@@ -62,7 +69,11 @@ impl PackageInfo {
                     if !path_exists {
                         errors.push(Error::invalid_include_path(abs_path.clone(), span));
                     }
-                    *dir.get_mut() = abs_path.to_string_lossy().into_owned();
+                    let new_dir = abs_path
+                        .as_path()
+                        .strip_prefix(root.clone())
+                        .unwrap_or(&abs_path);
+                    *dir.get_mut() = new_dir.to_string_lossy().into_owned();
                     dirs.insert(dir);
                 });
             }
@@ -149,7 +160,7 @@ mod test {
     #[test]
     fn test_parsing_basic_file() {
         let test_path = SRCDIR.as_path().join("tests/package-1.toml");
-        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text("", test_path.to_str().unwrap()).unwrap();
         assert!(info.errors.is_empty());
 
         let foo = &info.packages()["foo"];
@@ -194,7 +205,7 @@ mod test {
     #[test]
     fn test_multiline_uses() {
         let test_path = SRCDIR.as_path().join("tests/package-2.toml");
-        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text("", test_path.to_str().unwrap()).unwrap();
         assert!(info.errors.is_empty());
 
         let foo = &info.packages()["foo"];
@@ -212,7 +223,7 @@ mod test {
     #[test]
     fn test_config_errors1() {
         let test_path = SRCDIR.as_path().join("tests/package-3.toml");
-        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text("", test_path.to_str().unwrap()).unwrap();
         assert_eq!(info.errors.len(), 3);
         assert_eq!(info.errors[0].msg(), "Undefined package: baz");
         assert_eq!(info.errors[1].msg(), "Undefined package: baz");
@@ -225,7 +236,7 @@ mod test {
     #[test]
     fn test_config_errors2() {
         let test_path = SRCDIR.as_path().join("tests/package-4.toml");
-        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text("", test_path.to_str().unwrap()).unwrap();
         let errors = info
             .errors
             .iter()
@@ -245,7 +256,7 @@ mod test {
     #[test]
     fn test_soft() {
         let test_path = SRCDIR.as_path().join("tests/package-5.toml");
-        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text("", test_path.to_str().unwrap()).unwrap();
         let c = &info.packages()["c"];
         let errors = info
             .errors
@@ -273,7 +284,7 @@ mod test {
     #[test]
     fn test_include_paths1() {
         let test_path = SRCDIR.as_path().join("tests/package-6.toml");
-        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text("", test_path.to_str().unwrap()).unwrap();
         let included_dirs = info.packages()["foo"].include_paths.as_ref().unwrap();
         assert_eq!(included_dirs.len(), 2);
         assert!(
@@ -291,7 +302,7 @@ mod test {
     #[test]
     fn test_include_paths2() {
         let test_path = SRCDIR.as_path().join("tests/package-6.toml");
-        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text("", test_path.to_str().unwrap()).unwrap();
         let included_dirs = info.packages()["bar"].include_paths.as_ref().unwrap();
         assert_eq!(included_dirs.len(), 3);
 
@@ -318,7 +329,7 @@ mod test {
     #[test]
     fn test_include_paths_error() {
         let test_path = SRCDIR.as_path().join("tests/package-6.toml");
-        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text("", test_path.to_str().unwrap()).unwrap();
 
         let errors = info
             .errors

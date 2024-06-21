@@ -656,6 +656,13 @@ struct Program {
   1: DefinitionAttrs attrs;
 
   /**
+  * The id of the program in this snapshot of the schema.
+  * In hash mode we still store programs as a list so the root program can be easily identified.
+  * This field would otherwise be the key into the map of programs.
+  **/
+  2: id.ProgramId id;
+
+  /**
    * The included programs, in the order included in the IDL/AST.
    *
    * Changing the order of includes is always backward compatible.

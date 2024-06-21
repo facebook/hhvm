@@ -761,6 +761,16 @@ std::string schematizer::identify_definition(const t_named& node) {
   return std::string(reinterpret_cast<const char*>(hash), kBytes);
 }
 
+int64_t schematizer::identify_program(const t_program& node) {
+  // @lint-ignore CLANGTIDY facebook-hte-CArray
+  unsigned char hash[SHA256_DIGEST_LENGTH];
+  const auto& val = node.path();
+  SHA256(reinterpret_cast<const unsigned char*>(val.c_str()), val.size(), hash);
+  int64_t ret;
+  memcpy(&ret, hash, sizeof(ret));
+  return ret;
+}
+
 } // namespace compiler
 } // namespace thrift
 } // namespace apache

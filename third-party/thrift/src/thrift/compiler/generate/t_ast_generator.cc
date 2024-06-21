@@ -109,10 +109,6 @@ class t_ast_generator : public t_generator {
   Id positionToId(size_t pos) {
     return Id{int64_t(pos + 1)};
   }
-  template <typename Id>
-  size_t idToPosition(Id id) {
-    return size_t(id) - 1;
-  }
 
   std::ofstream f_out_;
   ast_protocol protocol_;
@@ -130,6 +126,7 @@ void t_ast_generator::generate_program() {
   cpp2::Ast ast;
   std::unordered_map<const t_program*, apache::thrift::type::ProgramId>
       program_index;
+  std::unordered_map<apache::thrift::type::ProgramId, size_t> program_pos_index;
   std::unordered_map<const t_named*, apache::thrift::type::DefinitionId>
       definition_index;
   std::unordered_map<const t_named*, apache::thrift::type::DefinitionKey>
@@ -162,14 +159,10 @@ void t_ast_generator::generate_program() {
   };
 
   auto populate_defs = [&](t_program* program) {
-    auto& defs = ast.programs()
-                     ->at(idToPosition(program_index.at(program)))
-                     .definitions()
-                     .value();
-    auto& defKeys = ast.programs()
-                        ->at(idToPosition(program_index.at(program)))
-                        .definitionKeys()
-                        .value();
+    auto& prog =
+        ast.programs()->at(program_pos_index.at(program_index.at(program)));
+    auto& defs = prog.definitions().value();
+    auto& defKeys = prog.definitionKeys().value();
     for (auto& def : program->definitions()) {
       if (def.generated() && !include_generated_) {
         continue;
@@ -243,9 +236,14 @@ void t_ast_generator::generate_program() {
 
     auto& programs = *ast.programs();
     auto pos = programs.size();
-    auto program_id = positionToId<apache::thrift::type::ProgramId>(pos);
+    auto program_id = schema_opts_.use_hash
+        ? apache::thrift::type::ProgramId{schematizer::identify_program(
+              program)}
+        : positionToId<apache::thrift::type::ProgramId>(pos);
     program_index[&program] = program_id;
+    program_pos_index[program_id] = pos;
     hydrate_const(programs.emplace_back(), *schema_source.gen_schema(program));
+    programs.back().id() = program_id;
     if (program.has_doc()) {
       programs.back().attrs()->docs()->sourceRange() =
           src_range(program.doc_range(), &program);

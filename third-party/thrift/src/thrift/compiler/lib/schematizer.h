@@ -82,6 +82,7 @@ class schematizer {
   // Gets a universally unique identifier for a definition that is consistent
   // across runs on different including programs.
   static std::string identify_definition(const t_named& node);
+  static int64_t identify_program(const t_program& node);
 
  private:
   const t_program_bundle* bundle_;

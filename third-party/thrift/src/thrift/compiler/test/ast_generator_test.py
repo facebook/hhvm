@@ -449,6 +449,9 @@ class AstGeneratorTest(unittest.TestCase):
 
         ast = self.run_thrift("foo.thrift", use_hash=True)
         for v in ast.definitionsMap.values():
+            self.assertEqual(
+                v.structDef.attrs.sourceRange.programId, ast.programs[0].id
+            )
             if v.structDef.attrs.name == "Bar":
                 self.assertEqual(
                     ast.definitionsMap[

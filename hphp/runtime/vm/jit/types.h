@@ -333,8 +333,7 @@ inline std::string show(const Reason &r) {
   FALLBACK(Fatal)                          \
   FALLBACK(FatalResolveClass)              \
   FALLBACK(ThrowClassnameToClassString)    \
-  FALLBACK(ThrowClassnameToClassLazyClass) \
-  FALLBACK(Silent)
+  FALLBACK(ThrowClassnameToClassLazyClass)
 
 enum class LdClsFallback: uint8_t {
   #define FALLBACK(name) name,

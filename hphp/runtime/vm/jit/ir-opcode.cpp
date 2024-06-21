@@ -89,7 +89,6 @@ TRACE_SET_MOD(hhir);
 #define DElemLvalPos   HasDest
 #define DCOW           HasDest
 #define DStructTypeBound HasDest
-#define DLdCls         HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -171,7 +170,6 @@ OpInfo g_opInfo[] = {
 #undef DElemLvalPos
 #undef DCOW
 #undef DStructTypeBound
-#undef DLdCls
 
 ///////////////////////////////////////////////////////////////////////////////
 

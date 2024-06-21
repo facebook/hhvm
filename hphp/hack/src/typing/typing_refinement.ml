@@ -135,6 +135,7 @@ let rec split_ty ~(expansions : SSet.t) (env : env) (ty : locl_ty) ~predicate =
     | Tnonnull -> partition_f env DataType.(of_ty env Nonnull) ty
     | Ttuple _ -> partition_f env DataType.(of_ty env Tuple) ty
     | Tshape _ -> partition_f env DataType.(of_ty env Shape) ty
+    | Tlabel _ -> partition_f env DataType.(of_ty env Label) ty
     | Tclass ((_, name), _, _) ->
       partition_f env DataType.(of_ty env @@ Class name) ty
     | Tneg (Neg_class (_, name)) ->

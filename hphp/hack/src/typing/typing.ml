@@ -9947,7 +9947,7 @@ end = struct
         | ( r,
             ( Tany _ | Tnonnull | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _
             | Ttuple _ | Tnewtype _ | Tdependent _ | Tshape _ | Taccess _
-            | Tneg _ ) ) ->
+            | Tneg _ | Tlabel _ ) ) ->
           let ty_err2 =
             Some
               Typing_error.(
@@ -11664,7 +11664,7 @@ end = struct
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | ( _,
         ( Tvar _ | Tnonnull | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _
-        | Ttuple _ | Tshape _ | Taccess _ | Tneg _ ) ) ->
+        | Ttuple _ | Tshape _ | Taccess _ | Tneg _ | Tlabel _ ) ) ->
       if not (TUtils.is_tyvar_error env cty) then
         Typing_error_utils.add_typing_error
           ~env

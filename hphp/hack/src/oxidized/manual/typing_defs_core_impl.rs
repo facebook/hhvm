@@ -79,6 +79,7 @@ impl std::fmt::Debug for Ty_ {
             Toption(ty) => f.debug_tuple("Toption").field(ty).finish(),
             Tprim(tprim) => write!(f, "Tprim({:?})", tprim),
             Tneg(tprim) => write!(f, "Tneg({:?})", tprim),
+            Tlabel(name) => write!(f, "Tlabel({:?})", name),
             Tfun(fun_type) => f.debug_tuple("Tfun").field(fun_type).finish(),
             Ttuple(tys) => f.debug_tuple("Ttuple").field(tys).finish(),
             Tshape(shape) => f.debug_tuple("Tshape").field(shape).finish(),

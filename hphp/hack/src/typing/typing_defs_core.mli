@@ -384,6 +384,8 @@ and _ ty_ =
    *)
   | Tclass : pos_id * exact * locl_ty list -> locl_phase ty_
   | Tneg : neg_type -> locl_phase ty_
+  | Tlabel : string -> locl_phase ty_
+      (** The type of the label expression #ID *)
 
 and exact =
   | Exact
@@ -635,6 +637,11 @@ type constraint_type_ =
   | Thas_type_member of has_type_member
       (** [Thas_type_member('T',lo,hi)] is a supertype of all concrete class
           types that have a type member [::T] satisfying [lo <: T <: hi] *)
+  | Thas_const of {
+      name: string;
+      ty: locl_ty;
+    }
+      (** Check if the given type has a class constant that is compatible with [ty] *)
   | Tcan_index of can_index
   | Tcan_traverse of can_traverse
   | Tdestructure of destructure

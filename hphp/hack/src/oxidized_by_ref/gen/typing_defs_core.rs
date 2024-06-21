@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fd132be8d4c45fde5c86f482ec0f90ba>>
+// @generated SignedSource<<4157a6b3942cf9d00f2fdd03895a46bf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -734,6 +734,9 @@ pub enum Ty_<'a> {
     /// The negation of the type in neg_type
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tneg(&'a NegType<'a>),
+    /// The type of the label expression #ID
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Tlabel(&'a str),
 }
 impl<'a> TrivialDrop for Ty_<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Ty_<'arena>);

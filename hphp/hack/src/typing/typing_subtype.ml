@@ -265,6 +265,8 @@ end = struct
             (bound_desc ~prefix:" as " ~is_trivial:TUtils.is_mixed up)
       | (_, Tcan_traverse _) -> "an array that can be traversed with foreach"
       | (_, Tcan_index _) -> "an array that can be indexed"
+      | (_, Thas_const { name; ty = _ }) ->
+        Printf.sprintf "a class with a member `%s`" name
       | (_, Ttype_switch _)
       | (_, Tdestructure _) ->
         Markdown_lite.md_codify
@@ -911,6 +913,7 @@ end = struct
     | Tfun _
     | Ttuple _
     | Tshape _
+    | Tlabel _
     | Tvec_or_dict _ ->
       true
     | Tdependent (_, bound)
@@ -2945,7 +2948,7 @@ end = struct
           ( Tany _ | Tnonnull | Tdynamic | Tprim _ | Tvar _ | Tfun _ | Ttuple _
           | Tshape _ | Tgeneric _ | Tintersection _ | Tvec_or_dict _ | Taccess _
           | Tnewtype _ | Tunapplied_alias _ | Tdependent _ | Tclass _ | Tneg _
-            ) ),
+          | Tlabel _ ) ),
         (_r_super, Tvar var_super_id) ) -> begin
       let (env, simplified_sub_ty) =
         Typing_solver_utils.remove_tyvar_from_lower_bound
@@ -3008,7 +3011,7 @@ end = struct
           ( Tany _ | Tnonnull | Toption _ | Tdynamic | Tprim _ | Tvar _ | Tfun _
           | Ttuple _ | Tshape _ | Tgeneric _ | Tintersection _ | Tvec_or_dict _
           | Taccess _ | Tnewtype _ | Tunapplied_alias _ | Tdependent _
-          | Tclass _ | Tneg _ ) ),
+          | Tclass _ | Tneg _ | Tlabel _ ) ),
         (r_super, Tintersection tyl) ) ->
       (* t <: (t1 & ... & tn)
        *   if and only if
@@ -3360,7 +3363,8 @@ end = struct
       | ( _,
           ( Tany _ | Tprim _ | Tnonnull | Tdynamic | Tfun _ | Ttuple _
           | Tshape _ | Tgeneric _ | Tvec_or_dict _ | Taccess _ | Tnewtype _
-          | Tunapplied_alias _ | Tdependent _ | Tclass _ | Tneg _ ) ) ->
+          | Tunapplied_alias _ | Tdependent _ | Tclass _ | Tneg _ | Tlabel _ )
+        ) ->
         simplify_sub_union
           ~subtype_env
           ~sub_supportdyn
@@ -3541,7 +3545,7 @@ end = struct
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | ( ( _,
           ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
-          | Tclass _ | Tvec_or_dict _ | Tany _ | Taccess _ ) ),
+          | Tclass _ | Tvec_or_dict _ | Tany _ | Taccess _ | Tlabel _ ) ),
         (_, Toption lty_inner) ) ->
       simplify
         ~subtype_env
@@ -3618,7 +3622,7 @@ end = struct
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tgeneric _
           | Taccess _ | Tnewtype _ | Tprim _ | Tnonnull | Tclass _
           | Tvec_or_dict _ | Ttuple _ | Tshape _ | Tdynamic | Tneg _ | Tfun _
-          | Tvar _ | Tunapplied_alias _ ) ),
+          | Tvar _ | Tunapplied_alias _ | Tlabel _ ) ),
         (_, Tdependent _) ) ->
       default_subtype
         ~subtype_env
@@ -3674,7 +3678,7 @@ end = struct
           ( Tany _ | Toption _ | Tnonnull | Tdynamic | Tprim _ | Tfun _
           | Ttuple _ | Tshape _ | Tintersection _ | Tunapplied_alias _
           | Tvec_or_dict _ | Taccess _ | Tnewtype _ | Tdependent _ | Tclass _
-          | Tneg _ | Tgeneric _ ) ),
+          | Tneg _ | Tgeneric _ | Tlabel _ ) ),
         (_, Tgeneric _) )
       when subtype_env.Subtype_env.require_completeness ->
       mk_issubtype_prop
@@ -3687,7 +3691,7 @@ end = struct
           ( Tany _ | Toption _ | Tnonnull | Tdynamic | Tprim _ | Tfun _
           | Ttuple _ | Tshape _ | Tintersection _ | Tunapplied_alias _
           | Tvec_or_dict _ | Taccess _ | Tnewtype _ | Tdependent _ | Tclass _
-          | Tneg _ | Tgeneric _ ) ),
+          | Tneg _ | Tgeneric _ | Tlabel _ ) ),
         (r_super, Tgeneric (name_super, _tyargs_super)) ) ->
       (* If we've seen this type parameter before then we must have gone
        * round a cycle so we fail
@@ -3744,7 +3748,7 @@ end = struct
                 ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
                 | Tnoreturn ))
           | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tclass _ | Tvec_or_dict _
-          | Taccess _ ) ),
+          | Taccess _ | Tlabel _ ) ),
         (_, Tnonnull) ) ->
       valid env
     (* supportdyn<t> <: nonnull iff t <: nonnull *)
@@ -3812,6 +3816,7 @@ end = struct
         valid env
       else
         match deref ty_sub with
+        | (_, Tlabel _)
         | (_, Tany _)
         | ( _,
             Tprim
@@ -4159,7 +4164,7 @@ end = struct
           ( Tany _ | Tdynamic | Tunion _ | Toption _ | Tintersection _
           | Tdependent _ | Taccess _ | Tgeneric _ | Tnonnull | Tfun _ | Ttuple _
           | Tshape _ | Tvec_or_dict _ | Tclass _ | Tnewtype _ | Tneg _
-          | Tunapplied_alias _ | Tvar _ ) ),
+          | Tunapplied_alias _ | Tvar _ | Tlabel _ ) ),
         (_, Tprim _) ) ->
       default_subtype
         ~subtype_env
@@ -4200,7 +4205,7 @@ end = struct
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tgeneric _
           | Taccess _ | Tnewtype _ | Tprim _ | Tnonnull | Tclass _
           | Tvec_or_dict _ | Ttuple _ | Tshape _ | Tdynamic | Tneg _
-          | Tdependent _ | Tvar _ | Tunapplied_alias _ ) ),
+          | Tdependent _ | Tvar _ | Tunapplied_alias _ | Tlabel _ ) ),
         (_, Tfun _) ) ->
       default_subtype
         ~subtype_env
@@ -4273,7 +4278,7 @@ end = struct
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tfun _
           | Tgeneric _ | Taccess _ | Tprim _ | Tnonnull | Tclass _
           | Tvec_or_dict _ | Ttuple _ | Tdynamic | Tneg _ | Tdependent _
-          | Tvar _ | Tunapplied_alias _ ) ),
+          | Tvar _ | Tunapplied_alias _ | Tlabel _ ) ),
         (_, Tshape _) ) ->
       default_subtype
         ~subtype_env
@@ -4366,7 +4371,7 @@ end = struct
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tfun _
           | Tgeneric _ | Taccess _ | Tprim _ | Tnonnull | Tclass _ | Ttuple _
           | Tshape _ | Tnewtype _ | Tdynamic | Tneg _ | Tdependent _ | Tvar _
-          | Tunapplied_alias _ ) ),
+          | Tunapplied_alias _ | Tlabel _ ) ),
         (_, Tvec_or_dict _) ) ->
       default_subtype
         ~subtype_env
@@ -4874,7 +4879,26 @@ end = struct
           ~lhs:{ sub_supportdyn; ty_sub }
           ~rhs:{ super_like; super_supportdyn = false; ty_super }
           env
+      (* -- C-Label-R ---------------------------------------------------------- *)
     end
+    | ((_, Tlabel sub_name), (_, Tlabel sup_name)) ->
+      if String.equal sub_name sup_name then
+        valid env
+      else
+        invalid ~fail env
+    | ( ( _,
+          ( Tany _ | Tdynamic | Tunion _ | Toption _ | Tintersection _
+          | Tdependent _ | Taccess _ | Tgeneric _ | Tnonnull | Tfun _ | Ttuple _
+          | Tshape _ | Tvec_or_dict _ | Tclass _ | Tnewtype _ | Tneg _ | Tprim _
+          | Tunapplied_alias _ | Tvar _ ) ),
+        (_, Tlabel _) ) ->
+      default_subtype
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_like; super_supportdyn = false; ty_super }
+        env
 end
 
 (* -- Non-subtype constraints ----------------------------------------------- *)
@@ -5302,7 +5326,7 @@ end = struct
           env
       | ( ( _,
             ( Tany _ | Tnonnull | Toption _ | Tprim _ | Tfun _ | Tshape _
-            | Tvec_or_dict _ | Taccess _ | Tclass _ | Tneg _
+            | Tvec_or_dict _ | Taccess _ | Tclass _ | Tneg _ | Tlabel _
             | Tunapplied_alias _ ) ),
           ListDestructure ) ->
         let ty_sub_descr =
@@ -5586,6 +5610,7 @@ end = struct
       | Ttuple _
       | Tshape _
       | Taccess _
+      | Tlabel _
       | Tunapplied_alias _ ->
         invalid ~fail env
 end
@@ -5820,7 +5845,7 @@ end = struct
     | ( _,
         ( Tany _ | Tdynamic | Tnonnull | Toption _ | Tprim _ | Tneg _ | Tfun _
         | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _ | Tnewtype _
-        | Tunapplied_alias _ ) ) ->
+        | Tlabel _ | Tunapplied_alias _ ) ) ->
       invalid ~fail env
 end
 
@@ -6078,7 +6103,7 @@ end = struct
     | ( _,
         ( Toption _ | Tdynamic | Tnonnull | Tany _ | Tprim _ | Tfun _ | Ttuple _
         | Tshape _ | Tgeneric _ | Tdependent _ | Tvec_or_dict _ | Taccess _
-        | Tunapplied_alias _ | Tclass _ | Tneg _ ) ) ->
+        | Tunapplied_alias _ | Tclass _ | Tneg _ | Tlabel _ ) ) ->
       typing_obj_get
         ~subtype_env
         ~this_ty
@@ -6088,6 +6113,45 @@ end = struct
         ~member_ty
         ty_sub
         env
+end
+
+and Has_const : sig
+  type rhs = {
+    reason_super: Reason.t;
+    name: string;
+    ty: locl_ty;
+  }
+
+  include Constraint_handler with type rhs := rhs
+end = struct
+  type rhs = {
+    reason_super: Reason.t;
+    name: string;
+    ty: locl_ty;
+  }
+
+  let simplify
+      ~subtype_env
+      ~(this_ty : locl_ty option)
+      ~lhs:{ sub_supportdyn = _; ty_sub }
+      ~rhs:{ reason_super = r; name; ty = member_ty }
+      env =
+    let cty_super =
+      mk_constraint_type (r, Thas_const { name; ty = member_ty })
+    in
+    let ity_super = ConstraintType cty_super in
+
+    Logging.log_subtype_i
+      ~level:2
+      ~this_ty
+      ~function_name:"simplify_subtype_has_const"
+      env
+      (LoclType ty_sub)
+      ity_super;
+    let fail =
+      Subtype_env.fail subtype_env ~ty_sub:(LoclType ty_sub) ~ty_super:ity_super
+    in
+    invalid ~fail env
 end
 
 and Type_switch : sig
@@ -6764,7 +6828,7 @@ end = struct
     | ( _,
         ( Tany _ | Tdynamic | Tprim _ | Tneg _ | Tnonnull | Tunapplied_alias _
         | Tfun _ | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _ | Tclass _
-          ) ) ->
+        | Tlabel _ ) ) ->
       let ( ||| ) = ( ||| ) ~fail in
       mk_prop
         ~subtype_env
@@ -6831,6 +6895,14 @@ end = struct
             ~this_ty
             ~lhs:{ sub_supportdyn; ty_sub }
             ~rhs:{ reason_super = r; has_type_member }
+            env)
+      | (reason_super, Thas_const { name; ty }) ->
+        Has_const.(
+          simplify
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn; ty_sub }
+            ~rhs:{ reason_super; name; ty }
             env)
       | (reason_super, Ttype_switch { predicate; ty_true; ty_false }) ->
         Type_switch.(
@@ -8230,6 +8302,16 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
     true
   | (Tclass ((_, c1), _, _), Tclass ((_, c2), _, _)) ->
     Subtype_negation.is_class_disjoint env c1 c2
+  | (Tprim _, Tlabel _)
+  | (Tlabel _, Tprim _) ->
+    true
+  | (Tfun _, Tlabel _)
+  | (Tlabel _, Tfun _) ->
+    true
+  | (Tclass _, Tlabel _)
+  | (Tlabel _, Tclass _) ->
+    true
+  | (Tlabel name1, Tlabel name2) -> not @@ String.equal name1 name2
 
 (* incomplete, e.g., is_intersection_type_disjoint (?int & ?float) num *)
 and is_intersection_type_disjoint visited_tvyars env inter_tyl ty =

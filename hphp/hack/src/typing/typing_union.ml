@@ -439,7 +439,7 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
            * types, etc. - so for now we leave it here.
            * TODO improve that. *)
           | Tnonnull | Tany _ | Tintersection _ | Toption _ | Tunion _
-          | Taccess _ | Tneg _ ) ),
+          | Tlabel _ | Taccess _ | Tneg _ ) ),
         (_, _) ) ->
       ty_equiv env ty1 ty2 ~are_ty_param:false
   with

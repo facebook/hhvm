@@ -73,6 +73,7 @@ module AtomicDataTypes : sig
     | Nonnull
     | Tuple
     | Shape
+    | Label
     | Class of string
 
   val of_ty : env -> atomic_ty -> t

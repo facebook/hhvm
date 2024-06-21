@@ -58,6 +58,7 @@ let rec enforce_not_awaitable env p ty =
   | Tshape _
   | Tdynamic
   | Taccess _
+  | Tlabel _
   | Tneg _ ->
     ()
   | Tunapplied_alias _ ->

@@ -91,7 +91,9 @@ let rec strip_ty ty =
     | Taccess _ -> ty
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-    | Tneg _ -> ty
+    | Tlabel _
+    | Tneg _ ->
+      ty
   in
   mk (reason, ty)
 

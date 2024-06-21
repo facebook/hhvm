@@ -205,8 +205,9 @@ and refresh_type renv v ty_orig =
   with_default ~default:ty_orig
   @@
   match deref ty with
-  | (_, (Tany _ | Tnonnull | Tdynamic | Tprim _ | Tunapplied_alias _ | Tneg _))
-    ->
+  | ( _,
+      ( Tany _ | Tnonnull | Tdynamic | Tprim _ | Tunapplied_alias _ | Tneg _
+      | Tlabel _ ) ) ->
     (renv, ty_orig, Unchanged)
   | (r, Toption ty1) ->
     let (renv, ty1, changed) = refresh_type renv v ty1 in
@@ -411,6 +412,9 @@ let refresh_ctype renv v cty_orig =
     ( renv,
       mk_constraint_type (r, Ttype_switch { predicate; ty_true; ty_false }),
       ch1 || ch2 )
+  | (r, Thas_const { name; ty }) ->
+    let (renv, ty, changed) = refresh_type renv inv ty in
+    (renv, mk_constraint_type (r, Thas_const { name; ty }), changed)
 
 let refresh_bounds renv v tys =
   ITySet.fold

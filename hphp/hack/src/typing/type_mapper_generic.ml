@@ -69,6 +69,8 @@ class type ['env] type_mapper_type =
 
     method on_neg_type : 'env -> Reason.t -> neg_type -> 'env * locl_ty
 
+    method on_tlabel : 'env -> Reason.t -> string -> 'env * locl_ty
+
     method on_locl_ty_list : 'env -> locl_ty list -> 'env * locl_ty list
   end
 
@@ -126,6 +128,8 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_neg_type env r p = (env, mk (r, Tneg p))
 
+    method on_tlabel env r name = (env, mk (r, Tlabel name))
+
     method on_reason env r = (env, r)
 
     method on_type env ty =
@@ -151,6 +155,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tunapplied_alias name -> this#on_tunapplied_alias env r name
       | Taccess (ty, id) -> this#on_taccess env r ty id
       | Tneg ty -> this#on_neg_type env r ty
+      | Tlabel name -> this#on_tlabel env r name
 
     method on_locl_ty_list env tyl = List.map_env env tyl ~f:this#on_type
   end
@@ -348,6 +353,9 @@ class type ['env] constraint_type_mapper_type =
       locl_ty ->
       locl_ty ->
       'env * constraint_type
+
+    method on_Thas_const :
+      'env -> Reason.t -> string -> locl_ty -> 'env * constraint_type
   end
 
 class type ['env] locl_constraint_type_mapper_type =
@@ -374,6 +382,7 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       | Tdestructure tyl -> this#on_Tdestructure env r tyl
       | Ttype_switch { predicate; ty_true; ty_false } ->
         this#on_Ttype_switch env r predicate ty_true ty_false
+      | Thas_const { name; ty } -> this#on_Thas_const env r name ty
 
     method on_Thas_member env r hm =
       let { hm_name; hm_type; hm_class_id; hm_explicit_targs } = hm in
@@ -416,6 +425,10 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       let (env, ty_false) = this#on_type env lty_false in
       ( env,
         mk_constraint_type (r, Ttype_switch { predicate; ty_true; ty_false }) )
+
+    method on_Thas_const env r name ty =
+      let (env, ty) = this#on_type env ty in
+      (env, mk_constraint_type (r, Thas_const { name; ty }))
   end
 
 class type ['env] internal_type_mapper_type =

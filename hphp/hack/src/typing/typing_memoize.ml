@@ -57,6 +57,7 @@ let check_param : env -> Nast.fun_param -> unit =
              the comment above about "stricter check_memoizables to come later" was added in revision
              in August 2015 *)
           ()
+        | Tlabel _ -> ()
         | Tnewtype (id, _, _) when String.equal SN.Classes.cEnumClassLabel id ->
           (* EnumClassLabels are memoizable *)
           ()

@@ -1667,6 +1667,7 @@ and get_tyvars_i env (ty : internal_type) =
         Tvid.Set.union positive1 positive2,
         Tvid.Set.union negative1 negative2 )
     | Tunapplied_alias _ -> (env, Tvid.Set.empty, Tvid.Set.empty)
+    | Tlabel _name -> (env, Tvid.Set.empty, Tvid.Set.empty)
     | Taccess (ty, _ids) -> get_tyvars env ty)
   | ConstraintType ty ->
     (match deref_constraint_type ty with
@@ -1718,7 +1719,8 @@ and get_tyvars_i env (ty : internal_type) =
       let (env, positive2, negative2) = get_tyvars env ty_false in
       ( env,
         Tvid.Set.union positive1 positive2,
-        Tvid.Set.union negative1 negative2 ))
+        Tvid.Set.union negative1 negative2 )
+    | (_, Thas_const { name = _; ty }) -> get_tyvars env ty)
 
 and get_tyvars_variance_list (env, acc_positive, acc_negative) variancel tyl =
   match (variancel, tyl) with

@@ -5813,7 +5813,9 @@ end = struct
       | (_, Ttype_switch _) ->
         Markdown_lite.md_codify
           (Typing_print.with_blank_tyvars (fun () ->
-               Typing_print.full_strip_ns_i env (ConstraintType ty))))
+               Typing_print.full_strip_ns_i env (ConstraintType ty)))
+      | (_, Thas_const { name; ty = _ }) ->
+        Printf.sprintf "a class with a constant `%s`" name)
 
   let describe_ty_sub ~is_coeffect env ety =
     let ty_descr = describe_ty ~is_coeffect env ety in

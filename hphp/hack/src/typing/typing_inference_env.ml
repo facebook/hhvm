@@ -683,6 +683,7 @@ module Size = struct
       1 + ty_size env ct.ct_val + type_size_option ~f:(ty_size env) ct.ct_key
     | (_, Ttype_switch { predicate = _; ty_true; ty_false }) ->
       1 + ty_size env ty_true + ty_size env ty_false
+    | (_, Thas_const { name = _; ty }) -> 1 + ty_size env ty
 
   let internal_type_size env ty =
     match ty with

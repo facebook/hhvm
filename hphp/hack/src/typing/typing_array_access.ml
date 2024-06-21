@@ -841,6 +841,7 @@ let rec array_get
       | Tunion _
       | Tintersection _
       | Taccess _
+      | Tlabel _
       | Tneg _ ->
         if not ignore_error then error_array env expr_pos expr_ty;
         let (env, res_ty) = err_witness env expr_pos in
@@ -1036,7 +1037,8 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
       | ( r,
           ( Tnonnull | Tvec_or_dict _ | Toption _ | Tprim _ | Tvar _ | Tfun _
           | Tclass _ | Ttuple _ | Tshape _ | Tunion _ | Tintersection _
-          | Tgeneric _ | Tnewtype _ | Tdependent _ | Taccess _ | Tneg _ ) ) ->
+          | Tlabel _ | Tgeneric _ | Tnewtype _ | Tdependent _ | Taccess _
+          | Tneg _ ) ) ->
         let (env, ty) = error_assign_array_append env expr_pos ty1 in
         let (env, ty) = maybe_make_supportdyn r env ~supportdyn ty in
         let ty_nothing = MakeType.nothing Reason.none in
@@ -1453,6 +1455,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
       | Tfun _
       | Tclass _
       | Taccess _
+      | Tlabel _
       | Tneg _ ->
         Typing_error_utils.add_typing_error
           ~env

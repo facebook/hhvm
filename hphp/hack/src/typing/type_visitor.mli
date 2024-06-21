@@ -168,6 +168,8 @@ class type ['a] locl_type_visitor_type =
       'a
 
     method on_neg_type : 'a -> Typing_reason.t -> Typing_defs.neg_type -> 'a
+
+    method on_tlabel : 'a -> Typing_reason.t -> string -> 'a
   end
 
 class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type
@@ -234,6 +236,9 @@ class type ['a] internal_type_visitor_type =
       Typing_defs.locl_ty ->
       Typing_defs.locl_ty ->
       'a
+
+    method on_thas_const :
+      'a -> Typing_reason.t -> string -> Typing_defs.locl_ty -> 'a
   end
 
 class ['a] internal_type_visitor : ['a] internal_type_visitor_type

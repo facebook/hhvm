@@ -137,6 +137,7 @@ let rec truthiness env ty =
           Possibly_falsy
         | Ctrait -> Unknown)
     )
+  | Tlabel _ -> Always_truthy
   | Tprim Tresource -> Always_truthy
   | Tprim Tnull -> Always_falsy
   | Tprim Tvoid -> Always_falsy
@@ -256,6 +257,7 @@ let rec find_sketchy_types env acc ty =
   | Tvec_or_dict _
   | Tunapplied_alias _
   | Taccess _
+  | Tlabel _
   | Tneg _ ->
     acc
 

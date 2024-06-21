@@ -414,6 +414,8 @@ and _ ty_ =
        *)
   | Tneg : neg_type -> locl_phase ty_
       (** The negation of the type in neg_type *)
+  | Tlabel : string -> locl_phase ty_
+      (** The type of the label expression #ID *)
 
 and 'phase taccess_type = 'phase ty * pos_id
 
@@ -661,6 +663,10 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>Tneg@ ";
       pp_neg_type fmt a0;
       Format.fprintf fmt "@])"
+    | Tlabel a0 ->
+      Format.fprintf fmt "(@[<2>Tlabel@ ";
+      Format.fprintf fmt "%S" a0;
+      Format.fprintf fmt "@])"
 
   and pp_list :
       type a.
@@ -824,6 +830,7 @@ let ty_con_ordinal_ : type a. a ty_ -> int = function
   | Tdependent _ -> 202
   | Tclass _ -> 204
   | Tneg _ -> 205
+  | Tlabel _ -> 206
 
 let same_type_origin (orig1 : type_origin) orig2 =
   match orig1 with
@@ -914,10 +921,11 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     | (Tneg neg1, Tneg neg2) -> neg_type_compare neg1 neg2
     | (Tnonnull, Tnonnull) -> 0
     | (Tdynamic, Tdynamic) -> 0
+    | (Tlabel name1, Tlabel name2) -> String.compare name1 name2
     | ( ( Tprim _ | Toption _ | Tvec_or_dict _ | Tfun _ | Tintersection _
         | Tunion _ | Ttuple _ | Tgeneric _ | Tnewtype _ | Tdependent _
         | Tclass _ | Tshape _ | Tvar _ | Tunapplied_alias _ | Tnonnull
-        | Tdynamic | Taccess _ | Tany _ | Tneg _ | Trefinement _ ),
+        | Tdynamic | Taccess _ | Tany _ | Tneg _ | Trefinement _ | Tlabel _ ),
         _ ) ->
       ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
   and shape_field_type_compare :
@@ -1290,6 +1298,11 @@ type has_type_member = {
 type constraint_type_ =
   | Thas_member of has_member
   | Thas_type_member of has_type_member
+  | Thas_const of {
+      name: string;
+      ty: locl_ty;
+    }
+      (** Check if the given type has a class constant that is compatible with [ty] *)
   | Tcan_index of can_index
   | Tcan_traverse of can_traverse
   | Tdestructure of destructure
@@ -1438,6 +1451,7 @@ let constraint_ty_con_ordinal cty =
   | Tcan_traverse _ -> 3
   | Thas_type_member _ -> 4
   | Ttype_switch _ -> 5
+  | Thas_const _ -> 6
 
 let constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
   let (_, ty1) = deref_constraint_type ty1 in
@@ -1474,9 +1488,17 @@ let constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
       | comp -> comp
     in
     comp
+  | ( Thas_const { name = name1; ty = ty1 },
+      Thas_const { name = name2; ty = ty2 } ) ->
+    let comp =
+      match String.compare name1 name2 with
+      | 0 -> ty_compare ~normalize_lists ty1 ty2
+      | comp -> comp
+    in
+    comp
   | ( _,
       ( Thas_member _ | Tcan_index _ | Tcan_traverse _ | Tdestructure _
-      | Thas_type_member _ | Ttype_switch _ ) ) ->
+      | Thas_type_member _ | Ttype_switch _ | Thas_const _ ) ) ->
     constraint_ty_con_ordinal ty2 - constraint_ty_con_ordinal ty1
 
 let constraint_ty_equal ?(normalize_lists = false) ty1 ty2 =

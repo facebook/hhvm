@@ -29,6 +29,7 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
   | Tdependent _
   | Tunion _
   | Tintersection _
+  | Tlabel _
   | Tneg _ ->
     raise Non_denotable
   | Tnonnull -> "nonnull"

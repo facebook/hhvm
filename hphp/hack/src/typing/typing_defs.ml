@@ -509,6 +509,7 @@ let is_union_or_inter_type (ty : locl_ty) =
   | Tclass _
   | Tunapplied_alias _
   | Tvec_or_dict _
+  | Tlabel _
   | Taccess _ ->
     false
 
@@ -605,6 +606,7 @@ let rec is_denotable ty =
   | Tany _
   | Tvar _
   | Tdependent _
+  | Tlabel _
   | Tunapplied_alias _ ->
     false
 

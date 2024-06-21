@@ -63,6 +63,7 @@ let make_type_const_equal
       | (_, Tcan_index _)
       | (_, Tcan_traverse _)
       | (_, Ttype_switch _)
+      | (_, Thas_const _)
       | (_, Tdestructure _) ->
         (env, None))
   in

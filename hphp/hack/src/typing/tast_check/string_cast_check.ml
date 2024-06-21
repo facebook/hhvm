@@ -59,6 +59,7 @@ let rec is_stringish env ty =
   | Ttuple _
   | Tfun _
   | Tshape _
+  | Tlabel _
   | Taccess _ ->
     false
   | Tunapplied_alias _ ->

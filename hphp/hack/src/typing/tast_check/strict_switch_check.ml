@@ -300,6 +300,7 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
           else
             ValueSet.singleton (Value.Enum info))
   | Tdynamic -> ValueSet.singleton Value.Dynamic
+  | Tlabel _
   | Ttuple _
   | Tshape _
   | Tvec_or_dict _

@@ -185,7 +185,8 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
             | typing_defs_core::Ty_::Tdependent(_)
             | typing_defs_core::Ty_::Tclass(_)
             | typing_defs_core::Ty_::Tneg(_)
-            | typing_defs_core::Ty_::Tvar(_) => {
+            | typing_defs_core::Ty_::Tvar(_)
+            | typing_defs_core::Ty_::Tlabel(_) => {
                 unreachable!("Not used in decl tys")
             }
         };

@@ -591,6 +591,7 @@ let rec expand ctx env root =
     | Tfun _
     | Tdynamic
     | Toption _
+    | Tlabel _
     | Tneg _ ->
       ((env, None), Missing err)
 

@@ -2309,6 +2309,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             | Ty_::Tthis => return ty,
             Ty_::Tdependent(_)
             | Ty_::Tneg(_)
+            | Ty_::Tlabel(_)
             | Ty_::Tnewtype(_)
             | Ty_::Tvar(_)
             | Ty_::TunappliedAlias(_) => panic!("unexpected decl type in constraint"),

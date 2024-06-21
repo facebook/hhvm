@@ -212,6 +212,8 @@ class type ['a] locl_type_visitor_type =
     method on_taccess : 'a -> Reason.t -> locl_phase taccess_type -> 'a
 
     method on_neg_type : 'a -> Reason.t -> neg_type -> 'a
+
+    method on_tlabel : 'a -> Reason.t -> string -> 'a
   end
 
 class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
@@ -305,6 +307,8 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
 
     method on_taccess acc _ (ty, _ids) = this#on_type acc ty
 
+    method on_tlabel acc _r _name = acc
+
     method on_type acc ty =
       let (r, x) = deref ty in
       match x with
@@ -327,6 +331,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Tunapplied_alias n -> this#on_tunapplied_alias acc r n
       | Taccess (ty, ids) -> this#on_taccess acc r (ty, ids)
       | Tneg tneg -> this#on_neg_type acc r tneg
+      | Tlabel name -> this#on_tlabel acc r name
   end
 
 class type ['a] internal_type_visitor_type =
@@ -370,6 +375,8 @@ class type ['a] internal_type_visitor_type =
 
     method on_ttype_switch :
       'a -> Reason.t -> type_predicate -> locl_ty -> locl_ty -> 'a
+
+    method on_thas_const : 'a -> Reason.t -> string -> locl_ty -> 'a
   end
 
 class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
@@ -389,6 +396,7 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
       | Tdestructure des -> this#on_tdestructure acc r des
       | Ttype_switch { predicate; ty_true; ty_false } ->
         this#on_ttype_switch acc r predicate ty_true ty_false
+      | Thas_const { name; ty } -> this#on_thas_const acc r name ty
 
     method on_locl_type acc ty = this#on_type acc ty
 
@@ -449,6 +457,10 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
     method on_ttype_switch acc _r _predicate ty_true ty_false =
       let acc = this#on_locl_type acc ty_true in
       let acc = this#on_locl_type acc ty_false in
+      acc
+
+    method on_thas_const acc _r _name ty =
+      let acc = this#on_locl_type acc ty in
       acc
 
     inherit ['a] locl_type_visitor

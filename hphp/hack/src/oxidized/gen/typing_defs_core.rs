@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5c39afe165bf253f35879c65288e8771>>
+// @generated SignedSource<<2a3963204ad120390349ed94d4c97ac0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -755,6 +755,8 @@ pub enum Ty_ {
     Tclass(PosId, Exact, Vec<Ty>),
     /// The negation of the type in neg_type
     Tneg(NegType),
+    /// The type of the label expression #ID
+    Tlabel(String),
 }
 
 #[derive(
@@ -1102,6 +1104,9 @@ pub enum ConstraintType_ {
     ThasMember(HasMember),
     #[rust_to_ocaml(name = "Thas_type_member")]
     ThasTypeMember(HasTypeMember),
+    /// Check if the given type has a class constant that is compatible with [ty]
+    #[rust_to_ocaml(name = "Thas_const")]
+    ThasConst { name: String, ty: Ty },
     #[rust_to_ocaml(name = "Tcan_index")]
     TcanIndex(CanIndex),
     #[rust_to_ocaml(name = "Tcan_traverse")]

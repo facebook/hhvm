@@ -122,6 +122,9 @@ class type ['env] type_mapper_type =
       Typing_defs.neg_type ->
       'env * Typing_defs.locl_ty
 
+    method on_tlabel :
+      'env -> Typing_reason.t -> string -> 'env * Typing_defs.locl_ty
+
     method on_locl_ty_list :
       'env -> Typing_defs.locl_ty list -> 'env * Typing_defs.locl_ty list
   end
@@ -182,6 +185,13 @@ class type ['env] constraint_type_mapper_type =
       Typing_reason.t ->
       Typing_defs.type_predicate ->
       Typing_defs.locl_ty ->
+      Typing_defs.locl_ty ->
+      'env * Typing_defs.constraint_type
+
+    method on_Thas_const :
+      'env ->
+      Typing_reason.t ->
+      string ->
       Typing_defs.locl_ty ->
       'env * Typing_defs.constraint_type
   end

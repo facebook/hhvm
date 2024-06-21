@@ -305,18 +305,6 @@ let is_tyvar_error Typing_env_types.{ inference_env; _ } ty =
   | (_, Tvar tvid) -> Typing_inference_env.is_error inference_env tvid
   | _ -> false
 
-(** Simplify unions and intersections of constraint
-types which involve mixed or nothing. *)
-let simplify_constraint_type env ty =
-  match deref_constraint_type ty with
-  | (_, Thas_member _)
-  | (_, Thas_type_member _)
-  | (_, Tcan_index _)
-  | (_, Tcan_traverse _)
-  | (_, Ttype_switch _)
-  | (_, Tdestructure _) ->
-    (env, ConstraintType ty)
-
 let contains_unresolved_tyvars env ty =
   let finder =
     object (this)

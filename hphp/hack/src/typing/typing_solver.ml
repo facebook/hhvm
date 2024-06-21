@@ -75,6 +75,7 @@ let rec freshen_inside_ty env ty =
   | Tnonnull
   | Tdynamic
   | Tprim _
+  | Tlabel _
   | Tneg _ ->
     default ()
   | Tgeneric (name, tyl) ->

@@ -155,6 +155,7 @@ let rec is_byval_collection_or_string_or_any_type env ty =
     | Tfun _
     | Tvar _
     | Taccess _
+    | Tlabel _
     | Tneg _ ->
       false
     | Tunapplied_alias _ ->

@@ -104,6 +104,7 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
   | Tprim _
   | Tvar _
   | Tfun _
+  | Tlabel _
   | Ttuple _
   | Tshape _
   | Tneg _ ->

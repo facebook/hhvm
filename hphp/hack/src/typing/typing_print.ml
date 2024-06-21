@@ -1166,6 +1166,9 @@ module Full = struct
       let (fuel, root_ty_doc) = k ~fuel root_ty in
       let access_doc = Concat [root_ty_doc; text "::"; to_doc (snd id)] in
       (fuel, access_doc)
+    | Tlabel name ->
+      let label_doc = Concat [text "#"; text name] in
+      (fuel, label_doc)
 
   and type_predicate ~fuel ~negate predicate =
     let rec predicate_doc predicate =
@@ -1247,6 +1250,12 @@ module Full = struct
           ]
       in
       (fuel, ttype_switch_doc)
+    | Thas_const { name; ty } ->
+      let (fuel, ty_doc) = k ~fuel ty in
+      let has_const_doc =
+        Concat [text "has_const("; text name; text ":"; Space; ty_doc; text ")"]
+      in
+      (fuel, has_const_doc)
 
   and constraint_type ~fuel to_doc st penv ty =
     let (_r, x) = deref_constraint_type ty in
@@ -1531,6 +1540,7 @@ module ErrorString = struct
          prints with a different function (namely Full.locl_ty) *)
       failwith "Tunapplied_alias is not a type"
     | Taccess (_ty, _id) -> (fuel, "a type constant")
+    | Tlabel name -> (fuel, Printf.sprintf "a label (#%s)" name)
     | Tneg (Neg_class (_, c)) -> (fuel, "anything but a " ^ strip_ns c)
     | Tneg (Neg_predicate predicate) ->
       let rec str predicate =
@@ -1822,6 +1832,7 @@ module Json = struct
       obj @@ kind p "vec_or_dict" @ args [ty1; ty2]
     (* TODO akenn *)
     | (p, Taccess (ty, _id)) -> obj @@ kind p "type_constant" @ args [ty]
+    | (p, Tlabel s) -> obj @@ kind p "label" @ name s
 
   type deserialized_result = (locl_ty, deserialization_error) result
 
@@ -1870,6 +1881,9 @@ module Json = struct
         | "mixed" -> ty (Toption (mk (reason, Tnonnull)))
         | "nonnull" -> ty Tnonnull
         | "dynamic" -> ty Tdynamic
+        | "label" ->
+          get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
+          ty (Tlabel name)
         | "generic" ->
           get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
           get_bool "is_array" (json, keytrace)

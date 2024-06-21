@@ -151,3 +151,13 @@ struct TestStructNested_0 {
   1: i32 i32_field;
   2: TestStructNested_1 nested_1;
 }
+
+union TestUnion {
+  1: i32 i32_field;
+  2: string string_field;
+}
+
+struct TestStructWithUnionField {
+  1: i32 i32_field;
+  2: TestUnion union_field;
+}

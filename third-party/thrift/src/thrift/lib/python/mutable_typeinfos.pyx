@@ -27,7 +27,12 @@ from thrift.python.mutable_containers cimport (
     MutableSet,
     MutableMap,
 )
-from thrift.python.mutable_types cimport MutableStruct, MutableStructInfo
+from thrift.python.mutable_types cimport (
+    MutableStruct,
+    MutableStructInfo,
+    MutableUnion,
+    MutableUnionInfo,
+)
 from thrift.python.exceptions cimport GeneratedError
 from thrift.python.types cimport getCTypeInfo
 
@@ -41,8 +46,14 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
     """
     def __cinit__(self, mutable_struct_class):
         self._mutable_struct_class = mutable_struct_class
-        cdef MutableStructInfo py_mutable_struct_info = mutable_struct_class._fbthrift_mutable_struct_info
-        cdef cDynamicStructInfo* c_struct_info = py_mutable_struct_info.cpp_obj.get()
+        py_mutable_struct_info = mutable_struct_class._fbthrift_mutable_struct_info
+
+        cdef cDynamicStructInfo* c_struct_info
+        if isinstance(py_mutable_struct_info, MutableUnionInfo):
+            c_struct_info = (<MutableUnionInfo>py_mutable_struct_info).cpp_obj.get()
+        else:
+            c_struct_info = (<MutableStructInfo>py_mutable_struct_info).cpp_obj.get()
+
         self.cpp_obj = createImmutableStructTypeInfo(deref(c_struct_info))
 
     cdef const cTypeInfo* get_cTypeInfo(self):
@@ -66,6 +77,8 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
 
         if isinstance(value, MutableStruct):
             return (<MutableStruct>value)._fbthrift_data
+        if isinstance(value, MutableUnion):
+            return (<MutableUnion>value)._fbthrift_data
         if isinstance(value, GeneratedError):
             return (<GeneratedError>value)._fbthrift_data
 

@@ -61,6 +61,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
     TestStructNested_2 as TestStructNested_2_Mutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
     TestStructWithTypedefField as TestStructWithTypedefFieldMutable,
+    TestStructWithUnionField as TestStructWithUnionFieldMutable,
 )
 
 from thrift.test.thrift_python.struct_test.thrift_types import (
@@ -1259,3 +1260,6 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # Unfortunately, this is not intuitive, `my_s2_var1` is not `s1`
         self.assertIs(my_s2_var1, my_s2_var2)
         self.assertIsNot(s1, my_s2_var2)
+
+    def test_create_for_struct_with_union_field(self) -> None:
+        _ = TestStructWithUnionFieldMutable()

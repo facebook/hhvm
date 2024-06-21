@@ -672,7 +672,7 @@ cdef class MutableUnion(MutableStructOrUnion):
             return None
 
         cdef MutableUnionInfo union_info = <MutableUnionInfo>(
-            type(self)._fbthrift_struct_info
+            type(self)._fbthrift_mutable_struct_info
         )
 
         adapter_info = union_info.id_to_adapter_info[field_id]
@@ -726,7 +726,7 @@ cdef class MutableUnion(MutableStructOrUnion):
             return None
 
         cdef MutableUnionInfo union_info = (
-            <MutableUnionInfo>type(self)._fbthrift_struct_info
+            <MutableUnionInfo>type(self)._fbthrift_mutable_struct_info
         )
         cdef TypeInfoBase type_info = (
             <TypeInfoBase>union_info.type_infos[current_field_enum_value]
@@ -760,6 +760,12 @@ cdef class MutableUnion(MutableStructOrUnion):
             f"'{requested_field_enum.name}', but currently holds "
             f"'{current_field_enum.name}'."
         )
+
+    @classmethod
+    def _fbthrift_create(cls, data):
+        cdef MutableUnion inst = cls.__new__(cls)
+        inst._fbthrift_data = data
+        return inst
 
 
 def _gen_mutable_union_field_enum_members(field_infos):
@@ -812,7 +818,7 @@ class MutableUnionMeta(type):
         field_infos = union_class_namespace.pop('_fbthrift_SPEC')
         num_fields = len(field_infos)
 
-        union_class_namespace["_fbthrift_struct_info"] = MutableUnionInfo(
+        union_class_namespace["_fbthrift_mutable_struct_info"] = MutableUnionInfo(
             union_name, field_infos
         )
 
@@ -829,4 +835,4 @@ class MutableUnionMeta(type):
         return super().__new__(cls, union_name, (MutableUnion,), union_class_namespace)
 
     def _fbthrift_fill_spec(cls):
-        (<MutableUnionInfo>cls._fbthrift_struct_info)._fill_mutable_union_info()
+        (<MutableUnionInfo>cls._fbthrift_mutable_struct_info)._fill_mutable_union_info()

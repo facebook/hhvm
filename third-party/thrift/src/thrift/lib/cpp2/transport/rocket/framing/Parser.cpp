@@ -16,16 +16,13 @@
 
 #include <thrift/lib/cpp2/transport/rocket/framing/Parser.h>
 
-// NOTE: rocket_frame_parser is aimed at replacing rocket_strategy_parser and
-// rocket_allocating_strategy_parser boolean flags.
-// Should take one of the following three values:
-// - "legacy" - use legacy parser which is the legacy implementation currently
-// in Parser-inl.h
-// - "strategy" - use strategy parser which we intend to replace legacy parser.
-// Currently in FrameLengthParserStrategy.cpp
-// - "allocating" - use allocating strategy parser which allow usage of custom
-// allocator. Currently in AllocatingParserStrategy.cpp
-// Note the current way to configure which parser to use is error prone as some
-// one may specify rocket_strategy_parser and rocket_allocating_strategy_parser
-// to be both true and it is ambiguous which one to use.
-THRIFT_FLAG_DEFINE_string(rocket_frame_parser, "legacy");
+// rocket_frame_parser flag specify which frame parser rocket transport decide
+// to use. It can take three values
+// - "strategy": rocket transport will use FrameLengthParserStrategy to parse
+// rocket frames. This parsing strategy reads the rocket frame length (first 3
+// bytes) and immediately hands off frames to downstream as soon as a full frame
+// is available.
+// - "allocating": frame parser that can take a custom allocator, we also
+// guarantee buffer returned are not chained (meaning continuous). This can
+// provide performance benefits when using cursor-based serialization.
+THRIFT_FLAG_DEFINE_string(rocket_frame_parser, "strategy");

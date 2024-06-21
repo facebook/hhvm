@@ -135,7 +135,7 @@ void Parser<T>::readDataAvailable(size_t nbytes) noexcept {
     }
   } catch (...) {
     auto exceptionStr =
-        folly::exceptionStr(std::current_exception()).toStdString();
+        folly::exceptionStr(folly::current_exception()).toStdString();
     LOG(ERROR) << "Bad frame received, closing connection: " << exceptionStr;
     owner_.close(transport::TTransportException(exceptionStr));
   }
@@ -208,7 +208,7 @@ void Parser<T>::readBufferAvailable(
     }
   } catch (...) {
     auto exceptionStr =
-        folly::exceptionStr(std::current_exception()).toStdString();
+        folly::exceptionStr(folly::current_exception()).toStdString();
     LOG(ERROR) << "Bad frame received, closing connection: " << exceptionStr;
     owner_.close(transport::TTransportException(exceptionStr));
   }

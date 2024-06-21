@@ -95,7 +95,7 @@ void Cpp2Worker::onNewConnection(
   } catch (...) {
     FB_LOG_EVERY_MS(WARNING, 1000)
         << "Cpp2Worker::onNewConnection(...) caught an unhandled exception: "
-        << folly::exceptionStr(std::current_exception());
+        << folly::exceptionStr(folly::current_exception());
   }
 }
 
@@ -648,7 +648,7 @@ void Cpp2Worker::dispatchRequest(
     }
   } catch (...) {
     LOG(DFATAL) << "AsyncProcessor::process exception: "
-                << folly::exceptionStr(std::current_exception());
+                << folly::exceptionStr(folly::current_exception());
   }
 }
 

@@ -1662,7 +1662,7 @@ void ThriftServer::stopAcceptingAndJoinOutstandingRequests() {
                 .get(dumpSnapshotResult.timeout);
           } catch (...) {
             XLOG(ERR) << "Failed to dump server snapshot on long shutdown: "
-                      << folly::exceptionStr(std::current_exception());
+                      << folly::exceptionStr(folly::current_exception());
           }
         }
 

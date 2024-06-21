@@ -538,7 +538,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
               std::move(metadata),
               rocket::Payload{},
               createDefaultRequestContext()),
-          folly::exceptionStr(std::current_exception()).toStdString());
+          folly::exceptionStr(folly::current_exception()).toStdString());
       return;
     }
   }

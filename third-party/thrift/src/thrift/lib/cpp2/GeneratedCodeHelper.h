@@ -478,7 +478,7 @@ folly::exception_wrapper recv_wrapped_helper(
     }
     return folly::exception_wrapper();
   } catch (...) {
-    return folly::exception_wrapper(std::current_exception());
+    return folly::exception_wrapper(folly::current_exception());
   }
 }
 
@@ -1548,7 +1548,7 @@ apache::thrift::detail::SinkConsumerImpl toSinkConsumerImpl(
               std::move(finalResponse)),
           {}));
     } catch (...) {
-      ew = folly::exception_wrapper(std::current_exception());
+      ew = folly::exception_wrapper(folly::current_exception());
     }
     co_return folly::Try<StreamPayload>(ap::encode_stream_exception<
                                         ErrorBlame::SERVER,

@@ -102,7 +102,7 @@ void logSetupConnectionEventsOnce(
     } catch (...) {
       LOG(ERROR)
           << "Exception thrown during Thrift server connection events logging: "
-          << folly::exceptionStr(std::current_exception());
+          << folly::exceptionStr(folly::current_exception());
     }
     return true;
   }));

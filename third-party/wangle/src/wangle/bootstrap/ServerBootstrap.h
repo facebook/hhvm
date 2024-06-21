@@ -242,7 +242,7 @@ class ServerBootstrap {
 
         barrier->post();
       } catch (...) {
-        exn = std::current_exception();
+        exn = folly::current_exception();
         barrier->post();
 
         return;

@@ -1744,7 +1744,7 @@ void GeneratedAsyncProcessorBase::deserializeRequest(
     throw TrustedServerException::requestParsingError(ex.what());
   } catch (...) {
     throw TrustedServerException::requestParsingError(
-        folly::exceptionStr(std::current_exception()).c_str());
+        folly::exceptionStr(folly::current_exception()).c_str());
   }
   if (c) {
     c->postRead(nullptr, bytes);
@@ -1763,7 +1763,7 @@ void GeneratedAsyncProcessorBase::simpleDeserializeRequest(
     throw TrustedServerException::requestParsingError(ex.what());
   } catch (...) {
     throw TrustedServerException::requestParsingError(
-        folly::exceptionStr(std::current_exception()).c_str());
+        folly::exceptionStr(folly::current_exception()).c_str());
   }
 }
 

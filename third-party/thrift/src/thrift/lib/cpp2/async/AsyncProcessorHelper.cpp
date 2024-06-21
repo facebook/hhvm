@@ -45,7 +45,7 @@ namespace apache::thrift {
   try {
     ap->executeRequest(std::move(serverRequest), metadata);
   } catch (...) {
-    auto exceptionStr = folly::exceptionStr(std::current_exception());
+    auto exceptionStr = folly::exceptionStr(folly::current_exception());
     LOG(WARNING) << "exception in executeRequest: " << exceptionStr;
 
     auto eb = detail::ServerRequestHelper::eventBase(serverRequest);

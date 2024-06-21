@@ -209,7 +209,7 @@ class TransportPeekingManager : public PeekingManagerBase,
       acceptor_->handleHeader(std::move(socket_), &clientAddr_, tinfo_);
     } catch (...) {
       LOG(ERROR) << __func__ << " failed, dropping connection: "
-                 << folly::exceptionStr(std::current_exception());
+                 << folly::exceptionStr(folly::current_exception());
     }
   }
 

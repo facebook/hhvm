@@ -1082,7 +1082,7 @@ void RocketServerConnection::applyQosMarking(
   } catch (...) {
     FB_LOG_EVERY_MS(WARNING, 60 * 1000)
         << "Failed to apply DSCP to socket: "
-        << folly::exceptionStr(std::current_exception());
+        << folly::exceptionStr(folly::current_exception());
   }
 }
 

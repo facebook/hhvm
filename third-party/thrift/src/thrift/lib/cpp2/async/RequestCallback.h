@@ -268,7 +268,8 @@ class RequestCallback : public RequestClientCallback {
         } catch (...) {
           LOG(DFATAL)
               << "Exception thrown while executing replyReceived() callback. "
-              << "Exception: " << folly::exceptionStr(std::current_exception());
+              << "Exception: "
+              << folly::exceptionStr(folly::current_exception());
         }
       }
     }
@@ -295,7 +296,7 @@ class RequestCallback : public RequestClientCallback {
       } catch (...) {
         LOG(DFATAL)
             << "Exception thrown while executing requestError() callback. "
-            << "Exception: " << folly::exceptionStr(std::current_exception());
+            << "Exception: " << folly::exceptionStr(folly::current_exception());
       }
     }
     if (unmanaged_) {
@@ -318,7 +319,7 @@ class RequestCallback : public RequestClientCallback {
     } catch (...) {
       LOG(DFATAL) << "Exception thrown while executing requestSent() callback. "
                   << "Exception: "
-                  << folly::exceptionStr(std::current_exception());
+                  << folly::exceptionStr(folly::current_exception());
     }
   }
 

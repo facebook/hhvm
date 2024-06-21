@@ -241,7 +241,7 @@ bool GeneratedAsyncProcessorBase::createInteraction(ServerRequest& req) {
             });
             return;
           } catch (...) {
-            ex = std::current_exception();
+            ex = folly::current_exception();
           }
           DCHECK(ex);
           eb.add([promisePtr, ex = std::move(ex)]() {
@@ -321,7 +321,7 @@ bool GeneratedAsyncProcessorBase::createInteraction(
         });
         return;
       } catch (...) {
-        ex = std::current_exception();
+        ex = folly::current_exception();
       }
       DCHECK(ex);
       eb.add([promisePtr, ex = std::move(ex)]() {
@@ -727,7 +727,7 @@ void ServerInterface::BlockingThreadManager::add(folly::Func f) {
     return;
   } catch (...) {
     LOG(FATAL) << "Failed to schedule a task within timeout: "
-               << folly::exceptionStr(std::current_exception());
+               << folly::exceptionStr(folly::current_exception());
   }
 }
 
@@ -1119,7 +1119,7 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
       co_await serviceInterceptorsInfo[i].interceptor->internal_onRequest(
           std::move(connectionInfo), std::move(requestInfo));
     } catch (...) {
-      exceptions.emplace_back(std::current_exception());
+      exceptions.emplace_back(folly::current_exception());
     }
   }
   if (!exceptions.empty()) {
@@ -1159,7 +1159,7 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse() {
       co_await serviceInterceptorsInfo[i].interceptor->internal_onResponse(
           std::move(connectionInfo), std::move(responseInfo));
     } catch (...) {
-      exceptions.emplace_back(std::current_exception());
+      exceptions.emplace_back(folly::current_exception());
     }
   }
 
@@ -1192,7 +1192,7 @@ folly::coro::Task<void> processServiceInterceptorsOnRequest(
   try {
     co_await callback.processServiceInterceptorsOnRequest(std::move(arguments));
   } catch (...) {
-    callback.exception(std::current_exception());
+    callback.exception(folly::current_exception());
     throw;
   }
 }

@@ -335,7 +335,7 @@ SerializedRequest preprocessSendT(
     } catch (const apache::thrift::TException&) {
       if (ctx) {
         ctx->handlerErrorWrapped(
-            folly::exception_wrapper(std::current_exception()));
+            folly::exception_wrapper(folly::current_exception()));
       }
       throw;
     }

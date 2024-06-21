@@ -151,7 +151,7 @@ void ScopedServerThread::Helper::run() {
   try {
     server_->serve();
   } catch (...) {
-    handleServeErrorImpl(folly::exception_wrapper(std::current_exception()));
+    handleServeErrorImpl(folly::exception_wrapper(folly::current_exception()));
   }
   if (onExit_) {
     onExit_();

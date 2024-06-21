@@ -32,7 +32,7 @@ bool FilePersistenceLayer::persist(const folly::dynamic& dynObj) noexcept {
     serializedCache = folly::json::serialize(dynObj, opts);
   } catch (...) {
     LOG(ERROR) << "Serializing to JSON failed with error: "
-               << folly::exceptionStr(std::current_exception());
+               << folly::exceptionStr(folly::current_exception());
     return false;
   }
   bool persisted = false;
@@ -77,7 +77,7 @@ folly::Optional<folly::dynamic> FilePersistenceLayer::load() noexcept {
     return folly::parseJson(serializedCache, opts);
   } catch (...) {
     LOG(ERROR) << "Deserialization of cache file " << file_
-               << "failed: " << folly::exceptionStr(std::current_exception());
+               << "failed: " << folly::exceptionStr(folly::current_exception());
     return folly::none;
   }
 }

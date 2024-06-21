@@ -116,7 +116,7 @@ struct Utf8TestStructLegacy {
 }
 
 struct Utf8TestStructBin {
-  1: string (java.swift.binary_string) str_field;
+  1: string_5433 str_field;
   2: list<string_7069> str_list;
   @compat.Strings{onInvalidUtf8 = compat.CodingErrorAction.Report}
   3: set<string_7069> str_set;
@@ -126,9 +126,9 @@ struct Utf8TestStructBin {
     adapterClassName = "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
     typeClassName = "io.netty.buffer.ByteBuf",
   }
-  6: string (java.swift.binary_string) adapted_str;
+  6: string_5433 adapted_str;
   @thrift.TerseWrite
-  7: string (java.swift.binary_string) terse_str;
+  7: string_5433 terse_str;
   8: map<string_7069, map<string_7069, string_7069>> complex_field;
 }
 
@@ -173,3 +173,6 @@ transient exception TestExceptionCompat {
 
 // The following were automatically generated and may benefit from renaming.
 typedef string (java.swift.binary_string = "1") string_7069
+
+// The following were automatically generated and may benefit from renaming.
+typedef string (java.swift.binary_string = "1") string_5433

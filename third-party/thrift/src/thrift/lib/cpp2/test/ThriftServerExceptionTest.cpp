@@ -177,11 +177,11 @@ class ThriftServerExceptionTest : public testing::Test {
   const Context& ctx() const { return *contexts.back(); }
 
   template <class E>
-  exception_ptr to_eptr(const E& e) {
+  std::exception_ptr to_eptr(const E& e) {
     try {
       throw e;
     } catch (E&) {
-      return current_exception();
+      return std::current_exception();
     }
   }
 

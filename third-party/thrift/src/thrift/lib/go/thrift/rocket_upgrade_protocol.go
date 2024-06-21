@@ -148,3 +148,13 @@ func (p *upgradeToRocketProtocol) SetProtocolID(protoID ProtocolID) error {
 	}
 	return p.Protocol.SetProtocolID(protoID)
 }
+
+func (p *upgradeToRocketProtocol) Close() error {
+	if p.Protocol == nil {
+		if err := p.headerProtocol.Close(); err != nil {
+			return err
+		}
+		return p.rocketProtocol.Close()
+	}
+	return p.Protocol.Close()
+}

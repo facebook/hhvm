@@ -319,7 +319,6 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
           if constexpr (type::is_optional_or_union_field_v<T, Id>) {
             v.template ensure<Id>(FieldType<Id>{});
           }
-          v.template patchIfSet<Id>(FieldPatchType{});
         }
       });
     }

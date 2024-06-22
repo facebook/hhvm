@@ -1,7 +1,7 @@
 #include <string>
 
 #include <folly/Range.h>
-#include <folly/experimental/TestUtil.h>
+#include <folly/testing/TestUtil.h>
 #include <folly/portability/GTest.h>
 
 #include "hphp/util/sqlite-wrapper.h"

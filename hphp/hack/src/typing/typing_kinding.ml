@@ -420,7 +420,7 @@ module Simple = struct
              env
              (Cls.internal class_info)
              (Cls.get_module class_info)
-             None (* TODO(milliechen): Add package_override to Cls.t *));
+             (Cls.get_package_override class_info));
         let tparams = Cls.tparams class_info in
         check_against_tparams ~in_signature (Cls.pos class_info) argl tparams
       | Decl_entry.Found (Env.TypedefResult typedef) ->

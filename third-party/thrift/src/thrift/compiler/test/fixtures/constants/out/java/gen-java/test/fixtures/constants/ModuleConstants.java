@@ -47,6 +47,8 @@ public final class ModuleConstants {
 
     public static final double LONG_DOUBLE_VALUE = (double)2.59961000990301e-05;
 
+    public static final byte[] BIN = "a\000z".getBytes();
+
     public static final test.fixtures.constants.Company MY_COMPANY = construct_MY_COMPANY();
 
     private static test.fixtures.constants.Company construct_MY_COMPANY() {

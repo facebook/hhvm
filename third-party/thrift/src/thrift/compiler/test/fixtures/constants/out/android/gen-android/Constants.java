@@ -47,6 +47,8 @@ public class Constants {
 
   public static final Double longDoubleValue = 2.59961e-05;
 
+  public static final byte[] bin = "a\x00z".getBytes();
+
   public static final Company my_company = Company.FACEBOOK;
 
   public static final String foo = "foo";

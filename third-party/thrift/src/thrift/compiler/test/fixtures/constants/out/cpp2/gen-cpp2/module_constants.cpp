@@ -32,6 +32,7 @@ namespace cpp2 {
 
 
 
+
 ::cpp2::MyMapIdentifier const& module_constants::mymap() {
   static folly::Indestructible<::cpp2::MyMapIdentifier> const instance{ std::initializer_list<::cpp2::MyMapIdentifier::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("keys"), apache::thrift::StringTraits<std::string>::fromStringLiteral("values") } } };
   return *instance;

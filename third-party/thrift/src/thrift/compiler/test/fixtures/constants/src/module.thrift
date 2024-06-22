@@ -34,6 +34,8 @@ const double zeroDoubleValue = 0.0;
 
 const double longDoubleValue = 0.0000259961000990301;
 
+const binary bin = "a\x00z";
+
 enum EmptyEnum {
 }
 

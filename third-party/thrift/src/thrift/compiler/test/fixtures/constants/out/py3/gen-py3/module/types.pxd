@@ -446,6 +446,7 @@ cdef extern from "thrift/compiler/test/fixtures/constants/gen-cpp2/module_consta
     cdef double cz "::cpp2::module_constants::z"
     cdef double czeroDoubleValue "::cpp2::module_constants::zeroDoubleValue"
     cdef double clongDoubleValue "::cpp2::module_constants::longDoubleValue"
+    cdef string cbin "::cpp2::module_constants::bin"()
     cdef cCompany cmy_company "::cpp2::module_constants::my_company"()
     cdef const char* cfoo "::cpp2::module_constants::foo"()
     cdef cint32_t cbar "::cpp2::module_constants::bar"

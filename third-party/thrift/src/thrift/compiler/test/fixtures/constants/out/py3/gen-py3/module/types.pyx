@@ -2563,6 +2563,7 @@ y = 1000000.0
 z = 1000000000
 zeroDoubleValue = 0
 longDoubleValue = 2.59961000990301e-05
+bin = <bytes> cbin()
 my_company = Company(<int> (cmy_company()))
 foo = cfoo().decode('UTF-8')
 bar = 42

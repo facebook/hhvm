@@ -76,6 +76,12 @@ class module_CONSTANTS implements \IThriftConstants {
 
   /**
    * Original thrift constant:-
+   * binary bin
+   */
+  const string bin = "a\x00z";
+
+  /**
+   * Original thrift constant:-
    * module.MyCompany my_company
    */
   const MyCompany my_company = Company::FACEBOOK;

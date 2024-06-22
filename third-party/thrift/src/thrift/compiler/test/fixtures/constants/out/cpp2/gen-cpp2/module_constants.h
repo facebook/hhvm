@@ -56,6 +56,11 @@ struct module_constants {
     return longDoubleValue_;
   }
 
+  static constexpr ::std::string const bin_ = "a\000z";
+  static constexpr ::std::string bin() {
+    return bin_;
+  }
+
   static constexpr ::cpp2::MyCompany const my_company_ =  ::cpp2::MyCompany::FACEBOOK;
   static constexpr ::cpp2::MyCompany my_company() {
     return my_company_;

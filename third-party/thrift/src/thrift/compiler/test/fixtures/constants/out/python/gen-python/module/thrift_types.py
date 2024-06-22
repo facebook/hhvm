@@ -706,6 +706,8 @@ zeroDoubleValue = float(0)
 
 longDoubleValue = float(2.59961000990301e-05)
 
+bin = b"a\000z"
+
 my_company = Company.FACEBOOK
 
 foo = "foo"

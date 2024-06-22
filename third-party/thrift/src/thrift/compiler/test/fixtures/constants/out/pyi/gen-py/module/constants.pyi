@@ -17,6 +17,7 @@ y: float
 z: float
 zeroDoubleValue: float
 longDoubleValue: float
+bin: bytes
 my_company: Company
 foo: str
 bar: int

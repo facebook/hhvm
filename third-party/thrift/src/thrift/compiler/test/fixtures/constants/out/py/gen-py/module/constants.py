@@ -46,6 +46,8 @@ zeroDoubleValue = 0.00000
 
 longDoubleValue = 2.59961e-05
 
+bin = "a\x00z"
+
 my_company = 0
 
 foo = "foo"

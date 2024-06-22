@@ -52,7 +52,11 @@ type package_error_info = {
 
 let is_calling_from_tests env =
   let current_file = Relative_path.to_absolute @@ Env.get_file env in
-  Str.string_match (Str.regexp "__tests__") current_file 0
+  try
+    ignore (Str.search_forward (Str.regexp_string "__tests__") current_file 0);
+    true
+  with
+  | _ -> false
 
 (* Use the module names of current and target symbols to calculate their respective
  * packages, then determine if the current package is allowed to access the target

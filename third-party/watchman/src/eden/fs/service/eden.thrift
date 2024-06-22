@@ -2225,6 +2225,11 @@ service EdenService extends fb303_core.BaseService {
   list<ThriftRequestMetadata> debugOutstandingThriftRequests();
 
   /**
+   * Get the list of outstanding file download events from source control servers
+   */
+  list<HgEvent> debugOutstandingHgEvents(1: PathString mountPoint);
+
+  /**
    * Start recording performance metrics such as files read
    *
    * This will return a structure containing unique id identifying this recording.

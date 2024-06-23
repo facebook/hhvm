@@ -4,5 +4,4 @@
 #![doc(hidden)]
 #![allow(non_snake_case, unused_crate_dependencies)]
 
-#[doc(inline)]
 pub use :: as types;

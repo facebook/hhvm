@@ -2074,7 +2074,6 @@ dependencies = [
  "quote",
  "regex",
  "relative_path",
- "rust_parser_errors",
  "serde",
  "syn 1.0.109",
  "thiserror",
@@ -3504,6 +3503,7 @@ dependencies = [
  "rust_to_ocaml_attr",
  "serde",
  "serde_json",
+ "strum",
  "thiserror",
  "toml 0.8.5",
 ]

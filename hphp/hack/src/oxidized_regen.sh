@@ -72,6 +72,7 @@ summary "Write oxidized/gen/"
   hphp/hack/src/naming/naming_phase_error.ml                                  \
   hphp/hack/src/options/declFoldOptions.ml                                  \
   hphp/hack/src/options/declParserOptions.ml                                  \
+  hphp/hack/src/options/experimental_features.ml                              \
   hphp/hack/src/options/globalOptions.ml                                      \
   hphp/hack/src/options/parserOptions.ml                                      \
   hphp/hack/src/options/saved_state_rollouts.ml                               \

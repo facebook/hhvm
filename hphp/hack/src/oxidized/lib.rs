@@ -87,6 +87,7 @@ pub use gen::decl_reference;
 pub use gen::error_codes;
 pub use gen::error_message;
 pub use gen::errors;
+pub use gen::experimental_features;
 pub use gen::full_fidelity_parser_env;
 pub use gen::global_options;
 pub use gen::map_reduce_ffi;

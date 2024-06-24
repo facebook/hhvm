@@ -13,6 +13,8 @@ use hash::HashSet;
 use hh_autoimport_rust as hh_autoimport;
 use itertools::Itertools;
 use naming_special_names_rust as sn;
+use oxidized::experimental_features::FeatureName;
+use oxidized::experimental_features::FeatureStatus;
 use oxidized::namespace_env::Mode;
 use oxidized::parser_options::ParserOptions;
 use parser_core_types::indexed_source_text::IndexedSourceText;
@@ -33,11 +35,7 @@ use parser_core_types::syntax_error::{self as errors};
 use parser_core_types::syntax_trait::SyntaxTrait;
 use parser_core_types::syntax_tree::SyntaxTree;
 use parser_core_types::token_kind::TokenKind;
-use strum::Display;
-use strum::EnumIter;
-use strum::EnumString;
 use strum::IntoEnumIterator;
-use strum::IntoStaticStr;
 
 #[derive(Clone, PartialEq, Debug)]
 struct Location {
@@ -68,94 +66,42 @@ enum BinopAllowsAwaitInPositions {
     BinopAllowAwaitNone,
 }
 
-#[allow(dead_code)] // Deprecated is currently unused
-#[derive(Eq, PartialEq)]
-enum FeatureStatus {
-    Unstable,
-    Preview,
-    Migration,
-    Deprecated,
-    OngoingRelease,
-    // TODO: add other modes like "Advanced" or "Deprecated" if necessary.
-    // Those are just variants of "Preview" for the runtime's sake, though,
-    // and likely only need to be distinguished in the lint rule rather than here
-}
-
-#[derive(Clone, Copy, Eq, Display, Hash, PartialEq)]
-#[derive(EnumIter, EnumString, IntoStaticStr)]
-#[strum(serialize_all = "snake_case")]
-pub enum FeatureName {
-    // TODO: rename this from unstable to something else
-    UnionIntersectionTypeHints,
-    ClassLevelWhere,
-    ExpressionTrees,
-    Readonly,
-    ModuleReferences,
-    ClassConstDefault,
-    TypeConstMultipleBounds,
-    TypeConstSuperBound,
-    TypeRefinements,
-    ContextAliasDeclaration,
-    ContextAliasDeclarationShort,
-    MethodTraitDiamond,
-    UpcastExpression,
-    RequireClass,
-    NewtypeSuperBounds,
-    ExpressionTreeBlocks,
-    Package,
-    CaseTypes,
-    ModuleLevelTraits,
-    ModuleLevelTraitsExtensions,
-    TypedLocalVariables,
-    PipeAwait,
-    MatchStatements,
-    StrictSwitch,
-    ClassType,
-    FunctionReferences,
-    FunctionTypeOptionalParams,
-    ExpressionTreeMap,
-    ExpressionTreeNest,
-    SealedMethods,
-    AwaitInSplice,
-}
-impl FeatureName {
-    // Preview features are allowed to run in prod. This function decides
-    // whether the feature is considered Unstable or Preview.
-    fn get_feature_status(&self) -> FeatureStatus {
-        use FeatureStatus::*;
-        match self {
-            FeatureName::UnionIntersectionTypeHints => Unstable,
-            FeatureName::ClassLevelWhere => Unstable,
-            FeatureName::ExpressionTrees => Unstable,
-            FeatureName::Readonly => Preview,
-            FeatureName::ModuleReferences => Unstable,
-            FeatureName::ContextAliasDeclaration => Unstable,
-            FeatureName::ContextAliasDeclarationShort => Preview,
-            FeatureName::TypeConstMultipleBounds => Preview,
-            FeatureName::TypeConstSuperBound => Unstable,
-            FeatureName::ClassConstDefault => Migration,
-            FeatureName::TypeRefinements => OngoingRelease,
-            FeatureName::MethodTraitDiamond => OngoingRelease,
-            FeatureName::UpcastExpression => Unstable,
-            FeatureName::RequireClass => OngoingRelease,
-            FeatureName::NewtypeSuperBounds => Unstable,
-            FeatureName::ExpressionTreeBlocks => OngoingRelease,
-            FeatureName::Package => OngoingRelease,
-            FeatureName::CaseTypes => Preview,
-            FeatureName::ModuleLevelTraits => OngoingRelease,
-            FeatureName::ModuleLevelTraitsExtensions => OngoingRelease,
-            FeatureName::TypedLocalVariables => Preview,
-            FeatureName::PipeAwait => Preview,
-            FeatureName::MatchStatements => Unstable,
-            FeatureName::StrictSwitch => Unstable,
-            FeatureName::ClassType => Unstable,
-            FeatureName::FunctionReferences => Unstable,
-            FeatureName::FunctionTypeOptionalParams => OngoingRelease,
-            FeatureName::ExpressionTreeMap => OngoingRelease,
-            FeatureName::ExpressionTreeNest => Preview,
-            FeatureName::SealedMethods => Unstable,
-            FeatureName::AwaitInSplice => Preview,
-        }
+// Preview features are allowed to run in prod. This function decides
+// whether the feature is considered Unstable or Preview.
+fn get_feature_status(name: &FeatureName) -> FeatureStatus {
+    use FeatureStatus::*;
+    match name {
+        FeatureName::UnionIntersectionTypeHints => Unstable,
+        FeatureName::ClassLevelWhere => Unstable,
+        FeatureName::ExpressionTrees => Unstable,
+        FeatureName::Readonly => Preview,
+        FeatureName::ModuleReferences => Unstable,
+        FeatureName::ContextAliasDeclaration => Unstable,
+        FeatureName::ContextAliasDeclarationShort => Preview,
+        FeatureName::TypeConstMultipleBounds => Preview,
+        FeatureName::TypeConstSuperBound => Unstable,
+        FeatureName::ClassConstDefault => Migration,
+        FeatureName::TypeRefinements => OngoingRelease,
+        FeatureName::MethodTraitDiamond => OngoingRelease,
+        FeatureName::UpcastExpression => Unstable,
+        FeatureName::RequireClass => OngoingRelease,
+        FeatureName::NewtypeSuperBounds => Unstable,
+        FeatureName::ExpressionTreeBlocks => OngoingRelease,
+        FeatureName::Package => OngoingRelease,
+        FeatureName::CaseTypes => Preview,
+        FeatureName::ModuleLevelTraits => OngoingRelease,
+        FeatureName::ModuleLevelTraitsExtensions => OngoingRelease,
+        FeatureName::TypedLocalVariables => Preview,
+        FeatureName::PipeAwait => Preview,
+        FeatureName::MatchStatements => Unstable,
+        FeatureName::StrictSwitch => Unstable,
+        FeatureName::ClassType => Unstable,
+        FeatureName::FunctionReferences => Unstable,
+        FeatureName::FunctionTypeOptionalParams => OngoingRelease,
+        FeatureName::ExpressionTreeMap => OngoingRelease,
+        FeatureName::ExpressionTreeNest => Preview,
+        FeatureName::SealedMethods => Unstable,
+        FeatureName::AwaitInSplice => Preview,
     }
 }
 
@@ -1243,7 +1189,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     Ok(feature) => {
                         if !self.env.parser_options.allow_unstable_features
                             && !self.env.is_hhi_mode()
-                            && feature.get_feature_status() == FeatureStatus::Unstable
+                            && get_feature_status(&feature) == FeatureStatus::Unstable
                         {
                             self.errors.push(make_error_from_node(
                                 node,
@@ -1290,7 +1236,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         } || self.env.context.active_unstable_features.contains(feature)
           // Preview features with an ongoing release should be allowed by the
           // runtime, but not the typechecker
-          || (feature.get_feature_status() == FeatureStatus::OngoingRelease
+          || (get_feature_status(feature) == FeatureStatus::OngoingRelease
             && matches!(self.env.mode, Mode::ForCodegen));
 
         if !enabled {
@@ -3029,7 +2975,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         // Preview features with an ongoing release should be allowed by the
         // runtime, but not the typechecker
         let enabled = self.env.context.active_unstable_features.contains(&feature)
-            || (feature.get_feature_status() == FeatureStatus::OngoingRelease
+            || (get_feature_status(&feature) == FeatureStatus::OngoingRelease
                 && matches!(self.env.mode, Mode::ForCodegen));
         (feature, enabled)
     }

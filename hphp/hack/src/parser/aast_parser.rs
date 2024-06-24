@@ -17,6 +17,7 @@ use namespaces_rust as namespaces;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use oxidized::aast::Program;
+use oxidized::experimental_features;
 use oxidized::file_info::Mode;
 use oxidized::namespace_env::Env as NamespaceEnv;
 use oxidized::namespace_env::Mode as NamespaceMode;
@@ -65,7 +66,7 @@ impl<'src> AastParser {
     pub fn from_text(
         env: &Env,
         indexed_source_text: &'src IndexedSourceText<'src>,
-        default_unstable_features: HashSet<rust_parser_errors::FeatureName>,
+        default_unstable_features: HashSet<experimental_features::FeatureName>,
     ) -> Result<ParserResult> {
         let ns = NamespaceEnv::empty(
             env.parser_options.auto_namespace_map.clone(),
@@ -84,7 +85,7 @@ impl<'src> AastParser {
         env: &Env,
         ns: Arc<NamespaceEnv>,
         indexed_source_text: &'src IndexedSourceText<'src>,
-        default_unstable_features: HashSet<rust_parser_errors::FeatureName>,
+        default_unstable_features: HashSet<experimental_features::FeatureName>,
     ) -> Result<ParserResult> {
         if let Some(err) = Self::verify_utf8(indexed_source_text) {
             return Ok(err);
@@ -119,7 +120,7 @@ impl<'src> AastParser {
         language: Language,
         mode: Option<Mode>,
         tree: PositionedSyntaxTree<'src, 'arena>,
-        default_unstable_features: HashSet<rust_parser_errors::FeatureName>,
+        default_unstable_features: HashSet<experimental_features::FeatureName>,
     ) -> Result<ParserResult> {
         let ns = NamespaceEnv::empty(
             env.parser_options.auto_namespace_map.clone(),
@@ -167,7 +168,7 @@ impl<'src> AastParser {
         language: Language,
         mode: Option<Mode>,
         tree: PositionedSyntaxTree<'src, 'arena>,
-        default_unstable_features: HashSet<rust_parser_errors::FeatureName>,
+        default_unstable_features: HashSet<experimental_features::FeatureName>,
     ) -> Result<ParserResult> {
         let lowering_t = Instant::now();
         match language {
@@ -237,7 +238,7 @@ impl<'src> AastParser {
         indexed_source_text: &'src IndexedSourceText<'src>,
         tree: &PositionedSyntaxTree<'src, 'arena>,
         aast: Option<&mut Program<(), ()>>,
-        default_unstable_features: HashSet<rust_parser_errors::FeatureName>,
+        default_unstable_features: HashSet<experimental_features::FeatureName>,
     ) -> Vec<SyntaxError> {
         let find_errors = |hhi_mode: bool| -> Vec<SyntaxError> {
             let mut errors = tree.errors().into_iter().cloned().collect::<Vec<_>>();

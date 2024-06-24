@@ -72,6 +72,8 @@ errors::NameContext
 errors::Phase
 errors::NamingError
 errors::NastCheckError
+experimental_features::FeatureName
+experimental_features::FeatureStatus
 nast_check_error::Verb
 naming_error::Visibility
 naming_error::ReturnOnlyHint

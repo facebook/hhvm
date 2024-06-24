@@ -145,6 +145,19 @@ let additional_derives ty : (string option * string) list =
     else
       result
   in
+  let result =
+    let strum = Some "strum" in
+    if String.equal ty "experimental_features::FeatureName" then
+      (strum, "Display")
+      :: (strum, "EnumIter")
+      :: (strum, "EnumString")
+      :: (strum, "IntoStaticStr")
+      :: result
+    else if String.equal ty "experimental_features::FeatureStatus" then
+      (strum, "EnumString") :: result
+    else
+      result
+  in
   result
 
 module DeriveSkipLists : sig
@@ -725,6 +738,15 @@ let type_declaration ~mutual_rec ~safe_ints name td =
         "\n#[repr(u8)]"
       | Sum_type { num_variants } when num_variants <= 256 -> "\n#[repr(C, u8)]"
       | _ -> "\n#[repr(C)]"
+    in
+    let additional_attrs =
+      if
+        String.equal name "FeatureName"
+        && String.equal (curr_module_name ()) "experimental_features"
+      then
+        "#[strum(serialize_all = \"snake_case\")]\n" ^ additional_attrs
+      else
+        additional_attrs
     in
     doc ^ derive_attr ^ serde_attr ^ attr ^ additional_attrs ^ repr ^ "\npub"
   in

@@ -96,7 +96,7 @@ namespace Facts {
 // implementation.  We use this when we make a change that invalidates
 // the cache, such as adding a new table which would otherwise be
 // unpopulated without a cache rebuild.
-constexpr size_t kSchemaVersion = 1916337637;
+constexpr size_t kSchemaVersion = 8306754210;
 }
 
 /*

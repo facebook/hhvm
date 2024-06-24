@@ -330,6 +330,7 @@ mod ffi {
         pub constants: Vec<String>,
         pub modules: Vec<ModuleFacts>,
         pub file_attributes: Vec<AttrFacts>,
+        pub module_membership: String, // Empty means none. Cannot use Option in ffi.
         pub sha1sum: String,
     }
 
@@ -496,6 +497,7 @@ mod ffi {
 
         fn get_file_modules(decls: &DeclsHolder) -> Vec<ExtDeclModule>;
         fn get_file_module(decls: &DeclsHolder, name: &str) -> Vec<ExtDeclModule>;
+        fn get_file_module_membership(decls: &DeclsHolder) -> String;
 
         fn get_file_typedefs(decls: &DeclsHolder) -> Vec<ExtDeclTypeDef>;
         fn get_file_typedef(decls: &DeclsHolder, name: &str) -> Vec<ExtDeclTypeDef>;
@@ -870,6 +872,10 @@ fn get_file_modules(holder: &DeclsHolder) -> Vec<ffi::ExtDeclModule> {
 
 fn get_file_module(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclModule> {
     ext_decl::get_file_modules(&holder.parsed_file, name)
+}
+
+fn get_file_module_membership(holder: &DeclsHolder) -> String {
+    ext_decl::get_file_module_membership(&holder.parsed_file)
 }
 
 fn get_file_typedefs(holder: &DeclsHolder) -> Vec<ffi::ExtDeclTypeDef> {

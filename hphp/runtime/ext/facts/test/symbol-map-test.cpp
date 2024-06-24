@@ -498,6 +498,23 @@ struct MockAutoloadDB : public AutoloadDB {
       (const std::filesystem::path&),
       (override));
 
+  // Module Membership
+  MOCK_METHOD(
+      void,
+      insertModuleMembership,
+      (const std::filesystem::path&, std::string_view),
+      (override));
+  MOCK_METHOD(
+      std::optional<std::string>,
+      getPathModuleMembership,
+      (const std::filesystem::path&),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::filesystem::path>,
+      getModuleMembers,
+      (std::string_view),
+      (override));
+
   /**
    * Return a list of all paths defined in the given root, as absolute paths.
    *
@@ -784,6 +801,86 @@ TEST_F(SymbolMapTest, OverwriteExistingDbModules) {
   EXPECT_THAT(
       m.getFileModules(path2),
       UnorderedElementsAre(kSecondPath2, kSecondPath3));
+}
+
+TEST_F(SymbolMapTest, NewModuleMembership) {
+  auto db = std::make_shared<MockAutoloadDB>();
+  db->DelegateToFake();
+
+  auto m = make("/var/www", db);
+  fs::path path1 = {"some/path1.php"};
+
+  FileFacts ff{.module_membership = {"some_module"}};
+
+  EXPECT_CALL(*db, insertModuleMembership(path1, "some_module"));
+  update(m, "", "1:2:3", {path1}, {}, {ff});
+
+  // We didn't actually write to any database, so if the symbol map is working,
+  // we should still get the results.
+  EXPECT_THAT(m.getFileModuleMembership(path1), "some_module");
+}
+
+TEST_F(SymbolMapTest, ModuleMembershipFromDB) {
+  auto db = std::make_shared<MockAutoloadDB>();
+  db->DelegateToFake();
+
+  auto m = make("/var/www", db);
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
+
+  EXPECT_CALL(*db, insertPath(_)).Times(0);
+
+  EXPECT_CALL(*db, getPathModuleMembership(path1))
+      .WillOnce(Return(std::string{"some_new_module"}));
+  EXPECT_CALL(*db, getPathModuleMembership(path2))
+      .WillOnce(Return(std::string{"some_other_new_module"}));
+
+  EXPECT_THAT(m.getFileModuleMembership(path1), "some_new_module");
+  EXPECT_THAT(m.getFileModuleMembership(path2), "some_other_new_module");
+}
+
+TEST_F(SymbolMapTest, OverwriteExistingDbModuleMembership) {
+  const char* kEmptyModule = "";
+  const char* kFirstModule1 = "k-1-1";
+  const char* kSecondModule1 = "k-2-1";
+
+  auto db = std::make_shared<NiceMock<MockAutoloadDB>>();
+  db->DelegateToFake();
+
+  auto m = make("/var/www", db);
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
+
+  // These paths won't be in memory, so the symbol map will try to get
+  // them from the database.
+  EXPECT_CALL(*db, getPathModuleMembership(path1))
+      .WillOnce(Return(std::string{kEmptyModule}));
+  EXPECT_CALL(*db, getPathModuleMembership(path2))
+      .WillOnce(Return(std::string{kFirstModule1}));
+
+  // Everything should be read from the database.
+  EXPECT_THAT(m.getFileModuleMembership(path1), kEmptyModule);
+  EXPECT_THAT(m.getFileModuleMembership(path2), kFirstModule1);
+
+  // Now we overwrite it with new information.  The new information should
+  // be returned by the symbol map and the db should get updated.
+  FileFacts ff1{.module_membership = kSecondModule1};
+  FileFacts ff2{.module_membership = kEmptyModule};
+
+  EXPECT_CALL(*db, erasePath(path1));
+  EXPECT_CALL(*db, erasePath(path2));
+  EXPECT_CALL(*db, insertModuleMembership(path1, kSecondModule1));
+  EXPECT_CALL(*db, insertModuleMembership(path2, kEmptyModule)).Times(0);
+
+  update(m, "", "1:2:3", {path1, path2}, {}, {ff1, ff2});
+
+  // The in memory map should already know these were blown away.
+  std::vector<fs::path> empty_path_list{};
+  EXPECT_CALL(*db, getPathModuleMembership(path1)).Times(0);
+  EXPECT_CALL(*db, getPathModuleMembership(path2)).Times(0);
+
+  EXPECT_THAT(m.getFileModuleMembership(path1), kSecondModule1);
+  EXPECT_THAT(m.getFileModuleMembership(path2), std::nullopt);
 }
 
 TEST_F(SymbolMapTest, addPaths) {

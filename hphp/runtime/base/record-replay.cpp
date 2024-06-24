@@ -269,6 +269,11 @@ String serialize(const Optional<std::string>& value) {
 }
 
 template<>
+String serialize(const Optional<String>& value) {
+  return serialize(value ? *value : init_null());
+}
+
+template<>
 String serialize(const Optional<AutoloadMap::FileResult>& value) {
   return serialize(value ? value->m_path : init_null());
 }
@@ -446,6 +451,17 @@ Optional<std::string> unserialize(const String& recordedValue) {
   } else {
     always_assert_flog(variant.isString(), "{}", recordedValue);
     return variant.asCStrRef().toCppString();
+  }
+}
+
+template<>
+Optional<String> unserialize(const String& recordedValue) {
+  const auto variant{unserialize<Variant>(recordedValue)};
+  if (variant.isNull()) {
+    return std::nullopt;
+  } else {
+    always_assert_flog(variant.isString(), "{}", recordedValue);
+    return variant.asCStrRef();
   }
 }
 

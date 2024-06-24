@@ -80,7 +80,7 @@ namespace EnumClass {
 /**
  * Type of enum class labels
  */
-newtype Label<-TEnumClass, TType> = mixed;
+newtype Label<-TEnumClass, +TType> = mixed;
 }
 
 

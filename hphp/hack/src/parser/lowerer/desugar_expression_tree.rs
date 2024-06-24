@@ -568,6 +568,9 @@ fn create_temp_statement_parallel(
         .enumerate()
         .map(|(i, expr)| (mk_lvar(&expr.1, i)))
         .collect();
+    // assign a tuple to a list to ensure any awaits can execute concurrently.
+    // We don't use a concurrent statement because that requires each rhs to have
+    // an await, and that might not be the case here.
     vec![Stmt::new(
         pos.clone(),
         Stmt_::Expr(Box::new(Expr::new(

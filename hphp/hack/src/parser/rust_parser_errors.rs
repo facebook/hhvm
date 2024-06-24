@@ -154,7 +154,7 @@ impl FeatureName {
             FeatureName::ExpressionTreeMap => OngoingRelease,
             FeatureName::ExpressionTreeNest => Preview,
             FeatureName::SealedMethods => Unstable,
-            FeatureName::AwaitInSplice => Unstable,
+            FeatureName::AwaitInSplice => Preview,
         }
     }
 }

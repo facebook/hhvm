@@ -251,13 +251,17 @@ and contexts env (_, hl) = List.concat_map ~f:(context_hint env) hl
 
 and contexts_opt env = Option.value_map ~default:[] ~f:(contexts env)
 
-let hint ?(in_signature = true) env (p, h) =
+let hint ?(in_signature = true) ?(in_typeconst = false) env (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
-  Typing_kinding.Simple.check_well_kinded_hint ~in_signature env.tenv (p, h);
+  Typing_kinding.Simple.check_well_kinded_hint
+    ~in_signature
+    ~in_typeconst
+    env.tenv
+    (p, h);
   hint_ ~in_signature env p h
 
-let hint_opt ?in_signature env =
-  Option.value_map ~default:[] ~f:(hint ?in_signature env)
+let hint_opt ?in_signature ?in_typeconst env =
+  Option.value_map ~default:[] ~f:(hint ?in_signature ?in_typeconst env)
 
 let hints ?in_signature env = List.concat_map ~f:(hint ?in_signature env)
 
@@ -313,13 +317,14 @@ let consts env cs = List.concat_map ~f:(const env) cs
 
 let typeconsts env tcs =
   let f tconst =
+    let in_typeconst = true in
     match tconst.c_tconst_kind with
     | TCAbstract { c_atc_as_constraint; c_atc_super_constraint; c_atc_default }
       ->
-      hint_opt env c_atc_as_constraint
-      @ hint_opt env c_atc_super_constraint
-      @ hint_opt env c_atc_default
-    | TCConcrete { c_tc_type } -> hint env c_tc_type
+      hint_opt ~in_typeconst env c_atc_as_constraint
+      @ hint_opt ~in_typeconst env c_atc_super_constraint
+      @ hint_opt ~in_typeconst env c_atc_default
+    | TCConcrete { c_tc_type } -> hint ~in_typeconst env c_tc_type
   in
   List.concat_map ~f tcs
 
@@ -507,15 +512,20 @@ let typedef tenv t =
      parameters of typedefs by Tany, which makes the kind check moot *)
   maybe
     (* We always check the constraints for internal types, so treat in_signature:true *)
-    (Typing_kinding.Simple.check_well_kinded_hint ~in_signature:true)
+    (Typing_kinding.Simple.check_well_kinded_hint
+       ~in_signature:true
+       ~in_typeconst:false)
     tenv_with_typedef_tparams
     t_as_constraint;
   maybe
-    (Typing_kinding.Simple.check_well_kinded_hint ~in_signature:true)
+    (Typing_kinding.Simple.check_well_kinded_hint
+       ~in_signature:true
+       ~in_typeconst:false)
     tenv_with_typedef_tparams
     t_super_constraint;
   Typing_kinding.Simple.check_well_kinded_hint
     ~in_signature:should_check_internal_signature
+    ~in_typeconst:false
     tenv_with_typedef_tparams
     t_kind;
   let env =

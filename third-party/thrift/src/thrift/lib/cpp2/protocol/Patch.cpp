@@ -802,6 +802,13 @@ ExtractedMasksFromPatch extractMaskFromPatch(
     masks.write = allMask();
   }
 
+  // Read mask should be always subset of write mask. If not, make read mask
+  // equal to write mask. This can happen for struct or map fields with patch
+  // operations that returns noneMask for read mask (i.e. assign).
+  if ((masks.read | masks.write) != masks.write) {
+    masks.read = masks.write;
+  }
+
   return masks;
 }
 

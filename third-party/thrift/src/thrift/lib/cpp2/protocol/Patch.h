@@ -71,10 +71,11 @@ inline constexpr detail::ApplyPatch applyPatch{};
  * Extracted Thrift Masks from Thrift Patch. Read Thrift Mask contains fields or
  * map elements that are need to be known to apply Thrift Patch to the target
  * value. Write Thrift Mask contains fields or map elements that are affected by
- * Thrift Patch. Read and write Thrift Masks are useful to gain better insight
- * on the given Thrift Patch. For example, it is used in
- * `protocol::applyPatchToSerializedData` to avoid full deserialization when
- * applying Thrift Patch to serialized data in a binary blob.
+ * Thrift Patch. Read Thrift Mask is always subset of Write Thrift Mask. Read
+ * and write Thrift Masks are useful to gain better insight on the given Thrift
+ * Patch. For example, it is used in `protocol::applyPatchToSerializedData` to
+ * avoid full deserialization when applying Thrift Patch to serialized data in a
+ * binary blob.
  */
 struct ExtractedMasksFromPatch {
   Mask read; // read mask from patch

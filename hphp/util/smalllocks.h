@@ -73,7 +73,7 @@ inline void futex_wake(std::atomic<uint32_t>* value, int nwake) {
 struct SmallLock {
   void lock() {
     uint32_t c = 0;
-    if (lock_data.compare_exchange_strong(c, 1, std::memory_order_acquire)) {
+    if (lock_data.compare_exchange_strong(c, 1, std::memory_order_acq_rel)) {
       return;
     }
 
@@ -101,4 +101,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-

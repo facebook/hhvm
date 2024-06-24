@@ -218,8 +218,7 @@ struct RangeState {
       // Need to add more mapping.
       if (newUse > mapFrontier) return nullptr;
       if (low_use.compare_exchange_weak(oldUse, newUse,
-                                        std::memory_order_release,
-                                        std::memory_order_acquire)) {
+                                        std::memory_order_acq_rel)) {
         return reinterpret_cast<void*>(aligned);
       }
     } while (true);
@@ -235,8 +234,7 @@ struct RangeState {
       // Need to add more mapping.
       if (newUse < mapFrontier) return nullptr;
       if (high_use.compare_exchange_weak(oldUse, newUse,
-                                         std::memory_order_release,
-                                         std::memory_order_acquire)) {
+                                         std::memory_order_acq_rel)) {
         return reinterpret_cast<void*>(newUse);
       }
     } while (true);

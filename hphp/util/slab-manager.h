@@ -101,7 +101,7 @@ struct TaggedSlabList {
     while (true) {
       ptr->store(currHead, std::memory_order_release);
       if (m_head.compare_exchange_weak(currHead, tagged,
-                                       std::memory_order_release)) {
+                                       std::memory_order_acq_rel)) {
         return;
       } // otherwise currHead is updated with latest value of m_head.
     }
@@ -141,7 +141,7 @@ struct TaggedSlabList {
       auto const ptr = reinterpret_cast<AtomicTaggedSlabPtr*>(currHead.ptr());
       auto next = ptr->load(std::memory_order_acquire);
       if (m_head.compare_exchange_weak(currHead, next,
-                                       std::memory_order_release)) {
+                                       std::memory_order_acq_rel)) {
         m_bytes.fetch_sub(kSlabSize, std::memory_order_acq_rel);
         return currHead;
       } // otherwise currHead is updated with latest value of m_head.
@@ -185,7 +185,7 @@ struct SlabManager : TaggedSlabList {
     while (true) {
       last->store(currHead, std::memory_order_release);
       if (m_head.compare_exchange_weak(currHead, newHead,
-                                       std::memory_order_release)) {
+                                       std::memory_order_acq_rel)) {
         return;
       }
     } // otherwise currHead is updated with latest value of m_head.

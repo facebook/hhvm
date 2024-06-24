@@ -42,7 +42,7 @@ NEVER_INLINE RangeState& getRange(AddrRangeClass index) {
   auto result = reinterpret_cast<RangeState*>(g_ranges + index);
   if (!result->low()) {
     static std::atomic_flag lock = ATOMIC_FLAG_INIT;
-    while (lock.test_and_set(std::memory_order_acquire)) {
+    while (lock.test_and_set(std::memory_order_acq_rel)) {
       // Spin while another thread initializes the ranges. We don't really reach
       // here, because the function is called very early during process
       // initialization when there is only one thread. Do it just for extra

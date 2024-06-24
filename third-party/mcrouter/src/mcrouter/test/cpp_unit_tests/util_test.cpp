@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 
 #include <folly/FileUtil.h>
-#include <folly/experimental/TestUtil.h>
+#include <folly/testing/TestUtil.h>
 
 #include "mcrouter/lib/fbi/cpp/util.h"
 

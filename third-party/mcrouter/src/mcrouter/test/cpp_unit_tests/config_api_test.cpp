@@ -10,7 +10,7 @@
 #include <gtest/gtest.h>
 
 #include <folly/FileUtil.h>
-#include <folly/experimental/TestUtil.h>
+#include <folly/testing/TestUtil.h>
 
 #include "mcrouter/ConfigApi.h"
 #include "mcrouter/options.h"

@@ -12,8 +12,8 @@
 #include <gtest/gtest.h>
 
 #include <folly/FileUtil.h>
-#include <folly/experimental/TestUtil.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
+#include <folly/testing/TestUtil.h>
 
 #include "mcrouter/FileObserver.h"
 

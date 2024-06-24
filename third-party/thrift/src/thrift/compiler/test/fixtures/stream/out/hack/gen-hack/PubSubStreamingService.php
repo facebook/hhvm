@@ -556,6 +556,36 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
   /* send and recv functions */
 }
 
+abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
+  use \GetThriftServiceMetadata;
+  abstract const type TThriftIf as PubSubStreamingServiceAsyncIf;
+  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = PubSubStreamingServiceStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'PubSubStreamingService';
+
+  protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, PubSubStreamingServiceStaticMetadata::class);
+  }
+}
+class PubSubStreamingServiceAsyncProcessor extends PubSubStreamingServiceAsyncProcessorBase {
+  const type TThriftIf = PubSubStreamingServiceAsyncIf;
+}
+
+abstract class PubSubStreamingServiceSyncProcessorBase extends \ThriftSyncProcessor {
+  use \GetThriftServiceMetadata;
+  abstract const type TThriftIf as PubSubStreamingServiceIf;
+  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = PubSubStreamingServiceStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'PubSubStreamingService';
+
+  protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
+    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, PubSubStreamingServiceStaticMetadata::class);
+  }
+}
+class PubSubStreamingServiceSyncProcessor extends PubSubStreamingServiceSyncProcessorBase {
+  const type TThriftIf = PubSubStreamingServiceIf;
+}
+// For backwards compatibility
+class PubSubStreamingServiceProcessor extends PubSubStreamingServiceSyncProcessor {}
+
 // HELPER FUNCTIONS AND STRUCTURES
 
 class PubSubStreamingService_returnstream_args implements \IThriftSyncStruct, \IThriftStructMetadata {

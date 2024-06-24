@@ -416,9 +416,9 @@ class StructuredCursorReader : detail::BaseCursorReader {
       return ret;
     } else if (ret) {
     } else if (type::is_terse_field_v<T, Ident>) {
-      val = *op::get<Ident>(op::getIntrinsicDefault<T>());
+      val = copy(*op::get<Ident>(op::getIntrinsicDefault<T>()));
     } else {
-      val = *op::get<Ident>(op::getDefault<T>());
+      val = copy(*op::get<Ident>(op::getDefault<T>()));
     }
   }
 
@@ -427,6 +427,15 @@ class StructuredCursorReader : detail::BaseCursorReader {
   FieldId fieldId_{0};
   // Contains last field id read from the buffer.
   BinaryProtocolReader::StructReadState readState_;
+
+  template <typename T>
+  T copy(const T& in) {
+    return in;
+  }
+  folly::IOBuf copy(const folly::IOBuf& in) { return in.cloneAsValue(); }
+  std::unique_ptr<folly::IOBuf> copy(const std::unique_ptr<folly::IOBuf>& in) {
+    return in->clone();
+  }
 
   template <typename, bool>
   friend class StructuredCursorReader;

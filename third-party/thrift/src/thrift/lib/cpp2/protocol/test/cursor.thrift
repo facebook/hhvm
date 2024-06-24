@@ -92,6 +92,13 @@ struct Containers {
   1: list<string> list_of_string;
 }
 
+struct Types {
+  @cpp.Type{name = "folly::IOBuf"}
+  1: binary iobuf;
+  @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+  2: binary iobufptr;
+}
+
 struct Empty {}
 @cpp.UseCursorSerialization
 typedef Empty EmptyWrapper

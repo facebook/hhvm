@@ -297,6 +297,17 @@ TEST(CursorSerializer, CursorReadInContainer) {
   wrapper.endRead(std::move(reader));
 }
 
+TEST(CursorSerializer, TypesRead) {
+  test::Types obj;
+  obj.iobuf() = folly::IOBuf::wrapBufferAsValue("foo", 3);
+  obj.iobufptr() = folly::IOBuf::wrapBuffer("bar", 3);
+  CursorSerializationWrapper wrapper(obj);
+  auto reader = wrapper.beginRead();
+  EXPECT_EQ(reader.read<ident::iobuf>().toString(), "foo");
+  EXPECT_EQ(reader.read<ident::iobufptr>()->toString(), "bar");
+  wrapper.endRead(std::move(reader));
+}
+
 TEST(CursorSerializer, QualifierWrite) {
   CursorSerializationWrapper<Qualifiers> wrapper;
   auto writer = wrapper.beginWrite();

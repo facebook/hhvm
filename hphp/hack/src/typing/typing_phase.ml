@@ -1373,6 +1373,7 @@ let localize_targ_with_kind
         ~in_signature:false
         ~in_typeconst:false
         ~in_typehint:true
+        ~in_targ:false
         env
         ty
         nkind;

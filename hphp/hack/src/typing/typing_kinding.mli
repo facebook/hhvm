@@ -15,6 +15,7 @@ module Simple : sig
     in_signature:bool ->
     in_typeconst:bool ->
     in_typehint:bool ->
+    in_targ:bool ->
     Typing_env_types.env ->
     decl_ty ->
     KindDefs.Simple.named_kind ->

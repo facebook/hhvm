@@ -56,8 +56,8 @@ struct module_constants {
     return longDoubleValue_;
   }
 
-  static constexpr ::std::string const bin_ = "a\000z";
-  static constexpr ::std::string bin() {
+  static constexpr std::string_view bin_{"a\000z", 3};
+  static constexpr std::string_view bin() {
     return bin_;
   }
 

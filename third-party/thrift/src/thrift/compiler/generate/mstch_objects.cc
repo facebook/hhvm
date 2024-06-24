@@ -270,6 +270,14 @@ mstch::node mstch_const_value::string_value() {
   return escaped;
 }
 
+mstch::node mstch_const_value::string_length() {
+  if (type_ != cv::CV_STRING) {
+    return {};
+  }
+
+  return const_value_->get_string().length();
+}
+
 mstch::node mstch_const_value::list_elems() {
   if (type_ == cv::CV_LIST) {
     const t_type* expected_type = nullptr;

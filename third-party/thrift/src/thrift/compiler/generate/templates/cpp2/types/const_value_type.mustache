@@ -15,5 +15,6 @@
   limitations under the License.
 
 }}{{#type:string?}}char const *{{/type:string?}}{{!
-}}{{^type:string?}}{{constant:cpp_type}}{{/type:string?}}{{!
+}}{{#type:binary?}}std::string_view{{/type:binary?}}{{!
+}}{{^type:string?}}{{^type:binary?}}{{constant:cpp_type}}{{/type:binary?}}{{/type:string?}}{{!
 }}

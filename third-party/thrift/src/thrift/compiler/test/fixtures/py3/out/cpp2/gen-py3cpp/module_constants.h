@@ -54,8 +54,8 @@ struct module_constants {
     return A_WORD_;
   }
 
-  static constexpr ::std::string const SOME_BYTES_ = "bytes";
-  static constexpr ::std::string SOME_BYTES() {
+  static constexpr std::string_view SOME_BYTES_{"bytes", 5};
+  static constexpr std::string_view SOME_BYTES() {
     return SOME_BYTES_;
   }
 

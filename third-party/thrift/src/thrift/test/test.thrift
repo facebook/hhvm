@@ -41,6 +41,10 @@ const string str_4 = '"foo"';
 const string str_5 = "line 1
 line 2
 ";
+const string str_nul = "hi\x00boo";
+
+const binary bin_e = "";
+const binary bin_nul = "hi\x00boo";
 
 const list<string> escapes = [
   "\x42cafes",

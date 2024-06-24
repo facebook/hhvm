@@ -31,7 +31,12 @@ struct {{program:name}}_constants {
 
 {{#program:constants}}{{#constant:type}}{{#constant:value}}
 {{^constant:outline_init?}}
+{{^type:binary?}}
   static constexpr {{ > types/const_value_type}} const {{constant:name}}_ = {{ > common/const_value}};
+{{/type:binary?}}
+{{#type:binary?}}
+  static constexpr std::string_view {{constant:name}}_{"{{value:string_value}}", {{value:string_length}}};
+{{/type:binary?}}
   static constexpr {{ > types/const_value_type}} {{constant:name}}() {
     return {{constant:name}}_;
   }

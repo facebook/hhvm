@@ -1358,6 +1358,7 @@ class mstch_const_value : public mstch_base {
             {"value:nonzero?", &mstch_const_value::is_non_zero},
             {"value:enum_name", &mstch_const_value::enum_name},
             {"value:string_value", &mstch_const_value::string_value},
+            {"value:string_length", &mstch_const_value::string_length},
             {"value:list_elements", &mstch_const_value::list_elems},
             {"value:map_elements", &mstch_const_value::map_elems},
             {"value:const_struct", &mstch_const_value::const_struct},
@@ -1402,6 +1403,7 @@ class mstch_const_value : public mstch_base {
   mstch::node is_non_zero();
   mstch::node enum_name();
   mstch::node string_value();
+  mstch::node string_length();
   mstch::node list_elems();
   mstch::node map_elems();
   mstch::node const_struct();

@@ -41,6 +41,11 @@ TEST(constants, examples) {
   EXPECT_EQ(std::string("'"), test_constants::str_3());
   EXPECT_EQ(std::string("\"foo\""), test_constants::str_4());
   EXPECT_EQ(std::string("line 1\nline 2\n"), test_constants::str_5());
+  EXPECT_EQ(std::string("hi"), test_constants::str_nul());
+
+  EXPECT_EQ(std::string(), test_constants::bin_e_);
+  EXPECT_EQ(std::string(), test_constants::bin_e());
+  EXPECT_EQ(std::string("hi\000boo", 6), test_constants::bin_nul());
 
   EXPECT_TRUE(test_constants::l_e().empty());
   EXPECT_EQ((std::vector<std::int32_t>{23, 42, 56}), test_constants::l_1());

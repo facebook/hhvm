@@ -302,6 +302,7 @@ module Simple = struct
       ~allow_missing_targs
       ~in_signature
       ~in_typeconst
+      ~in_typehint
       ~def_pos
       ~use_pos
       env
@@ -327,10 +328,15 @@ module Simple = struct
     List.iter2_exn
       tyargs
       nkinds
-      ~f:(check_targ_well_kinded ~in_signature ~in_typeconst env)
+      ~f:(check_targ_well_kinded ~in_signature ~in_typeconst ~in_typehint env)
 
   and check_targ_well_kinded
-      ~in_signature ~in_typeconst env tyarg (nkind : Simple.named_kind) =
+      ~in_signature
+      ~in_typeconst
+      ~in_typehint
+      env
+      tyarg
+      (nkind : Simple.named_kind) =
     let kind = snd nkind in
     match get_node tyarg with
     | Twildcard ->
@@ -340,12 +346,24 @@ module Simple = struct
           get_reason tyarg |> Reason.to_pos |> Pos_or_decl.unsafe_to_raw_pos
         in
         Errors.add_error Naming_error.(to_user_error @@ HKT_wildcard pos);
-        check_well_kinded ~in_signature ~in_typeconst env tyarg nkind
+        check_well_kinded
+          ~in_signature
+          ~in_typeconst
+          ~in_typehint
+          env
+          tyarg
+          nkind
       )
-    | _ -> check_well_kinded ~in_signature ~in_typeconst env tyarg nkind
+    | _ ->
+      check_well_kinded ~in_signature ~in_typeconst ~in_typehint env tyarg nkind
 
   and check_well_kinded_type
-      ~allow_missing_targs ~in_signature ~in_typeconst env (ty : decl_ty) =
+      ~allow_missing_targs
+      ~in_signature
+      ~in_typeconst
+      ~in_typehint
+      env
+      (ty : decl_ty) =
     let (r, ty_) = deref ty in
     let use_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos in
     let check =
@@ -353,6 +371,7 @@ module Simple = struct
         ~allow_missing_targs:false
         ~in_signature
         ~in_typeconst
+        ~in_typehint
         env
     in
     let check_against_tparams def_pos tyargs tparams =
@@ -361,6 +380,7 @@ module Simple = struct
       check_targs_well_kinded
         ~allow_missing_targs
         ~in_typeconst
+        ~in_typehint
         ~def_pos
         ~use_pos
         env
@@ -393,6 +413,7 @@ module Simple = struct
         ~allow_missing_targs:true
         ~in_signature
         ~in_typeconst
+        ~in_typehint
         env
         ty
     | Trefinement (ty, rs) ->
@@ -415,6 +436,7 @@ module Simple = struct
           ~allow_missing_targs:false
           ~in_signature
           ~in_typeconst
+          ~in_typehint
           ~def_pos
           ~use_pos
           env
@@ -428,7 +450,7 @@ module Simple = struct
         Option.iter
           ~f:(Typing_error_utils.add_typing_error ~env)
           (Typing_visibility.check_top_level_access
-             ~ignore_package_errors:in_typeconst
+             ~ignore_package_errors:(in_typeconst || in_typehint)
              ~in_signature
              ~use_pos
              ~def_pos:(Cls.pos class_info)
@@ -442,7 +464,7 @@ module Simple = struct
         Option.iter
           ~f:(Typing_error_utils.add_typing_error ~env)
           (Typing_visibility.check_top_level_access
-             ~ignore_package_errors:false
+             ~ignore_package_errors:(in_typeconst || in_typehint)
              ~in_signature
              ~use_pos
              ~def_pos:typedef.td_pos
@@ -485,6 +507,7 @@ module Simple = struct
   and check_well_kinded
       ~in_signature
       ~in_typeconst
+      ~in_typehint
       env
       (ty : decl_ty)
       (expected_nkind : Simple.named_kind) =
@@ -512,6 +535,7 @@ module Simple = struct
         ~allow_missing_targs:false
         ~in_signature
         ~in_typeconst
+        ~in_typehint
         env
         ty
     else
@@ -551,20 +575,23 @@ module Simple = struct
       | Tany _ -> ()
       | _ -> kind_error (Simple.fully_applied_type ()) env
 
-  (* Export the version that doesn't expose allow_missing_targs *)
-  let check_well_kinded_type ~in_signature ~in_typeconst env (ty : decl_ty) =
+  let check_well_kinded_hint ~in_signature ~in_typeconst ~in_typehint env hint =
+    let decl_ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
     check_well_kinded_type
       ~allow_missing_targs:false
       ~in_signature
       ~in_typeconst
+      ~in_typehint
       env
-      ty
-
-  let check_well_kinded_hint ~in_signature ~in_typeconst env hint =
-    let decl_ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
-    check_well_kinded_type ~in_signature ~in_typeconst env decl_ty
+      decl_ty
 
   let check_well_kinded_context_hint ~in_signature env hint =
     let decl_ty = Decl_hint.context_hint env.Typing_env_types.decl_env hint in
-    check_well_kinded_type ~in_signature ~in_typeconst:false env decl_ty
+    check_well_kinded_type
+      ~in_signature
+      ~allow_missing_targs:false
+      ~in_typeconst:false
+      ~in_typehint:false
+      env
+      decl_ty
 end

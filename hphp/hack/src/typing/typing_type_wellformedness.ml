@@ -251,11 +251,17 @@ and contexts env (_, hl) = List.concat_map ~f:(context_hint env) hl
 
 and contexts_opt env = Option.value_map ~default:[] ~f:(contexts env)
 
-let hint ?(in_signature = true) ?(in_typeconst = false) env (p, h) =
+let hint
+    ?(in_signature = true)
+    ?(in_typeconst = false)
+    ?(in_typehint = false)
+    env
+    (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
   Typing_kinding.Simple.check_well_kinded_hint
     ~in_signature
     ~in_typeconst
+    ~in_typehint
     env.tenv
     (p, h);
   hint_ ~in_signature env p h
@@ -266,7 +272,10 @@ let hint_opt ?in_signature ?in_typeconst env =
 let hints ?in_signature env = List.concat_map ~f:(hint ?in_signature env)
 
 let type_hint env th =
-  Option.value_map ~default:[] ~f:(hint env) (hint_of_type_hint th)
+  Option.value_map
+    ~default:[]
+    ~f:(hint ~in_typehint:true env)
+    (hint_of_type_hint th)
 
 let fun_param env param = type_hint env param.param_type_hint
 
@@ -514,18 +523,21 @@ let typedef tenv t =
     (* We always check the constraints for internal types, so treat in_signature:true *)
     (Typing_kinding.Simple.check_well_kinded_hint
        ~in_signature:true
-       ~in_typeconst:false)
+       ~in_typeconst:false
+       ~in_typehint:false)
     tenv_with_typedef_tparams
     t_as_constraint;
   maybe
     (Typing_kinding.Simple.check_well_kinded_hint
        ~in_signature:true
-       ~in_typeconst:false)
+       ~in_typeconst:false
+       ~in_typehint:false)
     tenv_with_typedef_tparams
     t_super_constraint;
   Typing_kinding.Simple.check_well_kinded_hint
     ~in_signature:should_check_internal_signature
     ~in_typeconst:false
+    ~in_typehint:false
     tenv_with_typedef_tparams
     t_kind;
   let env =

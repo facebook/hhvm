@@ -131,6 +131,7 @@ class t_hack_generator : public t_concat_generator {
     typedef_ = option_is_specified(options, "typedef");
     shapes_use_pipe_structure_ =
         option_is_specified(options, "shapes_use_pipe_structure");
+    server_stream_ = option_is_specified(options, "server_stream");
 
     auto [_, ns_type_] = get_namespace(program_);
     has_hack_namespace = ns_type_ == HackThriftNamespaceType::HACK ||
@@ -1199,6 +1200,11 @@ class t_hack_generator : public t_concat_generator {
    * Use pipes in __fromShape implementation to avoid repeated indexing
    */
   bool shapes_use_pipe_structure_;
+
+  /**
+   * True to generate service code for streaming methods
+   */
+  bool server_stream_;
 
   bool has_hack_namespace;
 
@@ -7610,6 +7616,7 @@ THRIFT_REGISTER_GENERATOR(
     "    enum_transparenttype Use transparent typing for Hack enums: 'enum "
     "FooBar: int as int'.\n"
     "    shapes_use_pipe_structure Use pipes in __fromShape implementation "
-    "to avoid repeated indexing.\n");
+    "to avoid repeated indexing.\n"
+    "    server_stream Generate service code for streaming methods'.\n");
 
 } // namespace apache::thrift::compiler

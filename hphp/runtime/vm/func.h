@@ -1660,13 +1660,13 @@ public:
     AtomicFlags& operator=(const AtomicFlags&) = delete;
 
     bool set(Flags flags) {
-      auto const prev = m_flags.fetch_or(flags, std::memory_order_release);
+      auto const prev = m_flags.fetch_or(flags, std::memory_order_acq_rel);
       return prev & flags;
     }
 
     bool unset(Flags flags) {
       auto const prev =
-        m_flags.fetch_and(~uint8_t(flags), std::memory_order_release);
+        m_flags.fetch_and(~uint8_t(flags), std::memory_order_acq_rel);
       return prev & flags;
     }
 

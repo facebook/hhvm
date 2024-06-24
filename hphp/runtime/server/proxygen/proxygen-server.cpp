@@ -127,7 +127,7 @@ void HPHPWorkerThread::cleanup() {
 }
 
 void HPHPWorkerThread::addPendingTransport(ProxygenTransport& transport) {
-  m_pendingTransportsCount.fetch_add(1, std::memory_order_acquire);
+  m_pendingTransportsCount.fetch_add(1, std::memory_order_acq_rel);
   if (m_server->partialPostEchoEnabled()) {
     const auto status = m_server->getStatus();
     transport.setShouldRepost(status == ProxygenServer::RunStatus::STOPPING
@@ -139,7 +139,7 @@ void HPHPWorkerThread::addPendingTransport(ProxygenTransport& transport) {
 void HPHPWorkerThread::removePendingTransport(ProxygenTransport& transport) {
   if (transport.is_linked()) {
     transport.unlink();
-    m_pendingTransportsCount.fetch_sub(1, std::memory_order_release);
+    m_pendingTransportsCount.fetch_sub(1, std::memory_order_acq_rel);
   }
 }
 
@@ -952,7 +952,7 @@ void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
     RequestPriority priority = getRequestPriority(transport->getUrl());
     VLOG(4) << this << ": enqueing request with path=" << transport->getUrl() <<
       " and priority=" << priority;
-    m_enqueuedCount.fetch_add(1, std::memory_order_release);
+    m_enqueuedCount.fetch_add(1, std::memory_order_acq_rel);
     transport->setEnqueued();
     m_dispatcher.enqueue(std::make_shared<ProxygenJob>(transport), priority);
   } else {
@@ -973,7 +973,7 @@ void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
 }
 
 void ProxygenServer::decrementEnqueuedCount() {
-  auto const cnt = m_enqueuedCount.fetch_sub(1, std::memory_order_acquire);
+  auto const cnt = m_enqueuedCount.fetch_sub(1, std::memory_order_acq_rel);
   if (cnt == 1) {
     auto const evb = m_workers[0]->getEventBase();
     evb->runInEventBaseThread([this] {

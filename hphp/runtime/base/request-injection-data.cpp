@@ -617,7 +617,7 @@ void RequestInjectionData::sendSignal(int signum) {
   const unsigned index = signum / 64;
   const unsigned offset = signum % 64;
   const uint64_t mask = 1ull << offset;
-  m_signalMask[index].fetch_or(mask, std::memory_order_release);
+  m_signalMask[index].fetch_or(mask, std::memory_order_acq_rel);
   setFlag(SignaledFlag);
 }
 

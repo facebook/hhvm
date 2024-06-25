@@ -16,8 +16,6 @@
 
 #include <thrift/compiler/generate/common.h>
 
-#include <boost/algorithm/string/replace.hpp>
-
 #include <regex>
 #include <stdexcept>
 #include <string>
@@ -48,30 +46,6 @@ std::vector<std::string> split_namespace(const std::string& s) {
   }
 
   return output;
-}
-
-void strip_cpp_comments_and_newlines(std::string& s) {
-  // strip c-style comments
-  auto fr = s.find("/*");
-  while (fr != std::string::npos) {
-    auto to = s.find("*/", fr + 2);
-    if (to == std::string::npos) {
-      throw std::runtime_error{"no matching */ for annotation comments"};
-    }
-    s.erase(fr, to - fr + 2);
-    fr = s.find("/*", fr);
-  }
-  // strip cpp-style comments
-  s.replace(
-      s.begin(),
-      s.end(),
-      std::regex_replace(
-          s,
-          std::regex("//.*(?=$|\\n)"), /* simulate multiline regex */
-          ""));
-
-  // strip newlines
-  boost::algorithm::replace_all(s, "\n", " ");
 }
 
 namespace {

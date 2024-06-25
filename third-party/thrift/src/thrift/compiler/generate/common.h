@@ -36,11 +36,6 @@ namespace compiler {
 std::vector<std::string> split_namespace(const std::string& s);
 
 /**
- * strip comments and newlines off cpp annotation text
- */
-void strip_cpp_comments_and_newlines(std::string& s);
-
-/**
  * return all types used in the struct, including types container elements,
  * but not including fields of nested structs
  */

@@ -556,11 +556,7 @@ class py3_mstch_function : public mstch_function {
 
 class py3_mstch_type : public mstch_type {
  public:
-  struct CachedProperties {
-    const std::string cppTemplate;
-    std::string cppType;
-    std::string flatName;
-  };
+  using CachedProperties = apache::thrift::compiler::py3::CachedProperties;
 
   struct data {
     const t_program* program;
@@ -577,7 +573,6 @@ class py3_mstch_type : public mstch_type {
       : mstch_type(type->get_true_type(), ctx, pos),
         prog_(d.program),
         cached_props_(get_cached_props(type, d)) {
-    strip_cpp_comments_and_newlines(cached_props_.cppType);
     register_cached_methods(
         this,
         {
@@ -628,19 +623,19 @@ class py3_mstch_type : public mstch_type {
     return fmt::format("_{}", fmt::join(get_type_py3_namespace(), "_"));
   }
 
-  mstch::node flatName() { return cached_props_.flatName; }
+  mstch::node flatName() { return cached_props_.flatName(); }
 
   mstch::node cppNamespaces() {
     return create_string_array(get_type_cpp2_namespace());
   }
 
-  mstch::node cppTemplate() { return cached_props_.cppTemplate; }
+  mstch::node cppTemplate() { return cached_props_.cppTemplate(); }
 
   mstch::node cythonTemplate() { return to_cython_template(); }
 
   mstch::node isDefaultTemplate() { return is_default_template(); }
 
-  mstch::node cppType() { return cached_props_.cppType; }
+  mstch::node cppType() { return cached_props_.cppType(); }
 
   mstch::node cythonType() { return to_cython_type(); }
 
@@ -679,33 +674,17 @@ class py3_mstch_type : public mstch_type {
         resolved_type_->is_exception();
   }
 
-  const std::string& get_flat_name() const { return cached_props_.flatName; }
+  const std::string& get_flat_name() const { return cached_props_.flatName(); }
 
   void set_flat_name(const std::string& extra) {
-    std::string custom_prefix;
-    if (!is_default_template()) {
-      custom_prefix = to_cython_template() + "__";
-    } else {
-      if (cached_props_.cppType != "") {
-        custom_prefix = to_cython_type() + "__";
-      }
-    }
-    const t_program* typeProgram = type_->program();
-    if (typeProgram && typeProgram != prog_) {
-      custom_prefix += typeProgram->name() + "_";
-    }
-    custom_prefix += extra;
-    cached_props_.flatName = std::move(custom_prefix);
+    cached_props_.set_flat_name(prog_, type_, extra);
   }
 
   bool is_default_template() const {
-    return (!type_->is_container() && cached_props_.cppTemplate == "") ||
-        (type_->is_list() && cached_props_.cppTemplate == "std::vector") ||
-        (type_->is_set() && cached_props_.cppTemplate == "std::set") ||
-        (type_->is_map() && cached_props_.cppTemplate == "std::map");
+    return cached_props_.is_default_template(type_);
   }
 
-  bool has_custom_cpp_type() const { return cached_props_.cppType != ""; }
+  bool has_custom_cpp_type() const { return cached_props_.cppType() != ""; }
 
  protected:
   const t_program* get_type_program() const {
@@ -726,32 +705,10 @@ class py3_mstch_type : public mstch_type {
   }
 
   std::string to_cython_template() const {
-    // handle special built-ins first:
-    if (cached_props_.cppTemplate == "std::vector") {
-      return "vector";
-    } else if (cached_props_.cppTemplate == "std::set") {
-      return "cset";
-    } else if (cached_props_.cppTemplate == "std::map") {
-      return "cmap";
-    }
-    // then default handling:
-    return boost::algorithm::replace_all_copy(
-        cached_props_.cppTemplate, "::", "_");
+    return cached_props_.to_cython_template();
   }
 
-  std::string to_cython_type() const {
-    if (cached_props_.cppType == "") {
-      return "";
-    }
-    std::string cython_type = cached_props_.cppType;
-    boost::algorithm::replace_all(cython_type, "::", "_");
-    boost::algorithm::replace_all(cython_type, "<", "_");
-    boost::algorithm::replace_all(cython_type, ">", "");
-    boost::algorithm::replace_all(cython_type, " ", "");
-    boost::algorithm::replace_all(cython_type, ", ", "_");
-    boost::algorithm::replace_all(cython_type, ",", "_");
-    return cython_type;
-  }
+  std::string to_cython_type() const { return cached_props_.to_cython_type(); }
 
   bool is_integer() const { return type_->is_any_int() || type_->is_byte(); }
 
@@ -773,10 +730,10 @@ class py3_mstch_type : public mstch_type {
 
   bool has_cython_type() const { return !type_->is_container(); }
 
-  bool is_iobuf() const { return cached_props_.cppType == "folly::IOBuf"; }
+  bool is_iobuf() const { return cached_props_.cppType() == "folly::IOBuf"; }
 
   bool is_iobuf_ref() const {
-    return cached_props_.cppType == "std::unique_ptr<folly::IOBuf>";
+    return cached_props_.cppType() == "std::unique_ptr<folly::IOBuf>";
   }
 
   bool is_flexible_binary() const {
@@ -784,8 +741,8 @@ class py3_mstch_type : public mstch_type {
         !is_iobuf_ref() &&
         // We know that folly::fbstring is completely substitutable for
         // std::string and it's a common-enough type to special-case:
-        cached_props_.cppType != "folly::fbstring" &&
-        cached_props_.cppType != "::folly::fbstring";
+        cached_props_.cppType() != "folly::fbstring" &&
+        cached_props_.cppType() != "::folly::fbstring";
   }
 
   bool has_custom_type_behavior() const {

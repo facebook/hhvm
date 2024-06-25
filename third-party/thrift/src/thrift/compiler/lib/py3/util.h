@@ -28,27 +28,12 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
-inline std::vector<std::string> get_py3_namespace(const t_program* prog) {
-  t_program::namespace_config conf;
-  conf.no_top_level_domain = true;
-  conf.no_filename = true;
-  return prog->gen_namespace_or_default("py3", conf);
-}
+std::vector<std::string> get_py3_namespace(const t_program* prog);
 
-inline std::string get_py3_namespace_with_name_and_prefix(
+std::string get_py3_namespace_with_name_and_prefix(
     const t_program* prog,
     const std::string& prefix,
-    const std::string& sep = ".") {
-  std::ostringstream ss;
-  if (!prefix.empty()) {
-    ss << prefix << sep;
-  }
-  for (const auto& name : get_py3_namespace(prog)) {
-    ss << name << sep;
-  }
-  ss << prog->name();
-  return ss.str();
-}
+    const std::string& sep = ".");
 
 inline const std::unordered_set<std::string>& get_python_reserved_names() {
   static const std::unordered_set<std::string> keywords = {
@@ -62,7 +47,38 @@ inline const std::unordered_set<std::string>& get_python_reserved_names() {
   return keywords;
 }
 
+/**
+ * strip comments and newlines off cpp annotation text
+ */
+void strip_cpp_comments_and_newlines(std::string& s);
+
 namespace py3 {
+
+class CachedProperties {
+ public:
+  CachedProperties(
+      std::string _template, std::string type, std::string flatName);
+
+  const std::string& cppTemplate() const { return cppTemplate_; }
+  const std::string& cppType() const { return cppType_; }
+  const std::string& flatName() const { return flatName_; }
+
+  std::string to_cython_template() const;
+
+  std::string to_cython_type() const;
+
+  bool is_default_template(const apache::thrift::compiler::t_type* type) const;
+
+  void set_flat_name(
+      const apache::thrift::compiler::t_program* thisProg,
+      const apache::thrift::compiler::t_type* type,
+      const std::string& extra);
+
+ private:
+  const std::string cppTemplate_;
+  std::string cppType_;
+  std::string flatName_;
+};
 
 template <class T>
 std::string get_py3_name(const T& node) {

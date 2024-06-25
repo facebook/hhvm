@@ -111,6 +111,12 @@ struct watchman_pending_fs : watchman::PendingChange {
 /**
  * Holds a linked list of watchman_pending_fs instances and a trie that
  * efficiently prunes redundant changes.
+ *
+ * PendingChanges is only intended to be accessed by one thread at a time.
+ * If you would like to use a single pending changes object accross
+ * threads, you should use PendingCollection which puts a lock around
+ * accesses to the unerlying PendingChanges object. If you only intend to
+ * use the object on one thread, then you can use PendingChanges directly.
  */
 class PendingChanges {
  public:

@@ -1,2 +1,6 @@
 ERROR: File "reified.php", line 7, characters 24-24:
 `nameof` cannot be used with a generic type (Parsing[1002])
+ERROR: File "reified.php", line 12, characters 26-27:
+`nameof` cannot be used with a generic type (Parsing[1002])
+ERROR: File "reified.php", line 15, characters 26-27:
+`nameof` cannot be used with a generic type (Parsing[1002])

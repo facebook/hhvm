@@ -2567,32 +2567,26 @@ fn p_nameof<'a>(
     p: &'a NameofExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
 ) -> Result<Expr_> {
-    let basic_error = |env| Error::ParsingError {
-        message: String::from("`nameof` can only be used with a class"),
-        pos: p_pos(&p.target, env),
-    };
-    match &p.target.children {
-        Token(_) | SimpleTypeSpecifier(_) | QualifiedName(_) => {
-            let target = p_expr(&p.target, env)?;
-            match &target.2 {
-                Expr_::Id(id) => {
-                    if env.get_reification(id.name()).is_some() {
-                        Err(Error::ParsingError {
-                            message: String::from("`nameof` cannot be used with a generic type"),
-                            pos: p_pos(&p.target, env),
-                        })
-                    } else {
-                        Ok(Expr_::mk_nameof(ast::ClassId(
-                            (),
-                            target.1.clone(),
-                            ast::ClassId_::CIexpr(target),
-                        )))
-                    }
-                }
-                _ => Err(basic_error(env)),
+    let target = p_expr(&p.target, env)?;
+    match &target.2 {
+        Expr_::Id(id) => {
+            if env.get_reification(id.name()).is_some() {
+                raise_parsing_error(
+                    &p.target,
+                    env,
+                    "`nameof` cannot be used with a generic type",
+                );
             }
+            Ok(Expr_::mk_nameof(ast::ClassId(
+                (),
+                target.1.clone(),
+                ast::ClassId_::CIexpr(target),
+            )))
         }
-        _ => Err(basic_error(env)),
+        _ => Err(Error::ParsingError {
+            message: String::from("`nameof` can only be used with a class"),
+            pos: p_pos(&p.target, env),
+        }),
     }
 }
 

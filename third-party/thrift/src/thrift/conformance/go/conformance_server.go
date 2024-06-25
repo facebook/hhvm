@@ -132,7 +132,7 @@ func main() {
 	// Startup thrift server
 	handler := &dataConformanceServiceHandler{registry}
 	proc := conformance.NewConformanceServiceProcessor(handler)
-	ts, err := newServer(
+	ts, addr, err := newServer(
 		proc,
 		// Ports must be dynamically allocated to prevent any conflicts.
 		// Allocating a free port is usually done by setting the port number as zero.
@@ -142,7 +142,7 @@ func main() {
 	if err != nil {
 		glog.Fatalf("failed to start server: %v", err)
 	}
-	fmt.Println(ts.Addr().(*net.TCPAddr).Port)
+	fmt.Println(addr.(*net.TCPAddr).Port)
 	go func() {
 		err := ts.Serve()
 		if err != nil {
@@ -154,12 +154,12 @@ func main() {
 	os.Exit(0)
 }
 
-func newServer(processor thrift.ProcessorContext, addr string) (thrift.Server, error) {
+func newServer(processor thrift.ProcessorContext, addr string) (thrift.Server, net.Addr, error) {
 	socket, err := thrift.NewServerSocket(addr)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return thrift.NewSimpleServer(processor, socket, thrift.TransportIDHeader), nil
+	return thrift.NewSimpleServer(processor, socket, thrift.TransportIDHeader), socket.Addr(), nil
 }
 
 type dataConformanceServiceHandler struct {

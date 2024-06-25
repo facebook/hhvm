@@ -41,7 +41,7 @@ func main() {
 
 	handler := &rpcConformanceServiceHandler{}
 	proc := rpc.NewRPCConformanceServiceProcessor(handler)
-	ts, err := newServer(
+	ts, addr, err := newServer(
 		proc,
 		"[::]:0",
 	)
@@ -49,7 +49,7 @@ func main() {
 		glog.Fatalf("failed to start server: %v", err)
 	}
 
-	fmt.Println(ts.Addr().(*net.TCPAddr).Port)
+	fmt.Println(addr.(*net.TCPAddr).Port)
 	go func() {
 		err := ts.Serve()
 		if err != nil {
@@ -61,12 +61,12 @@ func main() {
 	os.Exit(0)
 }
 
-func newServer(processor thrift.ProcessorContext, addr string) (thrift.Server, error) {
+func newServer(processor thrift.ProcessorContext, addr string) (thrift.Server, net.Addr, error) {
 	socket, err := thrift.NewServerSocket(addr)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return thrift.NewSimpleServer(processor, socket, thrift.TransportIDHeader), nil
+	return thrift.NewSimpleServer(processor, socket, thrift.TransportIDHeader), socket.Addr(), nil
 }
 
 type rpcConformanceServiceHandler struct {

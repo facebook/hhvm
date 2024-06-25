@@ -803,8 +803,9 @@ module Primary : sig
         pos: Pos.t;
         ty_name: string Lazy.t;
       }
-    | Redundant_covariant of {
+    | Redundant_generic of {
         pos: Pos.t;
+        variance: [ `Co | `Contra ];
         msg: string;
         suggest: string;
       }

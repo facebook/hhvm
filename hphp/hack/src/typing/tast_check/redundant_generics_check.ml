@@ -28,6 +28,30 @@ let ft_redundant_generics env tparams ty =
       (SMap.empty, SMap.empty)
       ty
   in
+  (* Find the set of generics that appear as part of the type HH\EnumClass\Label *)
+  let label_generics =
+    let generics_finder =
+      object
+        inherit [SSet.t] Type_visitor.decl_type_visitor
+
+        method! on_tgeneric acc _ n _ = SSet.add n acc
+      end
+    in
+    let finder =
+      object
+        inherit [SSet.t] Type_visitor.decl_type_visitor as parent
+
+        method! on_type acc ty =
+          match get_node ty with
+          | Tapply ((_, name), [_; ty])
+            when String.equal name Naming_special_names.Classes.cEnumClassLabel
+            ->
+            generics_finder#on_type acc ty
+          | _ -> parent#on_type acc ty
+      end
+    in
+    finder#on_type SSet.empty ty
+  in
   List.iter tparams ~f:(fun t ->
       let (pos, name) = t.tp_name in
       (* It's only redundant if it's erased and inferred *)
@@ -67,9 +91,10 @@ let ft_redundant_generics env tparams ty =
                 ~env:(Tast_env.tast_env_as_typing_env env)
                 Typing_error.(
                   primary
-                  @@ Primary.Redundant_covariant
+                  @@ Primary.Redundant_generic
                        {
                          pos = Pos_or_decl.unsafe_to_raw_pos pos;
+                         variance = `Co;
                          msg = bounds_message;
                          suggest = "nothing";
                        })
@@ -78,13 +103,78 @@ let ft_redundant_generics env tparams ty =
                 ~env:(Tast_env.tast_env_as_typing_env env)
                 Typing_error.(
                   primary
-                  @@ Primary.Redundant_covariant
+                  @@ Primary.Redundant_generic
                        {
                          pos = Pos_or_decl.unsafe_to_raw_pos pos;
+                         variance = `Co;
                          msg = bounds_message;
                          suggest = Tast_env.print_decl_ty env t;
                        })
             | _ -> ()
+          end
+        (* Only report an error if the generic appears within a enum class label *)
+        | (None, Some _positions) when SSet.mem name label_generics ->
+          let bounds_message =
+            if List.is_empty super_bounds then
+              ""
+            else
+              " with useless `super` bound"
+          in
+          (* If there is more than one `as` bound, we can't replace,
+           * because we don't support explicit intersection types
+           *)
+          begin
+            match as_bounds with
+            | [(_, t)] ->
+              Typing_error_utils.add_typing_error
+                ~env:(Tast_env.tast_env_as_typing_env env)
+                Typing_error.(
+                  primary
+                  @@ Primary.Redundant_generic
+                       {
+                         pos = Pos_or_decl.unsafe_to_raw_pos pos;
+                         variance = `Contra;
+                         msg = bounds_message;
+                         suggest = Tast_env.print_decl_ty env t;
+                       })
+            | _ ->
+              let ts = List.map as_bounds ~f:snd in
+              let t = mk (Reason.none, Tintersection ts) in
+              (* Need to localize in order to simplify *)
+              let (_, locl_ty) =
+                Tast_env.localize_no_subst ~ignore_errors:true env t
+              in
+              (* Multiple bounds can be expressed as an intersection,
+               * but it might be possible to simplify this *)
+              let (_, locl_ty) = Tast_env.simplify_intersections env locl_ty in
+              begin
+                match get_node locl_ty with
+                (* We can't denote this in source code so just suggest mixed *)
+                | Tintersection _ ->
+                  Typing_error_utils.add_typing_error
+                    ~env:(Tast_env.tast_env_as_typing_env env)
+                    Typing_error.(
+                      primary
+                      @@ Primary.Redundant_generic
+                           {
+                             pos = Pos_or_decl.unsafe_to_raw_pos pos;
+                             variance = `Contra;
+                             msg = bounds_message;
+                             suggest = "mixed";
+                           })
+                | _ ->
+                  Typing_error_utils.add_typing_error
+                    ~env:(Tast_env.tast_env_as_typing_env env)
+                    Typing_error.(
+                      primary
+                      @@ Primary.Redundant_generic
+                           {
+                             pos = Pos_or_decl.unsafe_to_raw_pos pos;
+                             variance = `Contra;
+                             msg = bounds_message;
+                             suggest = Tast_env.print_ty env locl_ty;
+                           })
+              end
           end
         | (None, Some _positions) -> ()
         | (None, None) -> ())

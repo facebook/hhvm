@@ -93,7 +93,18 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
 
     method on_tvar acc _ _ = acc
 
-    method on_tfun acc _ { ft_params; ft_tparams; ft_ret; _ } =
+    method on_tfun
+        acc
+        _
+        {
+          ft_params;
+          ft_tparams;
+          ft_ret;
+          ft_flags = _;
+          ft_cross_package = _;
+          ft_implicit_params;
+          ft_where_constraints;
+        } =
       let acc =
         List.fold_left
           ~f:this#on_type
@@ -107,6 +118,20 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
         List.fold_left
           tparams
           ~f:(fun acc tp -> List.fold ~f:this#on_type ~init:acc tp)
+          ~init:acc
+      in
+      let acc =
+        match ft_implicit_params.capability with
+        | CapDefaults _ -> acc
+        | CapTy ty -> this#on_type acc ty
+      in
+      let acc =
+        List.fold_left
+          ft_where_constraints
+          ~f:(fun acc (ty1, _ck, ty2) ->
+            let acc = this#on_type acc ty1 in
+            let acc = this#on_type acc ty2 in
+            acc)
           ~init:acc
       in
       this#on_type acc ft_ret

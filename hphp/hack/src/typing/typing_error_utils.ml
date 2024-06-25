@@ -3199,11 +3199,18 @@ end = struct
       [],
       User_error_flags.empty )
 
-  let redundant_covariant pos msg suggest =
+  let redundant_generic pos variance msg suggest =
+    let variance_msg =
+      match variance with
+      | `Co -> "covariant (output)"
+      | `Contra -> "contravariant (input)"
+    in
     ( Error_code.RedundantGeneric,
       lazy
         ( pos,
-          "This generic parameter is redundant because it only appears in a covariant (output) position"
+          Printf.sprintf
+            "This generic parameter is redundant because it only appears in a %s position"
+            variance_msg
           ^ msg
           ^ ". Consider replacing uses of generic parameter with "
           ^ Markdown_lite.md_codify suggest
@@ -5212,8 +5219,8 @@ end = struct
     | Unserializable_type { pos; message } -> unserializable_type pos message
     | Invalid_arraykey_constraint { pos; ty_name } ->
       invalid_arraykey_constraint pos @@ Lazy.force ty_name
-    | Redundant_covariant { pos; msg; suggest } ->
-      redundant_covariant pos msg suggest
+    | Redundant_generic { pos; variance; msg; suggest } ->
+      redundant_generic pos variance msg suggest
     | Meth_caller_trait { pos; trait_name } -> meth_caller_trait pos trait_name
     | Duplicate_interface { pos; name; others } ->
       duplicate_interface pos name others

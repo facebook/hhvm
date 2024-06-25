@@ -1,10 +1,22 @@
-File "tc_in_enum_class.php", line 98, characters 5-15:
-  ~arraykey
-File "tc_in_enum_class.php", line 105, characters 5-15:
-  ~nothing
 ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
 Invalid argument (Typing[4110])
   File "tc_in_enum_class.php", line 47, characters 23-25:
   Expected `int`
   File "tc_in_enum_class.php", line 91, characters 29-44:
   But got `<expr#8>::T::TSource as IAntParent::T::TSource`
+ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
+Invalid argument (Typing[4110])
+  File "tc_in_enum_class.php", line 90, characters 5-40:
+  Expected `~HH\MemberOf<<expr#8>::T, _>`
+  File "tc_in_enum_class.php", line 47, characters 38-40:
+  But got `HH\MemberOf<ParentAccessors, ~IAntGetter<int, arraykey>>`
+ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
+Invalid argument (Typing[4323])
+  File "tc_in_enum_class.php", line 89, characters 40-46:
+  `TGetter` is a constrained type parameter
+  File "tc_in_enum_class.php", line 89, characters 51-77:
+  This type constraint is violated
+  File "tc_in_enum_class.php", line 89, characters 51-77:
+  Expected `IAntGetter<_, _>`
+  File "tc_in_enum_class.php", line 47, characters 12-36:
+  But got `dynamic`

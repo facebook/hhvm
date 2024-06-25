@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3f73b9c46db7783aa814db8de69cb0d3>>
+// @generated SignedSource<<782d3dc8821b811507054cbd42faf7b0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -606,6 +606,7 @@ pub enum Ureason<'a> {
     URstrInterp,
     #[rust_to_ocaml(name = "URdynamic_prop")]
     URdynamicProp,
+    URlabel,
 }
 impl<'a> TrivialDrop for Ureason<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Ureason<'arena>);

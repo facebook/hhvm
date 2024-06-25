@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ac5320c1cb3d93915ecd9dbdf73d0967>>
+// @generated SignedSource<<db871cfc03ca5f2503dcfe5ebdbc6a1a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -572,4 +572,5 @@ pub enum Ureason {
     URstrInterp,
     #[rust_to_ocaml(name = "URdynamic_prop")]
     URdynamicProp,
+    URlabel,
 }

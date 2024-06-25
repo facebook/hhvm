@@ -95,14 +95,14 @@ abstract class PPPAjoux {
   public static function foo(IAntParent $ant): arraykey {
     $r = $ant->get(#Foo);
     //              ^ hover-at-caret
-    hh_show($r);
+    hh_expect<arraykey>($r);
     return $r;
   }
   public static function bar(IAntParent $ant): arraykey {
     // expect an error here
     $r = $ant->get(#Bar);
     //              ^ hover-at-caret
-    hh_show($r);
+    hh_expect<nothing>($r);
     return $r;
   }
 }

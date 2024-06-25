@@ -1104,8 +1104,14 @@ let autocomplete_enum_class_label_call env f args =
     let ty_args = zip_truncate args ft_params in
     List.iter
       ~f:(fun (arg, arg_ty) ->
+        (* If the argument was wrapped in a hole, remove it *)
+        let arg =
+          match arg with
+          | (_, (_, _, Aast.Hole (e, _, _, _))) -> e
+          | _ -> snd arg
+        in
         match (arg, get_node (expand_and_strip_dynamic env arg_ty.fp_type)) with
-        | ( (_, (_, p, Aast.EnumClassLabel (None, n))),
+        | ( (_, p, Aast.EnumClassLabel (None, n)),
             Typing_defs.Tnewtype (ty_name, [enum_ty; member_ty], _) )
           when is_enum_class_label_ty_name ty_name && is_auto_complete n ->
           suggest_members_from_ty env enum_ty (p, n) (Some member_ty)

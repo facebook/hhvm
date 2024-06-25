@@ -2211,6 +2211,7 @@ type ureason =
   | URstr_concat
   | URstr_interp
   | URdynamic_prop
+  | URlabel
 [@@deriving show]
 
 let index_array = URindex "array"
@@ -2270,6 +2271,8 @@ let string_of_ureason = function
   | URstr_interp ->
     "Only string and int values can be used in string interpolation"
   | URdynamic_prop -> "Dynamic access of property"
+  | URlabel ->
+    "This label is not a valid reference to a member of the given enum class"
 
 let compare : type phase. phase t_ -> phase t_ -> int =
  fun r1 r2 ->

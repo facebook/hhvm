@@ -72,7 +72,9 @@ ERROR: File "user_attributes_params.php", line 29, characters 19-28:
 Was expecting a return type hint (Typing[4030])
 ERROR: File "user_attributes_params.php", line 32, characters 19-27:
 Was expecting a return type hint (Typing[4030])
-ERROR: File "user_attributes_params.php", line 10, characters 27-33:
-Enum class label/member mismatch (Typing[4110])
-  File "user_attributes_params.php", line 10, characters 27-33:
-  Unexpected enum class label/member: `Label2`
+ERROR: File "user_attributes_params.php", line 10, characters 9-24:
+This label is not a valid reference to a member of the given enum class (Typing[4110])
+  File "user_attributes_params.php", line 10, characters 18-24:
+  Expected a class with a constant `Label1`
+  File "user_attributes_params.php", line 10, characters 9-17:
+  But got `SomeClass`

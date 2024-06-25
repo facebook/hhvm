@@ -165,14 +165,6 @@ module Primary = struct
           trail: Pos_or_decl.t list;
         }
       | Enum_type_typedef_nonnull of Pos.t
-      | Enum_class_label_unknown of {
-          pos: Pos.t;
-          label_name: string;
-          enum_name: string;
-          decl_pos: Pos_or_decl.t;
-          most_similar: (string * Pos_or_decl.t) option;
-          ty_pos: Pos_or_decl.t option;
-        }
       | Enum_class_label_as_expr of Pos.t
       | Enum_class_label_member_mismatch of {
           pos: Pos.t;
@@ -1801,6 +1793,11 @@ and Secondary : sig
     | Violated_refinement_constraint of {
         cstr: [ `As | `Super ] * Pos_or_decl.t;
       }
+    | Unknown_label of {
+        enum_name: string;
+        decl_pos: Pos_or_decl.t;
+        most_similar: (string * Pos_or_decl.t) option;
+      }
   [@@deriving show]
 end = struct
   type t =
@@ -2095,6 +2092,11 @@ end = struct
     | Inexact_tconst_access of Pos_or_decl.t * (Pos_or_decl.t * string)
     | Violated_refinement_constraint of {
         cstr: [ `As | `Super ] * Pos_or_decl.t;
+      }
+    | Unknown_label of {
+        enum_name: string;
+        decl_pos: Pos_or_decl.t;
+        most_similar: (string * Pos_or_decl.t) option;
       }
   [@@deriving show]
 end

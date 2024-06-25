@@ -46,7 +46,6 @@ module MakeType = Typing_make_type
 module Cls = Folded_class
 module Fake = Typing_fake_members
 module ExpectedTy = Typing_helpers.ExpectedTy
-module ITySet = Internal_type_set
 module Prov = Typing_helpers.Prov
 
 type newable_class_info =
@@ -2230,107 +2229,6 @@ let key_exists env tparamet pos shape field =
         Typing_shapes.refine_key_exists field_name pos env shape_ty
       else
         Typing_shapes.refine_not_key_exists field_name pos env shape_ty)
-
-module EnumClassLabelOps = struct
-  type result =
-    | Success of Tast.expr * locl_ty
-    | ClassNotFound
-    | LabelNotFound of Tast.expr * locl_ty
-    | Skip
-
-  (** Given an [enum_id] and a [label_name], tries to see if
-      [enum_id] has a constant named [label_name].
-      In such case, creates the expected typed expression.
-
-      If [label_name] is not there, it will register an error.
-
-      [ctor] is either `MemberOf` or `Label`
-      [full] describes if the original expression was a full
-      label, as in E#A, or a short version, as in #A
-  *)
-  let expand
-      pos env ~full ~ctor enum_id label_name (ty_pos : Pos_or_decl.t option) =
-    let (_, enum_name) = enum_id in
-    let cls = Env.get_class env enum_name in
-    match cls with
-    | Decl_entry.Found cls ->
-      (match Env.get_const env cls label_name with
-      | Some const_def ->
-        let dty = const_def.cc_type in
-        (* the enum constant has type MemberOf<X, Y>. If we are
-         * processing a Label argument, we just switch MemberOf for
-         * Label.
-         *)
-        let dty =
-          match deref dty with
-          | (r, Tapply ((p, _), args)) -> mk (r, Tapply ((p, ctor), args))
-          | _ -> dty
-        in
-        let ety_env =
-          {
-            empty_expand_env with
-            this_ty =
-              MakeType.class_type (Reason.witness (fst enum_id)) enum_name [];
-          }
-        in
-        let ((env, ty_err_opt), lty) =
-          if
-            TCO.experimental_feature_enabled
-              (Env.get_tcopt env)
-              TCO.experimental_sound_enum_class_type_const
-          then
-            Phase.localize env ~ety_env dty
-          else
-            Phase.localize_no_subst env ~ignore_errors:true dty
-        in
-
-        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-        let hi = lty in
-        let qualifier =
-          if full then
-            Some enum_id
-          else
-            None
-        in
-        let te = (hi, pos, Aast.EnumClassLabel (qualifier, label_name)) in
-        (env, Success (te, lty))
-      | None ->
-        let consts =
-          Cls.consts cls
-          |> List.filter ~f:(fun (name, _) ->
-                 not (String.equal name SN.Members.mClass))
-        in
-        let most_similar =
-          match Env.most_similar label_name consts fst with
-          | Some (name, const) ->
-            Some
-              ( (if full then
-                  Render.strip_ns enum_name ^ "#" ^ name
-                else
-                  "#" ^ name),
-                const.cc_pos )
-          | None -> None
-        in
-        Typing_error_utils.add_typing_error
-          ~env
-          Typing_error.(
-            enum
-            @@ Primary.Enum.Enum_class_label_unknown
-                 {
-                   pos;
-                   label_name;
-                   enum_name;
-                   decl_pos = Cls.pos cls;
-                   most_similar;
-                   ty_pos;
-                 });
-        let (env, ty) = Env.fresh_type_error env pos in
-        let te = (ty, pos, Aast.EnumClassLabel (None, label_name)) in
-        (env, LabelNotFound (te, ty)))
-    | Decl_entry.NotYetAvailable
-    | Decl_entry.DoesNotExist ->
-      (env, ClassNotFound)
-end
 
 module Valkind = struct
   type t =
@@ -4691,71 +4589,63 @@ end = struct
     | ET_Splice splice ->
       Env.with_outside_expr_tree env (fun env dsl_name ->
           et_splice env dsl_name p splice)
-    | EnumClassLabel (None, s) ->
-      let (env, expect_label, lty_opt) =
+    | EnumClassLabel (None, name) ->
+      let label_ty = mk (Reason.witness p, Tlabel name) in
+      let env = check_expected_ty "Label" env label_ty expected in
+      let ty =
+        (* If there is an expected type, use that as the type recorded in the
+           TAST*)
         match expected with
-        | Some ety ->
-          let (env, lty) = Env.expand_type env ety.ExpectedTy.ty in
-          let expect_label =
-            match get_node (TUtils.strip_dynamic env lty) with
-            | Tnewtype (name, _, _) ->
-              String.equal SN.Classes.cEnumClassLabel name
-            | _ -> false
-          in
-          (env, expect_label, Some lty)
-        | None -> (env, false, None)
+        | None -> label_ty
+        | Some ExpectedTy.{ ty; _ } -> mk (Reason.witness p, get_node ty)
       in
-      let () =
-        if expect_label then
-          Typing_error_utils.add_typing_error
-            ~env
-            Typing_error.(enum @@ Primary.Enum.Enum_class_label_as_expr p)
-        else
-          let expected_ty_msg_opt =
-            Option.map lty_opt ~f:(fun lty ->
-                let ty_str = lazy (Typing_print.error env lty) in
-                let r = get_reason lty in
-                Lazy.map ty_str ~f:(fun ty_str ->
-                    Reason.to_string (Format.sprintf "Expected %s" ty_str) r))
-          in
-          Typing_error_utils.add_typing_error
-            ~env
-            Typing_error.(
-              enum
-              @@ Primary.Enum.Enum_class_label_member_mismatch
-                   { pos = p; label = s; expected_ty_msg_opt })
+      make_result env p (Aast.EnumClassLabel (None, name)) ty
+    | EnumClassLabel (Some enum_name, name) ->
+      let ty_cls =
+        MakeType.class_type (Reason.witness (fst enum_name)) (snd enum_name) []
       in
-      let (env, ty) = Env.fresh_type_error env p in
-      make_result env p (Aast.EnumClassLabel (None, s)) ty
-    | EnumClassLabel ((Some cname as e), name) ->
-      let (env, res) =
-        EnumClassLabelOps.expand
+      let label_pos =
+        let (_, end_column) = Pos.end_line_column p in
+        p |> Pos.set_col_start (end_column - (String.length name + 1))
+      in
+      let env = Env.open_tyvars env p in
+      let (env, ty_in) = Env.fresh_type env p in
+      let (env, ty_out) = Env.fresh_type env p in
+      let has_const =
+        ConstraintType
+          (mk_constraint_type
+             ( Reason.witness label_pos,
+               Thas_const
+                 {
+                   name;
+                   ty =
+                     mk
+                       ( Reason.witness p,
+                         Tnewtype (SN.Classes.cMemberOf, [ty_in; ty_out], ty_out)
+                       );
+                 } ))
+      in
+      let env = Env.set_tyvar_variance_i env has_const in
+      let (env, err) =
+        Type.sub_type_i
           p
+          Reason.URlabel
           env
-          ~full:true
-          ~ctor:SN.Classes.cEnumClassLabel
-          cname
-          name
-          None
+          (LoclType ty_cls)
+          has_const
+          Typing_error.Callback.unify_error
       in
-      let error () =
-        let (env, ty) = Env.fresh_type_error env p in
-        make_result env p (Aast.EnumClassLabel (e, name)) ty
+      let (env, ty_err) = Typing_solver.close_tyvars_and_solve env in
+      let errs = Option.merge err ty_err ~f:Typing_error.both in
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) errs;
+      let r = Reason.witness p in
+      let ty =
+        mk
+          ( r,
+            Tnewtype
+              (SN.Classes.cEnumClassLabel, [ty_in; ty_out], MakeType.mixed r) )
       in
-      (match res with
-      | EnumClassLabelOps.Success ((_, _, texpr), lty) ->
-        make_result env p texpr lty
-      | EnumClassLabelOps.ClassNotFound ->
-        (* Error registered in nast_check/unbound_name_check *)
-        error ()
-      | EnumClassLabelOps.LabelNotFound _ ->
-        (* Error registered in EnumClassLabelOps.expand *)
-        error ()
-      | EnumClassLabelOps.Skip ->
-        Typing_error_utils.add_typing_error
-          ~env
-          Typing_error.(enum @@ Primary.Enum.Enum_class_label_as_expr p);
-        error ())
+      make_result env p (Aast.EnumClassLabel (Some enum_name, name)) ty
     | Package ((p, _) as id) ->
       make_result env p (Aast.Package id) (MakeType.bool (Reason.witness p))
     | Nameof (_, p, CI sid) when Env.is_typedef env (snd sid) ->
@@ -6225,20 +6115,11 @@ end = struct
               ~combine_ty_errs:Typing_error.multiple_opt
               ~f:(fun env (pk, elt) ->
                 let (env, te, e_ty) =
-                  match elt with
-                  (* Special case for unqualified enum class label: treat as dynamic *)
-                  | (_, p, EnumClassLabel (None, s)) ->
-                    make_result
-                      env
-                      p
-                      (Aast.EnumClassLabel (None, s))
-                      (MakeType.dynamic (Reason.witness p))
-                  | _ ->
-                    expr
-                      ~expected:(Some expected_arg_ty)
-                      ~ctxt:Context.default
-                      env
-                      elt
+                  expr
+                    ~expected:(Some expected_arg_ty)
+                    ~ctxt:Context.default
+                    env
+                    elt
                 in
                 let env =
                   match pk with
@@ -6468,59 +6349,6 @@ end = struct
               | Some (idx, param) -> (idx, (true, Some param, paraml))
               | None -> (-1, (true, None, paraml)))
           in
-          let rec compute_enum_name env lty =
-            match get_node lty with
-            | Tclass ((_, enum_name), _, _) when Env.is_enum_class env enum_name
-              ->
-              (env, Some enum_name)
-            | Tgeneric (name, _) ->
-              let (env, upper_bounds) =
-                TUtils.collect_enum_class_upper_bounds env name
-              in
-              begin
-                match upper_bounds with
-                | None -> (env, None)
-                | Some upper_bound -> begin
-                  (* To avoid ambiguity, we only support the case where
-                   * there is a single upper bound that is an EnumClass.
-                   * We might want to relax that later (e.g. with  the
-                   * support for intersections).
-                   *)
-                  match get_node upper_bound with
-                  | Tclass ((_, name), _, _) when Env.is_enum_class env name ->
-                    (env, Some name)
-                  | _ -> (env, None)
-                end
-              end
-            | Tvar var ->
-              (* minimal support to only deal with Tvar when:
-               * - it is the valueOf from BuiltinEnumClass.
-               *   In this case, we know the tvar as a single lowerbound,
-               *   `this` which must be an enum class.
-               * - it is a generic "TX::T" from a where clause. We try
-               *   to look at an upper bound, if it is an enum class, or fail.
-               *
-               * We could relax this in the future but
-               * I want to avoid complex constraints for now.
-               *)
-              let lower_bounds = Env.get_tyvar_lower_bounds env var in
-              if ITySet.cardinal lower_bounds <> 1 then
-                (env, None)
-              else (
-                match ITySet.choose lower_bounds with
-                | ConstraintType _ -> (env, None)
-                | LoclType lower ->
-                  (match get_node lower with
-                  | Tclass ((_, enum_name), _, _)
-                    when Env.is_enum_class env enum_name ->
-                    (env, Some enum_name)
-                  | Tgeneric _ -> compute_enum_name env lower
-                  | _ -> (env, None))
-              )
-            | _ ->
-              (* Already reported, see Typing_type_wellformedness *)
-              (env, None)
-          in
           let check_arg
               env
               param_kind
@@ -6531,85 +6359,43 @@ end = struct
               ~is_variadic =
             match opt_param with
             | Some param ->
-              (* First check if the parameter is a HH\EnumClass\Label.  *)
-              let (env, label_type) =
-                let ety = param.fp_type in
-                let (env, ety) = Env.expand_type env ety in
-                let is_label env ety =
-                  match get_node (TUtils.strip_dynamic env ety) with
-                  | Tnewtype (name, [ty_enum; _ty_interface], _) ->
-                    if String.equal SN.Classes.cEnumClassLabel name then
-                      Some (name, ty_enum)
-                    else
-                      None
-                  | _ -> None
-                in
-                let is_maybe_label =
-                  match get_node (TUtils.strip_dynamic env ety) with
-                  | Toption ety -> is_label env ety
-                  | _ -> is_label env ety
-                in
-                let () =
-                  Typing_class_pointers.check_string_coercion_point
-                    env
-                    ~flag:"param"
-                    pos
-                    arg
-                    ety
-                in
-                match (arg, is_maybe_label) with
-                | (Aast.EnumClassLabel (None, label_name), Some (name, ty_enum))
-                  ->
-                  let ctor = name in
-                  (match compute_enum_name env ty_enum with
-                  | (env, None) -> (env, EnumClassLabelOps.ClassNotFound)
-                  | (env, Some enum_name) ->
-                    let ty_pos = Typing_defs.get_pos ty_enum in
-                    EnumClassLabelOps.expand
-                      pos
-                      env
-                      ~full:false
-                      ~ctor
-                      (Pos.none, enum_name)
-                      label_name
-                      (Some ty_pos))
-                | (Aast.EnumClassLabel (Some _, _), _) ->
-                  (* Full info is here, use normal inference *)
-                  (env, EnumClassLabelOps.Skip)
-                | (_, _) -> (env, EnumClassLabelOps.Skip)
+              let ety = param.fp_type in
+              let (env, ety) = Env.expand_type env ety in
+              let () =
+                Typing_class_pointers.check_string_coercion_point
+                  env
+                  ~flag:"param"
+                  pos
+                  arg
+                  ety
               in
               let (env, te, ty) =
-                match label_type with
-                | EnumClassLabelOps.Success (te, ty)
-                | EnumClassLabelOps.LabelNotFound (te, ty) ->
-                  (env, te, ty)
-                | _ ->
-                  (* Expected type has a like type for checking arguments
-                   * to supportdyn functions
-                   *)
-                  let (env, pess_type) =
-                    match dynamic_func with
-                    | Some Supportdyn_function ->
-                      Typing_array_access.pessimise_type env param.fp_type
-                    | _ -> (env, param.fp_type)
-                  in
-                  let expected =
-                    ExpectedTy.make_and_allow_coercion_opt
-                      env
-                      pos
-                      Reason.URparam
-                      pess_type
-                  in
-                  expr
-                    ~expected
-                    ~ctxt:
-                      Context.
-                        {
-                          default with
-                          accept_using_var = get_fp_accept_disposable param;
-                        }
+                (* Expected type has a like type for checking arguments
+                 * to supportdyn functions
+                 *)
+                let (env, pess_type) =
+                  match dynamic_func with
+                  | Some Supportdyn_function ->
+                    Typing_array_access.pessimise_type env param.fp_type
+                  | _ -> (env, param.fp_type)
+                in
+                let expected =
+                  ExpectedTy.make_and_allow_coercion_opt
                     env
-                    e
+                    pos
+                    Reason.URparam
+                    pess_type
+                in
+                expr
+                  ~expected
+                  ~ctxt:
+                    Context.
+                      {
+                        default with
+                        accept_using_var = get_fp_accept_disposable param;
+                      }
+                  env
+                  e
               in
               (* If we were using our function subtyping code to handle calls
                  we would have a contravariant function arg projection so

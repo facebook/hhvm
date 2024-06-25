@@ -713,58 +713,6 @@ end = struct
         [],
         User_error_flags.empty )
 
-    let enum_class_label_unknown
-        pos label_name enum_name decl_pos most_similar ty_pos =
-      let enum_name = Markdown_lite.md_codify (Render.strip_ns enum_name) in
-
-      let claim =
-        lazy
-          ( pos,
-            Printf.sprintf
-              "Enum class %s does not contain a label named %s."
-              enum_name
-              (Markdown_lite.md_codify label_name) )
-      in
-
-      let decl_reason =
-        [(decl_pos, Printf.sprintf "%s is defined here" enum_name)]
-      in
-      let (similar_reason, quickfixes) =
-        match most_similar with
-        | Some (similar_name, similar_pos) ->
-          ( [
-              ( similar_pos,
-                Printf.sprintf
-                  "Did you mean %s?"
-                  (Markdown_lite.md_codify similar_name) );
-            ],
-            [
-              Quickfix.make_eager_default_hint_style
-                ~title:("Change to " ^ Markdown_lite.md_codify similar_name)
-                ~new_text:similar_name
-                pos;
-            ] )
-        | None -> ([], [])
-      in
-      let ty_reason =
-        match ty_pos with
-        | Some ty_pos ->
-          [
-            ( ty_pos,
-              Printf.sprintf
-                "This is why I expected an enum class label from %s."
-                enum_name );
-          ]
-        | None -> []
-      in
-
-      let reason = lazy (decl_reason @ similar_reason @ ty_reason) in
-      ( Error_code.EnumClassLabelUnknown,
-        claim,
-        reason,
-        quickfixes,
-        User_error_flags.empty )
-
     let enum_class_label_as_expr pos =
       let claim =
         lazy
@@ -853,15 +801,6 @@ end = struct
           expected_pos
           actual
           pos
-      | Enum_class_label_unknown
-          { pos; label_name; enum_name; decl_pos; most_similar; ty_pos } ->
-        enum_class_label_unknown
-          pos
-          label_name
-          enum_name
-          decl_pos
-          most_similar
-          ty_pos
       | Enum_class_label_as_expr pos -> enum_class_label_as_expr pos
       | Enum_class_label_member_mismatch { pos; label; expected_ty_msg_opt } ->
         enum_class_label_member_mismatch pos label expected_ty_msg_opt
@@ -6598,6 +6537,26 @@ end = struct
       lazy [(pos, "This " ^ kind ^ " refinement constraint is violated")],
       User_error_flags.empty )
 
+  let label_unknown enum_name decl_pos most_similar =
+    let reasons =
+      lazy
+        begin
+          let enum_name = Markdown_lite.md_codify (Render.strip_ns enum_name) in
+          (decl_pos, Printf.sprintf "%s is defined here" enum_name)
+          ::
+          (match most_similar with
+          | Some (similar_name, similar_pos) ->
+            [
+              ( similar_pos,
+                Printf.sprintf
+                  "Did you mean %s?"
+                  (Markdown_lite.md_codify similar_name) );
+            ]
+          | None -> [])
+        end
+    in
+    (Error_code.EnumClassLabelUnknown, reasons, User_error_flags.empty)
+
   let eval t ~env ~current_span =
     let open Typing_error.Secondary in
     match t with
@@ -6814,6 +6773,8 @@ end = struct
       Eval_result.single (inexact_tconst_access pos id)
     | Violated_refinement_constraint { cstr } ->
       Eval_result.single (violated_refinement_constraint cstr)
+    | Unknown_label { enum_name; decl_pos; most_similar } ->
+      Eval_result.single (label_unknown enum_name decl_pos most_similar)
 end
 
 and Eval_callback : sig

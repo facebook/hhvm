@@ -180,6 +180,9 @@ let intersection r tyl =
 
 let function_ref r ty = mk (r, Tnewtype (SN.Classes.cFunctionRef, [ty], ty))
 
+let label r ty_in ty_out =
+  mk (r, Tnewtype (SN.Classes.cEnumClassLabel, [ty_in; ty_out], mixed r))
+
 let has_member r ~name ~ty ~class_id ~explicit_targs =
   ConstraintType
     (mk_constraint_type

@@ -1,8 +1,10 @@
 ERROR: File "call_missing_label.php", line 10, characters 15-16:
-Enum class `E` does not contain a label named `B`. (Typing[4394])
+Invalid argument (Typing[4110])
+  File "call_missing_label.php", line 10, characters 15-16:
+  Expected a class with a constant `B`
+  File "call_missing_label.php", line 7, characters 41-41:
+  But got `E`
   File "call_missing_label.php", line 3, characters 12-12:
   `E` is defined here
   File "call_missing_label.php", line 4, characters 7-7:
-  Did you mean `#A`?
-  File "call_missing_label.php", line 7, characters 41-41:
-  This is why I expected an enum class label from `E`.
+  Did you mean `A`?

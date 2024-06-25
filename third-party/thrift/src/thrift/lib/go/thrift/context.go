@@ -35,6 +35,17 @@ type ConnInfo struct {
 	tlsState   tlsConnectionStater // set by thrift tcp servers
 }
 
+// tlsConnectionStater is an abstract interface for types that can return
+// the state of TLS connections. This is used to support not only tls.Conn
+// but also custom wrappers such as permissive TLS/non-TLS sockets.
+//
+// Caveat: this interface has to support at least tls.Conn, which has
+// the current signature for ConnectionState. Because of that, wrappers
+// for permissive TLS/non-TLS may return an empty tls.ConnectionState.
+type tlsConnectionStater interface {
+	ConnectionState() tls.ConnectionState
+}
+
 // TLS returns the TLS connection state.
 func (c ConnInfo) TLS() *tls.ConnectionState {
 	if c.tlsState == nil {

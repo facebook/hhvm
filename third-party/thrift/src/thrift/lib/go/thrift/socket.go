@@ -17,13 +17,8 @@
 package thrift
 
 import (
-	"crypto/tls"
-	"errors"
 	"net"
-	"time"
 )
-
-var _ net.Conn = (*socket)(nil)
 
 type socket struct {
 	conn net.Conn
@@ -72,76 +67,11 @@ func SocketConn(conn net.Conn) SocketOption {
 //	conn, err := thrift.NewSocket(thrift.SocketAddr("localhost:9090"))
 func NewSocket(options ...SocketOption) (net.Conn, error) {
 	socket := &socket{}
-
 	for _, option := range options {
 		err := option(socket)
 		if err != nil {
 			return nil, err
 		}
 	}
-
-	if _, ok := socket.conn.(*net.UnixConn); ok {
-		return socket, nil
-	}
-
-	if socket.conn.RemoteAddr().String() == "" {
-		return nil, errors.New("must supply either an address or a connection")
-	}
-
-	return socket, nil
-}
-
-// LocalAddr returns the local network address, if known.
-func (s *socket) LocalAddr() net.Addr {
-	return s.conn.LocalAddr()
-}
-
-// RemoteAddr returns the remote network address, if known.
-func (s *socket) RemoteAddr() net.Addr {
-	return s.conn.RemoteAddr()
-}
-
-func (s *socket) SetDeadline(t time.Time) error {
-	return s.conn.SetDeadline(t)
-}
-
-func (s *socket) SetReadDeadline(t time.Time) error {
-	return s.conn.SetReadDeadline(t)
-}
-
-func (s *socket) SetWriteDeadline(t time.Time) error {
-	return s.conn.SetWriteDeadline(t)
-}
-
-// tlsConnectionStater is an abstract interface for types that can return
-// the state of TLS connections. This is used to support not only tls.Conn
-// but also custom wrappers such as permissive TLS/non-TLS sockets.
-//
-// Caveat: this interface has to support at least tls.Conn, which has
-// the current signature for ConnectionState. Because of that, wrappers
-// for permissive TLS/non-TLS may return an empty tls.ConnectionState.
-type tlsConnectionStater interface {
-	ConnectionState() tls.ConnectionState
-}
-
-func (s *socket) ConnectionState() tls.ConnectionState {
-	tlsConn, ok := s.conn.(tlsConnectionStater)
-	if !ok {
-		return tls.ConnectionState{}
-	}
-	return tlsConn.ConnectionState()
-}
-
-// Close closes the underlying net.Conn
-func (s *socket) Close() error {
-	return s.conn.Close()
-}
-
-func (s *socket) Read(buf []byte) (int, error) {
-	n, err := s.conn.Read(buf)
-	return n, NewTransportExceptionFromError(err)
-}
-
-func (s *socket) Write(buf []byte) (int, error) {
-	return s.conn.Write(buf)
+	return socket.conn, nil
 }

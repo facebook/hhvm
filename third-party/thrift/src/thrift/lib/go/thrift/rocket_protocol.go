@@ -33,7 +33,7 @@ import (
 type rocketProtocol struct {
 	Format
 
-	conn net.Conn
+	conn *connTimeout
 
 	// rsocket client state
 	ctx    context.Context
@@ -61,13 +61,17 @@ func NewRocketProtocol(conn net.Conn) (Protocol, error) {
 		protoID:           ProtocolIDCompact,
 		persistentHeaders: make(map[string]string),
 		buf:               NewMemoryBuffer(),
-		conn:              conn,
+		conn:              &connTimeout{Conn: conn},
 		zstd:              false, // zstd adds a performance overhead, so we default to false
 	}
 	if err := p.resetProtocol(); err != nil {
 		return nil, err
 	}
 	return p, nil
+}
+
+func (p *rocketProtocol) SetTimeout(timeout time.Duration) {
+	p.conn.timeout = timeout
 }
 
 func (p *rocketProtocol) resetProtocol() error {

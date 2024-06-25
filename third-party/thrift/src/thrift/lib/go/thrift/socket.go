@@ -26,20 +26,11 @@ import (
 var _ net.Conn = (*socket)(nil)
 
 type socket struct {
-	conn    net.Conn
-	timeout time.Duration
+	conn net.Conn
 }
 
 // SocketOption is the type used to set options on the socket
 type SocketOption func(*socket) error
-
-// SocketTimeout sets the timeout
-func SocketTimeout(timeout time.Duration) SocketOption {
-	return func(socket *socket) error {
-		socket.timeout = timeout
-		return nil
-	}
-}
 
 func resolveAddr(hostPort string) (net.Addr, error) {
 	addr, err := net.ResolveTCPAddr("tcp6", hostPort)
@@ -100,20 +91,6 @@ func NewSocket(options ...SocketOption) (net.Conn, error) {
 	return socket, nil
 }
 
-func (s *socket) pushDeadline(read, write bool) {
-	var t time.Time
-	if s.timeout > 0 {
-		t = time.Now().Add(time.Duration(s.timeout))
-	}
-	if read && write {
-		s.conn.SetDeadline(t)
-	} else if read {
-		s.conn.SetReadDeadline(t)
-	} else if write {
-		s.conn.SetWriteDeadline(t)
-	}
-}
-
 // LocalAddr returns the local network address, if known.
 func (s *socket) LocalAddr() net.Addr {
 	return s.conn.LocalAddr()
@@ -125,26 +102,14 @@ func (s *socket) RemoteAddr() net.Addr {
 }
 
 func (s *socket) SetDeadline(t time.Time) error {
-	if s.timeout > 0 {
-		// timeout is preferred over deadline
-		return nil
-	}
 	return s.conn.SetDeadline(t)
 }
 
 func (s *socket) SetReadDeadline(t time.Time) error {
-	if s.timeout > 0 {
-		// timeout is preferred over deadline
-		return nil
-	}
 	return s.conn.SetReadDeadline(t)
 }
 
 func (s *socket) SetWriteDeadline(t time.Time) error {
-	if s.timeout > 0 {
-		// timeout is preferred over deadline
-		return nil
-	}
 	return s.conn.SetWriteDeadline(t)
 }
 
@@ -173,12 +138,10 @@ func (s *socket) Close() error {
 }
 
 func (s *socket) Read(buf []byte) (int, error) {
-	s.pushDeadline(true, false)
 	n, err := s.conn.Read(buf)
 	return n, NewTransportExceptionFromError(err)
 }
 
 func (s *socket) Write(buf []byte) (int, error) {
-	s.pushDeadline(false, true)
 	return s.conn.Write(buf)
 }

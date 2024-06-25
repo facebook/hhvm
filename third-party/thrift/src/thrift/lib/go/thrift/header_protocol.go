@@ -19,6 +19,7 @@ package thrift
 import (
 	"fmt"
 	"net"
+	"time"
 )
 
 type headerProtocol struct {
@@ -37,6 +38,10 @@ func NewHeaderProtocol(conn net.Conn) (Protocol, error) {
 		return nil, err
 	}
 	return p, nil
+}
+
+func (p *headerProtocol) SetTimeout(timeout time.Duration) {
+	p.trans.conn.timeout = timeout
 }
 
 func (p *headerProtocol) resetProtocol() error {

@@ -32,7 +32,7 @@ const (
 )
 
 type headerTransport struct {
-	conn net.Conn
+	conn *connTimeout
 
 	// Used on read
 	rbuf       *bufio.Reader
@@ -58,7 +58,8 @@ type headerTransport struct {
 }
 
 // newHeaderTransport creates a new transport with defaults.
-func newHeaderTransport(conn net.Conn) *headerTransport {
+func newHeaderTransport(c net.Conn) *headerTransport {
+	conn := &connTimeout{Conn: c}
 	return &headerTransport{
 		conn:      conn,
 		rbuf:      bufio.NewReader(conn),

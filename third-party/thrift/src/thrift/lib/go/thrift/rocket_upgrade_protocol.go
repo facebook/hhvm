@@ -19,6 +19,7 @@ package thrift
 import (
 	"context"
 	"net"
+	"time"
 )
 
 type upgradeToRocketProtocol struct {
@@ -41,6 +42,15 @@ func NewUpgradeToRocketProtocol(conn net.Conn) (Protocol, error) {
 		rocketProtocol: rocket,
 		headerProtocol: header,
 	}, nil
+}
+
+func (p *upgradeToRocketProtocol) SetTimeout(timeout time.Duration) {
+	if p.Protocol == nil {
+		p.rocketProtocol.SetTimeout(timeout)
+		p.headerProtocol.SetTimeout(timeout)
+		return
+	}
+	p.Protocol.SetTimeout(timeout)
 }
 
 // WriteMessageBegin first sends a upgradeToRocket message using the HeaderProtocol.

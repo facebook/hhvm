@@ -19,6 +19,7 @@ package thrift
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 type httpProtocol struct {
@@ -43,6 +44,10 @@ func NewHTTPProtocol(url string) Protocol {
 		panic(err)
 	}
 	return p
+}
+
+func (p *httpProtocol) SetTimeout(timeout time.Duration) {
+	p.transport.client.Timeout = timeout
 }
 
 func (p *httpProtocol) resetProtocol() error {

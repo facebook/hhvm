@@ -36,8 +36,9 @@ export HACK_OPAM_DEPS=(
   visitors.20210608
   wtf8.1.0.2
   yojson.2.0.2
-  ocaml-option-flambda
   ocamlbuild.0.14.3
+  ocaml-option-flambda
+  ocaml-option-no-compression
 )
 
 # The rest of the file exports variables based on the above configuration.

@@ -8,6 +8,11 @@
 
 set -euf
 
+VERBOSE=${VERBOSE:-0}
+if [ "${VERBOSE}" -eq "1" ]; then
+  set -x
+fi
+
 unset DUNE_BUILD_DIR
 
 if [ -z "$1" ]; then

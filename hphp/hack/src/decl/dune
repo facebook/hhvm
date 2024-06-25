@@ -214,7 +214,12 @@
 (library
  (name decl_fun_utils)
  (modules decl_fun_utils)
- (libraries decl_defs decl_env decl_hint typing_defs )
+ (libraries
+  annotated_ast_utils
+  decl_defs
+  decl_env
+  decl_hint
+  typing_defs )
  (preprocess
   (pps ppx_deriving.std)))
 

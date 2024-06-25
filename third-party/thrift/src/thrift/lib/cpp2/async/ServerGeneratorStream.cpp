@@ -123,6 +123,9 @@ void ServerGeneratorStream::processPayloads() {
   }
 }
 
+void ServerGeneratorStream::close() {
+  serverClose();
+}
 } // namespace detail
 } // namespace thrift
 } // namespace apache

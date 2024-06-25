@@ -26,10 +26,6 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 
-namespace HPHP::thrift {
-struct TServerStream;
-}
-
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -110,6 +106,8 @@ class ServerGeneratorStream : public TwoWayBridge<
 
   void canceled();
 
+  void close();
+
  private:
   ServerGeneratorStream(
       StreamClientCallback* clientCallback, folly::EventBase* clientEb);
@@ -138,7 +136,6 @@ class ServerGeneratorStream : public TwoWayBridge<
   folly::CancellationSource cancelSource_;
 #endif
 
-  friend struct HPHP::thrift::TServerStream;
   friend class test::TestProducerCallback;
 };
 

@@ -55,9 +55,8 @@ std::string uri_or_name(const t_named& node) {
 } // namespace
 
 t_type_ref schematizer::stdType(std::string_view uri) {
-  auto scope = bundle_->get_root_program()->scope();
   return t_type_ref::from_req_ptr(
-      static_cast<const t_type*>(scope->find_by_uri(uri)));
+      static_cast<const t_type*>(scope_.find_by_uri(uri)));
 }
 
 std::unique_ptr<t_const_value> schematizer::typeUri(const t_type& type) {

@@ -22,7 +22,7 @@
 #include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_program.h>
-#include <thrift/compiler/ast/t_program_bundle.h>
+#include <thrift/compiler/ast/t_scope.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/ast/t_typedef.h>
@@ -66,8 +66,8 @@ class schematizer {
     bool only_root_program_ = false;
   };
 
-  explicit schematizer(const t_program_bundle* bundle, options opts)
-      : bundle_(bundle), opts_(std::move(opts)) {}
+  explicit schematizer(const t_scope& scope, options opts)
+      : scope_(scope), opts_(std::move(opts)) {}
 
   // Creates a constant of type schema.Struct describing the argument.
   // https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/schema.thrift
@@ -88,7 +88,7 @@ class schematizer {
   static int64_t identify_program(const t_program& node);
 
  private:
-  const t_program_bundle* bundle_;
+  const t_scope& scope_;
   options opts_;
 
   t_type_ref stdType(std::string_view uri);

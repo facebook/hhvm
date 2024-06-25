@@ -83,15 +83,15 @@ class t_ast_generator : public t_generator {
               fmt::format("Unknown protocol `{}`", pair.second));
         }
       } else if (pair.first == "include_generated") {
-        include_generated_ = true;
+        schema_opts_.include_generated_ = true;
       } else if (pair.first == "source_ranges") {
-        source_ranges_ = true;
+        schema_opts_.source_ranges_ = true;
       } else if (pair.first == "no_backcompat") {
         schema_opts_.include.reset(schematizer::included_data::DoubleWrites);
       } else if (pair.first == "use_hash") {
         schema_opts_.use_hash = true;
       } else if (pair.first == "root_program_only") {
-        only_root_program_ = true;
+        schema_opts_.only_root_program_ = true;
       } else if (pair.first == "ast") {
       } else {
         throw std::runtime_error(
@@ -103,7 +103,7 @@ class t_ast_generator : public t_generator {
           "Missing required argument protocol=json|debug|compact");
     }
 
-    if (only_root_program_ && !schema_opts_.use_hash) {
+    if (schema_opts_.only_root_program_ && !schema_opts_.use_hash) {
       throw std::runtime_error(
           "root_program_only requires use_hash to be enabled");
     }
@@ -120,10 +120,6 @@ class t_ast_generator : public t_generator {
   std::ofstream f_out_;
   ast_protocol protocol_;
   schematizer::options schema_opts_;
-  bool include_generated_{false};
-  bool source_ranges_{false};
-  bool is_root_program_{true};
-  bool only_root_program_{false};
 };
 
 void t_ast_generator::generate_program() {
@@ -172,7 +168,7 @@ void t_ast_generator::generate_program() {
     auto& defs = prog.definitions().value();
     auto& defKeys = prog.definitionKeys().value();
     for (auto& def : program->definitions()) {
-      if (def.generated() && !include_generated_) {
+      if (def.generated() && !schema_opts_.include_generated_) {
         continue;
       }
       if (!schema_opts_.use_hash) {
@@ -239,6 +235,7 @@ void t_ast_generator::generate_program() {
   schema_opts_.intern_value = intern_value;
   schematizer schema_source(&program_bundle_, schema_opts_);
   const_ast_visitor visitor;
+  bool is_root_program = true;
   visitor.add_program_visitor([&](const t_program& program) {
     assert(!program_index.count(&program));
 
@@ -257,7 +254,7 @@ void t_ast_generator::generate_program() {
           src_range(program.doc_range(), &program);
     }
 
-    auto is_root_program = std::exchange(is_root_program_, false);
+    auto was_root_program = std::exchange(is_root_program, false);
     for (auto* include : program.get_included_programs()) {
       // This could invalidate references into `programs`.
       if (!program_index.count(include)) {
@@ -266,7 +263,7 @@ void t_ast_generator::generate_program() {
       }
       programs.at(pos).includes().value().push_back(program_index.at(include));
     }
-    is_root_program_ = is_root_program;
+    is_root_program = was_root_program;
 
     // Double write to deprecated externed path. (T161963504)
     // The new path is populated in the Program struct by the schematizer.
@@ -296,12 +293,12 @@ void t_ast_generator::generate_program() {
 
 #define THRIFT_ADD_VISITOR(kind)                                     \
   visitor.add_##kind##_visitor([&](const t_##kind& node) {           \
-    if (node.generated() && !include_generated_) {                   \
+    if (node.generated() && !schema_opts_.include_generated_) {      \
       return;                                                        \
     }                                                                \
     auto key = schematizer::identify_definition(node);               \
     definition_key_index[&node] = key;                               \
-    if (!is_root_program_ && only_root_program_) {                   \
+    if (!is_root_program && schema_opts_.only_root_program_) {       \
       return;                                                        \
     }                                                                \
     auto& definitions = *ast.definitions();                          \
@@ -332,7 +329,7 @@ void t_ast_generator::generate_program() {
   // Populate identifier source range map if enabled.
   auto span = [&](t_type_ref ref) {
     auto combinator = [&](t_type_ref ref, auto& recurse) -> void {
-      if (!ref || !source_ranges_ || !is_root_program_) {
+      if (!ref || !schema_opts_.source_ranges_ || !is_root_program) {
         return;
       }
       while (ref->is_typedef() &&
@@ -370,7 +367,7 @@ void t_ast_generator::generate_program() {
 
   auto const_spans = [&](const t_const_value* val) {
     auto combinator = [&](const t_const_value* val, auto recurse) -> void {
-      if (!val || !source_ranges_ || !is_root_program_) {
+      if (!val || !schema_opts_.source_ranges_ || !is_root_program) {
         return;
       }
       if (auto rng = val->ref_range(); rng.begin != source_location{}) {
@@ -472,7 +469,7 @@ void t_ast_generator::generate_program() {
   if (schema_opts_.use_hash) {
     ast.definitions()->clear();
   }
-  if (source_ranges_) {
+  if (schema_opts_.source_ranges_) {
     for (auto inc : program_->includes()) {
       cpp2::IncludeRef ident;
       ident.range() = src_range(inc->str_range(), program_);

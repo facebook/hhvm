@@ -61,6 +61,9 @@ class schematizer {
     InternFunc intern_value;
     bool use_hash = false; // Uses typeHashPrefixSha2_256 in typeUri and
                            // definitionKey instead of definitionId.
+    bool include_generated_ = false;
+    bool source_ranges_ = false;
+    bool only_root_program_ = false;
   };
 
   explicit schematizer(const t_program_bundle* bundle, options opts)

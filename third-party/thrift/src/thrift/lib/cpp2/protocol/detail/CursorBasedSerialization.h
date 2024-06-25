@@ -27,11 +27,11 @@
 
 namespace apache::thrift {
 
-template <typename T, bool Contiguous>
+template <typename ProtocolReader, typename T, bool Contiguous>
 class StructuredCursorReader;
-template <typename Tag, bool Contiguous>
+template <typename ProtocolReader, typename Tag, bool Contiguous>
 class ContainerCursorReader;
-template <typename Tag, bool Contiguous>
+template <typename ProtocolReader, typename Tag, bool Contiguous>
 class ContainerCursorIterator;
 
 template <typename T>
@@ -93,9 +93,10 @@ struct ContainerTraits<type::map<KTag, VTag>> {
 template <typename Tag, typename Type>
 struct ContainerTraits<type::cpp_type<Type, Tag>> : ContainerTraits<Tag> {};
 
+template <typename ProtocolReader>
 class BaseCursorReader {
  protected:
-  BinaryProtocolReader* protocol_;
+  ProtocolReader* protocol_;
   enum class State {
     Active,
     Child, // Reading a nested struct or container
@@ -118,7 +119,7 @@ class BaseCursorReader {
     }
   }
 
-  explicit BaseCursorReader(BinaryProtocolReader* p) : protocol_(p) {}
+  explicit BaseCursorReader(ProtocolReader* p) : protocol_(p) {}
   BaseCursorReader() = default;
 
   ~BaseCursorReader() {
@@ -318,7 +319,8 @@ using lift_view_t = std::conditional_t<
     std::string_view,
     T>;
 
-inline std::string_view readStringView(BinaryProtocolReader& protocol) {
+template <typename ProtocolReader>
+std::string_view readStringView(ProtocolReader& protocol) {
   int32_t size;
   protocol.readI32(size);
   if (size < 0) {
@@ -332,8 +334,8 @@ inline std::string_view readStringView(BinaryProtocolReader& protocol) {
   return std::string_view(reinterpret_cast<const char*>(c.data()), size);
 }
 
-template <typename Tag, typename T>
-void decodeTo(BinaryProtocolReader& protocol, T& t) {
+template <typename ProtocolReader, typename Tag, typename T>
+void decodeTo(ProtocolReader& protocol, T& t) {
   if constexpr (
       std::is_same_v<T, std::string_view> &&
       type::is_a_v<Tag, type::string_c>) {

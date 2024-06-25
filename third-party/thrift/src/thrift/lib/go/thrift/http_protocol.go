@@ -30,20 +30,21 @@ type httpProtocol struct {
 }
 
 // NewHTTPProtocol creates a Protocol from a format that serializes directly to an HTTPClient.
-func NewHTTPProtocol(url string) Protocol {
+func NewHTTPProtocol(url string) (Protocol, error) {
 	httpClient, err := newHTTPPostClient(url)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	p := &httpProtocol{
 		transport:         httpClient,
 		persistentHeaders: make(map[string]string),
 		protoID:           ProtocolIDCompact,
 	}
+	p.SetRequestHeader("User-Agent", "Go/THttpClient")
 	if err := p.resetProtocol(); err != nil {
-		panic(err)
+		return nil, err
 	}
-	return p
+	return p, nil
 }
 
 func (p *httpProtocol) SetTimeout(timeout time.Duration) {

@@ -14,7 +14,7 @@
 #include <fizz/server/TicketTypes.h>
 #include <fizz/util/FizzUtil.h>
 #include <folly/FileUtil.h>
-#include <folly/experimental/TestUtil.h>
+#include <folly/testing/TestUtil.h>
 
 namespace fizz {
 namespace test {

@@ -51,13 +51,17 @@ class AstGeneratorTest(unittest.TestCase):
         os.chdir(self.tmp)
         self.maxDiff = None
 
-    def run_thrift(self, file, backcompat=True, use_hash=False):
+    def run_thrift(
+        self, file, backcompat=True, use_hash=False, root_program_only=False
+    ):
         with resources.as_file(
             resources.files(__package__).joinpath("implicit_includes")
         ) as inc:
             extra_args = "" if backcompat else ",no_backcompat"
             if use_hash:
                 extra_args += ",use_hash"
+            if root_program_only:
+                extra_args += ",root_program_only"
             argsx = [
                 thrift2ast,
                 "--gen",
@@ -465,3 +469,46 @@ class AstGeneratorTest(unittest.TestCase):
                 self.assertEqual(
                     ast.valuesMap[v.structDef.fields[0].customDefault].i64Value, 42
                 )
+
+    def test_sharding(self):
+        files = {
+            "a.thrift": """
+            include "b.thrift"
+            include "c.thrift"
+
+            struct A {}
+            """,
+            "b.thrift": """
+            include "d.thrift"
+
+            struct B {}
+            """,
+            "c.thrift": """
+            include "d.thrift"
+
+            struct C {}
+            """,
+            "d.thrift": """
+            struct D {}
+            """,
+        }
+
+        for name, contents in files.items():
+            write_file(name, textwrap.dedent(contents))
+
+        asts = {
+            name: self.run_thrift(
+                name, backcompat=False, use_hash=True, root_program_only=True
+            )
+            for name in files
+        }
+        combined_ast = self.run_thrift("a.thrift", backcompat=False, use_hash=True)
+
+        self.assertEqual(
+            len(combined_ast.definitionsMap),
+            sum(len(ast.definitionsMap) for ast in asts.values()),
+        )
+
+        for ast in asts.values():
+            for uri, definition in ast.definitionsMap.items():
+                self.assertEqual(definition, combined_ast.definitionsMap[uri])

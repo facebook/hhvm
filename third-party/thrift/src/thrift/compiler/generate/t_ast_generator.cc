@@ -90,6 +90,8 @@ class t_ast_generator : public t_generator {
         schema_opts_.include.reset(schematizer::included_data::DoubleWrites);
       } else if (pair.first == "use_hash") {
         schema_opts_.use_hash = true;
+      } else if (pair.first == "root_program_only") {
+        only_root_program_ = true;
       } else if (pair.first == "ast") {
       } else {
         throw std::runtime_error(
@@ -99,6 +101,11 @@ class t_ast_generator : public t_generator {
     if (!protocol_set) {
       throw std::runtime_error(
           "Missing required argument protocol=json|debug|compact");
+    }
+
+    if (only_root_program_ && !schema_opts_.use_hash) {
+      throw std::runtime_error(
+          "root_program_only requires use_hash to be enabled");
     }
   }
 
@@ -116,6 +123,7 @@ class t_ast_generator : public t_generator {
   bool include_generated_{false};
   bool source_ranges_{false};
   bool is_root_program_{true};
+  bool only_root_program_{false};
 };
 
 void t_ast_generator::generate_program() {
@@ -291,6 +299,11 @@ void t_ast_generator::generate_program() {
     if (node.generated() && !include_generated_) {                   \
       return;                                                        \
     }                                                                \
+    auto key = schematizer::identify_definition(node);               \
+    definition_key_index[&node] = key;                               \
+    if (!is_root_program_ && only_root_program_) {                   \
+      return;                                                        \
+    }                                                                \
     auto& definitions = *ast.definitions();                          \
     auto pos = definitions.size();                                   \
     definition_index[&node] =                                        \
@@ -299,14 +312,12 @@ void t_ast_generator::generate_program() {
     hydrate_const(def, *schema_source.gen_schema(node));             \
     set_source_range(node, *def.attrs());                            \
     set_child_source_ranges(node, def);                              \
-    auto key = schematizer::identify_definition(node);               \
     if (ast.definitionsMap()->count(key)) {                          \
       throw std::runtime_error(fmt::format(                          \
           "Duplicate definition key: {}",                            \
           node.uri().empty() ? node.name() : node.uri()));           \
     }                                                                \
-    ast.definitionsMap()[key] = definitions.back();                  \
-    definition_key_index[&node] = std::move(key);                    \
+    ast.definitionsMap()[std::move(key)] = definitions.back();       \
   })
   THRIFT_ADD_VISITOR(service);
   THRIFT_ADD_VISITOR(interaction);
@@ -492,6 +503,7 @@ THRIFT_REGISTER_GENERATOR(
     "    source_ranges:     Enables population of the identifier source range map.\n"
     "    no_backcompat:     Disables double writes (breaking changes possible!).\n"
     "    use_hash:          Uses typeHashPrefixSha2_256 in typeUri and instead of extern ids.\n"
+    "    root_program_only: Only schematize the root program.\n"
     "");
 
 } // namespace compiler

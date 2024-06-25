@@ -68,7 +68,6 @@ impl ffi::FileFacts {
             modules: (facts.modules.into_iter())
                 .map(|(name, facts::ModuleFacts {})| ffi::ModuleFacts { name })
                 .collect(),
-            module_membership: facts.module_membership.unwrap_or_default(),
         }
     }
 }
@@ -208,7 +207,6 @@ mod tests {
             functions: vec![],
             modules,
             types,
-            module_membership: None,
         };
         (facts, sha1(b"fake source text"))
     }
@@ -229,7 +227,6 @@ mod tests {
             constants: vec!["C".to_string()],
             modules: rust_module_facts_by_name,
             file_attributes: Default::default(),
-            module_membership: None,
         };
         assert_eq!(ffi::FileSymbols::from(rust_facts), ffi_symbols)
     }

@@ -982,13 +982,6 @@ static Variant HHVM_METHOD(FileDecls, getFileModule, const String& name) {
   return decls.empty() ? init_null_variant : populateModules(decls)[0];
 }
 
-static Variant HHVM_METHOD(FileDecls, getFileModuleMembership) {
-  auto data = Native::data<FileDecls>(this_);
-  data->validateState();
-  auto result = hackc::get_file_module_membership(**data->declsHolder);
-  return result.empty() ? init_null_variant : rustToString(result);
-}
-
 static Array HHVM_METHOD(FileDecls, getFileTypedefs) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
@@ -1209,11 +1202,6 @@ struct DeclExtension final : Extension {
     HHVM_MALIAS(HH\\FileDecls, getFileFunc, FileDecls, getFileFunc);
     HHVM_MALIAS(HH\\FileDecls, getFileModules, FileDecls, getFileModules);
     HHVM_MALIAS(HH\\FileDecls, getFileModule, FileDecls, getFileModule);
-    HHVM_MALIAS(
-        HH\\FileDecls,
-        getFileModuleMembership,
-        FileDecls,
-        getFileModuleMembership);
     HHVM_MALIAS(HH\\FileDecls, getFileTypedefs, FileDecls, getFileTypedefs);
     HHVM_MALIAS(HH\\FileDecls, getFileTypedef, FileDecls, getFileTypedef);
     HHVM_MALIAS(HH\\FileDecls, getFile, FileDecls, getFile);

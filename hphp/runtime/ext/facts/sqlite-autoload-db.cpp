@@ -218,12 +218,6 @@ void createSchema(SQLiteTxn& txn) {
       " module_name TEXT NOT NULL,"
       " UNIQUE (pathid, module_name)"
       ")");
-
-  txn.exec(
-      "CREATE TABLE IF NOT EXISTS file_module_membership ("
-      " pathid INTEGER NOT NULL UNIQUE REFERENCES all_paths ON DELETE CASCADE,"
-      " module_name TEXT NOT NULL"
-      ")");
 }
 
 void rebuildIndices(SQLiteTxn& txn) {
@@ -297,11 +291,6 @@ void rebuildIndices(SQLiteTxn& txn) {
   txn.exec(
       "CREATE INDEX IF NOT EXISTS file_modules__module_name"
       " ON file_modules (module_name)");
-
-  // file_module_membership
-  txn.exec(
-      "CREATE INDEX IF NOT EXISTS file_module_membership__module_name"
-      " ON file_module_membership (module_name)");
 }
 
 TypeKind toTypeKind(const std::string_view kind) {
@@ -618,7 +607,6 @@ struct ValidateStmts {
   SQLiteStmt m_validateNoDuplicateTypeEntries;
 };
 
-// Module Definitions
 struct ModuleStmts {
   explicit ModuleStmts(SQLite& db)
       : m_insert{db.prepare(
@@ -636,26 +624,6 @@ struct ModuleStmts {
   SQLiteStmt m_insert;
   SQLiteStmt m_getModulePath;
   SQLiteStmt m_getPathModules;
-};
-
-struct ModuleMembershipStmts {
-  explicit ModuleMembershipStmts(SQLite& db)
-      : m_insert{db.prepare(
-            "INSERT OR IGNORE INTO file_module_membership (pathid, module_name) VALUES("
-            " (SELECT pathid FROM all_paths WHERE path=@path),"
-            " @module_name"
-            ")")},
-        m_getModuleMembers{db.prepare("SELECT path FROM file_module_membership"
-                                      " JOIN all_paths USING (pathid)"
-                                      " WHERE module_name=@module_name")},
-        m_getPathModuleMembership{
-            db.prepare("SELECT module_name FROM file_module_membership"
-                       " JOIN all_paths USING (pathid)"
-                       " WHERE path=@path")} {}
-
-  SQLiteStmt m_insert;
-  SQLiteStmt m_getModuleMembers;
-  SQLiteStmt m_getPathModuleMembership;
 };
 
 struct ClockStmts {
@@ -681,7 +649,6 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
         m_constantStmts{m_db},
         m_validateSmts{m_db},
         m_moduleStmts{m_db},
-        m_moduleMembershipStmts{m_db},
         m_clockStmts{m_db} {}
 
   // We can't move `m_db` unless it has no outstanding
@@ -1358,42 +1325,6 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return modules;
   }
 
-  void insertModuleMembership(
-      const std::filesystem::path& path,
-      std::string_view module) override {
-    assertx(path.is_relative());
-    auto query = m_txn.query(m_moduleMembershipStmts.m_insert);
-    query.bindString("@path", path.native());
-    query.bindString("@module_name", module);
-    XLOGF(DBG9, "Running {}", query.sql());
-    query.step();
-  }
-
-  std::optional<std::string> getPathModuleMembership(
-      const std::filesystem::path& path) override {
-    auto query = m_txn.query(m_moduleMembershipStmts.m_getPathModuleMembership);
-    query.bindString("@path", path.native());
-    std::optional<std::string> result;
-    XLOGF(DBG9, "Running {}", query.sql());
-    for (query.step(); query.row(); query.step()) {
-      assertx(!result.has_value());
-      result.emplace(std::string{query.getString(0)});
-    }
-    return result;
-  }
-
-  std::vector<std::filesystem::path> getModuleMembers(
-      std::string_view module) override {
-    auto query = m_txn.query(m_moduleMembershipStmts.m_getModuleMembers);
-    query.bindString("@module_name", module);
-    std::vector<fs::path> results;
-    XLOGF(DBG9, "Running {}", query.sql());
-    for (query.step(); query.row(); query.step()) {
-      results.emplace_back(std::string{query.getString(0)});
-    }
-    return results;
-  }
-
   MultiResult<PathAndHash> getAllPathsAndHashes() override {
     auto query = m_txn.query(m_pathStmts.m_getAllPaths);
     XLOGF(DBG9, "Running {}", query.sql());
@@ -1454,7 +1385,6 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   ConstantStmts m_constantStmts;
   ValidateStmts m_validateSmts;
   ModuleStmts m_moduleStmts;
-  ModuleMembershipStmts m_moduleMembershipStmts;
   ClockStmts m_clockStmts;
 };
 

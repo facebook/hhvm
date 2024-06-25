@@ -420,14 +420,6 @@ namespace HH {
     public function getFileModule(string $name)[]: ?ExtDeclModule;
 
     /*
-     * Query the content for module membership of the file.
-     *
-     * @return ?string - The module the file is a member of,
-     *                   or null if file is not a member of a module.
-     */
-    public function getFileModuleMembership()[]: ?string;
-
-    /*
      * Query the content for all the top level type definitions.
      *
      * @return vec<ExtDeclTypedef> - Array of the type definitions

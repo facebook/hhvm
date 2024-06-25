@@ -153,12 +153,6 @@ function path_to_constants(string $path)[]: vec<string>;
 function path_to_type_aliases(string $path)[]: vec<string>;
 
 /**
- * Return the module the file is a member of, if any.
- */
-<<__Native>>
-function path_to_module_membership(string $path)[]: ?string;
-
-/**
  * Resolve a string into a classname that's properly capitalized and
  * properly typed.
  *

@@ -133,7 +133,7 @@ pub struct Impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> {
     under_no_auto_likes: bool,
     inside_no_auto_dynamic_class: bool,
     source_text_allocator: S,
-    pub module: Option<Id<'a>>,
+    module: Option<Id<'a>>,
     package_override: Option<&'a str>,
 }
 

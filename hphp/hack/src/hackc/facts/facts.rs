@@ -118,10 +118,8 @@ pub struct Facts {
     pub constants: Vec<String>,
     pub file_attributes: Attributes,
     pub modules: ModuleFactsByName,
-    pub module_membership: Option<String>,
 }
 
-// This must keep in sync with hack/src/facebook/hh_distc/facts/facts_sqlite.rs.
 impl Facts {
     pub fn from_decls(parsed_file: &ParsedFile<'_>) -> Facts {
         let mut types = Default::default();
@@ -181,7 +179,6 @@ impl Facts {
             constants,
             file_attributes,
             modules,
-            module_membership: parsed_file.module_membership.map(str::to_string),
         }
     }
 

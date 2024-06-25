@@ -131,9 +131,7 @@ struct SymbolMap {
   Path getFunctionFile(const StringData& function);
   Path getConstantFile(Symbol<SymKind::Constant> constant);
   Path getConstantFile(const StringData& constant);
-  // Returns the file containing the module definition.
   Path getModuleFile(Symbol<SymKind::Module> module);
-  // Returns the file containing the module definition.
   Path getModuleFile(const StringData& module);
   Path getTypeAliasFile(Symbol<SymKind::Type> typeAlias);
   Path getTypeAliasFile(const StringData& typeAlias);
@@ -155,15 +153,8 @@ struct SymbolMap {
   std::vector<Symbol<SymKind::Constant>> getFileConstants(
       const std::filesystem::path& path);
 
-  // Returns the set of Modules defined in the given file.
   std::vector<Symbol<SymKind::Module>> getFileModules(Path path);
   std::vector<Symbol<SymKind::Module>> getFileModules(
-      const std::filesystem::path& path);
-
-  // Returns the module the file is contained in, if any.
-  std::optional<Symbol<SymKind::ModuleMembership>> getFileModuleMembership(
-      Path path);
-  std::optional<Symbol<SymKind::ModuleMembership>> getFileModuleMembership(
       const std::filesystem::path& path);
 
   std::vector<Symbol<SymKind::Type>> getFileTypeAliases(Path path);
@@ -464,7 +455,6 @@ struct SymbolMap {
     PathToSymbolsMap<SymKind::Function> m_functionPath;
     PathToSymbolsMap<SymKind::Constant> m_constantPath;
     PathToSymbolsMap<SymKind::Module> m_modulePath;
-    PathToSymbolsMap<SymKind::ModuleMembership> m_moduleMembershipPath;
 
     /**
      * Future chain and queue holding the work that needs to be done before the

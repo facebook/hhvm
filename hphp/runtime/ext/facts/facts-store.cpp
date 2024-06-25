@@ -80,22 +80,6 @@ Optional<fs::path> resolvePathRelativeToRoot(
   return fs::relative(path, root);
 }
 
-Optional<Path> ensureRelativePath(const String& path, const fs::path& root) {
-  if (path.empty()) {
-    return {};
-  }
-
-  if (path.slice().at(0) != '/') {
-    return Path{*path.get()};
-  }
-  auto resolvedPath =
-      resolvePathRelativeToRoot(fs::path{path.toCppString()}, root);
-  if (!resolvedPath) {
-    return {};
-  }
-  return Path{*resolvedPath};
-}
-
 constexpr std::string_view kKindFilterKey{"kind"};
 constexpr std::string_view kDeriveKindFilterKey{"derive_kind"};
 constexpr std::string_view kExtendsFilterKey{"extends"};
@@ -803,19 +787,6 @@ struct FactsStoreImpl final
         path, [](SymbolMap& m, Path s) { return m.getFileModules(s); });
   }
 
-  Optional<String> getFileModuleMembership(const String& path) override {
-    auto relativePath = ensureRelativePath(path, m_root);
-    if (!relativePath.has_value()) {
-      return std::nullopt;
-    }
-    auto result = m_symbolMap.getFileModuleMembership(*relativePath);
-    if (result.has_value()) {
-      return StrNR{result->get()};
-    } else {
-      return std::nullopt;
-    }
-  }
-
   Array getBaseTypes(const String& derivedType, const Variant& filters)
       override {
     return filterBaseTypes(
@@ -1336,12 +1307,21 @@ struct FactsStoreImpl final
 
   template <SymKind k, typename TLambda>
   Array getFileSymbols(const String& path, TLambda lambda) {
-    auto relativePath = ensureRelativePath(path, m_root);
-    if (!relativePath) {
+    if (path.empty()) {
       return Array::CreateVec();
     }
 
-    auto symbols = lambda(m_symbolMap, *relativePath);
+    auto symbols = [&]() -> std::vector<Symbol<k>> {
+      if (path.slice().at(0) != '/') {
+        return lambda(m_symbolMap, Path{*path.get()});
+      }
+      auto resolvedPath =
+          resolvePathRelativeToRoot(fs::path{path.toCppString()}, m_root);
+      if (!resolvedPath) {
+        return {};
+      }
+      return lambda(m_symbolMap, Path{*resolvedPath});
+    }();
     VecInit ret{symbols.size()};
     for (auto s : std::move(symbols)) {
       ret.append(make_tv<KindOfPersistentString>(s.get()));

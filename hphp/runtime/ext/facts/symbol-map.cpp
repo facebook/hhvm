@@ -66,13 +66,6 @@ typename std::enable_if<
 getPathSymMap(const typename SymbolMap::Data& data) {
   return data.m_modulePath;
 }
-template <SymKind k>
-typename std::enable_if<
-    k == SymKind::ModuleMembership,
-    const PathToSymbolsMap<SymKind::ModuleMembership>&>::type
-getPathSymMap(const typename SymbolMap::Data& data) {
-  return data.m_moduleMembershipPath;
-}
 
 // non-const
 template <SymKind k>
@@ -100,13 +93,6 @@ typename std::
     enable_if<k == SymKind::Module, PathToSymbolsMap<SymKind::Module>&>::type
     getPathSymMap(typename SymbolMap::Data& data) {
   return data.m_modulePath;
-}
-template <SymKind k>
-typename std::enable_if<
-    k == SymKind::ModuleMembership,
-    PathToSymbolsMap<SymKind::ModuleMembership>&>::type
-getPathSymMap(typename SymbolMap::Data& data) {
-  return data.m_moduleMembershipPath;
 }
 
 } // namespace
@@ -276,22 +262,6 @@ std::vector<Symbol<SymKind::Module>> SymbolMap::getFileModules(Path path) {
 std::vector<Symbol<SymKind::Module>> SymbolMap::getFileModules(
     const fs::path& path) {
   return getFileModules(Path{path});
-}
-
-std::optional<Symbol<SymKind::ModuleMembership>>
-SymbolMap::getFileModuleMembership(Path path) {
-  auto const& symbols = getPathSymbols<SymKind::ModuleMembership>(path);
-  if (symbols.empty()) {
-    return std::nullopt;
-  } else {
-    assertx(symbols.size() == 1);
-    return symbols[0];
-  }
-}
-
-std::optional<Symbol<SymKind::ModuleMembership>>
-SymbolMap::getFileModuleMembership(const fs::path& path) {
-  return getFileModuleMembership(Path{path});
 }
 
 std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypeAliases(Path path) {
@@ -1413,11 +1383,6 @@ void SymbolMap::updateDBPath(
     db.insertModule(as_slice(module.name), path);
   }
 
-  // module membership uses empty for None as we cannot use Option in interop.
-  if (!facts.module_membership.empty()) {
-    db.insertModuleMembership(path, as_slice(facts.module_membership));
-  }
-
   for (auto const& function : facts.functions) {
     db.insertFunction(as_slice(function), path);
   }
@@ -1508,8 +1473,6 @@ Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
               return db->getConstantPath(symbol.slice());
             case SymKind::Module:
               return db->getModulePath(symbol.slice());
-            case SymKind::ModuleMembership:
-              return db->getModuleMembers(symbol.slice());
             case SymKind::Method:
               always_assert(false && "getSymbolPath only for toplevel symbols");
           }
@@ -1561,14 +1524,6 @@ typename PathToSymbolsMap<k>::PathSymbolMap::Values SymbolMap::getPathSymbols(
               return db->getPathConstants(path);
             case SymKind::Module:
               return db->getPathModules(path);
-            case SymKind::ModuleMembership: {
-              auto result = db->getPathModuleMembership(path);
-              if (result.has_value()) {
-                return std::vector<std::string>{*result};
-              } else {
-                return std::vector<std::string>{};
-              }
-            }
             case SymKind::Method:
               always_assert(
                   false && "getPathSymbols only for toplevel symbols");
@@ -1596,7 +1551,6 @@ SymbolMap::Data::Data()
       m_functionPath{m_versions},
       m_constantPath{m_versions},
       m_modulePath{m_versions},
-      m_moduleMembershipPath{m_versions},
       m_inheritanceInfo{m_versions},
       m_typeAttrs{m_versions},
       m_typeAliasAttrs{m_versions},
@@ -1672,13 +1626,6 @@ void SymbolMap::Data::updatePath(
     modules.push_back(Symbol<SymKind::Module>{as_slice(module.name)});
   }
 
-  typename PathToSymbolsMap<SymKind::ModuleMembership>::Symbols
-      moduleMembership;
-  if (!facts.module_membership.empty()) {
-    moduleMembership.push_back(
-        Symbol<SymKind::ModuleMembership>{as_slice(facts.module_membership)});
-  }
-
   typename PathToSymbolsMap<SymKind::Function>::Symbols functions;
   for (auto const& function : facts.functions) {
     always_assert(!function.empty());
@@ -1693,7 +1640,6 @@ void SymbolMap::Data::updatePath(
 
   m_fileAttrs.setAttributes({path}, facts.file_attributes);
 
-  m_moduleMembershipPath.replacePathSymbols(path, std::move(moduleMembership));
   m_modulePath.replacePathSymbols(path, std::move(modules));
   m_typePath.replacePathSymbols(path, std::move(types));
   m_functionPath.replacePathSymbols(path, std::move(functions));

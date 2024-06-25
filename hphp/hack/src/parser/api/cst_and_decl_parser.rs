@@ -68,7 +68,6 @@ pub fn parse_script<'a, 'o>(
         decls: sc_state.1.decls,
         has_first_pass_parse_errors,
         disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
-        module_membership: sc_state.1.module.map(|id| id.1),
     };
     (cst, parsed_file)
 }

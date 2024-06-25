@@ -7,38 +7,38 @@
  *)
 
 module type S = sig
-  (* The set we are partitioning over. Sets are treated atomically,
+  (* The set we are partitioning over. Atoms are treated atomically,
      meaning we compute partitions without knowing the relationships
-     between different sets in the partition. *)
-  type set
+     between different atoms in the partition. *)
+  type atom
 
   (** Abstract representation of a partition *)
   type t
 
-  (** Operations on sets are represented in disjunctive normal form (DNF).
+  (** Operations on atoms are represented in disjunctive normal form (DNF).
       This means it is a list of disjunctions (unions) that contain
       a list of conjunctions (intersections).
 
-      (A & B) | C, where A, B, C are sets is represented as:
+      (A & B) | C, where A, B, C are atoms is represented as:
         [[A; B]; [C]]
       *)
-  type dnf = set list list
+  type dnf = atom list list
 
   (* Smart Constructors for a partition*)
 
   (** A completely empty partition where both the left and right are empty *)
   val mk_bottom : t
 
-  (** A partition where the set is assumed to be fully within the left side
+  (** A partition where the atom is assumed to be fully within the left side
      of the partition *)
-  val mk_left : set -> t
+  val mk_left : atom -> t
 
-  (** A partition where the set is assumed to be fully within the right side
+  (** A partition where the atom is assumed to be fully within the right side
      of the partition *)
-  val mk_right : set -> t
+  val mk_right : atom -> t
 
   (** A partition that spans across the left and right partitions *)
-  val mk_span : set -> t
+  val mk_span : atom -> t
 
   (** Unions two partitions together producing another partition *)
   val join : t -> t -> t
@@ -47,8 +47,9 @@ module type S = sig
   val meet : t -> t -> t
 
   (** If the partition is fully within the left, span or right we can
-     simplify the DNF to be [set], otherwise return [t] unchanged *)
-  val simplify : t -> set -> t
+     simplify the DNF to be just the given atom, otherwise return [t] unchanged
+  *)
+  val simplify : t -> atom -> t
 
   (* Accessors *)
 
@@ -64,7 +65,7 @@ module type S = sig
       is definitely within the right side of the partition *)
   val right : t -> dnf
 
-  (** Given a product function from sets to a set and a list of partitions,
+  (** Given a product function from atoms to an atom and a list of partitions,
       Returns a new partition that is the "product" of the given partitions
       such that:
       A set in the new partition is a set obtained by taking one set from each
@@ -75,7 +76,7 @@ module type S = sig
       Combinations of sets containing at least one set from the right side of
       an input partition are on the right of the new partition.
       All other combinations of sets are in the span of the new partition. *)
-  val product : (set list -> set) -> t list -> t
+  val product : (atom list -> atom) -> t list -> t
 
   module Infix_ops : sig
     val ( ||| ) : t -> t -> t
@@ -90,10 +91,10 @@ module type Partition = sig
 
   module type S = S
 
-  (* Constructs a partition representation over the given [AtomicSet] *)
+  (* Constructs a partition representation over the given atom type *)
   module Make (M : sig
     type t
 
     val compare : t -> t -> int
-  end) : S with type set := M.t
+  end) : S with type atom := M.t
 end

@@ -31,68 +31,69 @@ let cartesian xss =
   in
   aux xss ~k:(fun x -> x)
 
-module Make (AtomicSet : sig
+module Make (Atom : sig
   type t
 
   val compare : t -> t -> int
-end) : S with type set := AtomicSet.t = struct
-  type set = AtomicSet.t
+end) : S with type atom := Atom.t = struct
+  type atom = Atom.t
 
-  type dnf = set list list
+  type dnf = atom list list
 
-  module SetSet = Stdlib.Set.Make (AtomicSet)
-  module ConjunctionSet = Stdlib.Set.Make (SetSet)
+  module Conjunction = Stdlib.Set.Make (Atom)
+  module Disjunction = Stdlib.Set.Make (Conjunction)
 
-  (** Represents union and intersection across [set] in
+  (** Represents union and intersection across [atom] in
      disjunctive normal form (DNF) *)
   module Lattice = struct
     (** Notable we lack logical negations in our representation *)
     type t =
-      | And of SetSet.t
-      | Or of ConjunctionSet.t
+      | And of Conjunction.t
+      | Or of Disjunction.t
 
     (* The empty disjunction is the bottom type, i.e. "false" *)
-    let bottom = Or ConjunctionSet.empty
+    let bottom = Or Disjunction.empty
 
     (* The empty conjunction is the top type, i.e. "true" *)
-    let top = And SetSet.empty
+    let top = And Conjunction.empty
 
     let is_bottom = function
-      | Or ands when ConjunctionSet.is_empty ands -> true
+      | Or disjunction when Disjunction.is_empty disjunction -> true
       | _ -> false
 
-    let singleton ty = And (SetSet.singleton ty)
+    let singleton atom = And (Conjunction.singleton atom)
 
     (** Unions two abstract sets *)
     let join (set1 : t) (set2 : t) : t =
       match (set1, set2) with
       (* Top | A = Top *)
-      | (And ss1, And ss2) when SetSet.is_empty ss1 || SetSet.is_empty ss2 ->
+      | (And conj1, And conj2)
+        when Conjunction.is_empty conj1 || Conjunction.is_empty conj2 ->
         top
-      | (And ss1, And ss2) -> Or (ConjunctionSet.of_list [ss1; ss2])
+      | (And conj1, And conj2) -> Or (Disjunction.of_list [conj1; conj2])
       (* (A1 | A2) | B = (A1 | A2 | B) *)
-      | (And conjunction, Or ands)
-      | (Or ands, And conjunction) ->
-        Or (ConjunctionSet.add conjunction ands)
+      | (And conjunction, Or disjunction)
+      | (Or disjunction, And conjunction) ->
+        Or (Disjunction.add conjunction disjunction)
       (* (A1 | A2) | (B1 | B2) = (A1 | A2 | B1 | B2) *)
-      | (Or ands1, Or ands2) -> Or (ConjunctionSet.union ands1 ands2)
+      | (Or disj1, Or disj2) -> Or (Disjunction.union disj1 disj2)
 
     (** Intersects two abstract sets *)
     let meet (set1 : t) (set2 : t) =
-      let meet (set1 : t) (set2 : SetSet.t) =
+      let meet (set1 : t) (conj2 : Conjunction.t) =
         match set1 with
-        | And set1 -> And (SetSet.union set1 set2)
-        | Or ands ->
-          Or (ConjunctionSet.map (fun set -> SetSet.union set set2) ands)
+        | And conj1 -> And (Conjunction.union conj1 conj2)
+        | Or disj ->
+          Or (Disjunction.map (fun conj -> Conjunction.union conj conj2) disj)
       in
       match set1 with
-      | And set -> meet set2 set
+      | And conj -> meet set2 conj
       (* (A1 | A2) & B = (A1 & B) | (A2 & B) *)
-      | Or ands ->
+      | Or disj ->
         (* dedupe should occur in join *)
-        ConjunctionSet.fold
-          (fun conj dnf -> join dnf @@ meet set2 conj)
-          ands
+        Disjunction.fold
+          (fun conj set -> join set @@ meet set2 conj)
+          disj
           bottom
 
     module Infix_ops = struct
@@ -102,10 +103,10 @@ end) : S with type set := AtomicSet.t = struct
     end
 
     let to_list : t -> dnf = function
-      | And list -> [SetSet.elements list]
-      | Or ands ->
-        List.map (fun list -> SetSet.elements list)
-        @@ ConjunctionSet.elements ands
+      | And conjunction -> [Conjunction.elements conjunction]
+      | Or disjunction ->
+        List.map (fun conj -> Conjunction.elements conj)
+        @@ Disjunction.elements disjunction
 
     (** This function computes a product of N-lattices by pushing the product
         operation through the DNF such that the resulting lattice
@@ -124,32 +125,33 @@ end) : S with type set := AtomicSet.t = struct
           a_i x b_j = and(for all k=0..xi, l=0..yi : product_f [a_i_k; b_j_l])
     *)
     let product product_f (tl : t list) =
-      let product_of_setsets (setset_l : SetSet.t list) =
+      let product_of_conjunctions (conjunctions : Conjunction.t list) =
         let product_elts =
-          setset_l
-          |> List.map SetSet.elements
+          conjunctions
+          |> List.map Conjunction.elements
           |> cartesian
           |> List.map product_f
         in
         let sets = List.map singleton product_elts in
         List.fold_left meet top sets
       in
-      let product_of_csets (cset_l : ConjunctionSet.t list) =
+      let product_of_disjunctions (disjunctions : Disjunction.t list) =
         let product_elts =
-          cartesian @@ List.map ConjunctionSet.elements cset_l
+          cartesian @@ List.map Disjunction.elements disjunctions
         in
-        List.fold_left join bottom @@ List.map product_of_setsets product_elts
+        List.fold_left join bottom
+        @@ List.map product_of_conjunctions product_elts
       in
-      let to_cset t =
+      let to_disjunction t =
         match t with
-        | And setset -> ConjunctionSet.singleton setset
-        | Or cset -> cset
+        | And conjunction -> Disjunction.singleton conjunction
+        | Or disjunction -> disjunction
       in
-      product_of_csets @@ List.map to_cset tl
+      product_of_disjunctions @@ List.map to_disjunction tl
   end
 
-  (* [left] is disjoint from [right], while [span] contains sets
-     that overlaps partitially with [left] and [right] *)
+  (* [left] is disjoint from [right], while [span] overlaps partitially with
+     [left] and [right] *)
   type t = {
     left: Lattice.t;
     span: Lattice.t;
@@ -159,24 +161,24 @@ end) : S with type set := AtomicSet.t = struct
   let mk_bottom =
     { left = Lattice.bottom; span = Lattice.bottom; right = Lattice.bottom }
 
-  let mk_left ty =
+  let mk_left atom =
     {
-      left = Lattice.singleton ty;
+      left = Lattice.singleton atom;
       span = Lattice.bottom;
       right = Lattice.bottom;
     }
 
-  let mk_right ty =
+  let mk_right atom =
     {
       left = Lattice.bottom;
       span = Lattice.bottom;
-      right = Lattice.singleton ty;
+      right = Lattice.singleton atom;
     }
 
-  let mk_span ty =
+  let mk_span atom =
     {
       left = Lattice.bottom;
-      span = Lattice.singleton ty;
+      span = Lattice.singleton atom;
       right = Lattice.bottom;
     }
 
@@ -235,15 +237,15 @@ end) : S with type set := AtomicSet.t = struct
 
   (* If the partition is fully within the left, span or right we can
      simplify the DNF to be [set], otherwise return [t] unchanged *)
-  let simplify t set =
+  let simplify t atom =
     match
       ( Lattice.is_bottom t.left,
         Lattice.is_bottom t.span,
         Lattice.is_bottom t.right )
     with
-    | (false, true, true) -> mk_left set
-    | (true, false, true) -> mk_span set
-    | (true, true, false) -> mk_right set
+    | (false, true, true) -> mk_left atom
+    | (true, false, true) -> mk_span atom
+    | (true, true, false) -> mk_right atom
     | _ -> t
 
   let left t = Lattice.to_list t.left

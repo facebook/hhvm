@@ -112,11 +112,11 @@ class ServerGeneratorStream : public TwoWayBridge<
 
   bool wait(ServerStreamConsumer* consumer);
 
+  void publish(folly::Try<StreamPayload>&& payload);
+
  private:
   ServerGeneratorStream(
       StreamClientCallback* clientCallback, folly::EventBase* clientEb);
-
-  void publish(folly::Try<StreamPayload>&& payload);
 
   bool onStreamRequestN(uint64_t credits) override;
 

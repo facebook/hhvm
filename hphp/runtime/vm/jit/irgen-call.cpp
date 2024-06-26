@@ -1311,8 +1311,8 @@ void emitModuleBoundaryCheckKnownImpl(IRGS& env, const T* symbol) {
         OptClassAndFuncData { curClass(env), caller },
         cns(env, symbol));
   }
-  if (RO::EvalEnforceDeployment &&
-      env.unit.packageInfo().violatesDeploymentBoundary(*symbol)) {
+  if (env.unit.packageInfo().violatesDeploymentBoundary(*caller)) return;
+  if (env.unit.packageInfo().violatesDeploymentBoundary(*symbol)) {
     gen(env,
         RaiseDeploymentBoundaryViolation,
         OptClassAndFuncData { curClass(env), caller },

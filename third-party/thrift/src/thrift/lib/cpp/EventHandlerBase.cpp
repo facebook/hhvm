@@ -17,12 +17,13 @@
 #include <algorithm>
 #include <thrift/lib/cpp/EventHandlerBase.h>
 
+#include <thrift/lib/cpp2/runtime/Init.h>
+
 using std::remove;
 using std::shared_ptr;
 using std::vector;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 void EventHandlerBase::addEventHandler(
     const std::shared_ptr<TProcessorEventHandler>& handler) {
@@ -100,7 +101,9 @@ TClientBase::TClientBase(Options options) {
   std::shared_lock lock{getRWMutex()};
 
   auto& handlers = getHandlers();
-  size_t capacity = handlers.size();
+  auto globalHandlers =
+      apache::thrift::runtime::getGlobalLegacyClientEventHandlers();
+  size_t capacity = handlers.size() + globalHandlers.size();
 
   if (capacity != 0) {
     // Initialize the handlers_ in the ctor to be owner of vector object.
@@ -109,6 +112,9 @@ TClientBase::TClientBase(Options options) {
     // production data suggests reserving capacity here.
     handlers_->reserve(capacity);
 
+    for (const auto& handler : globalHandlers) {
+      addEventHandler(handler);
+    }
     for (const auto& handler : handlers) {
       addEventHandler(handler);
     }
@@ -149,5 +155,4 @@ TClientBase::getHandlers() {
   return handlers;
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

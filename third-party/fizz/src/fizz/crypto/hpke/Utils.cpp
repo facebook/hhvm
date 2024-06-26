@@ -28,7 +28,7 @@ HpkeSuiteId generateHpkeSuiteId(KEMId kem, KDFId kdf, AeadId aead) {
   return suiteId;
 }
 
-KEMId getKEMId(NamedGroup group) {
+folly::Optional<KEMId> tryGetKEMId(NamedGroup group) {
   switch (group) {
     case NamedGroup::secp256r1:
       return KEMId::secp256r1;
@@ -39,8 +39,16 @@ KEMId getKEMId(NamedGroup group) {
     case NamedGroup::x25519:
       return KEMId::x25519;
     default:
-      throw std::runtime_error("ke: not implemented");
+      return folly::none;
   }
+}
+
+KEMId getKEMId(NamedGroup group) {
+  const auto kemId = tryGetKEMId(group);
+  if (!kemId.has_value()) {
+    throw std::runtime_error("ke: not implemented");
+  }
+  return *kemId;
 }
 
 KDFId getKDFId(HashFunction hash) {
@@ -56,7 +64,7 @@ KDFId getKDFId(HashFunction hash) {
   }
 }
 
-AeadId getAeadId(CipherSuite suite) {
+folly::Optional<AeadId> tryGetAeadId(CipherSuite suite) {
   switch (suite) {
     case CipherSuite::TLS_AES_128_GCM_SHA256:
       return AeadId::TLS_AES_128_GCM_SHA256;
@@ -65,8 +73,16 @@ AeadId getAeadId(CipherSuite suite) {
     case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
       return AeadId::TLS_CHACHA20_POLY1305_SHA256;
     default:
-      throw std::runtime_error("ciphersuite: not implemented");
+      return folly::none;
   }
+}
+
+AeadId getAeadId(CipherSuite suite) {
+  const auto aeadId = tryGetAeadId(suite);
+  if (!aeadId.has_value()) {
+    throw std::runtime_error("ciphersuite: not implemented");
+  }
+  return *aeadId;
 }
 
 NamedGroup getKexGroup(KEMId kemId) {

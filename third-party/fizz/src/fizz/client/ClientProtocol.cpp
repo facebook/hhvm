@@ -635,11 +635,17 @@ static ech::SupportedECHConfig getSupportedECHConfig(
   // Convert vectors to use HPKE types.
   std::vector<hpke::KEMId> supportedKEMs(supportedGroups.size());
   for (const auto& group : supportedGroups) {
-    supportedKEMs.push_back(hpke::getKEMId(group));
+    const auto kemId = hpke::tryGetKEMId(group);
+    if (kemId.has_value()) {
+      supportedKEMs.push_back(*kemId);
+    }
   }
   std::vector<hpke::AeadId> supportedAeads(supportedCiphers.size());
   for (const auto& suite : supportedCiphers) {
-    supportedAeads.push_back(hpke::getAeadId(suite));
+    const auto aeadId = hpke::tryGetAeadId(suite);
+    if (aeadId.has_value()) {
+      supportedAeads.push_back(*aeadId);
+    }
   }
 
   // Get a supported ECH config.

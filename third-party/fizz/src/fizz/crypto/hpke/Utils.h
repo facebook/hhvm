@@ -15,6 +15,8 @@
 #include <fizz/crypto/hpke/Hkdf.h>
 #include <fizz/protocol/Types.h>
 
+#include <folly/Optional.h>
+
 namespace fizz {
 namespace hpke {
 
@@ -59,6 +61,15 @@ HpkeSuiteId generateHpkeSuiteId(KEMId kem, KDFId kdf, AeadId aead);
  * Key Encapsulation (KEM)   *
  *                           *
  *****************************/
+
+/**
+ * fizz::hpke::getKEMId converts a `fizz:NamedGroup` code point to the
+ * corresponding HPKE KEM code point.
+ *
+ * @param group A `fizz::NamedGroup` code point
+ * @return folly::Optional of the corresponding HPKE KEM code point
+ */
+folly::Optional<KEMId> tryGetKEMId(NamedGroup group);
 
 /**
  * fizz::hpke::getKEMId converts a `fizz:NamedGroup` code point to the
@@ -166,6 +177,16 @@ std::unique_ptr<Hkdf> makeHpkeHkdf(
  * Symmetric Encryption      *
  *                           *
  *****************************/
+
+/**
+ * fizz::hpke::getAeadId converts a TLS CipherSuite code point to the
+ * corresponding HPKE AEAD code point.
+ *
+ * @param suite  The TLS cipher suite
+ * @return folly::Optional of the corresponding HPKE AEAD code point. The digest
+ *         portion of the TLS ciphersuite is dropped.
+ */
+folly::Optional<AeadId> tryGetAeadId(CipherSuite suite);
 
 /**
  * fizz::hpke::getAeadId converts a TLS CipherSuite code point to the

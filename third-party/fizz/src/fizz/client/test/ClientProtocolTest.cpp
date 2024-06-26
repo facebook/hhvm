@@ -1079,6 +1079,142 @@ TEST_F(ClientProtocolTest, TestConnectECH) {
   EXPECT_FALSE(earlyExtension.hasValue());
 }
 
+#if FIZZ_HAVE_OQS
+TEST_F(ClientProtocolTest, TestConnectECHWithHybridSupportedGroup) {
+  auto echConfig = ech::test::getECHConfig();
+  Connect connect;
+  // Should not crash on named group not recognized by HPKE
+  std::vector<NamedGroup> supportedGroups(context_->getSupportedGroups());
+  supportedGroups.push_back(NamedGroup::x25519_kyber768_draft00);
+  context_->setSupportedGroups(supportedGroups);
+  connect.context = context_;
+  connect.echConfigs = std::vector<ech::ECHConfig>();
+  connect.echConfigs->push_back(echConfig);
+  connect.sni = "www.hostname.com";
+  const auto& actualChlo = getDefaultClientHello();
+
+  // Two randoms should be generated, 1 for the client hello inner and 1 for the
+  // client hello outer.
+  EXPECT_CALL(*factory_, makeRandom()).Times(2);
+
+  fizz::Param param = std::move(connect);
+  auto actions = detail::processEvent(state_, param);
+  expectActions<MutateState, WriteToSocket>(actions);
+  processStateMutations(actions);
+
+  EXPECT_EQ(state_.state(), StateEnum::ExpectingServerHello);
+  EXPECT_TRUE(state_.encodedClientHello().has_value());
+
+  auto encodedClientHello = state_.encodedClientHello().value()->clone();
+
+  // We expect this to be false because the encoded client hello should be
+  // the encrypted client hello, which contains the actualChlo.
+  EXPECT_FALSE(
+      folly::IOBufEqualTo()(encodedClientHello, encodeHandshake(actualChlo)));
+
+  // Get rid of handshake header (type + version).
+  encodedClientHello->trimStart(4);
+  ClientHello chloOuter = decode<ClientHello>(std::move(encodedClientHello));
+
+  // Check we used fake server name.
+  auto sniExt = getExtension<ServerNameList>(chloOuter.extensions);
+  EXPECT_TRUE(sniExt.hasValue());
+  EXPECT_TRUE(folly::IOBufEqualTo()(
+      sniExt.value().server_name_list[0].hostname,
+      folly::IOBuf::copyBuffer("public.dummy.com")));
+
+  // Check that the state is using the fake server name
+  EXPECT_EQ(*state_.sni(), "public.dummy.com");
+
+  // Check that the real name is saved.
+  EXPECT_EQ(state_.echState()->sni, "www.hostname.com");
+
+  // Check the legacy session id is the same in both the client hello inner
+  // and the client hello outer
+  EXPECT_TRUE(folly::IOBufEqualTo()(
+      actualChlo.legacy_session_id, chloOuter.legacy_session_id));
+
+  // Check there exists an ECH extension.
+  auto echExtension =
+      getExtension<ech::OuterECHClientHello>(chloOuter.extensions);
+  EXPECT_TRUE(echExtension.hasValue());
+
+  // Check that early data and PSK are NOT present.
+  auto pskExtension = getExtension<ClientPresharedKey>(chloOuter.extensions);
+  EXPECT_FALSE(pskExtension.hasValue());
+  auto earlyExtension = getExtension<ClientEarlyData>(chloOuter.extensions);
+  EXPECT_FALSE(earlyExtension.hasValue());
+}
+#endif
+
+#if FIZZ_BUILD_AEGIS
+TEST_F(ClientProtocolTest, TestConnectECHWithAEGIS) {
+  auto echConfig = ech::test::getECHConfig();
+  Connect connect;
+  // Should not crash on cipher suite not recognized by HPKE
+  std::vector<CipherSuite> supportedCiphers(context_->getSupportedCiphers());
+  supportedCiphers.push_back(CipherSuite::TLS_AEGIS_128L_SHA256);
+  context_->setSupportedCiphers(supportedCiphers);
+  connect.context = context_;
+  connect.echConfigs = std::vector<ech::ECHConfig>();
+  connect.echConfigs->push_back(echConfig);
+  connect.sni = "www.hostname.com";
+  const auto& actualChlo = getDefaultClientHello();
+
+  // Two randoms should be generated, 1 for the client hello inner and 1 for the
+  // client hello outer.
+  EXPECT_CALL(*factory_, makeRandom()).Times(2);
+
+  fizz::Param param = std::move(connect);
+  auto actions = detail::processEvent(state_, param);
+  expectActions<MutateState, WriteToSocket>(actions);
+  processStateMutations(actions);
+
+  EXPECT_EQ(state_.state(), StateEnum::ExpectingServerHello);
+  EXPECT_TRUE(state_.encodedClientHello().has_value());
+
+  auto encodedClientHello = state_.encodedClientHello().value()->clone();
+
+  // We expect this to be false because the encoded client hello should be
+  // the encrypted client hello, which contains the actualChlo.
+  EXPECT_FALSE(
+      folly::IOBufEqualTo()(encodedClientHello, encodeHandshake(actualChlo)));
+
+  // Get rid of handshake header (type + version).
+  encodedClientHello->trimStart(4);
+  ClientHello chloOuter = decode<ClientHello>(std::move(encodedClientHello));
+
+  // Check we used fake server name.
+  auto sniExt = getExtension<ServerNameList>(chloOuter.extensions);
+  EXPECT_TRUE(sniExt.hasValue());
+  EXPECT_TRUE(folly::IOBufEqualTo()(
+      sniExt.value().server_name_list[0].hostname,
+      folly::IOBuf::copyBuffer("public.dummy.com")));
+
+  // Check that the state is using the fake server name
+  EXPECT_EQ(*state_.sni(), "public.dummy.com");
+
+  // Check that the real name is saved.
+  EXPECT_EQ(state_.echState()->sni, "www.hostname.com");
+
+  // Check the legacy session id is the same in both the client hello inner
+  // and the client hello outer
+  EXPECT_TRUE(folly::IOBufEqualTo()(
+      actualChlo.legacy_session_id, chloOuter.legacy_session_id));
+
+  // Check there exists an ECH extension.
+  auto echExtension =
+      getExtension<ech::OuterECHClientHello>(chloOuter.extensions);
+  EXPECT_TRUE(echExtension.hasValue());
+
+  // Check that early data and PSK are NOT present.
+  auto pskExtension = getExtension<ClientPresharedKey>(chloOuter.extensions);
+  EXPECT_FALSE(pskExtension.hasValue());
+  auto earlyExtension = getExtension<ClientEarlyData>(chloOuter.extensions);
+  EXPECT_FALSE(earlyExtension.hasValue());
+}
+#endif
+
 TEST_F(ClientProtocolTest, TestConnectECHWithPSK) {
   Connect connect;
   connect.context = context_;

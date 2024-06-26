@@ -143,14 +143,16 @@ func main() {
 		glog.Fatalf("failed to start server: %v", err)
 	}
 	fmt.Println(addr.(*net.TCPAddr).Port)
+	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		err := ts.Serve()
+		err := ts.ServeContext(ctx)
 		if err != nil {
 			glog.Fatalf("failed to start server")
 		}
 	}()
 
 	<-sigc
+	cancel()
 	os.Exit(0)
 }
 

@@ -21,6 +21,7 @@ namespace capi {
 template <>
 struct Extractor<::cpp2::Fields>
     : public BaseExtractor<::cpp2::Fields> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::Fields> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -36,6 +37,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::cpp2::Fields>
     : public BaseConstructor<::cpp2::Fields> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::Fields& val);
 };
 
@@ -50,6 +52,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::cpp2::FieldsInjectedToEmptyStruct>
     : public BaseExtractor<::cpp2::FieldsInjectedToEmptyStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::FieldsInjectedToEmptyStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -65,6 +68,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::cpp2::FieldsInjectedToEmptyStruct>
     : public BaseConstructor<::cpp2::FieldsInjectedToEmptyStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::FieldsInjectedToEmptyStruct& val);
 };
 
@@ -79,6 +83,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::cpp2::FieldsInjectedToStruct>
     : public BaseExtractor<::cpp2::FieldsInjectedToStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::FieldsInjectedToStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -94,6 +99,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::cpp2::FieldsInjectedToStruct>
     : public BaseConstructor<::cpp2::FieldsInjectedToStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::FieldsInjectedToStruct& val);
 };
 
@@ -108,6 +114,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::cpp2::FieldsInjectedWithIncludedStruct>
     : public BaseExtractor<::cpp2::FieldsInjectedWithIncludedStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::FieldsInjectedWithIncludedStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -123,6 +130,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::cpp2::FieldsInjectedWithIncludedStruct>
     : public BaseConstructor<::cpp2::FieldsInjectedWithIncludedStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::FieldsInjectedWithIncludedStruct& val);
 };
 

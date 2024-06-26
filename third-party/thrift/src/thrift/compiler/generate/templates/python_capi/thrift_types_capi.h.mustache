@@ -34,6 +34,8 @@ namespace capi {
 template <>
 struct Extractor<{{struct:cpp_name}}>
     : public BaseExtractor<{{struct:cpp_name}}> {
+  {{> common/using_capi }}
+
   ExtractorResult<{{struct:cpp_name}}> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -49,6 +51,8 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<{{struct:cpp_name}}>
     : public BaseConstructor<{{struct:cpp_name}}> {
+  {{> common/using_capi }}
+
   PyObject* operator()(const {{struct:cpp_name}}& val);
 };
 

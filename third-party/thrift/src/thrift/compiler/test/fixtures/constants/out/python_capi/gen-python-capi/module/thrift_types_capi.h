@@ -21,6 +21,7 @@ namespace capi {
 template <>
 struct Extractor<::cpp2::Internship>
     : public BaseExtractor<::cpp2::Internship> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::Internship> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -36,6 +37,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::cpp2::Internship>
     : public BaseConstructor<::cpp2::Internship> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::Internship& val);
 };
 
@@ -50,6 +52,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::cpp2::Range>
     : public BaseExtractor<::cpp2::Range> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::Range> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -65,6 +68,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::cpp2::Range>
     : public BaseConstructor<::cpp2::Range> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::Range& val);
 };
 
@@ -79,6 +83,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::cpp2::struct1>
     : public BaseExtractor<::cpp2::struct1> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::struct1> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -94,6 +99,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::cpp2::struct1>
     : public BaseConstructor<::cpp2::struct1> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::struct1& val);
 };
 
@@ -108,6 +114,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::cpp2::struct2>
     : public BaseExtractor<::cpp2::struct2> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::struct2> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -123,6 +130,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::cpp2::struct2>
     : public BaseConstructor<::cpp2::struct2> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::struct2& val);
 };
 
@@ -137,6 +145,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::cpp2::struct3>
     : public BaseExtractor<::cpp2::struct3> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::struct3> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -152,6 +161,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::cpp2::struct3>
     : public BaseConstructor<::cpp2::struct3> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::struct3& val);
 };
 
@@ -166,6 +176,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::cpp2::struct4>
     : public BaseExtractor<::cpp2::struct4> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::struct4> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -181,6 +192,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::cpp2::struct4>
     : public BaseConstructor<::cpp2::struct4> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::struct4& val);
 };
 
@@ -195,6 +207,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::cpp2::union1>
     : public BaseExtractor<::cpp2::union1> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::union1> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -210,6 +223,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::cpp2::union1>
     : public BaseConstructor<::cpp2::union1> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::union1& val);
 };
 
@@ -224,6 +238,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::cpp2::union2>
     : public BaseExtractor<::cpp2::union2> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::union2> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -239,6 +254,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::cpp2::union2>
     : public BaseConstructor<::cpp2::union2> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::union2& val);
 };
 

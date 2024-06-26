@@ -21,6 +21,7 @@ namespace capi {
 template <>
 struct Extractor<::test::fixtures::python_capi::SerializedStruct>
     : public BaseExtractor<::test::fixtures::python_capi::SerializedStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::python_capi::SerializedStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -36,6 +37,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::python_capi::SerializedStruct>
     : public BaseConstructor<::test::fixtures::python_capi::SerializedStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::python_capi::SerializedStruct& val);
 };
 
@@ -50,6 +52,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::python_capi::SerializedUnion>
     : public BaseExtractor<::test::fixtures::python_capi::SerializedUnion> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::python_capi::SerializedUnion> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -65,6 +68,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::python_capi::SerializedUnion>
     : public BaseConstructor<::test::fixtures::python_capi::SerializedUnion> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::python_capi::SerializedUnion& val);
 };
 
@@ -79,6 +83,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::python_capi::SerializedError>
     : public BaseExtractor<::test::fixtures::python_capi::SerializedError> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::python_capi::SerializedError> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -94,6 +99,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::python_capi::SerializedError>
     : public BaseConstructor<::test::fixtures::python_capi::SerializedError> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::python_capi::SerializedError& val);
 };
 
@@ -108,6 +114,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::python_capi::MarshalStruct>
     : public BaseExtractor<::test::fixtures::python_capi::MarshalStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::python_capi::MarshalStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -123,6 +130,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::python_capi::MarshalStruct>
     : public BaseConstructor<::test::fixtures::python_capi::MarshalStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::python_capi::MarshalStruct& val);
 };
 
@@ -137,6 +145,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::python_capi::MarshalUnion>
     : public BaseExtractor<::test::fixtures::python_capi::MarshalUnion> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::python_capi::MarshalUnion> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -152,6 +161,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::python_capi::MarshalUnion>
     : public BaseConstructor<::test::fixtures::python_capi::MarshalUnion> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::python_capi::MarshalUnion& val);
 };
 
@@ -166,6 +176,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::python_capi::MarshalError>
     : public BaseExtractor<::test::fixtures::python_capi::MarshalError> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::python_capi::MarshalError> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -181,6 +192,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::python_capi::MarshalError>
     : public BaseConstructor<::test::fixtures::python_capi::MarshalError> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::python_capi::MarshalError& val);
 };
 

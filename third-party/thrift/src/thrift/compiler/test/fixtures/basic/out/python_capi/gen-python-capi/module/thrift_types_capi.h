@@ -21,6 +21,7 @@ namespace capi {
 template <>
 struct Extractor<::test::fixtures::basic::MyStruct>
     : public BaseExtractor<::test::fixtures::basic::MyStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::basic::MyStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -36,6 +37,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::basic::MyStruct>
     : public BaseConstructor<::test::fixtures::basic::MyStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::basic::MyStruct& val);
 };
 
@@ -50,6 +52,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::basic::Containers>
     : public BaseExtractor<::test::fixtures::basic::Containers> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::basic::Containers> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -65,6 +68,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::basic::Containers>
     : public BaseConstructor<::test::fixtures::basic::Containers> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::basic::Containers& val);
 };
 
@@ -79,6 +83,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::basic::MyDataItem>
     : public BaseExtractor<::test::fixtures::basic::MyDataItem> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::basic::MyDataItem> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -94,6 +99,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::basic::MyDataItem>
     : public BaseConstructor<::test::fixtures::basic::MyDataItem> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::basic::MyDataItem& val);
 };
 
@@ -108,6 +114,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::basic::MyUnion>
     : public BaseExtractor<::test::fixtures::basic::MyUnion> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::basic::MyUnion> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -123,6 +130,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::basic::MyUnion>
     : public BaseConstructor<::test::fixtures::basic::MyUnion> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::basic::MyUnion& val);
 };
 
@@ -137,6 +145,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::basic::MyException>
     : public BaseExtractor<::test::fixtures::basic::MyException> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::basic::MyException> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -152,6 +161,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::basic::MyException>
     : public BaseConstructor<::test::fixtures::basic::MyException> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::basic::MyException& val);
 };
 
@@ -166,6 +176,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::basic::ReservedKeyword>
     : public BaseExtractor<::test::fixtures::basic::ReservedKeyword> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::basic::ReservedKeyword> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -181,6 +192,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::basic::ReservedKeyword>
     : public BaseConstructor<::test::fixtures::basic::ReservedKeyword> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::basic::ReservedKeyword& val);
 };
 
@@ -195,6 +207,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::basic::UnionToBeRenamed>
     : public BaseExtractor<::test::fixtures::basic::UnionToBeRenamed> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::basic::UnionToBeRenamed> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -210,6 +223,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::basic::UnionToBeRenamed>
     : public BaseConstructor<::test::fixtures::basic::UnionToBeRenamed> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::basic::UnionToBeRenamed& val);
 };
 

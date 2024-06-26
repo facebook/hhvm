@@ -21,6 +21,7 @@ namespace capi {
 template <>
 struct Extractor<::test::fixtures::python_capi::TemplateLists>
     : public BaseExtractor<::test::fixtures::python_capi::TemplateLists> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::python_capi::TemplateLists> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -36,6 +37,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::python_capi::TemplateLists>
     : public BaseConstructor<::test::fixtures::python_capi::TemplateLists> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::python_capi::TemplateLists& val);
 };
 
@@ -50,6 +52,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::python_capi::TemplateSets>
     : public BaseExtractor<::test::fixtures::python_capi::TemplateSets> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::python_capi::TemplateSets> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -65,6 +68,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::python_capi::TemplateSets>
     : public BaseConstructor<::test::fixtures::python_capi::TemplateSets> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::python_capi::TemplateSets& val);
 };
 
@@ -79,6 +83,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::python_capi::TemplateMaps>
     : public BaseExtractor<::test::fixtures::python_capi::TemplateMaps> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::python_capi::TemplateMaps> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -94,6 +99,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::python_capi::TemplateMaps>
     : public BaseConstructor<::test::fixtures::python_capi::TemplateMaps> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::python_capi::TemplateMaps& val);
 };
 

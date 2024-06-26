@@ -21,6 +21,7 @@ namespace capi {
 template <>
 struct Extractor<::facebook::thrift::test::MyAnnotation>
     : public BaseExtractor<::facebook::thrift::test::MyAnnotation> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::MyAnnotation> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -36,6 +37,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::MyAnnotation>
     : public BaseConstructor<::facebook::thrift::test::MyAnnotation> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::MyAnnotation& val);
 };
 
@@ -50,6 +52,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::Foo>
     : public BaseExtractor<::facebook::thrift::test::Foo> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::Foo> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -65,6 +68,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::Foo>
     : public BaseConstructor<::facebook::thrift::test::Foo> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::Foo& val);
 };
 
@@ -79,6 +83,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::Baz>
     : public BaseExtractor<::facebook::thrift::test::Baz> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::Baz> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -94,6 +99,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::Baz>
     : public BaseConstructor<::facebook::thrift::test::Baz> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::Baz& val);
 };
 
@@ -108,6 +114,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::Bar>
     : public BaseExtractor<::facebook::thrift::test::Bar> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::Bar> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -123,6 +130,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::Bar>
     : public BaseConstructor<::facebook::thrift::test::Bar> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::Bar& val);
 };
 
@@ -137,6 +145,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::detail::DirectlyAdapted>
     : public BaseExtractor<::facebook::thrift::test::detail::DirectlyAdapted> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::detail::DirectlyAdapted> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -152,6 +161,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::detail::DirectlyAdapted>
     : public BaseConstructor<::facebook::thrift::test::detail::DirectlyAdapted> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::detail::DirectlyAdapted& val);
 };
 
@@ -166,6 +176,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::detail::IndependentDirectlyAdapted>
     : public BaseExtractor<::facebook::thrift::test::detail::IndependentDirectlyAdapted> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::detail::IndependentDirectlyAdapted> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -181,6 +192,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::detail::IndependentDirectlyAdapted>
     : public BaseConstructor<::facebook::thrift::test::detail::IndependentDirectlyAdapted> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::detail::IndependentDirectlyAdapted& val);
 };
 
@@ -195,6 +207,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::StructWithFieldAdapter>
     : public BaseExtractor<::facebook::thrift::test::StructWithFieldAdapter> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::StructWithFieldAdapter> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -210,6 +223,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::StructWithFieldAdapter>
     : public BaseConstructor<::facebook::thrift::test::StructWithFieldAdapter> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::StructWithFieldAdapter& val);
 };
 
@@ -224,6 +238,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::TerseAdaptedFields>
     : public BaseExtractor<::facebook::thrift::test::TerseAdaptedFields> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::TerseAdaptedFields> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -239,6 +254,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::TerseAdaptedFields>
     : public BaseConstructor<::facebook::thrift::test::TerseAdaptedFields> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::TerseAdaptedFields& val);
 };
 
@@ -253,6 +269,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::B>
     : public BaseExtractor<::facebook::thrift::test::B> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::B> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -268,6 +285,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::B>
     : public BaseConstructor<::facebook::thrift::test::B> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::B& val);
 };
 
@@ -282,6 +300,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::A>
     : public BaseExtractor<::facebook::thrift::test::A> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::A> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -297,6 +316,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::A>
     : public BaseConstructor<::facebook::thrift::test::A> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::A& val);
 };
 
@@ -311,6 +331,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::Config>
     : public BaseExtractor<::facebook::thrift::test::Config> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::Config> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -326,6 +347,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::Config>
     : public BaseConstructor<::facebook::thrift::test::Config> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::Config& val);
 };
 
@@ -340,6 +362,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::MyStruct>
     : public BaseExtractor<::facebook::thrift::test::MyStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::MyStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -355,6 +378,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::MyStruct>
     : public BaseConstructor<::facebook::thrift::test::MyStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::MyStruct& val);
 };
 
@@ -369,6 +393,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::AdaptTestStruct>
     : public BaseExtractor<::facebook::thrift::test::AdaptTestStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::AdaptTestStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -384,6 +409,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::AdaptTestStruct>
     : public BaseConstructor<::facebook::thrift::test::AdaptTestStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::AdaptTestStruct& val);
 };
 
@@ -398,6 +424,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::AdaptTemplatedTestStruct>
     : public BaseExtractor<::facebook::thrift::test::AdaptTemplatedTestStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::AdaptTemplatedTestStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -413,6 +440,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::AdaptTemplatedTestStruct>
     : public BaseConstructor<::facebook::thrift::test::AdaptTemplatedTestStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::AdaptTemplatedTestStruct& val);
 };
 
@@ -427,6 +455,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>
     : public BaseExtractor<::facebook::thrift::test::AdaptTemplatedNestedTestStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::AdaptTemplatedNestedTestStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -442,6 +471,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>
     : public BaseConstructor<::facebook::thrift::test::AdaptTemplatedNestedTestStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::AdaptTemplatedNestedTestStruct& val);
 };
 
@@ -456,6 +486,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::ThriftAdaptTestUnion>
     : public BaseExtractor<::facebook::thrift::test::ThriftAdaptTestUnion> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::ThriftAdaptTestUnion> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -471,6 +502,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::ThriftAdaptTestUnion>
     : public BaseConstructor<::facebook::thrift::test::ThriftAdaptTestUnion> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::ThriftAdaptTestUnion& val);
 };
 
@@ -485,6 +517,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::ThriftAdaptedStruct>
     : public BaseExtractor<::facebook::thrift::test::ThriftAdaptedStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::ThriftAdaptedStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -500,6 +533,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::ThriftAdaptedStruct>
     : public BaseConstructor<::facebook::thrift::test::ThriftAdaptedStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::ThriftAdaptedStruct& val);
 };
 
@@ -514,6 +548,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::detail::DirectlyAdaptedStruct>
     : public BaseExtractor<::facebook::thrift::test::detail::DirectlyAdaptedStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::detail::DirectlyAdaptedStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -529,6 +564,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::detail::DirectlyAdaptedStruct>
     : public BaseConstructor<::facebook::thrift::test::detail::DirectlyAdaptedStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::detail::DirectlyAdaptedStruct& val);
 };
 
@@ -543,6 +579,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::StructFieldAdaptedStruct>
     : public BaseExtractor<::facebook::thrift::test::StructFieldAdaptedStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::StructFieldAdaptedStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -558,6 +595,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::StructFieldAdaptedStruct>
     : public BaseConstructor<::facebook::thrift::test::StructFieldAdaptedStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::StructFieldAdaptedStruct& val);
 };
 
@@ -572,6 +610,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::CircularAdaptee>
     : public BaseExtractor<::facebook::thrift::test::CircularAdaptee> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::CircularAdaptee> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -587,6 +626,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::CircularAdaptee>
     : public BaseConstructor<::facebook::thrift::test::CircularAdaptee> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::CircularAdaptee& val);
 };
 
@@ -601,6 +641,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::CircularStruct>
     : public BaseExtractor<::facebook::thrift::test::CircularStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::CircularStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -616,6 +657,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::CircularStruct>
     : public BaseConstructor<::facebook::thrift::test::CircularStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::CircularStruct& val);
 };
 
@@ -630,6 +672,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::ReorderedStruct>
     : public BaseExtractor<::facebook::thrift::test::ReorderedStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::ReorderedStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -645,6 +688,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::ReorderedStruct>
     : public BaseConstructor<::facebook::thrift::test::ReorderedStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::ReorderedStruct& val);
 };
 
@@ -659,6 +703,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::detail::DeclaredAfterStruct>
     : public BaseExtractor<::facebook::thrift::test::detail::DeclaredAfterStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::detail::DeclaredAfterStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -674,6 +719,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::detail::DeclaredAfterStruct>
     : public BaseConstructor<::facebook::thrift::test::detail::DeclaredAfterStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::detail::DeclaredAfterStruct& val);
 };
 
@@ -688,6 +734,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::UnderlyingRenamedStruct>
     : public BaseExtractor<::facebook::thrift::test::UnderlyingRenamedStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::UnderlyingRenamedStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -703,6 +750,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::UnderlyingRenamedStruct>
     : public BaseConstructor<::facebook::thrift::test::UnderlyingRenamedStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::UnderlyingRenamedStruct& val);
 };
 
@@ -717,6 +765,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::UnderlyingSameNamespaceStruct>
     : public BaseExtractor<::facebook::thrift::test::UnderlyingSameNamespaceStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::UnderlyingSameNamespaceStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -732,6 +781,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::UnderlyingSameNamespaceStruct>
     : public BaseConstructor<::facebook::thrift::test::UnderlyingSameNamespaceStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::UnderlyingSameNamespaceStruct& val);
 };
 
@@ -746,6 +796,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::detail::HeapAllocated>
     : public BaseExtractor<::facebook::thrift::test::detail::HeapAllocated> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::detail::HeapAllocated> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -761,6 +812,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::detail::HeapAllocated>
     : public BaseConstructor<::facebook::thrift::test::detail::HeapAllocated> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::detail::HeapAllocated& val);
 };
 
@@ -775,6 +827,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::MoveOnly>
     : public BaseExtractor<::facebook::thrift::test::MoveOnly> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::MoveOnly> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -790,6 +843,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::MoveOnly>
     : public BaseConstructor<::facebook::thrift::test::MoveOnly> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::MoveOnly& val);
 };
 
@@ -804,6 +858,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::AlsoMoveOnly>
     : public BaseExtractor<::facebook::thrift::test::AlsoMoveOnly> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::AlsoMoveOnly> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -819,6 +874,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::AlsoMoveOnly>
     : public BaseConstructor<::facebook::thrift::test::AlsoMoveOnly> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::AlsoMoveOnly& val);
 };
 
@@ -833,6 +889,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::ApplyAdapter>
     : public BaseExtractor<::facebook::thrift::test::ApplyAdapter> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::ApplyAdapter> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -848,6 +905,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::ApplyAdapter>
     : public BaseConstructor<::facebook::thrift::test::ApplyAdapter> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::ApplyAdapter& val);
 };
 
@@ -862,6 +920,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::detail::TransitiveAdapted>
     : public BaseExtractor<::facebook::thrift::test::detail::TransitiveAdapted> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::detail::TransitiveAdapted> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -877,6 +936,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::detail::TransitiveAdapted>
     : public BaseConstructor<::facebook::thrift::test::detail::TransitiveAdapted> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::detail::TransitiveAdapted& val);
 };
 
@@ -891,6 +951,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::CountingStruct>
     : public BaseExtractor<::facebook::thrift::test::CountingStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::facebook::thrift::test::CountingStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -906,6 +967,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::CountingStruct>
     : public BaseConstructor<::facebook::thrift::test::CountingStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::facebook::thrift::test::CountingStruct& val);
 };
 
@@ -920,6 +982,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::Person>
     : public BaseExtractor<::facebook::thrift::test::Person> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::Person> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -935,6 +998,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::Person>
     : public BaseConstructor<::facebook::thrift::test::Person> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::Person& val);
 };
 
@@ -949,6 +1013,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::facebook::thrift::test::Person2>
     : public BaseExtractor<::facebook::thrift::test::Person2> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::facebook::thrift::test::Person2> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -964,6 +1029,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::facebook::thrift::test::Person2>
     : public BaseConstructor<::facebook::thrift::test::Person2> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::facebook::thrift::test::Person2& val);
 };
 

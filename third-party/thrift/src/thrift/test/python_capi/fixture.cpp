@@ -22,6 +22,38 @@ using ::apache::thrift::python::capi::Constructor;
 
 namespace {
 
+static_assert(
+    Constructor<::thrift::test::python_capi::MyStruct>::kUsingMarshal,
+    "Should be marshaled because opt-in at module level");
+static_assert(
+    Constructor<::thrift::test::python_capi::PrimitiveStruct>::kUsingMarshal,
+    "Should be marshaled because opt-in at module level");
+static_assert(
+    Constructor<::thrift::test::python_capi::ListStruct>::kUsingMarshal,
+    "Should be marshaled because opt-in at module level");
+static_assert(
+    Constructor<::thrift::test::python_capi::SetStruct>::kUsingMarshal,
+    "Should be marshaled because opt-in at module level");
+static_assert(
+    Constructor<::thrift::test::python_capi::MapStruct>::kUsingMarshal,
+    "Should be marshaled because opt-in at module level");
+static_assert(
+    Constructor<::thrift::test::python_capi::ComposeStruct>::kUsingMarshal,
+    "Should be marshaled because opt-in at module level");
+static_assert(
+    Constructor<::thrift::test::python_capi::Shallot>::kUsingMarshal,
+    "Should be marshaled because opt-in at module level");
+
+static_assert(
+    !Constructor<::thrift::test::python_capi::TemplateLists>::kUsingMarshal,
+    "Should be serialized because cpp.Type template usage");
+static_assert(
+    !Constructor<::thrift::test::python_capi::TemplateSets>::kUsingMarshal,
+    "Should be serialized because cpp.Type template usage");
+static_assert(
+    !Constructor<::thrift::test::python_capi::TemplateMaps>::kUsingMarshal,
+    "Should be serialized because cpp.Type template usage");
+
 template <typename Container>
 void fill_list(const std::string& prefix, Container& list) {
   for (auto view : {"foo", "bar", "baz"}) {

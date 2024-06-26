@@ -21,6 +21,7 @@ namespace capi {
 template <>
 struct Extractor<::test::fixtures::enums::SomeStruct>
     : public BaseExtractor<::test::fixtures::enums::SomeStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::enums::SomeStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -36,6 +37,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::enums::SomeStruct>
     : public BaseConstructor<::test::fixtures::enums::SomeStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::enums::SomeStruct& val);
 };
 
@@ -50,6 +52,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::enums::MyStruct>
     : public BaseExtractor<::test::fixtures::enums::MyStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::enums::MyStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -65,6 +68,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::enums::MyStruct>
     : public BaseConstructor<::test::fixtures::enums::MyStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::enums::MyStruct& val);
 };
 

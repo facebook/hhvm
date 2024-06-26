@@ -21,6 +21,7 @@ namespace capi {
 template <>
 struct Extractor<::py3::simple::SimpleException>
     : public BaseExtractor<::py3::simple::SimpleException> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::py3::simple::SimpleException> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -36,6 +37,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::py3::simple::SimpleException>
     : public BaseConstructor<::py3::simple::SimpleException> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::py3::simple::SimpleException& val);
 };
 
@@ -50,6 +52,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::py3::simple::OptionalRefStruct>
     : public BaseExtractor<::py3::simple::OptionalRefStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::py3::simple::OptionalRefStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -65,6 +68,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::py3::simple::OptionalRefStruct>
     : public BaseConstructor<::py3::simple::OptionalRefStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::py3::simple::OptionalRefStruct& val);
 };
 
@@ -79,6 +83,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::py3::simple::SimpleStruct>
     : public BaseExtractor<::py3::simple::SimpleStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::py3::simple::SimpleStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -94,6 +99,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::py3::simple::SimpleStruct>
     : public BaseConstructor<::py3::simple::SimpleStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::py3::simple::SimpleStruct& val);
 };
 
@@ -108,6 +114,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::py3::simple::HiddenTypeFieldsStruct>
     : public BaseExtractor<::py3::simple::HiddenTypeFieldsStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::py3::simple::HiddenTypeFieldsStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -123,6 +130,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::py3::simple::HiddenTypeFieldsStruct>
     : public BaseConstructor<::py3::simple::HiddenTypeFieldsStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::py3::simple::HiddenTypeFieldsStruct& val);
 };
 
@@ -137,6 +145,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::py3::simple::detail::AdaptedUnion>
     : public BaseExtractor<::py3::simple::detail::AdaptedUnion> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::py3::simple::detail::AdaptedUnion> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -152,6 +161,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::py3::simple::detail::AdaptedUnion>
     : public BaseConstructor<::py3::simple::detail::AdaptedUnion> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::py3::simple::detail::AdaptedUnion& val);
 };
 
@@ -166,6 +176,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::py3::simple::HiddenException>
     : public BaseExtractor<::py3::simple::HiddenException> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::py3::simple::HiddenException> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -181,6 +192,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::py3::simple::HiddenException>
     : public BaseConstructor<::py3::simple::HiddenException> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::py3::simple::HiddenException& val);
 };
 
@@ -195,6 +207,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::py3::simple::ComplexStruct>
     : public BaseExtractor<::py3::simple::ComplexStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::py3::simple::ComplexStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -210,6 +223,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::py3::simple::ComplexStruct>
     : public BaseConstructor<::py3::simple::ComplexStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::py3::simple::ComplexStruct& val);
 };
 
@@ -224,6 +238,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::py3::simple::BinaryUnion>
     : public BaseExtractor<::py3::simple::BinaryUnion> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::py3::simple::BinaryUnion> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -239,6 +254,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::py3::simple::BinaryUnion>
     : public BaseConstructor<::py3::simple::BinaryUnion> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::py3::simple::BinaryUnion& val);
 };
 
@@ -253,6 +269,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::py3::simple::BinaryUnionStruct>
     : public BaseExtractor<::py3::simple::BinaryUnionStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::py3::simple::BinaryUnionStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -268,6 +285,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::py3::simple::BinaryUnionStruct>
     : public BaseConstructor<::py3::simple::BinaryUnionStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::py3::simple::BinaryUnionStruct& val);
 };
 

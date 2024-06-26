@@ -21,6 +21,7 @@ namespace capi {
 template <>
 struct Extractor<::test::fixtures::patch::MyData>
     : public BaseExtractor<::test::fixtures::patch::MyData> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::patch::MyData> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -36,6 +37,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyData>
     : public BaseConstructor<::test::fixtures::patch::MyData> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::patch::MyData& val);
 };
 
@@ -50,6 +52,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyDataWithCustomDefault>
     : public BaseExtractor<::test::fixtures::patch::MyDataWithCustomDefault> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::patch::MyDataWithCustomDefault> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -65,6 +68,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyDataWithCustomDefault>
     : public BaseConstructor<::test::fixtures::patch::MyDataWithCustomDefault> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::patch::MyDataWithCustomDefault& val);
 };
 
@@ -79,6 +83,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::InnerUnion>
     : public BaseExtractor<::test::fixtures::patch::InnerUnion> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::patch::InnerUnion> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -94,6 +99,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::InnerUnion>
     : public BaseConstructor<::test::fixtures::patch::InnerUnion> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::patch::InnerUnion& val);
 };
 
@@ -108,6 +114,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyUnion>
     : public BaseExtractor<::test::fixtures::patch::MyUnion> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::patch::MyUnion> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -123,6 +130,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyUnion>
     : public BaseConstructor<::test::fixtures::patch::MyUnion> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::patch::MyUnion& val);
 };
 
@@ -137,6 +145,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyStruct>
     : public BaseExtractor<::test::fixtures::patch::MyStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::patch::MyStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -152,6 +161,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyStruct>
     : public BaseConstructor<::test::fixtures::patch::MyStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::patch::MyStruct& val);
 };
 
@@ -166,6 +176,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::LateDefStruct>
     : public BaseExtractor<::test::fixtures::patch::LateDefStruct> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::patch::LateDefStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -181,6 +192,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::LateDefStruct>
     : public BaseConstructor<::test::fixtures::patch::LateDefStruct> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::patch::LateDefStruct& val);
 };
 
@@ -195,6 +207,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::Recursive>
     : public BaseExtractor<::test::fixtures::patch::Recursive> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::patch::Recursive> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -210,6 +223,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::Recursive>
     : public BaseConstructor<::test::fixtures::patch::Recursive> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::patch::Recursive& val);
 };
 
@@ -224,6 +238,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::Bar>
     : public BaseExtractor<::test::fixtures::patch::Bar> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::patch::Bar> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -239,6 +254,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::Bar>
     : public BaseConstructor<::test::fixtures::patch::Bar> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::patch::Bar& val);
 };
 
@@ -253,6 +269,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::Loop>
     : public BaseExtractor<::test::fixtures::patch::Loop> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::patch::Loop> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -268,6 +285,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::Loop>
     : public BaseConstructor<::test::fixtures::patch::Loop> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::patch::Loop& val);
 };
 
@@ -282,6 +300,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::RefFields>
     : public BaseExtractor<::test::fixtures::patch::RefFields> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::patch::RefFields> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -297,6 +316,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::RefFields>
     : public BaseConstructor<::test::fixtures::patch::RefFields> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::patch::RefFields& val);
 };
 
@@ -311,6 +331,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyDataPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyDataPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyDataPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -326,6 +347,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyDataPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::MyDataPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyDataPatchStruct& val);
 };
 
@@ -340,6 +362,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyDataFieldPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyDataFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyDataFieldPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -355,6 +378,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyDataFieldPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::MyDataFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyDataFieldPatchStruct& val);
 };
 
@@ -369,6 +393,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyDataEnsureStruct>
     : public BaseExtractor<::test::fixtures::patch::MyDataEnsureStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyDataEnsureStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -384,6 +409,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyDataEnsureStruct>
     : public BaseConstructor<::test::fixtures::patch::MyDataEnsureStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyDataEnsureStruct& val);
 };
 
@@ -398,6 +424,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyDataSafePatch>
     : public BaseExtractor<::test::fixtures::patch::MyDataSafePatch> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyDataSafePatch> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -413,6 +440,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyDataSafePatch>
     : public BaseConstructor<::test::fixtures::patch::MyDataSafePatch> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyDataSafePatch& val);
 };
 
@@ -427,6 +455,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -442,6 +471,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct& val);
 };
 
@@ -456,6 +486,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -471,6 +502,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct& val);
 };
 
@@ -485,6 +517,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>
     : public BaseExtractor<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -500,6 +533,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>
     : public BaseConstructor<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct& val);
 };
 
@@ -514,6 +548,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>
     : public BaseExtractor<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -529,6 +564,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>
     : public BaseConstructor<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyDataWithCustomDefaultSafePatch& val);
 };
 
@@ -543,6 +579,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::InnerUnionPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::InnerUnionPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::InnerUnionPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -558,6 +595,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::InnerUnionPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::InnerUnionPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::InnerUnionPatchStruct& val);
 };
 
@@ -572,6 +610,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::InnerUnionFieldPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::InnerUnionFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::InnerUnionFieldPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -587,6 +626,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::InnerUnionFieldPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::InnerUnionFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::InnerUnionFieldPatchStruct& val);
 };
 
@@ -601,6 +641,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::InnerUnionSafePatch>
     : public BaseExtractor<::test::fixtures::patch::InnerUnionSafePatch> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::InnerUnionSafePatch> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -616,6 +657,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::InnerUnionSafePatch>
     : public BaseConstructor<::test::fixtures::patch::InnerUnionSafePatch> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::InnerUnionSafePatch& val);
 };
 
@@ -630,6 +672,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyUnionPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyUnionPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyUnionPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -645,6 +688,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyUnionPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::MyUnionPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyUnionPatchStruct& val);
 };
 
@@ -659,6 +703,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyUnionFieldPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyUnionFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyUnionFieldPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -674,6 +719,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyUnionFieldPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::MyUnionFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyUnionFieldPatchStruct& val);
 };
 
@@ -688,6 +734,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyUnionSafePatch>
     : public BaseExtractor<::test::fixtures::patch::MyUnionSafePatch> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyUnionSafePatch> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -703,6 +750,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyUnionSafePatch>
     : public BaseConstructor<::test::fixtures::patch::MyUnionSafePatch> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyUnionSafePatch& val);
 };
 
@@ -717,6 +765,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyStructPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyStructPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyStructPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -732,6 +781,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyStructPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::MyStructPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyStructPatchStruct& val);
 };
 
@@ -746,6 +796,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyStructField10PatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyStructField10PatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyStructField10PatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -761,6 +812,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyStructField10PatchStruct>
     : public BaseConstructor<::test::fixtures::patch::MyStructField10PatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyStructField10PatchStruct& val);
 };
 
@@ -775,6 +827,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyStructField23PatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyStructField23PatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyStructField23PatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -790,6 +843,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyStructField23PatchStruct>
     : public BaseConstructor<::test::fixtures::patch::MyStructField23PatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyStructField23PatchStruct& val);
 };
 
@@ -804,6 +858,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyStructField26PatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyStructField26PatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyStructField26PatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -819,6 +874,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyStructField26PatchStruct>
     : public BaseConstructor<::test::fixtures::patch::MyStructField26PatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyStructField26PatchStruct& val);
 };
 
@@ -833,6 +889,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyStructField27PatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyStructField27PatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyStructField27PatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -848,6 +905,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyStructField27PatchStruct>
     : public BaseConstructor<::test::fixtures::patch::MyStructField27PatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyStructField27PatchStruct& val);
 };
 
@@ -862,6 +920,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyStructField28PatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyStructField28PatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyStructField28PatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -877,6 +936,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyStructField28PatchStruct>
     : public BaseConstructor<::test::fixtures::patch::MyStructField28PatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyStructField28PatchStruct& val);
 };
 
@@ -891,6 +951,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyStructField29PatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyStructField29PatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyStructField29PatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -906,6 +967,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyStructField29PatchStruct>
     : public BaseConstructor<::test::fixtures::patch::MyStructField29PatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyStructField29PatchStruct& val);
 };
 
@@ -920,6 +982,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyStructField30PatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyStructField30PatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyStructField30PatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -935,6 +998,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyStructField30PatchStruct>
     : public BaseConstructor<::test::fixtures::patch::MyStructField30PatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyStructField30PatchStruct& val);
 };
 
@@ -949,6 +1013,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyStructField30Patch1Struct>
     : public BaseExtractor<::test::fixtures::patch::MyStructField30Patch1Struct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyStructField30Patch1Struct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -964,6 +1029,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyStructField30Patch1Struct>
     : public BaseConstructor<::test::fixtures::patch::MyStructField30Patch1Struct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyStructField30Patch1Struct& val);
 };
 
@@ -978,6 +1044,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyStructFieldPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyStructFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyStructFieldPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -993,6 +1060,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyStructFieldPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::MyStructFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyStructFieldPatchStruct& val);
 };
 
@@ -1007,6 +1075,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyStructEnsureStruct>
     : public BaseExtractor<::test::fixtures::patch::MyStructEnsureStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyStructEnsureStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1022,6 +1091,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyStructEnsureStruct>
     : public BaseConstructor<::test::fixtures::patch::MyStructEnsureStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyStructEnsureStruct& val);
 };
 
@@ -1036,6 +1106,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::MyStructSafePatch>
     : public BaseExtractor<::test::fixtures::patch::MyStructSafePatch> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::MyStructSafePatch> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1051,6 +1122,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::MyStructSafePatch>
     : public BaseConstructor<::test::fixtures::patch::MyStructSafePatch> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::MyStructSafePatch& val);
 };
 
@@ -1065,6 +1137,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::LateDefStructPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::LateDefStructPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::LateDefStructPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1080,6 +1153,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::LateDefStructPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::LateDefStructPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::LateDefStructPatchStruct& val);
 };
 
@@ -1094,6 +1168,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::LateDefStructFieldPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::LateDefStructFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::LateDefStructFieldPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1109,6 +1184,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::LateDefStructFieldPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::LateDefStructFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::LateDefStructFieldPatchStruct& val);
 };
 
@@ -1123,6 +1199,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::LateDefStructEnsureStruct>
     : public BaseExtractor<::test::fixtures::patch::LateDefStructEnsureStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::LateDefStructEnsureStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1138,6 +1215,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::LateDefStructEnsureStruct>
     : public BaseConstructor<::test::fixtures::patch::LateDefStructEnsureStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::LateDefStructEnsureStruct& val);
 };
 
@@ -1152,6 +1230,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::LateDefStructSafePatch>
     : public BaseExtractor<::test::fixtures::patch::LateDefStructSafePatch> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::LateDefStructSafePatch> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1167,6 +1246,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::LateDefStructSafePatch>
     : public BaseConstructor<::test::fixtures::patch::LateDefStructSafePatch> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::LateDefStructSafePatch& val);
 };
 
@@ -1181,6 +1261,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::RecursivePatchStruct>
     : public BaseExtractor<::test::fixtures::patch::RecursivePatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::RecursivePatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1196,6 +1277,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::RecursivePatchStruct>
     : public BaseConstructor<::test::fixtures::patch::RecursivePatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::RecursivePatchStruct& val);
 };
 
@@ -1210,6 +1292,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::RecursiveField1PatchStruct>
     : public BaseExtractor<::test::fixtures::patch::RecursiveField1PatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::RecursiveField1PatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1225,6 +1308,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::RecursiveField1PatchStruct>
     : public BaseConstructor<::test::fixtures::patch::RecursiveField1PatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::RecursiveField1PatchStruct& val);
 };
 
@@ -1239,6 +1323,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::RecursiveFieldPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::RecursiveFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::RecursiveFieldPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1254,6 +1339,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::RecursiveFieldPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::RecursiveFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::RecursiveFieldPatchStruct& val);
 };
 
@@ -1268,6 +1354,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::RecursiveEnsureStruct>
     : public BaseExtractor<::test::fixtures::patch::RecursiveEnsureStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::RecursiveEnsureStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1283,6 +1370,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::RecursiveEnsureStruct>
     : public BaseConstructor<::test::fixtures::patch::RecursiveEnsureStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::RecursiveEnsureStruct& val);
 };
 
@@ -1297,6 +1385,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::RecursiveSafePatch>
     : public BaseExtractor<::test::fixtures::patch::RecursiveSafePatch> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::RecursiveSafePatch> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1312,6 +1401,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::RecursiveSafePatch>
     : public BaseConstructor<::test::fixtures::patch::RecursiveSafePatch> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::RecursiveSafePatch& val);
 };
 
@@ -1326,6 +1416,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::BarPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::BarPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::BarPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1341,6 +1432,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::BarPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::BarPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::BarPatchStruct& val);
 };
 
@@ -1355,6 +1447,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::BarFieldPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::BarFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::BarFieldPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1370,6 +1463,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::BarFieldPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::BarFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::BarFieldPatchStruct& val);
 };
 
@@ -1384,6 +1478,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::BarEnsureStruct>
     : public BaseExtractor<::test::fixtures::patch::BarEnsureStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::BarEnsureStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1399,6 +1494,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::BarEnsureStruct>
     : public BaseConstructor<::test::fixtures::patch::BarEnsureStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::BarEnsureStruct& val);
 };
 
@@ -1413,6 +1509,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::BarSafePatch>
     : public BaseExtractor<::test::fixtures::patch::BarSafePatch> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::BarSafePatch> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1428,6 +1525,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::BarSafePatch>
     : public BaseConstructor<::test::fixtures::patch::BarSafePatch> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::BarSafePatch& val);
 };
 
@@ -1442,6 +1540,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::LoopPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::LoopPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::LoopPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1457,6 +1556,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::LoopPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::LoopPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::LoopPatchStruct& val);
 };
 
@@ -1471,6 +1571,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::LoopSafePatch>
     : public BaseExtractor<::test::fixtures::patch::LoopSafePatch> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::LoopSafePatch> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1486,6 +1587,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::LoopSafePatch>
     : public BaseConstructor<::test::fixtures::patch::LoopSafePatch> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::LoopSafePatch& val);
 };
 
@@ -1500,6 +1602,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::RefFieldsPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::RefFieldsPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::RefFieldsPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1515,6 +1618,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::RefFieldsPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::RefFieldsPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::RefFieldsPatchStruct& val);
 };
 
@@ -1529,6 +1633,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::RefFieldsField1PatchStruct>
     : public BaseExtractor<::test::fixtures::patch::RefFieldsField1PatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::RefFieldsField1PatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1544,6 +1649,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::RefFieldsField1PatchStruct>
     : public BaseConstructor<::test::fixtures::patch::RefFieldsField1PatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::RefFieldsField1PatchStruct& val);
 };
 
@@ -1558,6 +1664,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::RefFieldsField4PatchStruct>
     : public BaseExtractor<::test::fixtures::patch::RefFieldsField4PatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::RefFieldsField4PatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1573,6 +1680,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::RefFieldsField4PatchStruct>
     : public BaseConstructor<::test::fixtures::patch::RefFieldsField4PatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::RefFieldsField4PatchStruct& val);
 };
 
@@ -1587,6 +1695,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::RefFieldsField7PatchStruct>
     : public BaseExtractor<::test::fixtures::patch::RefFieldsField7PatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::RefFieldsField7PatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1602,6 +1711,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::RefFieldsField7PatchStruct>
     : public BaseConstructor<::test::fixtures::patch::RefFieldsField7PatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::RefFieldsField7PatchStruct& val);
 };
 
@@ -1616,6 +1726,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::RefFieldsFieldPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::RefFieldsFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::RefFieldsFieldPatchStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1631,6 +1742,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::RefFieldsFieldPatchStruct>
     : public BaseConstructor<::test::fixtures::patch::RefFieldsFieldPatchStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::RefFieldsFieldPatchStruct& val);
 };
 
@@ -1645,6 +1757,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::RefFieldsEnsureStruct>
     : public BaseExtractor<::test::fixtures::patch::RefFieldsEnsureStruct> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::RefFieldsEnsureStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1660,6 +1773,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::RefFieldsEnsureStruct>
     : public BaseConstructor<::test::fixtures::patch::RefFieldsEnsureStruct> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::RefFieldsEnsureStruct& val);
 };
 
@@ -1674,6 +1788,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::test::fixtures::patch::RefFieldsSafePatch>
     : public BaseExtractor<::test::fixtures::patch::RefFieldsSafePatch> {
+  static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::patch::RefFieldsSafePatch> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -1689,6 +1804,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::fixtures::patch::RefFieldsSafePatch>
     : public BaseConstructor<::test::fixtures::patch::RefFieldsSafePatch> {
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::patch::RefFieldsSafePatch& val);
 };
 

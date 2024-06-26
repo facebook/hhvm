@@ -21,6 +21,7 @@ namespace capi {
 template <>
 struct Extractor<::test::namespace_from_package::module::Foo>
     : public BaseExtractor<::test::namespace_from_package::module::Foo> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::test::namespace_from_package::module::Foo> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -36,6 +37,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::test::namespace_from_package::module::Foo>
     : public BaseConstructor<::test::namespace_from_package::module::Foo> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::namespace_from_package::module::Foo& val);
 };
 

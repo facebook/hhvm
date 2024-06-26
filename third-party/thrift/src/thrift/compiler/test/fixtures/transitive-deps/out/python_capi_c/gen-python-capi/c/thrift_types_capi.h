@@ -21,6 +21,7 @@ namespace capi {
 template <>
 struct Extractor<::cpp2::C>
     : public BaseExtractor<::cpp2::C> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::C> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -36,6 +37,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::cpp2::C>
     : public BaseConstructor<::cpp2::C> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::C& val);
 };
 
@@ -50,6 +52,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::cpp2::E>
     : public BaseExtractor<::cpp2::E> {
+  static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::E> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -65,6 +68,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::cpp2::E>
     : public BaseConstructor<::cpp2::E> {
+  static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::E& val);
 };
 

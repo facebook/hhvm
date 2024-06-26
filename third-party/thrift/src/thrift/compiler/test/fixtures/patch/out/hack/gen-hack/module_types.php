@@ -348,7 +348,7 @@ enum InnerUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * InnerUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/InnerUnion'))>>
@@ -509,7 +509,7 @@ enum MyUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * MyUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyUnion'))>>

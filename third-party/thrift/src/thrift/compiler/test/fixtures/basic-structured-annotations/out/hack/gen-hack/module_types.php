@@ -1022,7 +1022,7 @@ enum MyUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * MyUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic-structured-annotations/MyUnion'))>>

@@ -166,7 +166,7 @@ enum FooUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * FooUnion
  */
 class FooUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\hack\fixtures\FooUnionEnum> {

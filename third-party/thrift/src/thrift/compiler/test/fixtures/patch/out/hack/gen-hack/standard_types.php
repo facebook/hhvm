@@ -86,7 +86,7 @@ enum apache_thrift_type_standard_TypeUriEnum: int {
 /**
  * The "uri" of a Thrift type.
  *
- * Original thrift struct:-
+ * Original thrift union:-
  * TypeUri
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/TypeUri'))>>
@@ -420,7 +420,7 @@ enum apache_thrift_type_standard_TypeNameEnum: int {
 /**
  * Uniquely identifies a Thrift type.
  *
- * Original thrift struct:-
+ * Original thrift union:-
  * TypeName
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/TypeName'))>>

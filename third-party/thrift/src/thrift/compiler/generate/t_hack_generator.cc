@@ -6334,8 +6334,15 @@ void t_hack_generator::generate_php_docstring(
         ""); // comment_end
     indent(out) << " *\n";
   }
-  indent(out) << " * " << "Original thrift "
-              << (is_exception ? "exception" : "struct") << ":-\n";
+  indent(out) << " * " << "Original thrift ";
+  if (is_exception) {
+    out << "exception";
+  } else if (tstruct->is_union()) {
+    out << "union";
+  } else {
+    out << "struct";
+  };
+  out << ":-\n";
   indent(out) << " * " << tstruct->name() << "\n";
   indent(out) << " */\n";
 }

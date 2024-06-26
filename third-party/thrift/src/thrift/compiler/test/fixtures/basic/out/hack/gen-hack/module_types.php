@@ -728,7 +728,7 @@ enum MyUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * MyUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/MyUnion'))>>
@@ -1355,7 +1355,7 @@ enum MyRenamedUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * UnionToBeRenamed
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/UnionToBeRenamed'))>>

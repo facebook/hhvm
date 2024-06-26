@@ -1283,7 +1283,7 @@ enum BazEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * Baz
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/Baz'))>>
@@ -5857,7 +5857,7 @@ enum AdaptTestUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * AdaptTestUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdaptTestUnion'))>>

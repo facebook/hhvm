@@ -17,7 +17,7 @@ enum ComplexUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * ComplexUnion
  */
 class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<ComplexUnionEnum> {
@@ -523,7 +523,7 @@ enum ListUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * ListUnion
  */
 class ListUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<ListUnionEnum> {
@@ -761,7 +761,7 @@ enum DataUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * DataUnion
  */
 class DataUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<DataUnionEnum> {
@@ -1151,7 +1151,7 @@ enum ValUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * ValUnion
  */
 class ValUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<ValUnionEnum> {
@@ -1365,7 +1365,7 @@ enum VirtualComplexUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * VirtualComplexUnion
  */
 class VirtualComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<VirtualComplexUnionEnum> {
@@ -1656,7 +1656,7 @@ enum NonCopyableUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * NonCopyableUnion
  */
 class NonCopyableUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<NonCopyableUnionEnum> {

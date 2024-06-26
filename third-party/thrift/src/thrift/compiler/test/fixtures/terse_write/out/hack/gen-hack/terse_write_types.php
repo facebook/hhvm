@@ -137,7 +137,7 @@ enum MyUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * MyUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/MyUnion'))>>

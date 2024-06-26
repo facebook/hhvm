@@ -481,7 +481,7 @@ enum UnionTestingEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * UnionTesting
  */
 class UnionTesting implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\test\fixtures\jsenum\UnionTestingEnum> {
@@ -670,7 +670,7 @@ enum UnionTestingStructuredEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * UnionTestingStructured
  */
 class UnionTestingStructured implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\test\fixtures\jsenum\UnionTestingStructuredEnum> {

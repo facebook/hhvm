@@ -135,7 +135,7 @@ enum UEnum: int {
 /**
  * Union U
  *
- * Original thrift struct:-
+ * Original thrift union:-
  * U
  */
 class U implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<UEnum> {

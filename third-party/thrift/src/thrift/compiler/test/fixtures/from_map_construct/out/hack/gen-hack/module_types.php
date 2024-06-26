@@ -274,7 +274,7 @@ enum TestUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * TestUnion
  */
 class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<TestUnionEnum> {

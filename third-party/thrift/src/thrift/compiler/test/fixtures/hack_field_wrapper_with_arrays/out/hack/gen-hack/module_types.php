@@ -131,7 +131,7 @@ enum MyUnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * MyUnion
  */
 class MyUnion implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftUnion<MyUnionEnum>, \IThriftShapishAsyncStruct {

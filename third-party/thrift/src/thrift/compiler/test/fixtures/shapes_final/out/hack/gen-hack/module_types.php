@@ -44,7 +44,7 @@ enum UnionEnum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * Union
  */
 class Union implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\test\fixtures\UnionEnum>, \IThriftShapishSyncStruct {

@@ -949,7 +949,7 @@ enum union1Enum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * union1
  */
 class union1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<union1Enum> {
@@ -1131,7 +1131,7 @@ enum union2Enum: int {
 }
 
 /**
- * Original thrift struct:-
+ * Original thrift union:-
  * union2
  */
 class union2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<union2Enum> {

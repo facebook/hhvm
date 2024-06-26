@@ -53,6 +53,8 @@ inline constexpr auto kUriUri = "facebook.com/thrift/annotation/Uri";
 inline constexpr auto kPriorityUri = "facebook.com/thrift/annotation/Priority";
 inline constexpr auto kDeprecatedUnvalidatedAnnotationsUri =
     "facebook.com/thrift/annotation/DeprecatedUnvalidatedAnnotations";
+inline constexpr auto kAllowReservedIdentifierNameUri =
+    "facebook.com/thrift/annotation/AllowReservedIdentifierName";
 
 // scope
 inline constexpr auto kScopeProgramUri =

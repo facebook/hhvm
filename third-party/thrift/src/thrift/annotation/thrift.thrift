@@ -249,3 +249,24 @@ enum RpcPriority {
 struct DeprecatedUnvalidatedAnnotations {
   1: map<string, string> items;
 }
+
+/**
+* In addition to reserved words, Thrift reserves all identifiers
+* that contain the case-insensitive substring fbthrift.
+* The use of such identifiers requires users to explicitly annotate
+* the usage with `@thrift.AllowReservedIdentifierName`,
+* and may result in undefined behavior.
+*/
+@scope.Const
+@scope.Enum
+@scope.EnumValue
+@scope.Exception
+@scope.Field
+@scope.Function
+@scope.Interaction
+@scope.Program
+@scope.Service
+@scope.Struct
+@scope.Typedef
+@scope.Union
+struct AllowReservedIdentifierName {}

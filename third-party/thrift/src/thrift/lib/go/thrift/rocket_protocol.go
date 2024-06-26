@@ -71,7 +71,8 @@ func NewRocketProtocol(conn net.Conn) (Protocol, error) {
 }
 
 func (p *rocketProtocol) SetTimeout(timeout time.Duration) {
-	p.conn.timeout = timeout
+	p.conn.writeTimeout = timeout
+	p.conn.readTimeout = timeout
 }
 
 func (p *rocketProtocol) resetProtocol() error {
@@ -174,11 +175,15 @@ func (p *rocketProtocol) open() error {
 		return transport.NewTCPClientTransport(p.conn), nil
 	}
 	p.ctx, p.cancel = context.WithCancel(context.Background())
-	p.client, err = rsocket.Connect().
-		// See T182939211. This copies the keep alives from Java Rocket.
-		// KeepaliveLifetime = time.Duration(missedAcks = 1) * (ackTimeout = 3600000)
-		KeepAlive(time.Millisecond*30000, time.Millisecond*3600000, 1).
-		SetupPayload(setupPayload).
+	clientBuilder := rsocket.Connect()
+	// See T182939211. This copies the keep alives from Java Rocket.
+	// KeepaliveLifetime = time.Duration(missedAcks = 1) * (ackTimeout = 3600000)
+	clientBuilder = clientBuilder.KeepAlive(time.Millisecond*30000, time.Millisecond*3600000, 1)
+	clientBuilder = clientBuilder.SetupPayload(setupPayload)
+	clientBuilder = clientBuilder.OnClose(func(err error) {
+		p.cancel()
+	})
+	clientStarter := clientBuilder.
 		Acceptor(func(ctx context.Context, socket rsocket.RSocket) rsocket.RSocket {
 			return rsocket.NewAbstractSocket(
 				rsocket.MetadataPush(func(pay payload.Payload) {
@@ -212,9 +217,8 @@ func (p *rocketProtocol) open() error {
 					}
 				}),
 			)
-		}).
-		Transport(transporter).
-		Start(p.ctx)
+		})
+	p.client, err = clientStarter.Transport(transporter).Start(p.ctx)
 	return err
 }
 
@@ -235,6 +239,8 @@ func (p *rocketProtocol) readPayload() (resp payload.Payload, err error) {
 			} else {
 				errDone = true
 			}
+		case <-p.ctx.Done():
+			return nil, p.ctx.Err()
 		}
 	}
 	return resp, err

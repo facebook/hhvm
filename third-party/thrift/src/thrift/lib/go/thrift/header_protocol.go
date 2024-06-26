@@ -41,7 +41,8 @@ func NewHeaderProtocol(conn net.Conn) (Protocol, error) {
 }
 
 func (p *headerProtocol) SetTimeout(timeout time.Duration) {
-	p.trans.conn.timeout = timeout
+	p.trans.conn.readTimeout = timeout
+	p.trans.conn.writeTimeout = timeout
 }
 
 func (p *headerProtocol) resetProtocol() error {

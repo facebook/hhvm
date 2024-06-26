@@ -23,13 +23,14 @@ import (
 
 type connTimeout struct {
 	net.Conn
-	timeout time.Duration
+	readTimeout  time.Duration
+	writeTimeout time.Duration
 }
 
 var _ net.Conn = (*connTimeout)(nil)
 
 func (c *connTimeout) SetDeadline(t time.Time) error {
-	if c.timeout > 0 {
+	if c.readTimeout > 0 || c.writeTimeout > 0 {
 		// timeout is preferred over deadline
 		return nil
 	}
@@ -37,7 +38,7 @@ func (c *connTimeout) SetDeadline(t time.Time) error {
 }
 
 func (c *connTimeout) SetReadDeadline(t time.Time) error {
-	if c.timeout > 0 {
+	if c.readTimeout > 0 {
 		// timeout is preferred over deadline
 		return nil
 	}
@@ -45,7 +46,7 @@ func (c *connTimeout) SetReadDeadline(t time.Time) error {
 }
 
 func (c *connTimeout) SetWriteDeadline(t time.Time) error {
-	if c.timeout > 0 {
+	if c.writeTimeout > 0 {
 		// timeout is preferred over deadline
 		return nil
 	}
@@ -54,8 +55,8 @@ func (c *connTimeout) SetWriteDeadline(t time.Time) error {
 
 func (c *connTimeout) Read(buf []byte) (int, error) {
 	var t time.Time
-	if c.timeout > 0 {
-		t = time.Now().Add(c.timeout)
+	if c.readTimeout > 0 {
+		t = time.Now().Add(c.readTimeout)
 	}
 	if err := c.Conn.SetReadDeadline(t); err != nil {
 		return 0, err
@@ -65,8 +66,8 @@ func (c *connTimeout) Read(buf []byte) (int, error) {
 
 func (c *connTimeout) Write(buf []byte) (int, error) {
 	var t time.Time
-	if c.timeout > 0 {
-		t = time.Now().Add(c.timeout)
+	if c.writeTimeout > 0 {
+		t = time.Now().Add(c.writeTimeout)
 	}
 	if err := c.Conn.SetWriteDeadline(t); err != nil {
 		return 0, err

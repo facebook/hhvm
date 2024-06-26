@@ -20,12 +20,12 @@ def debug_conditions?
 end
 
 DELIMS = {
-  comment:  "<%!",
-  cond:     "<%#",
-  inv_cond: "<%^",
-  end_cond: "<%/",
-  echo:     "<%",
-  close:    "%>",
+  comment:  "{{!",
+  cond:     "{{#",
+  inv_cond: "{{^",
+  end_cond: "{{/",
+  echo:     "{{",
+  close:    "}}",
 }
 
 if ARGV.length != 1
@@ -217,7 +217,7 @@ class Parser
         end
 
       when :close then
-        raise("unexpected closing token at #{tok.to_loc_and_val_s}")
+        # }} shows up sometimes in C++
       when :source then
         # source is fine to see outside of echo/cond/inv_cond/end_cond/comment
       else

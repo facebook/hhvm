@@ -100,6 +100,8 @@ class RocketServerConnection final
       StreamId streamId = StreamId(),
       folly::SocketFds fds = folly::SocketFds{});
 
+  void sendErrorAfterDrain(StreamId streamId, RocketException&& rex);
+
   // does not create callback and returns nullptr if streamId is already in use
   RocketStreamClientCallback* FOLLY_NULLABLE createStreamClientCallback(
       StreamId streamId,

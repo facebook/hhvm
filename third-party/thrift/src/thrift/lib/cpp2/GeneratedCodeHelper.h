@@ -1456,10 +1456,14 @@ folly::exception_wrapper decode_stream_exception(folly::exception_wrapper ew) {
         TApplicationException::TApplicationExceptionType exType{
             TApplicationException::UNKNOWN};
         auto code = streamRpcError.code();
-        if (code &&
-            (code.value() == StreamRpcErrorCode::CREDIT_TIMEOUT ||
-             code.value() == StreamRpcErrorCode::CHUNK_TIMEOUT)) {
-          exType = TApplicationException::TIMEOUT;
+        if (code) {
+          if (code.value() == StreamRpcErrorCode::CREDIT_TIMEOUT ||
+              code.value() == StreamRpcErrorCode::CHUNK_TIMEOUT) {
+            exType = TApplicationException::TIMEOUT;
+          } else if (
+              code.value() == StreamRpcErrorCode::SERVER_CLOSING_CONNECTION) {
+            exType = TApplicationException::INTERRUPTION;
+          }
         }
         hijacked = TApplicationException(
             exType, streamRpcError.what_utf8().value_or(""));

@@ -391,6 +391,7 @@ enum StreamRpcErrorCode {
   UNKNOWN = 0,
   CREDIT_TIMEOUT = 1,
   CHUNK_TIMEOUT = 2,
+  SERVER_CLOSING_CONNECTION = 3,
 }
 
 struct StreamRpcError {

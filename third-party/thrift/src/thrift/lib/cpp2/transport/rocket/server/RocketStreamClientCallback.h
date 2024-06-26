@@ -74,6 +74,8 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   }
   std::string_view getRpcMethodName() const { return rpcMethodName_; }
 
+  StreamId getStreamId() const { return streamId_; }
+
  private:
   StreamServerCallback* serverCallback() const {
     return reinterpret_cast<StreamServerCallback*>(serverCallbackOrCancelled_);

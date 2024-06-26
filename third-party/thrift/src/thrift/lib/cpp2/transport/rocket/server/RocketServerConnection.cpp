@@ -53,6 +53,7 @@
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 
 THRIFT_FLAG_DEFINE_bool(enable_rocket_connection_observers, false);
+THRIFT_FLAG_DEFINE_bool(enable_stream_graceful_shutdown, true);
 
 namespace apache {
 namespace thrift {
@@ -231,6 +232,19 @@ void RocketServerConnection::send(
       std::move(data), std::move(cb), streamId, std::move(fds));
 }
 
+void RocketServerConnection::sendErrorAfterDrain(
+    StreamId streamId, RocketException&& rex) {
+  evb_.dcheckIsInEventBaseThread();
+  DCHECK(
+      state_ == ConnectionState::CLOSING || state_ == ConnectionState::CLOSED);
+
+  writeBatcher_.enqueueWrite(
+      ErrorFrame(streamId, std::move(rex)).serialize(),
+      nullptr,
+      streamId,
+      folly::SocketFds{});
+}
+
 RocketServerConnection::~RocketServerConnection() {
   DCHECK(inflightRequests_ == 0);
   DCHECK(inflightWritesQueue_.empty());
@@ -254,6 +268,19 @@ RocketServerConnection::~RocketServerConnection() {
     egressBufferSize_ = 0;
   }
 }
+
+namespace {
+StreamRpcError getStreamConnectionClosingError() {
+  StreamRpcError streamRpcError;
+  streamRpcError.code_ref() = StreamRpcErrorCode::SERVER_CLOSING_CONNECTION;
+  streamRpcError.name_utf8_ref() =
+      apache::thrift::TEnumTraits<StreamRpcErrorCode>::findName(
+          StreamRpcErrorCode::SERVER_CLOSING_CONNECTION);
+  streamRpcError.what_utf8_ref() =
+      "Server closing connection, cancelling stream";
+  return streamRpcError;
+}
+} // namespace
 
 void RocketServerConnection::closeIfNeeded() {
   if (state_ == ConnectionState::DRAINING && inflightRequests_ == 0 &&
@@ -306,7 +333,14 @@ void RocketServerConnection::closeIfNeeded() {
     // Calling application callback may trigger rehashing.
     folly::variant_match(
         callback,
-        [](const std::unique_ptr<RocketStreamClientCallback>& callback) {
+        [&](const std::unique_ptr<RocketStreamClientCallback>& callback) {
+          if (THRIFT_FLAG(enable_stream_graceful_shutdown)) {
+            sendErrorAfterDrain(
+                callback->getStreamId(),
+                RocketException(
+                    ErrorCode::CANCELED,
+                    packCompact(getStreamConnectionClosingError())));
+          }
           callback->onStreamCancel();
         },
         [](const std::unique_ptr<RocketSinkClientCallback>& callback) {

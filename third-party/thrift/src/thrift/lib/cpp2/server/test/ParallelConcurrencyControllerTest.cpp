@@ -290,14 +290,14 @@ class ParallelConcurrencyControllerTest
 TEST_P(ParallelConcurrencyControllerTest, NormalCases) {
   Cpp2RequestContextStorage contextStorage; // Must be destroyed last.
 
-  folly::EventBase eb;
-  auto holder = getResourcePoolHolder(true /*useFifoRequestPile*/);
-
   folly::Baton baton1;
   folly::Baton baton2;
 
   auto blockingAP = makeAP(blockingTaskGen(baton1));
   auto endingAP = makeAP(endingTaskGen(baton2));
+
+  folly::EventBase eb;
+  auto holder = getResourcePoolHolder(true /*useFifoRequestPile*/);
 
   ResourcePoolMock pool(holder.pile.get(), holder.controller.get());
 
@@ -322,24 +322,22 @@ TEST_P(ParallelConcurrencyControllerTest, NormalCases) {
 TEST_P(ParallelConcurrencyControllerTest, LimitedTasks) {
   Cpp2RequestContextStorage contextStorage; // Must be destroyed last.
 
-  folly::EventBase eb;
-
-  auto holder = getResourcePoolHolder(true /*useFifoRequestPile*/);
-
-  holder.controller->setExecutionLimitRequests(2);
-
   folly::Baton baton1;
   folly::Baton baton2;
   folly::Baton baton3;
 
-  auto staringBlockingAP = makeAP(blockingTaskGen(baton1));
+  auto startingBlockingAP = makeAP(blockingTaskGen(baton1));
   auto blockingAP = makeAP(blockingTaskGen(baton2));
   auto endingAP = makeAP(endingTaskGen(baton3));
+
+  folly::EventBase eb;
+  auto holder = getResourcePoolHolder(true /*useFifoRequestPile*/);
+  holder.controller->setExecutionLimitRequests(2);
 
   ResourcePoolMock pool(holder.pile.get(), holder.controller.get());
 
   pool.enqueue(
-      getRequest(staringBlockingAP.get(), contextStorage.makeContext(), &eb));
+      getRequest(startingBlockingAP.get(), contextStorage.makeContext(), &eb));
   pool.enqueue(getRequest(blockingAP.get(), contextStorage.makeContext(), &eb));
   pool.enqueue(getRequest(endingAP.get(), contextStorage.makeContext(), &eb));
 
@@ -559,7 +557,7 @@ TEST_P(ParallelConcurrencyControllerTest, InternalPrioritization) {
   }
 }
 
-TEST(ParallelConcurrencyControllerTest, FinishCallbackExecptionSafe) {
+TEST(ParallelConcurrencyControllerTest, FinishCallbackExceptionSafe) {
   THRIFT_FLAG_SET_MOCK(allow_resource_pools_for_wildcards, true);
 
   class DummyTestService : public apache::thrift::ServiceHandler<TestService> {

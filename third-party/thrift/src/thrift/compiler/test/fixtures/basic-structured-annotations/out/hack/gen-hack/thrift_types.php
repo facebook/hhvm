@@ -1398,3 +1398,115 @@ class DeprecatedUnvalidatedAnnotations implements \IThriftSyncStruct, \IThriftSt
 
 }
 
+/**
+ * In addition to reserved words, Thrift reserves all identifiers
+ * that contain the case-insensitive substring fbthrift.
+ * The use of such identifiers requires users to explicitly annotate
+ * the usage with `@thrift.AllowReservedIdentifierName`,
+ * and may result in undefined behavior.
+ *
+ * Original thrift struct:-
+ * AllowReservedIdentifierName
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/AllowReservedIdentifierName'))>>
+class AllowReservedIdentifierName implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AllowReservedIdentifierName';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "thrift.AllowReservedIdentifierName",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\TConst' => \facebook\thrift\annotation\TConst::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Enum' => \facebook\thrift\annotation\Enum::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\EnumValue' => \facebook\thrift\annotation\EnumValue::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Exception' => \facebook\thrift\annotation\Exception::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\TFunction' => \facebook\thrift\annotation\TFunction::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Interaction' => \facebook\thrift\annotation\Interaction::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Program' => \facebook\thrift\annotation\Program::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Service' => \facebook\thrift\annotation\Service::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Union' => \facebook\thrift\annotation\Union::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+

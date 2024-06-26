@@ -494,6 +494,111 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 248
+      },
+      "AllowReservedIdentifierName" : {
+        "name" : "AllowReservedIdentifierName",
+        "structured_annotations": {
+          "scope.Const" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Const",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Enum" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Enum",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.EnumValue" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "EnumValue",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Exception" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Exception",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Function" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Function",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Interaction" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Interaction",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Program" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Program",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Service" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Service",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Union" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Union",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "docstring" : "In addition to reserved words, Thrift reserves all identifiers\nthat contain the case-insensitive substring fbthrift.\nThe use of such identifiers requires users to explicitly annotate\nthe usage with `@thrift.AllowReservedIdentifierName`,\nand may result in undefined behavior.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 260
       }
       },
   "source_path" : "thrift/annotation/thrift",

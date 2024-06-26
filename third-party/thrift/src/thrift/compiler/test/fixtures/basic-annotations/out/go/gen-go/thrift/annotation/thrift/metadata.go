@@ -160,6 +160,9 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_map_string_string),
         },
     ),
+    metadata.NewThriftStruct().
+    SetName("thrift.AllowReservedIdentifierName").
+    SetIsUnion(false),
 }
 
 var exceptionMetadatas = []*metadata.ThriftException{

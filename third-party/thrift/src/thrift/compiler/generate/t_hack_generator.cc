@@ -47,8 +47,6 @@ namespace {
 
 class t_name_generator {
  public:
-  std::string operator()() { return operator()("tmp_"); }
-
   std::string operator()(const char* prefix) {
     return prefix + std::to_string(counter_++);
   }
@@ -162,7 +160,9 @@ class t_hack_generator : public t_concat_generator {
   void init_generator() override;
   void close_generator() override;
   void init_codegen_file(
-      std::ofstream& file_, std::string file_name_, bool skip_ns = false);
+      std::ofstream& file_,
+      const std::string& file_name_,
+      bool skip_ns = false);
 
   /**
    * Program-level generation functions
@@ -403,12 +403,12 @@ class t_hack_generator : public t_concat_generator {
       t_name_generator& namer,
       bool is_shape = false,
       bool uses_thrift_only_methods = false,
-      std::string obj_ref = "$obj");
+      const std::string& obj_ref = "$obj");
   bool generate_php_struct_async_struct_creation_method_field_assignment_helper(
       std::ostream& out,
       const t_type* ttype,
       t_name_generator& namer,
-      std::string val,
+      const std::string& val,
       bool is_shape_method,
       bool uses_thrift_only_methods = false);
 
@@ -426,7 +426,7 @@ class t_hack_generator : public t_concat_generator {
       std::ostream& out,
       const t_type* ttype,
       t_name_generator& namer,
-      std::string val);
+      const std::string& val);
 
   void generate_hack_attributes(
       std::ofstream& out, const t_named* type, bool include_user_defined);
@@ -508,7 +508,8 @@ class t_hack_generator : public t_concat_generator {
       const t_service* tservice, bool mangle, bool async);
   void generate_processor_event_handler_functions(std::ofstream& out);
   void generate_client_event_handler_functions(std::ofstream& out);
-  void generate_event_handler_functions(std::ofstream& out, std::string cl);
+  void generate_event_handler_functions(
+      std::ofstream& out, const std::string& cl);
 
   /**
    * Read thrift object from JSON string, generated using the
@@ -602,11 +603,11 @@ class t_hack_generator : public t_concat_generator {
       bool thrift = false);
   std::string function_signature(
       const t_function* tfunction,
-      std::string more_tail_parameters = "",
+      const std::string& more_tail_parameters = "",
       std::string typehint = "");
   std::string argument_list(
       const t_paramlist& tparamlist,
-      std::string more_tail_parameters = "",
+      const std::string& more_tail_parameters = "",
       bool typehints = true,
       bool force_nullable = false);
   std::string generate_rpc_function_name(
@@ -1550,7 +1551,7 @@ void t_hack_generator::init_generator() {
 }
 
 void t_hack_generator::init_codegen_file(
-    std::ofstream& file_, std::string file_name_, bool skip_ns) {
+    std::ofstream& file_, const std::string& file_name_, bool skip_ns) {
   file_.open(file_name_.c_str());
   record_genfile(file_name_);
 
@@ -2537,7 +2538,7 @@ std::unique_ptr<t_const_value> t_hack_generator::enum_to_tmeta(
       std::make_unique<t_const_value>("name"),
       std::make_unique<t_const_value>(tenum->get_scoped_name()));
 
-  auto enum_values = tenum->get_enum_values();
+  auto const& enum_values = tenum->get_enum_values();
   if (!enum_values.empty()) {
     auto tmeta_elements = t_const_value::make_map();
 
@@ -3563,7 +3564,7 @@ void t_hack_generator::generate_php_struct_shape_methods(
               indent_down();
               indent(val) << ")";
             }
-            val << std::endl;
+            val << '\n';
             indent_up();
             indent(val) << "|> " << (nullable ? "$$ === null ? null : " : "")
                         << generate_to_array_method(t, "$$") << ",\n";
@@ -3611,7 +3612,7 @@ bool t_hack_generator::
         std::ostream& out,
         const t_type* ttype,
         t_name_generator& namer,
-        std::string val,
+        const std::string& val,
         bool is_shape_method,
         bool uses_thrift_only_methods) {
   if (const auto* ttypedef =
@@ -3768,7 +3769,7 @@ bool t_hack_generator::generate_php_struct_async_toShape_method_helper(
     std::ostream& out,
     const t_type* ttype,
     t_name_generator& namer,
-    std::string val) {
+    const std::string& val) {
   if (find_hack_adapter(ttype)) {
     out << val;
     return false;
@@ -5346,7 +5347,7 @@ void t_hack_generator::_generate_args(
     if (!fields.empty()) {
       // Loop through the fields and assign to the args struct
       for (auto&& field : fields) {
-        std::string name = field.name();
+        const std::string& name = field.name();
         const t_type* ftype = field.type()->get_true_type();
         bool nullable = nullable_everything_ || !no_nullables_ ||
             (ftype->is_enum() &&
@@ -5433,7 +5434,7 @@ void t_hack_generator::
         t_name_generator& namer,
         bool is_shape,
         bool uses_thrift_only_methods,
-        std::string obj_ref) {
+        const std::string& obj_ref) {
   if (tstruct->is_union()) {
     out << indent() << obj_ref
         << "->_type = " << union_field_to_enum(&field, struct_hack_name_with_ns)
@@ -5640,7 +5641,7 @@ void t_hack_generator::generate_client_event_handler_functions(
   generate_event_handler_functions(out, "\\TClientEventHandler");
 }
 void t_hack_generator::generate_event_handler_functions(
-    std::ofstream& /*out*/, std::string cl) {
+    std::ofstream& /*out*/, const std::string& cl) {
   f_service_ << indent() << "public function setEventHandler(" << cl
              << " $event_handler)[write_props]: this {\n"
              << indent() << "  $this->eventHandler_ = $event_handler;\n"
@@ -7427,7 +7428,7 @@ std::string t_hack_generator::declare_field(
  */
 std::string t_hack_generator::function_signature(
     const t_function* tfunction,
-    std::string more_tail_parameters,
+    const std::string& more_tail_parameters,
     std::string typehint) {
   if (typehint.empty()) {
     typehint = type_to_typehint(tfunction->return_type().get_type());
@@ -7443,7 +7444,7 @@ std::string t_hack_generator::function_signature(
  */
 std::string t_hack_generator::argument_list(
     const t_paramlist& tparamlist,
-    std::string more_tail_parameters,
+    const std::string& more_tail_parameters,
     bool typehints,
     bool force_nullable) {
   std::string result = "";
@@ -7537,8 +7538,6 @@ std::string t_hack_generator::type_to_cast(const t_type* type) {
       default:
         return "";
     }
-  } else if (type->is_enum()) {
-    return "";
   }
   return "";
 }

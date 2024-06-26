@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import unittest
 
-from testing.thrift_types import ComplexRef
+from python_test.refs.thrift_types import ComplexRef
 
 
 class RefTest(unittest.TestCase):

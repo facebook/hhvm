@@ -247,3 +247,12 @@ class MutableListTest(unittest.TestCase):
             self.assertTrue(i in mutable_list)
 
         self.assertFalse(10 in mutable_list)
+
+    def test_add(self) -> None:
+        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list.extend(range(100))
+
+        result = mutable_list + list(range(100, 200))
+        self.assertEqual(list(range(200)), result)
+        self.assertIsInstance(result, MutableList)
+        self.assertIsNot(result, mutable_list)

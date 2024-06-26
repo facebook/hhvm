@@ -140,10 +140,7 @@ class MapTests(unittest.TestCase):
         px["foo"] = x["foo"]
         px["baz"] = {"wat": [4]}
         px["foo"] = dict(px["foo"])
-        # DO_BEFORE(alperyoney,20240801): Implement '+' for `MutableList`
-        # pyre-ignore[16]: has no attribute `maps_types`
-        if self.maps_types.__name__.endswith("immutable_types"):
-            px["foo"]["bar"] = px["foo"]["bar"] + [5, 7, 8]
+        px["foo"]["bar"] = px["foo"]["bar"] + [5, 7, 8]
         self.assertEqual(s["bar"], [0, 1])
         # Now turn this crazy mixed structure back to Cython
         cx = self.StrStrIntListMapMap(px)

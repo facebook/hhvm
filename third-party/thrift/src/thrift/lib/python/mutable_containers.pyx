@@ -122,6 +122,11 @@ cdef class MutableList:
         internal_item = self._val_typeinfo.to_internal_data(item)
         return internal_item in self._list_data
 
+    def __add__(self, other):
+        lst = MutableList(self._val_typeinfo, self._list_data[:])
+        lst.extend(other)
+        return lst
+
 
 MutableSequence.register(MutableList)
 

@@ -20,15 +20,16 @@ import (
 	"net"
 )
 
-// NewServerSocket creates a new net.Listener bound to the given address.
+// Deprecated: NewServerSocket rather use NewListener.
 func NewServerSocket(listenAddr string) (net.Listener, error) {
+	return NewListener(listenAddr)
+}
+
+// NewListener creates a new net.Listener bound to the given address.
+func NewListener(listenAddr string) (net.Listener, error) {
 	addr, err := net.ResolveTCPAddr("tcp", listenAddr)
 	if err != nil {
 		return nil, err
 	}
-	l, err := net.Listen(addr.Network(), addr.String())
-	if err != nil {
-		return nil, err
-	}
-	return l, nil
+	return net.Listen(addr.Network(), addr.String())
 }

@@ -23,7 +23,7 @@ import (
 
 // TestSimpleServer is a simple tests that simple sends an empty message to a server and receives an empty result.
 func TestSimpleServer(t *testing.T) {
-	serverSocket, err := NewServerSocket("[::]:0")
+	serverSocket, err := NewListener("[::]:0")
 	if err != nil {
 		t.Fatalf("could not create server socket: %s", err)
 	}
@@ -106,7 +106,7 @@ func (p *testProcessorFunction) RunContext(ctx context.Context, reqStruct Struct
 // This tests that S425600 does not happen again.
 // The client is allowed to set a serializaton format to the non default and the server should adjust accordingly.
 func TestSimpleServerClientSetsDifferentProtocol(t *testing.T) {
-	serverSocket, err := NewServerSocket("[::]:0")
+	serverSocket, err := NewListener("[::]:0")
 	if err != nil {
 		t.Fatalf("could not create server socket: %s", err)
 	}

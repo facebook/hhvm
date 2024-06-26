@@ -26,13 +26,13 @@ func TestSocketIsntListeningAfterInterrupt(t *testing.T) {
 	port := 9090
 	addr := fmt.Sprintf("%s:%d", host, port)
 
-	socket, err := NewServerSocket(addr)
+	socket, err := NewListener(addr)
 	if err != nil {
 		t.Fatalf("Failed to create server socket: %s", err)
 	}
 	socket.Close()
 
-	newSocket, err := NewServerSocket(addr)
+	newSocket, err := NewListener(addr)
 	if err != nil {
 		t.Fatalf("Failed to create server socket: %s", err)
 	}

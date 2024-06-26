@@ -214,6 +214,12 @@ struct IRBuilder {
   void appendBlock(Block* block);
 
   /*
+   * If the final instruction in the current block is a block end and no next
+   * block has been assigned yet, create one.
+   */
+  void ensureBlockAppendable();
+
+  /*
    * Clear the SrcKey-to-block map.
    */
   void resetOffsetMapping();

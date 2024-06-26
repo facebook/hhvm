@@ -95,6 +95,21 @@ bool IRBuilder::isMBaseLoad(const IRInstruction* inst) const {
   return m_state.isMBase(inst->src(0)) == TriBool::Yes;
 }
 
+void IRBuilder::ensureBlockAppendable() {
+  if (m_curBlock->empty()) return;
+
+  auto& prev = m_curBlock->back();
+  if (!prev.isBlockEnd()) return;
+  assertx(!prev.isTerminal());
+
+  m_curBlock = m_unit.defBlock(prev.block()->profCount());
+  m_curBlock->setHint(prev.block()->hint());
+  prev.setNext(m_curBlock);
+  m_state.finishBlock(prev.block());
+  FTRACE(2, "lazily appending B{}\n", m_curBlock->id());
+  m_state.startBlock(m_curBlock, false);
+}
+
 void IRBuilder::appendInstruction(IRInstruction* inst) {
   FTRACE(1, "  append {}\n", inst->toString());
   assertx(inst->marker().valid());
@@ -141,18 +156,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   }
 
   // If the block isn't empty, check if we need to create a new block.
-  if (!m_curBlock->empty()) {
-    auto& prev = m_curBlock->back();
-    if (prev.isBlockEnd()) {
-      assertx(!prev.isTerminal());
-      m_curBlock = m_unit.defBlock(prev.block()->profCount());
-      m_curBlock->setHint(prev.block()->hint());
-      prev.setNext(m_curBlock);
-      m_state.finishBlock(prev.block());
-      FTRACE(2, "lazily appending B{}\n", m_curBlock->id());
-      m_state.startBlock(m_curBlock, false);
-    }
-  }
+  ensureBlockAppendable();
 
   assertx((m_curBlock->empty() || !m_curBlock->back().isBlockEnd()) &&
           "Can't append an instruction after a BlockEnd instruction");

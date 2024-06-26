@@ -131,7 +131,13 @@ inline Block* defBlock(IRGS& env, Block::Hint hint = Block::Hint::Neither) {
 }
 
 inline void hint(IRGS& env, Block::Hint h) {
-  env.irb->curBlock()->setHint(h);
+  // Force IRBuilder to start a new block if we're currently at a block end,
+  // it's likely that the caller intended for only the ->next() branch of this
+  // block to be marked as unlikely.
+  if (!env.irb->inUnreachableState()) {
+    env.irb->ensureBlockAppendable();
+    env.irb->curBlock()->setHint(h);
+  }
 }
 
 /*

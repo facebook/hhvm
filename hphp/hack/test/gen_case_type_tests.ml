@@ -244,16 +244,21 @@ class Check%s<T as %s> extends BaseCheck {
           let union_decl = String.concat ~sep:"|" types in
           let values = String.concat ~sep:"," (Set.elements examples) in
           let name = "CT" ^ string_of_int idx in
+          let alias_name = "AliasCT" ^ string_of_int idx in
           let decls =
             Printf.sprintf
               "case type %s = %s;
+              type %s = %s;
 
   %s"
               name
               union_decl
-              (declare_checker name values)
+              alias_name
+              name
+              (declare_checker alias_name values)
             :: decls
           in
+          let name = alias_name in
           let checks = Printf.sprintf "Check%s::run();" name :: checks in
           ((preludes, decls, checks), name ^ " Ok"))
     in
@@ -384,8 +389,6 @@ let type_to_specs =
   in
   Map.map ~f:TypeSpec.build config
 
-let broken_cases = String.Set.of_list ["noreturn"; "nothing"; "null"; "void"]
-
 let invalid_types_to_specs =
   let config = String.Map.of_alist_exn [("NonExistent", [])] in
   Map.map ~f:TypeSpec.build config
@@ -407,23 +410,29 @@ let () =
     List.cartesian_product config config
     |> List.filter_map ~f:(fun ((type1, spec1), (type2, spec2)) ->
            if String.compare type1 type2 <= 0 then
+             let ok =
+               SSet.of_list
+                 [
+                   "(function(): void)";
+                   "HH\\FunctionRef<(function(): void)>";
+                   "MyEnum";
+                   "arraykey";
+                   "dynamic";
+                   "int";
+                   "mixed";
+                   "nonnull";
+                   "noreturn";
+                   "nothing";
+                   "string";
+                   "void";
+                   "null";
+                 ]
+             in
              let disable_test =
                match (type1, type2) with
-               | ("noreturn", "noreturn")
-               | ("noreturn", "nothing")
-               | ("noreturn", "null")
-               | ("noreturn", "void")
-               | ("nothing", "nothing")
-               | ("nothing", "null")
-               | ("nothing", "void")
-               | ("null", "null")
-               | ("null", "void")
-               | ("void", "void")
-               | ("?bool", "AClass")
-               | ("?bool", "I")
-               | ("?bool", "ReifiedClass<null>")
-               | ("?bool", "resource") ->
-                 true
+               | (x, "MyEnum")
+               | ("MyEnum", x) ->
+                 not @@ SSet.mem x ok
                | _ -> false
              in
              Some (disable_test, [(type1, spec1); (type2, spec2)])
@@ -458,41 +467,18 @@ let () =
             {
               test_name =
                 Printf.sprintf
-                  "hphp/test/slow/case-types/generated-fuzz-test-broken-%d.php"
+                  "hphp/test/slow/case-types/generated-fuzz-test-broken-alias-%d.php"
                   (idx + 1);
               disable_test = true;
               config = [test];
             })
         skipped_tests
   in
-  let mystery_case =
-    let open TypeSpec in
-    [
-      ("string", [String]);
-      ("float", [Float]);
-      ("?bool", [Nullable Bool]);
-      ("vec<mixed>", [Vec]);
-    ]
-    |> String.Map.of_alist_exn
-    |> Map.map ~f:TypeSpec.build
-    |> Map.to_alist
-  in
-  let tests =
-    TestInstance.
-      {
-        test_name = "hphp/test/slow/case-types/generated-fuzz-test-mystery.php";
-        disable_test = true;
-        config =
-          List.cartesian_product mystery_case mystery_case
-          |> List.map ~f:(fun (spec1, spec2) -> [spec1; spec2]);
-      }
-    :: tests
-  in
   let tests =
     TestInstance.
       {
         test_name = "hphp/test/slow/case-types/generated-fuzz-test.php";
-        disable_test = true;
+        disable_test = false;
         config = good_tests;
       }
     :: tests

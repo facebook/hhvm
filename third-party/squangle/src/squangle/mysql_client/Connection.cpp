@@ -262,9 +262,12 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
   return toSemiFuture(std::move(op));
 }
 
-template <>
-DbQueryResult
-Connection::query(Query&& query, QueryCallback&& cb, QueryOptions&& options) {
+// Query
+
+DbQueryResult Connection::internalQuery(
+    Query&& query,
+    QueryCallback&& cb,
+    QueryOptions&& options) {
   auto op = beginAnyQuery<QueryOperation>(
       Operation::ConnectionProxy(Operation::ReferencedConnection(this)),
       std::move(query));
@@ -317,6 +320,12 @@ Connection::query(Query&& query, QueryCallback&& cb, QueryOptions&& options) {
 }
 
 template <>
+DbQueryResult
+Connection::query(Query&& query, QueryCallback&& cb, QueryOptions&& options) {
+  return internalQuery(std::move(query), std::move(cb), std::move(options));
+}
+
+template <>
 DbQueryResult Connection::query(Query&& query) {
   return Connection::query(std::move(query), QueryOptions());
 }
@@ -332,8 +341,9 @@ DbQueryResult Connection::query(Query&& query, QueryCallback&& cb) {
   return Connection::query(std::move(query), std::move(cb), QueryOptions());
 }
 
-template <>
-DbMultiQueryResult Connection::multiQuery(
+// MultiQuery
+
+DbMultiQueryResult Connection::internalMultiQuery(
     std::vector<Query>&& queries,
     MultiQueryCallback&& cb,
     QueryOptions&& options) {
@@ -385,6 +395,15 @@ DbMultiQueryResult Connection::multiQuery(
         .get();
   }
   return result;
+}
+
+template <>
+DbMultiQueryResult Connection::multiQuery(
+    std::vector<Query>&& queries,
+    MultiQueryCallback&& cb,
+    QueryOptions&& options) {
+  return internalMultiQuery(
+      std::move(queries), std::move(cb), std::move(options));
 }
 
 template <>

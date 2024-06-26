@@ -363,9 +363,10 @@ class Connection {
     return false;
   }
 
-  // Don't actually store the new schema at this point - just the presence of an
-  // updated schema is sufficient to indicate we shouldn't reuse the connection
-  // for pooling as it means that someone ran a "USE <dbname>" command.
+  // Don't actually store the new schema at this point - just the presence of
+  // an updated schema is sufficient to indicate we shouldn't reuse the
+  // connection for pooling as it means that someone ran a "USE <dbname>"
+  // command.
   void setCurrentSchema(std::string_view /*schema*/) const {
     CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
     mysql_connection_->setReusable(false);
@@ -467,9 +468,9 @@ class Connection {
     mysql_connection_ = std::move(mysql_connection);
   }
 
-  // If this is set and other necessary conditions are met, we clone Connection
-  // object in its destructor to properly reset the connection by sending
-  // COM_RESET_CONNECTION before it is completed destructed.
+  // If this is set and other necessary conditions are met, we clone
+  // Connection object in its destructor to properly reset the connection by
+  // sending COM_RESET_CONNECTION before it is completed destructed.
   bool needToCloneConnection_{true};
 
   static std::shared_ptr<ResetOperation> resetConn(
@@ -608,6 +609,22 @@ class Connection {
 
   Connection(const Connection&) = delete;
   Connection& operator=(const Connection&) = delete;
+
+  // Query
+
+  // This method holds the core logic for query() and can be
+  // overridden in derived class
+  virtual DbQueryResult
+  internalQuery(Query&& query, QueryCallback&& cb, QueryOptions&& options);
+
+  // MultiQuery
+
+  // This method holds the core logic for multiQuery() and can be
+  // overridden in derived class
+  virtual DbMultiQueryResult internalMultiQuery(
+      std::vector<Query>&& queries,
+      MultiQueryCallback&& cb,
+      QueryOptions&& options);
 };
 
 template <>

@@ -66,4 +66,6 @@ std::unique_ptr<UnitEmitter> compile_systemlib_string_to_ue(
    const char* s, size_t sz, const char* fname,
    const Extension* extension);
 
+void dump_compiled_units(const std::string& path);
+
 }

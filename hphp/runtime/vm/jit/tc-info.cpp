@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
 
+#include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -130,14 +131,22 @@ bool dumpEnabled() {
 bool dump(bool ignoreLease /* = false */) {
   if (!mcgen::initialized()) return false;
 
-  std::unique_lock<SimpleMutex> codeLock;
-  std::unique_lock<SimpleMutex> metaLock;
-  if (!ignoreLease) {
-    codeLock = lockCode();
-    metaLock = lockMetadata();
+  {
+    std::unique_lock<SimpleMutex> codeLock;
+    std::unique_lock<SimpleMutex> metaLock;
+    if (!ignoreLease) {
+      codeLock = lockCode();
+      metaLock = lockMetadata();
+    }
+    if (!dumpTCData()) return false;
+    if (!dumpTCCode(RO::EvalDumpTCPath + "/tc_dump")) return false;
   }
-  return dumpTCData() &&
-    dumpTCCode(RuntimeOption::EvalDumpTCPath + "/tc_dump");
+
+  if (!RO::RepoAuthoritative) {
+    dump_compiled_units(RO::EvalDumpTCPath + "/hhvm.hhbc");
+  }
+
+  return true;
 }
 
 std::vector<UsageInfo> getUsageInfo() {

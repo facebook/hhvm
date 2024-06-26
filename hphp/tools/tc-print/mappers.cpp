@@ -145,7 +145,7 @@ AddrToBcMapper::operator()(const TCA& addr) {
   if (tid == INVALID_ID) return std::nullopt;
 
   const TransRec* trec = transData->getTransRec(tid);
-  Unit* unit = g_repo->getUnit(trec->sha1);
+  Unit* unit = g_repo->getUnit(trec->sn);
   if (!unit) return std::nullopt;
 
   auto r = getExtOpcode(addr, trec);

@@ -77,17 +77,17 @@ RepoWrapper::~RepoWrapper() {
 }
 
 void RepoWrapper::addUnit(Unit* unit) {
-  unitCache.insert({unit->sha1(), unit});
+  unitCache.insert({unit->sn(), unit});
 }
 
-Unit* RepoWrapper::getUnit(SHA1 sha1) {
+Unit* RepoWrapper::getUnit(int64_t sn) {
   if (!hasRepo) return nullptr;
 
-  CacheType::const_iterator it = unitCache.find(sha1);
+  CacheType::const_iterator it = unitCache.find(sn);
   if (it != unitCache.end()) return it->second;
 
   auto const unit = [&] () -> Unit* {
-    auto const path = RepoFile::findUnitPath(sha1);
+    auto const path = RepoFile::findUnitPath(sn);
     if (!path) return nullptr;
     auto const ue =
       RepoFile::loadUnitEmitter(path, nullptr, false);
@@ -95,14 +95,14 @@ Unit* RepoWrapper::getUnit(SHA1 sha1) {
     return ue->create().release();
   }();
 
-  if (unit) unitCache.insert({sha1, unit});
+  if (unit) unitCache.insert({sn, unit});
   return unit;
 }
 
-Func* RepoWrapper::getFunc(SHA1 sha1, Id funcSn) {
+Func* RepoWrapper::getFunc(int64_t sn, Id funcSn) {
   if (!hasRepo) return nullptr;
 
-  auto const unit = getUnit(sha1);
+  auto const unit = getUnit(sn);
   if (!unit) {
     return nullptr;
   }

@@ -30,8 +30,12 @@
 
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/repo-autoload-map-builder.h"
+#include "hphp/runtime/vm/repo-file.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit-parser.h"
+#include "hphp/runtime/vm/jit/tc.h"
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/sha1.h"
@@ -49,6 +53,19 @@ TRACE_SET_MOD(runtime);
 namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
+
+std::mutex s_encodedUELock;
+std::vector<RepoFileBuilder::EncodedUE> s_encodedUEs;
+RepoAutoloadMapBuilder s_autoload;
+
+void onLoadUE(std::unique_ptr<UnitEmitter>& ue) {
+  if (RO::RepoAuthoritative || !jit::tc::dumpEnabled()) return;
+
+  std::lock_guard lock{s_encodedUELock};
+  ue->m_sn = s_encodedUEs.size();
+  s_autoload.addUnit(*ue);
+  s_encodedUEs.emplace_back(RepoFileBuilder::EncodedUE{*ue});
+}
 
 std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
                                    CodeSource codeSource,
@@ -142,11 +159,41 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
     }
   }
 
+  onLoadUE(ue);
   return ue;
+}
+
+RepoGlobalData getGlobalData() {
+  auto const now = std::chrono::high_resolution_clock::now();
+  auto const nanos =
+    std::chrono::duration_cast<std::chrono::nanoseconds>(
+      now.time_since_epoch()
+    );
+
+  auto gd      = RepoGlobalData{};
+  gd.Signature = nanos.count();
+
+  Cfg::StoreToGlobalData(gd);
+
+  gd.EnableArgsInBacktraces        = RO::EnableArgsInBacktraces;
+  gd.AbortBuildOnVerifyError       = RO::EvalAbortBuildOnVerifyError;
+  gd.EvalCoeffectEnforcementLevels = RO::EvalCoeffectEnforcementLevels;
+
+  return gd;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
+}
+
+void dump_compiled_units(const std::string& path) {
+  RepoFileBuilder repo{path};
+  auto const gd  = getGlobalData();
+  auto const pkg = RepoOptions::defaults().packageInfo();
+
+  std::lock_guard lock{s_encodedUELock};
+  for (auto const& ue : s_encodedUEs) repo.add(ue);
+  repo.finish(gd, s_autoload, pkg);
 }
 
 Unit* compile_file(LazyUnitContentsLoader& loader,
@@ -218,6 +265,8 @@ Unit* get_systemlib(const std::string& path, const Extension* extension) {
   uew.serde(decoder, extension);
 
   auto ue = std::move(uew.m_ue);
+  onLoadUE(ue);
+
   auto u = ue->create();
   SystemLib::registerUnitEmitter(std::move(ue));
   return u.release();
@@ -252,6 +301,7 @@ std::unique_ptr<UnitEmitter> compile_systemlib_string_to_ue(
     true,
     false
   );
+  onLoadUE(ue);
   always_assert(ue);
   return ue;
 }

@@ -76,6 +76,7 @@ void IRMetadataUpdater::register_inst(const Vinstr& inst) {
     if (m_bcmap->empty() || m_bcmap->back().sk != sk) {
       m_bcmap->push_back(TransBCMapping{
         sk.unit()->sha1(),
+        sk.unit()->sn(),
         sk,
         m_env.text.main().code.frontier(),
         m_env.text.cold().code.frontier(),

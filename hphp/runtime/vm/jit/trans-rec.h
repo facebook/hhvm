@@ -26,11 +26,12 @@ namespace HPHP { namespace jit {
  * Used to maintain a mapping from the bytecode to its corresponding x86.
  */
 struct TransBCMapping {
-  SHA1   sha1;
-  SrcKey sk;
-  TCA    aStart;
-  TCA    acoldStart;
-  TCA    afrozenStart;
+  SHA1    sha1;
+  int64_t sn;
+  SrcKey  sk;
+  TCA     aStart;
+  TCA     acoldStart;
+  TCA     afrozenStart;
 };
 
 /*
@@ -38,9 +39,9 @@ struct TransBCMapping {
  */
 struct TransRec {
   struct Block {
-    SHA1   sha1;
-    SrcKey sk;
-    Offset bcPast;
+    SHA1    sha1;
+    SrcKey  sk;
+    Offset  bcPast;
   };
 
   std::vector<std::string>
@@ -52,6 +53,7 @@ struct TransRec {
   std::string            funcName;
   SrcKey                 src;
   SHA1                   sha1;
+  int64_t                sn;
   TCA                    aStart;
   TCA                    acoldStart;
   TCA                    afrozenStart;

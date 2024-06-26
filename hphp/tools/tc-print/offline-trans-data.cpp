@@ -80,6 +80,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
   for (uint32_t tid = 0; tid < nTranslations; tid++) {
     TransRec  tRec;
     SHA1Str   sha1Str;
+    int64_t   sn;
     uint32_t  kind;
     uint64_t  srcKeyInt;
     uint64_t  annotationsCount;
@@ -96,6 +97,8 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
     }
     READ(" src.sha1 = %40s", sha1Str);
     tRec.sha1 = SHA1(sha1Str);
+    READ(" src.sn = %" PRId64 "", &sn);
+    tRec.sn = sn;
     READ(" src.funcName = %s", funcName);
     tRec.funcName = funcName;
     READ(" src.key = %" PRIu64 "", &srcKeyInt);
@@ -104,12 +107,13 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
     READ(" src.blocks = %lu", &numBlocks);
     for (size_t i = 0; i < numBlocks; ++i) {
       SHA1Str sha1Tmp;
+      int64_t sn;
       Id funcSn = kInvalidId;
       uint64_t srcKeyIntTmp;
       Offset past = kInvalidOffset;
 
       if (gzgets(file, buf, BUFLEN) == Z_NULL ||
-          sscanf(buf, "%40s %d %" PRIu64 " %d", sha1Tmp, &funcSn, &srcKeyIntTmp, &past) != 4) {
+          sscanf(buf, "%40s %" PRId64 " %d %" PRIu64 " %d", sha1Tmp, &sn, &funcSn, &srcKeyIntTmp, &past) != 5) {
         snprintf(buf, BUFLEN,
                  "Error reading bytecode block #%lu at translation %u\n",
                  i, tRec.id);
@@ -117,7 +121,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
       }
 
       auto const sha1 = SHA1(sha1Tmp);
-      auto const func = repoWrapper->getFunc(sha1, funcSn);
+      auto const func = repoWrapper->getFunc(sn, funcSn);
       auto const funcId = func != nullptr ? func->getFuncId() : FuncId::Invalid;
       auto const sk = SrcKey::fromAtomicInt(srcKeyIntTmp).withFuncID(funcId);
       tRec.blocks.emplace_back(TransRec::Block { sha1, sk, past });
@@ -185,13 +189,14 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
       uint64_t srcKeyIntTmp;
 
       if (gzgets(file, buf, BUFLEN) == Z_NULL ||
-          sscanf(buf, "%40s %d %" PRIu64 " %p %p %p",
+          sscanf(buf, "%40s %ld %d %" PRIu64 " %p %p %p",
                  sha1Tmp,
+                 &bcMap.sn,
                  &funcSn,
                  &srcKeyIntTmp,
                  (void**)&bcMap.aStart,
                  (void**)&bcMap.acoldStart,
-                 (void**)&bcMap.afrozenStart) != 6) {
+                 (void**)&bcMap.afrozenStart) != 7) {
 
         snprintf(buf, BUFLEN,
                  "Error reading bytecode mapping #%lu at translation %u\n",
@@ -201,14 +206,14 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
       }
 
       bcMap.sha1 = SHA1(sha1Tmp);
-      auto const func = repoWrapper->getFunc(bcMap.sha1, funcSn);
+      auto const func = repoWrapper->getFunc(bcMap.sn, funcSn);
       auto const funcId = func != nullptr ? func->getFuncId() : FuncId::Invalid;
       bcMap.sk = SrcKey::fromAtomicInt(srcKeyIntTmp).withFuncID(funcId);
       tRec.bcMapping.push_back(bcMap);
     }
 
     // push a sentinel bcMapping so that we can figure out stop offsets later on
-    const TransBCMapping sentinel { tRec.sha1, SrcKey {},
+    const TransBCMapping sentinel { tRec.sha1, tRec.sn, SrcKey {},
                                     tRec.aStart + tRec.aLen,
                                     tRec.acoldStart + tRec.acoldLen,
                                     tRec.afrozenStart + tRec.afrozenLen };

@@ -1091,7 +1091,7 @@ void printTopBytecodes(const OfflineTransData* tdata,
     const TransFragment& tfrag = ranking[i].second;
     const TransRec* trec = tdata->getTransRec(tfrag.tid);
 
-    Unit* unit = g_repo->getUnit(trec->sha1);
+    Unit* unit = g_repo->getUnit(trec->sn);
     always_assert(unit);
 
     g_logger->printGeneric("\n====================\n");

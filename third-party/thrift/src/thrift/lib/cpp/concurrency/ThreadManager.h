@@ -412,9 +412,12 @@ class ThreadManagerExecutorAdapter : public ThreadManager,
                                      public folly::DefaultKeepAliveExecutor {
  public:
   struct Options {
-    Options() = default;
+    Options();
     explicit Options(std::string name) : wrappedExecutorName(std::move(name)) {}
     std::string wrappedExecutorName;
+    // When wrapping a generic executor, propagate this parameter to the
+    // MeteredExecutors.
+    uint32_t meteredExecutorMaxInQueue = 1;
   };
 
   /* implicit */
@@ -468,18 +471,22 @@ class ThreadManagerExecutorAdapter : public ThreadManager,
   [[nodiscard]] KeepAlive<> getKeepAlive(
       ExecutionScope es, Source source) const override;
 
+ protected:
+  bool fromGenericExecutor() const { return fromGenericExecutor_; }
+
  private:
   explicit ThreadManagerExecutorAdapter(
       std::array<folly::Executor*, N_PRIORITIES * N_SOURCES>);
 
-  std::vector<std::shared_ptr<void>> owning_;
-  std::array<folly::Executor*, N_PRIORITIES * N_SOURCES> executors_;
   void joinKeepAliveOnce() {
     if (!std::exchange(keepAliveJoined_, true)) {
       joinKeepAlive();
     }
   }
 
+  std::vector<std::shared_ptr<void>> owning_;
+  std::array<folly::Executor*, N_PRIORITIES * N_SOURCES> executors_;
+  bool fromGenericExecutor_ = false;
   bool keepAliveJoined_{false};
   Options opts_;
 };

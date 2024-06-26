@@ -33,7 +33,9 @@ namespace concurrency {
 static constexpr uint64_t kDefaultTenantId{0};
 
 SFQThreadManager::SFQThreadManager(SFQThreadManagerConfig config)
-    : ThreadManagerExecutorAdapter(config.getExecutors()), config_(config) {
+    : ThreadManagerExecutorAdapter(
+          config.getExecutors(), adapterOptions(config)),
+      config_(config) {
   if (config_.getPerturbInterval().count() > 0) {
     initPerturbation();
   }
@@ -52,13 +54,21 @@ size_t SFQThreadManager::getTaskCount(ExecutionScope es) {
 }
 
 void SFQThreadManager::initQueues() {
-  // We make fair queues to be used on UPSTREAM sources for each priority.
+  // We make fair queues to be used on UPSTREAM sources for each priority,
+  // unless the underlying executor is not a ThreadManager, in which case we
+  // avoid the chain of MeteredExecutors internally added by
+  // ThreadManagerExecutorAdapter since we're already fronting the executor with
+  // MeteredExecutors.
+  auto source = fromGenericExecutor() ? Source::INTERNAL : Source::UPSTREAM;
   for (size_t pri = 0; pri < PRIORITY::N_PRIORITIES; ++pri) {
     fqs_[pri].resize(config_.getNumFairQueuesForUpstream());
     for (uint32_t ii = 0; ii < config_.getNumFairQueuesForUpstream(); ++ii) {
       auto keepalive = ThreadManagerExecutorAdapter::getKeepAlive(
-          ExecutionScope(static_cast<PRIORITY>(pri)), Source::UPSTREAM);
-      fqs_[pri][ii] = std::make_unique<folly::MeteredExecutor>(keepalive);
+          ExecutionScope(static_cast<PRIORITY>(pri)), source);
+      folly::MeteredExecutor::Options options;
+      options.maxInQueue = config_.getMaxInQueue();
+      fqs_[pri][ii] = std::make_unique<folly::MeteredExecutor>(
+          keepalive, std::move(options));
     }
   }
 }

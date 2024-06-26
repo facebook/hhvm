@@ -1474,6 +1474,8 @@ void forEachThreadManager(
 
 } // namespace
 
+ThreadManagerExecutorAdapter::Options::Options() = default;
+
 ThreadManagerExecutorAdapter::ThreadManagerExecutorAdapter(
     std::shared_ptr<folly::Executor> exe, Options opts)
     : ThreadManagerExecutorAdapter(
@@ -1519,11 +1521,13 @@ ThreadManagerExecutorAdapter::ThreadManagerExecutorAdapter(
           << "InlineExecutor cannot be used as a ThreadManager. "
           << "If you wish to process requests inline you should instead use the "
           << "`thread='eb'` annotation in your IDL file.";
+      fromGenericExecutor_ = true;
       executors_[idxFromPriSrc(i, 0)] = executor.get();
       std::unique_ptr<folly::MeteredExecutor> adapter;
       for (int j = 1; j < N_SOURCES; j++) {
         folly::MeteredExecutor::Options opt;
         opt.name = opts_.wrappedExecutorName;
+        opt.maxInQueue = opts_.meteredExecutorMaxInQueue;
         if (!adapter) {
           adapter = std::make_unique<folly::MeteredExecutor>(
               executor.get(), std::move(opt));

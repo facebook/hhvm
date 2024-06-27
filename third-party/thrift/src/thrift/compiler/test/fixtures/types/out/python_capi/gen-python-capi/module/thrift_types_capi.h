@@ -486,7 +486,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<::apache::thrift::fixtures::types::AnnotatedTypes>
     : public BaseExtractor<::apache::thrift::fixtures::types::AnnotatedTypes> {
-  static const bool kUsingMarshal = true;
+  static const bool kUsingMarshal = false;
   ExtractorResult<::apache::thrift::fixtures::types::AnnotatedTypes> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
@@ -502,7 +502,7 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Constructor<::apache::thrift::fixtures::types::AnnotatedTypes>
     : public BaseConstructor<::apache::thrift::fixtures::types::AnnotatedTypes> {
-  static const bool kUsingMarshal = true;
+  static const bool kUsingMarshal = false;
   PyObject* operator()(const ::apache::thrift::fixtures::types::AnnotatedTypes& val);
 };
 

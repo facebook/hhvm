@@ -56,9 +56,6 @@ bool ensure_module_imported() {
   static constexpr std::int16_t _fbthrift__Renaming__tuple_pos[1] = {
     1
   };
-  static constexpr std::int16_t _fbthrift__AnnotatedTypes__tuple_pos[2] = {
-    1, 2
-  };
   static constexpr std::int16_t _fbthrift__ForwardUsageRoot__tuple_pos[2] = {
     1, 2
   };
@@ -1411,38 +1408,37 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::apache::thrift::fixtures::types::AnnotatedTypes>
 Extractor<::apache::thrift::fixtures::types::AnnotatedTypes>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a AnnotatedTypes");
-      }
-      return extractorError<::apache::thrift::fixtures::types::AnnotatedTypes>(
-          "Marshal error: AnnotatedTypes");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::apache::thrift::fixtures::types::AnnotatedTypes>(
+      "Module apache.thrift.fixtures.types.module import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::apache::thrift::fixtures::types::AnnotatedTypes>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__apache__thrift__fixtures__types__module__AnnotatedTypes(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::apache::thrift::fixtures::types::AnnotatedTypes>(
+        "Thrift serialize error: AnnotatedTypes");
+  }
+  return detail::deserialize_iobuf<::apache::thrift::fixtures::types::AnnotatedTypes>(std::move(val));
 }
+
 
 ExtractorResult<::apache::thrift::fixtures::types::AnnotatedTypes>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::apache::thrift::fixtures::types::AnnotatedTypes>>::operator()(PyObject* fbThriftData) {
-  ::apache::thrift::fixtures::types::AnnotatedTypes cpp;
-  std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
-      cpp.binary_field_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__AnnotatedTypes__tuple_pos[0]),
-      error);
-  Extractor<list<map<int32_t, Bytes, std::unordered_map<native_t<int32_t>, native_t<Bytes>>>>>{}.extractInto(
-      cpp.list_field_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__AnnotatedTypes__tuple_pos[1]),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::apache::thrift::fixtures::types::AnnotatedTypes>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::apache::thrift::fixtures::types::AnnotatedTypes>(
+      "Module apache.thrift.fixtures.types.module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__apache__thrift__fixtures__types__module__AnnotatedTypes(fbthrift_data));
+  if (!obj) {
+      return extractorError<::apache::thrift::fixtures::types::AnnotatedTypes>(
+          "Init from fbthrift error: AnnotatedTypes");
+  }
+  return Extractor<::apache::thrift::fixtures::types::AnnotatedTypes>{}(*obj);
 }
-
 
 int Extractor<::apache::thrift::fixtures::types::AnnotatedTypes>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -1465,42 +1461,31 @@ PyObject* Constructor<::apache::thrift::fixtures::types::AnnotatedTypes>::operat
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::apache::thrift::fixtures::types::AnnotatedTypes>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
     return nullptr;
   }
-  return init__apache__thrift__fixtures__types__module__AnnotatedTypes(*fbthrift_data);
+  DCHECK(serialized);
+  auto ptr = construct__apache__thrift__fixtures__types__module__AnnotatedTypes(std::move(serialized));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::AnnotatedTypes>>::operator()(
-    [[maybe_unused]] const ::apache::thrift::fixtures::types::AnnotatedTypes& val) {
-  StrongRef fbthrift_data(createStructTuple(2));
-  StrongRef _fbthrift__binary_field(
-    Constructor<Bytes>{}
-    .constructFrom(val.binary_field_ref()));
-  if (!_fbthrift__binary_field ||
-      setStructField(
-          *fbthrift_data,
-          _fbthrift__AnnotatedTypes__tuple_pos[0],
-          *_fbthrift__binary_field) == -1) {
+    const ::apache::thrift::fixtures::types::AnnotatedTypes& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::fixtures::types::AnnotatedTypes>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  StrongRef _fbthrift__list_field(
-    Constructor<list<map<int32_t, Bytes, std::unordered_map<native_t<int32_t>, native_t<Bytes>>>>>{}
-    .constructFrom(val.list_field_ref()));
-  if (!_fbthrift__list_field ||
-      setStructField(
-          *fbthrift_data,
-          _fbthrift__AnnotatedTypes__tuple_pos[1],
-          *_fbthrift__list_field) == -1) {
-    return nullptr;
-  }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 ExtractorResult<::apache::thrift::fixtures::types::ForwardUsageRoot>
 Extractor<::apache::thrift::fixtures::types::ForwardUsageRoot>::operator()(PyObject* obj) {

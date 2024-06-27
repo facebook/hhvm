@@ -15,7 +15,6 @@
  */
 
 include "thrift/annotation/cpp.thrift"
-include "thrift/annotation/python.thrift"
 
 cpp_include "<deque>"
 cpp_include "<unordered_map>"
@@ -110,7 +109,6 @@ typedef TWrapped (cpp.indirection) CppWrapper
 typedef list<CppWrapper> ListOfWrapped
 
 // Cannot be marshaled and compile
-@python.UseCAPI{serialize = true}
 struct IndirectionA {
   1: ListOfWrapped lst;
 }
@@ -127,7 +125,6 @@ struct IndirectionB {
 typedef ListOfWrapped ListOfWrappedAlias
 
 // Cannot be marshaled and compile
-@python.UseCAPI{serialize = true}
 struct IndirectionC {
   1: ListOfWrappedAlias lst;
 }

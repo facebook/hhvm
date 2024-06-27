@@ -70,7 +70,7 @@ interface MyServiceAsyncClientIf extends MyServiceAsyncIf {
    * i32, stream<i32>
    *   serialize();
    */
-  public function serialize(): Awaitable<\ResponseAndClientStream<int, int>>;
+  public function serialize(): Awaitable<\ResponseAndStream<int, int>>;
 }
 
 /**
@@ -104,7 +104,7 @@ interface MyServiceClientIf extends \IThriftSyncIf {
    * i32, stream<i32>
    *   serialize();
    */
-  public function serialize(): Awaitable<\ResponseAndClientStream<int, int>>;
+  public function serialize(): Awaitable<\ResponseAndStream<int, int>>;
 }
 
 /**
@@ -196,7 +196,7 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
    * i32, stream<i32>
    *   serialize();
    */
-  public async function serialize(): Awaitable<\ResponseAndClientStream<int, int>> {
+  public async function serialize(): Awaitable<\ResponseAndStream<int, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -271,7 +271,7 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
    * i32, stream<i32>
    *   serialize();
    */
-  public async function serialize(): Awaitable<\ResponseAndClientStream<int, int>> {
+  public async function serialize(): Awaitable<\ResponseAndStream<int, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -441,7 +441,7 @@ class MyService_MyInteraction extends \ThriftClientBase {
    * void, stream<bool>
    *   truthify();
    */
-  public async function truthify(): Awaitable<\ResponseAndClientStream<null, bool>> {
+  public async function truthify(): Awaitable<\ResponseAndStream<null, bool>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -679,7 +679,7 @@ class MyService_MyInteractionFast extends \ThriftClientBase {
    * void, stream<bool>
    *   truthify();
    */
-  public async function truthify(): Awaitable<\ResponseAndClientStream<null, bool>> {
+  public async function truthify(): Awaitable<\ResponseAndStream<null, bool>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);

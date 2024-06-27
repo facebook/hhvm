@@ -264,7 +264,7 @@ class Perform_MyInteraction extends \ThriftClientBase {
    * void, stream<bool>
    *   truthify();
    */
-  public async function truthify(): Awaitable<\ResponseAndClientStream<null, bool>> {
+  public async function truthify(): Awaitable<\ResponseAndStream<null, bool>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -502,7 +502,7 @@ class Perform_MyInteractionFast extends \ThriftClientBase {
    * void, stream<bool>
    *   truthify();
    */
-  public async function truthify(): Awaitable<\ResponseAndClientStream<null, bool>> {
+  public async function truthify(): Awaitable<\ResponseAndStream<null, bool>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);

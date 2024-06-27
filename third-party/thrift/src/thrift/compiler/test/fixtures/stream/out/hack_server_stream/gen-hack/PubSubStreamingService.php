@@ -11,6 +11,76 @@
  * PubSubStreamingService
  */
 interface PubSubStreamingServiceAsyncIf extends \IThriftAsyncIf {
+  /**
+   * Original thrift definition:-
+   * void, stream<i32>
+   *   returnstream(1: i32 i32_from,
+   *                2: i32 i32_to);
+   */
+  public function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndStream<null, int>>;
+
+  /**
+   * Original thrift definition:-
+   * void, stream<i32, throws (1: FooStreamEx e)>
+   *   streamthrows(1: i32 foo);
+   */
+  public function streamthrows(int $foo): Awaitable<\ResponseAndStream<null, int>>;
+
+  /**
+   * Original thrift definition:-
+   * void, stream<i32>
+   *   servicethrows(1: i32 foo)
+   *   throws (1: FooEx e);
+   */
+  public function servicethrows(int $foo): Awaitable<\ResponseAndStream<null, int>>;
+
+  /**
+   * Original thrift definition:-
+   * void, stream<i32>
+   *   servicethrows2(1: i32 foo)
+   *   throws (1: FooEx e1,
+   *           2: FooEx2 e2);
+   */
+  public function servicethrows2(int $foo): Awaitable<\ResponseAndStream<null, int>>;
+
+  /**
+   * Original thrift definition:-
+   * void, stream<i32, throws (1: FooStreamEx e)>
+   *   boththrows(1: i32 foo)
+   *   throws (1: FooEx e);
+   */
+  public function boththrows(int $foo): Awaitable<\ResponseAndStream<null, int>>;
+
+  /**
+   * Original thrift definition:-
+   * i32, stream<i32, throws (1: FooStreamEx e)>
+   *   responseandstreamstreamthrows(1: i32 foo);
+   */
+  public function responseandstreamstreamthrows(int $foo): Awaitable<\ResponseAndStream<int, int>>;
+
+  /**
+   * Original thrift definition:-
+   * i32, stream<i32>
+   *   responseandstreamservicethrows(1: i32 foo)
+   *   throws (1: FooEx e);
+   */
+  public function responseandstreamservicethrows(int $foo): Awaitable<\ResponseAndStream<int, int>>;
+
+  /**
+   * Original thrift definition:-
+   * i32, stream<i32, throws (1: FooStreamEx e)>
+   *   responseandstreamboththrows(1: i32 foo)
+   *   throws (1: FooEx e);
+   */
+  public function responseandstreamboththrows(int $foo): Awaitable<\ResponseAndStream<int, int>>;
+
+  /**
+   * Original thrift definition:-
+   * void, stream<i32>
+   *   returnstreamFast(1: i32 i32_from,
+   *                    2: i32 i32_to);
+   */
+  public function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndStream<null, int>>;
 }
 
 /**
@@ -25,76 +95,6 @@ interface PubSubStreamingServiceIf extends \IThriftSyncIf {
  * PubSubStreamingService
  */
 interface PubSubStreamingServiceAsyncClientIf extends PubSubStreamingServiceAsyncIf {
-  /**
-   * Original thrift definition:-
-   * void, stream<i32>
-   *   returnstream(1: i32 i32_from,
-   *                2: i32 i32_to);
-   */
-  public function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>>;
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32, throws (1: FooStreamEx e)>
-   *   streamthrows(1: i32 foo);
-   */
-  public function streamthrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32>
-   *   servicethrows(1: i32 foo)
-   *   throws (1: FooEx e);
-   */
-  public function servicethrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32>
-   *   servicethrows2(1: i32 foo)
-   *   throws (1: FooEx e1,
-   *           2: FooEx2 e2);
-   */
-  public function servicethrows2(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32, throws (1: FooStreamEx e)>
-   *   boththrows(1: i32 foo)
-   *   throws (1: FooEx e);
-   */
-  public function boththrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
-
-  /**
-   * Original thrift definition:-
-   * i32, stream<i32, throws (1: FooStreamEx e)>
-   *   responseandstreamstreamthrows(1: i32 foo);
-   */
-  public function responseandstreamstreamthrows(int $foo): Awaitable<\ResponseAndClientStream<int, int>>;
-
-  /**
-   * Original thrift definition:-
-   * i32, stream<i32>
-   *   responseandstreamservicethrows(1: i32 foo)
-   *   throws (1: FooEx e);
-   */
-  public function responseandstreamservicethrows(int $foo): Awaitable<\ResponseAndClientStream<int, int>>;
-
-  /**
-   * Original thrift definition:-
-   * i32, stream<i32, throws (1: FooStreamEx e)>
-   *   responseandstreamboththrows(1: i32 foo)
-   *   throws (1: FooEx e);
-   */
-  public function responseandstreamboththrows(int $foo): Awaitable<\ResponseAndClientStream<int, int>>;
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32>
-   *   returnstreamFast(1: i32 i32_from,
-   *                    2: i32 i32_to);
-   */
-  public function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>>;
 }
 
 /**
@@ -108,14 +108,14 @@ interface PubSubStreamingServiceClientIf extends \IThriftSyncIf {
    *   returnstream(1: i32 i32_from,
    *                2: i32 i32_to);
    */
-  public function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>>;
+  public function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndStream<null, int>>;
 
   /**
    * Original thrift definition:-
    * void, stream<i32, throws (1: FooStreamEx e)>
    *   streamthrows(1: i32 foo);
    */
-  public function streamthrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
+  public function streamthrows(int $foo): Awaitable<\ResponseAndStream<null, int>>;
 
   /**
    * Original thrift definition:-
@@ -123,7 +123,7 @@ interface PubSubStreamingServiceClientIf extends \IThriftSyncIf {
    *   servicethrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public function servicethrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
+  public function servicethrows(int $foo): Awaitable<\ResponseAndStream<null, int>>;
 
   /**
    * Original thrift definition:-
@@ -132,7 +132,7 @@ interface PubSubStreamingServiceClientIf extends \IThriftSyncIf {
    *   throws (1: FooEx e1,
    *           2: FooEx2 e2);
    */
-  public function servicethrows2(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
+  public function servicethrows2(int $foo): Awaitable<\ResponseAndStream<null, int>>;
 
   /**
    * Original thrift definition:-
@@ -140,14 +140,14 @@ interface PubSubStreamingServiceClientIf extends \IThriftSyncIf {
    *   boththrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public function boththrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
+  public function boththrows(int $foo): Awaitable<\ResponseAndStream<null, int>>;
 
   /**
    * Original thrift definition:-
    * i32, stream<i32, throws (1: FooStreamEx e)>
    *   responseandstreamstreamthrows(1: i32 foo);
    */
-  public function responseandstreamstreamthrows(int $foo): Awaitable<\ResponseAndClientStream<int, int>>;
+  public function responseandstreamstreamthrows(int $foo): Awaitable<\ResponseAndStream<int, int>>;
 
   /**
    * Original thrift definition:-
@@ -155,7 +155,7 @@ interface PubSubStreamingServiceClientIf extends \IThriftSyncIf {
    *   responseandstreamservicethrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public function responseandstreamservicethrows(int $foo): Awaitable<\ResponseAndClientStream<int, int>>;
+  public function responseandstreamservicethrows(int $foo): Awaitable<\ResponseAndStream<int, int>>;
 
   /**
    * Original thrift definition:-
@@ -163,7 +163,7 @@ interface PubSubStreamingServiceClientIf extends \IThriftSyncIf {
    *   responseandstreamboththrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public function responseandstreamboththrows(int $foo): Awaitable<\ResponseAndClientStream<int, int>>;
+  public function responseandstreamboththrows(int $foo): Awaitable<\ResponseAndStream<int, int>>;
 
   /**
    * Original thrift definition:-
@@ -171,7 +171,7 @@ interface PubSubStreamingServiceClientIf extends \IThriftSyncIf {
    *   returnstreamFast(1: i32 i32_from,
    *                    2: i32 i32_to);
    */
-  public function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>>;
+  public function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndStream<null, int>>;
 }
 
 /**
@@ -192,7 +192,7 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
    *   returnstream(1: i32 i32_from,
    *                2: i32 i32_to);
    */
-  public async function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>> {
+  public async function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -212,7 +212,7 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
    * void, stream<i32, throws (1: FooStreamEx e)>
    *   streamthrows(1: i32 foo);
    */
-  public async function streamthrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
+  public async function streamthrows(int $foo): Awaitable<\ResponseAndStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -232,7 +232,7 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
    *   servicethrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public async function servicethrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
+  public async function servicethrows(int $foo): Awaitable<\ResponseAndStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -253,7 +253,7 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
    *   throws (1: FooEx e1,
    *           2: FooEx2 e2);
    */
-  public async function servicethrows2(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
+  public async function servicethrows2(int $foo): Awaitable<\ResponseAndStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -273,7 +273,7 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
    *   boththrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public async function boththrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
+  public async function boththrows(int $foo): Awaitable<\ResponseAndStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -292,7 +292,7 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
    * i32, stream<i32, throws (1: FooStreamEx e)>
    *   responseandstreamstreamthrows(1: i32 foo);
    */
-  public async function responseandstreamstreamthrows(int $foo): Awaitable<\ResponseAndClientStream<int, int>> {
+  public async function responseandstreamstreamthrows(int $foo): Awaitable<\ResponseAndStream<int, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -312,7 +312,7 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
    *   responseandstreamservicethrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public async function responseandstreamservicethrows(int $foo): Awaitable<\ResponseAndClientStream<int, int>> {
+  public async function responseandstreamservicethrows(int $foo): Awaitable<\ResponseAndStream<int, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -332,7 +332,7 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
    *   responseandstreamboththrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public async function responseandstreamboththrows(int $foo): Awaitable<\ResponseAndClientStream<int, int>> {
+  public async function responseandstreamboththrows(int $foo): Awaitable<\ResponseAndStream<int, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -352,7 +352,7 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
    *   returnstreamFast(1: i32 i32_from,
    *                    2: i32 i32_to);
    */
-  public async function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>> {
+  public async function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -378,7 +378,7 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
    *   returnstream(1: i32 i32_from,
    *                2: i32 i32_to);
    */
-  public async function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>> {
+  public async function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -398,7 +398,7 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
    * void, stream<i32, throws (1: FooStreamEx e)>
    *   streamthrows(1: i32 foo);
    */
-  public async function streamthrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
+  public async function streamthrows(int $foo): Awaitable<\ResponseAndStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -418,7 +418,7 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
    *   servicethrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public async function servicethrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
+  public async function servicethrows(int $foo): Awaitable<\ResponseAndStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -439,7 +439,7 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
    *   throws (1: FooEx e1,
    *           2: FooEx2 e2);
    */
-  public async function servicethrows2(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
+  public async function servicethrows2(int $foo): Awaitable<\ResponseAndStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -459,7 +459,7 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
    *   boththrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public async function boththrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
+  public async function boththrows(int $foo): Awaitable<\ResponseAndStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -478,7 +478,7 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
    * i32, stream<i32, throws (1: FooStreamEx e)>
    *   responseandstreamstreamthrows(1: i32 foo);
    */
-  public async function responseandstreamstreamthrows(int $foo): Awaitable<\ResponseAndClientStream<int, int>> {
+  public async function responseandstreamstreamthrows(int $foo): Awaitable<\ResponseAndStream<int, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -498,7 +498,7 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
    *   responseandstreamservicethrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public async function responseandstreamservicethrows(int $foo): Awaitable<\ResponseAndClientStream<int, int>> {
+  public async function responseandstreamservicethrows(int $foo): Awaitable<\ResponseAndStream<int, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -518,7 +518,7 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
    *   responseandstreamboththrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public async function responseandstreamboththrows(int $foo): Awaitable<\ResponseAndClientStream<int, int>> {
+  public async function responseandstreamboththrows(int $foo): Awaitable<\ResponseAndStream<int, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -538,7 +538,7 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
    *   returnstreamFast(1: i32 i32_from,
    *                    2: i32 i32_to);
    */
-  public async function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>> {
+  public async function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -562,6 +562,189 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = PubSubStreamingServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = 'PubSubStreamingService';
 
+  protected async function process_returnstream(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('returnstream');
+    $reply_type = \TMessageType::REPLY;
+    $args = $this->readHelper(PubSubStreamingService_returnstream_args::class, $input, 'returnstream', $handler_ctx);
+    $result = PubSubStreamingService_returnstream_FirstResponse::withDefaultValues();
+    try {
+      $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'returnstream', $args);
+      $response_and_stream = await $this->handler->returnstream($args->i32_from, $args->i32_to);
+      $this->eventHandler_->postExec($handler_ctx, 'returnstream', $result);
+      await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_returnstream_StreamResponse::class, $output);
+      return;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'returnstream', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'returnstream', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_streamthrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('streamthrows');
+    $reply_type = \TMessageType::REPLY;
+    $args = $this->readHelper(PubSubStreamingService_streamthrows_args::class, $input, 'streamthrows', $handler_ctx);
+    $result = PubSubStreamingService_streamthrows_FirstResponse::withDefaultValues();
+    try {
+      $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'streamthrows', $args);
+      $response_and_stream = await $this->handler->streamthrows($args->foo);
+      $this->eventHandler_->postExec($handler_ctx, 'streamthrows', $result);
+      await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_streamthrows_StreamResponse::class, $output);
+      return;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'streamthrows', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'streamthrows', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_servicethrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('servicethrows');
+    $reply_type = \TMessageType::REPLY;
+    $args = $this->readHelper(PubSubStreamingService_servicethrows_args::class, $input, 'servicethrows', $handler_ctx);
+    $result = PubSubStreamingService_servicethrows_FirstResponse::withDefaultValues();
+    try {
+      $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'servicethrows', $args);
+      $response_and_stream = await $this->handler->servicethrows($args->foo);
+      $this->eventHandler_->postExec($handler_ctx, 'servicethrows', $result);
+      await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_servicethrows_StreamResponse::class, $output);
+      return;
+    } catch (FooEx $exc0) {
+      $this->eventHandler_->handlerException($handler_ctx, 'servicethrows', $exc0);
+      $result->e = $exc0;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'servicethrows', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'servicethrows', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_servicethrows2(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('servicethrows2');
+    $reply_type = \TMessageType::REPLY;
+    $args = $this->readHelper(PubSubStreamingService_servicethrows2_args::class, $input, 'servicethrows2', $handler_ctx);
+    $result = PubSubStreamingService_servicethrows2_FirstResponse::withDefaultValues();
+    try {
+      $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'servicethrows2', $args);
+      $response_and_stream = await $this->handler->servicethrows2($args->foo);
+      $this->eventHandler_->postExec($handler_ctx, 'servicethrows2', $result);
+      await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_servicethrows2_StreamResponse::class, $output);
+      return;
+    } catch (FooEx $exc0) {
+      $this->eventHandler_->handlerException($handler_ctx, 'servicethrows2', $exc0);
+      $result->e1 = $exc0;
+    } catch (FooEx2 $exc1) {
+      $this->eventHandler_->handlerException($handler_ctx, 'servicethrows2', $exc1);
+      $result->e2 = $exc1;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'servicethrows2', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'servicethrows2', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_boththrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('boththrows');
+    $reply_type = \TMessageType::REPLY;
+    $args = $this->readHelper(PubSubStreamingService_boththrows_args::class, $input, 'boththrows', $handler_ctx);
+    $result = PubSubStreamingService_boththrows_FirstResponse::withDefaultValues();
+    try {
+      $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'boththrows', $args);
+      $response_and_stream = await $this->handler->boththrows($args->foo);
+      $this->eventHandler_->postExec($handler_ctx, 'boththrows', $result);
+      await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_boththrows_StreamResponse::class, $output);
+      return;
+    } catch (FooEx $exc0) {
+      $this->eventHandler_->handlerException($handler_ctx, 'boththrows', $exc0);
+      $result->e = $exc0;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'boththrows', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'boththrows', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_responseandstreamstreamthrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('responseandstreamstreamthrows');
+    $reply_type = \TMessageType::REPLY;
+    $args = $this->readHelper(PubSubStreamingService_responseandstreamstreamthrows_args::class, $input, 'responseandstreamstreamthrows', $handler_ctx);
+    $result = PubSubStreamingService_responseandstreamstreamthrows_FirstResponse::withDefaultValues();
+    try {
+      $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'responseandstreamstreamthrows', $args);
+      $response_and_stream = await $this->handler->responseandstreamstreamthrows($args->foo);
+      $this->eventHandler_->postExec($handler_ctx, 'responseandstreamstreamthrows', $result);
+      $result->success = $response_and_stream->response;      $this->writeHelper($result, 'responseandstreamstreamthrows', $seqid, $handler_ctx, $output, $reply_type);
+      await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_responseandstreamstreamthrows_StreamResponse::class, $output);
+      return;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'responseandstreamstreamthrows', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'responseandstreamstreamthrows', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_responseandstreamservicethrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('responseandstreamservicethrows');
+    $reply_type = \TMessageType::REPLY;
+    $args = $this->readHelper(PubSubStreamingService_responseandstreamservicethrows_args::class, $input, 'responseandstreamservicethrows', $handler_ctx);
+    $result = PubSubStreamingService_responseandstreamservicethrows_FirstResponse::withDefaultValues();
+    try {
+      $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'responseandstreamservicethrows', $args);
+      $response_and_stream = await $this->handler->responseandstreamservicethrows($args->foo);
+      $this->eventHandler_->postExec($handler_ctx, 'responseandstreamservicethrows', $result);
+      $result->success = $response_and_stream->response;      $this->writeHelper($result, 'responseandstreamservicethrows', $seqid, $handler_ctx, $output, $reply_type);
+      await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_responseandstreamservicethrows_StreamResponse::class, $output);
+      return;
+    } catch (FooEx $exc0) {
+      $this->eventHandler_->handlerException($handler_ctx, 'responseandstreamservicethrows', $exc0);
+      $result->e = $exc0;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'responseandstreamservicethrows', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'responseandstreamservicethrows', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_responseandstreamboththrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('responseandstreamboththrows');
+    $reply_type = \TMessageType::REPLY;
+    $args = $this->readHelper(PubSubStreamingService_responseandstreamboththrows_args::class, $input, 'responseandstreamboththrows', $handler_ctx);
+    $result = PubSubStreamingService_responseandstreamboththrows_FirstResponse::withDefaultValues();
+    try {
+      $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'responseandstreamboththrows', $args);
+      $response_and_stream = await $this->handler->responseandstreamboththrows($args->foo);
+      $this->eventHandler_->postExec($handler_ctx, 'responseandstreamboththrows', $result);
+      $result->success = $response_and_stream->response;      $this->writeHelper($result, 'responseandstreamboththrows', $seqid, $handler_ctx, $output, $reply_type);
+      await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_responseandstreamboththrows_StreamResponse::class, $output);
+      return;
+    } catch (FooEx $exc0) {
+      $this->eventHandler_->handlerException($handler_ctx, 'responseandstreamboththrows', $exc0);
+      $result->e = $exc0;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'responseandstreamboththrows', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'responseandstreamboththrows', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_returnstreamFast(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('returnstreamFast');
+    $reply_type = \TMessageType::REPLY;
+    $args = $this->readHelper(PubSubStreamingService_returnstreamFast_args::class, $input, 'returnstreamFast', $handler_ctx);
+    $result = PubSubStreamingService_returnstreamFast_FirstResponse::withDefaultValues();
+    try {
+      $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'returnstreamFast', $args);
+      $response_and_stream = await $this->handler->returnstreamFast($args->i32_from, $args->i32_to);
+      $this->eventHandler_->postExec($handler_ctx, 'returnstreamFast', $result);
+      await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_returnstreamFast_StreamResponse::class, $output);
+      return;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'returnstreamFast', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'returnstreamFast', $seqid, $handler_ctx, $output, $reply_type);
+  }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, PubSubStreamingServiceStaticMetadata::class);
   }

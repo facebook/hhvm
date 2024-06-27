@@ -76,7 +76,7 @@ interface CAsyncClientIf extends CAsyncIf {
    * void, stream<number>
    *   numbers();
    */
-  public function numbers(): Awaitable<\ResponseAndClientStream<null, int>>;
+  public function numbers(): Awaitable<\ResponseAndStream<null, int>>;
 }
 
 /**
@@ -113,7 +113,7 @@ interface CClientIf extends \IThriftSyncIf {
    * void, stream<number>
    *   numbers();
    */
-  public function numbers(): Awaitable<\ResponseAndClientStream<null, int>>;
+  public function numbers(): Awaitable<\ResponseAndStream<null, int>>;
 }
 
 /**
@@ -181,7 +181,7 @@ class CAsyncClient extends \ThriftClientBase implements CAsyncClientIf {
    * void, stream<number>
    *   numbers();
    */
-  public async function numbers(): Awaitable<\ResponseAndClientStream<null, int>> {
+  public async function numbers(): Awaitable<\ResponseAndStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -249,7 +249,7 @@ class CClient extends \ThriftClientBase implements CClientIf {
    * void, stream<number>
    *   numbers();
    */
-  public async function numbers(): Awaitable<\ResponseAndClientStream<null, int>> {
+  public async function numbers(): Awaitable<\ResponseAndStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);

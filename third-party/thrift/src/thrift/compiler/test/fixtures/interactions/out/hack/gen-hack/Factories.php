@@ -70,7 +70,7 @@ interface FactoriesAsyncClientIf extends FactoriesAsyncIf {
    * i32, stream<i32>
    *   serialize();
    */
-  public function serialize(): Awaitable<\ResponseAndClientStream<int, int>>;
+  public function serialize(): Awaitable<\ResponseAndStream<int, int>>;
 }
 
 /**
@@ -104,7 +104,7 @@ interface FactoriesClientIf extends \IThriftSyncIf {
    * i32, stream<i32>
    *   serialize();
    */
-  public function serialize(): Awaitable<\ResponseAndClientStream<int, int>>;
+  public function serialize(): Awaitable<\ResponseAndStream<int, int>>;
 }
 
 /**
@@ -177,7 +177,7 @@ class FactoriesAsyncClient extends \ThriftClientBase implements FactoriesAsyncCl
    * i32, stream<i32>
    *   serialize();
    */
-  public async function serialize(): Awaitable<\ResponseAndClientStream<int, int>> {
+  public async function serialize(): Awaitable<\ResponseAndStream<int, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -252,7 +252,7 @@ class FactoriesClient extends \ThriftClientBase implements FactoriesClientIf {
    * i32, stream<i32>
    *   serialize();
    */
-  public async function serialize(): Awaitable<\ResponseAndClientStream<int, int>> {
+  public async function serialize(): Awaitable<\ResponseAndStream<int, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);

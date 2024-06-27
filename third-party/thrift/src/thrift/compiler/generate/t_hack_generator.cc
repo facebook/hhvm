@@ -1040,12 +1040,14 @@ class t_hack_generator : public t_concat_generator {
   bool is_hack_const_type(const t_type* type);
 
   std::vector<const t_function*> get_supported_server_functions(
-      const t_service* tservice) {
+      const t_service* tservice, bool async) {
     std::vector<const t_function*> funcs;
     for (auto func : tservice->get_functions()) {
       if (!is_client_only_function(func) &&
           !func->is_interaction_constructor()) {
-        funcs.push_back(func);
+        if (async || !func->sink_or_stream()) {
+          funcs.push_back(func);
+        }
       }
     }
     return funcs;
@@ -1053,7 +1055,7 @@ class t_hack_generator : public t_concat_generator {
 
   std::vector<const t_function*> get_supported_client_functions(
       const t_service* tservice) {
-    auto funcs = get_supported_server_functions(tservice);
+    auto funcs = get_supported_server_functions(tservice, true);
     for (auto func : tservice->get_functions()) {
       if (is_client_only_function(func)) {
         funcs.push_back(func);
@@ -1063,6 +1065,9 @@ class t_hack_generator : public t_concat_generator {
   }
 
   bool is_client_only_function(const t_function* func) {
+    if (server_stream_) {
+      return func->sink();
+    }
     return func->sink_or_stream();
   }
 
@@ -5692,7 +5697,7 @@ void t_hack_generator::generate_service_processor(
   indent_up();
 
   // Generate the process subfunctions
-  for (const auto* function : get_supported_server_functions(tservice)) {
+  for (const auto* function : get_supported_server_functions(tservice, async)) {
     if (!skip_codegen(function)) {
       generate_process_function(tservice, function, async);
     }
@@ -5753,11 +5758,16 @@ void t_hack_generator::generate_process_function(
       << (async ? "Awaitable<void>" : "void") << " {\n";
   indent_up();
 
+  auto is_stream = tfunction->stream() != nullptr;
+
   std::string service_name = hack_name(tservice);
   std::string argsname = generate_function_helper_name(
       tservice, tfunction, PhpFunctionNameSuffix::ARGS);
   std::string resultname = generate_function_helper_name(
-      tservice, tfunction, PhpFunctionNameSuffix::RESULT);
+      tservice,
+      tfunction,
+      is_stream ? PhpFunctionNameSuffix::FIRST_RESPONSE
+                : PhpFunctionNameSuffix::RESULT);
   const std::string& fn_name = find_hack_name(tfunction);
 
   f_service_ << indent()
@@ -5783,8 +5793,11 @@ void t_hack_generator::generate_process_function(
                      << service_name << "', '" << fn_name << "', $args);\n";
 
   f_service_ << indent();
-  if (tfunction->qualifier() != t_function_qualifier::oneway &&
-      !tfunction->return_type()->is_void()) {
+  auto is_void = tfunction->return_type()->is_void();
+  if (is_stream) {
+    f_service_ << "$response_and_stream = ";
+  } else if (
+      tfunction->qualifier() != t_function_qualifier::oneway && !is_void) {
     f_service_ << "$result->success = ";
   }
   f_service_ << (async ? "await " : "") << "$this->handler->"
@@ -5800,7 +5813,21 @@ void t_hack_generator::generate_process_function(
     indent(f_service_) << "$this->eventHandler_->postExec($handler_ctx, '"
                        << fn_name << "', $result);\n";
   }
+  if (is_stream) {
+    if (!is_void) {
+      f_service_ << indent()
+                 << "$result->success = $response_and_stream->response;"
+                 << indent() << "$this->writeHelper($result, '" << fn_name
+                 << "', $seqid, $handler_ctx, $output, $reply_type);\n";
+    }
 
+    std::string stream_response_type = generate_function_helper_name(
+        tservice, tfunction, PhpFunctionNameSuffix::STREAM_RESPONSE);
+    f_service_ << indent()
+               << "await $this->genExecuteStream($response_and_stream->stream, "
+               << stream_response_type << "::class, $output);\n"
+               << indent() << "return;\n";
+  }
   indent_down();
   int exc_num = 0;
   for (const t_field& x : get_elems(tfunction->exceptions())) {
@@ -6665,11 +6692,10 @@ std::string t_hack_generator::get_stream_function_return_typehint(
   if (function->has_return_type()) {
     auto first_response_type_hint =
         type_to_typehint(function->return_type().get_type());
-    return_typehint = "\\ResponseAndClientStream<" + first_response_type_hint +
-        ", " + stream_response_type_hint;
+    return_typehint = "\\ResponseAndStream<" + first_response_type_hint + ", " +
+        stream_response_type_hint;
   } else {
-    return_typehint =
-        "\\ResponseAndClientStream<null, " + stream_response_type_hint;
+    return_typehint = "\\ResponseAndStream<null, " + stream_response_type_hint;
   }
   return return_typehint;
 }
@@ -6762,7 +6788,7 @@ void t_hack_generator::generate_service_interface(
   indent_up();
   auto delim = "";
   auto functions = client ? get_supported_client_functions(tservice)
-                          : get_supported_server_functions(tservice);
+                          : get_supported_server_functions(tservice, async);
 
   auto svc_mod_int =
       (tservice->find_structured_annotation_or_null(kHackModuleInternalUri) !=
@@ -7105,7 +7131,8 @@ void t_hack_generator::_generate_service_client_children(
   if (!async) {
     out << indent() << "/* send and recv functions */\n";
 
-    for (const auto* function : get_supported_server_functions(tservice)) {
+    for (const auto* function :
+         get_supported_server_functions(tservice, async)) {
       if (skip_codegen(function)) {
         continue;
       }

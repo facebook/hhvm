@@ -20,14 +20,37 @@ from __future__ import annotations
 
 import unittest
 
+from typing import Type
+
+import iobuf.thrift_mutable_types as mutable_types
+import iobuf.thrift_types as immutable_ypes
+
 from folly.iobuf import IOBuf
-from iobuf.thrift_types import Moo
+
+from iobuf.thrift_types import Moo as MooType
+
+from parameterized import parameterized_class
 
 
+@parameterized_class(
+    ("test_types"),
+    [(immutable_ypes,), (mutable_types,)],
+)
 class IOBufTests(unittest.TestCase):
+    def setUp(self) -> None:
+        """
+        The `setUp` method performs these assignments with type hints to enable
+        pyre when using 'parameterized'. Otherwise, Pyre cannot deduce the types
+        behind `test_types`.
+        """
+        # pyre-ignore[16]: has no attribute `sets_types`
+        self.Moo: Type[MooType] = self.test_types.Moo
+
     def test_get_set_struct_field(self) -> None:
-        m = Moo(val=3, ptr=IOBuf(b"abcdef"), buf=IOBuf(b"xyzzy"), opt_ptr=IOBuf(b"pqr"))
-        m2 = Moo(
+        m = self.Moo(
+            val=3, ptr=IOBuf(b"abcdef"), buf=IOBuf(b"xyzzy"), opt_ptr=IOBuf(b"pqr")
+        )
+        m2 = self.Moo(
             val=3, ptr=IOBuf(b"abcdef"), buf=IOBuf(b"xyzzy"), opt_ptr=IOBuf(b"pqr")
         )
         self.assertEqual(m, m2)

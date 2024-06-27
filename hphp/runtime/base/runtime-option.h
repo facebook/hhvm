@@ -999,6 +999,10 @@ public:
   static bool SimpleXMLEmptyNamespaceMatchesAll;
 
 #ifdef HHVM_FACEBOOK
+  // ThriftFBServer
+  static int ThriftFBServerWorkerThreads;
+  static int ThriftFBServerPoolThreads;
+
   // fb303 server
   static bool EnableFb303Server;
   static int Fb303ServerPort;

@@ -911,6 +911,10 @@ double RuntimeOption::ProfilerTraceExpansion = 1.2;
 int RuntimeOption::ProfilerMaxTraceBuffer = 0;
 
 #ifdef HHVM_FACEBOOK
+
+int RuntimeOption::ThriftFBServerWorkerThreads = 1;
+int RuntimeOption::ThriftFBServerPoolThreads = 1;
+
 bool RuntimeOption::EnableFb303Server = false;
 int RuntimeOption::Fb303ServerPort = 0;
 std::string RuntimeOption::Fb303ServerIP;
@@ -1985,6 +1989,12 @@ void RuntimeOption::Load(
   }
 #ifdef HHVM_FACEBOOK
   {
+    // ThriftFBServer
+    Config::Bind(ThriftFBServerWorkerThreads, ini, config,
+                 "ThriftFBServer.WorkerThreads", 1);
+    Config::Bind(ThriftFBServerPoolThreads, ini, config, "ThriftFBServer.PoolThreads",
+                 1);
+                 
     // Fb303Server
     Config::Bind(EnableFb303Server, ini, config, "Fb303Server.Enable",
                  EnableFb303Server);

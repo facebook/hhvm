@@ -43,6 +43,38 @@ namespace compiler {
 
 namespace {
 
+std::string_view remove_global_scope(std::string_view symbol) {
+  if (symbol.size() >= 2 && symbol.find("::", 0, 2) == 0) {
+    symbol.remove_prefix(2);
+  }
+  return symbol;
+}
+
+bool is_supported_template(std::string_view symbol) {
+  symbol = remove_global_scope(symbol);
+  static const std::unordered_set<std::string_view> kSupportedTemplates = {
+      "folly::F14FastMap",
+      "folly::F14FastSet",
+      "folly::F14NodeMap",
+      "folly::F14NodeSet",
+      "folly::F14ValueMap",
+      "folly::F14ValueSet",
+      "folly::F14VectorMap",
+      "folly::F14VectorSet",
+      "folly::fbvector",
+      "folly::small_vector",
+      "folly::sorted_vector_map",
+      "folly::sorted_vector_set",
+      "std::deque",
+      "std::map",
+      "std::set",
+      "std::unordered_map",
+      "std::unordered_set",
+      "std::vector",
+  };
+  return kSupportedTemplates.count(symbol);
+}
+
 // t_node must be t_type or t_field
 const t_const* find_structured_annotation(const t_node& node, const char* uri) {
   if (auto field = dynamic_cast<const t_field*>(&node)) {
@@ -472,8 +504,12 @@ class python_capi_mstch_struct : public mstch_struct {
             annotation->get_value_from_structured_annotation_or_null("name")) {
       return is_type_iobuf(type_name->get_string());
     }
-    return annotation->get_value_from_structured_annotation_or_null(
-               "template") == nullptr;
+    if (const auto* template_name =
+            annotation->get_value_from_structured_annotation_or_null(
+                "template")) {
+      return is_supported_template(template_name->get_string());
+    }
+    return false;
   }
 
   bool capi_eligible_type(const t_type* type) {
@@ -491,8 +527,11 @@ class python_capi_mstch_struct : public mstch_struct {
     // annotations so this will always be non-null if @cpp.Type annotation
     // used on type or field
     // TODO: delete these if structured annotation migration completed
-    if (type->find_annotation_or_null({"cpp.template", "cpp2.template"})) {
-      return false;
+    if (const std::string* template_anno =
+            type->find_annotation_or_null({"cpp.template", "cpp2.template"})) {
+      if (!is_supported_template(*template_anno)) {
+        return false;
+      }
     }
     if (const std::string* type_anno =
             type->find_annotation_or_null({"cpp.type", "cpp2.type"})) {

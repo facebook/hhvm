@@ -157,16 +157,6 @@ cdef api object init__apache__thrift__fixtures__types__module__Renaming(object d
 cdef api int can_extract__apache__thrift__fixtures__types__module__AnnotatedTypes(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.AnnotatedTypes) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__AnnotatedTypes(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__AnnotatedTypes(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.AnnotatedTypes,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__AnnotatedTypes(object data):
     return __thrift_types.AnnotatedTypes._fbthrift_create(data)
@@ -209,16 +199,6 @@ cdef api object init__apache__thrift__fixtures__types__module__IncompleteMapDep(
 cdef api int can_extract__apache__thrift__fixtures__types__module__CompleteMap(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.CompleteMap) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__CompleteMap(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__CompleteMap(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.CompleteMap,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__CompleteMap(object data):
     return __thrift_types.CompleteMap._fbthrift_create(data)
@@ -257,16 +237,6 @@ cdef api object init__apache__thrift__fixtures__types__module__IncompleteListDep
 cdef api int can_extract__apache__thrift__fixtures__types__module__CompleteList(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.CompleteList) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__CompleteList(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__CompleteList(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.CompleteList,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__CompleteList(object data):
     return __thrift_types.CompleteList._fbthrift_create(data)

@@ -25,10 +25,22 @@ bool ensure_module_imported() {
       ::import_test__fixtures__python_capi__containers__thrift_types_capi));
   return import();
 }
+  static constexpr std::int16_t _fbthrift__TemplateLists__tuple_pos[5] = {
+    1, 2, 3, 4, 5
+  };
+  static constexpr std::int16_t _fbthrift__TemplateSets__tuple_pos[7] = {
+    1, 2, 3, 4, 5, 6, 7
+  };
+  static constexpr std::int16_t _fbthrift__TemplateMaps__tuple_pos[7] = {
+    1, 2, 3, 4, 5, 6, 7
+  };
   static constexpr std::int16_t _fbthrift__TWrapped__tuple_pos[2] = {
     1, 2
   };
   static constexpr std::int16_t _fbthrift__IndirectionA__tuple_pos[1] = {
+    1
+  };
+  static constexpr std::int16_t _fbthrift__IndirectionB__tuple_pos[1] = {
     1
   };
   static constexpr std::int16_t _fbthrift__IndirectionC__tuple_pos[1] = {
@@ -38,37 +50,50 @@ bool ensure_module_imported() {
 
 ExtractorResult<::test::fixtures::python_capi::TemplateLists>
 Extractor<::test::fixtures::python_capi::TemplateLists>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::python_capi::TemplateLists>(
-      "Module test.fixtures.python_capi.containers import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a TemplateLists");
+      }
+      return extractorError<::test::fixtures::python_capi::TemplateLists>(
+          "Marshal error: TemplateLists");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__python_capi__containers__TemplateLists(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::python_capi::TemplateLists>(
-        "Thrift serialize error: TemplateLists");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::python_capi::TemplateLists>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::python_capi::TemplateLists>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::python_capi::TemplateLists>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::python_capi::TemplateLists>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::python_capi::TemplateLists>(
-      "Module test.fixtures.python_capi.containers import error");
+    ::test::fixtures::python_capi::TemplateLists>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::python_capi::TemplateLists cpp;
+  std::optional<std::string_view> error;
+  Extractor<list<Bytes, std::vector<native_t<Bytes>>>>{}.extractInto(
+      cpp.std_string_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateLists__tuple_pos[0]),
+      error);
+  Extractor<list<Bytes, std::deque<native_t<Bytes>>>>{}.extractInto(
+      cpp.deque_string_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateLists__tuple_pos[1]),
+      error);
+  Extractor<list<folly::IOBuf, folly::small_vector<native_t<folly::IOBuf>>>>{}.extractInto(
+      cpp.small_vector_iobuf_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateLists__tuple_pos[2]),
+      error);
+  Extractor<list<list<Bytes, folly::fbvector<native_t<Bytes>>>, folly::small_vector<native_t<list<Bytes, folly::fbvector<native_t<Bytes>>>>>>>{}.extractInto(
+      cpp.nested_small_vector_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateLists__tuple_pos[3]),
+      error);
+  Extractor<list<list<list<Bytes, folly::fbvector<native_t<Bytes>>>, folly::fbvector<native_t<list<Bytes, folly::fbvector<native_t<Bytes>>>>>>, folly::fbvector<native_t<list<list<Bytes, folly::fbvector<native_t<Bytes>>>, folly::fbvector<native_t<list<Bytes, folly::fbvector<native_t<Bytes>>>>>>>>>>{}.extractInto(
+      cpp.small_vector_tensor_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateLists__tuple_pos[4]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__test__fixtures__python_capi__containers__TemplateLists(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::python_capi::TemplateLists>(
-          "Init from fbthrift error: TemplateLists");
-  }
-  return Extractor<::test::fixtures::python_capi::TemplateLists>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::python_capi::TemplateLists>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -91,65 +116,134 @@ PyObject* Constructor<::test::fixtures::python_capi::TemplateLists>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  ::std::unique_ptr<::folly::IOBuf> serialized;
-  try {
-    serialized = detail::serialize_to_iobuf(val);
-  } catch (const apache::thrift::TProtocolException& e) {
-    detail::handle_protocol_error(e);
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::TemplateLists>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
     return nullptr;
   }
-  DCHECK(serialized);
-  auto ptr = construct__test__fixtures__python_capi__containers__TemplateLists(std::move(serialized));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
-  }
-  return ptr;
+  return init__test__fixtures__python_capi__containers__TemplateLists(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::TemplateLists>>::operator()(
-    const ::test::fixtures::python_capi::TemplateLists& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::python_capi::TemplateLists>{}(val));
-  if (!obj) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::TemplateLists& val) {
+  StrongRef fbthrift_data(createStructTuple(5));
+  StrongRef _fbthrift__std_string(
+    Constructor<list<Bytes, std::vector<native_t<Bytes>>>>{}
+    .constructFrom(val.std_string_ref()));
+  if (_fbthrift__std_string.isNone()) {
+    Py_INCREF(Py_None);
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__TemplateLists__tuple_pos[0],
+      Py_None);
+  } else
+  if (!_fbthrift__std_string ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateLists__tuple_pos[0],
+          *_fbthrift__std_string) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  StrongRef _fbthrift__deque_string(
+    Constructor<list<Bytes, std::deque<native_t<Bytes>>>>{}
+    .constructFrom(val.deque_string_ref()));
+  if (!_fbthrift__deque_string ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateLists__tuple_pos[1],
+          *_fbthrift__deque_string) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__small_vector_iobuf(
+    Constructor<list<folly::IOBuf, folly::small_vector<native_t<folly::IOBuf>>>>{}
+    .constructFrom(val.small_vector_iobuf_ref()));
+  if (!_fbthrift__small_vector_iobuf ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateLists__tuple_pos[2],
+          *_fbthrift__small_vector_iobuf) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__nested_small_vector(
+    Constructor<list<list<Bytes, folly::fbvector<native_t<Bytes>>>, folly::small_vector<native_t<list<Bytes, folly::fbvector<native_t<Bytes>>>>>>>{}
+    .constructFrom(val.nested_small_vector_ref()));
+  if (!_fbthrift__nested_small_vector ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateLists__tuple_pos[3],
+          *_fbthrift__nested_small_vector) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__small_vector_tensor(
+    Constructor<list<list<list<Bytes, folly::fbvector<native_t<Bytes>>>, folly::fbvector<native_t<list<Bytes, folly::fbvector<native_t<Bytes>>>>>>, folly::fbvector<native_t<list<list<Bytes, folly::fbvector<native_t<Bytes>>>, folly::fbvector<native_t<list<Bytes, folly::fbvector<native_t<Bytes>>>>>>>>>>{}
+    .constructFrom(val.small_vector_tensor_ref()));
+  if (!_fbthrift__small_vector_tensor ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateLists__tuple_pos[4],
+          *_fbthrift__small_vector_tensor) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::test::fixtures::python_capi::TemplateSets>
 Extractor<::test::fixtures::python_capi::TemplateSets>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::python_capi::TemplateSets>(
-      "Module test.fixtures.python_capi.containers import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a TemplateSets");
+      }
+      return extractorError<::test::fixtures::python_capi::TemplateSets>(
+          "Marshal error: TemplateSets");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__python_capi__containers__TemplateSets(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::python_capi::TemplateSets>(
-        "Thrift serialize error: TemplateSets");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::python_capi::TemplateSets>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::python_capi::TemplateSets>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::python_capi::TemplateSets>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::python_capi::TemplateSets>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::python_capi::TemplateSets>(
-      "Module test.fixtures.python_capi.containers import error");
+    ::test::fixtures::python_capi::TemplateSets>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::python_capi::TemplateSets cpp;
+  std::optional<std::string_view> error;
+  Extractor<set<Bytes, std::set<native_t<Bytes>>>>{}.extractInto(
+      cpp.std_set_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateSets__tuple_pos[0]),
+      error);
+  Extractor<set<Bytes, std::unordered_set<native_t<Bytes>>>>{}.extractInto(
+      cpp.std_unordered_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateSets__tuple_pos[1]),
+      error);
+  Extractor<set<Bytes, folly::F14FastSet<native_t<Bytes>>>>{}.extractInto(
+      cpp.folly_fast_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateSets__tuple_pos[2]),
+      error);
+  Extractor<set<Bytes, folly::F14NodeSet<native_t<Bytes>>>>{}.extractInto(
+      cpp.folly_node_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateSets__tuple_pos[3]),
+      error);
+  Extractor<set<Bytes, folly::F14ValueSet<native_t<Bytes>>>>{}.extractInto(
+      cpp.folly_value_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateSets__tuple_pos[4]),
+      error);
+  Extractor<set<Bytes, folly::F14VectorSet<native_t<Bytes>>>>{}.extractInto(
+      cpp.folly_vector_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateSets__tuple_pos[5]),
+      error);
+  Extractor<set<Bytes, folly::sorted_vector_set<native_t<Bytes>>>>{}.extractInto(
+      cpp.folly_sorted_vector_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateSets__tuple_pos[6]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__test__fixtures__python_capi__containers__TemplateSets(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::python_capi::TemplateSets>(
-          "Init from fbthrift error: TemplateSets");
-  }
-  return Extractor<::test::fixtures::python_capi::TemplateSets>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::python_capi::TemplateSets>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -172,65 +266,147 @@ PyObject* Constructor<::test::fixtures::python_capi::TemplateSets>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  ::std::unique_ptr<::folly::IOBuf> serialized;
-  try {
-    serialized = detail::serialize_to_iobuf(val);
-  } catch (const apache::thrift::TProtocolException& e) {
-    detail::handle_protocol_error(e);
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::TemplateSets>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
     return nullptr;
   }
-  DCHECK(serialized);
-  auto ptr = construct__test__fixtures__python_capi__containers__TemplateSets(std::move(serialized));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
-  }
-  return ptr;
+  return init__test__fixtures__python_capi__containers__TemplateSets(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::TemplateSets>>::operator()(
-    const ::test::fixtures::python_capi::TemplateSets& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::python_capi::TemplateSets>{}(val));
-  if (!obj) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::TemplateSets& val) {
+  StrongRef fbthrift_data(createStructTuple(7));
+  StrongRef _fbthrift__std_set(
+    Constructor<set<Bytes, std::set<native_t<Bytes>>>>{}
+    .constructFrom(val.std_set_ref()));
+  if (!_fbthrift__std_set ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateSets__tuple_pos[0],
+          *_fbthrift__std_set) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  StrongRef _fbthrift__std_unordered(
+    Constructor<set<Bytes, std::unordered_set<native_t<Bytes>>>>{}
+    .constructFrom(val.std_unordered_ref()));
+  if (!_fbthrift__std_unordered ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateSets__tuple_pos[1],
+          *_fbthrift__std_unordered) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__folly_fast(
+    Constructor<set<Bytes, folly::F14FastSet<native_t<Bytes>>>>{}
+    .constructFrom(val.folly_fast_ref()));
+  if (!_fbthrift__folly_fast ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateSets__tuple_pos[2],
+          *_fbthrift__folly_fast) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__folly_node(
+    Constructor<set<Bytes, folly::F14NodeSet<native_t<Bytes>>>>{}
+    .constructFrom(val.folly_node_ref()));
+  if (!_fbthrift__folly_node ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateSets__tuple_pos[3],
+          *_fbthrift__folly_node) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__folly_value(
+    Constructor<set<Bytes, folly::F14ValueSet<native_t<Bytes>>>>{}
+    .constructFrom(val.folly_value_ref()));
+  if (!_fbthrift__folly_value ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateSets__tuple_pos[4],
+          *_fbthrift__folly_value) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__folly_vector(
+    Constructor<set<Bytes, folly::F14VectorSet<native_t<Bytes>>>>{}
+    .constructFrom(val.folly_vector_ref()));
+  if (!_fbthrift__folly_vector ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateSets__tuple_pos[5],
+          *_fbthrift__folly_vector) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__folly_sorted_vector(
+    Constructor<set<Bytes, folly::sorted_vector_set<native_t<Bytes>>>>{}
+    .constructFrom(val.folly_sorted_vector_ref()));
+  if (!_fbthrift__folly_sorted_vector ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateSets__tuple_pos[6],
+          *_fbthrift__folly_sorted_vector) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::test::fixtures::python_capi::TemplateMaps>
 Extractor<::test::fixtures::python_capi::TemplateMaps>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::python_capi::TemplateMaps>(
-      "Module test.fixtures.python_capi.containers import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a TemplateMaps");
+      }
+      return extractorError<::test::fixtures::python_capi::TemplateMaps>(
+          "Marshal error: TemplateMaps");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__python_capi__containers__TemplateMaps(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::python_capi::TemplateMaps>(
-        "Thrift serialize error: TemplateMaps");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::python_capi::TemplateMaps>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::python_capi::TemplateMaps>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::python_capi::TemplateMaps>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::python_capi::TemplateMaps>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::python_capi::TemplateMaps>(
-      "Module test.fixtures.python_capi.containers import error");
+    ::test::fixtures::python_capi::TemplateMaps>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::python_capi::TemplateMaps cpp;
+  std::optional<std::string_view> error;
+  Extractor<map<Bytes, Bytes, std::map<native_t<Bytes>, native_t<Bytes>>>>{}.extractInto(
+      cpp.std_map_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateMaps__tuple_pos[0]),
+      error);
+  Extractor<map<Bytes, Bytes, std::unordered_map<native_t<Bytes>, native_t<Bytes>>>>{}.extractInto(
+      cpp.std_unordered_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateMaps__tuple_pos[1]),
+      error);
+  Extractor<map<Bytes, Bytes, folly::F14FastMap<native_t<Bytes>, native_t<Bytes>>>>{}.extractInto(
+      cpp.folly_fast_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateMaps__tuple_pos[2]),
+      error);
+  Extractor<map<Bytes, Bytes, folly::F14NodeMap<native_t<Bytes>, native_t<Bytes>>>>{}.extractInto(
+      cpp.folly_node_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateMaps__tuple_pos[3]),
+      error);
+  Extractor<map<Bytes, Bytes, folly::F14ValueMap<native_t<Bytes>, native_t<Bytes>>>>{}.extractInto(
+      cpp.folly_value_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateMaps__tuple_pos[4]),
+      error);
+  Extractor<map<Bytes, Bytes, folly::F14VectorMap<native_t<Bytes>, native_t<Bytes>>>>{}.extractInto(
+      cpp.folly_vector_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateMaps__tuple_pos[5]),
+      error);
+  Extractor<map<Bytes, Bytes, folly::sorted_vector_map<native_t<Bytes>, native_t<Bytes>>>>{}.extractInto(
+      cpp.folly_sorted_vector_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TemplateMaps__tuple_pos[6]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__test__fixtures__python_capi__containers__TemplateMaps(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::python_capi::TemplateMaps>(
-          "Init from fbthrift error: TemplateMaps");
-  }
-  return Extractor<::test::fixtures::python_capi::TemplateMaps>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::python_capi::TemplateMaps>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -253,31 +429,92 @@ PyObject* Constructor<::test::fixtures::python_capi::TemplateMaps>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  ::std::unique_ptr<::folly::IOBuf> serialized;
-  try {
-    serialized = detail::serialize_to_iobuf(val);
-  } catch (const apache::thrift::TProtocolException& e) {
-    detail::handle_protocol_error(e);
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::TemplateMaps>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
     return nullptr;
   }
-  DCHECK(serialized);
-  auto ptr = construct__test__fixtures__python_capi__containers__TemplateMaps(std::move(serialized));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
-  }
-  return ptr;
+  return init__test__fixtures__python_capi__containers__TemplateMaps(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::TemplateMaps>>::operator()(
-    const ::test::fixtures::python_capi::TemplateMaps& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::python_capi::TemplateMaps>{}(val));
-  if (!obj) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::TemplateMaps& val) {
+  StrongRef fbthrift_data(createStructTuple(7));
+  StrongRef _fbthrift__std_map(
+    Constructor<map<Bytes, Bytes, std::map<native_t<Bytes>, native_t<Bytes>>>>{}
+    .constructFrom(val.std_map_ref()));
+  if (!_fbthrift__std_map ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateMaps__tuple_pos[0],
+          *_fbthrift__std_map) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  StrongRef _fbthrift__std_unordered(
+    Constructor<map<Bytes, Bytes, std::unordered_map<native_t<Bytes>, native_t<Bytes>>>>{}
+    .constructFrom(val.std_unordered_ref()));
+  if (!_fbthrift__std_unordered ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateMaps__tuple_pos[1],
+          *_fbthrift__std_unordered) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__folly_fast(
+    Constructor<map<Bytes, Bytes, folly::F14FastMap<native_t<Bytes>, native_t<Bytes>>>>{}
+    .constructFrom(val.folly_fast_ref()));
+  if (!_fbthrift__folly_fast ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateMaps__tuple_pos[2],
+          *_fbthrift__folly_fast) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__folly_node(
+    Constructor<map<Bytes, Bytes, folly::F14NodeMap<native_t<Bytes>, native_t<Bytes>>>>{}
+    .constructFrom(val.folly_node_ref()));
+  if (!_fbthrift__folly_node ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateMaps__tuple_pos[3],
+          *_fbthrift__folly_node) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__folly_value(
+    Constructor<map<Bytes, Bytes, folly::F14ValueMap<native_t<Bytes>, native_t<Bytes>>>>{}
+    .constructFrom(val.folly_value_ref()));
+  if (!_fbthrift__folly_value ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateMaps__tuple_pos[4],
+          *_fbthrift__folly_value) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__folly_vector(
+    Constructor<map<Bytes, Bytes, folly::F14VectorMap<native_t<Bytes>, native_t<Bytes>>>>{}
+    .constructFrom(val.folly_vector_ref()));
+  if (!_fbthrift__folly_vector ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateMaps__tuple_pos[5],
+          *_fbthrift__folly_vector) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__folly_sorted_vector(
+    Constructor<map<Bytes, Bytes, folly::sorted_vector_map<native_t<Bytes>, native_t<Bytes>>>>{}
+    .constructFrom(val.folly_sorted_vector_ref()));
+  if (!_fbthrift__folly_sorted_vector ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TemplateMaps__tuple_pos[6],
+          *_fbthrift__folly_sorted_vector) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::test::fixtures::python_capi::TWrapped>
 Extractor<::test::fixtures::python_capi::TWrapped>::operator()(PyObject* obj) {
@@ -453,37 +690,34 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::test::fixtures::python_capi::IndirectionB>
 Extractor<::test::fixtures::python_capi::IndirectionB>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::python_capi::IndirectionB>(
-      "Module test.fixtures.python_capi.containers import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a IndirectionB");
+      }
+      return extractorError<::test::fixtures::python_capi::IndirectionB>(
+          "Marshal error: IndirectionB");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__python_capi__containers__IndirectionB(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::python_capi::IndirectionB>(
-        "Thrift serialize error: IndirectionB");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::python_capi::IndirectionB>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::python_capi::IndirectionB>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::python_capi::IndirectionB>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::python_capi::IndirectionB>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::python_capi::IndirectionB>(
-      "Module test.fixtures.python_capi.containers import error");
+    ::test::fixtures::python_capi::IndirectionB>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::python_capi::IndirectionB cpp;
+  std::optional<std::string_view> error;
+  Extractor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>, std::vector<native_t<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>>>>>{}.extractInto(
+      cpp.lst_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__IndirectionB__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__test__fixtures__python_capi__containers__IndirectionB(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::python_capi::IndirectionB>(
-          "Init from fbthrift error: IndirectionB");
-  }
-  return Extractor<::test::fixtures::python_capi::IndirectionB>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::python_capi::IndirectionB>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -506,31 +740,32 @@ PyObject* Constructor<::test::fixtures::python_capi::IndirectionB>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  ::std::unique_ptr<::folly::IOBuf> serialized;
-  try {
-    serialized = detail::serialize_to_iobuf(val);
-  } catch (const apache::thrift::TProtocolException& e) {
-    detail::handle_protocol_error(e);
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::IndirectionB>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
     return nullptr;
   }
-  DCHECK(serialized);
-  auto ptr = construct__test__fixtures__python_capi__containers__IndirectionB(std::move(serialized));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
-  }
-  return ptr;
+  return init__test__fixtures__python_capi__containers__IndirectionB(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::IndirectionB>>::operator()(
-    const ::test::fixtures::python_capi::IndirectionB& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::python_capi::IndirectionB>{}(val));
-  if (!obj) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::IndirectionB& val) {
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__lst(
+    Constructor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>, std::vector<native_t<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>>>>>{}
+    .constructFrom(val.lst_ref()));
+  if (!_fbthrift__lst ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__IndirectionB__tuple_pos[0],
+          *_fbthrift__lst) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::test::fixtures::python_capi::IndirectionC>
 Extractor<::test::fixtures::python_capi::IndirectionC>::operator()(PyObject* obj) {

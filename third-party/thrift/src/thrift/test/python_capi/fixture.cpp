@@ -45,14 +45,14 @@ static_assert(
     "Should be marshaled because opt-in at module level");
 
 static_assert(
-    !Constructor<::thrift::test::python_capi::TemplateLists>::kUsingMarshal,
-    "Should be serialized because cpp.Type template usage");
+    Constructor<::thrift::test::python_capi::TemplateLists>::kUsingMarshal,
+    "Should be marshaled because cpp.Type template is standard");
 static_assert(
-    !Constructor<::thrift::test::python_capi::TemplateSets>::kUsingMarshal,
-    "Should be serialized because cpp.Type template usage");
+    Constructor<::thrift::test::python_capi::TemplateSets>::kUsingMarshal,
+    "Should be marshaled because cpp.Type template is standard");
 static_assert(
-    !Constructor<::thrift::test::python_capi::TemplateMaps>::kUsingMarshal,
-    "Should be serialized because cpp.Type template usage");
+    Constructor<::thrift::test::python_capi::TemplateMaps>::kUsingMarshal,
+    "Should be marshaled because cpp.Type template is standard");
 
 static_assert(
     !Constructor<::thrift::test::python_capi::IndirectionA>::kUsingMarshal,

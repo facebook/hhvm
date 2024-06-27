@@ -348,7 +348,9 @@ bool MemOperand::IsPostIndex() const {
 
 // Assembler
 Assembler::Assembler(HPHP::CodeBlock& cb)
-    : cb_(cb), literal_pool_monitor_(0) {
+    : cb_(cb)
+    , next_literal_pool_check_(cb.frontier() + kLiteralPoolCheckInterval)
+    , literal_pool_monitor_(0) {
   // Assert that this is an LP64 system.
   assert(sizeof(int) == sizeof(int32_t));     // NOLINT(runtime/sizeof)
   assert(sizeof(long) == sizeof(int64_t));    // NOLINT(runtime/int)

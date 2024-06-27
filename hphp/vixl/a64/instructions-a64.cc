@@ -33,6 +33,7 @@ namespace vixl {
 static uint64_t RotateRight(uint64_t value,
                             unsigned int rotate,
                             unsigned int width) {
+  if (rotate == 0) return value;
   assert(width <= 64);
   rotate &= 63;
   return ((value & ((1UL << rotate) - 1UL)) << (width - rotate)) |

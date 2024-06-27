@@ -920,9 +920,7 @@ int RuntimeOption::Fb303ServerPort = 0;
 std::string RuntimeOption::Fb303ServerIP;
 int RuntimeOption::Fb303ServerWorkerThreads = 1;
 int RuntimeOption::Fb303ServerPoolThreads = 1;
-bool RuntimeOption::Fb303ServerEnableAclChecks = false;
-bool RuntimeOption::Fb303ServerEnforceAclChecks = false;
-std::string RuntimeOption::Fb303ServerIdentity;
+bool RuntimeOption::Fb303ServerExposeSensitiveMethods = false;
 
 bool RuntimeOption::ThreadTuneDebug = false;
 bool RuntimeOption::ThreadTuneSkipWarmup = false;
@@ -2004,11 +2002,8 @@ void RuntimeOption::Load(
                  "Fb303Server.WorkerThreads", 1);
     Config::Bind(Fb303ServerPoolThreads, ini, config, "Fb303Server.PoolThreads",
                  1);
-    Config::Bind(Fb303ServerEnableAclChecks, ini, config,
-                 "Fb303Server.EnableAclChecks", Fb303ServerEnableAclChecks);
-    Config::Bind(Fb303ServerEnforceAclChecks, ini, config,
-                 "Fb303Server.EnforceAclChecks", Fb303ServerEnforceAclChecks);
-    Config::Bind(Fb303ServerIdentity, ini, config, "Fb303Server.Identity");
+    Config::Bind(Fb303ServerExposeSensitiveMethods, ini, config,
+                 "Fb303Server.ExposeSensitiveMethods", Fb303ServerExposeSensitiveMethods);
 
     Config::Bind(ThreadTuneDebug, ini, config,
                  "ThreadTuneDebug", ThreadTuneDebug);

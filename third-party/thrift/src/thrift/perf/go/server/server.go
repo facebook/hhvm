@@ -41,7 +41,7 @@ func Serve(addr string) error {
 	}
 
 	glog.Infof("starting thrift server on '%s'", addr)
-	return srv.Serve()
+	return srv.ServeContext(context.Background())
 }
 
 func newServer(processor thrift.ProcessorContext, addr string) (thrift.Server, error) {

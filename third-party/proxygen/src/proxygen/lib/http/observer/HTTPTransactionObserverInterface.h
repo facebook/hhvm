@@ -51,8 +51,8 @@ class HTTPTransactionObserverInterface {
     };
 
     struct Builder : public BuilderFields {
-      Builder&& setTimestamp(const proxygen::TimePoint& timestamp);
-      Builder&& setType(Type type);
+      Builder&& setTimestamp(const proxygen::TimePoint& timestampIn);
+      Builder&& setType(Type typeIn);
       TxnBytesEvent build() &&;
       explicit Builder() = default;
     };

@@ -14,8 +14,8 @@ namespace proxygen {
 
 HTTPTransactionObserverInterface::TxnBytesEvent::Builder&&
 HTTPTransactionObserverInterface::TxnBytesEvent::Builder::setTimestamp(
-    const proxygen::TimePoint& timestamp) {
-  maybeTimestampRef = timestamp;
+    const proxygen::TimePoint& timestampIn) {
+  maybeTimestampRef = timestampIn;
   return std::move(*this);
 }
 

@@ -29,8 +29,8 @@ HTTPSessionObserverInterface::RequestStartedEvent::Builder::setRequest(
 HTTPSessionObserverInterface::RequestStartedEvent::Builder&&
 HTTPSessionObserverInterface::RequestStartedEvent::Builder::
     setTxnObserverAccessor(
-        proxygen::HTTPTransactionObserverAccessor* txnObserverAccessor) {
-  maybeTxnObserverAccessorPtr = txnObserverAccessor;
+        proxygen::HTTPTransactionObserverAccessor* txnObserverAccessorIn) {
+  maybeTxnObserverAccessorPtr = txnObserverAccessorIn;
   return std::move(*this);
 }
 
@@ -74,8 +74,8 @@ HTTPSessionObserverInterface::PreWriteEvent::PreWriteEvent(
 
 HTTPSessionObserverInterface::PingReplyEvent::Builder&&
 HTTPSessionObserverInterface::PingReplyEvent::Builder::setId(
-    const uint64_t& IdIn) {
-  maybeId = IdIn;
+    const uint64_t& idIn) {
+  maybeId = idIn;
   return std::move(*this);
 }
 HTTPSessionObserverInterface::PingReplyEvent::Builder&&

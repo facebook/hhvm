@@ -81,10 +81,10 @@ class HTTPSessionObserverInterface {
     };
 
     struct Builder : public BuilderFields {
-      Builder&& setTimestamp(const TimePoint& timestamp);
-      Builder&& setRequest(const proxygen::HTTPMessage& request);
+      Builder&& setTimestamp(const TimePoint& timestampIn);
+      Builder&& setRequest(const proxygen::HTTPMessage& requestIn);
       Builder&& setTxnObserverAccessor(
-          proxygen::HTTPTransactionObserverAccessor* txnObserverAccessor);
+          proxygen::HTTPTransactionObserverAccessor* txnObserverAccessorIn);
       RequestStartedEvent build() &&;
       explicit Builder() = default;
     };
@@ -112,8 +112,8 @@ class HTTPSessionObserverInterface {
     };
 
     struct Builder : public BuilderFields {
-      Builder&& setPendingEgressBytes(const uint64_t& pendingEgressBytes);
-      Builder&& setTimestamp(const TimePoint& timestamp);
+      Builder&& setPendingEgressBytes(const uint64_t& pendingEgressBytesIn);
+      Builder&& setTimestamp(const TimePoint& timestampIn);
 
       PreWriteEvent build() &&;
       explicit Builder() = default;
@@ -140,8 +140,8 @@ class HTTPSessionObserverInterface {
     };
 
     struct Builder : public BuilderFields {
-      Builder&& setId(const uint64_t& Id);
-      Builder&& setTimestamp(const TimePoint& Timestamp);
+      Builder&& setId(const uint64_t& idIn);
+      Builder&& setTimestamp(const TimePoint& timestampIn);
       PingReplyEvent build() &&;
       explicit Builder() = default;
     };

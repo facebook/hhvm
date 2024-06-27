@@ -32,7 +32,7 @@ import (
 type rocketProtocol struct {
 	Format
 
-	conn *connTimeout
+	conn net.Conn
 
 	// rsocket client state
 	ctx    context.Context
@@ -40,6 +40,8 @@ type rocketProtocol struct {
 	client rsocket.Client
 
 	resultChan chan rsocketResult
+
+	timeout time.Duration
 
 	protoID ProtocolID
 	zstd    bool
@@ -59,7 +61,7 @@ func NewRocketProtocol(conn net.Conn) (Protocol, error) {
 		protoID:           ProtocolIDCompact,
 		persistentHeaders: make(map[string]string),
 		buf:               NewMemoryBuffer(),
-		conn:              &connTimeout{Conn: conn},
+		conn:              conn,
 		zstd:              false, // zstd adds a performance overhead, so we default to false
 	}
 	if err := p.resetProtocol(); err != nil {
@@ -74,8 +76,7 @@ type rsocketResult struct {
 }
 
 func (p *rocketProtocol) SetTimeout(timeout time.Duration) {
-	p.conn.writeTimeout = timeout
-	p.conn.readTimeout = timeout
+	p.timeout = timeout
 }
 
 func (p *rocketProtocol) resetProtocol() error {
@@ -143,6 +144,11 @@ func (p *rocketProtocol) Flush() (err error) {
 	if err := p.open(); err != nil {
 		return err
 	}
+	// It is necessary to reset the deadline to 0.
+	// The rsocket library only sets the deadline at connection start.
+	// This means if you wait long enough, the connection will become useless.
+	// Or something else is happening, but this is very necessary.
+	p.conn.SetDeadline(time.Time{})
 	mono := p.client.RequestResponse(request)
 	if p.reqMetadata.TypeID != CALL {
 		return nil
@@ -170,7 +176,9 @@ func (p *rocketProtocol) open() error {
 		return err
 	}
 	transporter := func(ctx context.Context) (*transport.Transport, error) {
-		return transport.NewTCPClientTransport(p.conn), nil
+		conn := transport.NewTCPClientTransport(p.conn)
+		conn.SetLifetime(time.Millisecond * 3600000)
+		return conn, nil
 	}
 	p.ctx, p.cancel = context.WithCancel(context.Background())
 	clientBuilder := rsocket.Connect()
@@ -221,11 +229,17 @@ func (p *rocketProtocol) open() error {
 }
 
 func (p *rocketProtocol) readPayload() (resp payload.Payload, err error) {
+	var readTimeout <-chan time.Time
+	if p.timeout > 0 {
+		readTimeout = time.After(p.timeout)
+	}
 	select {
 	case r := <-p.resultChan:
 		return r.val, nil
 	case <-p.ctx.Done():
 		return nil, p.ctx.Err()
+	case <-readTimeout:
+		return nil, fmt.Errorf("rocket protocol timeout")
 	}
 }
 

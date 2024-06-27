@@ -31,8 +31,9 @@ func TestSimpleServer(t *testing.T) {
 	handler := &testProcessor{}
 	server := NewSimpleServer(handler, serverSocket, TransportIDHeader)
 	errChan := make(chan error)
+	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		err := server.Serve()
+		err := server.ServeContext(ctx)
 		errChan <- err
 		close(errChan)
 	}()
@@ -52,9 +53,7 @@ func TestSimpleServer(t *testing.T) {
 	if err := client.Call(context.Background(), "test", &MyTestStruct{}, &MyTestStruct{}); err != nil {
 		t.Fatalf("could not send message: %s", err)
 	}
-	if err := server.Stop(); err != nil {
-		t.Fatalf("could not stop server: %s", err)
-	}
+	cancel()
 	<-errChan
 }
 
@@ -114,8 +113,9 @@ func TestSimpleServerClientSetsDifferentProtocol(t *testing.T) {
 	handler := &testProcessor{}
 	server := NewSimpleServer(handler, serverSocket, TransportIDHeader)
 	errChan := make(chan error)
+	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		err := server.Serve()
+		err := server.ServeContext(ctx)
 		errChan <- err
 		close(errChan)
 	}()
@@ -139,8 +139,6 @@ func TestSimpleServerClientSetsDifferentProtocol(t *testing.T) {
 	if err := client.Call(context.Background(), "test", &MyTestStruct{}, &MyTestStruct{}); err != nil {
 		t.Fatalf("could not send message: %s", err)
 	}
-	if err := server.Stop(); err != nil {
-		t.Fatalf("could not stop server: %s", err)
-	}
+	cancel()
 	<-errChan
 }

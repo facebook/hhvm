@@ -114,7 +114,8 @@ func (p *SimpleServer) Serve() error {
 	return p.ServeContext(ctx)
 }
 
-// ServeContext behaves like Serve but supports cancellation via context.
+// ServeContext starts listening on the transport and accepting new connections
+// and blocks until Stop is called or an error occurs.
 func (p *SimpleServer) ServeContext(ctx context.Context) error {
 	go func() {
 		<-ctx.Done()

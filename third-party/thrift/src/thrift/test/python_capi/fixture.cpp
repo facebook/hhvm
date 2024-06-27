@@ -54,6 +54,16 @@ static_assert(
     !Constructor<::thrift::test::python_capi::TemplateMaps>::kUsingMarshal,
     "Should be serialized because cpp.Type template usage");
 
+static_assert(
+    !Constructor<::thrift::test::python_capi::IndirectionA>::kUsingMarshal,
+    "Bug: Using force serialize because list of cpp.Type override ignored");
+static_assert(
+    !Constructor<::thrift::test::python_capi::IndirectionB>::kUsingMarshal,
+    "Should be serialized because list of cpp.Type override");
+static_assert(
+    !Constructor<::thrift::test::python_capi::IndirectionC>::kUsingMarshal,
+    "Bug: Using force serialize because list of cpp.Type override ignored");
+
 template <typename Container>
 void fill_list(const std::string& prefix, Container& list) {
   for (auto view : {"foo", "bar", "baz"}) {

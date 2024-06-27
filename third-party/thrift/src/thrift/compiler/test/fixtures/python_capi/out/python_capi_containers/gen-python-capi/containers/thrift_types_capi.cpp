@@ -25,6 +25,15 @@ bool ensure_module_imported() {
       ::import_test__fixtures__python_capi__containers__thrift_types_capi));
   return import();
 }
+  static constexpr std::int16_t _fbthrift__TWrapped__tuple_pos[2] = {
+    1, 2
+  };
+  static constexpr std::int16_t _fbthrift__IndirectionA__tuple_pos[1] = {
+    1
+  };
+  static constexpr std::int16_t _fbthrift__IndirectionC__tuple_pos[1] = {
+    1
+  };
 } // namespace
 
 ExtractorResult<::test::fixtures::python_capi::TemplateLists>
@@ -269,6 +278,338 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   }
   return getThriftData(*obj);
 }
+
+ExtractorResult<::test::fixtures::python_capi::TWrapped>
+Extractor<::test::fixtures::python_capi::TWrapped>::operator()(PyObject* obj) {
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a TWrapped");
+      }
+      return extractorError<::test::fixtures::python_capi::TWrapped>(
+          "Marshal error: TWrapped");
+  }
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::python_capi::TWrapped>>{}(*fbThriftData);
+}
+
+ExtractorResult<::test::fixtures::python_capi::TWrapped>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::python_capi::TWrapped>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::python_capi::TWrapped cpp;
+  std::optional<std::string_view> error;
+  Extractor<Bytes>{}.extractInto(
+      cpp.fieldA_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TWrapped__tuple_pos[0]),
+      error);
+  Extractor<Bytes>{}.extractInto(
+      cpp.fieldB_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__TWrapped__tuple_pos[1]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+
+
+int Extractor<::test::fixtures::python_capi::TWrapped>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.python_capi.containers import error");
+  }
+  int result =
+      can_extract__test__fixtures__python_capi__containers__TWrapped(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: TWrapped");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::python_capi::TWrapped>::operator()(
+    const ::test::fixtures::python_capi::TWrapped& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::TWrapped>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
+  return init__test__fixtures__python_capi__containers__TWrapped(*fbthrift_data);
+}
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::TWrapped>>::operator()(
+    [[maybe_unused]] const ::test::fixtures::python_capi::TWrapped& val) {
+  StrongRef fbthrift_data(createStructTuple(2));
+  StrongRef _fbthrift__fieldA(
+    Constructor<Bytes>{}
+    .constructFrom(val.fieldA_ref()));
+  if (!_fbthrift__fieldA ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TWrapped__tuple_pos[0],
+          *_fbthrift__fieldA) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__fieldB(
+    Constructor<Bytes>{}
+    .constructFrom(val.fieldB_ref()));
+  if (!_fbthrift__fieldB ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__TWrapped__tuple_pos[1],
+          *_fbthrift__fieldB) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
+}
+
+
+ExtractorResult<::test::fixtures::python_capi::IndirectionA>
+Extractor<::test::fixtures::python_capi::IndirectionA>::operator()(PyObject* obj) {
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a IndirectionA");
+      }
+      return extractorError<::test::fixtures::python_capi::IndirectionA>(
+          "Marshal error: IndirectionA");
+  }
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::python_capi::IndirectionA>>{}(*fbThriftData);
+}
+
+ExtractorResult<::test::fixtures::python_capi::IndirectionA>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::python_capi::IndirectionA>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::python_capi::IndirectionA cpp;
+  std::optional<std::string_view> error;
+  Extractor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>>>{}.extractInto(
+      cpp.lst_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__IndirectionA__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+
+
+int Extractor<::test::fixtures::python_capi::IndirectionA>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.python_capi.containers import error");
+  }
+  int result =
+      can_extract__test__fixtures__python_capi__containers__IndirectionA(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: IndirectionA");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::python_capi::IndirectionA>::operator()(
+    const ::test::fixtures::python_capi::IndirectionA& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::IndirectionA>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
+  return init__test__fixtures__python_capi__containers__IndirectionA(*fbthrift_data);
+}
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::IndirectionA>>::operator()(
+    [[maybe_unused]] const ::test::fixtures::python_capi::IndirectionA& val) {
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__lst(
+    Constructor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>>>{}
+    .constructFrom(val.lst_ref()));
+  if (!_fbthrift__lst ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__IndirectionA__tuple_pos[0],
+          *_fbthrift__lst) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
+}
+
+
+ExtractorResult<::test::fixtures::python_capi::IndirectionB>
+Extractor<::test::fixtures::python_capi::IndirectionB>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::python_capi::IndirectionB>(
+      "Module test.fixtures.python_capi.containers import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__python_capi__containers__IndirectionB(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::python_capi::IndirectionB>(
+        "Thrift serialize error: IndirectionB");
+  }
+  return detail::deserialize_iobuf<::test::fixtures::python_capi::IndirectionB>(std::move(val));
+}
+
+
+ExtractorResult<::test::fixtures::python_capi::IndirectionB>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::python_capi::IndirectionB>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::python_capi::IndirectionB>(
+      "Module test.fixtures.python_capi.containers import error");
+  }
+  auto obj = StrongRef(init__test__fixtures__python_capi__containers__IndirectionB(fbthrift_data));
+  if (!obj) {
+      return extractorError<::test::fixtures::python_capi::IndirectionB>(
+          "Init from fbthrift error: IndirectionB");
+  }
+  return Extractor<::test::fixtures::python_capi::IndirectionB>{}(*obj);
+}
+
+int Extractor<::test::fixtures::python_capi::IndirectionB>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.python_capi.containers import error");
+  }
+  int result =
+      can_extract__test__fixtures__python_capi__containers__IndirectionB(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: IndirectionB");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::python_capi::IndirectionB>::operator()(
+    const ::test::fixtures::python_capi::IndirectionB& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__test__fixtures__python_capi__containers__IndirectionB(std::move(serialized));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::IndirectionB>>::operator()(
+    const ::test::fixtures::python_capi::IndirectionB& val) {
+  auto obj = StrongRef(Constructor<::test::fixtures::python_capi::IndirectionB>{}(val));
+  if (!obj) {
+    return nullptr;
+  }
+  return getThriftData(*obj);
+}
+
+ExtractorResult<::test::fixtures::python_capi::IndirectionC>
+Extractor<::test::fixtures::python_capi::IndirectionC>::operator()(PyObject* obj) {
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a IndirectionC");
+      }
+      return extractorError<::test::fixtures::python_capi::IndirectionC>(
+          "Marshal error: IndirectionC");
+  }
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::python_capi::IndirectionC>>{}(*fbThriftData);
+}
+
+ExtractorResult<::test::fixtures::python_capi::IndirectionC>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::python_capi::IndirectionC>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::python_capi::IndirectionC cpp;
+  std::optional<std::string_view> error;
+  Extractor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>>>{}.extractInto(
+      cpp.lst_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__IndirectionC__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+
+
+int Extractor<::test::fixtures::python_capi::IndirectionC>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.python_capi.containers import error");
+  }
+  int result =
+      can_extract__test__fixtures__python_capi__containers__IndirectionC(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: IndirectionC");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::python_capi::IndirectionC>::operator()(
+    const ::test::fixtures::python_capi::IndirectionC& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::IndirectionC>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
+  return init__test__fixtures__python_capi__containers__IndirectionC(*fbthrift_data);
+}
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::IndirectionC>>::operator()(
+    [[maybe_unused]] const ::test::fixtures::python_capi::IndirectionC& val) {
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__lst(
+    Constructor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>>>{}
+    .constructFrom(val.lst_ref()));
+  if (!_fbthrift__lst ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__IndirectionC__tuple_pos[0],
+          *_fbthrift__lst) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
+}
+
 
 } // namespace capi
 } // namespace python

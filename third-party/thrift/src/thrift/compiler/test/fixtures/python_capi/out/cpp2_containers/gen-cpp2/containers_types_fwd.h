@@ -11,5 +11,9 @@ namespace test::fixtures::python_capi {
 class TemplateLists;
 class TemplateSets;
 class TemplateMaps;
+class TWrapped;
+class IndirectionA;
+class IndirectionB;
+class IndirectionC;
 } // namespace test::fixtures::python_capi
 // END forward_declare

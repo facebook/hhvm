@@ -83,6 +83,60 @@ struct VisitByFieldId<::test::fixtures::python_capi::TemplateMaps> {
     }
   }
 };
+
+template <>
+struct VisitByFieldId<::test::fixtures::python_capi::TWrapped> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).fieldA_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).fieldB_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::python_capi::TWrapped");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::python_capi::IndirectionA> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).lst_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::python_capi::IndirectionA");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::python_capi::IndirectionB> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).lst_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::python_capi::IndirectionB");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::python_capi::IndirectionC> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).lst_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::python_capi::IndirectionC");
+    }
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

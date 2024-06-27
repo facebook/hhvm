@@ -30,3 +30,27 @@ cdef cTemplateMaps TemplateMaps_convert_to_cpp(object inst) except *:
 cdef object TemplateMaps_from_cpp(const cTemplateMaps& c_struct):
     return cpp_to_python[cTemplateMaps](c_struct)
 
+cdef cTWrapped TWrapped_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cTWrapped](inst))
+
+cdef object TWrapped_from_cpp(const cTWrapped& c_struct):
+    return cpp_to_python[cTWrapped](c_struct)
+
+cdef cIndirectionA IndirectionA_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cIndirectionA](inst))
+
+cdef object IndirectionA_from_cpp(const cIndirectionA& c_struct):
+    return cpp_to_python[cIndirectionA](c_struct)
+
+cdef cIndirectionB IndirectionB_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cIndirectionB](inst))
+
+cdef object IndirectionB_from_cpp(const cIndirectionB& c_struct):
+    return cpp_to_python[cIndirectionB](c_struct)
+
+cdef cIndirectionC IndirectionC_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cIndirectionC](inst))
+
+cdef object IndirectionC_from_cpp(const cIndirectionC& c_struct):
+    return cpp_to_python[cIndirectionC](c_struct)
+

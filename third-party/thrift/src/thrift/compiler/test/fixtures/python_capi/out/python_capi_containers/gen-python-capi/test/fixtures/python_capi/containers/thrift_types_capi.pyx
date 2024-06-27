@@ -70,3 +70,41 @@ cdef api object construct__test__fixtures__python_capi__containers__TemplateMaps
 cdef api object init__test__fixtures__python_capi__containers__TemplateMaps(object data):
     return __thrift_types.TemplateMaps._fbthrift_create(data)
 
+cdef api int can_extract__test__fixtures__python_capi__containers__TWrapped(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.TWrapped) else 0
+
+
+cdef api object init__test__fixtures__python_capi__containers__TWrapped(object data):
+    return __thrift_types.TWrapped._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__python_capi__containers__IndirectionA(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.IndirectionA) else 0
+
+
+cdef api object init__test__fixtures__python_capi__containers__IndirectionA(object data):
+    return __thrift_types.IndirectionA._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__python_capi__containers__IndirectionB(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.IndirectionB) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__python_capi__containers__IndirectionB(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__python_capi__containers__IndirectionB(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.IndirectionB,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__python_capi__containers__IndirectionB(object data):
+    return __thrift_types.IndirectionB._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__python_capi__containers__IndirectionC(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.IndirectionC) else 0
+
+
+cdef api object init__test__fixtures__python_capi__containers__IndirectionC(object data):
+    return __thrift_types.IndirectionC._fbthrift_create(data)
+

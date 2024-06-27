@@ -125,7 +125,98 @@ class TemplateMaps(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Temp
     def _to_py3(self) -> "test.fixtures.python_capi.containers.types.TemplateMaps": ...  # type: ignore
     def _to_py_deprecated(self) -> "containers.ttypes.TemplateMaps": ...  # type: ignore
 
+
+class _fbthrift_compatible_with_TWrapped:
+    pass
+
+
+class TWrapped(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TWrapped):
+    fieldA: _typing.Final[str] = ...
+    fieldB: _typing.Final[bytes] = ...
+    def __init__(
+        self, *,
+        fieldA: _typing.Optional[str]=...,
+        fieldB: _typing.Optional[bytes]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        fieldA: _typing.Optional[str]=...,
+        fieldB: _typing.Optional[bytes]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, bytes]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.python_capi.containers.types.TWrapped": ...  # type: ignore
+    def _to_py_deprecated(self) -> "containers.ttypes.TWrapped": ...  # type: ignore
+
+
+class _fbthrift_compatible_with_IndirectionA:
+    pass
+
+
+class IndirectionA(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IndirectionA):
+    lst: _typing.Final[_typing.Sequence[TWrapped]] = ...
+    def __init__(
+        self, *,
+        lst: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_TWrapped]]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        lst: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_TWrapped]]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[TWrapped]]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.python_capi.containers.types.IndirectionA": ...  # type: ignore
+    def _to_py_deprecated(self) -> "containers.ttypes.IndirectionA": ...  # type: ignore
+
+
+class _fbthrift_compatible_with_IndirectionB:
+    pass
+
+
+class IndirectionB(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IndirectionB):
+    lst: _typing.Final[_typing.Sequence[TWrapped]] = ...
+    def __init__(
+        self, *,
+        lst: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_TWrapped]]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        lst: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_TWrapped]]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[TWrapped]]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.python_capi.containers.types.IndirectionB": ...  # type: ignore
+    def _to_py_deprecated(self) -> "containers.ttypes.IndirectionB": ...  # type: ignore
+
+
+class _fbthrift_compatible_with_IndirectionC:
+    pass
+
+
+class IndirectionC(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IndirectionC):
+    lst: _typing.Final[_typing.Sequence[TWrapped]] = ...
+    def __init__(
+        self, *,
+        lst: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_TWrapped]]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        lst: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_TWrapped]]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[TWrapped]]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.python_capi.containers.types.IndirectionC": ...  # type: ignore
+    def _to_py_deprecated(self) -> "containers.ttypes.IndirectionC": ...  # type: ignore
+
 IOBuf = _fbthrift_iobuf.IOBuf
 small_vector_iobuf = _typing.List[_fbthrift_iobuf.IOBuf]
 fbvector_string = _typing.List[str]
 fbvector_fbvector_string = _typing.List[_typing.Sequence[str]]
+CppWrapper = TWrapped
+ListOfWrapped = _typing.List[TWrapped]
+VecOfWrapped = _typing.List[TWrapped]
+ListOfWrappedAlias = _typing.List[TWrapped]

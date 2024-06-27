@@ -164,5 +164,78 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures:
   6,
 }};
 
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::TWrapped>::name = "TWrapped";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::python_capi::TWrapped>::fields_names = { {
+  "fieldA"sv,
+  "fieldB"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::python_capi::TWrapped>::fields_ids = { {
+  1,
+  2,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::python_capi::TWrapped>::fields_types = { {
+  TType::T_STRING,
+  TType::T_STRING,
+}};
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::python_capi::TWrapped>::storage_names = { {
+  "__fbthrift_field_fieldA"sv,
+  "__fbthrift_field_fieldB"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::python_capi::TWrapped>::isset_indexes = { {
+  0,
+  1,
+}};
+
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::IndirectionA>::name = "IndirectionA";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionA>::fields_names = { {
+  "lst"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionA>::fields_ids = { {
+  1,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionA>::fields_types = { {
+  TType::T_LIST,
+}};
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionA>::storage_names = { {
+  "__fbthrift_field_lst"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionA>::isset_indexes = { {
+  0,
+}};
+
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::IndirectionB>::name = "IndirectionB";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionB>::fields_names = { {
+  "lst"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionB>::fields_ids = { {
+  1,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionB>::fields_types = { {
+  TType::T_LIST,
+}};
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionB>::storage_names = { {
+  "__fbthrift_field_lst"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionB>::isset_indexes = { {
+  0,
+}};
+
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::IndirectionC>::name = "IndirectionC";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionC>::fields_names = { {
+  "lst"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionC>::fields_ids = { {
+  1,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionC>::fields_types = { {
+  TType::T_LIST,
+}};
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionC>::storage_names = { {
+  "__fbthrift_field_lst"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionC>::isset_indexes = { {
+  0,
+}};
+
 } // namespace thrift
 } // namespace apache

@@ -16,6 +16,7 @@
 #include <folly/FBString.h>
 #include <folly/container/F14Map.h>
 #include <folly/small_vector.h>
+#include <thrift/test/python_capi/indirection.h>
 
 namespace apache {
 namespace thrift {
@@ -39,6 +40,11 @@ struct folly_node;
 struct folly_value;
 struct folly_vector;
 struct folly_sorted_vector;
+struct fieldA;
+struct fieldB;
+struct lst;
+struct lst;
+struct lst;
 } // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_std_string
@@ -117,6 +123,26 @@ APACHE_THRIFT_DEFINE_ACCESSOR(folly_vector);
 #define APACHE_THRIFT_ACCESSOR_folly_sorted_vector
 APACHE_THRIFT_DEFINE_ACCESSOR(folly_sorted_vector);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_fieldA
+#define APACHE_THRIFT_ACCESSOR_fieldA
+APACHE_THRIFT_DEFINE_ACCESSOR(fieldA);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_fieldB
+#define APACHE_THRIFT_ACCESSOR_fieldB
+APACHE_THRIFT_DEFINE_ACCESSOR(fieldB);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_lst
+#define APACHE_THRIFT_ACCESSOR_lst
+APACHE_THRIFT_DEFINE_ACCESSOR(lst);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_lst
+#define APACHE_THRIFT_ACCESSOR_lst
+APACHE_THRIFT_DEFINE_ACCESSOR(lst);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_lst
+#define APACHE_THRIFT_ACCESSOR_lst
+APACHE_THRIFT_DEFINE_ACCESSOR(lst);
+#endif
 } // namespace detail
 } // namespace thrift
 } // namespace apache
@@ -129,6 +155,10 @@ namespace test::fixtures::python_capi {
 class TemplateLists;
 class TemplateSets;
 class TemplateMaps;
+class TWrapped;
+class IndirectionA;
+class IndirectionB;
+class IndirectionC;
 } // namespace test::fixtures::python_capi
 // END forward_declare
 namespace apache::thrift::detail::annotation {
@@ -149,6 +179,10 @@ typedef folly::IOBuf IOBuf;
 typedef folly::small_vector<::test::fixtures::python_capi::IOBuf> small_vector_iobuf;
 typedef folly::fbvector<::std::string> fbvector_string;
 typedef folly::fbvector<::test::fixtures::python_capi::fbvector_string> fbvector_fbvector_string;
+typedef ::thrift::test::python_capi::CppWrapperT CppWrapper;
+typedef ::std::vector<::test::fixtures::python_capi::TWrapped> ListOfWrapped;
+typedef std::vector<::test::fixtures::python_capi::TWrapped> VecOfWrapped;
+typedef ::test::fixtures::python_capi::ListOfWrapped ListOfWrappedAlias;
 
 class TemplateLists final  {
  private:
@@ -1446,6 +1480,679 @@ class TemplateMaps final  {
 
 template <class Protocol_>
 unsigned long TemplateMaps::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class TWrapped final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static const char* __fbthrift_thrift_uri();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::fieldA,
+    ::apache::thrift::ident::fieldB
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::binary_t
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = TWrapped;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
+
+
+ public:
+
+  TWrapped();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  TWrapped(apache::thrift::FragileConstructor, ::std::string fieldA__arg, ::std::string fieldB__arg);
+
+  TWrapped(TWrapped&&) noexcept;
+
+  TWrapped(const TWrapped& src);
+
+
+  TWrapped& operator=(TWrapped&&) noexcept;
+  TWrapped& operator=(const TWrapped& src);
+
+  ~TWrapped();
+
+ private:
+  ::std::string __fbthrift_field_fieldA;
+ private:
+  ::std::string __fbthrift_field_fieldB;
+ private:
+  apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const TWrapped&) const;
+  bool operator<(const TWrapped&) const;
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> fieldA_ref() const& {
+    return {this->__fbthrift_field_fieldA, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fieldA_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_fieldA), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> fieldA_ref() & {
+    return {this->__fbthrift_field_fieldA, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> fieldA_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_fieldA), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> fieldA() const& {
+    return {this->__fbthrift_field_fieldA, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fieldA() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_fieldA), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> fieldA() & {
+    return {this->__fbthrift_field_fieldA, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> fieldA() && {
+    return {static_cast<T&&>(this->__fbthrift_field_fieldA), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> fieldB_ref() const& {
+    return {this->__fbthrift_field_fieldB, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fieldB_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_fieldB), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> fieldB_ref() & {
+    return {this->__fbthrift_field_fieldB, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> fieldB_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_fieldB), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> fieldB() const& {
+    return {this->__fbthrift_field_fieldB, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fieldB() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_fieldB), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> fieldB() & {
+    return {this->__fbthrift_field_fieldB, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> fieldB() && {
+    return {static_cast<T&&>(this->__fbthrift_field_fieldB), __isset.at(1), __isset.bit(1)};
+  }
+
+  const ::std::string& get_fieldA() const& {
+    return __fbthrift_field_fieldA;
+  }
+
+  ::std::string get_fieldA() && {
+    return std::move(__fbthrift_field_fieldA);
+  }
+
+  template <typename T_TWrapped_fieldA_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.fieldA_ref() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
+  ::std::string& set_fieldA(T_TWrapped_fieldA_struct_setter&& fieldA_) {
+    fieldA_ref() = std::forward<T_TWrapped_fieldA_struct_setter>(fieldA_);
+    return __fbthrift_field_fieldA;
+  }
+
+  const ::std::string& get_fieldB() const& {
+    return __fbthrift_field_fieldB;
+  }
+
+  ::std::string get_fieldB() && {
+    return std::move(__fbthrift_field_fieldB);
+  }
+
+  template <typename T_TWrapped_fieldB_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.fieldB_ref() = BAR;` instead of `FOO.set_fieldB(BAR);`")]]
+  ::std::string& set_fieldB(T_TWrapped_fieldB_struct_setter&& fieldB_) {
+    fieldB_ref() = std::forward<T_TWrapped_fieldB_struct_setter>(fieldB_);
+    return __fbthrift_field_fieldB;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<TWrapped>;
+  friend void swap(TWrapped& a, TWrapped& b);
+};
+
+template <class Protocol_>
+unsigned long TWrapped::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class IndirectionA final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static const char* __fbthrift_thrift_uri();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::lst
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::TWrapped>>
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = IndirectionA;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
+
+
+ public:
+
+  IndirectionA();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  IndirectionA(apache::thrift::FragileConstructor, ::test::fixtures::python_capi::ListOfWrapped lst__arg);
+
+  IndirectionA(IndirectionA&&) noexcept;
+
+  IndirectionA(const IndirectionA& src);
+
+
+  IndirectionA& operator=(IndirectionA&&) noexcept;
+  IndirectionA& operator=(const IndirectionA& src);
+
+  ~IndirectionA();
+
+ private:
+  ::test::fixtures::python_capi::ListOfWrapped __fbthrift_field_lst;
+ private:
+  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const IndirectionA&) const;
+  bool operator<(const IndirectionA&) const;
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> lst_ref() const& {
+    return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lst_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> lst_ref() & {
+    return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> lst_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> lst() const& {
+    return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lst() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> lst() & {
+    return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> lst() && {
+    return {static_cast<T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  }
+  const ::test::fixtures::python_capi::ListOfWrapped& get_lst() const&;
+  ::test::fixtures::python_capi::ListOfWrapped get_lst() &&;
+
+  template <typename T_IndirectionA_lst_struct_setter = ::test::fixtures::python_capi::ListOfWrapped>
+  [[deprecated("Use `FOO.lst_ref() = BAR;` instead of `FOO.set_lst(BAR);`")]]
+  ::test::fixtures::python_capi::ListOfWrapped& set_lst(T_IndirectionA_lst_struct_setter&& lst_) {
+    lst_ref() = std::forward<T_IndirectionA_lst_struct_setter>(lst_);
+    return __fbthrift_field_lst;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<IndirectionA>;
+  friend void swap(IndirectionA& a, IndirectionA& b);
+};
+
+template <class Protocol_>
+unsigned long IndirectionA::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class IndirectionB final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static const char* __fbthrift_thrift_uri();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::lst
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::cpp_type<std::vector<::test::fixtures::python_capi::TWrapped>, ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::TWrapped>>>
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = IndirectionB;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
+
+
+ public:
+
+  IndirectionB();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  IndirectionB(apache::thrift::FragileConstructor, ::test::fixtures::python_capi::VecOfWrapped lst__arg);
+
+  IndirectionB(IndirectionB&&) noexcept;
+
+  IndirectionB(const IndirectionB& src);
+
+
+  IndirectionB& operator=(IndirectionB&&) noexcept;
+  IndirectionB& operator=(const IndirectionB& src);
+
+  ~IndirectionB();
+
+ private:
+  ::test::fixtures::python_capi::VecOfWrapped __fbthrift_field_lst;
+ private:
+  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const IndirectionB&) const;
+  bool operator<(const IndirectionB&) const;
+
+  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> lst_ref() const& {
+    return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lst_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> lst_ref() & {
+    return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> lst_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> lst() const& {
+    return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lst() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> lst() & {
+    return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> lst() && {
+    return {static_cast<T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  }
+  const ::test::fixtures::python_capi::VecOfWrapped& get_lst() const&;
+  ::test::fixtures::python_capi::VecOfWrapped get_lst() &&;
+
+  template <typename T_IndirectionB_lst_struct_setter = ::test::fixtures::python_capi::VecOfWrapped>
+  [[deprecated("Use `FOO.lst_ref() = BAR;` instead of `FOO.set_lst(BAR);`")]]
+  ::test::fixtures::python_capi::VecOfWrapped& set_lst(T_IndirectionB_lst_struct_setter&& lst_) {
+    lst_ref() = std::forward<T_IndirectionB_lst_struct_setter>(lst_);
+    return __fbthrift_field_lst;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<IndirectionB>;
+  friend void swap(IndirectionB& a, IndirectionB& b);
+};
+
+template <class Protocol_>
+unsigned long IndirectionB::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class IndirectionC final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static const char* __fbthrift_thrift_uri();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::lst
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::TWrapped>>
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = IndirectionC;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
+
+
+ public:
+
+  IndirectionC();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  IndirectionC(apache::thrift::FragileConstructor, ::test::fixtures::python_capi::ListOfWrappedAlias lst__arg);
+
+  IndirectionC(IndirectionC&&) noexcept;
+
+  IndirectionC(const IndirectionC& src);
+
+
+  IndirectionC& operator=(IndirectionC&&) noexcept;
+  IndirectionC& operator=(const IndirectionC& src);
+
+  ~IndirectionC();
+
+ private:
+  ::test::fixtures::python_capi::ListOfWrappedAlias __fbthrift_field_lst;
+ private:
+  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const IndirectionC&) const;
+  bool operator<(const IndirectionC&) const;
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> lst_ref() const& {
+    return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lst_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> lst_ref() & {
+    return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> lst_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> lst() const& {
+    return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lst() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> lst() & {
+    return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> lst() && {
+    return {static_cast<T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  }
+  const ::test::fixtures::python_capi::ListOfWrappedAlias& get_lst() const&;
+  ::test::fixtures::python_capi::ListOfWrappedAlias get_lst() &&;
+
+  template <typename T_IndirectionC_lst_struct_setter = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  [[deprecated("Use `FOO.lst_ref() = BAR;` instead of `FOO.set_lst(BAR);`")]]
+  ::test::fixtures::python_capi::ListOfWrappedAlias& set_lst(T_IndirectionC_lst_struct_setter&& lst_) {
+    lst_ref() = std::forward<T_IndirectionC_lst_struct_setter>(lst_);
+    return __fbthrift_field_lst;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<IndirectionC>;
+  friend void swap(IndirectionC& a, IndirectionC& b);
+};
+
+template <class Protocol_>
+unsigned long IndirectionC::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

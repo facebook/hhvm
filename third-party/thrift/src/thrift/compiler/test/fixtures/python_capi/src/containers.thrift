@@ -23,6 +23,7 @@ cpp_include "<folly/container/F14Set.h>"
 cpp_include "<folly/FBString.h>"
 cpp_include "<folly/container/F14Map.h>"
 cpp_include "<folly/small_vector.h>"
+cpp_include "<thrift/test/python_capi/indirection.h>"
 
 package "test.dev/fixtures/python_capi"
 
@@ -94,4 +95,34 @@ struct TemplateMaps {
   6: map<string, string> folly_vector;
   @cpp.Type{template = "folly::sorted_vector_map"}
   7: map<string, string> folly_sorted_vector;
+}
+
+struct TWrapped {
+  1: string fieldA;
+  2: binary fieldB;
+}
+
+@cpp.Type{name = "::thrift::test::python_capi::CppWrapperT"}
+typedef TWrapped (cpp.indirection) CppWrapper
+
+typedef list<TWrapped> ListOfWrapped
+
+// Should not be marshaled
+struct IndirectionA {
+  1: ListOfWrapped lst;
+}
+
+@cpp.Type{template = "std::vector"}
+typedef list<TWrapped> VecOfWrapped
+
+// Should also not be marshaled
+struct IndirectionB {
+  1: VecOfWrapped lst;
+}
+
+typedef ListOfWrapped ListOfWrappedAlias
+
+// Should also not be marshaled
+struct IndirectionC {
+  1: ListOfWrappedAlias lst;
 }

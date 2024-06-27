@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/python.thrift"
 
 cpp_include "<deque>"
 cpp_include "<unordered_map>"
@@ -24,6 +25,7 @@ cpp_include "<folly/container/F14Map.h>"
 cpp_include "<folly/container/F14Set.h>"
 cpp_include "<folly/container/sorted_vector_types.h>"
 cpp_include "<folly/small_vector.h>"
+cpp_include "<thrift/test/python_capi/indirection.h>"
 
 package "thrift.biz/test/python_capi"
 
@@ -95,4 +97,37 @@ struct TemplateMaps {
   6: map<string, string> folly_vector;
   @cpp.Type{template = "folly::sorted_vector_map"}
   7: map<string, string> folly_sorted_vector;
+}
+
+struct TWrapped {
+  1: string fieldA;
+  2: binary fieldB;
+}
+
+@cpp.Type{name = "::thrift::test::python_capi::CppWrapperT"}
+typedef TWrapped (cpp.indirection) CppWrapper
+
+typedef list<CppWrapper> ListOfWrapped
+
+// Cannot be marshaled and compile
+@python.UseCAPI{serialize = true}
+struct IndirectionA {
+  1: ListOfWrapped lst;
+}
+
+@cpp.Type{template = "std::vector"}
+typedef list<CppWrapper> VecOfWrapped
+
+// Should also not be marshaled
+// Opted-out automatically due to "no-op" cpp.Type
+struct IndirectionB {
+  1: VecOfWrapped lst;
+} (cpp.noncomparable)
+
+typedef ListOfWrapped ListOfWrappedAlias
+
+// Cannot be marshaled and compile
+@python.UseCAPI{serialize = true}
+struct IndirectionC {
+  1: ListOfWrappedAlias lst;
 }

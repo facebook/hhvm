@@ -52,6 +52,39 @@ struct ForEachField<::test::fixtures::python_capi::TemplateMaps> {
     f(6, static_cast<T&&>(t).folly_sorted_vector_ref()...);
   }
 };
+
+template <>
+struct ForEachField<::test::fixtures::python_capi::TWrapped> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).fieldA_ref()...);
+    f(1, static_cast<T&&>(t).fieldB_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::python_capi::IndirectionA> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).lst_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::python_capi::IndirectionB> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).lst_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::python_capi::IndirectionC> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).lst_ref()...);
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

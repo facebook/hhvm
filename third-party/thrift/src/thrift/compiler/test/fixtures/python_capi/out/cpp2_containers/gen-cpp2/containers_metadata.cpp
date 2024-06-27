@@ -95,6 +95,98 @@ StructMetadata<::test::fixtures::python_capi::TemplateMaps>::gen(ThriftMetadata&
   }
   return res.first->second;
 }
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::python_capi::TWrapped>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("containers.TWrapped", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& containers_TWrapped = res.first->second;
+  containers_TWrapped.name() = "containers.TWrapped";
+  containers_TWrapped.is_union() = false;
+  static const auto* const
+  containers_TWrapped_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "fieldA", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "fieldB", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ }},  }};
+  for (const auto& f : *containers_TWrapped_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    containers_TWrapped.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::python_capi::IndirectionA>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("containers.IndirectionA", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& containers_IndirectionA = res.first->second;
+  containers_IndirectionA.name() = "containers.IndirectionA";
+  containers_IndirectionA.is_union() = false;
+  static const auto* const
+  containers_IndirectionA_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "lst", false, std::make_unique<Typedef>("containers.ListOfWrapped", std::make_unique<List>(std::make_unique<Struct<::test::fixtures::python_capi::TWrapped>>("containers.TWrapped")), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},  }};
+  for (const auto& f : *containers_IndirectionA_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    containers_IndirectionA.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::python_capi::IndirectionB>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("containers.IndirectionB", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& containers_IndirectionB = res.first->second;
+  containers_IndirectionB.name() = "containers.IndirectionB";
+  containers_IndirectionB.is_union() = false;
+  static const auto* const
+  containers_IndirectionB_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "lst", false, std::make_unique<Typedef>("containers.VecOfWrapped", std::make_unique<List>(std::make_unique<Struct<::test::fixtures::python_capi::TWrapped>>("containers.TWrapped")), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::vector") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},  }};
+  for (const auto& f : *containers_IndirectionB_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    containers_IndirectionB.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::python_capi::IndirectionC>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("containers.IndirectionC", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& containers_IndirectionC = res.first->second;
+  containers_IndirectionC.name() = "containers.IndirectionC";
+  containers_IndirectionC.is_union() = false;
+  static const auto* const
+  containers_IndirectionC_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "lst", false, std::make_unique<Typedef>("containers.ListOfWrappedAlias", std::make_unique<Typedef>("containers.ListOfWrapped", std::make_unique<List>(std::make_unique<Struct<::test::fixtures::python_capi::TWrapped>>("containers.TWrapped")), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},  }};
+  for (const auto& f : *containers_IndirectionC_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    containers_IndirectionC.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
 
 } // namespace md
 } // namespace detail

@@ -235,7 +235,7 @@ func (p *rocketProtocol) readPayload() (resp payload.Payload, err error) {
 	}
 	select {
 	case r := <-p.resultChan:
-		return r.val, nil
+		return r.val, r.err
 	case <-p.ctx.Done():
 		return nil, p.ctx.Err()
 	case <-readTimeout:

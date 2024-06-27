@@ -40,8 +40,7 @@ type rocketProtocol struct {
 	cancel func()
 	client rsocket.Client
 
-	responseChan chan payload.Payload
-	errChan      chan error
+	resultChan chan rsocketResult
 
 	protoID ProtocolID
 	zstd    bool
@@ -68,6 +67,11 @@ func NewRocketProtocol(conn net.Conn) (Protocol, error) {
 		return nil, err
 	}
 	return p, nil
+}
+
+type rsocketResult struct {
+	val payload.Payload
+	err error
 }
 
 func (p *rocketProtocol) SetTimeout(timeout time.Duration) {
@@ -135,8 +139,7 @@ func (p *rocketProtocol) Flush() (err error) {
 	}
 
 	request := payload.New(dataBytes, metadataBytes)
-	p.responseChan = make(chan payload.Payload, 1)
-	p.errChan = make(chan error, 1)
+	p.resultChan = make(chan rsocketResult, 1)
 	if err := p.open(); err != nil {
 		return err
 	}
@@ -145,17 +148,11 @@ func (p *rocketProtocol) Flush() (err error) {
 			metadata, _ := response.Metadata()
 			data := response.Data()
 			newPayload := payload.New(data, metadata)
-			p.responseChan <- newPayload
+			p.resultChan <- rsocketResult{val: newPayload}
 			return nil
 		}),
 		rx.OnError(func(e error) {
-			p.errChan <- e
-			close(p.responseChan)
-			close(p.errChan)
-		}),
-		rx.OnComplete(func() {
-			close(p.responseChan)
-			close(p.errChan)
+			p.resultChan <- rsocketResult{err: e}
 		}))
 
 	p.buf.Reset()
@@ -223,27 +220,12 @@ func (p *rocketProtocol) open() error {
 }
 
 func (p *rocketProtocol) readPayload() (resp payload.Payload, err error) {
-	respDone := false
-	errDone := false
-	for !respDone || !errDone {
-		select {
-		case v, ok := <-p.responseChan:
-			if ok {
-				resp = v
-			} else {
-				respDone = true
-			}
-		case v, ok := <-p.errChan:
-			if ok {
-				err = v
-			} else {
-				errDone = true
-			}
-		case <-p.ctx.Done():
-			return nil, p.ctx.Err()
-		}
+	select {
+	case r := <-p.resultChan:
+		return r.val, nil
+	case <-p.ctx.Done():
+		return nil, p.ctx.Err()
 	}
-	return resp, err
 }
 
 func (p *rocketProtocol) ReadMessageBegin() (string, MessageType, int32, error) {

@@ -259,8 +259,14 @@ func (p *rocketProtocol) ReadMessageBegin() (string, MessageType, int32, error) 
 		if p.respMetadata.PayloadMetadata != nil && p.respMetadata.PayloadMetadata.ExceptionMetadata != nil {
 			exception := newRocketException(p.respMetadata.PayloadMetadata.ExceptionMetadata)
 			exceptionMetadata := p.respMetadata.PayloadMetadata.ExceptionMetadata
-			if exceptionMetadata.Metadata != nil && exceptionMetadata.Metadata.AppUnknownException != nil {
-				return name, EXCEPTION, p.seqID, exception
+			if exceptionMetadata.Metadata != nil {
+				if exceptionMetadata.Metadata.AppUnknownException != nil {
+					return name, EXCEPTION, p.seqID, exception
+				}
+				// This is necessary for SR Proxy timeouts to work
+				if exceptionMetadata.Metadata.DEPRECATEDProxyException != nil {
+					return name, EXCEPTION, p.seqID, exception
+				}
 			}
 		}
 	}

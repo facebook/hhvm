@@ -50,6 +50,16 @@ impl Default for Value {
     }
 }
 
+impl Clone for Value {
+    fn clone(&self) -> Self {
+        let mut cloned = Self {
+            inner: ffi::hdf_new(),
+        };
+        let _ = cloned.copy(self);
+        cloned
+    }
+}
+
 /// Impl Debug using the underlying C++ Hdf pretty printer.
 impl std::fmt::Debug for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

@@ -1,15 +1,48 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
+use std::fmt;
 use std::fs;
 
 use anyhow::Result;
 use byteorder::ByteOrder;
 use byteorder::NetworkEndian;
+use colored::Colorize;
 use md5::Digest;
 use md5::Md5;
 use regex::Regex;
 
 use crate::cxx_ffi;
+
+/// A config.hdf rule that matched an input
+// Temporarily allow this to compile, we're actually logging this for now.
+#[allow(dead_code)]
+#[derive(Debug)]
+pub struct TracedRule {
+    // Name of the overwrite rule that matched
+    rule_name: String,
+    // Name of the property we're tracing
+    traced_property: String,
+    // The body of the rule that matched
+    rule_body: hdf::Value,
+    // TODO: We also want to store what property/rule matched what input potentially?
+}
+
+impl fmt::Display for TracedRule {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "\n{}: {},\n{}:\n{}",
+            "Rule".magenta(),
+            self.rule_name.yellow().bold(),
+            "Body".purple(),
+            if self.rule_name == "Root" {
+                "Root {\n ... \n}".to_string()
+            } else {
+                format!("{:?}", self.rule_body)
+            }
+        )
+    }
+}
 
 /// A machine can belong to a tier, which can overwrite
 /// various settings, even if they are set in the same
@@ -41,7 +74,7 @@ pub fn apply_tier_overrides(config: hdf::Value) -> Result<hdf::Value> {
         .unwrap_or_else(|| "".to_owned());
 
     let results = apply_tier_overrides_with_params(
-        config, &hostname, &tier, &task, &cpu, &tiers, &tags, None,
+        config, &hostname, &tier, &task, &cpu, &tiers, &tags, None, None,
     )?;
     Ok(results.0)
 }
@@ -55,7 +88,8 @@ pub fn apply_tier_overrides_with_params(
     tiers: &String,
     tags: &String,
     predefined_shard_value: Option<i64>,
-) -> Result<(hdf::Value, Vec<String>)> {
+    trace_property: Option<String>,
+) -> Result<(hdf::Value, Vec<String>, Vec<TracedRule>)> {
     log::debug!(
         "Matching tiers using: machine='{}', tier='{}', task='{}', cpu='{}', tiers='{}', tags='{}'",
         hostname,
@@ -66,6 +100,24 @@ pub fn apply_tier_overrides_with_params(
         tags
     );
     let mut matched_tiers = vec![];
+
+    // Setup property tracing state
+    //let property_overrides: Vec<&hdf::Value> = vec![];
+
+    let mut traced_rules: Vec<TracedRule> = vec![];
+    if let Some(ref debug_prop_name) = trace_property {
+        log::info!(
+            "Property tracing enabled for property: {}",
+            &debug_prop_name
+        );
+        if let Some(_config_body) = config.get(debug_prop_name)? {
+            traced_rules.push(TracedRule {
+                rule_name: "Root".to_string(),
+                traced_property: debug_prop_name.clone(),
+                rule_body: config.clone(),
+            });
+        }
+    }
 
     let check_patterns = |hdf: &hdf::Value| -> Result<bool> {
         Ok(match_hdf_pattern(hostname, hdf, "machine", false)?
@@ -103,12 +155,27 @@ pub fn apply_tier_overrides_with_params(
                         }
                     }
 
-                    if let Some(overwrite) = tier.get("overwrite")? {
+                    if let Some(ref overwrite) = tier.get("overwrite")? {
                         log::info!(
                             "Applying overrides for tier: {}",
                             tier.name().unwrap_or_default()
                         );
-                        config.copy(&overwrite)?;
+                        config.copy(overwrite)?;
+
+                        if let Some(ref debug_prop_name) = trace_property {
+                            if overwrite.get(debug_prop_name)?.is_some() {
+                                traced_rules.push(TracedRule {
+                                    rule_name: tier.name()?,
+                                    traced_property: debug_prop_name.clone(),
+                                    rule_body: overwrite.clone(),
+                                });
+                                log::debug!(
+                                    "Applied overrides from rule {:?}\n{:?}",
+                                    overwrite.name()?,
+                                    overwrite
+                                );
+                            }
+                        }
                     } else {
                         log::info!(
                             "No overrides found for tier: {} {:?}",
@@ -126,7 +193,7 @@ pub fn apply_tier_overrides_with_params(
             }
         }
     }
-    Ok((config, matched_tiers))
+    Ok((config, matched_tiers, traced_rules))
 }
 
 fn match_shard(
@@ -456,7 +523,7 @@ mod test {
         shard: Option<i64>,
         expected_matches: Vec<String>,
     ) -> Result<()> {
-        let (hdf, matched_tiers) = apply_tier_overrides_with_params(
+        let (hdf, matched_tiers, _) = apply_tier_overrides_with_params(
             get_complex_hdf(),
             &"hostname".into(),
             &"tier".into(),
@@ -465,6 +532,7 @@ mod test {
             &"tiers".into(),
             &tags.unwrap_or("tags".into()),
             shard,
+            None,
         )?;
         assert_eq!(hdf.get_str("Eval.strA")?, str_a);
         assert_eq!(hdf.get_str("Eval.strB")?, str_b);

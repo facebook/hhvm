@@ -87,6 +87,7 @@ add_library(
   STATIC
 
   detail/system.cc
+  detail/pluggable_functions.cc
   diagnostic.cc
   source_location.cc
 

@@ -347,6 +347,50 @@ end = struct
 
 end
 
+and TypeDefType: sig
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= {
+    alias: QualName.t;
+    type_: TypeSpecification.t;
+    structured_annotations: StructuredAnnotation.t list;
+  }
+  [@@deriving ord]
+
+  val to_json: t -> json
+
+  val to_json_key: key -> json
+
+end = struct
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= {
+    alias: QualName.t;
+    type_: TypeSpecification.t;
+    structured_annotations: StructuredAnnotation.t list;
+  }
+  [@@deriving ord]
+
+  let rec to_json = function
+    | Id f -> Util.id f
+    | Key t -> Util.key (to_json_key t)
+
+  and to_json_key {alias; type_; structured_annotations} =
+    let fields = [
+      ("alias", QualName.to_json alias);
+      ("type_", TypeSpecification.to_json type_);
+      ("structuredAnnotations", JSON_Array (List.map ~f:(fun x -> StructuredAnnotation.to_json x) structured_annotations));
+    ] in
+    JSON_Object fields
+
+end
+
 and FunctionSpecification: sig
   type t =
     | Id of Fact_id.t
@@ -547,6 +591,50 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key str = JSON_String str
+end
+
+and DeclarationUses: sig
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= {
+    target: Declaration.t;
+    file: Src.File.t;
+    range: Loc.t;
+  }
+  [@@deriving ord]
+
+  val to_json: t -> json
+
+  val to_json_key: key -> json
+
+end = struct
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= {
+    target: Declaration.t;
+    file: Src.File.t;
+    range: Loc.t;
+  }
+  [@@deriving ord]
+
+  let rec to_json = function
+    | Id f -> Util.id f
+    | Key t -> Util.key (to_json_key t)
+
+  and to_json_key {target; file; range} =
+    let fields = [
+      ("target", Declaration.to_json target);
+      ("file", Src.File.to_json file);
+      ("range", Loc.to_json range);
+    ] in
+    JSON_Object fields
+
 end
 
 and NameLowerCase: sig
@@ -1045,6 +1133,50 @@ end = struct
   and to_json_key {fields} =
     let fields = [
       ("fields", JSON_Array (List.map ~f:(fun x -> StructFieldVal.to_json x) fields));
+    ] in
+    JSON_Object fields
+
+end
+
+and FieldDecl: sig
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= {
+    qname: QualName.t;
+    kind: FieldKind.t;
+    name: Identifier.t;
+  }
+  [@@deriving ord]
+
+  val to_json: t -> json
+
+  val to_json_key: key -> json
+
+end = struct
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= {
+    qname: QualName.t;
+    kind: FieldKind.t;
+    name: Identifier.t;
+  }
+  [@@deriving ord]
+
+  let rec to_json = function
+    | Id f -> Util.id f
+    | Key t -> Util.key (to_json_key t)
+
+  and to_json_key {qname; kind; name} =
+    let fields = [
+      ("qname", QualName.to_json qname);
+      ("kind", FieldKind.to_json kind);
+      ("name", Identifier.to_json name);
     ] in
     JSON_Object fields
 
@@ -1936,6 +2068,7 @@ and XRefTarget: sig
      | Constant of Constant.t
      | EnumValue of EnumValue.t
      | Function_ of FunctionName.t
+     | Field of FieldDecl.t
   [@@deriving ord]
 
   val to_json : t -> json
@@ -1948,6 +2081,7 @@ end = struct
      | Constant of Constant.t
      | EnumValue of EnumValue.t
      | Function_ of FunctionName.t
+     | Field of FieldDecl.t
   [@@deriving ord]
 
   let to_json  = function
@@ -1958,6 +2092,7 @@ end = struct
      | Constant constant -> JSON_Object [("constant", Constant.to_json constant)]
      | EnumValue enum_value -> JSON_Object [("enumValue", EnumValue.to_json enum_value)]
      | Function_ function_ -> JSON_Object [("function_", FunctionName.to_json function_)]
+     | Field field -> JSON_Object [("field", FieldDecl.to_json field)]
 
 end
 
@@ -2469,5 +2604,29 @@ end = struct
      | Enum_ -> JSON_Number (string_of_int 1)
      | Struct_ -> JSON_Number (string_of_int 2)
      | Union_ -> JSON_Number (string_of_int 3)
+
+end
+
+and FieldKind: sig
+  type t =
+    | Struct_
+    | Union_
+    | Exception_
+
+  [@@deriving ord]
+
+  val to_json : t -> json
+end = struct
+  type t =
+    | Struct_
+    | Union_
+    | Exception_
+
+  [@@deriving ord]
+
+  let to_json  = function
+     | Struct_ -> JSON_Number (string_of_int 0)
+     | Union_ -> JSON_Number (string_of_int 1)
+     | Exception_ -> JSON_Number (string_of_int 2)
 
 end

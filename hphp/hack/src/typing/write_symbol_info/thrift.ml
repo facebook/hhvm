@@ -14,6 +14,7 @@ open Option.Monad_infix
 type kind =
   | Exception
   | Struct
+  | Union
   | Service
 
 type container = {
@@ -38,7 +39,7 @@ let lookup { services; _ } ~interfaces =
 
 let rex_id = "(\\w(?:\\w|\\.)+)"
 
-let rex_ty = "(?:\\w|<|>|, )+"
+let rex_ty = "(?:\\w|<|>|\\.|, )+"
 
 let rex_sp = "(?:\\s|\\*|\\d|\\:|\\-)*"
 
@@ -46,7 +47,7 @@ let rex_container =
   Pcre.regexp
     ~flags:[`MULTILINE]
     (Printf.sprintf
-       "Original thrift (struct|service|exception):-%s%s"
+       "Original thrift (struct|service|exception|union):-%s%s"
        rex_sp
        rex_id)
 
@@ -82,6 +83,14 @@ let get_thrift_from_container_aux ~thrift_path ~doc =
                 { name = NamedType.{ name = qname; kind = NamedKind.Struct_ } }))
       in
       Some ({ thrift_path; name; kind = Struct }, xref_target)
+    | "union" ->
+      let xref_target =
+        XRefTarget.(
+          Named
+            NamedDecl.(
+              Key { name = NamedType.{ name = qname; kind = NamedKind.Union_ } }))
+      in
+      Some ({ thrift_path; name; kind = Union }, xref_target)
     | "exception" ->
       let xref_target =
         XRefTarget.(Exception_ ExceptionName.(Key { name = qname }))
@@ -125,21 +134,26 @@ let get_thrift_from_container t ~thrift_path con =
 
 let make_member_decl member_name container_qname kind =
   let name = container_qname in
+  let mname = Identifier.Key member_name in
   match kind with
   | Service ->
     XRefTarget.(
       Function_
         FunctionName.(
-          Key
-            {
-              service_ = ServiceName.(Key { name });
-              name = Identifier.Key member_name;
-            }))
+          Key { service_ = ServiceName.(Key { name }); name = mname }))
   | Struct ->
     XRefTarget.(
-      Named
-        NamedDecl.(Key { name = NamedType.{ name; kind = NamedKind.Struct_ } }))
-  | Exception -> XRefTarget.(Exception_ ExceptionName.(Key { name }))
+      Field
+        FieldDecl.(Key { qname = name; kind = FieldKind.Struct_; name = mname }))
+  | Union ->
+    XRefTarget.(
+      Field
+        FieldDecl.(Key { qname = name; kind = FieldKind.Union_; name = mname }))
+  | Exception ->
+    XRefTarget.(
+      Field
+        FieldDecl.(
+          Key { qname = name; kind = FieldKind.Exception_; name = mname }))
 
 let get_thrift_from_member t ~doc =
   t.cur_container >>= fun { thrift_path; name; kind } ->

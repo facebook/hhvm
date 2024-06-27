@@ -341,6 +341,47 @@ DbQueryResult Connection::query(Query&& query, QueryCallback&& cb) {
   return Connection::query(std::move(query), std::move(cb), QueryOptions());
 }
 
+// Query with generator
+
+DbQueryResult Connection::internalQueryWithGenerator(
+    QueryGenerator&& query_generator,
+    QueryCallback&& cb,
+    QueryOptions&& options) {
+  return Connection::query(
+      query_generator.query(), std::move(cb), std::move(options));
+}
+
+template <>
+DbQueryResult Connection::queryWithGenerator(
+    QueryGenerator&& query_generator,
+    QueryCallback&& cb,
+    QueryOptions&& options) {
+  return internalQueryWithGenerator(
+      std::move(query_generator), std::move(cb), std::move(options));
+}
+
+template <>
+DbQueryResult Connection::queryWithGenerator(
+    QueryGenerator&& query_generator,
+    QueryOptions&& options) {
+  return Connection::queryWithGenerator(
+      std::move(query_generator), (QueryCallback) nullptr, std::move(options));
+}
+
+template <>
+DbQueryResult Connection::queryWithGenerator(QueryGenerator&& query_generator) {
+  return Connection::queryWithGenerator(
+      std::move(query_generator), QueryOptions());
+}
+
+template <>
+DbQueryResult Connection::queryWithGenerator(
+    QueryGenerator&& query_generator,
+    QueryCallback&& cb) {
+  return Connection::queryWithGenerator(
+      std::move(query_generator), std::move(cb), QueryOptions());
+}
+
 // MultiQuery
 
 DbMultiQueryResult Connection::internalMultiQuery(
@@ -434,6 +475,75 @@ DbMultiQueryResult Connection::multiQuery(Query&& query) {
 template <typename... Args>
 DbMultiQueryResult Connection::multiQuery(Args&&... args) {
   return multiQuery(std::vector<Query>{std::forward<Args>(args)...});
+}
+
+// Multi query with generators
+
+namespace {
+
+std::vector<Query> generateQueries(
+    std::vector<std::unique_ptr<QueryGenerator>>&& query_generators) {
+  std::vector<Query> queries;
+  queries.reserve(query_generators.size());
+
+  for (const auto& query_generator : query_generators) {
+    queries.push_back(query_generator->query());
+  }
+  return queries;
+}
+
+} // namespace
+
+DbMultiQueryResult Connection::internalMultiQueryWithGenerators(
+    std::vector<std::unique_ptr<QueryGenerator>>&& query_generators,
+    MultiQueryCallback&& cb,
+    QueryOptions&& options) {
+  return Connection::multiQuery(
+      generateQueries(std::move(query_generators)),
+      std::move(cb),
+      std::move(options));
+}
+
+template <>
+DbMultiQueryResult Connection::multiQueryWithGenerators(
+    std::vector<std::unique_ptr<QueryGenerator>>&& query_generators,
+    MultiQueryCallback&& cb,
+    QueryOptions&& options) {
+  return internalMultiQueryWithGenerators(
+      std::move(query_generators), std::move(cb), std::move(options));
+}
+
+template <>
+DbMultiQueryResult Connection::multiQueryWithGenerators(
+    std::vector<std::unique_ptr<QueryGenerator>>&& query_generators,
+    MultiQueryCallback&& cb) {
+  return Connection::multiQueryWithGenerators(
+      std::move(query_generators), std::move(cb), QueryOptions());
+}
+
+template <>
+DbMultiQueryResult Connection::multiQueryWithGenerators(
+    std::vector<std::unique_ptr<QueryGenerator>>&& query_generators,
+    QueryOptions&& options) {
+  return Connection::multiQueryWithGenerators(
+      std::move(query_generators),
+      (MultiQueryCallback) nullptr,
+      std::move(options));
+}
+
+template <>
+DbMultiQueryResult Connection::multiQueryWithGenerators(
+    std::vector<std::unique_ptr<QueryGenerator>>&& query_generators) {
+  return Connection::multiQueryWithGenerators(
+      std::move(query_generators), QueryOptions());
+}
+
+template <>
+DbMultiQueryResult Connection::multiQueryWithGenerators(
+    std::unique_ptr<QueryGenerator>&& query_generator) {
+  std::vector<std::unique_ptr<QueryGenerator>> query_generators;
+  query_generators.push_back(std::move(query_generator));
+  return Connection::multiQueryWithGenerators(std::move(query_generators));
 }
 
 MultiQueryStreamHandler Connection::streamMultiQuery(

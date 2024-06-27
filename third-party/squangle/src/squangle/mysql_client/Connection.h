@@ -17,6 +17,7 @@
 #include "squangle/mysql_client/MysqlConnectionHolder.h"
 #include "squangle/mysql_client/Operation.h"
 #include "squangle/mysql_client/Query.h"
+#include "squangle/mysql_client/QueryGenerator.h"
 
 namespace facebook::common::mysql_client {
 
@@ -185,6 +186,21 @@ class Connection {
 
   template <typename... Args>
   DbMultiQueryResult multiQuery(Args&&... args);
+
+  template <typename... Args>
+  DbQueryResult queryWithGenerator(
+      QueryGenerator&& query_generator,
+      Args&&... args);
+
+  template <typename... Args>
+  DbMultiQueryResult multiQueryWithGenerators(
+      std::vector<std::unique_ptr<QueryGenerator>>&& query_generators,
+      Args&&... args);
+
+  template <typename... Args>
+  DbMultiQueryResult multiQueryWithGenerators(
+      std::unique_ptr<QueryGenerator>&& query_generator,
+      Args&&... args);
 
   // EXPERIMENTAL
 
@@ -623,6 +639,24 @@ class Connection {
   // overridden in derived class
   virtual DbMultiQueryResult internalMultiQuery(
       std::vector<Query>&& queries,
+      MultiQueryCallback&& cb,
+      QueryOptions&& options);
+
+  // QueryWithGenerator
+
+  // This method holds the core logic for queryWithGenerator and can be
+  // overridden in derived class
+  virtual DbQueryResult internalQueryWithGenerator(
+      QueryGenerator&& query_Generator,
+      QueryCallback&& cb,
+      QueryOptions&& options);
+
+  // MultiQueryWithGenerator
+
+  // This method holds the core logic for multiQueryWithGenerator and can be
+  // overridden in derived class.
+  virtual DbMultiQueryResult internalMultiQueryWithGenerators(
+      std::vector<std::unique_ptr<QueryGenerator>>&& query_generators,
       MultiQueryCallback&& cb,
       QueryOptions&& options);
 };

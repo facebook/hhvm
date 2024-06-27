@@ -75,9 +75,6 @@ class HkdfImpl : public Hkdf {
   }
 
  private:
-  using HmacFunc =
-      void (*)(folly::ByteRange, const folly::IOBuf&, folly::MutableByteRange);
-
   HkdfImpl(size_t hashLength, HmacFunc hmacFunc)
       : hashLength_(hashLength), hmacFunc_(hmacFunc) {}
 

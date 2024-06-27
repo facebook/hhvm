@@ -10,6 +10,7 @@
 
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
+#include <fizz/crypto/Hkdf.h>
 
 #include <fizz/fizz-config.h>
 
@@ -90,6 +91,20 @@ std::unique_ptr<Aead> OpenSSLFactory::makeAead(CipherSuite cipher) const {
   }
 }
 
+namespace detail {
+template <typename Hash>
+inline std::unique_ptr<KeyDerivation> makeKeyDerivationPtr(
+    const std::string& labelPrefix) {
+  return std::unique_ptr<KeyDerivationImpl>(new KeyDerivationImpl(
+      labelPrefix,
+      Hash::HashLen,
+      &Hasher<Hash>::hash,
+      &Hasher<Hash>::hmac,
+      HkdfImpl::create<Hash>(),
+      Hash::BlankHash));
+}
+} // namespace detail
+
 std::unique_ptr<KeyDerivation> OpenSSLFactory::makeKeyDeriver(
     CipherSuite cipher) const {
   switch (cipher) {
@@ -97,11 +112,11 @@ std::unique_ptr<KeyDerivation> OpenSSLFactory::makeKeyDeriver(
     case CipherSuite::TLS_AES_128_GCM_SHA256:
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
     case CipherSuite::TLS_AEGIS_128L_SHA256:
-      return KeyDerivationImpl::make<Sha256>(getHkdfPrefix());
+      return detail::makeKeyDerivationPtr<Sha256>(getHkdfPrefix());
     case CipherSuite::TLS_AES_256_GCM_SHA384:
-      return KeyDerivationImpl::make<Sha384>(getHkdfPrefix());
+      return detail::makeKeyDerivationPtr<Sha384>(getHkdfPrefix());
     case CipherSuite::TLS_AEGIS_256_SHA512:
-      return KeyDerivationImpl::make<Sha512>(getHkdfPrefix());
+      return detail::makeKeyDerivationPtr<Sha512>(getHkdfPrefix());
     default:
       throw std::runtime_error("ks: not implemented");
   }

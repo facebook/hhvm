@@ -37,7 +37,13 @@ Buf HandshakeContextImpl<Hash>::getFinishedData(
     folly::ByteRange baseKey) const {
   auto context = getHandshakeContext();
   auto finishedKey =
-      KeyDerivationImpl::create<Hash>(hkdfLabelPrefix_)
+      KeyDerivationImpl(
+          hkdfLabelPrefix_,
+          Hash::HashLen,
+          &openssl::Hasher<Hash>::hash,
+          &openssl::Hasher<Hash>::hmac,
+          HkdfImpl::create<Hash>(),
+          Hash::BlankHash)
           .expandLabel(
               baseKey, "finished", folly::IOBuf::create(0), Hash::HashLen);
   auto data = folly::IOBuf::create(Hash::HashLen);

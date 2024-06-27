@@ -24,4 +24,5 @@ struct HasherType {
 
 template <class T>
 using Hasher = Sha<HasherType<T>>;
+
 } // namespace fizz::openssl

@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <fizz/backend/openssl/Hasher.h>
+#include <fizz/crypto/Crypto.h>
 #include <fizz/crypto/Hkdf.h>
 #include <fizz/record/Types.h>
 
@@ -62,30 +62,15 @@ class KeyDerivation {
 
 class KeyDerivationImpl : public KeyDerivation {
  public:
+  KeyDerivationImpl(
+      const std::string& labelPrefix,
+      size_t hashLength,
+      HashFunc hashFunc,
+      HmacFunc hmacFunc,
+      HkdfImpl hkdf,
+      folly::ByteRange blankHash);
+
   ~KeyDerivationImpl() override = default;
-
-  template <typename Hash>
-  static KeyDerivationImpl create(const std::string& labelPrefix) {
-    return KeyDerivationImpl(
-        labelPrefix,
-        Hash::HashLen,
-        &openssl::Hasher<Hash>::hash,
-        &openssl::Hasher<Hash>::hmac,
-        HkdfImpl::create<Hash>(),
-        Hash::BlankHash);
-  }
-
-  template <typename Hash>
-  static std::unique_ptr<KeyDerivationImpl> make(
-      const std::string& labelPrefix) {
-    return std::unique_ptr<KeyDerivationImpl>(new KeyDerivationImpl(
-        labelPrefix,
-        Hash::HashLen,
-        &openssl::Hasher<Hash>::hash,
-        &openssl::Hasher<Hash>::hmac,
-        HkdfImpl::create<Hash>(),
-        Hash::BlankHash));
-  }
 
   size_t hashLength() const override {
     return hashLength_;
@@ -132,18 +117,6 @@ class KeyDerivationImpl : public KeyDerivation {
   }
 
  private:
-  using HashFunc = void (*)(const folly::IOBuf&, folly::MutableByteRange);
-  using HmacFunc =
-      void (*)(folly::ByteRange, const folly::IOBuf&, folly::MutableByteRange);
-
-  KeyDerivationImpl(
-      const std::string& labelPrefix,
-      size_t hashLength,
-      HashFunc hashFunc,
-      HmacFunc hmacFunc,
-      HkdfImpl hkdf,
-      folly::ByteRange blankHash);
-
   std::string labelPrefix_;
   size_t hashLength_;
   HashFunc hashFunc_;

@@ -9,6 +9,7 @@
 #pragma once
 
 #include <folly/Range.h>
+#include <folly/io/IOBuf.h>
 #include <array>
 
 namespace fizz {
@@ -78,5 +79,9 @@ struct P521 {
   static constexpr int coordinateLength = 66;
   static constexpr int keyShareLength = coordinateLength * 2 + 1;
 };
+
+using HashFunc = void (*)(const folly::IOBuf&, folly::MutableByteRange);
+using HmacFunc =
+    void (*)(folly::ByteRange, const folly::IOBuf&, folly::MutableByteRange);
 
 } // namespace fizz

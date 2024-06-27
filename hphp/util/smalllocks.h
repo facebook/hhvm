@@ -78,18 +78,18 @@ struct SmallLock {
     }
 
     if (c != 2) {
-      c = lock_data.exchange(2, std::memory_order_acquire);
+      c = lock_data.exchange(2, std::memory_order_acq_rel);
     }
     while (c != 0) {
       futex_wait(&lock_data, 2);
-      c = lock_data.exchange(2, std::memory_order_acquire);
+      c = lock_data.exchange(2, std::memory_order_acq_rel);
     }
   }
 
   void unlock() {
     // Differs from "futexes are tricky" because std::atomic can't generate
     // a dec instruction and test the flags.
-    if (lock_data.exchange(0, std::memory_order_release) != 1) {
+    if (lock_data.exchange(0, std::memory_order_acq_rel) != 1) {
       futex_wake(&lock_data, 1);
     }
   }

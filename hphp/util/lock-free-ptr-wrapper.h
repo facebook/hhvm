@@ -214,7 +214,7 @@ struct LockFreePtrWrapper {
   }
 
   raw_type unlock_helper(raw_type rep) {
-    auto const c = bits.exchange(rep, std::memory_order_release);
+    auto const c = bits.exchange(rep, std::memory_order_acq_rel);
     if (c & kLockWithWaitersBit) {
       futex_wake(&low_bits, 1);
     } else {

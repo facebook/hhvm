@@ -543,7 +543,7 @@ struct SparseHeap {
    * instead of handling them to slab manager.
    */
   static void PrepareToStop(bool val = true) {
-    s_shutdown.exchange(val, std::memory_order_release);
+    s_shutdown.store(val, std::memory_order_release);
   }
 
  protected:

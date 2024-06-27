@@ -62,7 +62,7 @@ void SparseHeap::reset() {
   };
   TaggedSlabList pooledSlabs;
   void* pooledSlabTail = nullptr;
-  auto const UNUSED isShuttingDown = s_shutdown.load(std::memory_order_acquire);
+  auto const isShuttingDown = s_shutdown.load(std::memory_order_acquire);
   for (auto& slab : m_pooled_slabs) {
     m_bigs.erase(slab.ptr);
     if (isShuttingDown) {

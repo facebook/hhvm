@@ -163,7 +163,7 @@ void* handle_signals(void*) {
             infop = &stored;
             g_state.m_siState.store(
               StoredInfoState::Free,
-              std::memory_order_acquire
+              std::memory_order_release
             );
           }
         }

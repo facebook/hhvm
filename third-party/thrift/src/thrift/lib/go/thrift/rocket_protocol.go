@@ -27,7 +27,6 @@ import (
 	rsocket "github.com/rsocket/rsocket-go"
 	"github.com/rsocket/rsocket-go/core/transport"
 	"github.com/rsocket/rsocket-go/payload"
-	"github.com/rsocket/rsocket-go/rx"
 )
 
 type rocketProtocol struct {
@@ -99,6 +98,7 @@ func (p *rocketProtocol) SetProtocolID(protoID ProtocolID) error {
 }
 
 func (p *rocketProtocol) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
+	p.buf.Reset()
 	p.seqID = seqid
 
 	if p.reqMetadata == nil {
@@ -143,19 +143,20 @@ func (p *rocketProtocol) Flush() (err error) {
 	if err := p.open(); err != nil {
 		return err
 	}
-	p.client.RequestResponse(request).Subscribe(p.ctx, rx.OnNext(
-		func(response payload.Payload) error {
-			metadata, _ := response.Metadata()
-			data := response.Data()
-			newPayload := payload.New(data, metadata)
-			p.resultChan <- rsocketResult{val: newPayload}
-			return nil
-		}),
-		rx.OnError(func(e error) {
-			p.resultChan <- rsocketResult{err: e}
-		}))
-
-	p.buf.Reset()
+	mono := p.client.RequestResponse(request)
+	if p.reqMetadata.TypeID != CALL {
+		return nil
+	}
+	ctx := p.ctx
+	go func() {
+		val, err := mono.Block(ctx)
+		if val != nil {
+			metadata, _ := val.Metadata()
+			data := val.Data()
+			val = payload.New(data, metadata)
+		}
+		p.resultChan <- rsocketResult{val: val, err: err}
+	}()
 	return nil
 }
 

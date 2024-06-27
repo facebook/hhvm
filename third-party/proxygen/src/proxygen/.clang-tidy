@@ -59,5 +59,7 @@ facebook-hte-PortabilityInclude-sys/un.h,
 facebook-hte-PortabilityInclude-syslog.h,
 facebook-hte-PortabilityInclude-unistd.h,
 facebook-hte-StdToStringUse,
+cppcoreguidelines-pro-type-member-init,
+cppcoreguidelines-init-variables,
 '
 ...

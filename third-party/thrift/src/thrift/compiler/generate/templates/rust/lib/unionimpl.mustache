@@ -36,6 +36,12 @@ impl ::fbthrift::GetUri for self::{{struct:rust_name}} {
 }
 {{/struct:thrift_uri}}
 
+impl ::fbthrift::GetTypeNameType for self::{{struct:rust_name}} {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for {{struct:rust_name}}
 where
     P: ::fbthrift::ProtocolWriter,

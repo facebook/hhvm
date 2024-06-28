@@ -53,6 +53,7 @@ pub mod serialize;
 pub mod simplejson_protocol;
 pub mod thrift_protocol;
 pub mod ttype;
+pub mod type_name_type;
 pub mod uri;
 
 mod bufext;
@@ -111,6 +112,8 @@ pub use crate::thrift_protocol::MessageType;
 pub use crate::thrift_protocol::ProtocolID;
 pub use crate::ttype::GetTType;
 pub use crate::ttype::TType;
+pub use crate::type_name_type::GetTypeNameType;
+pub use crate::type_name_type::TypeNameType;
 pub use crate::uri::GetUri;
 
 pub trait ThriftEnum: Sized {

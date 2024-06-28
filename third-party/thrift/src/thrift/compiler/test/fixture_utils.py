@@ -16,10 +16,10 @@
 import os
 import re
 import shlex
-import sys
 import typing
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
+from typing import Optional
 
 import pkg_resources
 
@@ -94,6 +94,7 @@ def _should_build_included_files_recursively(generator_spec: str) -> bool:
         or "schema" in generator_spec
         or "mstch_java" in generator_spec
         or "mstch_python" in generator_spec
+        or "-ast" in generator_spec
     )
 
 
@@ -103,6 +104,7 @@ def parse_fixture_cmds(
     fixture_dir_abspath: Path,
     fixture_output_root_dir_abspath: Path,
     thrift_bin_path: Path,
+    thrift2ast_bin_path: Optional[Path],
 ) -> list[FixtureCmd]:
     assert repo_root_dir_abspath.is_absolute()
     assert fixture_dir_abspath.is_absolute()
@@ -121,6 +123,7 @@ def parse_fixture_cmds(
             fixture_dir_abspath,
             fixture_output_root_dir_abspath,
             thrift_bin_path,
+            thrift2ast_bin_path,
         )
         if fixture_cmd is None:
             continue
@@ -148,6 +151,7 @@ def _parse_fixture_cmd(
     fixture_dir_abspath: Path,
     fixture_output_root_dir_abspath: Path,
     thrift_bin_path: Path,
+    thrift2ast_bin_path: Optional[Path],
 ) -> typing.Optional[FixtureCmd]:
     """
     Parses the given line from a `cmd` file and returns the command arguments
@@ -223,12 +227,20 @@ def _parse_fixture_cmd(
             generator_spec = _add_option_to_generator_spec(
                 generator_spec,
                 "include_prefix",
-                PurePosixPath("thrift/compiler/test/fixtures") / fixture_name,
+                str(PurePosixPath("thrift/compiler/test/fixtures") / fixture_name),
             )
+
+        if generator_spec.startswith("thrift2ast-"):
+            if thrift2ast_bin_path is None:
+                raise RuntimeError(f"No path to `thrift2ast` binary provided.")
+            generator_spec = generator_spec.removeprefix("thrift2ast-")
+            base_args[0] = thrift2ast_bin_path
 
         return FixtureCmd(
             unique_name=cmd_name,
-            build_command_args=base_args + [generator_spec, target_file_relpath],
+            build_command_args=[
+                str(x) for x in base_args + [generator_spec, target_file_relpath]
+            ],
         )
     except Exception as err:
         raise RuntimeError(
@@ -252,6 +264,21 @@ def get_thrift_binary_path(
         return Path(pkg_resources.resource_filename(__name__, "thrift"))
 
     return _ascend_find_exe(Path.cwd(), thrift_bin_arg)
+
+
+def get_thrift2ast_binary_path() -> typing.Optional[Path]:
+    """
+    Returns path to the Thrift compiler binary, or None if not be found.
+
+    Args:
+        thrift_bin_arg: Name of Thrift compiler binary provided by user on the
+          command line, if any. If this is not None, will try to find an
+          executable with this name in the current working directory or any of
+          its parents.
+    """
+    if pkg_resources.resource_exists(__name__, "thrift2ast"):
+        return Path(pkg_resources.resource_filename(__name__, "thrift2ast"))
+    return None
 
 
 def get_all_fixture_names(fixtures_root_dir_path: Path) -> list[str]:

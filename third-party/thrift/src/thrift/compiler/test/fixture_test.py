@@ -29,6 +29,7 @@ from thrift.compiler.test import fixture_utils
 
 
 _THRIFT_BIN_PATH = fixture_utils.get_thrift_binary_path(thrift_bin_arg=None)
+_THRIFT2AST_BIN_PATH = fixture_utils.get_thrift2ast_binary_path()
 assert _THRIFT_BIN_PATH
 
 _FIXTURES_ROOT_DIR_RELPATH = Path("thrift/compiler/test/fixtures")
@@ -121,6 +122,7 @@ class FixtureTest(unittest.TestCase):
             fixture_dir_abspath,
             fixture_output_root_dir_abspath,
             _THRIFT_BIN_PATH,
+            _THRIFT2AST_BIN_PATH,
         )
 
         # Run thrift compiler and generate files

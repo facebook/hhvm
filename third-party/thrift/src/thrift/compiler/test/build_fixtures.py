@@ -17,15 +17,12 @@ import argparse
 import asyncio
 import multiprocessing
 import os
-import re
-import shlex
 import shutil
 import subprocess
 import sys
 import typing
 from pathlib import Path
-
-import pkg_resources
+from typing import Optional
 
 from thrift.compiler.test import fixture_utils
 
@@ -117,6 +114,7 @@ def _add_processes_for_fixture(
     repo_root_dir_abspath: Path,
     fixtures_root_dir_abspath: Path,
     thrift_bin_path: Path,
+    thrift2ast_bin_path: Optional[Path],
     subprocess_semaphore,
     processes: list,
 ) -> None:
@@ -153,6 +151,7 @@ def _add_processes_for_fixture(
         fixture_dir_abspath,
         fixture_output_root_dir_abspath,
         thrift_bin_path,
+        thrift2ast_bin_path,
     ):
         os.mkdir(fixture_output_root_dir_abspath / fixture_cmd.unique_name)
         processes.append(
@@ -177,11 +176,16 @@ async def main() -> int:
     thrift_bin_path: typing.Optional[Path] = fixture_utils.get_thrift_binary_path(
         args.thrift_bin
     )
+
     if thrift_bin_path is None:
         sys.stderr.write(
             "error: cannot find the Thrift compiler ({})\n".format(args.thrift_bin)
         )
         return 1
+
+    thrift2ast_bin_path: typing.Optional[Path] = (
+        fixture_utils.get_thrift2ast_binary_path()
+    )
 
     repo_root_dir_abspath = Path(args.repo_root_dir).resolve(strict=True)
     assert repo_root_dir_abspath.is_dir()
@@ -213,6 +217,7 @@ async def main() -> int:
             repo_root_dir_abspath,
             fixtures_root_dir_abspath,
             thrift_bin_path,
+            thrift2ast_bin_path,
             subprocess_semaphore,
             processes,
         )

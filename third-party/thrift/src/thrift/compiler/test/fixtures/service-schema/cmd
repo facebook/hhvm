@@ -1,2 +1,3 @@
-cpp2: mstch_cpp2 src/module.thrift
-java: mstch_java src/module.thrift
+cpp2: thrift2ast-mstch_cpp2 src/module.thrift
+java: thrift2ast-mstch_java src/module.thrift
+ast: thrift2ast-ast:protocol=debug,root_program_only,use_hash,no_backcompat src/module.thrift

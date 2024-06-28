@@ -100,7 +100,7 @@ inline std::unique_ptr<KeyDerivation> makeKeyDerivationPtr(
       Hash::HashLen,
       &Hasher<Hash>::hash,
       &Hasher<Hash>::hmac,
-      HkdfImpl::create<Hash>(),
+      HkdfImpl(Hash::HashLen, &Hasher<Hash>::hmac),
       Hash::BlankHash));
 }
 } // namespace detail

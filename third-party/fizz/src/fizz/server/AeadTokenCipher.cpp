@@ -50,8 +50,9 @@ bool Aead128GCMTokenCipher::setSecrets(
   for (const auto& tokenSecret : tokenSecrets) {
     Secret extracted(tokenSecret.begin(), tokenSecret.end());
     for (const auto& contextString : contextStrings_) {
-      extracted = HkdfImpl::create<HashType>().extract(
-          folly::range(contextString), folly::range(extracted));
+      extracted =
+          HkdfImpl(HashType::HashLen, &openssl::Hasher<HashType>::hmac)
+              .extract(folly::range(contextString), folly::range(extracted));
     }
     secrets_.push_back(std::move(extracted));
   }
@@ -111,8 +112,8 @@ std::unique_ptr<Aead> Aead128GCMTokenCipher::createAead(
     folly::ByteRange salt) const {
   auto aead = AeadType::makeCipher<CipherType>();
   std::unique_ptr<folly::IOBuf> info = folly::IOBuf::wrapBuffer(salt);
-  auto keys = HkdfImpl::create<HashType>().expand(
-      secret, *info, aead->keyLength() + aead->ivLength());
+  auto keys = HkdfImpl(HashType::HashLen, &openssl::Hasher<HashType>::hmac)
+                  .expand(secret, *info, aead->keyLength() + aead->ivLength());
   folly::io::Cursor cursor(keys.get());
   TrafficKey key;
   cursor.clone(key.key, aead->keyLength());

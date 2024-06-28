@@ -29,6 +29,7 @@ Include this file to use openssl features.
 #include <fizz/backend/openssl/crypto/aead/OpenSSLEVPCipher.h>
 #include <fizz/backend/openssl/crypto/exchange/OpenSSLKeyExchange.h>
 #include <fizz/backend/openssl/crypto/signature/Signature.h>
+#include <fizz/crypto/Hkdf.h>
 #include <folly/io/IOBuf.h>
 
 namespace fizz::openssl {
@@ -48,4 +49,10 @@ makeOpenSSLECKeyExchange() {
   return std::make_unique<OpenSSLECKeyExchange>(
       Properties<T>::curveNid, T::keyShareLength);
 }
+
+template <typename Hash>
+HkdfImpl createHkdf() {
+  return HkdfImpl(Hash::HashLen, &openssl::Hasher<Hash>::hmac);
+}
+
 } // namespace fizz::openssl

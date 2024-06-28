@@ -42,7 +42,7 @@ Buf HandshakeContextImpl<Hash>::getFinishedData(
           Hash::HashLen,
           &openssl::Hasher<Hash>::hash,
           &openssl::Hasher<Hash>::hmac,
-          HkdfImpl::create<Hash>(),
+          HkdfImpl(Hash::HashLen, &openssl::Hasher<Hash>::hmac),
           Hash::BlankHash)
           .expandLabel(
               baseKey, "finished", folly::IOBuf::create(0), Hash::HashLen);

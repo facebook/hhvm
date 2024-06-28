@@ -24,6 +24,7 @@
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_include.h>
 #include <thrift/compiler/ast/t_type.h>
+#include <thrift/compiler/detail/pluggable_functions.h>
 #include <thrift/compiler/generate/t_generator.h>
 #include <thrift/compiler/lib/const_util.h>
 #include <thrift/compiler/lib/schematizer.h>
@@ -515,6 +516,22 @@ THRIFT_REGISTER_GENERATOR(
     "    use_hash:          Uses typeHashPrefixSha2_256 in typeUri and instead of extern ids.\n"
     "    root_program_only: Only schematize the root program.\n"
     "");
+
+namespace {
+std::string gen_schema(
+    schematizer::options& schema_opts,
+    const source_manager& source_mgr,
+    const t_program& root_program) {
+  auto schema =
+      t_ast_generator::gen_schema(schema_opts, source_mgr, root_program);
+  return serialize<CompactProtocolWriter>(schema);
+}
+
+static bool register_schema_generation = []() {
+  detail::pluggable_functions().set<GetSchemaTag>(gen_schema);
+  return true;
+}();
+} // namespace
 
 } // namespace compiler
 } // namespace thrift

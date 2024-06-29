@@ -1099,6 +1099,12 @@ impl ::fbthrift::GetUri for self::MyData {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyData {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyData
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1213,6 +1219,12 @@ impl ::fbthrift::GetUri for self::MyDataWithCustomDefault {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyDataWithCustomDefault {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyDataWithCustomDefault
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1304,6 +1316,12 @@ impl ::fbthrift::GetTType for InnerUnion {
 impl ::fbthrift::GetUri for self::InnerUnion {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/InnerUnion"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::InnerUnion {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
     }
 }
 
@@ -1408,6 +1426,12 @@ impl ::fbthrift::GetTType for MyUnion {
 impl ::fbthrift::GetUri for self::MyUnion {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyUnion"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyUnion {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
     }
 }
 
@@ -1624,6 +1648,12 @@ impl ::fbthrift::GetTType for self::MyStruct {
 impl ::fbthrift::GetUri for self::MyStruct {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -2072,6 +2102,12 @@ impl ::fbthrift::GetUri for self::LateDefStruct {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::LateDefStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::LateDefStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2163,6 +2199,12 @@ impl ::fbthrift::GetTType for self::Recursive {
 impl ::fbthrift::GetUri for self::Recursive {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/Recursive"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::Recursive {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -2282,6 +2324,12 @@ impl ::fbthrift::GetUri for self::Bar {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::Bar {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Bar
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2392,6 +2440,12 @@ impl ::fbthrift::GetTType for self::Loop {
 impl ::fbthrift::GetUri for self::Loop {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/Loop"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::Loop {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -2533,6 +2587,12 @@ impl ::fbthrift::GetTType for self::RefFields {
 impl ::fbthrift::GetUri for self::RefFields {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/RefFields"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::RefFields {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -2780,6 +2840,12 @@ impl ::fbthrift::GetUri for self::MyDataPatchStructInternalDoNotUse {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyDataPatchStructInternalDoNotUse {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyDataPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2900,6 +2966,12 @@ impl ::fbthrift::GetUri for self::MyDataFieldPatch {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyDataFieldPatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyDataFieldPatch
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2987,6 +3059,12 @@ impl ::fbthrift::GetTType for self::MyDataEnsureStruct {
 impl ::fbthrift::GetUri for self::MyDataEnsureStruct {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyDataEnsureStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyDataEnsureStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -3081,6 +3159,12 @@ impl ::fbthrift::GetTType for self::MyDataSafePatch {
 impl ::fbthrift::GetUri for self::MyDataSafePatch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyDataSafePatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyDataSafePatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -3179,6 +3263,12 @@ impl ::fbthrift::GetTType for self::MyDataWithCustomDefaultPatchStructInternalDo
 impl ::fbthrift::GetUri for self::MyDataWithCustomDefaultPatchStructInternalDoNotUse {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyDataWithCustomDefaultPatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyDataWithCustomDefaultPatchStructInternalDoNotUse {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -3302,6 +3392,12 @@ impl ::fbthrift::GetUri for self::MyDataWithCustomDefaultFieldPatch {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyDataWithCustomDefaultFieldPatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyDataWithCustomDefaultFieldPatch
 where
     P: ::fbthrift::ProtocolWriter,
@@ -3389,6 +3485,12 @@ impl ::fbthrift::GetTType for self::MyDataWithCustomDefaultEnsureStruct {
 impl ::fbthrift::GetUri for self::MyDataWithCustomDefaultEnsureStruct {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyDataWithCustomDefaultEnsureStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyDataWithCustomDefaultEnsureStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -3486,6 +3588,12 @@ impl ::fbthrift::GetUri for self::MyDataWithCustomDefaultSafePatch {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyDataWithCustomDefaultSafePatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyDataWithCustomDefaultSafePatch
 where
     P: ::fbthrift::ProtocolWriter,
@@ -3579,6 +3687,12 @@ impl ::fbthrift::GetTType for self::InnerUnionPatch {
 impl ::fbthrift::GetUri for self::InnerUnionPatch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/InnerUnionPatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::InnerUnionPatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -3693,6 +3807,12 @@ impl ::fbthrift::GetUri for self::InnerUnionFieldPatch {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::InnerUnionFieldPatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::InnerUnionFieldPatch
 where
     P: ::fbthrift::ProtocolWriter,
@@ -3773,6 +3893,12 @@ impl ::fbthrift::GetTType for self::InnerUnionSafePatch {
 impl ::fbthrift::GetUri for self::InnerUnionSafePatch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/InnerUnionSafePatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::InnerUnionSafePatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -3869,6 +3995,12 @@ impl ::fbthrift::GetTType for self::MyUnionPatch {
 impl ::fbthrift::GetUri for self::MyUnionPatch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyUnionPatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyUnionPatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -3987,6 +4119,12 @@ impl ::fbthrift::GetUri for self::MyUnionFieldPatch {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyUnionFieldPatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyUnionFieldPatch
 where
     P: ::fbthrift::ProtocolWriter,
@@ -4081,6 +4219,12 @@ impl ::fbthrift::GetTType for self::MyUnionSafePatch {
 impl ::fbthrift::GetUri for self::MyUnionSafePatch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyUnionSafePatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyUnionSafePatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -4179,6 +4323,12 @@ impl ::fbthrift::GetTType for self::MyStructPatchStructInternalDoNotUse {
 impl ::fbthrift::GetUri for self::MyStructPatchStructInternalDoNotUse {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyStructPatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyStructPatchStructInternalDoNotUse {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -4302,6 +4452,12 @@ impl ::fbthrift::GetUri for self::MyStructField10Patch {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyStructField10Patch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyStructField10Patch
 where
     P: ::fbthrift::ProtocolWriter,
@@ -4391,6 +4547,12 @@ impl ::fbthrift::GetTType for self::MyStructField23Patch {
 impl ::fbthrift::GetUri for self::MyStructField23Patch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyStructField23Patch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyStructField23Patch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -4487,6 +4649,12 @@ impl ::fbthrift::GetTType for self::MyStructField26Patch {
 impl ::fbthrift::GetUri for self::MyStructField26Patch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyStructField26Patch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyStructField26Patch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -4597,6 +4765,12 @@ impl ::fbthrift::GetTType for self::MyStructField27Patch {
 impl ::fbthrift::GetUri for self::MyStructField27Patch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyStructField27Patch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyStructField27Patch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -4713,6 +4887,12 @@ impl ::fbthrift::GetTType for self::MyStructField28Patch {
 impl ::fbthrift::GetUri for self::MyStructField28Patch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyStructField28Patch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyStructField28Patch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -4847,6 +5027,12 @@ impl ::fbthrift::GetUri for self::MyStructField29Patch {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyStructField29Patch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyStructField29Patch
 where
     P: ::fbthrift::ProtocolWriter,
@@ -4960,6 +5146,12 @@ impl ::fbthrift::GetTType for self::MyStructField30Patch {
 impl ::fbthrift::GetUri for self::MyStructField30Patch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyStructField30Patch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyStructField30Patch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -5097,6 +5289,12 @@ impl ::fbthrift::GetTType for self::MyStructField30Patch1 {
 impl ::fbthrift::GetUri for self::MyStructField30Patch1 {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyStructField30Patch1"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyStructField30Patch1 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -5286,6 +5484,12 @@ impl ::fbthrift::GetTType for self::MyStructFieldPatch {
 impl ::fbthrift::GetUri for self::MyStructFieldPatch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyStructFieldPatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyStructFieldPatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -5655,6 +5859,12 @@ impl ::fbthrift::GetTType for self::MyStructEnsureStruct {
 impl ::fbthrift::GetUri for self::MyStructEnsureStruct {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/MyStructEnsureStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyStructEnsureStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -6031,6 +6241,12 @@ impl ::fbthrift::GetUri for self::MyStructSafePatch {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyStructSafePatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyStructSafePatch
 where
     P: ::fbthrift::ProtocolWriter,
@@ -6126,6 +6342,12 @@ impl ::fbthrift::GetTType for self::LateDefStructPatchStructInternalDoNotUse {
 impl ::fbthrift::GetUri for self::LateDefStructPatchStructInternalDoNotUse {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/LateDefStructPatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::LateDefStructPatchStructInternalDoNotUse {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -6245,6 +6467,12 @@ impl ::fbthrift::GetUri for self::LateDefStructFieldPatch {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::LateDefStructFieldPatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::LateDefStructFieldPatch
 where
     P: ::fbthrift::ProtocolWriter,
@@ -6314,6 +6542,12 @@ impl ::fbthrift::GetTType for self::LateDefStructEnsureStruct {
 impl ::fbthrift::GetUri for self::LateDefStructEnsureStruct {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/LateDefStructEnsureStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::LateDefStructEnsureStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -6390,6 +6624,12 @@ impl ::fbthrift::GetTType for self::LateDefStructSafePatch {
 impl ::fbthrift::GetUri for self::LateDefStructSafePatch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/LateDefStructSafePatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::LateDefStructSafePatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -6488,6 +6728,12 @@ impl ::fbthrift::GetTType for self::RecursivePatchStructInternalDoNotUse {
 impl ::fbthrift::GetUri for self::RecursivePatchStructInternalDoNotUse {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/RecursivePatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::RecursivePatchStructInternalDoNotUse {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -6611,6 +6857,12 @@ impl ::fbthrift::GetUri for self::RecursiveField1Patch {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::RecursiveField1Patch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::RecursiveField1Patch
 where
     P: ::fbthrift::ProtocolWriter,
@@ -6701,6 +6953,12 @@ impl ::fbthrift::GetUri for self::RecursiveFieldPatch {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::RecursiveFieldPatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::RecursiveFieldPatch
 where
     P: ::fbthrift::ProtocolWriter,
@@ -6779,6 +7037,12 @@ impl ::fbthrift::GetTType for self::RecursiveEnsureStruct {
 impl ::fbthrift::GetUri for self::RecursiveEnsureStruct {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/RecursiveEnsureStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::RecursiveEnsureStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -6864,6 +7128,12 @@ impl ::fbthrift::GetTType for self::RecursiveSafePatch {
 impl ::fbthrift::GetUri for self::RecursiveSafePatch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/RecursiveSafePatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::RecursiveSafePatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -6962,6 +7232,12 @@ impl ::fbthrift::GetTType for self::BarPatchStructInternalDoNotUse {
 impl ::fbthrift::GetUri for self::BarPatchStructInternalDoNotUse {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/BarPatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::BarPatchStructInternalDoNotUse {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -7083,6 +7359,12 @@ impl ::fbthrift::GetUri for self::BarFieldPatch {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::BarFieldPatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::BarFieldPatch
 where
     P: ::fbthrift::ProtocolWriter,
@@ -7161,6 +7443,12 @@ impl ::fbthrift::GetTType for self::BarEnsureStruct {
 impl ::fbthrift::GetUri for self::BarEnsureStruct {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/BarEnsureStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::BarEnsureStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -7246,6 +7534,12 @@ impl ::fbthrift::GetTType for self::BarSafePatch {
 impl ::fbthrift::GetUri for self::BarSafePatch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/BarSafePatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::BarSafePatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -7339,6 +7633,12 @@ impl ::fbthrift::GetUri for self::LoopPatchStructInternalDoNotUse {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::LoopPatchStructInternalDoNotUse {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::LoopPatchStructInternalDoNotUse
 where
     P: ::fbthrift::ProtocolWriter,
@@ -7428,6 +7728,12 @@ impl ::fbthrift::GetTType for self::LoopSafePatch {
 impl ::fbthrift::GetUri for self::LoopSafePatch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/LoopSafePatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::LoopSafePatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -7526,6 +7832,12 @@ impl ::fbthrift::GetTType for self::RefFieldsPatchStructInternalDoNotUse {
 impl ::fbthrift::GetUri for self::RefFieldsPatchStructInternalDoNotUse {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/RefFieldsPatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::RefFieldsPatchStructInternalDoNotUse {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -7653,6 +7965,12 @@ impl ::fbthrift::GetUri for self::RefFieldsField1Patch {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::RefFieldsField1Patch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::RefFieldsField1Patch
 where
     P: ::fbthrift::ProtocolWriter,
@@ -7760,6 +8078,12 @@ impl ::fbthrift::GetTType for self::RefFieldsField4Patch {
 impl ::fbthrift::GetUri for self::RefFieldsField4Patch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/RefFieldsField4Patch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::RefFieldsField4Patch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -7873,6 +8197,12 @@ impl ::fbthrift::GetUri for self::RefFieldsField7Patch {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::RefFieldsField7Patch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::RefFieldsField7Patch
 where
     P: ::fbthrift::ProtocolWriter,
@@ -7981,6 +8311,12 @@ impl ::fbthrift::GetUri for self::RefFieldsFieldPatch {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::RefFieldsFieldPatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::RefFieldsFieldPatch
 where
     P: ::fbthrift::ProtocolWriter,
@@ -8085,6 +8421,12 @@ impl ::fbthrift::GetTType for self::RefFieldsEnsureStruct {
 impl ::fbthrift::GetUri for self::RefFieldsEnsureStruct {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/RefFieldsEnsureStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::RefFieldsEnsureStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -8224,6 +8566,12 @@ impl ::fbthrift::GetTType for self::RefFieldsSafePatch {
 impl ::fbthrift::GetUri for self::RefFieldsSafePatch {
     fn uri() -> &'static str {
         "test.dev/fixtures/patch/RefFieldsSafePatch"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::RefFieldsSafePatch {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 

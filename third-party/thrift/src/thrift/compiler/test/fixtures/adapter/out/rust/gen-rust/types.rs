@@ -783,6 +783,12 @@ impl ::fbthrift::GetUri for self::MyAnnotation {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyAnnotation {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyAnnotation
 where
     P: ::fbthrift::ProtocolWriter,
@@ -936,6 +942,12 @@ impl ::fbthrift::GetTType for self::Foo {
 impl ::fbthrift::GetUri for self::Foo {
     fn uri() -> &'static str {
         "facebook.com/thrift/compiler/test/fixtures/adapter/src/module/Foo"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::Foo {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -1391,6 +1403,12 @@ impl ::fbthrift::GetUri for self::Baz {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::Baz {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for Baz
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1691,6 +1709,12 @@ impl ::fbthrift::GetUri for self::Bar {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::Bar {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Bar
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1966,6 +1990,12 @@ impl ::fbthrift::GetUri for self::DirectlyAdapted {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::DirectlyAdapted {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::DirectlyAdapted
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2102,6 +2132,12 @@ impl ::fbthrift::GetUri for self::IndependentDirectlyAdapted {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::IndependentDirectlyAdapted {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::IndependentDirectlyAdapted
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2226,6 +2262,12 @@ impl ::fbthrift::GetTType for self::StructWithFieldAdapter {
 impl ::fbthrift::GetUri for self::StructWithFieldAdapter {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/StructWithFieldAdapter"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructWithFieldAdapter {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -2503,6 +2545,12 @@ impl ::fbthrift::GetUri for self::TerseAdaptedFields {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::TerseAdaptedFields {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::TerseAdaptedFields
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2705,6 +2753,12 @@ impl ::fbthrift::GetUri for self::B {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::B {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::B
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2806,6 +2860,12 @@ impl ::fbthrift::GetUri for self::A {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::A {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::A
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2897,6 +2957,12 @@ impl ::fbthrift::GetTType for self::Config {
 impl ::fbthrift::GetUri for self::Config {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/Config"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::Config {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -3060,6 +3126,12 @@ impl ::fbthrift::GetUri for self::MyStruct {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -3187,6 +3259,12 @@ impl ::fbthrift::GetTType for self::AdaptTestStruct {
 impl ::fbthrift::GetUri for self::AdaptTestStruct {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/AdaptTestStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::AdaptTestStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -3531,6 +3609,12 @@ impl ::fbthrift::GetTType for self::AdaptTemplatedTestStruct {
 impl ::fbthrift::GetUri for self::AdaptTemplatedTestStruct {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/AdaptTemplatedTestStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::AdaptTemplatedTestStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -3974,6 +4058,12 @@ impl ::fbthrift::GetUri for self::AdaptTemplatedNestedTestStruct {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::AdaptTemplatedNestedTestStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::AdaptTemplatedNestedTestStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -4056,6 +4146,12 @@ impl ::fbthrift::GetTType for AdaptTestUnion {
 impl ::fbthrift::GetUri for self::AdaptTestUnion {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/AdaptTestUnion"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::AdaptTestUnion {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
     }
 }
 
@@ -4208,6 +4304,12 @@ impl ::fbthrift::GetUri for self::AdaptedStruct {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::AdaptedStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::AdaptedStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -4322,6 +4424,12 @@ impl ::fbthrift::GetTType for self::DirectlyAdaptedStruct {
 impl ::fbthrift::GetUri for self::DirectlyAdaptedStruct {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/DirectlyAdaptedStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::DirectlyAdaptedStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -4449,6 +4557,12 @@ impl ::fbthrift::GetTType for self::StructFieldAdaptedStruct {
 impl ::fbthrift::GetUri for self::StructFieldAdaptedStruct {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/StructFieldAdaptedStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructFieldAdaptedStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -4600,6 +4714,12 @@ impl ::fbthrift::GetUri for self::CircularAdaptee {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::CircularAdaptee {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::CircularAdaptee
 where
     P: ::fbthrift::ProtocolWriter,
@@ -4700,6 +4820,12 @@ impl ::fbthrift::GetTType for self::CircularStruct {
 impl ::fbthrift::GetUri for self::CircularStruct {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/CircularStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::CircularStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -4818,6 +4944,12 @@ impl ::fbthrift::GetUri for self::ReorderedStruct {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::ReorderedStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::ReorderedStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -4926,6 +5058,12 @@ impl ::fbthrift::GetTType for self::DeclaredAfterStruct {
 impl ::fbthrift::GetUri for self::DeclaredAfterStruct {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/DeclaredAfterStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::DeclaredAfterStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -5038,6 +5176,12 @@ impl ::fbthrift::GetTType for self::RenamedStruct {
 impl ::fbthrift::GetUri for self::RenamedStruct {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/RenamedStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::RenamedStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -5162,6 +5306,12 @@ impl ::fbthrift::GetUri for self::SameNamespaceStruct {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::SameNamespaceStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::SameNamespaceStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -5281,6 +5431,12 @@ impl ::fbthrift::GetUri for self::HeapAllocated {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::HeapAllocated {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::HeapAllocated
 where
     P: ::fbthrift::ProtocolWriter,
@@ -5393,6 +5549,12 @@ impl ::fbthrift::GetUri for self::MoveOnly {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MoveOnly {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MoveOnly
 where
     P: ::fbthrift::ProtocolWriter,
@@ -5493,6 +5655,12 @@ impl ::fbthrift::GetTType for self::AlsoMoveOnly {
 impl ::fbthrift::GetUri for self::AlsoMoveOnly {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/AlsoMoveOnly"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::AlsoMoveOnly {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -5615,6 +5783,12 @@ impl ::fbthrift::GetUri for self::ApplyAdapter {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::ApplyAdapter {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::ApplyAdapter
 where
     P: ::fbthrift::ProtocolWriter,
@@ -5734,6 +5908,12 @@ impl ::fbthrift::GetUri for self::TransitiveAdapted {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::TransitiveAdapted {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::TransitiveAdapted
 where
     P: ::fbthrift::ProtocolWriter,
@@ -5842,6 +6022,12 @@ impl ::fbthrift::GetTType for self::CountingStruct {
 impl ::fbthrift::GetUri for self::CountingStruct {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/CountingStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::CountingStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -6008,6 +6194,12 @@ impl ::fbthrift::GetUri for self::Person {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::Person {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Person
 where
     P: ::fbthrift::ProtocolWriter,
@@ -6135,6 +6327,12 @@ impl ::fbthrift::GetTType for self::Person2 {
 impl ::fbthrift::GetUri for self::Person2 {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/Person2"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::Person2 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 

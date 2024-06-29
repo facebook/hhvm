@@ -238,6 +238,12 @@ impl ::fbthrift::GetTType for self::Fiery {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::Fiery {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Fiery
 where
     P: ::fbthrift::ProtocolWriter,
@@ -333,6 +339,12 @@ impl ::std::panic::UnwindSafe for self::Serious {}
 
 impl ::fbthrift::GetTType for self::Serious {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::Serious {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::Serious
@@ -434,6 +446,12 @@ impl ::std::panic::UnwindSafe for self::ComplexFieldNames {}
 
 impl ::fbthrift::GetTType for self::ComplexFieldNames {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::ComplexFieldNames {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::ComplexFieldNames
@@ -544,6 +562,12 @@ impl ::fbthrift::GetTType for self::CustomFieldNames {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::CustomFieldNames {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::CustomFieldNames
 where
     P: ::fbthrift::ProtocolWriter,
@@ -652,6 +676,12 @@ impl ::fbthrift::GetTType for self::ExceptionWithPrimitiveField {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::ExceptionWithPrimitiveField {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::ExceptionWithPrimitiveField
 where
     P: ::fbthrift::ProtocolWriter,
@@ -758,6 +788,12 @@ impl ::std::panic::UnwindSafe for self::ExceptionWithStructuredAnnotation {}
 
 impl ::fbthrift::GetTType for self::ExceptionWithStructuredAnnotation {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::ExceptionWithStructuredAnnotation {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::ExceptionWithStructuredAnnotation
@@ -871,6 +907,12 @@ impl ::std::panic::UnwindSafe for self::Banal {}
 
 impl ::fbthrift::GetTType for self::Banal {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::Banal {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::Banal

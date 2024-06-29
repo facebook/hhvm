@@ -496,6 +496,12 @@ impl ::fbthrift::GetTType for self::Internship {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::Internship {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Internship
 where
     P: ::fbthrift::ProtocolWriter,
@@ -637,6 +643,12 @@ impl ::fbthrift::GetTType for self::Range {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::Range {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Range
 where
     P: ::fbthrift::ProtocolWriter,
@@ -743,6 +755,12 @@ impl ::std::panic::UnwindSafe for self::struct1 {}
 
 impl ::fbthrift::GetTType for self::struct1 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::struct1 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::struct1
@@ -855,6 +873,12 @@ impl ::std::panic::UnwindSafe for self::struct2 {}
 
 impl ::fbthrift::GetTType for self::struct2 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::struct2 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::struct2
@@ -985,6 +1009,12 @@ impl ::fbthrift::GetTType for self::struct3 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::struct3 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::struct3
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1104,6 +1134,12 @@ impl ::fbthrift::GetTType for self::struct4 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::struct4 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::struct4
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1203,6 +1239,12 @@ impl ::std::default::Default for union1 {
 
 impl ::fbthrift::GetTType for union1 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::union1 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for union1
@@ -1314,6 +1356,12 @@ impl ::std::default::Default for union2 {
 
 impl ::fbthrift::GetTType for union2 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::union2 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for union2

@@ -50,6 +50,12 @@ impl ::fbthrift::GetTType for self::Empty {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::Empty {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Empty
 where
     P: ::fbthrift::ProtocolWriter,
@@ -118,6 +124,12 @@ impl ::std::default::Default for Nada {
 
 impl ::fbthrift::GetTType for Nada {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::Nada {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for Nada

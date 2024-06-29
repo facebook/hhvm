@@ -341,6 +341,12 @@ impl ::fbthrift::GetUri for self::MyStruct {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -414,6 +420,12 @@ impl ::fbthrift::GetTType for MyUnion {
 impl ::fbthrift::GetUri for self::MyUnion {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/terse_write/MyUnion"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyUnion {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
     }
 }
 
@@ -708,6 +720,12 @@ impl ::fbthrift::GetUri for self::MyStructWithCustomDefault {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyStructWithCustomDefault {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyStructWithCustomDefault
 where
     P: ::fbthrift::ProtocolWriter,
@@ -836,6 +854,12 @@ impl ::fbthrift::GetTType for self::StructLevelTerseStruct {
 impl ::fbthrift::GetUri for self::StructLevelTerseStruct {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/terse_write/StructLevelTerseStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructLevelTerseStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -1132,6 +1156,12 @@ impl ::fbthrift::GetTType for self::FieldLevelTerseStruct {
 impl ::fbthrift::GetUri for self::FieldLevelTerseStruct {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/terse_write/FieldLevelTerseStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::FieldLevelTerseStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -1670,6 +1700,12 @@ impl ::fbthrift::GetUri for self::TerseStructWithCustomDefault {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::TerseStructWithCustomDefault {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::TerseStructWithCustomDefault
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1913,6 +1949,12 @@ impl ::fbthrift::GetUri for self::AdaptedFields {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::AdaptedFields {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::AdaptedFields
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2089,6 +2131,12 @@ impl ::fbthrift::GetUri for self::WrappedFields {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::WrappedFields {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::WrappedFields
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2208,6 +2256,12 @@ impl ::fbthrift::GetTType for self::TerseException {
 impl ::fbthrift::GetUri for self::TerseException {
     fn uri() -> &'static str {
         "facebook.com/thrift/test/terse_write/TerseException"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::TerseException {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 

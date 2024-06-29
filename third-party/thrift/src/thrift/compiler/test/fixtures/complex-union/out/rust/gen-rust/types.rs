@@ -90,6 +90,12 @@ impl ::fbthrift::GetTType for ComplexUnion {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::ComplexUnion {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for ComplexUnion
 where
     P: ::fbthrift::ProtocolWriter,
@@ -263,6 +269,12 @@ impl ::fbthrift::GetTType for ListUnion {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::ListUnion {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for ListUnion
 where
     P: ::fbthrift::ProtocolWriter,
@@ -372,6 +384,12 @@ impl ::std::default::Default for DataUnion {
 
 impl ::fbthrift::GetTType for DataUnion {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::DataUnion {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for DataUnion
@@ -507,6 +525,12 @@ impl ::fbthrift::GetTType for self::Val {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::Val {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Val
 where
     P: ::fbthrift::ProtocolWriter,
@@ -602,6 +626,12 @@ impl ::std::default::Default for ValUnion {
 
 impl ::fbthrift::GetTType for ValUnion {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::ValUnion {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for ValUnion
@@ -713,6 +743,12 @@ impl ::std::default::Default for VirtualComplexUnion {
 
 impl ::fbthrift::GetTType for VirtualComplexUnion {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::VirtualComplexUnion {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for VirtualComplexUnion
@@ -844,6 +880,12 @@ impl ::fbthrift::GetTType for self::NonCopyableStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::NonCopyableStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::NonCopyableStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -921,6 +963,12 @@ impl ::std::default::Default for NonCopyableUnion {
 
 impl ::fbthrift::GetTType for NonCopyableUnion {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::NonCopyableUnion {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for NonCopyableUnion

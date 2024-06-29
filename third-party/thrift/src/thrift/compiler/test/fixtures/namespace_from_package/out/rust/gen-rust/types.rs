@@ -56,6 +56,12 @@ impl ::fbthrift::GetUri for self::Foo {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::Foo {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Foo
 where
     P: ::fbthrift::ProtocolWriter,

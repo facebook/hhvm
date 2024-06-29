@@ -72,6 +72,12 @@ impl ::fbthrift::GetTType for self::Limits {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::Limits {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Limits
 where
     P: ::fbthrift::ProtocolWriter,

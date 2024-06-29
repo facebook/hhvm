@@ -986,6 +986,12 @@ impl ::fbthrift::GetUri for self::SomeStruct {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::SomeStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::SomeStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1119,6 +1125,12 @@ impl ::fbthrift::GetTType for self::MyStruct {
 impl ::fbthrift::GetUri for self::MyStruct {
     fn uri() -> &'static str {
         "test.dev/fixtures/enums/MyStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 

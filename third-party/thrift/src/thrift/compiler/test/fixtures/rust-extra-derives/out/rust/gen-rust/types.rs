@@ -48,6 +48,12 @@ impl ::fbthrift::GetTType for self::WithCustomDerives {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::WithCustomDerives {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::WithCustomDerives
 where
     P: ::fbthrift::ProtocolWriter,

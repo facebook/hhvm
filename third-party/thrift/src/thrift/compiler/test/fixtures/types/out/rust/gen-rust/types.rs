@@ -849,6 +849,12 @@ impl ::fbthrift::GetUri for self::empty_struct {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::empty_struct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::empty_struct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -940,6 +946,12 @@ impl ::fbthrift::GetTType for self::decorated_struct {
 impl ::fbthrift::GetUri for self::decorated_struct {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/decorated_struct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::decorated_struct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -1057,6 +1069,12 @@ impl ::fbthrift::GetTType for self::ContainerStruct {
 impl ::fbthrift::GetUri for self::ContainerStruct {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/ContainerStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::ContainerStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -1281,6 +1299,12 @@ impl ::fbthrift::GetUri for self::CppTypeStruct {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::CppTypeStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::CppTypeStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1395,6 +1419,12 @@ impl ::fbthrift::GetUri for self::VirtualStruct {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::VirtualStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::VirtualStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1497,6 +1527,12 @@ impl ::fbthrift::GetTType for self::MyStructWithForwardRefEnum {
 impl ::fbthrift::GetUri for self::MyStructWithForwardRefEnum {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/MyStructWithForwardRefEnum"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyStructWithForwardRefEnum {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -1611,6 +1647,12 @@ impl ::fbthrift::GetTType for self::TrivialNumeric {
 impl ::fbthrift::GetUri for self::TrivialNumeric {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/TrivialNumeric"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::TrivialNumeric {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -1732,6 +1774,12 @@ impl ::fbthrift::GetUri for self::TrivialNestedWithDefault {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::TrivialNestedWithDefault {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::TrivialNestedWithDefault
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1847,6 +1895,12 @@ impl ::fbthrift::GetTType for self::ComplexString {
 impl ::fbthrift::GetUri for self::ComplexString {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/ComplexString"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::ComplexString {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -1969,6 +2023,12 @@ impl ::fbthrift::GetTType for self::ComplexNestedWithDefault {
 impl ::fbthrift::GetUri for self::ComplexNestedWithDefault {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/ComplexNestedWithDefault"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::ComplexNestedWithDefault {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -2097,6 +2157,12 @@ impl ::fbthrift::GetTType for self::MinPadding {
 impl ::fbthrift::GetUri for self::MinPadding {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/MinPadding"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MinPadding {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -2253,6 +2319,12 @@ impl ::fbthrift::GetTType for self::MinPaddingWithCustomType {
 impl ::fbthrift::GetUri for self::MinPaddingWithCustomType {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/MinPaddingWithCustomType"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MinPaddingWithCustomType {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -2450,6 +2522,12 @@ impl ::fbthrift::GetUri for self::MyStruct {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2578,6 +2656,12 @@ impl ::fbthrift::GetUri for self::MyDataItem {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyDataItem {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyDataItem
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2669,6 +2753,12 @@ impl ::fbthrift::GetTType for self::Renaming {
 impl ::fbthrift::GetUri for self::Renaming {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/Renaming"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::Renaming {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -2774,6 +2864,12 @@ impl ::fbthrift::GetTType for self::AnnotatedTypes {
 impl ::fbthrift::GetUri for self::AnnotatedTypes {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/AnnotatedTypes"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::AnnotatedTypes {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -2888,6 +2984,12 @@ impl ::fbthrift::GetTType for self::ForwardUsageRoot {
 impl ::fbthrift::GetUri for self::ForwardUsageRoot {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/ForwardUsageRoot"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::ForwardUsageRoot {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -3017,6 +3119,12 @@ impl ::fbthrift::GetUri for self::ForwardUsageStruct {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::ForwardUsageStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::ForwardUsageStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -3129,6 +3237,12 @@ impl ::fbthrift::GetTType for self::ForwardUsageByRef {
 impl ::fbthrift::GetUri for self::ForwardUsageByRef {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/ForwardUsageByRef"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::ForwardUsageByRef {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -3247,6 +3361,12 @@ impl ::fbthrift::GetUri for self::IncompleteMap {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::IncompleteMap {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::IncompleteMap
 where
     P: ::fbthrift::ProtocolWriter,
@@ -3350,6 +3470,12 @@ impl ::fbthrift::GetUri for self::IncompleteMapDep {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::IncompleteMapDep {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::IncompleteMapDep
 where
     P: ::fbthrift::ProtocolWriter,
@@ -3441,6 +3567,12 @@ impl ::fbthrift::GetTType for self::CompleteMap {
 impl ::fbthrift::GetUri for self::CompleteMap {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/CompleteMap"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::CompleteMap {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -3558,6 +3690,12 @@ impl ::fbthrift::GetUri for self::CompleteMapDep {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::CompleteMapDep {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::CompleteMapDep
 where
     P: ::fbthrift::ProtocolWriter,
@@ -3649,6 +3787,12 @@ impl ::fbthrift::GetTType for self::IncompleteList {
 impl ::fbthrift::GetUri for self::IncompleteList {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/IncompleteList"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::IncompleteList {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -3766,6 +3910,12 @@ impl ::fbthrift::GetUri for self::IncompleteListDep {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::IncompleteListDep {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::IncompleteListDep
 where
     P: ::fbthrift::ProtocolWriter,
@@ -3857,6 +4007,12 @@ impl ::fbthrift::GetTType for self::CompleteList {
 impl ::fbthrift::GetUri for self::CompleteList {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/CompleteList"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::CompleteList {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -3974,6 +4130,12 @@ impl ::fbthrift::GetUri for self::CompleteListDep {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::CompleteListDep {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::CompleteListDep
 where
     P: ::fbthrift::ProtocolWriter,
@@ -4065,6 +4227,12 @@ impl ::fbthrift::GetTType for self::AdaptedList {
 impl ::fbthrift::GetUri for self::AdaptedList {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/AdaptedList"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::AdaptedList {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -4170,6 +4338,12 @@ impl ::fbthrift::GetTType for self::AdaptedListDep {
 impl ::fbthrift::GetUri for self::AdaptedListDep {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/AdaptedListDep"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::AdaptedListDep {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -4294,6 +4468,12 @@ impl ::fbthrift::GetUri for self::DependentAdaptedList {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::DependentAdaptedList {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::DependentAdaptedList
 where
     P: ::fbthrift::ProtocolWriter,
@@ -4396,6 +4576,12 @@ impl ::fbthrift::GetTType for self::DependentAdaptedListDep {
 impl ::fbthrift::GetUri for self::DependentAdaptedListDep {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/DependentAdaptedListDep"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::DependentAdaptedListDep {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -4540,6 +4726,12 @@ impl ::fbthrift::GetTType for self::AllocatorAware {
 impl ::fbthrift::GetUri for self::AllocatorAware {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/AllocatorAware"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::AllocatorAware {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 
@@ -4722,6 +4914,12 @@ impl ::fbthrift::GetUri for self::AllocatorAware2 {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::AllocatorAware2 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::AllocatorAware2
 where
     P: ::fbthrift::ProtocolWriter,
@@ -4849,6 +5047,12 @@ impl ::fbthrift::GetUri for self::TypedefStruct {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::TypedefStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::TypedefStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -4967,6 +5171,12 @@ impl ::fbthrift::GetTType for self::StructWithDoubleUnderscores {
 impl ::fbthrift::GetUri for self::StructWithDoubleUnderscores {
     fn uri() -> &'static str {
         "apache.org/thrift/fixtures/types/StructWithDoubleUnderscores"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructWithDoubleUnderscores {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
 }
 

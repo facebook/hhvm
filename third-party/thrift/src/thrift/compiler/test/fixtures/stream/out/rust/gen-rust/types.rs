@@ -118,6 +118,12 @@ impl ::fbthrift::GetTType for self::FooStreamEx {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::FooStreamEx {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::FooStreamEx
 where
     P: ::fbthrift::ProtocolWriter,
@@ -204,6 +210,12 @@ impl ::fbthrift::GetTType for self::FooEx {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::FooEx {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::FooEx
 where
     P: ::fbthrift::ProtocolWriter,
@@ -288,6 +300,12 @@ impl ::std::panic::UnwindSafe for self::FooEx2 {}
 
 impl ::fbthrift::GetTType for self::FooEx2 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::FooEx2 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::FooEx2

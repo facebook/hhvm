@@ -63,6 +63,12 @@ impl ::fbthrift::GetTType for self::NoSerde {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::NoSerde {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::NoSerde
 where
     P: ::fbthrift::ProtocolWriter,
@@ -158,6 +164,12 @@ impl ::std::panic::UnwindSafe for self::Serde {}
 
 impl ::fbthrift::GetTType for self::Serde {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::Serde {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::Serde

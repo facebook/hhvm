@@ -85,6 +85,12 @@ impl ::fbthrift::GetTType for self::Fields {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::Fields {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Fields
 where
     P: ::fbthrift::ProtocolWriter,
@@ -180,6 +186,12 @@ impl ::std::panic::UnwindSafe for self::FieldsInjectedToEmptyStruct {}
 
 impl ::fbthrift::GetTType for self::FieldsInjectedToEmptyStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::FieldsInjectedToEmptyStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::FieldsInjectedToEmptyStruct
@@ -289,6 +301,12 @@ impl ::std::panic::UnwindSafe for self::FieldsInjectedToStruct {}
 
 impl ::fbthrift::GetTType for self::FieldsInjectedToStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::FieldsInjectedToStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::FieldsInjectedToStruct
@@ -411,6 +429,12 @@ impl ::std::panic::UnwindSafe for self::FieldsInjectedWithIncludedStruct {}
 
 impl ::fbthrift::GetTType for self::FieldsInjectedWithIncludedStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::FieldsInjectedWithIncludedStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::FieldsInjectedWithIncludedStruct

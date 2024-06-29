@@ -211,6 +211,12 @@ impl ::fbthrift::GetTType for self::Color {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetTypeNameType for self::Color {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Color
 where
     P: ::fbthrift::ProtocolWriter,
@@ -341,6 +347,12 @@ impl ::std::panic::UnwindSafe for self::Vehicle {}
 
 impl ::fbthrift::GetTType for self::Vehicle {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::Vehicle {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::Vehicle
@@ -500,6 +512,12 @@ impl ::std::panic::UnwindSafe for self::Person {}
 
 impl ::fbthrift::GetTType for self::Person {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::Person {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::Person

@@ -401,6 +401,12 @@ impl ::fbthrift::GetUri for self::MyStruct {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -600,6 +606,12 @@ impl ::fbthrift::GetUri for self::Containers {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::Containers {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Containers
 where
     P: ::fbthrift::ProtocolWriter,
@@ -719,6 +731,12 @@ impl ::fbthrift::GetUri for self::MyDataItem {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyDataItem {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyDataItem
 where
     P: ::fbthrift::ProtocolWriter,
@@ -792,6 +810,12 @@ impl ::fbthrift::GetTType for MyUnion {
 impl ::fbthrift::GetUri for self::MyUnion {
     fn uri() -> &'static str {
         "test.dev/fixtures/basic/MyUnion"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyUnion {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
     }
 }
 
@@ -972,6 +996,12 @@ impl ::fbthrift::GetUri for self::MyException {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::MyException {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyException
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1102,6 +1132,12 @@ impl ::fbthrift::GetUri for self::ReservedKeyword {
     }
 }
 
+impl ::fbthrift::GetTypeNameType for self::ReservedKeyword {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::ReservedKeyword
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1214,6 +1250,12 @@ impl ::fbthrift::GetTType for UnionToBeRenamed {
 impl ::fbthrift::GetUri for self::UnionToBeRenamed {
     fn uri() -> &'static str {
         "test.dev/fixtures/basic/UnionToBeRenamed"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::UnionToBeRenamed {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
     }
 }
 

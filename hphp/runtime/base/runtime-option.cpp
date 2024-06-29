@@ -713,13 +713,6 @@ bool RuntimeOption::DisableSmallAllocator = false;
 std::map<std::string, std::string> RuntimeOption::ServerVariables;
 std::map<std::string, std::string> RuntimeOption::EnvVariables;
 
-int64_t RuntimeOption::HeapSizeMB = 4096; // 4gb
-int64_t RuntimeOption::HeapResetCountBase = 1;
-int64_t RuntimeOption::HeapResetCountMultiple = 2;
-int64_t RuntimeOption::HeapLowWaterMark = 16;
-int64_t RuntimeOption::HeapHighWaterMark = 1024;
-
-
 std::string RuntimeOption::WatchmanRootSocket;
 std::string RuntimeOption::WatchmanDefaultSocket;
 
@@ -1513,17 +1506,6 @@ void RuntimeOption::Load(
                  0);
     Config::Bind(SerializationSizeLimit, ini, config,
                  "ResourceLimit.SerializationSizeLimit", StringData::MaxSize);
-    Config::Bind(HeapSizeMB, ini, config, "ResourceLimit.HeapSizeMB",
-                 HeapSizeMB);
-    Config::Bind(HeapResetCountBase, ini, config,
-                 "ResourceLimit.HeapResetCountBase", HeapResetCountBase);
-    Config::Bind(HeapResetCountMultiple, ini, config,
-                 "ResourceLimit.HeapResetCountMultiple",
-                 HeapResetCountMultiple);
-    Config::Bind(HeapLowWaterMark , ini, config,
-                 "ResourceLimit.HeapLowWaterMark", HeapLowWaterMark);
-    Config::Bind(HeapHighWaterMark , ini, config,
-                 "ResourceLimit.HeapHighWaterMark",HeapHighWaterMark);
   }
   {
     // watchman

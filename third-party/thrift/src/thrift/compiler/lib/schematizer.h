@@ -123,17 +123,6 @@ class schematizer {
 // TODO: allow increasing type fidelity.
 std::unique_ptr<t_const_value> wrap_with_protocol_value(
     const t_const_value& value, t_type_ref ttype);
-
-// Tag for obtaining a compact-encoded schema for the root program via pluggable
-// function.
-struct GetSchemaTag {
-  static std::string defaultImpl(
-      schematizer::options& /* schema_opts */,
-      const source_manager& /* source_mgr */,
-      const t_program& /* root_program */) {
-    return {};
-  }
-};
 } // namespace compiler
 } // namespace thrift
 } // namespace apache

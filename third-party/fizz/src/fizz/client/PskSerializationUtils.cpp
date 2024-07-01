@@ -28,6 +28,23 @@ void tryWriteCert(const fizz::Cert* cert, io::Appender& appender) {
 
 namespace client {
 
+/**
+ * Returns a system_clock::time_point that corresponds to a `value` expressed
+ * as a duration of `Duration`, possibly clamping it such that the `value`
+ * does not overflow the system_clock's time_point representation.
+ */
+template <class Duration>
+std::chrono::system_clock::time_point clampTimePoint(uint64_t value) {
+  static_assert(std::ratio_less_equal_v<
+                std::chrono::system_clock::period,
+                typename Duration::period>);
+  constexpr uint64_t kMaxValue = std::chrono::duration_cast<Duration>(
+                                     std::chrono::system_clock::duration::max())
+                                     .count();
+  return std::chrono::system_clock::time_point(
+      Duration(std::min(value, kMaxValue)));
+}
+
 std::string serializePsk(const fizz::client::CachedPsk& psk) {
   uint64_t ticketIssueTime =
       std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -106,13 +123,13 @@ fizz::client::CachedPsk deserializePsk(
 
   uint64_t ticketIssueTime;
   fizz::detail::read(ticketIssueTime, cursor);
-  psk.ticketIssueTime = std::chrono::time_point<std::chrono::system_clock>(
-      std::chrono::milliseconds(ticketIssueTime));
+  psk.ticketIssueTime =
+      clampTimePoint<std::chrono::milliseconds>(ticketIssueTime);
 
   uint64_t ticketExpirationTime;
   fizz::detail::read(ticketExpirationTime, cursor);
-  psk.ticketExpirationTime = std::chrono::time_point<std::chrono::system_clock>(
-      std::chrono::seconds(ticketExpirationTime));
+  psk.ticketExpirationTime =
+      clampTimePoint<std::chrono::seconds>(ticketExpirationTime);
 
   CertificateEntry entry;
   fizz::detail::readBuf<uint32_t>(entry.cert_data, cursor);
@@ -132,8 +149,7 @@ fizz::client::CachedPsk deserializePsk(
     uint64_t ticketHandshakeTime;
     fizz::detail::read(ticketHandshakeTime, cursor);
     psk.ticketHandshakeTime =
-        std::chrono::time_point<std::chrono::system_clock>(
-            std::chrono::milliseconds(ticketHandshakeTime));
+        clampTimePoint<std::chrono::milliseconds>(ticketHandshakeTime);
   } else {
     // Just assign it now();
     psk.ticketHandshakeTime = std::chrono::system_clock::now();

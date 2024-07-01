@@ -62,6 +62,19 @@ TEST_F(PskSerializationTest, TestSerialization) {
   EXPECT_EQ(ticketIssueTimeDiff.count(), 0);
 }
 
+TEST_F(PskSerializationTest, TestTimestampOverflow) {
+  // The timestamps for all of the time points are
+  // numeric_limits<int64_t>::max()
+  constexpr folly::StringPiece kValidPskWithBadTimestamps =
+      "0007536f6d6550736b0010726573756d7074696f6e7365637265740304130101001d026832111111117fffffffffffffff7fffffffffffffff0000000000000000000000017fffffffffffffff";
+  auto psk = fizz::client::deserializePsk(
+      folly::unhexlify(kValidPskWithBadTimestamps), *factory_);
+
+  EXPECT_GT(psk.ticketIssueTime.time_since_epoch().count(), 0);
+  EXPECT_GT(psk.ticketExpirationTime.time_since_epoch().count(), 0);
+  EXPECT_GT(psk.ticketHandshakeTime.time_since_epoch().count(), 0);
+}
+
 TEST_F(PskSerializationTest, TestInvalidSerializationThrows) {
   auto psk = getCachedPsk("SomePsk");
   std::string serializedPsk = fizz::client::serializePsk(psk);

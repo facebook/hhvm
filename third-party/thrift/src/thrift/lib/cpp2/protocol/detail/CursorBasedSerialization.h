@@ -345,5 +345,45 @@ void decodeTo(ProtocolReader& protocol, T& t) {
   }
 }
 
+template <typename T, typename = void>
+struct HasValueType {
+  constexpr static bool value = false;
+};
+template <typename T>
+struct HasValueType<T, std::void_t<typename T::value_type>> {
+  constexpr static bool value = true;
+};
+
+template <typename Tag>
+struct IsSupportedCppType {
+  constexpr static bool value = true;
+};
+template <typename T, typename Tag>
+struct IsSupportedCppType<type::cpp_type<T, Tag>> {
+  constexpr static bool value = [] {
+    if constexpr (type::is_a_v<Tag, type::integral_c>) {
+      return std::is_integral_v<T>;
+    } else if constexpr (type::is_a_v<Tag, type::string_c>) {
+      return std::is_same_v<T, folly::IOBuf> ||
+          std::is_same_v<T, std::unique_ptr<folly::IOBuf>> ||
+          std::is_same_v<T, folly::fbstring> || std::is_same_v<T, std::string>;
+    } else if constexpr (type::is_a_v<Tag, type::container_c>) {
+      return HasValueType<T>::value;
+    }
+    return false;
+  }();
+};
+
+template <typename T>
+constexpr bool validateCppTypes() {
+  op::for_each_ordinal<T>([](auto ord) {
+    using Ord = decltype(ord);
+    static_assert(
+        IsSupportedCppType<op::get_type_tag<T, Ord>>::value,
+        "Unsupported cpp.Type. Consider using cpp.Adapter instead.");
+  });
+  return true;
+}
+
 } // namespace detail
 } // namespace apache::thrift

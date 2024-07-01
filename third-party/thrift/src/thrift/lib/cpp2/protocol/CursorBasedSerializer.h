@@ -200,6 +200,7 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
   static_assert(
       type::is_a_v<Tag, type::structured_c>, "T must be a thrift class");
   using T = type::native_type<Tag>;
+  static_assert(detail::validateCppTypes<T>());
 
   template <typename Ident>
   using type_tag = op::get_type_tag<T, Ident>;
@@ -768,6 +769,7 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
   static_assert(
       type::is_a_v<Tag, type::structured_c>, "T must be a thrift class");
   using T = type::native_type<Tag>;
+  static_assert(detail::validateCppTypes<T>());
 
   template <typename Ident>
   using type_tag = op::get_type_tag<T, Ident>;

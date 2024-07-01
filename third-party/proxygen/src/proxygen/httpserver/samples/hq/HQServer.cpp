@@ -143,6 +143,8 @@ class QuicAcceptCB : public quic::QuicSocket::ConnectionSetupCallback {
       session->setEgressSettings(
           {{proxygen::SettingsId::ENABLE_CONNECT_PROTOCOL, 1},
            {proxygen::SettingsId::_HQ_DATAGRAM_DRAFT_8, 1},
+           {proxygen::SettingsId::_HQ_DATAGRAM, 1},
+           {proxygen::SettingsId::_HQ_DATAGRAM_RFC, 1},
            {proxygen::SettingsId::ENABLE_WEBTRANSPORT, 1}});
 
       session->startNow();

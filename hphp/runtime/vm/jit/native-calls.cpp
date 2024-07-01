@@ -370,8 +370,6 @@ static CallMap s_callMap {
                          getSPropOrRaise, DSSA, SSync,
                            {{extra(&ReadonlyData::op)}, {SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
 
-    {ProfileProp,        &PropertyProfile::incCount, DNone, SNone,
-                           {{SSA, 0}, {SSA, 1}}},
 
     {IncCallCounter,     FuncOrder::incCount, DNone, SNone, {{extra(&FuncData::func)}, {SSA, 0}}},
 

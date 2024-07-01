@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/property-profile.h"
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
@@ -266,7 +267,16 @@ void cgIssetProp(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
-IMPL_OPCODE_CALL(ProfileProp);
+void cgProfileProp(IRLS& env, const IRInstruction* inst) {
+  auto const cls = inst->src(0)->strVal();
+  auto const prop = inst->src(1)->strVal();
+  auto const counterPtr = PropertyProfile::getCounterAddr(cls, prop);
+  auto& v = vmain(env);
+  auto const addr = v.makeReg();
+  v << copy{v.cns(counterPtr), addr};
+  v << inclm{addr[0], v.makeReg()};
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

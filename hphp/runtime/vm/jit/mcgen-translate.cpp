@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/runtime/vm/property-profile.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
@@ -503,6 +504,7 @@ void retranslateAll(bool skipSerialize) {
     // discard ProfData in this mode.
     if (!RuntimeOption::EvalEnableReusableTC) {
       discardProfData();
+      PropertyProfile::clear();
     }
   }
 

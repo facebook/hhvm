@@ -612,7 +612,7 @@ To string conversions:
   Checks if the two arguments represent the same underlying ArrayData. That is,
   that they point at the same underlying storage.
 
-| ProfileInstanceCheck, ND, C(StaticStr), NF
+| ProfileInstanceCheck, ND, S(Cls), NF
 
   Profile that S0 has been used as the RHS of an instance check.
 

@@ -1819,6 +1819,9 @@ void Class::setInstanceBitsImpl() {
   // are initialized yet.
   if (m_instanceBits.test(0)) return;
 
+  // Make sure profiling translations stop changing the profiling counter.
+  m_instanceCheckCount.store(1, std::memory_order_release);
+
   InstanceBits::BitSet bits;
   bits.set(0);
   auto setBits = [&](Class* c) {

@@ -17,7 +17,6 @@
 
 #include <algorithm>
 #include <atomic>
-#include <tbb/concurrent_hash_map.h>
 #include <vector>
 
 #include <folly/MapUtil.h>
@@ -40,16 +39,10 @@ using folly::SharedMutex;
 
 namespace {
 
-using InstanceCounts = tbb::concurrent_hash_map<const StringData*,
-                                                uint64_t,
-                                                StringDataHashTCompare>;
 using InstanceBitsMap = hphp_hash_map<const StringData*,
                                       unsigned,
                                       string_data_hash,
                                       string_data_tsame>;
-
-InstanceCounts s_instanceCounts;
-folly::SharedMutex s_instanceCountsLock;
 InstanceBitsMap s_instanceBitsMap;
 
 Mutex s_initLock(RankInstanceBitsInit);
@@ -71,32 +64,25 @@ std::atomic<bool> g_profileDoneFlag{false};
 
 //////////////////////////////////////////////////////////////////////
 
-void profile(const StringData* name) {
-  if (g_profileDoneFlag.load(std::memory_order_acquire) ||
-      !RuntimeOption::RepoAuthoritative) {
+void profile(const Class* c) {
+  assertx(c);
+  if (!RuntimeOption::RepoAuthoritative ||
+      g_profileDoneFlag.load(std::memory_order_acquire)) {
     return;
   }
 
-  assertx(name->isStatic());
-  unsigned inc = 1;
-  Class* c = Class::lookup(name);
-
   // Don't profile final classes since they can be checked more efficiently via
   // direct pointer comparison through ExtendsClass than via InstanceOfBitmask.
-  if (c && (c->attrs() & AttrNoOverride)) return;
+  if (c->attrs() & AttrNoOverride) return;
 
-  if (c && (c->attrs() & AttrInterface)) {
-    // Favor interfaces
-    inc = 250;
+  // The lowest bit needs to be zero, as the nonzero value is used as a flag to
+  // prevent further changes to the counter.
+  uint64_t inc = 2;
+  if (c->attrs() & AttrInterface) {
+    inc = 256;                          // Favor interfaces
   }
 
-  // The extra layer of locking is here so that InstanceBits::init can safely
-  // iterate over s_instanceCounts while building its map of names to bits.
-  std::shared_lock l(s_instanceCountsLock);
-  InstanceCounts::accessor acc;
-  if (!s_instanceCounts.insert(acc, InstanceCounts::value_type(name, inc))) {
-    acc->second += inc;
-  }
+  c->incInstanceCheckCount(inc);
 }
 
 template<typename F>
@@ -106,14 +92,7 @@ void initImpl(F&& func) {
   Lock l(s_initLock);
   if (g_initFlag.load(std::memory_order_acquire)) return;
 
-  // Stop profiling before attempting to acquire the instance-counts lock. The
-  // reason for having two flags is because ReadWriteLock can in certain
-  // implementations favor readers over writers. Thus if there's a steady stream
-  // of calls to profile(), we'll block indefinitely waiting to acquire the
-  // instance-counts lock. Since this function is called from JITing threads,
-  // this can eventually lead to starvation. So, set this flag to stop other
-  // threads from attempting to acquire the instance-counts lock, and avoid
-  // starvation.
+  // Stop profiling before reading the counters.
   g_profileDoneFlag.store(true, std::memory_order_release);
 
   if (!RuntimeOption::RepoAuthoritative) {
@@ -124,10 +103,10 @@ void initImpl(F&& func) {
 
   func();
 
-  // Finally, update m_instanceBits on every Class that currently exists. This
-  // must be done while holding a lock that blocks insertion of new Classes
-  // into their class lists, but in practice most Classes will already be
-  // created by now and this process is very fast.
+  // Update m_instanceBits on every Class that currently exists. This must be
+  // done while holding a lock that blocks insertion of new Classes into their
+  // class lists, but in practice most Classes will already be created by now
+  // and this process is very fast.
   std::unique_lock clsLocker(g_clsInitLock);
   NamedType::foreach_class([&](Class* cls) {
     cls->setInstanceBitsAndParents();
@@ -147,26 +126,15 @@ void initImpl(F&& func) {
 void init() {
   initImpl(
     [] {
-      // First, grab a write lock on s_instanceCounts and grab the
-      // current set of counts as quickly as possible to minimize
-      // blocking other threads still trying to profile instance
-      // checks.
-      using Count = std::pair<const StringData*, unsigned>;
+      using Count = std::pair<const Class*, uint64_t>;
       std::vector<Count> counts;
       uint64_t total = 0;
-      {
-        // If you think of the read-write lock as a shared-exclusive
-        // lock instead, the fact that we're grabbing a write lock to
-        // iterate over the table makes more sense: it's safe to
-        // concurrently modify a tbb::concurrent_hash_map, but
-        // iteration is not guaranteed to be safe with concurrent
-        // insertions.
-        std::unique_lock l(s_instanceCountsLock);
-        for (auto& pair : s_instanceCounts) {
-          counts.push_back(pair);
-          total += pair.second;
-        }
-      }
+      NamedType::foreach_class([&](Class* cls) {
+        auto count = cls->getInstanceCheckCount();
+        if (count == 0) return;         // most likely
+        counts.push_back({cls,  count});
+        total += count;
+      });
       std::sort(counts.begin(),
                 counts.end(),
                 [&](const Count& a, const Count& b) {
@@ -179,15 +147,12 @@ void init() {
       uint64_t accum = 0;
       for (auto& item : counts) {
         if (i >= kNumInstanceBits) break;
-        auto const cls = Class::lookupKnown(item.first, nullptr);
-        if (cls) {
-          assertx(cls->attrs() & AttrPersistent);
-          s_instanceBitsMap[item.first] = i;
-          accum += item.second;
-          ++i;
-        }
+        auto const cls = item.first;
+        assertx(cls->attrs() & AttrPersistent);
+        s_instanceBitsMap[cls->name()] = i;
+        accum += item.second;
+        ++i;
       }
-
       // Print out stats about what we ended up using
       if (Trace::moduleEnabledRelease(Trace::instancebits, 1)) {
         Trace::traceRelease("%s: %u classes, %" PRIu64 " (%.2f%%) of warmup"
@@ -203,10 +168,12 @@ void init() {
               break;
             }
             accum += pair.second;
-            Trace::traceRelease("%3u %5.2f%% %7u -- %6.2f%% %7" PRIu64 " %s\n",
-                                i++, 100.0 * pair.second / total, pair.second,
-                                100.0 * accum / total, accum,
-                                pair.first->data());
+            Trace::traceRelease(
+                "%3u %5.2f%% %7" PRIu64" -- %6.2f%% %7" PRIu64 " %s\n",
+                i++, 100.0 * pair.second / total, pair.second,
+                100.0 * accum / total, accum,
+                pair.first->name()->data()
+            );
           }
         }
       }

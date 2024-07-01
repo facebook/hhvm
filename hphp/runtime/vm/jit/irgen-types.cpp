@@ -97,7 +97,7 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
   auto const objClass     = gen(env, LdObjClass, src);
 
   if (env.context.kind == TransKind::Profile && !InstanceBits::initted()) {
-    gen(env, ProfileInstanceCheck, cns(env, className));
+    gen(env, ProfileInstanceCheck, cns(env, knownCls));
   } else if (env.context.kind == TransKind::Optimize ||
              InstanceBits::initted()) {
     InstanceBits::init();

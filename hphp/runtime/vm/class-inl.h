@@ -217,9 +217,9 @@ inline bool Class::classof(const Class* cls) const {
   assertx(bit == kNoInstanceBit || kProfileInstanceBit || bit > 0);
   if (bit > 0) {
     return m_instanceBits.test(bit);
-  } else if (bit == kProfileInstanceBit) {
-    InstanceBits::profile(cls->name());
   }
+
+  if (this == cls) return true;
 
   // If `cls' is an interface, we can simply check to see if cls is in
   // this->m_interfaces.  Otherwise, if `this' is not an interface, the
@@ -230,7 +230,6 @@ inline bool Class::classof(const Class* cls) const {
   // non-interfaces, while this->classVec is either empty, or contains
   // interfaces).
   if (UNLIKELY(isInterface(cls))) {
-    if (this == cls) return true;
     auto const slot = cls->preClass()->ifaceVtableSlot();
     if (slot != kInvalidSlot && isConcreteNormalClass(this)) {
       assertx(RO::RepoAuthoritative);
@@ -622,6 +621,26 @@ inline const Class::RequirementMap& Class::allRequirements() const {
 inline bool Class::checkInstanceBit(unsigned int bit) const {
   assertx(bit > 0);
   return m_instanceBits[bit];
+}
+
+inline void Class::incInstanceCheckCount(uint64_t inc) const {
+  if (inc & 1) ++inc;
+  uint64_t curr = m_instanceCheckCount.load(std::memory_order_acquire);
+  while (true) {
+    if (curr & 1) return;               // no longer used as a counter
+    auto updated = curr + inc;
+    if (m_instanceCheckCount.compare_exchange_weak(
+            curr, updated, std::memory_order_acq_rel)) {
+      return;
+    }
+  }
+}
+
+inline uint64_t Class::getInstanceCheckCount() const {
+  assertx(m_instanceBitsIndex.load() == kProfileInstanceBit);
+  auto res = m_instanceCheckCount.load(std::memory_order_acquire);
+  assertx((res & 1) == 0);
+  return res;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

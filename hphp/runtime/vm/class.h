@@ -1423,6 +1423,16 @@ public:
   bool checkInstanceBit(unsigned int bit) const;
 
   /*
+   * Increase the counter for instanceof checks against this class.
+   */
+  void incInstanceCheckCount(uint64_t inc) const;
+
+  /*
+   * Get the frequency of instanceof checks against this class.
+   */
+  uint64_t getInstanceCheckCount() const;
+
+  /*
    * Get the underlying enum base type if this is an enum.
    *
    * A return of std::nullopt represents the `mixed' type.
@@ -1882,13 +1892,20 @@ private:
    */
   uint8_t m_RTAttrs;
 
-  /*
-   * Bitmap of parent classes and implemented interfaces.
-   *
-   * Each bit corresponds to a commonly used class name, determined during the
-   * profiling warmup requests.
-   */
-  InstanceBits::BitSet m_instanceBits;
+  union {
+    /*
+     * Bitmap of parent classes and implemented interfaces.
+     *
+     * Each bit corresponds to a commonly used class name, determined during the
+     * profiling. This bitmap is only valid when the lowest bit is set to 1.
+     */
+    InstanceBits::BitSet m_instanceBits;
+    /*
+     * m_instanceCheckCount is only valid during profiling, when the lowest bit
+     * is set to 0.
+     */
+    mutable std::atomic_uint64_t m_instanceCheckCount{0};
+  };
 
   /*
    * Map from logical slot to physical memory index for object properties.

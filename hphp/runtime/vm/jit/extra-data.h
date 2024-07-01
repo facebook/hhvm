@@ -113,7 +113,7 @@ struct ClassData : IRExtraData {
   }
 
   std::string show() const {
-    return folly::to<std::string>(cls->name()->data());
+    return cls->name()->data();
   }
 
   bool equals(const ClassData& o) const {
@@ -517,6 +517,23 @@ struct IndexData : IRExtraData {
   }
 
   uint32_t index;
+};
+
+/*
+ * ClassId.
+ */
+struct ClassIdData : IRExtraData {
+  explicit ClassIdData(uint32_t id) : id(id) {}
+
+  std::string show() const { return fmt::format("{}", id.id()); }
+  size_t hash() const { return std::hash<uint32_t>()(id.id()); }
+  size_t stableHash() const { return std::hash<uint32_t>()(id.id()); }
+
+  bool equals(const ClassIdData& o) const {
+    return id == o.id;
+  }
+
+  ClassId id;
 };
 
 /*

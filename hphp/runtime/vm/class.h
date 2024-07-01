@@ -74,6 +74,24 @@ struct StringData;
 struct c_Awaitable;
 struct c_Collection;
 
+// Unique identifier for every Class*
+struct ClassId {
+  
+  using Id = uint32_t;
+  static constexpr Id Invalid = std::numeric_limits<uint32_t>::max();
+  explicit ClassId(Id id) : m_id(id) {}
+
+  bool isInvalid() const { return m_id == Invalid; }
+
+  bool operator==(const ClassId& id) const {
+    return m_id == id.m_id;
+  }
+  Id id() const { return m_id; }
+
+private:
+  Id m_id;
+};
+
 struct MemberLookupContext {
   MemberLookupContext(const Class*, const Func*);
   MemberLookupContext(const Class*, const StringData*);
@@ -620,6 +638,7 @@ public:
   const StringData* name() const;
   const PreClass* preClass() const;
   Class* parent() const;
+  const ClassId classId() const;
 
   /*
    * A hash for this class that will remain constant across process restarts.
@@ -690,7 +709,7 @@ public:
    */
   Optional<int64_t> dynConstructSampleRate() const;
 
-
+  void setNewClassId();
   /////////////////////////////////////////////////////////////////////////////
   // Magic methods.                                                     [const]
 
@@ -1367,6 +1386,10 @@ public:
     return offsetof(Class, m_extra);
   }
 
+  static constexpr size_t classIdOffset() {
+    return offsetof(Class, m_classId);
+  }
+
   /*
    * Get the offset into the extra structure of m_handles.
    * Used by the JIT.
@@ -2036,6 +2059,8 @@ private:
   // For asserts only.
   uint32_t m_magic;
 #endif
+
+  ClassId m_classId{ClassId::Invalid};
 
   /*
    * Vector of Class pointers that encodes the inheritance hierarchy, including

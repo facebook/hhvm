@@ -40,6 +40,10 @@ inline bool Class::validate() const {
   return true;
 }
 
+inline const ClassId Class::classId() const {
+  return m_classId;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Class::PropInitVec.
 

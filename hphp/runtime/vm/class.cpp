@@ -84,6 +84,14 @@ const StaticString s___Reified("__Reified");
 const StaticString s___ModuleLevelTrait("__ModuleLevelTrait");
 
 Mutex g_classesMutex;
+static std::atomic<ClassId::Id> s_nextClassId{1};
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Class::setNewClassId() {
+  assertx(m_classId.isInvalid());
+  m_classId = ClassId(s_nextClassId.fetch_add(1, std::memory_order_acq_rel));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class::PropInitVec.
@@ -257,8 +265,8 @@ unsigned loadUsedTraits(PreClass* preClass,
  */
 constexpr size_t sizeof_Class = Class::classVecOff();
 
-static constexpr size_t kClassSize = debug ? (use_lowptr ? 276 : 320)
-                                           : (use_lowptr ? 272 : 312);
+static constexpr size_t kClassSize = debug ? (use_lowptr ? 280 : 320)
+                                           : (use_lowptr ? 276 : 320);
 static_assert(CheckSize<sizeof_Class, kClassSize>(), "");
 
 /*
@@ -4828,6 +4836,7 @@ void setupClass(Class* newClass, NamedType* nameList) {
 
   newClass->setClassHandle(nameList->m_cachedClass);
   newClass->incAtomicCount();
+  newClass->setNewClassId();
 
   InstanceBits::ifInitElse(
     [&] { newClass->setInstanceBits();

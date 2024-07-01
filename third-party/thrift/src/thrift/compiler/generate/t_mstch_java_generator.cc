@@ -1172,6 +1172,10 @@ class mstch_java_const : public mstch_const {
             "java.swift.skip_enum_name_map");
       }
     }
+    if (const_->generated()) {
+      // T194272441 generated schema const is rendered incorrectly.
+      return true;
+    }
     return mstch::node();
   }
 };

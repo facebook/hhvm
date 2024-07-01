@@ -19,6 +19,7 @@
 #include <functional>
 #include <type_traits>
 
+#include <thrift/compiler/detail/pluggable_functions.h>
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/schematizer.h>
 #include <thrift/compiler/lib/uri.h>
@@ -401,6 +402,36 @@ void lower_type_annotations(
   }
 }
 
+void inject_schema_const(
+    diagnostic_context& ctx, mutator_context&, t_program& prog) {
+  schematizer::options opts;
+  opts.only_root_program_ = true;
+  opts.use_hash = true;
+  opts.include.reset(schematizer::included_data::DoubleWrites);
+  std::string serialized;
+  try {
+    serialized = detail::pluggable_functions().call<GetSchemaTag>(
+        opts, ctx.source_mgr(), prog);
+  } catch (const std::runtime_error&) {
+    // Standard library isn't loaded yet so can't generate schemas.
+    return;
+  }
+
+  if (serialized.empty()) {
+    return;
+  }
+
+  auto cnst = std::make_unique<t_const>(
+      &prog,
+      t_primitive_type::t_binary(),
+      "_fbthrift_schema",
+      std::make_unique<t_const_value>(std::move(serialized)));
+  cnst->set_uri("");
+  cnst->set_src_range(prog.src_range());
+  cnst->set_generated();
+  prog.add_const(std::move(cnst));
+}
+
 } // namespace
 
 ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
@@ -422,6 +453,11 @@ ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
     main.add_const_visitor(&match_const_type_with_value);
     main.add_field_visitor(&match_field_type_with_default_value);
     main.add_definition_visitor(&match_annotation_types_with_const_values);
+  }
+
+  {
+    auto& plugin = mutators[standard_mutator_stage::plugin];
+    plugin.add_program_visitor(&inject_schema_const);
   }
 
   add_patch_mutators(mutators);

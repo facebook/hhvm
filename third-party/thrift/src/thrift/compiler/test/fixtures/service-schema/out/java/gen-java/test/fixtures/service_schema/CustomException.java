@@ -31,27 +31,37 @@ public final class CustomException extends org.apache.thrift.TBaseException impl
     private final String name;
     public static final int _NAME = 1;
     private static final TField NAME_FIELD_DESC = new TField("name", TType.STRING, (short)1);
+    private final test.fixtures.service_schema.Result result;
+    public static final int _RESULT = 2;
+    private static final TField RESULT_FIELD_DESC = new TField("result", TType.I32, (short)2);
 
     static {
       NAMES_TO_IDS.put("name", 1);
       THRIFT_NAMES_TO_IDS.put("name", 1);
       FIELD_METADATA.put(1, NAME_FIELD_DESC);
+      NAMES_TO_IDS.put("result", 2);
+      THRIFT_NAMES_TO_IDS.put("result", 2);
+      FIELD_METADATA.put(2, RESULT_FIELD_DESC);
     }
 
     @ThriftConstructor
     public CustomException(
-        @com.facebook.swift.codec.ThriftField(value=1, name="name", requiredness=Requiredness.NONE) final String name
+        @com.facebook.swift.codec.ThriftField(value=1, name="name", requiredness=Requiredness.NONE) final String name,
+        @com.facebook.swift.codec.ThriftField(value=2, name="result", requiredness=Requiredness.NONE) final test.fixtures.service_schema.Result result
     ) {
         this.name = name;
+        this.result = result;
     }
     
     @ThriftConstructor
     protected CustomException() {
       this.name = null;
+      this.result = test.fixtures.service_schema.Result.SO_SO;
     }
     
     public static class Builder {
         private String name = null;
+        private test.fixtures.service_schema.Result result = test.fixtures.service_schema.Result.SO_SO;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="name", requiredness=Requiredness.NONE)
         public Builder setName(String name) {
@@ -61,15 +71,25 @@ public final class CustomException extends org.apache.thrift.TBaseException impl
     
         public String getName() { return name; }
     
+            @com.facebook.swift.codec.ThriftField(value=2, name="result", requiredness=Requiredness.NONE)
+        public Builder setResult(test.fixtures.service_schema.Result result) {
+            this.result = result;
+            return this;
+        }
+    
+        public test.fixtures.service_schema.Result getResult() { return result; }
+    
         public Builder() { }
         public Builder(CustomException other) {
             this.name = other.name;
+            this.result = other.result;
         }
     
         @ThriftConstructor
         public CustomException build() {
             CustomException result = new CustomException (
-                this.name
+                this.name,
+                this.result
             );
             return result;
         }
@@ -79,6 +99,10 @@ public final class CustomException extends org.apache.thrift.TBaseException impl
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="name", requiredness=Requiredness.NONE)
     public String getName() { return name; }
+        
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=2, name="result", requiredness=Requiredness.NONE)
+    public test.fixtures.service_schema.Result getResult() { return result; }
     
     
     public static com.facebook.thrift.payload.Reader<CustomException> asReader() {
@@ -101,6 +125,14 @@ public final class CustomException extends org.apache.thrift.TBaseException impl
             TProtocolUtil.skip(oprot, __field.type);
           }
           break;
+        case _RESULT:
+          if (__field.type == TType.I32) {
+            test.fixtures.service_schema.Result result = test.fixtures.service_schema.Result.fromInteger(oprot.readI32());
+            builder.setResult(result);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(oprot, __field.type);
           break;
@@ -118,6 +150,9 @@ public final class CustomException extends org.apache.thrift.TBaseException impl
         oprot.writeString(this.name);
         oprot.writeFieldEnd();
       }
+      oprot.writeFieldBegin(RESULT_FIELD_DESC);
+      oprot.writeI32(this.result == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.result));
+      oprot.writeFieldEnd();
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }

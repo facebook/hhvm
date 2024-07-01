@@ -61,7 +61,8 @@ std::string_view CustomException::__fbthrift_get_class_name() {
 
 CustomException::CustomException(const CustomException&) = default;
 CustomException& CustomException::operator=(const CustomException&) = default;
-CustomException::CustomException() {
+CustomException::CustomException() :
+      __fbthrift_field_result( ::cpp2::Result::SO_SO) {
 }
 
 
@@ -69,25 +70,30 @@ CustomException::~CustomException() {}
 
 CustomException::CustomException([[maybe_unused]] CustomException&& other) noexcept :
     __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
+    __fbthrift_field_result(std::move(other.__fbthrift_field_result)),
     __isset(other.__isset) {
 }
 
 CustomException& CustomException::operator=([[maybe_unused]] CustomException&& other) noexcept {
     this->__fbthrift_field_name = std::move(other.__fbthrift_field_name);
+    this->__fbthrift_field_result = std::move(other.__fbthrift_field_result);
     __isset = other.__isset;
     return *this;
 }
 
 
-CustomException::CustomException(apache::thrift::FragileConstructor, ::std::string name__arg) :
-    __fbthrift_field_name(std::move(name__arg)) { 
+CustomException::CustomException(apache::thrift::FragileConstructor, ::std::string name__arg, ::cpp2::Result result__arg) :
+    __fbthrift_field_name(std::move(name__arg)),
+    __fbthrift_field_result(std::move(result__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
 }
 
 
 void CustomException::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_result = ::cpp2::Result();
   __isset = {};
 }
 
@@ -110,6 +116,7 @@ bool CustomException::operator<([[maybe_unused]] const CustomException& rhs) con
 void swap([[maybe_unused]] CustomException& a, [[maybe_unused]] CustomException& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_name, b.__fbthrift_field_name);
+  swap(a.__fbthrift_field_result, b.__fbthrift_field_result);
   swap(a.__isset, b.__isset);
 }
 

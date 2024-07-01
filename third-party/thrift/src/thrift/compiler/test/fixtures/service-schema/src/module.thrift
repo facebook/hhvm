@@ -27,6 +27,7 @@ enum Result {
 
 exception CustomException {
   1: string name;
+  2: Result result = Result.SO_SO;
 }
 
 @thrift.GenerateRuntimeSchema

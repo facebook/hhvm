@@ -20,6 +20,8 @@ struct VisitByFieldId<::cpp2::CustomException> {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).name_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).result_ref());
     default:
       throwInvalidThriftId(fieldId, "::cpp2::CustomException");
     }

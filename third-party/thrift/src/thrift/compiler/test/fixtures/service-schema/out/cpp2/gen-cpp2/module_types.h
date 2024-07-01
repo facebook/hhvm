@@ -15,11 +15,16 @@ namespace apache {
 namespace thrift {
 namespace ident {
 struct name;
+struct result;
 } // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_name
 #define APACHE_THRIFT_ACCESSOR_name
 APACHE_THRIFT_DEFINE_ACCESSOR(name);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_result
+#define APACHE_THRIFT_ACCESSOR_result
+APACHE_THRIFT_DEFINE_ACCESSOR(result);
 #endif
 } // namespace detail
 } // namespace thrift
@@ -103,15 +108,17 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
-    ::apache::thrift::ident::name
+    ::apache::thrift::ident::name,
+    ::apache::thrift::ident::result
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
   using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::enum_t<::cpp2::Result>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -153,7 +160,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  CustomException(apache::thrift::FragileConstructor, ::std::string name__arg);
+  CustomException(apache::thrift::FragileConstructor, ::std::string name__arg, ::cpp2::Result result__arg);
 
   CustomException(CustomException&&) noexcept;
 
@@ -168,7 +175,9 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
  private:
   ::std::string __fbthrift_field_name;
  private:
-  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  ::cpp2::Result __fbthrift_field_result;
+ private:
+  apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -215,6 +224,46 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
     return {static_cast<T&&>(this->__fbthrift_field_name), __isset.at(0), __isset.bit(0)};
   }
 
+  template <typename..., typename T = ::cpp2::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
+    return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::cpp2::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_result), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::cpp2::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> result_ref() & {
+    return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::cpp2::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_result), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::cpp2::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> result() const& {
+    return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::cpp2::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_result), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::cpp2::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> result() & {
+    return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::cpp2::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> result() && {
+    return {static_cast<T&&>(this->__fbthrift_field_result), __isset.at(1), __isset.bit(1)};
+  }
+
   const ::std::string& get_name() const& {
     return __fbthrift_field_name;
   }
@@ -228,6 +277,16 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   ::std::string& set_name(T_CustomException_name_struct_setter&& name_) {
     name_ref() = std::forward<T_CustomException_name_struct_setter>(name_);
     return __fbthrift_field_name;
+  }
+
+  ::cpp2::Result get_result() const {
+    return __fbthrift_field_result;
+  }
+
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
+  ::cpp2::Result& set_result(::cpp2::Result result_) {
+    result_ref() = result_;
+    return __fbthrift_field_result;
   }
 
   template <class Protocol_>

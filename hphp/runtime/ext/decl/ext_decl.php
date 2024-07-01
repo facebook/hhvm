@@ -466,6 +466,15 @@ namespace HH {
     public function getFileTypedef(string $name)[]: ?ExtDeclTypedef;
 
     /*
+     * Fetches all keys for the supplied shape name.
+     *
+     * @param string $name - the name of the shape typedef
+     * @return vec<string> - empty if error or no matching shape name
+     */
+    <<__Native>>
+    public function getShapeKeys(string $name)[]: vec<string>;
+
+    /*
      * Query the content for all the methods of a specific class.
      *
      * @return vec<ExtDeclMethod> - Array of the methods

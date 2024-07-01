@@ -155,6 +155,23 @@ pub fn get_file(parsed_file: &ParsedFile<'_>) -> ExtDeclFile {
     }
 }
 
+pub fn get_shape_keys(parsed_file: &ParsedFile<'_>, name: &str) -> Vec<String> {
+    // don't let empty strings pass in, else we fetch all type structures
+    if name.is_empty() {
+        return vec![];
+    }
+    let type_structure = get_type_structure(parsed_file, name);
+    // if empty, then no matching type for the name
+    let Some(type_) = type_structure.first() else {
+        return vec![];
+    };
+    // can't get keys unless it's a shape
+    match type_.kind.as_str() {
+        "shape" => type_.subtypes.iter().map(|st| st.name.clone()).collect(),
+        _ => vec![],
+    }
+}
+
 //pub fn get_method(parsed_file: &ParsedFile<'_>, name: &str) -> Option<ExtDeclClass>
 pub fn get_class_methods(
     parsed_file: &ParsedFile<'_>,
@@ -579,8 +596,11 @@ fn build_type_structure(outer_ty: &Ty<'_>) -> ExtDeclTypeStructure {
                     |(shape_field, shape_field_type)| ExtDeclTypeStructureSubType {
                         name: match shape_field.0 {
                             TshapeFieldName::TSFlitStr(field_name) => field_name.1.to_string(),
-                            TshapeFieldName::TSFclassConst((_, field_name))
-                            | TshapeFieldName::TSFlitInt(field_name) => field_name.1.to_string(),
+                            TshapeFieldName::TSFclassConst(((_pos, classish_name), field_name)) => {
+                                let cname = fmt_type(classish_name);
+                                format!("{}::{}", cname, field_name.1)
+                            }
+                            TshapeFieldName::TSFlitInt(field_name) => field_name.1.to_string(),
                         },
                         type_: build_type_structure(shape_field_type.ty),
                         optional: shape_field_type.optional,

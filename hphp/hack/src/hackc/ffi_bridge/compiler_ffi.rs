@@ -455,6 +455,7 @@ mod ffi {
         /// Extract TypeDecls from DeclsHolder.
         fn get_file(decls: &DeclsHolder) -> ExtDeclFile;
         fn get_type_structure(decls: &DeclsHolder, name: &str) -> Vec<ExtDeclTypeStructure>;
+        fn get_shape_keys(decls: &DeclsHolder, name: &str) -> Vec<String>;
 
         fn get_classes(decls: &DeclsHolder) -> Vec<ExtDeclClass>;
         fn get_class(decls: &DeclsHolder, name: &str) -> Vec<ExtDeclClass>;
@@ -886,6 +887,10 @@ fn get_file(holder: &DeclsHolder) -> ffi::ExtDeclFile {
 
 fn get_type_structure(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclTypeStructure> {
     ext_decl::get_type_structure(&holder.parsed_file, name)
+}
+
+fn get_shape_keys(holder: &DeclsHolder, name: &str) -> Vec<String> {
+    ext_decl::get_shape_keys(&holder.parsed_file, name)
 }
 
 // SAFETY: i must be a raw bitcast from a valid BytesId

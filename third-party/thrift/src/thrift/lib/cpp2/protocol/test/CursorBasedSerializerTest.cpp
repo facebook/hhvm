@@ -301,10 +301,12 @@ TEST(CursorSerializer, TypesRead) {
   test::Types obj;
   obj.iobuf() = folly::IOBuf::wrapBufferAsValue("foo", 3);
   obj.iobufptr() = folly::IOBuf::wrapBuffer("bar", 3);
+  obj.ms() = std::chrono::milliseconds(123456789);
   CursorSerializationWrapper wrapper(obj);
   auto reader = wrapper.beginRead();
   EXPECT_EQ(reader.read<ident::iobuf>().toString(), "foo");
   EXPECT_EQ(reader.read<ident::iobufptr>()->toString(), "bar");
+  EXPECT_EQ(reader.read<ident::ms>().count(), 123456789);
   wrapper.endRead(std::move(reader));
 }
 

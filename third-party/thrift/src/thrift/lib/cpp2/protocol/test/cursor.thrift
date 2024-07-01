@@ -18,6 +18,7 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
 cpp_include "thrift/lib/cpp2/protocol/CursorBasedSerializer.h"
+cpp_include "thrift/test/AdapterTest.h"
 
 @thrift.Experimental
 package "apache.org/thrift/test"
@@ -97,6 +98,8 @@ struct Types {
   1: binary iobuf;
   @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
   2: binary iobufptr;
+  @cpp.Adapter{name = "::apache::thrift::test::AdaptTestMsAdapter"}
+  3: i64 ms;
 }
 
 struct Empty {}

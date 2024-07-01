@@ -105,7 +105,7 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   MaskBuilder() { data_ = Mask{}; }
   /* implicit */ MaskBuilder(Mask mask) {
     detail::errorIfNotCompatible<type::struct_t<Struct>>(mask);
-    data_ = mask;
+    data_ = std::move(mask);
   }
 
   MaskBuilder& reset_to_none() {

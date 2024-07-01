@@ -418,12 +418,6 @@ struct RuntimeOption {
   static std::string ProfDataTag;
   static bool DumpPreciseProfData;
 
-  static int64_t HeapSizeMB;
-  static int64_t HeapResetCountBase;
-  static int64_t HeapResetCountMultiple;
-  static int64_t HeapLowWaterMark;
-  static int64_t HeapHighWaterMark;
-
   static std::string WatchmanRootSocket;
   static std::string WatchmanDefaultSocket;
 

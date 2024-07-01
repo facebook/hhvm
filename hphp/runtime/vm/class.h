@@ -1537,6 +1537,18 @@ public:
    *
    * Return nullptr if there is no such class.
    */
+
+  enum class ClassLookupResult {
+    None,
+    Exact,
+    Maybe,
+  };
+
+  struct ClassLookup {
+    ClassLookupResult tag;
+    const Class* cls;
+  };
+  static ClassLookup lookupKnownMaybe(const Class* cls, const Class* ctx);
   static const Class* lookupKnown(const NamedType* ne,
                                   const Class* ctx);
   static const Class* lookupKnown(const StringData* name,

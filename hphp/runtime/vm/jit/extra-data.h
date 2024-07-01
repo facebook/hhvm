@@ -523,11 +523,11 @@ struct IndexData : IRExtraData {
  * ClassId.
  */
 struct ClassIdData : IRExtraData {
-  explicit ClassIdData(uint32_t id) : id(id) {}
+  explicit ClassIdData(ClassId id) : id(id) {}
 
   std::string show() const { return fmt::format("{}", id.id()); }
-  size_t hash() const { return std::hash<uint32_t>()(id.id()); }
-  size_t stableHash() const { return std::hash<uint32_t>()(id.id()); }
+  size_t hash() const { return std::hash<ClassId::Id>()(id.id()); }
+  size_t stableHash() const { return std::hash<ClassId::Id>()(id.id()); }
 
   bool equals(const ClassIdData& o) const {
     return id == o.id;
@@ -3174,6 +3174,7 @@ X(CheckFuncNeedsCoverage,       FuncData);
 X(RecordFuncCall,               FuncData);
 X(LdClsPropAddrOrNull,          ReadonlyData);
 X(LdClsPropAddrOrRaise,         ReadonlyData);
+X(EqClassId,                    ClassIdData);
 X(LdMBase,                      AliasClassData);
 X(ThrowMustBeEnclosedInReadonly,ClassData);
 X(ThrowMustBeMutableException,  ClassData);

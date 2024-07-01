@@ -685,6 +685,16 @@ inline const Class* lookupKnown(IRGS& env, const StringData* name) {
   return lookupKnown(env, cls);
 }
 
+inline Class::ClassLookup lookupKnownMaybe(IRGS& env, const Class* cls) {
+  return Class::lookupKnownMaybe(cls, curClass(env));
+}
+
+inline Class::ClassLookup lookupKnownMaybe(IRGS& env, const StringData* name) {
+  auto const ne = NamedType::getOrCreate(name);
+  auto const cls = ne->clsList();
+  return lookupKnownMaybe(env, cls);
+}
+
 inline SSATmp* ldCls(IRGS& env,
                      SSATmp* lazyClassOrName,
                      LdClsFallback fallback = LdClsFallback::Fatal) {

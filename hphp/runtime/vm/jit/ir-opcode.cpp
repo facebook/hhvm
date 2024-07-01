@@ -632,6 +632,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EnterTranslation:
   case EqArrayDataPtr:
   case EqBool:
+  case EqClassId:
   case EqCls:
   case EqDbl:
   case EqFunc:

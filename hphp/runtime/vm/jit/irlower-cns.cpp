@@ -281,6 +281,17 @@ void cgLdClsCnsVecLen(IRLS& env, const IRInstruction* inst) {
   v << loadzlq{cls[off], dst};
 }
 
+void cgEqClassId(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<EqClassId>();
+  auto const cls = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  auto const off = Class::classIdOffset();
+  auto const sf = v.makeReg();
+  v << cmplim{safe_cast<int32_t>(extra->id.id()), cls[off], sf};
+  ifThen(v, CC_NE, sf, label(env, inst->taken()));
+}
+
 void cgProfileSubClsCns(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<ProfileSubClsCns>();
 

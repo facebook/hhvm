@@ -1081,6 +1081,10 @@ To string conversions:
 
   Load the size of S0's constant table.
 
+| EqClassId<classId>, ND, S(Cls), B
+
+  Check if the ClassId for S0 matches classId. Branch to B if not.
+
 | LdResolvedTypeCns<slot>, D(StaticDict), S(Cls), B|LA
 
   Loads the resolved type constant in the slot `slot' on S0 or branches to B if

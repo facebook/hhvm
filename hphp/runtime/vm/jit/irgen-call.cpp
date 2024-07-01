@@ -1705,33 +1705,69 @@ void emitFCallClsMethodD(IRGS& env,
                          FCallArgs fca,
                          const StringData* className,
                          const StringData* methodName) {
-  auto const cls = lookupKnown(env, className);
-  if (cls) {
-    auto const callCtx =
-      MemberLookupContext(callContext(env, fca, cls), curFunc(env));
-    auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
-    if (func) {
+  auto const lookup = lookupKnownMaybe(env, className);
+  auto const slow = [&]() {
+    auto const callerCtx = [&] {
+      if (!fca.context) return curClass(env);
+      auto const ret = lookupKnownWithUnit(env, fca.context);
+      if (!ret) PUNT(no-context);
+      return ret;
+    }();
+
+    auto const slowExit = makeExitSlow(env);
+    auto const ne = NamedType::getOrCreate(className);
+    auto const data =
+      ClsMethodData { className, methodName, ne, callerCtx, curFunc(env) };
+    auto const func = loadClsMethodUnknown(env, data, slowExit);
+    auto const ctx = gen(env, LdClsMethodCacheCls, data);
+    emitModuleBoundaryCheck(env, ctx, false);
+    prepareAndCallProfiled(env, func, fca, ctx, false, false);
+  };
+
+  switch (lookup.tag) {
+    case Class::ClassLookupResult::Exact: {
+      auto const cls = lookup.cls;
+      auto const callCtx =
+        MemberLookupContext(callContext(env, fca, cls), curFunc(env));
+      auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
+      if (!func) return slow();
       auto const ctx = ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
       emitModuleBoundaryCheckKnown(env, cls);
       return prepareAndCallKnown(env, func, fca, ctx, false, false);
     }
+    case Class::ClassLookupResult::None: {
+      return slow();
+    }
+    case Class::ClassLookupResult::Maybe: {
+      auto const cls = lookup.cls;
+      assertx(!RO::RepoAuthoritative);
+      auto const callCtx =
+        MemberLookupContext(callContext(env, fca, cls), curFunc(env));
+      auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
+      if (!func) return slow();
+
+      auto const loadedCls = gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
+      auto const classId = lookup.cls->classId();
+      return ifThenElse(
+        env,
+        [&] (Block* taken) {
+          gen(env, EqClassId, ClassIdData(classId), taken, loadedCls);
+        },
+        [&] {
+          updateStackOffset(env);
+          auto const ctx = ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
+          emitModuleBoundaryCheckKnown(env, cls);
+          prepareAndCallKnown(env, func, fca, ctx, false, false);
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          updateStackOffset(env);
+          slow();
+        }
+      );
+    }
+    not_reached();
   }
-
-  auto const callerCtx = [&] {
-    if (!fca.context) return curClass(env);
-    auto const ret = lookupKnownWithUnit(env, fca.context);
-    if (!ret) PUNT(no-context);
-    return ret;
-  }();
-
-  auto const slowExit = makeExitSlow(env);
-  auto const ne = NamedType::getOrCreate(className);
-  auto const data =
-    ClsMethodData { className, methodName, ne, callerCtx, curFunc(env) };
-  auto const func = loadClsMethodUnknown(env, data, slowExit);
-  auto const ctx = gen(env, LdClsMethodCacheCls, data);
-  emitModuleBoundaryCheck(env, ctx, false);
-  prepareAndCallProfiled(env, func, fca, ctx, false, false);
 }
 
 namespace {

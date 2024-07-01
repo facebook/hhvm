@@ -802,12 +802,27 @@ inline Class* Class::lookup(const StringData* name) {
  *     As a conservative approximation of this, we are currently just checking
  *     if ctx is a subtype of cls, but we can certainly do better.
  */
-inline const Class* Class::lookupKnown(const Class* cls,
-                                       const Class* ctx) {
-  if (UNLIKELY(cls == nullptr)) return nullptr;
-  if (cls->attrs() & AttrPersistent) return cls;
-  if (!ctx) return nullptr;
-  return ctx->classof(cls) ? cls : nullptr;
+
+inline const Class* Class::lookupKnown(const Class* cls, const Class* ctx) {
+  auto const res = lookupKnownMaybe(cls, ctx);
+  switch (res.tag) {
+    case Class::ClassLookupResult::None:
+    case Class::ClassLookupResult::Maybe:
+      return nullptr;
+    case Class::ClassLookupResult::Exact:
+      return res.cls;
+  }
+}
+
+inline Class::ClassLookup Class::lookupKnownMaybe(const Class* cls,
+                                                  const Class* ctx) {
+  auto const tag = [&]() {
+    if (UNLIKELY(cls == nullptr)) return Class::ClassLookupResult::None;
+    if (cls->attrs() & AttrPersistent) return Class::ClassLookupResult::Exact;
+    if (ctx && ctx->classof(cls)) return Class::ClassLookupResult::Exact;
+    return ClassLookupResult::Maybe;
+  }();
+  return Class::ClassLookup { tag, cls };
 }
 
 inline const Class* Class::lookupKnown(const NamedType* ne,

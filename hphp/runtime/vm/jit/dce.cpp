@@ -417,6 +417,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdResolvedTypeCns:
   case CheckSubClsCns:
   case LdClsCnsVecLen:
+  case EqClassId:
   case LookupClsMethodFCache:
   case LookupClsMethodCache:
   case LookupClsMethod:

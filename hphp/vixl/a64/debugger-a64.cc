@@ -190,7 +190,7 @@ class IntegerToken : public ValueToken<int64_t> {
 //  * c: character
 //  * d: double
 //  * s: float
-// When no qualifier is given for integers, they are printed in hexadecinal.
+// When no qualifier is given for integers, they are printed in hexadecimal.
 class FormatToken : public Token {
  public:
   FormatToken() {}
@@ -393,7 +393,7 @@ class MemCommand : public DebugCommand {
   FormatToken* format_;
 };
 
-// Commands which name does not match any of the known commnand.
+// Commands which name does not match any of the known command.
 class UnknownCommand : public DebugCommand {
  public:
   explicit UnknownCommand(std::vector<Token*> args) : args_(args) {}
@@ -452,7 +452,7 @@ const char* MemCommand::kArguments = "<addr> [n = 1] [format = %x]";
 const char* MemCommand::kHelp =
   "  print n memory item(s) at address addr according to the given format.\n"
   "  addr can be an immediate address, a register or the pc.\n"
-  "  format is made of a qualifer: 's', 'u', 'a' (signed, unsigned, hexa)\n"
+  "  format is made of a qualifier: 's', 'u', 'a' (signed, unsigned, hexa)\n"
   "  and a type 'x', 'w', 'h', 'b' (64- to 8-bit integer), 'c' (character),\n"
   "  's' (float) or 'd' (double). E.g 'mem sp %w' will print a 32-bit word\n"
   "  from the stack as an hexadecimal number."
@@ -818,7 +818,7 @@ static bool StringToInt64(int64_t* value, const char* line, int base = 10) {
   int64_t parsed = strtol(line, &endptr, base);
 
   if (errno == ERANGE) {
-    // Overflow, undeflow.
+    // Overflow, underflow.
     return false;
   }
 

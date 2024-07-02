@@ -526,23 +526,15 @@ let typedef tenv t =
      parameters of typedefs by Tany, which makes the kind check moot *)
   maybe
     (* We always check the constraints for internal types, so treat in_signature:true *)
-    (Typing_kinding.Simple.check_well_kinded_hint
-       ~in_signature:true
-       ~in_typeconst:false
-       ~in_typehint:false)
+    (Typing_kinding.Simple.check_well_kinded_hint ~in_signature:true)
     tenv_with_typedef_tparams
     t_as_constraint;
   maybe
-    (Typing_kinding.Simple.check_well_kinded_hint
-       ~in_signature:true
-       ~in_typeconst:false
-       ~in_typehint:false)
+    (Typing_kinding.Simple.check_well_kinded_hint ~in_signature:true)
     tenv_with_typedef_tparams
     t_super_constraint;
   Typing_kinding.Simple.check_well_kinded_hint
     ~in_signature:should_check_internal_signature
-    ~in_typeconst:false
-    ~in_typehint:false
     tenv_with_typedef_tparams
     t_kind;
   let env =

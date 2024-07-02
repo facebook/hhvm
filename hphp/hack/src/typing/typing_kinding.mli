@@ -10,13 +10,15 @@ module Simple : sig
   (** Check that the given type is a well-kinded type whose kind matches the provided one.
     Otherwise, reports errors.
     Check that classes mentioned in types are accessible from the current
-    module, and accessible also from outside if in_signature=true. *)
+    module, and accessible also from outside if in_signature=true.
+    We use the optional arguments `in_typeconst`, `in_typehint`, `in_targ`
+    and in_tp_constraint` to determine whether we should bypass package visibility check. *)
   val check_well_kinded :
     in_signature:bool ->
-    in_typeconst:bool ->
-    in_typehint:bool ->
-    in_targ:bool ->
-    in_tp_constraint:bool ->
+    ?in_typeconst:bool ->
+    ?in_typehint:bool ->
+    ?in_targ:bool ->
+    ?in_tp_constraint:bool ->
     Typing_env_types.env ->
     decl_ty ->
     KindDefs.Simple.named_kind ->
@@ -24,11 +26,14 @@ module Simple : sig
 
   (** Runs check_well_kinded_type after translating hint to decl type
       Check that classes mentioned in hints are accessible from the current
-      module, and accessible also from outside if in_signature=true. *)
+      module, and accessible also from outside if in_signature=true.
+      We use the optional arguments `in_typeconst`, `in_typehint`, `in_targ`,
+      and `in_tp_constraint` to determine whether we should bypass package
+      visibility check.*)
   val check_well_kinded_hint :
     in_signature:bool ->
-    in_typeconst:bool ->
-    in_typehint:bool ->
+    ?in_typeconst:bool ->
+    ?in_typehint:bool ->
     ?in_targ:bool ->
     ?in_tp_constraint:bool ->
     Typing_env_types.env ->

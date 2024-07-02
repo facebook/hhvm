@@ -534,10 +534,10 @@ module Simple = struct
 
   and check_well_kinded
       ~in_signature
-      ~in_typeconst
-      ~in_typehint
-      ~in_targ
-      ~in_tp_constraint
+      ?(in_typeconst = false)
+      ?(in_typehint = false)
+      ?(in_targ = false)
+      ?(in_tp_constraint = false)
       env
       (ty : decl_ty)
       (expected_nkind : Simple.named_kind) =
@@ -609,8 +609,8 @@ module Simple = struct
 
   let check_well_kinded_hint
       ~in_signature
-      ~in_typeconst
-      ~in_typehint
+      ?(in_typeconst = false)
+      ?(in_typehint = false)
       ?(in_targ = false)
       ?(in_tp_constraint = false)
       env

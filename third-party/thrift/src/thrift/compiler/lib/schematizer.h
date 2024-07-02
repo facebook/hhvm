@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <unordered_map>
 
 #include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_enum.h>
@@ -66,8 +67,8 @@ class schematizer {
     bool only_root_program_ = false;
   };
 
-  explicit schematizer(const t_scope& scope, options opts)
-      : scope_(scope), opts_(std::move(opts)) {}
+  explicit schematizer(const t_scope& scope, source_manager& sm, options opts)
+      : scope_(scope), sm_(sm), opts_(std::move(opts)) {}
 
   // Creates a constant of type schema.Struct describing the argument.
   // https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/schema.thrift
@@ -84,12 +85,14 @@ class schematizer {
 
   // Gets a universally unique identifier for a definition that is consistent
   // across runs on different including programs.
-  static std::string identify_definition(const t_named& node);
-  static int64_t identify_program(const t_program& node);
+  std::string identify_definition(const t_named& node);
+  int64_t identify_program(const t_program& node);
 
  private:
   const t_scope& scope_;
+  source_manager& sm_;
   options opts_;
+  std::unordered_map<const t_program*, std::string> program_checksums_;
 
   t_type_ref stdType(std::string_view uri);
   std::unique_ptr<t_const_value> typeUri(const t_type& type);
@@ -115,6 +118,7 @@ class schematizer {
       const std::string& fields_name,
       node_list_view<const t_field> fields,
       schematizer::InternFunc& intern_value);
+  std::string_view program_checksum(const t_program& program);
 };
 
 // Turns a t_const_value holding some value V into a t_const_value holding a
@@ -129,7 +133,7 @@ std::unique_ptr<t_const_value> wrap_with_protocol_value(
 struct GetSchemaTag {
   static std::string defaultImpl(
       schematizer::options& /* schema_opts */,
-      const source_manager& /* source_mgr */,
+      source_manager& /* source_mgr */,
       const t_program& /* root_program */) {
     return {};
   }

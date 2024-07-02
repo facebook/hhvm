@@ -68,7 +68,7 @@ class t_ast_generator : public t_generator {
 
   static type::Schema gen_schema(
       schematizer::options& schema_opts,
-      const source_manager& source_mgr,
+      source_manager& source_mgr,
       const t_program& root_program);
 
   void process_options(
@@ -130,7 +130,7 @@ class t_ast_generator : public t_generator {
 
 type::Schema t_ast_generator::gen_schema(
     schematizer::options& schema_opts,
-    const source_manager& source_mgr,
+    source_manager& source_mgr,
     const t_program& root_program) {
   type::Schema ast;
   std::unordered_map<const t_program*, apache::thrift::type::ProgramId>
@@ -237,7 +237,7 @@ type::Schema t_ast_generator::gen_schema(
   }
 
   schema_opts.intern_value = intern_value;
-  schematizer schema_source(*root_program.scope(), schema_opts);
+  schematizer schema_source(*root_program.scope(), source_mgr, schema_opts);
   const_ast_visitor visitor;
   bool is_root_program = true;
   visitor.add_program_visitor([&](const t_program& program) {
@@ -246,7 +246,7 @@ type::Schema t_ast_generator::gen_schema(
     auto& programs = *ast.programs();
     auto pos = programs.size();
     auto program_id = schema_opts.use_hash
-        ? apache::thrift::type::ProgramId{schematizer::identify_program(
+        ? apache::thrift::type::ProgramId{schema_source.identify_program(
               program)}
         : positionToId<apache::thrift::type::ProgramId>(pos);
     program_index[&program] = program_id;
@@ -300,7 +300,7 @@ type::Schema t_ast_generator::gen_schema(
     if (node.generated() && !schema_opts.include_generated_) {       \
       return;                                                        \
     }                                                                \
-    auto key = schematizer::identify_definition(node);               \
+    auto key = schema_source.identify_definition(node);              \
     definition_key_index[&node] = key;                               \
     if (!is_root_program && schema_opts.only_root_program_) {        \
       return;                                                        \
@@ -520,7 +520,7 @@ THRIFT_REGISTER_GENERATOR(
 namespace {
 std::string gen_schema(
     schematizer::options& schema_opts,
-    const source_manager& source_mgr,
+    source_manager& source_mgr,
     const t_program& root_program) {
   auto schema =
       t_ast_generator::gen_schema(schema_opts, source_mgr, root_program);

@@ -17,6 +17,8 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <fmt/core.h>
+#include <openssl/md5.h>
 #include <openssl/sha.h>
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_exception.h>
@@ -751,10 +753,28 @@ std::unique_ptr<t_const_value> wrap_with_protocol_value(
   return ret;
 }
 
+std::string_view schematizer::program_checksum(const t_program& program) {
+  if (auto it = program_checksums_.find(&program);
+      it != program_checksums_.end()) {
+    return it->second;
+  }
+  // @lint-ignore CLANGTIDY facebook-hte-CArray
+  unsigned char hash[MD5_DIGEST_LENGTH];
+  auto val = sm_.get_file(program.path())->text;
+  MD5(reinterpret_cast<const unsigned char*>(val.data()), val.size(), hash);
+  return (
+      program_checksums_[&program] =
+          std::string(reinterpret_cast<const char*>(hash), sizeof(hash)));
+}
+
 std::string schematizer::identify_definition(const t_named& node) {
   // @lint-ignore CLANGTIDY facebook-hte-CArray
   unsigned char hash[SHA256_DIGEST_LENGTH];
-  auto val = node.program()->path() + node.name();
+  auto val = fmt::format(
+      "{}{}{}",
+      program_checksum(*node.program()),
+      node.program()->path(),
+      node.name());
   SHA256(reinterpret_cast<const unsigned char*>(val.c_str()), val.size(), hash);
   constexpr size_t kBytes = 16;
   return std::string(reinterpret_cast<const char*>(hash), kBytes);
@@ -763,7 +783,7 @@ std::string schematizer::identify_definition(const t_named& node) {
 int64_t schematizer::identify_program(const t_program& node) {
   // @lint-ignore CLANGTIDY facebook-hte-CArray
   unsigned char hash[SHA256_DIGEST_LENGTH];
-  const auto& val = node.path();
+  auto val = fmt::format("{}{}", program_checksum(node), node.path());
   SHA256(reinterpret_cast<const unsigned char*>(val.c_str()), val.size(), hash);
   int64_t ret;
   memcpy(&ret, hash, sizeof(ret));

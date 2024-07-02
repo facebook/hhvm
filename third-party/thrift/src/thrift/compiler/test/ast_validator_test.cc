@@ -17,6 +17,8 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
+#include <thrift/compiler/test/test_utils.h>
+
 #include <thrift/compiler/sema/standard_validator.h>
 
 namespace apache::thrift::compiler {

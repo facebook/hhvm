@@ -41,6 +41,7 @@
 #include <thrift/compiler/gen/cpp/reference_type.h>
 #include <thrift/compiler/gen/cpp/type_resolver.h>
 #include <thrift/compiler/lib/cpp2/util.h>
+#include <thrift/compiler/lib/reserved_identifier_name.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/const_checker.h>
 #include <thrift/compiler/sema/explicit_include_validator.h>
@@ -330,6 +331,23 @@ struct structured_metadata {
     }
   }
 };
+
+void validate_identifier_name_is_not_reserved(
+    diagnostic_context& ctx, const t_named& node) {
+  static const std::string reserved_idl_string = "fbthrift";
+  // Bypass the check any of the cases below.
+  //  1. the node was generated.
+  //  2. @thrift.AllowedReservedIdentifierName is present.
+  if (node.generated() ||
+      node.find_structured_annotation_or_null(
+          kAllowReservedIdentifierNameUri) != nullptr) {
+    return;
+  }
+  ctx.check(
+      !is_reserved_identifier_name(node.name()),
+      "`{}` is a reserved identifier name. Choose a different name that does not contain `fbthrift`.",
+      node.name());
+}
 
 void validate_interface_function_name_uniqueness(
     diagnostic_context& ctx, const t_interface& node) {
@@ -1321,6 +1339,8 @@ void forbid_exception_as_const_type(
 
 ast_validator standard_validator() {
   ast_validator validator;
+  validator.add_definition_visitor(&validate_identifier_name_is_not_reserved);
+
   validator.add_interface_visitor(&validate_interface_function_name_uniqueness);
   validator.add_interface_visitor(&validate_function_priority_annotation);
   validator.add_service_visitor(

@@ -42,10 +42,19 @@ void maybeLogTlsPeerCertEvent(
     const ConnectionLoggingContext& context,
     const folly::AsyncTransportCertificate* cert) {
   DCHECK(context.getWorker() && context.getWorker()->getServer());
-  if (detail::isCertIPMismatch(context, cert)) {
-    THRIFT_CONNECTION_EVENT(tls.cert_ip_mismatch).log(context);
-  } else {
-    THRIFT_CONNECTION_EVENT(tls.cert_ip_match).log(context);
+  auto ret = detail::isCertIPMismatch(context, cert);
+  switch (ret) {
+    case CertIPResult::SKIPPED:
+      THRIFT_CONNECTION_EVENT(tls.cert_ip_skipped).log(context);
+      return;
+    case CertIPResult::MATCHED:
+      THRIFT_CONNECTION_EVENT(tls.cert_ip_match).log(context);
+      return;
+    case CertIPResult::MISMATCHED:
+      THRIFT_CONNECTION_EVENT(tls.cert_ip_mismatch).log(context);
+      return;
+    default:
+      return;
   }
 }
 

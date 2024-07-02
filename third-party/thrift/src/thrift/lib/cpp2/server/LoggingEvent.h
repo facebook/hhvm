@@ -204,13 +204,15 @@ class LoggingEventRegistry {
   virtual ~LoggingEventRegistry() {}
 };
 
+enum class CertIPResult { SKIPPED, MATCHED, MISMATCHED };
+
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     std::unique_ptr<apache::thrift::LoggingEventRegistry>,
     makeLoggingEventRegistry);
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
-    bool,
+    CertIPResult,
     isCertIPMismatch,
     const ConnectionLoggingContext& ctx,
     const folly::AsyncTransportCertificate* cert);

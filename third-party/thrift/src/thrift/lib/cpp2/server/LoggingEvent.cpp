@@ -62,11 +62,11 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 }
 
 THRIFT_PLUGGABLE_FUNC_REGISTER(
-    bool,
+    CertIPResult,
     isCertIPMismatch,
     const ConnectionLoggingContext&,
     const folly::AsyncTransportCertificate*) {
-  return false;
+  return CertIPResult::SKIPPED;
 }
 } // namespace detail
 

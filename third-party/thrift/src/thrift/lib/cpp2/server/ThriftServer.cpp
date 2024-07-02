@@ -108,10 +108,7 @@ THRIFT_FLAG_DEFINE_bool(fizz_server_enable_hybrid_kex, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_aegis, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_prefer_psk_ke, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_receiving_dc, false);
-
-THRIFT_FLAG_DEFINE_bool(fizz_deprecate_draft_versions, true);
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_presenting_dc, false);
-
 THRIFT_FLAG_DEFINE_bool(enable_rotation_for_in_memory_ticket_seeds, false);
 
 namespace apache::thrift::detail {

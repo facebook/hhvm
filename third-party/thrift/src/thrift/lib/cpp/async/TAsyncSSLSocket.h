@@ -77,7 +77,6 @@ class TAsyncSSLSocket : public folly::AsyncSSLSocket {
         new TAsyncSSLSocket(ctx, evb, fd, server));
   }
 
-#if OPENSSL_VERSION_NUMBER >= 0x1000105fL && !defined(OPENSSL_NO_TLSEXT)
   TAsyncSSLSocket(
       const std::shared_ptr<folly::SSLContext>& ctx,
       folly::EventBase* evb,
@@ -98,7 +97,6 @@ class TAsyncSSLSocket : public folly::AsyncSSLSocket {
     return TAsyncSSLSocket::UniquePtr(
         new TAsyncSSLSocket(ctx, evb, serverName));
   }
-#endif
 };
 
 } // namespace async

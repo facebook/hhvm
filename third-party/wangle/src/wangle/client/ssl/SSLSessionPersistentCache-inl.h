@@ -70,7 +70,6 @@ folly::ssl::SSLSessionUniquePtr SSLSessionPersistentCacheBase<K>::getSSLSession(
   auto& value = hit.value();
   auto sess = folly::ssl::SSLSessionUniquePtr(getSessionFromCacheData(value));
 
-#if OPENSSL_TICKETS
   if (sess && SSL_SESSION_has_ticket(sess.get()) &&
       SSL_SESSION_get_ticket_lifetime_hint(sess.get()) > 0) {
     auto now = timeUtil_->now();
@@ -81,7 +80,6 @@ folly::ssl::SSLSessionUniquePtr SSLSessionPersistentCacheBase<K>::getSSLSession(
       return nullptr;
     }
   }
-#endif
 
   return sess;
 }

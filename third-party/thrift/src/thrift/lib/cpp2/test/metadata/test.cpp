@@ -25,6 +25,7 @@
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/ParentService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/RepeatedTestService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/SimpleStructsTestService.h>
+#include <thrift/lib/cpp2/test/metadata/gen-cpp2/StreamTestService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/StructUnionTestService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/TypedefTestService.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
@@ -81,6 +82,28 @@ class ServiceMetadataTest : public testing::Test {
   ThriftServiceMetadataResponse response_;
   void resetResponse() { response_ = ThriftServiceMetadataResponse{}; }
 };
+
+TEST_F(ServiceMetadataTest, StreamTest) {
+  auto& metadata = getMetadata<apache::thrift::ServiceHandler<
+      metadata::test::stream::StreamTestService>>();
+  EXPECT_EQ(
+      response_.services_ref()->front().module_ref()->name_ref(),
+      "stream_test");
+  auto s = metadata.services_ref()->at("stream_test.StreamTestService");
+  EXPECT_EQ(*s.name_ref(), "stream_test.StreamTestService");
+  EXPECT_EQ(*s.functions_ref()->at(0).name_ref(), "responseAndRange");
+  EXPECT_EQ(
+      s.functions_ref()->at(0).return_type_ref()->getType(),
+      ThriftType::Type::t_stream);
+  EXPECT_EQ(
+      s.functions_ref()
+          ->at(0)
+          .return_type_ref()
+          ->get_t_stream()
+          .initialResponseType_ref()
+          ->getType(),
+      ThriftType::Type::t_primitive);
+}
 
 TEST_F(ServiceMetadataTest, EnumTest) {
   auto& metadata = getMetadata<

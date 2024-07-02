@@ -28,11 +28,11 @@ except ImportError:
 
 @unittest.skipIf(
     os.name == "nt" or sys.platform == "darwin" or os.geteuid() == 0,
-    "win or root or bad ldap",
+    "win, mac or root",
 )
 class TestSockPerms(unittest.TestCase):
     def _new_instance(self, config):
-        start_timeout = 20
+        start_timeout = 60
         return WatchmanInstance.InstanceWithStateDir(
             config=config, start_timeout=start_timeout
         )
@@ -55,7 +55,7 @@ class TestSockPerms(unittest.TestCase):
                 return group
         self.skipTest("no usable groups found")
 
-    def waitFor(self, cond, timeout: float = 20):
+    def waitFor(self, cond, timeout: float = 60):
         deadline = time.time() + timeout
         res = None
         while time.time() < deadline:

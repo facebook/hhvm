@@ -303,6 +303,7 @@ module Simple = struct
       ~in_signature
       ~in_typeconst
       ~in_typehint
+      ~in_tp_constraint
       ~def_pos
       ~use_pos
       env
@@ -328,12 +329,19 @@ module Simple = struct
     List.iter2_exn
       tyargs
       nkinds
-      ~f:(check_targ_well_kinded ~in_signature ~in_typeconst ~in_typehint env)
+      ~f:
+        (check_targ_well_kinded
+           ~in_signature
+           ~in_typeconst
+           ~in_typehint
+           ~in_tp_constraint
+           env)
 
   and check_targ_well_kinded
       ~in_signature
       ~in_typeconst
       ~in_typehint
+      ~in_tp_constraint
       env
       tyarg
       (nkind : Simple.named_kind) =
@@ -350,6 +358,7 @@ module Simple = struct
           ~in_signature
           ~in_typeconst
           ~in_typehint
+          ~in_tp_constraint
           ~in_targ:true
           env
           tyarg
@@ -360,6 +369,7 @@ module Simple = struct
         ~in_signature
         ~in_typeconst
         ~in_typehint
+        ~in_tp_constraint
         ~in_targ:true
         env
         tyarg
@@ -371,6 +381,7 @@ module Simple = struct
       ~in_typeconst
       ~in_typehint
       ?(in_targ = false)
+      ?(in_tp_constraint = false)
       env
       (ty : decl_ty) =
     let (r, ty_) = deref ty in
@@ -382,6 +393,7 @@ module Simple = struct
         ~in_typeconst
         ~in_typehint
         ~in_targ
+        ~in_tp_constraint
         env
     in
     let check_against_tparams def_pos tyargs tparams =
@@ -391,6 +403,7 @@ module Simple = struct
         ~allow_missing_targs
         ~in_typeconst
         ~in_typehint
+        ~in_tp_constraint
         ~def_pos
         ~use_pos
         env
@@ -424,6 +437,7 @@ module Simple = struct
         ~in_signature
         ~in_typeconst
         ~in_typehint
+        ~in_tp_constraint
         ~in_targ
         env
         ty
@@ -448,6 +462,7 @@ module Simple = struct
           ~in_signature
           ~in_typeconst
           ~in_typehint
+          ~in_tp_constraint
           ~def_pos
           ~use_pos
           env
@@ -461,7 +476,8 @@ module Simple = struct
         Option.iter
           ~f:(Typing_error_utils.add_typing_error ~env)
           (Typing_visibility.check_top_level_access
-             ~ignore_package_errors:(in_typeconst || in_typehint || in_targ)
+             ~ignore_package_errors:
+               (in_typeconst || in_typehint || in_targ || in_tp_constraint)
              ~in_signature
              ~use_pos
              ~def_pos:(Cls.pos class_info)
@@ -475,7 +491,8 @@ module Simple = struct
         Option.iter
           ~f:(Typing_error_utils.add_typing_error ~env)
           (Typing_visibility.check_top_level_access
-             ~ignore_package_errors:(in_typeconst || in_typehint || in_targ)
+             ~ignore_package_errors:
+               (in_typeconst || in_typehint || in_targ || in_tp_constraint)
              ~in_signature
              ~use_pos
              ~def_pos:typedef.td_pos
@@ -520,6 +537,7 @@ module Simple = struct
       ~in_typeconst
       ~in_typehint
       ~in_targ
+      ~in_tp_constraint
       env
       (ty : decl_ty)
       (expected_nkind : Simple.named_kind) =
@@ -548,6 +566,7 @@ module Simple = struct
         ~in_signature
         ~in_typeconst
         ~in_typehint
+        ~in_tp_constraint
         ~in_targ
         env
         ty
@@ -588,13 +607,22 @@ module Simple = struct
       | Tany _ -> ()
       | _ -> kind_error (Simple.fully_applied_type ()) env
 
-  let check_well_kinded_hint ~in_signature ~in_typeconst ~in_typehint env hint =
+  let check_well_kinded_hint
+      ~in_signature
+      ~in_typeconst
+      ~in_typehint
+      ?(in_targ = false)
+      ?(in_tp_constraint = false)
+      env
+      hint =
     let decl_ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
     check_well_kinded_type
       ~allow_missing_targs:false
       ~in_signature
       ~in_typeconst
       ~in_typehint
+      ~in_targ
+      ~in_tp_constraint
       env
       decl_ty
 

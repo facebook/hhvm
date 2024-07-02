@@ -1372,8 +1372,9 @@ let localize_targ_with_kind
       Kinding.Simple.check_well_kinded
         ~in_signature:false
         ~in_typeconst:false
-        ~in_typehint:true
-        ~in_targ:false
+        ~in_typehint:false
+        ~in_targ:true
+        ~in_tp_constraint:false
         env
         ty
         nkind;

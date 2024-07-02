@@ -255,6 +255,8 @@ let hint
     ?(in_signature = true)
     ?(in_typeconst = false)
     ?(in_typehint = false)
+    ?(in_targ = false)
+    ?(in_tp_constraint = false)
     env
     (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
@@ -262,6 +264,8 @@ let hint
     ~in_signature
     ~in_typeconst
     ~in_typehint
+    ~in_targ
+    ~in_tp_constraint
     env.tenv
     (p, h);
   hint_ ~in_signature env p h
@@ -282,7 +286,8 @@ let fun_param env param = type_hint env param.param_type_hint
 let fun_params env = List.concat_map ~f:(fun_param env)
 
 let tparam env t =
-  List.concat_map t.Aast.tp_constraints ~f:(fun (_, h) -> hint env h)
+  List.concat_map t.Aast.tp_constraints ~f:(fun (_, h) ->
+      hint ~in_tp_constraint:true env h)
 
 let tparams env = List.concat_map ~f:(tparam env)
 
@@ -582,9 +587,9 @@ let global_constant tenv gconst =
   in
   hint_opt env cst_type
 
-let hint tenv h =
+let hint ?(in_targ = false) tenv h =
   let env = { typedef_tparams = []; tenv } in
-  hint ~in_signature:false env h
+  hint ~in_signature:false ~in_targ env h
 
 (** Check well-formedness of type hints. See .mli file for more. *)
 let expr tenv ((), _p, e) =
@@ -597,7 +602,7 @@ let expr tenv ((), _p, e) =
     hint tenv h
   | New (_, hl, _, _, _)
   | Call { targs = hl; _ } ->
-    List.concat_map hl ~f:(fun (_, h) -> hint tenv h)
+    List.concat_map hl ~f:(fun (_, h) -> hint ~in_targ:true tenv h)
   | Lfun (f, _)
   | Efun { ef_fun = f; _ } ->
     fun_ tenv f

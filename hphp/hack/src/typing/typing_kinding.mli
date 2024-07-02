@@ -16,6 +16,7 @@ module Simple : sig
     in_typeconst:bool ->
     in_typehint:bool ->
     in_targ:bool ->
+    in_tp_constraint:bool ->
     Typing_env_types.env ->
     decl_ty ->
     KindDefs.Simple.named_kind ->
@@ -28,6 +29,8 @@ module Simple : sig
     in_signature:bool ->
     in_typeconst:bool ->
     in_typehint:bool ->
+    ?in_targ:bool ->
+    ?in_tp_constraint:bool ->
     Typing_env_types.env ->
     Aast.hint ->
     unit

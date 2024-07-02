@@ -2,20 +2,23 @@ error: Typing[4472] Cannot access a public element which belongs to package pkg1
 -> This is from package_access/include_paths_bad6.php--foo.php, which belongs to package pkg1 [2]
 -> But package_access/include_paths_bad6.php--bar.php is in package pkg2, and package pkg2 does not include package pkg1 [3]
 
-include_paths_bad6.php--bar.php:8:23
-6 |
-7 | class Bar1 implements IBar<TFoo> {} // ok
-[1] 8 | class Bar2 implements IFoo<TBar> {} // error
+include_paths_bad6.php--bar.php:10:23
+8 |
+9 | class Bar1 implements IBar<TFoo> {} // ok
+[1] 10 | class Bar2 implements IFoo<TBar> {} // error
+11 | class Bar3<T as TFoo> {} // ok
+12 | class Bar4<T as Foo> {} // ok
 
 include_paths_bad6.php--foo.php:4:11
 2 | // package pkg1
 3 | type TFoo = int;
-[2] 4 | interface IFoo<T> {}
+[2]  4 | interface IFoo<T> {}
+5 | class Foo {}
 
 ../PACKAGES.toml:6:11
 4 | include_paths=["./package_access/*"]
 5 |
-[3] 6 | [packages.pkg2]
+[3]  6 | [packages.pkg2]
 7 | include_paths=[
 8 |     "package_access/include_paths_bad1.php--foo.php",
 

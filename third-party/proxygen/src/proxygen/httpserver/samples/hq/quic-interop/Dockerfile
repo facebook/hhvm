@@ -10,7 +10,11 @@ RUN apt-get update
 RUN apt-get --yes --fix-missing update
 
 # Get and build proxygen with HTTP/3 support
-RUN apt-get install --yes wget net-tools iputils-ping tcpdump ethtool iperf git sudo cmake python3 libssl-dev m4 zlib1g-dev gcc g++
+RUN apt-get install --yes wget net-tools iputils-ping tcpdump ethtool iperf git sudo cmake python3 libssl-dev m4 zlib1g-dev gcc-10 g++-10
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
+RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
+RUN update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-10 100
+RUN update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-10 100
 RUN mkdir proxygen
 COPY . /proxygen
 RUN cd proxygen && ./getdeps.sh --no-tests --allow-system-packages

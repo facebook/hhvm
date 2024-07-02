@@ -113,3 +113,5 @@ cdef class MutableUnion(MutableStructOrUnion):
             self, int field_id, object field_python_value)
 
     cdef object _fbthrift_get_field_value(self, int16_t field_id)
+
+cdef object _mutable_struct_meta_new(object cls, object cls_name, object bases, object dct)

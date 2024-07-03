@@ -73,6 +73,12 @@ let strip_like_decl ty =
   | Tlike ty -> ty
   | _ -> ty
 
+let strip_like_ret_type_decl ty =
+  match get_node (strip_supportdyn_decl ty) with
+  | Tfun ft ->
+    mk (get_reason ty, Tfun { ft with ft_ret = strip_like_decl ft.ft_ret })
+  | _ -> ty
+
 (* We strip off ~ from types before matching on the underlying structure of the type.
  * Note that we only do this for matching, not pretty-printing of types, as we
  * want to retain ~ when showing types in suggestions
@@ -440,6 +446,17 @@ let autocomplete_member
           []
       in
       let ((env, ft1_err_opt), ft1) =
+        (* if where constraints involve pessimised function types
+         * strip the ~ from their return type before localization *)
+        let ft_stripped =
+          let stripped_constraints =
+            List.map
+              ~f:(fun (t1, c, t2) -> (t1, c, strip_like_ret_type_decl t2))
+              ft.ft_where_constraints
+          in
+          { ft with ft_where_constraints = stripped_constraints }
+        in
+
         Phase.(
           localize_ft
             ~instantiation:
@@ -447,7 +464,7 @@ let autocomplete_member
             ~ety_env:{ ety_env with on_error = None }
             ~def_pos:Pos_or_decl.none
             env
-            ft)
+            ft_stripped)
       in
       let (_, wc_err_opt) =
         List.fold_left

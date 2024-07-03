@@ -13,6 +13,8 @@ from thrift.py3.types cimport (
     assign_shared_const_ptr,
     bytes_to_string,
     make_unique,
+    make_shared,
+    make_const_shared,
 )
 cimport thrift.py3.types
 from thrift.py3.types cimport (
@@ -249,7 +251,7 @@ cdef class __RecursiveStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cRecursiveStruct](deref(self._struct_cpp_obj), 0)
             return
-        deref(self._struct_cpp_obj).mes_ref().assign(deref(_module_types.List__RecursiveStruct(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).mes_ref().assign(_module_types.List__RecursiveStruct__make_instance(_fbthrift_value))
 
 
 @__cython.auto_pickle(False)
@@ -279,7 +281,7 @@ cdef class __StructWithContainers_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cStructWithContainers](deref(self._struct_cpp_obj), 0)
             return
-        assign_unique_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).list_ref_ref(), make_unique[vector[cint32_t]](deref(_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        assign_unique_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).list_ref_ref(), make_unique[vector[cint32_t]](_module_types.List__i32__make_instance(_fbthrift_value)))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field set_ref
@@ -300,7 +302,7 @@ cdef class __StructWithContainers_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cStructWithContainers](deref(self._struct_cpp_obj), 3)
             return
-        assign_unique_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).list_ref_unique_ref(), make_unique[vector[cint32_t]](deref(_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        assign_unique_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).list_ref_unique_ref(), make_unique[vector[cint32_t]](_module_types.List__i32__make_instance(_fbthrift_value)))
 
     cdef void _set_field_4(self, _fbthrift_value) except *:
         # for field set_ref_shared
@@ -314,7 +316,7 @@ cdef class __StructWithContainers_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cStructWithContainers](deref(self._struct_cpp_obj), 5)
             return
-        assign_shared_const_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).list_ref_shared_const_ref(), const_pointer_cast(_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        assign_shared_const_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).list_ref_shared_const_ref(), make_const_shared[vector[cint32_t]](_module_types.List__i32__make_instance(_fbthrift_value)))
 
 
 @__cython.auto_pickle(False)
@@ -461,7 +463,7 @@ cdef class __StructWithBox_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cStructWithBox](deref(self._struct_cpp_obj), 1)
             return
-        deref(self._struct_cpp_obj).b_ref().assign(deref(_module_types.List__i64(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).b_ref().assign(_module_types.List__i64__make_instance(_fbthrift_value))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field c

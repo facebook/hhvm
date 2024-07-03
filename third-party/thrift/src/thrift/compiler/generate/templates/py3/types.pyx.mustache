@@ -34,7 +34,7 @@ want to include.
 }}
 {{> common/auto_generated_py}}
 cimport cython as __cython
-from cpython.object cimport PyTypeObject, Py_LT, Py_LE, Py_EQ, Py_NE, Py_GT, Py_GE
+from cpython.object cimport PyTypeObject
 from libcpp.memory cimport shared_ptr, make_shared, unique_ptr
 from libcpp.optional cimport optional as __optional
 from libcpp.string cimport string
@@ -53,12 +53,9 @@ from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as _
 from thrift.py3.types cimport (
     cSetOp as __cSetOp,
     richcmp as __richcmp,
+    list_getitem as __list_getitem,
     set_op as __set_op,
     setcmp as __setcmp,
-    list_index as __list_index,
-    list_count as __list_count,
-    list_slice as __list_slice,
-    list_getitem as __list_getitem,
     set_iter as __set_iter,
     map_iter as __map_iter,
     map_contains as __map_contains,
@@ -73,12 +70,14 @@ from thrift.py3.types cimport (
     translate_cpp_enum_to_python,
     SetMetaClass as __SetMetaClass,
     const_pointer_cast,
+    make_const_shared,
     constant_shared_ptr,
     NOTSET as __NOTSET,
     EnumData as __EnumData,
     EnumFlagsData as __EnumFlagsData,
     UnionTypeEnumData as __UnionTypeEnumData,
     createEnumDataForUnionType as __createEnumDataForUnionType,
+    BadEnum as __BadEnum,
 )
 {{#program:intercompatible?}}
 from thrift.py3.types import _is_python_enum, _is_python_struct
@@ -94,6 +93,7 @@ import sys
 from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
+import importlib
 {{#program:has_stream?}}
 import asyncio
 from folly.coro cimport bridgeCoroTaskWith
@@ -104,6 +104,15 @@ cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#include
 import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
 {{/hasTypes?}}
 {{/program:includeNamespaces}}
+
+{{#program:hasPyContainerTypes}}
+from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+{{#program:containerTypes}}{{#type:list?}}
+    {{type:flat_name}},
+{{/type:list?}}{{/program:containerTypes}}
+)
+{{/program:hasPyContainerTypes}}
+
 
 {{> types/enum }}
 {{> types/union_type_enum }}
@@ -510,12 +519,12 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("{{program:py_deprecated_module_path}}.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.{{struct:name}}, self)
+
 {{/program:filtered_structs}}
-{{#program:containerTypes}}
+{{#program:containerTypes}}{{^type:list?}}
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class {{type:flat_name}}(thrift.py3.types.{{!
-        }}{{#type:list?}}List{{/type:list?}}{{!
         }}{{#type:set?}}Set{{/type:set?}}{{!
         }}{{#type:map?}}Map{{/type:map?}}{{!
         }}):
@@ -540,66 +549,6 @@ cdef class {{type:flat_name}}(thrift.py3.types.{{!
     def __len__(self):
         return deref(self.{{> types/cpp_obj}}).size()
 
-{{#type:list?}}
-    cdef _get_slice(self, slice index_obj):
-        cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self.{{> types/cpp_obj}}).size())
-        return {{type:flat_name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[{{> types/cython_cpp_type}}](self.{{> types/cpp_obj}}, start, stop, step)
-        )
-
-    cdef _get_single_item(self, size_t index):
-        {{#type:list_elem_type}}
-        cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
-            }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
-        __list_getitem(self.{{> types/cpp_obj}}, index, citem)
-        return {{> types/container_cython_cpp_to_python_item}}
-        {{/type:list_elem_type}}
-
-    cdef _check_item_type(self, item):
-        if not self or item is None:
-            return
-        {{#type:list_elem_type}}
-        if isinstance(item, {{> types/python_type}}):
-            return item
-        {{#type:container?}}
-        try:
-            return {{> types/python_type}}(item)
-        except:
-            pass
-        {{/type:container?}}
-        {{/type:list_elem_type}}
-
-    def index(self, item, start=0, stop=None):
-        err = ValueError(f'{item} is not in list')
-        item = self._check_item_type(item)
-        if item is None:
-            raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self.{{> types/cpp_obj}}).size())
-        {{#type:list_elem_type}}
-        cdef {{>types/cython_cpp_type}} citem = {{> types/cython_python_to_cpp_item}}
-        {{/type:list_elem_type}}
-        cdef __optional[size_t] found = __list_index[{{> types/cython_cpp_type}}](self.{{> types/cpp_obj}}, indices[0], indices[1], citem)
-        if not found.has_value():
-            raise err
-        return found.value()
-
-    def count(self, item):
-        item = self._check_item_type(item)
-        if item is None:
-            return 0
-        {{#type:list_elem_type}}
-        cdef {{>types/cython_cpp_type}} citem = {{> types/cython_python_to_cpp_item}}
-        {{/type:list_elem_type}}
-        return __list_count[{{>types/cython_cpp_type}}](self.{{> types/cpp_obj}}, citem)
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__{{type:flat_name}}()
-
-
-Sequence.register({{type:flat_name}})
-{{/type:list?}}
 {{#type:set?}}
     def __contains__(self, item):
         if not self or item is None:
@@ -752,13 +701,13 @@ Set.register({{type:flat_name}})
         return get_types_reflection().get_reflection__{{type:flat_name}}()
 
 Mapping.register({{type:flat_name}})
-{{/type:map?}}
+{{/type:map?}}{{/type:list?}}
 
 {{! container to cpp converter }}
-cdef shared_ptr[{{> types/cython_cpp_type}}] {{type:flat_name}}__make_instance(object items) except *:
-    cdef shared_ptr[{{> types/cython_cpp_type}}] c_inst = make_shared[{{> types/cython_cpp_type}}]()
-    if items is not None:
 {{#type:list?}}
+cdef {{> types/cython_cpp_type}} {{type:flat_name}}__make_instance(object items) except *:
+    cdef {{> types/cython_cpp_type}} c_inst
+    if items is not None:
         {{#type:containerOfString?}}
         if isinstance(items, str):
             raise TypeError("If you really want to pass a string into a {{> types/pep484_type}} field, explicitly convert it first.")
@@ -779,10 +728,13 @@ cdef shared_ptr[{{> types/cython_cpp_type}}] {{type:flat_name}}__make_instance(o
             item = <{{> types/cython_python_type}}> item
             {{/type:integer?}}
             {{/type:container?}}
-            deref(c_inst).push_back({{> types/cython_python_to_cpp_item}})
+            c_inst.push_back({{> types/cython_python_to_cpp_item}})
             {{/type:list_elem_type}}
-{{/type:list?}}
-{{#type:set?}}
+{{/type:list?}}{{^type:list?}}
+cdef shared_ptr[{{> types/cython_cpp_type}}] {{type:flat_name}}__make_instance(object items) except *:
+    cdef shared_ptr[{{> types/cython_cpp_type}}] c_inst = make_shared[{{> types/cython_cpp_type}}]()
+    if items is not None:
+{{/type:list?}}{{#type:set?}}
         {{#type:containerOfString?}}
         if isinstance(items, str):
             raise TypeError("If you really want to pass a string into a {{> types/pep484_type}} field, explicitly convert it first.")
@@ -848,8 +800,23 @@ cdef shared_ptr[{{> types/cython_cpp_type}}] {{type:flat_name}}__make_instance(o
 {{/type:map?}}
     return cmove(c_inst)
 
-{{/program:containerTypes}}{{!
-}}{{#program:constants}}
+{{#type:list?}}
+cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    {{#type:list_elem_type}}
+    cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
+        }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
+    for idx in range(c_vec.size()):
+        __list_getitem(c_vec, idx, citem)
+        py_list.append({{> types/container_cython_cpp_to_python_item}})
+    {{/type:list_elem_type}}
+    return {{type:flat_name}}(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+{{/type:list?}}
+
+{{/program:containerTypes}}
+
+{{#program:constants}}
 {{#constant:value}}{{> types/constant_value}}{{/constant:value}}{{/program:constants}}{{!
 }}{{#program:filtered_typedefs}}
 {{typedef:name}} = {{#typedef:type}}{{> types/python_type}}{{/typedef:type}}

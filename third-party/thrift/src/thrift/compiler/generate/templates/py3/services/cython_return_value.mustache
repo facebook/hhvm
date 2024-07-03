@@ -68,7 +68,12 @@ to the client.
 }}{{/function:stream?}}{{!
 }}{{#type:container?}}{{!
   }}{{^function:stack_arguments?}}make_unique[{{> types/cython_cpp_type}}]({{/function:stack_arguments?}}{{!
+  }}{{#type:list?}}{{!
+    }}{{> types/container_to_cpp}}(result){{!
+  }}{{/type:list?}}{{!
+  }}{{^type:list?}}{{!
     }}deref((<{{> types/cython_python_type}}?> result).{{> types/cpp_obj}}){{!
+  }}{{/type:list?}}{{!
   }}{{^function:stack_arguments?}}){{/function:stack_arguments?}}{{!
 }}{{/type:container?}}{{!
 }}{{#type:void?}}c_unit{{/type:void?}}{{!

@@ -13,6 +13,8 @@ from thrift.py3.types cimport (
     assign_shared_const_ptr,
     bytes_to_string,
     make_unique,
+    make_shared,
+    make_const_shared,
 )
 cimport thrift.py3.types
 from thrift.py3.types cimport (
@@ -386,7 +388,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 25)
             return
-        deref(self._struct_cpp_obj).optListVal_ref().assign(deref(_test_fixtures_patch_module_types.List__i16(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).optListVal_ref().assign(_test_fixtures_patch_module_types.List__i16__make_instance(_fbthrift_value))
 
     cdef void _set_field_26(self, _fbthrift_value) except *:
         # for field optSetVal
@@ -407,7 +409,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 28)
             return
-        deref(self._struct_cpp_obj).listMap_ref().assign(deref(_test_fixtures_patch_module_types.List__Map__string_i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).listMap_ref().assign(_test_fixtures_patch_module_types.List__Map__string_i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_29(self, _fbthrift_value) except *:
         # for field mapMap
@@ -569,47 +571,47 @@ cdef class __RefFields_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 0)
             return
-        assign_unique_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).unique_ref(), make_unique[vector[cint32_t]](deref(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        assign_unique_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).unique_ref(), make_unique[vector[cint32_t]](_test_fixtures_patch_module_types.List__i32__make_instance(_fbthrift_value)))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field shared_const
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 1)
             return
-        assign_shared_const_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).shared_const_ref(), const_pointer_cast(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        assign_shared_const_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).shared_const_ref(), make_const_shared[vector[cint32_t]](_test_fixtures_patch_module_types.List__i32__make_instance(_fbthrift_value)))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field shared_mustable
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 2)
             return
-        assign_shared_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).shared_mustable_ref(), _test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        assign_shared_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).shared_mustable_ref(), make_shared[vector[cint32_t]](_test_fixtures_patch_module_types.List__i32__make_instance(_fbthrift_value)))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field opt_unique
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 3)
             return
-        assign_unique_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).opt_unique_ref(), make_unique[vector[cint32_t]](deref(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        assign_unique_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).opt_unique_ref(), make_unique[vector[cint32_t]](_test_fixtures_patch_module_types.List__i32__make_instance(_fbthrift_value)))
 
     cdef void _set_field_4(self, _fbthrift_value) except *:
         # for field opt_shared_const
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 4)
             return
-        assign_shared_const_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).opt_shared_const_ref(), const_pointer_cast(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        assign_shared_const_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).opt_shared_const_ref(), make_const_shared[vector[cint32_t]](_test_fixtures_patch_module_types.List__i32__make_instance(_fbthrift_value)))
 
     cdef void _set_field_5(self, _fbthrift_value) except *:
         # for field opt_shared_mustable
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 5)
             return
-        assign_shared_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).opt_shared_mustable_ref(), _test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        assign_shared_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).opt_shared_mustable_ref(), make_shared[vector[cint32_t]](_test_fixtures_patch_module_types.List__i32__make_instance(_fbthrift_value)))
 
     cdef void _set_field_6(self, _fbthrift_value) except *:
         # for field opt_box
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 6)
             return
-        deref(self._struct_cpp_obj).opt_box_ref().assign(deref(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).opt_box_ref().assign(_test_fixtures_patch_module_types.List__i32__make_instance(_fbthrift_value))
 

@@ -94,7 +94,7 @@ async def {{service:name}}_{{function:name}}_coro(
                     {{field:py_name}}{{^last?}},{{/last?}}{{/function:args}})
         {{#function:return_type}}
         {{#type:container?}}
-        result = {{> types/cython_python_type}}(result)
+        result = {{> types/python_type}}(result)
         {{/type:container?}}
         {{#function:stream?}}
         {{#function:stream_has_first_response?}}

@@ -13,6 +13,8 @@ from thrift.py3.types cimport (
     assign_shared_const_ptr,
     bytes_to_string,
     make_unique,
+    make_shared,
+    make_const_shared,
 )
 cimport thrift.py3.types
 from thrift.py3.types cimport (
@@ -96,35 +98,35 @@ cdef class __ContainerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_types.cContainerStruct](deref(self._struct_cpp_obj), 0)
             return
-        deref(self._struct_cpp_obj).fieldA_ref().assign(deref(_apache_thrift_fixtures_types_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldA_ref().assign(_apache_thrift_fixtures_types_module_types.List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field fieldB
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_types.cContainerStruct](deref(self._struct_cpp_obj), 1)
             return
-        deref(self._struct_cpp_obj).fieldB_ref().assign(deref(_apache_thrift_fixtures_types_module_types.std_list__List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldB_ref().assign(_apache_thrift_fixtures_types_module_types.std_list__List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field fieldC
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_types.cContainerStruct](deref(self._struct_cpp_obj), 2)
             return
-        deref(self._struct_cpp_obj).fieldC_ref().assign(deref(_apache_thrift_fixtures_types_module_types.std_deque__List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldC_ref().assign(_apache_thrift_fixtures_types_module_types.std_deque__List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field fieldD
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_types.cContainerStruct](deref(self._struct_cpp_obj), 3)
             return
-        deref(self._struct_cpp_obj).fieldD_ref().assign(deref(_apache_thrift_fixtures_types_module_types.folly_fbvector__List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldD_ref().assign(_apache_thrift_fixtures_types_module_types.folly_fbvector__List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_4(self, _fbthrift_value) except *:
         # for field fieldE
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_types.cContainerStruct](deref(self._struct_cpp_obj), 4)
             return
-        deref(self._struct_cpp_obj).fieldE_ref().assign(deref(_apache_thrift_fixtures_types_module_types.folly_small_vector__List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldE_ref().assign(_apache_thrift_fixtures_types_module_types.folly_small_vector__List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_5(self, _fbthrift_value) except *:
         # for field fieldF
@@ -170,7 +172,7 @@ cdef class __CppTypeStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_types.cCppTypeStruct](deref(self._struct_cpp_obj), 0)
             return
-        deref(self._struct_cpp_obj).fieldA_ref().assign(deref(_apache_thrift_fixtures_types_module_types.std_list_int32_t__List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldA_ref().assign(_apache_thrift_fixtures_types_module_types.std_list_int32_t__List__i32__make_instance(_fbthrift_value))
 
 
 @__cython.auto_pickle(False)
@@ -666,7 +668,7 @@ cdef class __AnnotatedTypes_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_types.cAnnotatedTypes](deref(self._struct_cpp_obj), 1)
             return
-        deref(self._struct_cpp_obj).list_field_ref().assign(deref(_apache_thrift_fixtures_types_module_types.List__std_unordered_map__Map__i32_string(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).list_field_ref().assign(_apache_thrift_fixtures_types_module_types.List__std_unordered_map__Map__i32_string__make_instance(_fbthrift_value))
 
 
 @__cython.auto_pickle(False)
@@ -866,7 +868,7 @@ cdef class __IncompleteList_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_types.cIncompleteList](deref(self._struct_cpp_obj), 0)
             return
-        deref(self._struct_cpp_obj).field_ref().assign(deref(_apache_thrift_fixtures_types_module_types._std_list__List__IncompleteListDep(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).field_ref().assign(_apache_thrift_fixtures_types_module_types._std_list__List__IncompleteListDep__make_instance(_fbthrift_value))
 
 
 @__cython.auto_pickle(False)
@@ -908,7 +910,7 @@ cdef class __CompleteList_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_types.cCompleteList](deref(self._struct_cpp_obj), 0)
             return
-        deref(self._struct_cpp_obj).field_ref().assign(deref(_apache_thrift_fixtures_types_module_types.folly_small_vector__List__CompleteListDep(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).field_ref().assign(_apache_thrift_fixtures_types_module_types.folly_small_vector__List__CompleteListDep__make_instance(_fbthrift_value))
 
 
 @__cython.auto_pickle(False)
@@ -950,7 +952,7 @@ cdef class __AdaptedList_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_types.cAdaptedList](deref(self._struct_cpp_obj), 0)
             return
-        deref(self._struct_cpp_obj).field_ref().assign(deref(_apache_thrift_fixtures_types_module_types.List__AdaptedListDep(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).field_ref().assign(_apache_thrift_fixtures_types_module_types.List__AdaptedListDep__make_instance(_fbthrift_value))
 
 
 @__cython.auto_pickle(False)
@@ -975,7 +977,7 @@ cdef class __DependentAdaptedList_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_types.cDependentAdaptedList](deref(self._struct_cpp_obj), 0)
             return
-        deref(self._struct_cpp_obj).field_ref().assign(deref(_apache_thrift_fixtures_types_module_types.List__DependentAdaptedListDep(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).field_ref().assign(_apache_thrift_fixtures_types_module_types.List__DependentAdaptedListDep__make_instance(_fbthrift_value))
 
 
 @__cython.auto_pickle(False)
@@ -1006,7 +1008,7 @@ cdef class __AllocatorAware_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_types.cAllocatorAware](deref(self._struct_cpp_obj), 0)
             return
-        deref(self._struct_cpp_obj).aa_list_ref().assign(deref(_apache_thrift_fixtures_types_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).aa_list_ref().assign(_apache_thrift_fixtures_types_module_types.List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field aa_set

@@ -13,6 +13,8 @@ from thrift.py3.types cimport (
     assign_shared_const_ptr,
     bytes_to_string,
     make_unique,
+    make_shared,
+    make_const_shared,
 )
 cimport thrift.py3.types
 from thrift.py3.types cimport (
@@ -145,7 +147,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 5)
             return
-        deref(self._struct_cpp_obj).fieldF_ref().assign(deref(_module_types.List__List__List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldF_ref().assign(_module_types.List__List__List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_6(self, _fbthrift_value) except *:
         # for field fieldG
@@ -159,7 +161,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 7)
             return
-        deref(self._struct_cpp_obj).fieldH_ref().assign(deref(_module_types.List__Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldH_ref().assign(_module_types.List__Set__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_8(self, _fbthrift_value) except *:
         # for field fieldI
@@ -182,7 +184,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 10)
             return
-        deref(self._struct_cpp_obj).fieldK_ref().assign(deref(_module_types.List__List__List__List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldK_ref().assign(_module_types.List__List__List__List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_11(self, _fbthrift_value) except *:
         # for field fieldL
@@ -203,21 +205,21 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 13)
             return
-        deref(self._struct_cpp_obj).fieldN_ref().assign(deref(_module_types.List__Foo__i64(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldN_ref().assign(_module_types.List__Foo__i64__make_instance(_fbthrift_value))
 
     cdef void _set_field_14(self, _fbthrift_value) except *:
         # for field fieldO
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 14)
             return
-        deref(self._struct_cpp_obj).fieldO_ref().assign(deref(_module_types.List__Bar__double(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldO_ref().assign(_module_types.List__Bar__double__make_instance(_fbthrift_value))
 
     cdef void _set_field_15(self, _fbthrift_value) except *:
         # for field fieldP
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 15)
             return
-        deref(self._struct_cpp_obj).fieldP_ref().assign(deref(_module_types.List__Baz__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldP_ref().assign(_module_types.List__Baz__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_16(self, _fbthrift_value) except *:
         # for field fieldQ

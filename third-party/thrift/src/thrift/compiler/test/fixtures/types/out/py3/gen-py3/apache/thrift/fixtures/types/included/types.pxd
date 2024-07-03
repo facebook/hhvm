@@ -100,12 +100,7 @@ cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
 
 cdef shared_ptr[std_unordered_map[cint32_t,string]] std_unordered_map__Map__i32_string__make_instance(object items) except *
 
-cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
-    cdef shared_ptr[vector[std_unordered_map[cint32_t,string]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[std_unordered_map[cint32_t,string]]])
-    cdef _check_item_type(self, item)
-
-cdef shared_ptr[vector[std_unordered_map[cint32_t,string]]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *
+cdef vector[std_unordered_map[cint32_t,string]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *
+cdef object List__std_unordered_map__Map__i32_string__from_cpp(const vector[std_unordered_map[cint32_t,string]]&) except *
 
 

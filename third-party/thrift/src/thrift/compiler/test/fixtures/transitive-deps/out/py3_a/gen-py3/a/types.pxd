@@ -82,27 +82,17 @@ cdef class A(thrift.py3.types.Struct):
     cdef _fbthrift_types_fields.__A_FieldsSetter _fields_setter
     cdef inline object b_impl(self)
     cdef inline object other_impl(self)
-    cdef List__List__c_C __fbthrift_cached_b
-    cdef List__c_C __fbthrift_cached_other
+    cdef object __fbthrift_cached_b
+    cdef object __fbthrift_cached_other
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cA])
 
 
-cdef class List__c_C(thrift.py3.types.List):
-    cdef shared_ptr[vector[_c_types.cC]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[_c_types.cC]])
-    cdef _check_item_type(self, item)
+cdef vector[_c_types.cC] List__c_C__make_instance(object items) except *
+cdef object List__c_C__from_cpp(const vector[_c_types.cC]&) except *
 
-cdef shared_ptr[vector[_c_types.cC]] List__c_C__make_instance(object items) except *
-
-cdef class List__List__c_C(thrift.py3.types.List):
-    cdef shared_ptr[vector[vector[_c_types.cC]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[vector[_c_types.cC]]])
-    cdef _check_item_type(self, item)
-
-cdef shared_ptr[vector[vector[_c_types.cC]]] List__List__c_C__make_instance(object items) except *
+cdef vector[vector[_c_types.cC]] List__List__c_C__make_instance(object items) except *
+cdef object List__List__c_C__from_cpp(const vector[vector[_c_types.cC]]&) except *
 
 

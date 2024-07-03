@@ -13,6 +13,8 @@ from thrift.py3.types cimport (
     assign_shared_const_ptr,
     bytes_to_string,
     make_unique,
+    make_shared,
+    make_const_shared,
 )
 cimport thrift.py3.types
 from thrift.py3.types cimport (
@@ -153,7 +155,7 @@ cdef class __Containers_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_basic_module_types.cContainers](deref(self._struct_cpp_obj), 0)
             return
-        deref(self._struct_cpp_obj).I32List_ref().assign(deref(_test_fixtures_basic_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).I32List_ref().assign(_test_fixtures_basic_module_types.List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field StringSet

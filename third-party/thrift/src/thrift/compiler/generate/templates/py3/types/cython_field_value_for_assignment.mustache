@@ -30,6 +30,9 @@ on a struct.
 }}{{/type:flexibleBinary?}}{{!
 }}{{^type:hasCustomTypeBehavior?}}{{!
 }}{{#field:reference?}}{{!
+}}{{#type:list?}}{{!
+}}{{> types/lift_to_heap }}({{> types/container_to_cpp }}(_fbthrift_value)){{!
+}}{{/type:list?}}{{^type:list?}}{{!
   }}{{#field:unique_ref?}}{{!
     For unique references, we just make a copy of the target object - it's not
     especially efficient but there isn't much else we can do from a shared ptr
@@ -41,6 +44,7 @@ on a struct.
   }}{{#field:shared_const_ref?}}{{!
     }}const_pointer_cast({{> types/cython_cast_or_create_python_type}}.{{> types/cpp_obj}}){{!
   }}{{/field:shared_const_ref?}}{{!
+}}{{/type:list?}}{{!
 }}{{/field:reference?}}{{^field:reference?}}{{!
 }}{{#type:base?}}{{!
   }}{{#type:string?}}cmove(bytes_to_string({{/type:string?}}{{!
@@ -53,7 +57,11 @@ on a struct.
 }}{{#type:struct?}}{{!
     }}deref((<{{> types/cython_python_type }}?> _fbthrift_value).{{> types/cpp_obj}}){{!
 }}{{/type:struct?}}{{!
-}}{{#type:container?}}{{!
+}}{{#type:list?}}{{!
+    }}{{> types/container_to_cpp }}(_fbthrift_value){{!
+}}{{/type:list?}}{{!
+}}{{#type:container?}}{{^type:list?}}{{!
     }}deref({{> types/cython_python_type }}(_fbthrift_value).{{> types/cpp_obj}}){{!
-}}{{/type:container?}}{{/field:reference?}}{{!
+}}{{/type:list?}}{{/type:container?}}{{!
+}}{{/field:reference?}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

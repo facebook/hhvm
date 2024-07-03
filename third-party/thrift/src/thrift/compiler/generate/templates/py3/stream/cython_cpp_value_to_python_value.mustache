@@ -41,9 +41,13 @@ to a python type.
 }}{{#type:struct}}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}_value)){{/type:struct}}{{!
-}}{{#type:container?}}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
+}}{{#type:list?}}{{!
+  }}{{> types/container_from_cpp }}(_value){{!
+}}{{/type:list?}}{{!
+}}{{#type:container?}}{{^type:list?}}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
-  }}_value)){{/type:container?}}{{!
+  }}_value)){{!
+}}{{/type:list?}}{{/type:container?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!
 }}{{#type:enum}}{{> types/cython_python_type}}(<int> _value){{/type:enum}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

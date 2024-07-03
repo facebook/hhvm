@@ -37,9 +37,28 @@ struct ImplicitContext {
   */
   int64_t m_memoKey;
 
-  // HashMap of TypedValues and their instance keys
+  // HashMap of TypedValues and their instance keys, for memo agnostic
+  // values, the second.second TypedValue will be KindOfUninit
   req::fast_map<const StringData*, std::pair<TypedValue, TypedValue>,
                 string_data_hash, string_data_same> m_map;
+
+  /*
+   * How Implicit Contexts behave with respect to memoization 
+   * divides them into two varieties: memo-agnostic and memo-sensitive.
+   * Memo-agnostic ICs do not affect memoization
+   * Memo-sensitive ICs contribute to memoization sharding
+   * We are implementing it in a way that at any given time, the current
+   * activeCtx will contain the information in the m_map that is 
+   * consistent with its memoization type. To accomoplish this, we 
+   * keep a second pointer called m_memoAgnosticIC in the struct that 
+   * contains only memo agnostic keys
+   * Additionally, whenever we need to be in the memo agnostic type IC,
+   * we can do so simply by swapping the activeCtx with the current IC's
+   * memo agnostic counterpart. Note that there is no variable to hold
+   * the current 'State' since the 'State' is determined by what is stored
+   * in m_map
+  */
+  ObjectData* m_memoAgnosticIC;
 
   ////////////////////////////////////////////////////////////////////////////
   // Statics

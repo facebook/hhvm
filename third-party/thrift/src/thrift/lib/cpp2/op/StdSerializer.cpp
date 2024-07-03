@@ -29,7 +29,7 @@ namespace {
         decltype(tag),
         StandardProtocol::SimpleJson,
         StandardProtocol::Compact,
-        StandardProtocol::Binary>(detail::getGeneratedTypeRegistry());
+        StandardProtocol::Binary>(detail::getGeneratedTypeRegistry(), true);
   };
 
   registry(bool_t{});

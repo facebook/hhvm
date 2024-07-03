@@ -589,11 +589,11 @@ void readUnion(
     }
     read(iprot, *fieldInfo->typeInfo, readState, value);
     setActiveId(unionObject, structInfo, fieldInfo->id);
+    readState.readFieldEnd(iprot);
+    readState.readFieldBegin(iprot);
   } else {
     skip(iprot, readState);
   }
-  readState.readFieldEnd(iprot);
-  readState.readFieldBegin(iprot);
   if (UNLIKELY(!readState.atStop())) {
     TProtocolException::throwUnionMissingStop();
   }

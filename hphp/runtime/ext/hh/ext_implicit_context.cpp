@@ -287,9 +287,9 @@ Array HHVM_FUNCTION(get_implicit_context_debug_info) {
   return ret.toArray();
 }
 
-
 Object HHVM_FUNCTION(create_implicit_context, StringArg keyarg,
-                                              TypedValue data) {
+                                              TypedValue data,
+                                              bool memoSensitive) {
   auto const key = keyarg.get();
   /*
    * Reserve the underscore prefix for the time being in case we want to
@@ -301,6 +301,8 @@ Object HHVM_FUNCTION(create_implicit_context, StringArg keyarg,
       "Implicit context keys cannot be empty or start with _");
   }
   assertx(*ImplicitContext::activeCtx);
+  
+  if (!memoSensitive) return create_implicit_context_impl(data, Variant{}, key, kAgnosticMemoKey);
 
   auto serializedValue = Variant::attach(HHVM_FN(serialize_memoize_param)(data));
   auto memo_key_int = memoKeyForInsert(key, serializedValue);

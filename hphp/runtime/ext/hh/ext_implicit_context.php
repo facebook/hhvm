@@ -111,6 +111,7 @@ function has_key(string $key)[zoned]: bool;
 function create_implicit_context(
   string $key,
   mixed $context,
+  bool $memo_sensitive,
 )[zoned]: ImplicitContextData;
 
 /*
@@ -141,6 +142,7 @@ abstract class ImplicitContext {
       ImplicitContext\_Private\create_implicit_context(
         nameof static,
         $context,
+        true,
       ),
     );
     try {
@@ -161,6 +163,7 @@ abstract class ImplicitContext {
       ImplicitContext\_Private\create_implicit_context(
         nameof static,
         $context,
+        true,
       ),
     );
     try {

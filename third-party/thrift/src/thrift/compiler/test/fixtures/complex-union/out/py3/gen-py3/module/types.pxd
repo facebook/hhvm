@@ -372,11 +372,21 @@ cdef class NonCopyableUnion(thrift.py3.types.Union):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cNonCopyableUnion])
 
 
-cdef vector[cint64_t] List__i64__make_instance(object items) except *
-cdef object List__i64__from_cpp(const vector[cint64_t]&) except *
+cdef class List__i64(thrift.py3.types.List):
+    cdef shared_ptr[vector[cint64_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint64_t]])
+    cdef _check_item_type(self, item)
 
-cdef vector[string] List__string__make_instance(object items) except *
-cdef object List__string__from_cpp(const vector[string]&) except *
+cdef shared_ptr[vector[cint64_t]] List__i64__make_instance(object items) except *
+
+cdef class List__string(thrift.py3.types.List):
+    cdef shared_ptr[vector[string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[string]])
+    cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[string]] List__string__make_instance(object items) except *
 
 cdef class Map__i16_string(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint16_t,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE

@@ -38,11 +38,10 @@ in the client or server source rather than the type definition source.
   }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
   }}{{struct:name}}{{!
 }}{{/type:struct}}{{!
-}}{{#type:list?}}object{{/type:list?}}{{!
-}}{{#type:container?}}{{^type:list?}}{{!
+}}{{#type:container?}}{{!
   }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
   }}{{type:flat_name}}{{!
-}}{{/type:list?}}{{/type:container?}}{{!
+}}{{/type:container?}}{{!
 }}{{#type:void?}}object{{/type:void?}}{{!
 }}{{#type:enum}}{{!
   }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!

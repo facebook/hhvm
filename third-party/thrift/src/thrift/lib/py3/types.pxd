@@ -28,11 +28,9 @@ from thrift.py3.std_libcpp cimport string_view, sv_to_str
 from thrift.python.common cimport cThriftMetadata
 from thrift.python.protocol cimport Protocol
 
-# make_unique was changed in cython to have except+ which breaks thrift-py3
+# This was changed in cython to have except+ which breaks thrift-py3
 cdef extern from "<memory>" namespace "std" nogil:
     unique_ptr[T] make_unique[T](...)
-    shared_ptr[T] make_shared[T](...)
-    shared_ptr[const T] make_const_shared "std::make_shared"[T](...)
 
 cdef extern from *:
     """
@@ -72,7 +70,10 @@ cdef extern from "thrift/lib/py3/types.h" namespace "::thrift::py3" nogil:
     bint richcmp[T](const shared_ptr[T]& a, const shared_ptr[T]& b, int op)
     bint setcmp[T](const shared_ptr[T]& a, const shared_ptr[T]& b, int op)
     shared_ptr[T] set_op[T](const shared_ptr[T]& a, const shared_ptr[T]& b, cSetOp op)
-    void list_getitem[T](T& cpp_obj, int index, ...)
+    optional[size_t] list_index[T](const shared_ptr[T]& list, int start, int stop, ...)
+    shared_ptr[T] list_slice[T](const shared_ptr[T]& cpp_obj, int start, int stop, int step)
+    void list_getitem[T](const shared_ptr[T]& cpp_obj, int index, ...)
+    size_t list_count[T](const shared_ptr[T]& list, ...)
     bint map_contains[T](const shared_ptr[T]& cpp_obj, ...)
     void map_getitem[T](const shared_ptr[T]& cpp_obj, ...)
     void reset_field[T](T& obj, uint16_t index) except +
@@ -164,9 +165,9 @@ cdef class Container:
 
 
 cdef class List(Container):
-    cdef list _py_obj
-    cdef object _child_cls
     cdef int _normalize_index(self, int index) except *
+    cdef _get_slice(self, slice index_obj)
+    cdef _get_single_item(self, size_t index)
 
 cdef class Set(Container):
     cdef _fbthrift_py_richcmp(self, other, int op)

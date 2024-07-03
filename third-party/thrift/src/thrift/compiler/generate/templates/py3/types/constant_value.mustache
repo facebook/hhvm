@@ -67,13 +67,10 @@ file.
 {{constant:name}} = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
     }}c{{constant:name}}()))
 {{/type:struct?}}
-{{#type:container?}}{{^type:list?}}
+{{#type:container?}}
 {{constant:name}} = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
     }}c{{constant:name}}()))
-{{/type:list?}}{{/type:container?}}
-{{#type:list?}}
-{{constant:name}} = {{> types/container_from_cpp }}(c{{constant:name}}())
-{{/type:list?}}
+{{/type:container?}}
 {{#type:enum}}
 {{constant:name}} = {{#type:need_module_path?}}{{type:modulePath}}.{{!
     }}{{/type:need_module_path?}}{{enum:name}}(<int> (c{{constant:name}}()))

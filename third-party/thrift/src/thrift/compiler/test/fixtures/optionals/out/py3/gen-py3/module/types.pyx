@@ -5,7 +5,7 @@
 #  @generated
 #
 cimport cython as __cython
-from cpython.object cimport PyTypeObject
+from cpython.object cimport PyTypeObject, Py_LT, Py_LE, Py_EQ, Py_NE, Py_GT, Py_GE
 from libcpp.memory cimport shared_ptr, make_shared, unique_ptr
 from libcpp.optional cimport optional as __optional
 from libcpp.string cimport string
@@ -24,9 +24,12 @@ from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as _
 from thrift.py3.types cimport (
     cSetOp as __cSetOp,
     richcmp as __richcmp,
-    list_getitem as __list_getitem,
     set_op as __set_op,
     setcmp as __setcmp,
+    list_index as __list_index,
+    list_count as __list_count,
+    list_slice as __list_slice,
+    list_getitem as __list_getitem,
     set_iter as __set_iter,
     map_iter as __map_iter,
     map_contains as __map_contains,
@@ -37,14 +40,12 @@ from thrift.py3.types cimport (
     translate_cpp_enum_to_python,
     SetMetaClass as __SetMetaClass,
     const_pointer_cast,
-    make_const_shared,
     constant_shared_ptr,
     NOTSET as __NOTSET,
     EnumData as __EnumData,
     EnumFlagsData as __EnumFlagsData,
     UnionTypeEnumData as __UnionTypeEnumData,
     createEnumDataForUnionType as __createEnumDataForUnionType,
-    BadEnum as __BadEnum,
 )
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
@@ -57,12 +58,6 @@ import sys
 from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
-import importlib
-
-from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
-    List__Vehicle,
-)
-
 
 
 cdef __EnumData __Animal_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnimal](), Animal)
@@ -270,7 +265,6 @@ cdef class Color(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Color, self)
-
 @__cython.auto_pickle(False)
 cdef class Vehicle(thrift.py3.types.Struct):
     def __init__(Vehicle self, **kwargs):
@@ -431,7 +425,6 @@ cdef class Vehicle(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Vehicle, self)
-
 @__cython.auto_pickle(False)
 cdef class Person(thrift.py3.types.Struct):
     def __init__(Person self, **kwargs):
@@ -571,7 +564,7 @@ cdef class Person(thrift.py3.types.Struct):
             return None
 
         if self.__fbthrift_cached_vehicles is None:
-            self.__fbthrift_cached_vehicles = List__Vehicle__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).vehicles_ref().ref_unchecked())
+            self.__fbthrift_cached_vehicles = List__Vehicle._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).vehicles_ref().ref_unchecked(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_vehicles
 
     @property
@@ -655,7 +648,6 @@ cdef class Person(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Person, self)
-
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class Set__i64(thrift.py3.types.Set):
@@ -736,7 +728,6 @@ cdef shared_ptr[cset[cint64_t]] Set__i64__make_instance(object items) except *:
             item = <cint64_t> item
             deref(c_inst).insert(item)
     return cmove(c_inst)
-
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -833,25 +824,81 @@ cdef shared_ptr[cmap[cAnimal,string]] Map__Animal_string__make_instance(object i
             deref(c_inst)[<cAnimal><int>key] = item.encode('UTF-8')
     return cmove(c_inst)
 
+@__cython.auto_pickle(False)
+@__cython.final
+cdef class List__Vehicle(thrift.py3.types.List):
+    def __init__(self, items=None):
+        if isinstance(items, List__Vehicle):
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<List__Vehicle> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+        else:
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = List__Vehicle__make_instance(items)
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cVehicle]] c_items):
+        __fbthrift_inst = <List__Vehicle>List__Vehicle.__new__(List__Vehicle)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(List__Vehicle self):
+        cdef shared_ptr[vector[cVehicle]] cpp_obj = make_shared[vector[cVehicle]](
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        )
+        return List__Vehicle._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
+
+    cdef _get_slice(self, slice index_obj):
+        cdef int start, stop, step
+        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
+        return List__Vehicle._create_FBTHRIFT_ONLY_DO_NOT_USE(
+            __list_slice[vector[cVehicle]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
+        )
+
+    cdef _get_single_item(self, size_t index):
+        cdef shared_ptr[cVehicle] citem
+        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
+        return Vehicle._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
+
+    cdef _check_item_type(self, item):
+        if not self or item is None:
+            return
+        if isinstance(item, Vehicle):
+            return item
+
+    def index(self, item, start=0, stop=None):
+        err = ValueError(f'{item} is not in list')
+        item = self._check_item_type(item)
+        if item is None:
+            raise err
+        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
+        cdef cVehicle citem = deref((<Vehicle>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef __optional[size_t] found = __list_index[vector[cVehicle]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
+        if not found.has_value():
+            raise err
+        return found.value()
+
+    def count(self, item):
+        item = self._check_item_type(item)
+        if item is None:
+            return 0
+        cdef cVehicle citem = deref((<Vehicle>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        return __list_count[vector[cVehicle]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__Vehicle()
 
 
-cdef vector[cVehicle] List__Vehicle__make_instance(object items) except *:
-    cdef vector[cVehicle] c_inst
+Sequence.register(List__Vehicle)
+
+cdef shared_ptr[vector[cVehicle]] List__Vehicle__make_instance(object items) except *:
+    cdef shared_ptr[vector[cVehicle]] c_inst = make_shared[vector[cVehicle]]()
     if items is not None:
         for item in items:
             if not isinstance(item, Vehicle):
                 raise TypeError(f"{item!r} is not of type Vehicle")
-            c_inst.push_back(deref((<Vehicle>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            deref(c_inst).push_back(deref((<Vehicle>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
-
-cdef object List__Vehicle__from_cpp(const vector[cVehicle]& c_vec) except *:
-    cdef list py_list = []
-    cdef int idx = 0
-    cdef shared_ptr[cVehicle] citem
-    for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(Vehicle._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
-    return List__Vehicle(py_list, thrift.py3.types._fbthrift_list_private_ctor)
-
 
 PersonID = int

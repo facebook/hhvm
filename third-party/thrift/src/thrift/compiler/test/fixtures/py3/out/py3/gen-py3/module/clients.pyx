@@ -401,7 +401,7 @@ cdef void SimpleService_fib_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__i32__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[cint32_t]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -453,7 +453,7 @@ cdef void SimpleService_list_of_lists_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__List__i32__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.List__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[vector[cint32_t]]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -479,7 +479,7 @@ cdef void SimpleService_list_of_sets_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__Set__string__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.List__Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[cset[string]]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -583,7 +583,7 @@ cdef void SimpleService_contain_enum_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__AnEnum__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.List__AnEnum._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[_module_types.cAnEnum]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -934,7 +934,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint32_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).sum_i16_list(rpc_options._cpp_obj, 
-                _module_types.List__i16__make_instance(numbers),
+                deref((<_module_types.List__i16>numbers)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_sum_i16_list_callback,
             <PyObject *> __userdata
@@ -958,7 +958,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint32_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).sum_i32_list(rpc_options._cpp_obj, 
-                _module_types.List__i32__make_instance(numbers),
+                deref((<_module_types.List__i32>numbers)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_sum_i32_list_callback,
             <PyObject *> __userdata
@@ -982,7 +982,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint32_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).sum_i64_list(rpc_options._cpp_obj, 
-                _module_types.List__i64__make_instance(numbers),
+                deref((<_module_types.List__i64>numbers)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_sum_i64_list_callback,
             <PyObject *> __userdata
@@ -1006,7 +1006,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[string](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).concat_many(rpc_options._cpp_obj, 
-                _module_types.List__string__make_instance(words),
+                deref((<_module_types.List__string>words)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_concat_many_callback,
             <PyObject *> __userdata
@@ -1030,7 +1030,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint32_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).count_structs(rpc_options._cpp_obj, 
-                _module_types.List__SimpleStruct__make_instance(items),
+                deref((<_module_types.List__SimpleStruct>items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_count_structs_callback,
             <PyObject *> __userdata
@@ -1268,7 +1268,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cset[string]](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).unique_words(rpc_options._cpp_obj, 
-                _module_types.List__string__make_instance(words),
+                deref((<_module_types.List__string>words)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_unique_words_callback,
             <PyObject *> __userdata
@@ -1292,7 +1292,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cmap[string,cint16_t]](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).words_count(rpc_options._cpp_obj, 
-                _module_types.List__string__make_instance(words),
+                deref((<_module_types.List__string>words)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_words_count_callback,
             <PyObject *> __userdata
@@ -1438,7 +1438,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[string](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).make_sentence(rpc_options._cpp_obj, 
-                _module_types.List__List__string__make_instance(word_chars),
+                deref((<_module_types.List__List__string>word_chars)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_make_sentence_callback,
             <PyObject *> __userdata
@@ -1462,7 +1462,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cset[cint32_t]](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).get_union(rpc_options._cpp_obj, 
-                _module_types.List__Set__i32__make_instance(sets),
+                deref((<_module_types.List__Set__i32>sets)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_get_union_callback,
             <PyObject *> __userdata
@@ -1486,7 +1486,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cset[string]](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).get_keys(rpc_options._cpp_obj, 
-                _module_types.List__Map__string_string__make_instance(string_map),
+                deref((<_module_types.List__Map__string_string>string_map)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_get_keys_callback,
             <PyObject *> __userdata
@@ -1558,7 +1558,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cset[string]](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).contain_binary(rpc_options._cpp_obj, 
-                _module_types.List__binary__make_instance(binaries),
+                deref((<_module_types.List__binary>binaries)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_contain_binary_callback,
             <PyObject *> __userdata
@@ -1582,7 +1582,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[vector[_module_types.cAnEnum]](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).contain_enum(rpc_options._cpp_obj, 
-                _module_types.List__AnEnum__make_instance(the_enum),
+                deref((<_module_types.List__AnEnum>the_enum)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_contain_enum_callback,
             <PyObject *> __userdata

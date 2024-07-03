@@ -156,8 +156,13 @@ cdef class SecretStruct(thrift.py3.types.Struct):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSecretStruct])
 
 
-cdef std_deque_std_string std_deque_std_string__List__string__make_instance(object items) except *
-cdef object std_deque_std_string__List__string__from_cpp(const std_deque_std_string&) except *
+cdef class std_deque_std_string__List__string(thrift.py3.types.List):
+    cdef shared_ptr[std_deque_std_string] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[std_deque_std_string])
+    cdef _check_item_type(self, item)
+
+cdef shared_ptr[std_deque_std_string] std_deque_std_string__List__string__make_instance(object items) except *
 
 
 cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_constants.h" namespace "::cpp2":

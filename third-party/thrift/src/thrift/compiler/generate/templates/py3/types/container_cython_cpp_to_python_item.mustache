@@ -43,10 +43,9 @@ citem.
 }}{{#type:float?}}citem{{/type:float?}}{{!
 }}{{#type:string?}}bytes(citem).decode('UTF-8'){{/type:string?}}{{!
 }}{{#type:binary?}}bytes(citem){{/type:binary?}}{{!
-}}{{^type:base?}}{{^type:enum?}}{{^type:list?}}{{!
+}}{{^type:base?}}{{^type:enum?}}{{!
     }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(citem){{!
-}}{{/type:list?}}{{/type:enum?}}{{/type:base?}}{{!
-}}{{#type:list?}}{{> types/container_from_cpp }}(citem){{/type:list?}}{{!
+}}{{/type:enum?}}{{/type:base?}}{{!
 }}{{#type:enum}}translate_cpp_enum_to_python({{!
     }}{{> types/cython_python_type}}, <int> citem){{/type:enum}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

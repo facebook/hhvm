@@ -467,7 +467,7 @@ cdef class RecursiveStruct(thrift.py3.types.Struct):
     cdef shared_ptr[cRecursiveStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__RecursiveStruct_FieldsSetter _fields_setter
     cdef inline object mes_impl(self)
-    cdef object __fbthrift_cached_mes
+    cdef List__RecursiveStruct __fbthrift_cached_mes
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cRecursiveStruct])
@@ -483,12 +483,12 @@ cdef class StructWithContainers(thrift.py3.types.Struct):
     cdef inline object list_ref_unique_impl(self)
     cdef inline object set_ref_shared_impl(self)
     cdef inline object list_ref_shared_const_impl(self)
-    cdef object __fbthrift_cached_list_ref
+    cdef List__i32 __fbthrift_cached_list_ref
     cdef Set__i32 __fbthrift_cached_set_ref
     cdef Map__i32_i32 __fbthrift_cached_map_ref
-    cdef object __fbthrift_cached_list_ref_unique
+    cdef List__i32 __fbthrift_cached_list_ref_unique
     cdef Set__i32 __fbthrift_cached_set_ref_shared
-    cdef object __fbthrift_cached_list_ref_shared_const
+    cdef List__i32 __fbthrift_cached_list_ref_shared_const
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStructWithContainers])
@@ -540,7 +540,7 @@ cdef class StructWithBox(thrift.py3.types.Struct):
     cdef inline object a_impl(self)
     cdef inline object b_impl(self)
     cdef inline object c_impl(self)
-    cdef object __fbthrift_cached_b
+    cdef List__i64 __fbthrift_cached_b
     cdef StructWithRef __fbthrift_cached_c
 
     @staticmethod
@@ -669,11 +669,21 @@ cdef class StructWithString(thrift.py3.types.Struct):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStructWithString])
 
 
-cdef vector[cRecursiveStruct] List__RecursiveStruct__make_instance(object items) except *
-cdef object List__RecursiveStruct__from_cpp(const vector[cRecursiveStruct]&) except *
+cdef class List__RecursiveStruct(thrift.py3.types.List):
+    cdef shared_ptr[vector[cRecursiveStruct]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cRecursiveStruct]])
+    cdef _check_item_type(self, item)
 
-cdef vector[cint32_t] List__i32__make_instance(object items) except *
-cdef object List__i32__from_cpp(const vector[cint32_t]&) except *
+cdef shared_ptr[vector[cRecursiveStruct]] List__RecursiveStruct__make_instance(object items) except *
+
+cdef class List__i32(thrift.py3.types.List):
+    cdef shared_ptr[vector[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint32_t]])
+    cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[cint32_t]] List__i32__make_instance(object items) except *
 
 cdef class Set__i32(thrift.py3.types.Set):
     cdef shared_ptr[cset[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -690,8 +700,13 @@ cdef class Map__i32_i32(thrift.py3.types.Map):
 
 cdef shared_ptr[cmap[cint32_t,cint32_t]] Map__i32_i32__make_instance(object items) except *
 
-cdef vector[cint64_t] List__i64__make_instance(object items) except *
-cdef object List__i64__from_cpp(const vector[cint64_t]&) except *
+cdef class List__i64(thrift.py3.types.List):
+    cdef shared_ptr[vector[cint64_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint64_t]])
+    cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[cint64_t]] List__i64__make_instance(object items) except *
 
 
 cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_constants.h" namespace "::cpp2":

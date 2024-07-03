@@ -13,8 +13,6 @@ from thrift.py3.types cimport (
     assign_shared_const_ptr,
     bytes_to_string,
     make_unique,
-    make_shared,
-    make_const_shared,
 )
 cimport thrift.py3.types
 from thrift.py3.types cimport (
@@ -223,7 +221,7 @@ cdef class __struct2_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cstruct2](deref(self._struct_cpp_obj), 3)
             return
-        deref(self._struct_cpp_obj).d_ref().assign(_module_types.List__i32__make_instance(_fbthrift_value))
+        deref(self._struct_cpp_obj).d_ref().assign(deref(_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
 @__cython.auto_pickle(False)

@@ -5,7 +5,7 @@
 #  @generated
 #
 cimport cython as __cython
-from cpython.object cimport PyTypeObject
+from cpython.object cimport PyTypeObject, Py_LT, Py_LE, Py_EQ, Py_NE, Py_GT, Py_GE
 from libcpp.memory cimport shared_ptr, make_shared, unique_ptr
 from libcpp.optional cimport optional as __optional
 from libcpp.string cimport string
@@ -24,9 +24,12 @@ from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as _
 from thrift.py3.types cimport (
     cSetOp as __cSetOp,
     richcmp as __richcmp,
-    list_getitem as __list_getitem,
     set_op as __set_op,
     setcmp as __setcmp,
+    list_index as __list_index,
+    list_count as __list_count,
+    list_slice as __list_slice,
+    list_getitem as __list_getitem,
     set_iter as __set_iter,
     map_iter as __map_iter,
     map_contains as __map_contains,
@@ -37,14 +40,12 @@ from thrift.py3.types cimport (
     translate_cpp_enum_to_python,
     SetMetaClass as __SetMetaClass,
     const_pointer_cast,
-    make_const_shared,
     constant_shared_ptr,
     NOTSET as __NOTSET,
     EnumData as __EnumData,
     EnumFlagsData as __EnumFlagsData,
     UnionTypeEnumData as __UnionTypeEnumData,
     createEnumDataForUnionType as __createEnumDataForUnionType,
-    BadEnum as __BadEnum,
 )
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
@@ -57,14 +58,6 @@ import sys
 from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
-import importlib
-
-from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
-    List__RecursiveStruct,
-    List__i32,
-    List__i64,
-)
-
 
 
 cdef __EnumData __MyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum](), MyEnum)
@@ -344,13 +337,11 @@ cdef class MyUnion(thrift.py3.types.Union):
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_anInteger():
                 self.value = None
             else:
-            
                 self.value = cint32_t._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_anInteger()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         elif type == 2:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_aString():
                 self.value = None
             else:
-            
                 self.value = str._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_aString()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     def __copy__(MyUnion self):
@@ -421,7 +412,6 @@ cdef class MyUnion(thrift.py3.types.Union):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyUnion, self)
-
 
 
 @__cython.auto_pickle(False)
@@ -498,7 +488,6 @@ cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_int_field():
                 self.value = None
             else:
-            
                 self.value = cint32_t._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_int_field()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     def __copy__(NonTriviallyDestructibleUnion self):
@@ -569,7 +558,6 @@ cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.NonTriviallyDestructibleUnion, self)
-
 @__cython.auto_pickle(False)
 cdef class MyField(thrift.py3.types.Struct):
     def __init__(MyField self, **kwargs):
@@ -785,7 +773,6 @@ cdef class MyField(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyField, self)
-
 @__cython.auto_pickle(False)
 cdef class MyStruct(thrift.py3.types.Struct):
     def __init__(MyStruct self, **kwargs):
@@ -929,7 +916,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
-
 @__cython.auto_pickle(False)
 cdef class StructWithUnion(thrift.py3.types.Struct):
     def __init__(StructWithUnion self, **kwargs):
@@ -1072,7 +1058,6 @@ cdef class StructWithUnion(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithUnion, self)
-
 @__cython.auto_pickle(False)
 cdef class RecursiveStruct(thrift.py3.types.Struct):
     def __init__(RecursiveStruct self, **kwargs):
@@ -1109,7 +1094,7 @@ cdef class RecursiveStruct(thrift.py3.types.Struct):
             return None
 
         if self.__fbthrift_cached_mes is None:
-            self.__fbthrift_cached_mes = List__RecursiveStruct__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).mes_ref().ref_unchecked())
+            self.__fbthrift_cached_mes = List__RecursiveStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).mes_ref().ref_unchecked(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_mes
 
     @property
@@ -1193,7 +1178,6 @@ cdef class RecursiveStruct(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.RecursiveStruct, self)
-
 @__cython.auto_pickle(False)
 cdef class StructWithContainers(thrift.py3.types.Struct):
     def __init__(StructWithContainers self, **kwargs):
@@ -1229,7 +1213,7 @@ cdef class StructWithContainers(thrift.py3.types.Struct):
         if self.__fbthrift_cached_list_ref is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_ref_ref():
                 return None
-            self.__fbthrift_cached_list_ref = List__i32__from_cpp(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_ref_ref()))
+            self.__fbthrift_cached_list_ref = List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_ref_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_list_ref
 
     @property
@@ -1265,7 +1249,7 @@ cdef class StructWithContainers(thrift.py3.types.Struct):
         if self.__fbthrift_cached_list_ref_unique is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_ref_unique_ref():
                 return None
-            self.__fbthrift_cached_list_ref_unique = List__i32__from_cpp(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_ref_unique_ref()))
+            self.__fbthrift_cached_list_ref_unique = List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_ref_unique_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_list_ref_unique
 
     @property
@@ -1289,7 +1273,7 @@ cdef class StructWithContainers(thrift.py3.types.Struct):
         if self.__fbthrift_cached_list_ref_shared_const is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_ref_shared_const_ref():
                 return None
-            self.__fbthrift_cached_list_ref_shared_const = List__i32__from_cpp(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_ref_shared_const_ref()))
+            self.__fbthrift_cached_list_ref_shared_const = List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_ref_shared_const_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_list_ref_shared_const
 
     @property
@@ -1373,7 +1357,6 @@ cdef class StructWithContainers(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithContainers, self)
-
 @__cython.auto_pickle(False)
 cdef class StructWithSharedConst(thrift.py3.types.Struct):
     def __init__(StructWithSharedConst self, **kwargs):
@@ -1517,7 +1500,6 @@ cdef class StructWithSharedConst(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithSharedConst, self)
-
 @__cython.auto_pickle(False)
 cdef class Empty(thrift.py3.types.Struct):
     def __init__(Empty self, **kwargs):
@@ -1618,7 +1600,6 @@ cdef class Empty(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Empty, self)
-
 @__cython.auto_pickle(False)
 cdef class StructWithRef(thrift.py3.types.Struct):
     def __init__(StructWithRef self, **kwargs):
@@ -1762,7 +1743,6 @@ cdef class StructWithRef(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRef, self)
-
 @__cython.auto_pickle(False)
 cdef class StructWithBox(thrift.py3.types.Struct):
     def __init__(StructWithBox self, **kwargs):
@@ -1811,7 +1791,7 @@ cdef class StructWithBox(thrift.py3.types.Struct):
             return None
 
         if self.__fbthrift_cached_b is None:
-            self.__fbthrift_cached_b = List__i64__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).b_ref().ref())
+            self.__fbthrift_cached_b = List__i64._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).b_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_b
 
     @property
@@ -1907,7 +1887,6 @@ cdef class StructWithBox(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithBox, self)
-
 @__cython.auto_pickle(False)
 cdef class StructWithInternBox(thrift.py3.types.Struct):
     def __init__(StructWithInternBox self, **kwargs):
@@ -2037,7 +2016,6 @@ cdef class StructWithInternBox(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithInternBox, self)
-
 @__cython.auto_pickle(False)
 cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
     def __init__(StructWithTerseInternBox self, **kwargs):
@@ -2165,7 +2143,6 @@ cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithTerseInternBox, self)
-
 @__cython.auto_pickle(False)
 cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
     def __init__(AdaptedStructWithInternBox self, **kwargs):
@@ -2295,7 +2272,6 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedStructWithInternBox, self)
-
 @__cython.auto_pickle(False)
 cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
     def __init__(AdaptedStructWithTerseInternBox self, **kwargs):
@@ -2423,7 +2399,6 @@ cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedStructWithTerseInternBox, self)
-
 @__cython.auto_pickle(False)
 cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
     def __init__(StructWithRefTypeUnique self, **kwargs):
@@ -2567,7 +2542,6 @@ cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefTypeUnique, self)
-
 @__cython.auto_pickle(False)
 cdef class StructWithRefTypeShared(thrift.py3.types.Struct):
     def __init__(StructWithRefTypeShared self, **kwargs):
@@ -2711,7 +2685,6 @@ cdef class StructWithRefTypeShared(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefTypeShared, self)
-
 @__cython.auto_pickle(False)
 cdef class StructWithRefTypeSharedConst(thrift.py3.types.Struct):
     def __init__(StructWithRefTypeSharedConst self, **kwargs):
@@ -2855,7 +2828,6 @@ cdef class StructWithRefTypeSharedConst(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefTypeSharedConst, self)
-
 @__cython.auto_pickle(False)
 cdef class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct):
     def __init__(StructWithRefAndAnnotCppNoexceptMoveCtor self, **kwargs):
@@ -2975,7 +2947,6 @@ cdef class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefAndAnnotCppNoexceptMoveCtor, self)
-
 @__cython.auto_pickle(False)
 cdef class StructWithString(thrift.py3.types.Struct):
     def __init__(StructWithString self, **kwargs):
@@ -3143,45 +3114,160 @@ cdef class StructWithString(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithString, self)
+@__cython.auto_pickle(False)
+@__cython.final
+cdef class List__RecursiveStruct(thrift.py3.types.List):
+    def __init__(self, items=None):
+        if isinstance(items, List__RecursiveStruct):
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<List__RecursiveStruct> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+        else:
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = List__RecursiveStruct__make_instance(items)
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cRecursiveStruct]] c_items):
+        __fbthrift_inst = <List__RecursiveStruct>List__RecursiveStruct.__new__(List__RecursiveStruct)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(List__RecursiveStruct self):
+        cdef shared_ptr[vector[cRecursiveStruct]] cpp_obj = make_shared[vector[cRecursiveStruct]](
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        )
+        return List__RecursiveStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
+
+    cdef _get_slice(self, slice index_obj):
+        cdef int start, stop, step
+        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
+        return List__RecursiveStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(
+            __list_slice[vector[cRecursiveStruct]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
+        )
+
+    cdef _get_single_item(self, size_t index):
+        cdef shared_ptr[cRecursiveStruct] citem
+        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
+        return RecursiveStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
+
+    cdef _check_item_type(self, item):
+        if not self or item is None:
+            return
+        if isinstance(item, RecursiveStruct):
+            return item
+
+    def index(self, item, start=0, stop=None):
+        err = ValueError(f'{item} is not in list')
+        item = self._check_item_type(item)
+        if item is None:
+            raise err
+        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
+        cdef cRecursiveStruct citem = deref((<RecursiveStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef __optional[size_t] found = __list_index[vector[cRecursiveStruct]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
+        if not found.has_value():
+            raise err
+        return found.value()
+
+    def count(self, item):
+        item = self._check_item_type(item)
+        if item is None:
+            return 0
+        cdef cRecursiveStruct citem = deref((<RecursiveStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        return __list_count[vector[cRecursiveStruct]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__RecursiveStruct()
 
 
-cdef vector[cRecursiveStruct] List__RecursiveStruct__make_instance(object items) except *:
-    cdef vector[cRecursiveStruct] c_inst
+Sequence.register(List__RecursiveStruct)
+
+cdef shared_ptr[vector[cRecursiveStruct]] List__RecursiveStruct__make_instance(object items) except *:
+    cdef shared_ptr[vector[cRecursiveStruct]] c_inst = make_shared[vector[cRecursiveStruct]]()
     if items is not None:
         for item in items:
             if not isinstance(item, RecursiveStruct):
                 raise TypeError(f"{item!r} is not of type RecursiveStruct")
-            c_inst.push_back(deref((<RecursiveStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            deref(c_inst).push_back(deref((<RecursiveStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
 
-cdef object List__RecursiveStruct__from_cpp(const vector[cRecursiveStruct]& c_vec) except *:
-    cdef list py_list = []
-    cdef int idx = 0
-    cdef shared_ptr[cRecursiveStruct] citem
-    for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(RecursiveStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
-    return List__RecursiveStruct(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+@__cython.auto_pickle(False)
+@__cython.final
+cdef class List__i32(thrift.py3.types.List):
+    def __init__(self, items=None):
+        if isinstance(items, List__i32):
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<List__i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+        else:
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = List__i32__make_instance(items)
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint32_t]] c_items):
+        __fbthrift_inst = <List__i32>List__i32.__new__(List__i32)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(List__i32 self):
+        cdef shared_ptr[vector[cint32_t]] cpp_obj = make_shared[vector[cint32_t]](
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        )
+        return List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
+
+    cdef _get_slice(self, slice index_obj):
+        cdef int start, stop, step
+        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
+        return List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(
+            __list_slice[vector[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
+        )
+
+    cdef _get_single_item(self, size_t index):
+        cdef cint32_t citem = 0
+        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
+        return citem
+
+    cdef _check_item_type(self, item):
+        if not self or item is None:
+            return
+        if isinstance(item, int):
+            return item
+
+    def index(self, item, start=0, stop=None):
+        err = ValueError(f'{item} is not in list')
+        item = self._check_item_type(item)
+        if item is None:
+            raise err
+        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
+        cdef cint32_t citem = item
+        cdef __optional[size_t] found = __list_index[vector[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
+        if not found.has_value():
+            raise err
+        return found.value()
+
+    def count(self, item):
+        item = self._check_item_type(item)
+        if item is None:
+            return 0
+        cdef cint32_t citem = item
+        return __list_count[vector[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__i32()
 
 
-cdef vector[cint32_t] List__i32__make_instance(object items) except *:
-    cdef vector[cint32_t] c_inst
+Sequence.register(List__i32)
+
+cdef shared_ptr[vector[cint32_t]] List__i32__make_instance(object items) except *:
+    cdef shared_ptr[vector[cint32_t]] c_inst = make_shared[vector[cint32_t]]()
     if items is not None:
         for item in items:
             if not isinstance(item, int):
                 raise TypeError(f"{item!r} is not of type int")
             item = <cint32_t> item
-            c_inst.push_back(item)
+            deref(c_inst).push_back(item)
     return cmove(c_inst)
-
-cdef object List__i32__from_cpp(const vector[cint32_t]& c_vec) except *:
-    cdef list py_list = []
-    cdef int idx = 0
-    cdef cint32_t citem = 0
-    for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(citem)
-    return List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -3263,7 +3349,6 @@ cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *:
             item = <cint32_t> item
             deref(c_inst).insert(item)
     return cmove(c_inst)
-
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -3362,27 +3447,83 @@ cdef shared_ptr[cmap[cint32_t,cint32_t]] Map__i32_i32__make_instance(object item
             deref(c_inst)[key] = item
     return cmove(c_inst)
 
+@__cython.auto_pickle(False)
+@__cython.final
+cdef class List__i64(thrift.py3.types.List):
+    def __init__(self, items=None):
+        if isinstance(items, List__i64):
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<List__i64> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+        else:
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = List__i64__make_instance(items)
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint64_t]] c_items):
+        __fbthrift_inst = <List__i64>List__i64.__new__(List__i64)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(List__i64 self):
+        cdef shared_ptr[vector[cint64_t]] cpp_obj = make_shared[vector[cint64_t]](
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        )
+        return List__i64._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
+
+    cdef _get_slice(self, slice index_obj):
+        cdef int start, stop, step
+        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
+        return List__i64._create_FBTHRIFT_ONLY_DO_NOT_USE(
+            __list_slice[vector[cint64_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
+        )
+
+    cdef _get_single_item(self, size_t index):
+        cdef cint64_t citem = 0
+        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
+        return citem
+
+    cdef _check_item_type(self, item):
+        if not self or item is None:
+            return
+        if isinstance(item, int):
+            return item
+
+    def index(self, item, start=0, stop=None):
+        err = ValueError(f'{item} is not in list')
+        item = self._check_item_type(item)
+        if item is None:
+            raise err
+        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
+        cdef cint64_t citem = item
+        cdef __optional[size_t] found = __list_index[vector[cint64_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
+        if not found.has_value():
+            raise err
+        return found.value()
+
+    def count(self, item):
+        item = self._check_item_type(item)
+        if item is None:
+            return 0
+        cdef cint64_t citem = item
+        return __list_count[vector[cint64_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__i64()
 
 
-cdef vector[cint64_t] List__i64__make_instance(object items) except *:
-    cdef vector[cint64_t] c_inst
+Sequence.register(List__i64)
+
+cdef shared_ptr[vector[cint64_t]] List__i64__make_instance(object items) except *:
+    cdef shared_ptr[vector[cint64_t]] c_inst = make_shared[vector[cint64_t]]()
     if items is not None:
         for item in items:
             if not isinstance(item, int):
                 raise TypeError(f"{item!r} is not of type int")
             item = <cint64_t> item
-            c_inst.push_back(item)
+            deref(c_inst).push_back(item)
     return cmove(c_inst)
-
-cdef object List__i64__from_cpp(const vector[cint64_t]& c_vec) except *:
-    cdef list py_list = []
-    cdef int idx = 0
-    cdef cint64_t citem = 0
-    for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(citem)
-    return List__i64(py_list, thrift.py3.types._fbthrift_list_private_ctor)
-
 
 kStructWithRef = StructWithRef._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(ckStructWithRef()))
 kStructWithRefTypeUnique = StructWithRefTypeUnique._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(ckStructWithRefTypeUnique()))

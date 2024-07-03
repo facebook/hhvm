@@ -13,8 +13,6 @@ from thrift.py3.types cimport (
     assign_shared_const_ptr,
     bytes_to_string,
     make_unique,
-    make_shared,
-    make_const_shared,
 )
 cimport thrift.py3.types
 from thrift.py3.types cimport (

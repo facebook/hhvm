@@ -205,7 +205,7 @@ cdef class NestedContainers(thrift.py3.client.Client):
         bridgeFutureWith[cFollyUnit](
             self._executor,
             down_cast_ptr[cNestedContainersClientWrapper, cClientWrapper](self._client.get()).listMap(rpc_options._cpp_obj, 
-                _module_types.List__Map__i32_i32__make_instance(foo),
+                deref((<_module_types.List__Map__i32_i32>foo)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             NestedContainers_listMap_callback,
             <PyObject *> __userdata
@@ -229,7 +229,7 @@ cdef class NestedContainers(thrift.py3.client.Client):
         bridgeFutureWith[cFollyUnit](
             self._executor,
             down_cast_ptr[cNestedContainersClientWrapper, cClientWrapper](self._client.get()).listSet(rpc_options._cpp_obj, 
-                _module_types.List__Set__i32__make_instance(foo),
+                deref((<_module_types.List__Set__i32>foo)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             NestedContainers_listSet_callback,
             <PyObject *> __userdata
@@ -253,7 +253,7 @@ cdef class NestedContainers(thrift.py3.client.Client):
         bridgeFutureWith[cFollyUnit](
             self._executor,
             down_cast_ptr[cNestedContainersClientWrapper, cClientWrapper](self._client.get()).turtles(rpc_options._cpp_obj, 
-                _module_types.List__List__Map__i32_Map__i32_Set__i32__make_instance(foo),
+                deref((<_module_types.List__List__Map__i32_Map__i32_Set__i32>foo)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             NestedContainers_turtles_callback,
             <PyObject *> __userdata

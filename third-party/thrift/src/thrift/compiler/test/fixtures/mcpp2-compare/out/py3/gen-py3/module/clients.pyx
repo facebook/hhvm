@@ -214,7 +214,7 @@ cdef void ReturnService_complexTypedefReturn_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__Map__Empty_MyStruct__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.List__Map__Empty_MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -227,7 +227,7 @@ cdef void ReturnService_list_mostComplexTypedefReturn_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__List__List__Map__Empty_MyStruct__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.List__List__List__Map__Empty_MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -253,7 +253,7 @@ cdef void ReturnService_list_EnumReturn_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__MyEnumA__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.List__MyEnumA._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[_module_types.cMyEnumA]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -305,7 +305,7 @@ cdef void ReturnService_list_UnionReturn_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__ComplexUnion__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.List__ComplexUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[_module_types.cComplexUnion]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -578,7 +578,7 @@ cdef void ParamService_list_ret_map_setlist_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__bool__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.List__bool._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[cbool]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -617,7 +617,7 @@ cdef void ParamService_listtypedef_ret_typedef_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__i32__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[cint32_t]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -656,7 +656,7 @@ cdef void ParamService_listenum_ret_map_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__MyEnumA__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.List__MyEnumA._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[_module_types.cMyEnumA]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -708,7 +708,7 @@ cdef void ParamService_listunion_string_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__ComplexUnion__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.List__ComplexUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[vector[_module_types.cComplexUnion]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -1420,7 +1420,7 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[cFollyUnit](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).void_ret_listunion_param(rpc_options._cpp_obj, 
-                _module_types.List__ComplexUnion__make_instance(param1),
+                deref((<_module_types.List__ComplexUnion>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_void_ret_listunion_param_callback,
             <PyObject *> __userdata
@@ -1716,7 +1716,7 @@ cdef class ParamService(thrift.py3.client.Client):
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).list_ret_map_setlist_param(rpc_options._cpp_obj, 
                 deref((<_module_types.Map__i32_List__string>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
-                _module_types.List__string__make_instance(param2),
+                deref((<_module_types.List__string>param2)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_list_ret_map_setlist_param_callback,
             <PyObject *> __userdata
@@ -1740,7 +1740,7 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).mapsetlistmapliststring_ret_listlistlist_param(rpc_options._cpp_obj, 
-                _module_types.List__List__List__List__i32__make_instance(param1),
+                deref((<_module_types.List__List__List__List__i32>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_mapsetlistmapliststring_ret_listlistlist_param_callback,
             <PyObject *> __userdata
@@ -1790,7 +1790,7 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[vector[cint32_t]](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).listtypedef_ret_typedef_param(rpc_options._cpp_obj, 
-                _module_types.List__Map__Empty_MyStruct__make_instance(param1),
+                deref((<_module_types.List__Map__Empty_MyStruct>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_listtypedef_ret_typedef_param_callback,
             <PyObject *> __userdata

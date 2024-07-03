@@ -186,7 +186,7 @@ cdef api void call_cy_SomeService_binary_keyed_map(
     unique_ptr[vector[cint64_t]] r
 ) noexcept:
     cdef Promise_cmap__binary_cint64_t __promise = Promise_cmap__binary_cint64_t._fbthrift_create(cmove(cPromise))
-    arg_r = _apache_thrift_fixtures_types_module_types.List__i64__from_cpp(deref(r))
+    arg_r = _apache_thrift_fixtures_types_module_types.List__i64._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(r)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(

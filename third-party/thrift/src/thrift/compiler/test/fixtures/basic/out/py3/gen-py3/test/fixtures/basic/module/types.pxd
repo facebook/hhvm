@@ -223,7 +223,7 @@ cdef class Containers(thrift.py3.types.Struct):
     cdef inline object I32List_impl(self)
     cdef inline object StringSet_impl(self)
     cdef inline object StringToI64Map_impl(self)
-    cdef object __fbthrift_cached_I32List
+    cdef List__i32 __fbthrift_cached_I32List
     cdef Set__string __fbthrift_cached_StringSet
     cdef Map__string_i64 __fbthrift_cached_StringToI64Map
 
@@ -317,8 +317,13 @@ cdef class Set__float(thrift.py3.types.Set):
 
 cdef shared_ptr[cset[float]] Set__float__make_instance(object items) except *
 
-cdef vector[cint32_t] List__i32__make_instance(object items) except *
-cdef object List__i32__from_cpp(const vector[cint32_t]&) except *
+cdef class List__i32(thrift.py3.types.List):
+    cdef shared_ptr[vector[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint32_t]])
+    cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[cint32_t]] List__i32__make_instance(object items) except *
 
 cdef class Set__string(thrift.py3.types.Set):
     cdef shared_ptr[cset[string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE

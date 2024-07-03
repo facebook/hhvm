@@ -264,7 +264,7 @@ cdef class struct2(thrift.py3.types.Struct):
     cdef inline object c_impl(self)
     cdef inline object d_impl(self)
     cdef struct1 __fbthrift_cached_c
-    cdef object __fbthrift_cached_d
+    cdef List__i32 __fbthrift_cached_d
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cstruct2])
@@ -341,8 +341,13 @@ cdef class union2(thrift.py3.types.Union):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cunion2])
 
 
-cdef vector[cint32_t] List__i32__make_instance(object items) except *
-cdef object List__i32__from_cpp(const vector[cint32_t]&) except *
+cdef class List__i32(thrift.py3.types.List):
+    cdef shared_ptr[vector[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint32_t]])
+    cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[cint32_t]] List__i32__make_instance(object items) except *
 
 cdef class Map__string_i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -352,8 +357,13 @@ cdef class Map__string_i32(thrift.py3.types.Map):
 
 cdef shared_ptr[cmap[string,cint32_t]] Map__string_i32__make_instance(object items) except *
 
-cdef vector[cmap[string,cint32_t]] List__Map__string_i32__make_instance(object items) except *
-cdef object List__Map__string_i32__from_cpp(const vector[cmap[string,cint32_t]]&) except *
+cdef class List__Map__string_i32(thrift.py3.types.List):
+    cdef shared_ptr[vector[cmap[string,cint32_t]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cmap[string,cint32_t]]])
+    cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[cmap[string,cint32_t]]] List__Map__string_i32__make_instance(object items) except *
 
 cdef class Map__string_string(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -363,14 +373,29 @@ cdef class Map__string_string(thrift.py3.types.Map):
 
 cdef shared_ptr[cmap[string,string]] Map__string_string__make_instance(object items) except *
 
-cdef vector[cRange] List__Range__make_instance(object items) except *
-cdef object List__Range__from_cpp(const vector[cRange]&) except *
+cdef class List__Range(thrift.py3.types.List):
+    cdef shared_ptr[vector[cRange]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cRange]])
+    cdef _check_item_type(self, item)
 
-cdef vector[cInternship] List__Internship__make_instance(object items) except *
-cdef object List__Internship__from_cpp(const vector[cInternship]&) except *
+cdef shared_ptr[vector[cRange]] List__Range__make_instance(object items) except *
 
-cdef vector[string] List__string__make_instance(object items) except *
-cdef object List__string__from_cpp(const vector[string]&) except *
+cdef class List__Internship(thrift.py3.types.List):
+    cdef shared_ptr[vector[cInternship]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cInternship]])
+    cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[cInternship]] List__Internship__make_instance(object items) except *
+
+cdef class List__string(thrift.py3.types.List):
+    cdef shared_ptr[vector[string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[string]])
+    cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[string]] List__string__make_instance(object items) except *
 
 cdef class Set__i32(thrift.py3.types.Set):
     cdef shared_ptr[cset[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE

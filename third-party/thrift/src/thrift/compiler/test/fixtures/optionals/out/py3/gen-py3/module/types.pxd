@@ -171,7 +171,7 @@ cdef class Person(thrift.py3.types.Struct):
     cdef Set__i64 __fbthrift_cached_friends
     cdef Map__Animal_string __fbthrift_cached_petNames
     cdef object __fbthrift_cached_afraidOfAnimal
-    cdef object __fbthrift_cached_vehicles
+    cdef List__Vehicle __fbthrift_cached_vehicles
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cPerson])
@@ -192,7 +192,12 @@ cdef class Map__Animal_string(thrift.py3.types.Map):
 
 cdef shared_ptr[cmap[cAnimal,string]] Map__Animal_string__make_instance(object items) except *
 
-cdef vector[cVehicle] List__Vehicle__make_instance(object items) except *
-cdef object List__Vehicle__from_cpp(const vector[cVehicle]&) except *
+cdef class List__Vehicle(thrift.py3.types.List):
+    cdef shared_ptr[vector[cVehicle]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cVehicle]])
+    cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[cVehicle]] List__Vehicle__make_instance(object items) except *
 
 

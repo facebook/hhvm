@@ -97,8 +97,13 @@ cdef class Struct(thrift.py3.types.Struct):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStruct])
 
 
-cdef vector[cEnum] List__Enum__make_instance(object items) except *
-cdef object List__Enum__from_cpp(const vector[cEnum]&) except *
+cdef class List__Enum(thrift.py3.types.List):
+    cdef shared_ptr[vector[cEnum]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cEnum]])
+    cdef _check_item_type(self, item)
+
+cdef shared_ptr[vector[cEnum]] List__Enum__make_instance(object items) except *
 
 
 cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module0_constants.h" namespace "::module0":

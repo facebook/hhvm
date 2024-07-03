@@ -13,8 +13,6 @@ from thrift.py3.types cimport (
     assign_shared_const_ptr,
     bytes_to_string,
     make_unique,
-    make_shared,
-    make_const_shared,
 )
 cimport thrift.py3.types
 from thrift.py3.types cimport (
@@ -77,26 +75,26 @@ cdef class __Combo_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_matching_struct_names_types.cCombo](deref(self._struct_cpp_obj), 0)
             return
-        deref(self._struct_cpp_obj).listOfOurMyStructLists_ref().assign(_matching_struct_names_types.List__List__MyStruct__make_instance(_fbthrift_value))
+        deref(self._struct_cpp_obj).listOfOurMyStructLists_ref().assign(deref(_matching_struct_names_types.List__List__MyStruct(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field theirMyStructList
         if _fbthrift_value is None:
             __reset_field[_matching_struct_names_types.cCombo](deref(self._struct_cpp_obj), 1)
             return
-        deref(self._struct_cpp_obj).theirMyStructList_ref().assign(_matching_struct_names_types.List__module_MyStruct__make_instance(_fbthrift_value))
+        deref(self._struct_cpp_obj).theirMyStructList_ref().assign(deref(_matching_struct_names_types.List__module_MyStruct(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field ourMyStructList
         if _fbthrift_value is None:
             __reset_field[_matching_struct_names_types.cCombo](deref(self._struct_cpp_obj), 2)
             return
-        deref(self._struct_cpp_obj).ourMyStructList_ref().assign(_matching_struct_names_types.List__MyStruct__make_instance(_fbthrift_value))
+        deref(self._struct_cpp_obj).ourMyStructList_ref().assign(deref(_matching_struct_names_types.List__MyStruct(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field listOfTheirMyStructList
         if _fbthrift_value is None:
             __reset_field[_matching_struct_names_types.cCombo](deref(self._struct_cpp_obj), 3)
             return
-        deref(self._struct_cpp_obj).listOfTheirMyStructList_ref().assign(_matching_struct_names_types.List__List__module_MyStruct__make_instance(_fbthrift_value))
+        deref(self._struct_cpp_obj).listOfTheirMyStructList_ref().assign(deref(_matching_struct_names_types.List__List__module_MyStruct(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 

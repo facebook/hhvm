@@ -255,7 +255,7 @@ mstch::node mstch_const_value::string_value() {
         escaped.append("\\n");
         break;
       default:
-        if (c < 0x20 || c >= 0x80) {
+        if (c < 0x20 || c >= 0x7F) {
           // Use octal escape sequences because they are the most portable
           // across languages. Hexadecimal ones have a problem of consuming
           // all hex digits after \x in C++, e.g. \xcafefe is a single escape

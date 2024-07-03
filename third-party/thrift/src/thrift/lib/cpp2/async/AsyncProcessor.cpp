@@ -1104,7 +1104,7 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
   DCHECK(server);
   const std::vector<server::ServerConfigs::ServiceInterceptorInfo>&
       serviceInterceptorsInfo = server->getServiceInterceptors();
-  std::vector<std::exception_ptr> exceptions;
+  std::vector<std::pair<std::size_t, std::exception_ptr>> exceptions;
 
   for (std::size_t i = 0; i < serviceInterceptorsInfo.size(); ++i) {
     auto* connectionCtx = reqCtx_->getConnectionContext();
@@ -1119,19 +1119,19 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
       co_await serviceInterceptorsInfo[i].interceptor->internal_onRequest(
           std::move(connectionInfo), std::move(requestInfo));
     } catch (...) {
-      exceptions.emplace_back(folly::current_exception());
+      exceptions.emplace_back(i, folly::current_exception());
     }
   }
   if (!exceptions.empty()) {
     std::string message = fmt::format(
         "ServiceInterceptor::onRequest threw exceptions:\n[{}] {}\n",
-        serviceInterceptorsInfo[0].qualifiedName,
-        folly::exceptionStr(exceptions[0]));
+        serviceInterceptorsInfo[exceptions[0].first].qualifiedName,
+        folly::exceptionStr(exceptions[0].second));
     for (std::size_t i = 1; i < exceptions.size(); ++i) {
       message += fmt::format(
           "[{}] {}\n",
-          serviceInterceptorsInfo[i].qualifiedName,
-          folly::exceptionStr(exceptions[i]));
+          serviceInterceptorsInfo[exceptions[i].first].qualifiedName,
+          folly::exceptionStr(exceptions[i].second));
     }
     co_yield folly::coro::co_error(TApplicationException(message));
   }
@@ -1145,7 +1145,7 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse() {
   DCHECK(server);
   const std::vector<server::ServerConfigs::ServiceInterceptorInfo>&
       serviceInterceptorsInfo = server->getServiceInterceptors();
-  std::vector<std::exception_ptr> exceptions;
+  std::vector<std::pair<std::size_t, std::exception_ptr>> exceptions;
 
   for (auto i = std::ptrdiff_t(serviceInterceptorsInfo.size()) - 1; i >= 0;
        --i) {
@@ -1159,20 +1159,20 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse() {
       co_await serviceInterceptorsInfo[i].interceptor->internal_onResponse(
           std::move(connectionInfo), std::move(responseInfo));
     } catch (...) {
-      exceptions.emplace_back(folly::current_exception());
+      exceptions.emplace_back(i, folly::current_exception());
     }
   }
 
   if (!exceptions.empty()) {
     std::string message = fmt::format(
         "ServiceInterceptor::onResponse threw exceptions:\n[{}] {}\n",
-        serviceInterceptorsInfo[0].qualifiedName,
-        folly::exceptionStr(exceptions[0]));
+        serviceInterceptorsInfo[exceptions[0].first].qualifiedName,
+        folly::exceptionStr(exceptions[0].second));
     for (std::size_t i = 1; i < exceptions.size(); ++i) {
       message += fmt::format(
           "[{}] {}\n",
-          serviceInterceptorsInfo[i].qualifiedName,
-          folly::exceptionStr(exceptions[i]));
+          serviceInterceptorsInfo[exceptions[i].first].qualifiedName,
+          folly::exceptionStr(exceptions[i].second));
     }
     co_yield folly::coro::co_error(TApplicationException(message));
   }

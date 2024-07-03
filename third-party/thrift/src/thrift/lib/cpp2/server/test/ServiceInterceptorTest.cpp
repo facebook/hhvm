@@ -405,11 +405,13 @@ CO_TEST_P(ServiceInterceptorTestP, OnRequestException) {
   auto interceptor1 =
       std::make_shared<ServiceInterceptorThrowOnRequest>("Interceptor1");
   auto interceptor2 =
-      std::make_shared<ServiceInterceptorThrowOnRequest>("Interceptor2");
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor2");
+  auto interceptor3 =
+      std::make_shared<ServiceInterceptorThrowOnRequest>("Interceptor3");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
-            InterceptorList{interceptor1, interceptor2}));
+            InterceptorList{interceptor1, interceptor2, interceptor3}));
       });
 
   auto client =
@@ -429,7 +431,10 @@ CO_TEST_P(ServiceInterceptorTestP, OnRequestException) {
           EXPECT_THAT(
               std::string(ex.what()), HasSubstr("[TestModule.Interceptor1]"));
           EXPECT_THAT(
-              std::string(ex.what()), HasSubstr("[TestModule.Interceptor2]"));
+              std::string(ex.what()),
+              Not(HasSubstr("[TestModule.Interceptor2]")));
+          EXPECT_THAT(
+              std::string(ex.what()), HasSubstr("[TestModule.Interceptor3]"));
           throw;
         }
       },
@@ -438,6 +443,8 @@ CO_TEST_P(ServiceInterceptorTestP, OnRequestException) {
   EXPECT_EQ(interceptor1->onResponseCount, 1);
   EXPECT_EQ(interceptor2->onRequestCount, 1);
   EXPECT_EQ(interceptor2->onResponseCount, 1);
+  EXPECT_EQ(interceptor3->onRequestCount, 1);
+  EXPECT_EQ(interceptor3->onResponseCount, 1);
 }
 
 CO_TEST_P(ServiceInterceptorTestP, OnRequestExceptionEB) {
@@ -474,11 +481,13 @@ CO_TEST_P(ServiceInterceptorTestP, OnResponseException) {
   auto interceptor1 =
       std::make_shared<ServiceInterceptorThrowOnResponse>("Interceptor1");
   auto interceptor2 =
-      std::make_shared<ServiceInterceptorThrowOnResponse>("Interceptor2");
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor2");
+  auto interceptor3 =
+      std::make_shared<ServiceInterceptorThrowOnResponse>("Interceptor3");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(
-            InterceptorList{interceptor1, interceptor2}));
+            InterceptorList{interceptor1, interceptor2, interceptor3}));
       });
 
   auto client =
@@ -498,7 +507,10 @@ CO_TEST_P(ServiceInterceptorTestP, OnResponseException) {
           EXPECT_THAT(
               std::string(ex.what()), HasSubstr("[TestModule.Interceptor1]"));
           EXPECT_THAT(
-              std::string(ex.what()), HasSubstr("[TestModule.Interceptor2]"));
+              std::string(ex.what()),
+              Not(HasSubstr("[TestModule.Interceptor2]")));
+          EXPECT_THAT(
+              std::string(ex.what()), HasSubstr("[TestModule.Interceptor3]"));
           throw;
         }
       },
@@ -507,6 +519,8 @@ CO_TEST_P(ServiceInterceptorTestP, OnResponseException) {
   EXPECT_EQ(interceptor1->onResponseCount, 1);
   EXPECT_EQ(interceptor2->onRequestCount, 1);
   EXPECT_EQ(interceptor2->onResponseCount, 1);
+  EXPECT_EQ(interceptor3->onRequestCount, 1);
+  EXPECT_EQ(interceptor3->onResponseCount, 1);
 }
 
 CO_TEST_P(ServiceInterceptorTestP, OnResponseExceptionEB) {

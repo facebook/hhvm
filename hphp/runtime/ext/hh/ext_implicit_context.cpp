@@ -45,9 +45,7 @@ namespace {
 
 const StaticString
   s_ImplicitContextDataClassName("HH\\ImplicitContext\\_Private\\ImplicitContextData"),
-  s_ICInaccessibleMemoKey("%Inaccessible%"),
-  s_ICSoftInaccessibleMemoKey("%SoftInaccessible%"),
-  s_ICSoftSetMemoKey("%SoftSet%"),
+  s_ICAgnostic("%MemoAgnostic%"),
   // matches HH\ImplicitContext\State
   s_ICStateNull("NULL"),
   s_ICStateValue("VALUE"),
@@ -276,14 +274,11 @@ Array HHVM_FUNCTION(get_implicit_context_debug_info) {
   auto const obj = *ImplicitContext::activeCtx;
   auto const context = Native::data<ImplicitContext>(obj);
 
-  if (context->m_memoKey == kAgnosticMemoKey) {
-    VecInit ret{1};
-    ret.append(s_ICInaccessibleMemoKey.data());
-    return ret.toArray();
-  }
   VecInit ret{context->m_map.size() * 2}; // key and value
   for (auto const& p : context->m_map) {
-    if (p.second.second.m_type == KindOfUninit) continue;
+    if (p.second.second.m_type == KindOfUninit) {
+      ret.append(s_ICAgnostic);
+    }
     auto const key = String(p.first->data());
     auto const value = p.second.second;
     ret.append(key);

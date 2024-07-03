@@ -1,20 +1,16 @@
 >>>>> from soft inaccessible
 Hash:
-vec(1) {
-  string(14) "%Inaccessible%"
+vec(0) {
 }
 Hash:
-vec(1) {
-  string(14) "%Inaccessible%"
+vec(0) {
 }
 ok
 >>>>> from soft run with
 Hash:
-vec(1) {
-  string(14) "%Inaccessible%"
+vec(0) {
 }
 Hash:
-vec(1) {
-  string(14) "%Inaccessible%"
+vec(0) {
 }
 ok

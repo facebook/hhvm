@@ -2,8 +2,7 @@
   Before: Implicit context is set to inaccessible
 Implicit context is set to inaccessible
 Hash:
-vec(1) {
-  string(14) "%%Inaccessible%%"
+vec(0) {
 }
 memoNoArg passed
   After: Implicit context is set to inaccessible
@@ -11,8 +10,7 @@ memoNoArg passed
   Before: Implicit context is set to inaccessible
 Implicit context is set to inaccessible
 Hash:
-vec(1) {
-  string(14) "%%Inaccessible%%"
+vec(0) {
 }
 memoWithArg passed
   After: Implicit context is set to inaccessible

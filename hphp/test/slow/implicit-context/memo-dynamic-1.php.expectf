@@ -1,6 +1,5 @@
   Before: C
-vec(1) {
-  string(14) "%%Inaccessible%%"
+vec(0) {
 }
 
 memo_normal passed
@@ -13,16 +12,14 @@ memo_keyed passed
   After: C
 ------------------------
   Before: C
-vec(1) {
-  string(14) "%%Inaccessible%%"
+vec(0) {
 }
 
 memo_ic_inaccessible passed
   After: C
 ------------------------
   Before: C
-vec(1) {
-  string(14) "%%Inaccessible%%"
+vec(0) {
 }
 
 memo_soft_ic_inaccessible passed
@@ -30,7 +27,7 @@ memo_soft_ic_inaccessible passed
 ------------------------
 memo_normal passed
 ------------------------
-string(14) "%%Inaccessible%%"
+string(0) ""
 
 memo_keyed passed
 ------------------------

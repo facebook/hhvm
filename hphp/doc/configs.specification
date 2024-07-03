@@ -680,7 +680,6 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 - int Server.QueueCount = Server.ThreadCount, UNKNOWN
 - int Server.IOThreadCount = 1, UNKNOWN
 - int Server.HighQueueingThreshold = 60, UNKNOWN, nobind
-- bool Server.LegacyBehavior = true, UNKNOWN
 - int Server.HugeThreadCount = 0, UNKNOWN
 
   Number of worker threads with stack partially on huge pages

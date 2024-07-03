@@ -340,14 +340,12 @@ struct ServerOptions {
                 uint16_t port,
                 int maxThreads,
                 int initThreads = -1,
-                int maxQueue = -1,
-                bool legacyBehavior = true)
+                int maxQueue = -1)
     : m_address(address),
       m_port(port),
       m_maxThreads(maxThreads),
       m_initThreads(initThreads),
-      m_maxQueue(maxQueue == -1 ? maxThreads : maxQueue),
-      m_legacyBehavior(legacyBehavior) {
+      m_maxQueue(maxQueue == -1 ? maxThreads : maxQueue) {
     assertx(m_maxThreads >= 0);
     if (m_initThreads < 0 || m_initThreads > m_maxThreads) {
       m_initThreads = m_maxThreads;
@@ -359,7 +357,6 @@ struct ServerOptions {
   int m_maxThreads;
   int m_initThreads;
   int m_maxQueue;
-  bool m_legacyBehavior;
   int m_serverFD{-1};
   int m_sslFD{-1};
   std::string m_takeoverFilename;

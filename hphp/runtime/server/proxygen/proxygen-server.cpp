@@ -227,8 +227,7 @@ ProxygenServer::ProxygenServer(
                    options.m_hugeThreads,
                    options.m_initThreads,
                    options.m_hugeStackKb,
-                   options.m_extraKb,
-                   options.m_legacyBehavior) {
+                   options.m_extraKb) {
   always_assert_flog(Cfg::Server::IOThreadCount > 0,
                      "Proxygen must have at least 1 thread to function.");
   for (int i = 0; i < Cfg::Server::IOThreadCount; i++) {

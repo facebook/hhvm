@@ -166,7 +166,7 @@ HttpServer::HttpServer() {
     ? Cfg::Server::IP : Cfg::Server::FileSocket;
   ServerOptions options(address, Cfg::Server::Port,
     Cfg::Server::ThreadCount, startingThreadCount,
-    Cfg::Server::QueueCount, Cfg::Server::LegacyBehavior);
+    Cfg::Server::QueueCount);
   options.m_useFileSocket = !Cfg::Server::FileSocket.empty();
   options.m_serverFD = Cfg::Server::PortFd;
   options.m_sslFD = Cfg::Server::SSLPortFd;

@@ -760,6 +760,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdIfaceMethod:
   case LdImplicitContext:
   case LdImplicitContextMemoKey:
+  case LdMemoAgnosticIC:
   case LdInitPropAddr:
   case LdInitRDSAddr:
   case LdIterEnd:

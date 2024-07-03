@@ -75,7 +75,13 @@ struct ImplicitContext {
     return offsetof(ImplicitContext, m_memoKey);
   }
 
-  ////////////////////////////////////////////////////////////////////////////
+// We only transition from memo-sensitive to memo-agnostic
+// in try catch blocks that restore the memo-sensitive ctx
+static constexpr ptrdiff_t memoAgnosticOffset() {
+  return offsetof(ImplicitContext, m_memoAgnosticIC);
+}
+
+////////////////////////////////////////////////////////////////////////////
   // RAII wrappers
   ////////////////////////////////////////////////////////////////////////////
 

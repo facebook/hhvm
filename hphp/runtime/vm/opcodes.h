@@ -248,7 +248,7 @@ namespace HPHP {
   O(WHResult,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(SetImplicitContextByValue,                                          \
                      NA,               ONE(CV),         ONE(CV),    NF) \
-  O(GetInaccessibleImplicitContext,                                     \
+  O(GetMemoAgnosticImplicitContext,                                     \
                      NA,               NOV,             ONE(CV),    NF) \
   O(Await,           NA,               ONE(CV),         ONE(CV),    CF) \
   O(AwaitAll,        ONE(LAR),         NOV,             ONE(CV),    CF) \

@@ -82,7 +82,7 @@ pub fn get_implicit_context_memo_key(local: Local) -> InstrSeq {
 
 fn ic_set(local: Local) -> InstrSeq {
     InstrSeq::gather(vec![
-        instr::get_inaccessible_implicit_context(),
+        instr::get_memo_agnostic_implicit_context(),
         instr::set_implicit_context_by_value(),
         instr::set_l(local),
         instr::pop_c(),

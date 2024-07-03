@@ -3210,10 +3210,9 @@ SetImplicitContextByValue [C:Obj] -> [C:Obj]
 
   Sets the implicit context to %1 and returns the previous implicit context.
 
-GetInaccessibleImplicitContext [] -> [C:Obj]
+GetMemoAgnosticImplicitContext [] -> [C:Obj]
 
-  Returns the inaccessible context that was created at the beginning
-  of the request.
+  Returns the memo agnostic branch of the current IC.
 
 14. Generator creation and execution
 ---------------------------------------

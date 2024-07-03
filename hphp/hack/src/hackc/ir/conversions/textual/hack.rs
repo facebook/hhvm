@@ -145,8 +145,8 @@ pub(crate) enum Hhbc {
     Fatal,
     #[decl(fn hhbc_get_cls_rg_prop(*HackMixed) -> *HackMixed)]
     GetClsRGProp,
-    #[decl(fn hhbc_get_inaccessible_implicit_context() -> *HackMixed)]
-    GetInaccessibleImplicitContext,
+    #[decl(fn hhbc_get_memo_agnostic_implicit_context() -> *HackMixed)]
+    GetMemoAgnosticImplicitContext,
     #[decl(fn hhbc_get_memo_key_l(*HackMixed) -> *HackMixed)]
     GetMemoKeyL,
     #[decl(fn hhbc_has_reified_parent(*HackMixed) -> *HackMixed)]

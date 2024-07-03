@@ -1546,7 +1546,7 @@ void dce(Env& env, const bc::LazyClassFromClass&) {
 void dce(Env& env, const bc::EnumClassLabelName&) { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::ClassGetC&)        { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::ResolveClass&)     { pushRemovableIfNoThrow(env); }
-void dce(Env& env, const bc::GetInaccessibleImplicitContext&) {
+void dce(Env& env, const bc::GetMemoAgnosticImplicitContext&) {
   pushRemovableIfNoThrow(env);
 }
 

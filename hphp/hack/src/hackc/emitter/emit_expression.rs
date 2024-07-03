@@ -1511,6 +1511,7 @@ fn emit_struct_array<'a, 'd>(
         .collect::<Result<Vec<_>>>()?
         .into_iter()
         .unzip();
+    #[allow(clippy::needless_borrow)]
     let keys: Vec<&[u8]> = keys.iter().map(|s| &s as &[u8]).collect();
     Ok(InstrSeq::gather(vec![
         InstrSeq::gather(value_instrs),
@@ -2970,8 +2971,8 @@ fn get_call_builtin_func_info(
         "HH\\ImplicitContext\\_Private\\set_implicit_context_by_value" if e.systemlib() => {
             Some((1, Instruct::Opcode(Opcode::SetImplicitContextByValue)))
         }
-        "HH\\ImplicitContext\\_Private\\get_inaccessible_implicit_context" if e.systemlib() => {
-            Some((0, Instruct::Opcode(Opcode::GetInaccessibleImplicitContext)))
+        "HH\\ImplicitContext\\_Private\\get_memo_agnostic_implicit_context" if e.systemlib() => {
+            Some((0, Instruct::Opcode(Opcode::GetMemoAgnosticImplicitContext)))
         }
         // TODO: enforce that this returns readonly
         "HH\\global_readonly_get" => Some((1, Instruct::Opcode(Opcode::CGetG))),
@@ -4062,6 +4063,7 @@ fn emit_xhp_obj_get<'a, 'd>(
             ast::PropOrMethod::IsMethod,
         ),
     );
+    #[allow(clippy::useless_vec)]
     let args = vec![(
         ParamKind::Pnormal,
         Expr(

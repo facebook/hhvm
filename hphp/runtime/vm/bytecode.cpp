@@ -5190,9 +5190,10 @@ OPTBLD_INLINE void iopSetImplicitContextByValue() {
   std::swap((*vmStack().topC()).m_data.pobj, (*ImplicitContext::activeCtx));
 }
 
-OPTBLD_INLINE void iopGetInaccessibleImplicitContext() {
-  assertx(*ImplicitContext::emptyCtx);
-  vmStack().pushObject(*ImplicitContext::emptyCtx);
+OPTBLD_INLINE void iopGetMemoAgnosticImplicitContext() {
+  assertx(*ImplicitContext::activeCtx);
+  auto context = Native::data<ImplicitContext>(*ImplicitContext::activeCtx);
+  vmStack().pushObject(context->m_memoAgnosticIC);
 }
 
 OPTBLD_INLINE void iopCheckProp(const StringData* propName) {

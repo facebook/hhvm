@@ -1378,6 +1378,10 @@ To string conversions:
 
   Loads memo key from implicit context in S0.
 
+| LdMemoAgnosticIC, D(Obj), S(Obj), NF
+
+  Given an Implicit Context, returns the memo agnostic version of it.
+
 7. Allocation
 
 | AllocInitROM<rom>, D(VoidPtr), NA, NF

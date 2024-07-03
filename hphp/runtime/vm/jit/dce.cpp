@@ -301,6 +301,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdStructDictVal:
   case LdImplicitContext:
   case LdImplicitContextMemoKey:
+  case LdMemoAgnosticIC:
   case CallViolatesModuleBoundary:
   case CallViolatesDeploymentBoundary:
     assertx(!inst.isControlFlow());

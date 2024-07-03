@@ -5501,7 +5501,7 @@ const StaticString
   s_Memoize("__Memoize"),
   s_MemoizeLSB("__MemoizeLSB");
 
-void in(ISS& env, const bc::GetInaccessibleImplicitContext&) {
+void in(ISS& env, const bc::GetMemoAgnosticImplicitContext&) {
   return push(env, TObj);
 }
 

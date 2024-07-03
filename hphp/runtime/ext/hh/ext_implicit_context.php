@@ -204,7 +204,7 @@ namespace HH\Coeffects {
     (function()[defaults]: Tout) $fn
   )[/* 86backdoor */]: Tout {
     $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_value(
-      \HH\ImplicitContext\_Private\get_inaccessible_implicit_context(),
+      \HH\ImplicitContext\_Private\get_memo_agnostic_implicit_context(),
     );
     try {
       return $fn();
@@ -221,7 +221,7 @@ namespace HH\Coeffects {
     (function()[defaults]: Awaitable<Tout>) $fn
   )[/* 86backdoor */]: Awaitable<Tout> {
     $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_value(
-      \HH\ImplicitContext\_Private\get_inaccessible_implicit_context()
+      \HH\ImplicitContext\_Private\get_memo_agnostic_implicit_context()
     );
     try {
       $result = $fn();

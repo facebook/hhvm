@@ -385,7 +385,7 @@ static const struct {
   { OpResolveClass,{None,             Stack1,       OutClass        }},
   { OpSetImplicitContextByValue,
                    {Stack1,           Stack1,       OutUnknown      }},
-  { OpGetInaccessibleImplicitContext,
+  { OpGetMemoAgnosticImplicitContext,
                    {None,             Stack1,       OutUnknown      }},
 
   /*** 14. Generator instructions ***/

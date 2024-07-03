@@ -119,7 +119,7 @@ impl LocalInfo {
             | Opcode::ContValid
             | Opcode::CreateCl(..)
             | Opcode::CreateCont
-            | Opcode::GetInaccessibleImplicitContext
+            | Opcode::GetMemoAgnosticImplicitContext
             | Opcode::DblAsBits
             | Opcode::Dict(..)
             | Opcode::Dim(..)

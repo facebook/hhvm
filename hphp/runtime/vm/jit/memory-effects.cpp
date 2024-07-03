@@ -1667,6 +1667,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StructDictAddNextSlot:
   case StructDictTypeBoundCheck:
   case LdImplicitContextMemoKey:
+  case LdMemoAgnosticIC:
     return IrrelevantEffects {};
 
   case LookupClsCns:

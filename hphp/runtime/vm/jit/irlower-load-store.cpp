@@ -281,6 +281,16 @@ void cgLdImplicitContextMemoKey(IRLS& env, const IRInstruction* inst) {
   };
 }
 
+void cgLdMemoAgnosticIC(IRLS& env, const IRInstruction* inst) {
+  auto const obj = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << load{
+    obj[Native::dataOffset<ImplicitContext>() + ImplicitContext::memoAgnosticOffset()],
+    dst
+  };
+}
+
 void cgStImplicitContext(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   assertx(inst->src(0)->isA(TObj));

@@ -57,7 +57,7 @@ LOOP = 1
 
 
 def benchmark_import():
-    def benchmark_single(namespace) -> float:
+    def benchmark_single(namespace) -> str:
         timer = timeit.Timer(
             stmt="importlib.reload(mm)",
             setup=f"import thrift.benchmark.struct.{namespace} as mm\nimport importlib",
@@ -79,7 +79,7 @@ def benchmark_import():
 
 
 def benchmark_init(init_statement: str, desc: str):
-    def benchmark_single(flavor) -> float:
+    def benchmark_single(flavor) -> str:
         timer = timeit.Timer(stmt=init_statement, setup=get_import(flavor))
         results = timer.repeat(REPEAT, 1)
         min_value_ms = min(results) * 1000
@@ -96,7 +96,7 @@ def benchmark_init(init_statement: str, desc: str):
 
 
 def benchmark_field_access():
-    def benchmark_single(flavor, field_name, cached) -> float:
+    def benchmark_single(flavor, field_name, cached) -> str:
         access = f"_ = inst.{field_name}"
         val_list = list(range(100))
         val_set = set(range(100))
@@ -177,13 +177,14 @@ val_map_structs = {
 }
 inst = MyStruct(
     val_list=list(range(30)),
+    str_list = [f"str_{i}" for i in range(30, 60)],
     val_set=set(range(30)),
     val_map=val_map,
     val_map_structs=val_map_structs,
 )
 """
 
-    def benchmark_single(flavor, st, cached) -> float:
+    def benchmark_single(flavor, st, cached) -> str:
         setup = f"{get_import(flavor)}; {INIT_FOR_CONTAINER}"
         if cached:
             setup = f"{setup}\n{st}"
@@ -196,8 +197,10 @@ inst = MyStruct(
         return f"{min_value_ms:.6f} ms"
 
     fields = {
-        "list field iter": "_ = [item for item in inst.val_list]",
-        "list field idx": "_ = inst.val_list[10]",
+        "list int field iter": "_ = [item for item in inst.val_list]",
+        "list int field idx": "_ = inst.val_list[10]",
+        "list str field iter": "_ = [item for item in inst.str_list]",
+        "list str field idx": "_ = inst.str_list[10]",
         "set field iter": "_ = [item for item in inst.val_set]",
         "set field lookup": "_ = 10 in inst.val_set",
         "map field lookup one": "_ = inst.val_map[10]",
@@ -206,21 +209,22 @@ inst = MyStruct(
     }
 
     table = [
-        [flavor]
+        [label]
         + [
             benchmark_single(
                 flavor,
                 st,
                 False,
             )
-            for st in fields.values()
+            for flavor in NAMESPACES
         ]
-        for flavor in NAMESPACES
+        for label, st in fields.items()
     ]
     print(
         tabulate(
             table,
-            headers=["Container Field Access (First/Uncached)"] + list(fields.keys()),
+            headers=["Container Field Access (First/Uncached)"]
+            + list(NAMESPACES.keys()),
             tablefmt="github",
         )
     )
@@ -228,21 +232,22 @@ inst = MyStruct(
     print("\n")
 
     table = [
-        [flavor]
+        [label]
         + [
             benchmark_single(
                 flavor,
                 st,
                 True,
             )
-            for st in fields.values()
+            for flavor in NAMESPACES
         ]
-        for flavor in NAMESPACES
+        for label, st in fields.items()
     ]
     print(
         tabulate(
             table,
-            headers=["Container Field Access (Repeated/Cached)"] + list(fields.keys()),
+            headers=["Container Field Access (Repeated/Cached)"]
+            + list(NAMESPACES.keys()),
             tablefmt="github",
         )
     )
@@ -292,7 +297,7 @@ def get_deserialize_setup(flavor: str) -> str:
 
 
 def benchmark_serializer():
-    def benchmark_serialize(flavor: str) -> float:
+    def benchmark_serialize(flavor: str) -> str:
         timer = timeit.Timer(
             setup=get_serialize_setup(flavor),
             stmt="_ = serialize(inst)",
@@ -301,7 +306,7 @@ def benchmark_serializer():
         min_value_ms = min(results) * 1000
         return f"{min_value_ms:.6f} ms"
 
-    def benchmark_deserialize(flavor: str) -> float:
+    def benchmark_deserialize(flavor: str) -> str:
         timer = timeit.Timer(
             setup=get_deserialize_setup(flavor),
             stmt="_ = deserialize(MyStruct, serialized)",

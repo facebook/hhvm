@@ -1,8 +1,9 @@
 # Copyright 2022-present Facebook. All Rights Reserved
 
-import lldb
 import dataclasses
 import typing
+
+import lldb
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
@@ -28,11 +29,12 @@ class Frame:
     line: typing.Optional[str] = None
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Frame sniffing.
 
+
 def is_jitted(ip: lldb.SBValue) -> bool:
-    """ Determine if the instruction pointer points inside the region of jitted code
+    """Determine if the instruction pointer points inside the region of jitted code
 
     Arguments:
         ip: The instruction pointer
@@ -62,7 +64,7 @@ def is_jitted(ip: lldb.SBValue) -> bool:
     return ip.unsigned >= tc_base and ip.unsigned < tc_end
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Frame builders.
 
 
@@ -70,10 +72,10 @@ def create_native(
     idx: int,
     fp: typing.Union[str, lldb.SBValue],
     rip: lldb.SBValue,
-    native_frame: typing.Optional[lldb.SBFrame]=None,
-    name: typing.Optional[str]=None,
+    native_frame: typing.Optional[lldb.SBFrame] = None,
+    name: typing.Optional[str] = None,
 ) -> Frame:
-    """ Collect metadata for a native frame.
+    """Collect metadata for a native frame.
 
     Args:
         idx: This frame's location in the stack
@@ -92,7 +94,9 @@ def create_native(
         else:
             func_name = name
     else:
-        fn = native_frame.GetFunctionName()  # When not None, returns function name + template args + parameters
+        fn = (
+            native_frame.GetFunctionName()
+        )  # When not None, returns function name + template args + parameters
         if fn is None:
             func_name = "<unknown>"
         else:
@@ -100,7 +104,7 @@ def create_native(
             if end == -1:
                 func_name = fn
             else:
-                func_name = fn[:fn.rfind("(")] + "()"
+                func_name = fn[: fn.rfind("(")] + "()"
 
     frame = Frame(
         idx=idx,
@@ -125,8 +129,8 @@ def create_native(
 def create_php(
     idx: int,
     ar: lldb.SBValue,
-    rip: typing.Union[str, lldb.SBValue]='0x????????',
-    pc: typing.Union[int, lldb.SBValue]=None,
+    rip: typing.Union[str, lldb.SBValue] = "0x????????",
+    pc: typing.Union[int, lldb.SBValue] = None,
 ) -> Frame:
     """Collect metadata for a PHP frame.
 
@@ -142,13 +146,19 @@ def create_php(
     if isinstance(pc, lldb.SBValue):
         pc = pc.unsigned
 
-    utils.debug_print(f"create_php(idx={idx}, ar=0x{ar.unsigned:x}, rip={format_ptr(rip)}, pc={pc if pc else None})")
+    utils.debug_print(
+        f"create_php(idx={idx}, ar=0x{ar.unsigned:x}, rip={format_ptr(rip)}, pc={pc if pc else None})"
+    )
     func = lookup.lookup_func_from_frame_pointer(ar)  # lldb.SBValue[HPHP::Func *]
     shared = utils.rawptr(utils.get(func, "m_shared"))  # lldb.SBValue[HPHP::SharedData]
-    flags = utils.get(shared, "m_allFlags")  # lldb.SBValue[HPHP::Func::SharedData::Flags]
+    flags = utils.get(
+        shared, "m_allFlags"
+    )  # lldb.SBValue[HPHP::Func::SharedData::Flags]
 
     shared_type = utils.rawtype(shared.type).GetPointeeType()
-    assert shared_type.name == "HPHP::Func::SharedData", f"create_php: Expected m_shared to point to HPHP::Func::SharedData, it points to {shared_type.name}"
+    assert (
+        shared_type.name == "HPHP::Func::SharedData"
+    ), f"create_php: Expected m_shared to point to HPHP::Func::SharedData, it points to {shared_type.name}"
 
     # Pull the function name.
     if utils.get(flags, "m_isClosureBody").unsigned == 0:
@@ -163,10 +173,7 @@ def create_php(
         func_name = "<pseudomain>"
 
     frame = Frame(
-        idx=idx,
-        fp=format_ptr(ar),
-        rip=format_ptr(rip),
-        func=f"[PHP] {func_name}()"
+        idx=idx, fp=format_ptr(ar), rip=format_ptr(rip), func=f"[PHP] {func_name}()"
     )
 
     attrs = utils.atomic_get(utils.get(func, "m_attrs", "m_attrs"))  # HPHP::Attr
@@ -178,7 +185,10 @@ def create_php(
     # Pull the PC from Func::base() and ar->m_callOff if necessary.
     if pc is None:
         bc = utils.rawptr(utils.get(shared, "m_bc"))
-        pc = bc.unsigned + (utils.get(ar, "m_callOffAndFlags").unsigned >> utils.Enum("HPHP::ActRec::Flags", "CallOffsetStart", ar.target).unsigned)
+        pc = bc.unsigned + (
+            utils.get(ar, "m_callOffAndFlags").unsigned
+            >> utils.Enum("HPHP::ActRec::Flags", "CallOffsetStart", ar.target).unsigned
+        )
 
     frame.file = php_filename(func, ar.target)
     frame.line = php_line_number(func, pc)
@@ -187,7 +197,7 @@ def create_php(
 
 
 def format_ptr(p: typing.Union[str, int, lldb.SBValue]) -> str:
-    """ Format the pointer `p` (typically an $rip or $fp/$rbp) for display in stack frames
+    """Format the pointer `p` (typically an $rip or $fp/$rbp) for display in stack frames
 
     Arguments:
         p: Value to format
@@ -210,11 +220,12 @@ def format_ptr(p: typing.Union[str, int, lldb.SBValue]) -> str:
     return f"0x{p:08x}"
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # PHP frame info.
 
+
 def php_filename(func: lldb.SBValue, target: lldb.SBTarget) -> str:
-    """ Get the filename where the PHP function is defined
+    """Get the filename where the PHP function is defined
 
     Arguments:
         func: A HPHP::Func* wrapped in an lldb.SBValue
@@ -233,7 +244,7 @@ def php_filename(func: lldb.SBValue, target: lldb.SBTarget) -> str:
 
 
 def php_line_number(func: lldb.SBValue, pc: int) -> typing.Optional[int]:
-    """ Get the line number in the php file associated with the given function and pc
+    """Get the line number in the php file associated with the given function and pc
 
     Uses the shared lineMap if the pc is present.
     See Func::getLineNumber()
@@ -259,7 +270,10 @@ def php_line_number(func: lldb.SBValue, pc: int) -> typing.Optional[int]:
             if r is None:
                 break
             first = utils.get(r, "first")
-            if utils.get(first, "base").unsigned <= pc and utils.get(first, "past").unsigned > pc:
+            if (
+                utils.get(first, "base").unsigned <= pc
+                and utils.get(first, "past").unsigned > pc
+            ):
                 return utils.get(r, "second").unsigned
             i += 1
 
@@ -267,7 +281,7 @@ def php_line_number(func: lldb.SBValue, pc: int) -> typing.Optional[int]:
 
 
 def php_line_number_from_repo(func: lldb.SBValue, pc: int) -> typing.Optional[int]:
-    """ Get the line number in the php file associated with the given function and pc
+    """Get the line number in the php file associated with the given function and pc
 
     Uses the repo.
 
@@ -280,7 +294,9 @@ def php_line_number_from_repo(func: lldb.SBValue, pc: int) -> typing.Optional[in
     Returns:
         line: The line number, if found successfully
     """
-    utils.debug_print(f"php_line_number_from_repo(func=0x{func.unsigned:x}, pc=0x{pc:x})")
+    utils.debug_print(
+        f"php_line_number_from_repo(func=0x{func.unsigned:x}, pc=0x{pc:x})"
+    )
 
     shared = utils.rawptr(utils.get(func, "m_shared"))
     line_table = utils.get(shared, "m_lineTable", "val")
@@ -289,7 +305,9 @@ def php_line_number_from_repo(func: lldb.SBValue, pc: int) -> typing.Optional[in
         line_table = utils.TokenOrPtr.get_ptr(line_table).Cast(line_table_type)
     else:
         rauth = utils.Global("HPHP::RuntimeOption::RepoAuthoritative", func.target)
-        assert rauth.unsigned != 0, "php_line_number_from_repo: expected to be in repo authoritative mode"
+        assert (
+            rauth.unsigned != 0
+        ), "php_line_number_from_repo: expected to be in repo authoritative mode"
         # TODO emulate FuncEmitter::loadLineTableFromRepo(m_unit->sn(), table.token())
         return None
 
@@ -314,11 +332,12 @@ def php_line_number_from_repo(func: lldb.SBValue, pc: int) -> typing.Optional[in
     return None
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Frame stringifiers.
 
-def stringify(frame: Frame, fp_len: int=0) -> str:
-    """ Stringify a single frame """
+
+def stringify(frame: Frame, fp_len: int = 0) -> str:
+    """Stringify a single frame"""
 
     fmt = "#{idx:<2d} {fp:<{fp_len}s} @ {rip}: {func}"
     out = fmt.format(fp_len=fp_len, **frame.__dict__)
@@ -327,8 +346,8 @@ def stringify(frame: Frame, fp_len: int=0) -> str:
     line = frame.line
 
     if filename is not None:
-        out += ' at ' + filename
+        out += " at " + filename
         if line is not None:
-            out += ':' + str(line)
+            out += ":" + str(line)
 
     return out

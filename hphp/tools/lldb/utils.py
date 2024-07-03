@@ -5,16 +5,18 @@ import argparse
 import collections
 import collections.abc
 import functools
-import lldb
 import re
 import shlex
 import struct
 import sys
 import typing
 
-class Command(abc.ABC):
+import lldb
 
-    """ The name used to call the command """
+
+class Command(abc.ABC):
+    """The name used to call the command"""
+
     command: str
 
     """ A short, one-line description of the command """
@@ -53,19 +55,25 @@ class Command(abc.ABC):
     @classmethod
     @abc.abstractmethod
     def create_parser(cls) -> argparse.ArgumentParser:
-        """ Create and return an ArgumentParser object.
+        """Create and return an ArgumentParser object.
 
-            Typical usage is to call .add_argument()
-            as needed on the parser that default_parser() returns,
-            and return that parser.
+        Typical usage is to call .add_argument()
+        as needed on the parser that default_parser() returns,
+        and return that parser.
         """
         ...
 
     @abc.abstractmethod
-    def __call__(self, debugger: lldb.SBDebugger, command: str, exe_ctx: lldb.SBExecutionContext, result: lldb.SBCommandReturnObject):
-        ...
+    def __call__(
+        self,
+        debugger: lldb.SBDebugger,
+        command: str,
+        exe_ctx: lldb.SBExecutionContext,
+        result: lldb.SBCommandReturnObject,
+    ): ...
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # Memoization.
 
 _all_caches = []
@@ -85,10 +93,11 @@ def memoized(func):
         if args not in cache:
             cache[args] = func(*args)
         return cache[args]
+
     return memoizer
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Type and symbol lookup
 #
 # Note that we need to thread a lldb.Target around, unless
@@ -96,9 +105,10 @@ def memoized(func):
 # when within a script. I.e. the target object needs to come from the
 # execution context that is passed when starting a command's execution.
 
-#TODO(michristensen) Deal with the following lookup helpers not being hashable
+
+# TODO(michristensen) Deal with the following lookup helpers not being hashable
 def Type(name: str, target: lldb.SBTarget) -> lldb.SBType:
-    """ Look up an HHVM type
+    """Look up an HHVM type
 
     Raises an exception if the type cannot be found.
 
@@ -123,7 +133,7 @@ def Type(name: str, target: lldb.SBTarget) -> lldb.SBType:
 
 
 def Global(name: str, target: lldb.SBTarget) -> lldb.SBValue:
-    """ Look up the value of a global variable (including static)
+    """Look up the value of a global variable (including static)
 
     Falls back to evaluating the variable as an expression, which
     raises an exception on failure.
@@ -140,13 +150,17 @@ def Global(name: str, target: lldb.SBTarget) -> lldb.SBValue:
     if g.GetError().Fail():
         g = target.FindFirstGlobalVariable(name)
         if g.GetError().Fail():
-            debug_print(f"couldn't find global variable '{name}'; attempting to find it by evaluating it")
+            debug_print(
+                f"couldn't find global variable '{name}'; attempting to find it by evaluating it"
+            )
             return Value(name, target)
     return g
 
 
-def Enum(enum_name: str, elem: typing.Union[str, int], target: lldb.SBTarget) -> lldb.SBTypeEnumMember:
-    """ Look up the value of an enum member
+def Enum(
+    enum_name: str, elem: typing.Union[str, int], target: lldb.SBTarget
+) -> lldb.SBTypeEnumMember:
+    """Look up the value of an enum member
 
     Raises an exception if the enum or member cannot be found.
 
@@ -163,12 +177,14 @@ def Enum(enum_name: str, elem: typing.Union[str, int], target: lldb.SBTarget) ->
     members = enum.GetEnumMembers()
     assert members.IsValid(), f"'{enum_name} is not an enumeration"
     val = members[elem]
-    assert val is not None and val.IsValid(), f"couldn't find enumerator '{elem}' in '{enum_name}'"
+    assert (
+        val is not None and val.IsValid()
+    ), f"couldn't find enumerator '{elem}' in '{enum_name}'"
     return val
 
 
 def Value(name: str, target: lldb.SBTarget) -> lldb.SBValue:
-    """ Look up the value of a symbol, by evaluating it as an expression
+    """Look up the value of a symbol, by evaluating it as an expression
 
     Raises an exception if the symbol cannot be found/expression evaluated.
     You typically should call Global(), which calls this as a fallback.
@@ -185,7 +201,7 @@ def Value(name: str, target: lldb.SBTarget) -> lldb.SBValue:
     return v
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # STL accessors
 
 
@@ -198,12 +214,12 @@ def atomic_get(atomic: lldb.SBValue) -> lldb.SBValue:
         return get(atomic, "_M_i")
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Member access helpers.
 
 
 def get(struct: lldb.SBValue, *field_names: str) -> lldb.SBValue:
-    """ Get the value of struct.field_names[0][field_names[1]]...
+    """Get the value of struct.field_names[0][field_names[1]]...
 
     Arguments:
         struct: The struct to reach into
@@ -221,7 +237,9 @@ def get(struct: lldb.SBValue, *field_names: str) -> lldb.SBValue:
     assert struct.GetError().Success(), f"invalid struct '{struct.name}'"
     # Note: You can also do lldb.value(val).<name>
     v = struct.GetChildMemberWithName(field_names[0])
-    assert v.GetError().Success(), f"couldn't find field '{field_names[0]}' in struct '{struct.name}' with type '{struct.type.name}'"
+    assert (
+        v.GetError().Success()
+    ), f"couldn't find field '{field_names[0]}' in struct '{struct.name}' with type '{struct.type.name}'"
 
     if len(field_names) == 1:
         return v
@@ -229,12 +247,12 @@ def get(struct: lldb.SBValue, *field_names: str) -> lldb.SBValue:
         return get(v, *field_names[1:])
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Type manipulations
 
 
 def rawtype(t: lldb.SBType):
-    """ Remove const, volatile, and typedefs
+    """Remove const, volatile, and typedefs
 
     Arguments:
         t: type to translate
@@ -251,9 +269,11 @@ def rawtype(t: lldb.SBType):
     #       Also look at GetBasicType().
     return t.GetUnqualifiedType().GetCanonicalType()
 
+
 def destruct(t: str) -> str:
-    """ Drop the class-key from a type name """
-    return re.sub(r'^(struct|class|union)\s+', '', t)
+    """Drop the class-key from a type name"""
+    return re.sub(r"^(struct|class|union)\s+", "", t)
+
 
 def template_type(t: lldb.SBType) -> str:
     """Get the unparameterized name of a template type.
@@ -267,10 +287,11 @@ def template_type(t: lldb.SBType) -> str:
     For example:
         HPHP::VMFixedVector<ObjectProps::quick_index> -> 'HPHP::VMFixedVector'
     """
-    return destruct(rawtype(t).name.split('<')[0])
+    return destruct(rawtype(t).name.split("<")[0])
+
 
 def unsigned_cast(v: lldb.SBValue, t: lldb.SBValue) -> lldb.SBValue:
-    """ Perform a cast of `v` to `t` with C compatible unsigned widening.
+    """Perform a cast of `v` to `t` with C compatible unsigned widening.
 
     Use this in place of SBValue::Cast for cases where you are widening a
     value (such as lowptr -> ptr conversion).  SBValue::Cast performs only a
@@ -296,15 +317,18 @@ def unsigned_cast(v: lldb.SBValue, t: lldb.SBValue) -> lldb.SBValue:
     # opposed to forcing no sign extension).
     ret = v.target.EvaluateExpression(f"({t.name}){v.unsigned}")
 
-    assert ret is not None and ret.GetError().Success(), f"Failed to cast {v} ({v.unsigned}) to {t.name}"
+    assert (
+        ret is not None and ret.GetError().Success()
+    ), f"Failed to cast {v} ({v.unsigned}) to {t.name}"
     return ret
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # Pointer helpers
 
 
 def nullptr(target: lldb.SBTarget):
-    """ Return an SBValue wrapping a pointer to 0 """
+    """Return an SBValue wrapping a pointer to 0"""
     return target.CreateValueFromExpression("nullptr", "(void *)0")
 
 
@@ -313,7 +337,7 @@ def is_nullptr(val: lldb.SBValue):
 
 
 def referenced_value(val: lldb.SBValue) -> lldb.SBValue:
-    """ Get the value referenced by a pointer/reference, or the value itself otherwise """
+    """Get the value referenced by a pointer/reference, or the value itself otherwise"""
     if val.type.IsReferenceType() or val.type.IsPointerType():
         return val.Dereference()
     return val
@@ -322,13 +346,13 @@ def referenced_value(val: lldb.SBValue) -> lldb.SBValue:
 def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     """Fully strip a smart pointer to a raw pointer. References are re-cast as pointers.
 
-        Arguments:
-            val: A smart pointer
+    Arguments:
+        val: A smart pointer
 
-        Returns:
-            The stripped pointer, or None if it's not yet supported
+    Returns:
+        The stripped pointer, or None if it's not yet supported
     """
-    #debug_print(f"rawptr(val=0x{val.unsigned:x})")
+    # debug_print(f"rawptr(val=0x{val.unsigned:x})")
 
     if val.type.IsPointerType():
         return val
@@ -355,8 +379,10 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
         ptr = unsigned_cast(ptr, inner.GetPointerType())
     elif name == "HPHP::CompactTaggedPtr":
         inner = val.type.GetTemplateArgumentType(0)
-        addr = get(val, "m_data").unsigned & 0xffffffffffff
-        ptr = val.CreateValueFromExpression("(tmp)", f"({inner.GetPointerType()}) {addr}")
+        addr = get(val, "m_data").unsigned & 0xFFFFFFFFFFFF
+        ptr = val.CreateValueFromExpression(
+            "(tmp)", f"({inner.GetPointerType()}) {addr}"
+        )
     elif name == "HPHP::CompactSizedPtr":
         ptr = rawptr(get(val, "m_data"))
     elif name == "HPHP::LockFreePtrWrapper":
@@ -369,8 +395,10 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
 
     return None
 
+
 kMaxTagSize = 16
 kShiftAmount = 64 - kMaxTagSize  # 64 = std::numeric_limits<uintptr_t>::digits
+
 
 class TokenOrPtr:
     @staticmethod
@@ -407,14 +435,14 @@ class TokenOrPtr:
 
 
 def deref(val: lldb.SBValue) -> lldb.SBValue:
-    """ Fully dereference a value, stripping away *, &, and all known smart
-        pointer wrappers (as well as const/volatile qualifiers).
+    """Fully dereference a value, stripping away *, &, and all known smart
+    pointer wrappers (as well as const/volatile qualifiers).
 
-        Arguments:
-            val: The value to dererefence
+    Arguments:
+        val: The value to dererefence
 
-        Returns:
-            The fully dereferenced value.
+    Returns:
+        The fully dereferenced value.
     """
     p = rawptr(val)
 
@@ -424,8 +452,10 @@ def deref(val: lldb.SBValue) -> lldb.SBValue:
         return deref(referenced_value(p))
 
 
-def ptr_add(ptr: lldb.SBValue, n: typing.Union[int, lldb.SBValue], sizeof=True) -> lldb.SBValue:
-    """ Create new a new pointer, pointing to value of ptr+(n*sizeof(*ptr))
+def ptr_add(
+    ptr: lldb.SBValue, n: typing.Union[int, lldb.SBValue], sizeof=True
+) -> lldb.SBValue:
+    """Create new a new pointer, pointing to value of ptr+(n*sizeof(*ptr))
 
     When sizeof=False, just add n, i.e. treating sizeof(*ptr) == 1
 
@@ -446,35 +476,39 @@ def ptr_add(ptr: lldb.SBValue, n: typing.Union[int, lldb.SBValue], sizeof=True) 
 
     # TODO(michristensen) Creating the new pointer using the following two
     # commented-out lines was adding extraneous MSB bytes in some cases:
-    #data = lldb.SBData.CreateDataFromInt(ptr.unsigned + n)
-    #val = ptr.CreateValueFromData(f"{ptr.name}+{str(n)}", data, ptr.type)
+    # data = lldb.SBData.CreateDataFromInt(ptr.unsigned + n)
+    # val = ptr.CreateValueFromData(f"{ptr.name}+{str(n)}", data, ptr.type)
     val = ptr.CreateValueFromExpression(
-            f"{ptr.name}+{str(n)}"[-10:],
-            f"({ptr.type.name}){ptr.unsigned + n}"
+        f"{ptr.name}+{str(n)}"[-10:], f"({ptr.type.name}){ptr.unsigned + n}"
     )
     return val
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Name accessor
 
 
 def _full_func_name(func: lldb.SBValue) -> str:
-    attrs = atomic_get(get(func, 'm_attrs', 'm_attrs'))
+    attrs = atomic_get(get(func, "m_attrs", "m_attrs"))
     if attrs.unsigned & Enum("HPHP::Attr", "AttrIsMethCaller", func.target).unsigned:
         cls = ""
     else:
         m_u = atomic_get(get(func, "m_u", "m_u"))
-        cls = get(m_u, 'm_cls')
+        cls = get(m_u, "m_cls")
         if cls.unsigned == 0:
             cls = ""
         else:
-            cls = nameof(unsigned_cast(cls, Type("HPHP::Class", cls.target).GetPointerType())) + "::"
-    return cls + string_data_val(deref(get(func, 'm_name')))
+            cls = (
+                nameof(
+                    unsigned_cast(cls, Type("HPHP::Class", cls.target).GetPointerType())
+                )
+                + "::"
+            )
+    return cls + string_data_val(deref(get(func, "m_name")))
 
 
 def nameof(val: lldb.SBValue) -> typing.Optional[str]:
-    """ Get the name of various HPHP objects, like functions or classes.
+    """Get the name of various HPHP objects, like functions or classes.
 
     Arguments:
         val: the value to get the name of (a Func, Class, or ObjectData)
@@ -484,9 +518,9 @@ def nameof(val: lldb.SBValue) -> typing.Optional[str]:
     val = deref(val)
     debug_print(f"nameof(val=0x{val.load_addr:x} (type={val.type.name}))")
     try:
-       t = val.type.name
+        t = val.type.name
     except Exception:
-       return None
+        return None
 
     sd = None
 
@@ -511,16 +545,17 @@ def nameof(val: lldb.SBValue) -> typing.Optional[str]:
         sd = _od_name(deref(get(val, "m_obj")))
 
     if sd is None:
-       return None
+        return None
 
     return string_data_val(deref(sd))
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Intel CRC32
 
+
 def _bit_reflect(num, nbits):
-    """ Perform bit reflection on the bottom 'nbits' of 'num' """
+    """Perform bit reflection on the bottom 'nbits' of 'num'"""
 
     out = 0
     mask = 1 << (nbits - 1)
@@ -532,7 +567,7 @@ def _bit_reflect(num, nbits):
 
 
 def crc32q(crc, quad):
-    """ Intel SSE4 CRC32 implementation """
+    """Intel SSE4 CRC32 implementation"""
 
     crc = _bit_reflect(crc, 32)
     quad = _bit_reflect(quad, 64)
@@ -540,7 +575,7 @@ def crc32q(crc, quad):
     msb = 1 << 63
 
     dividend = quad ^ (crc << 32)
-    divisor = 0x11edc6f41 << 31
+    divisor = 0x11EDC6F41 << 31
 
     for _ in range(64):
         if dividend & msb:
@@ -550,17 +585,23 @@ def crc32q(crc, quad):
     return _bit_reflect(dividend, 64)
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # String helpers
 
-def read_cstring(addr: typing.Union[int, lldb.SBValue], len: str, process: lldb.SBProcess, keep_case: bool = True) -> str:
-    """ Read a null-terminated char * from memory at the given address or lldb.SBValue's load_addr
 
-        LLDB can already format char * variables, like so:
+def read_cstring(
+    addr: typing.Union[int, lldb.SBValue],
+    len: str,
+    process: lldb.SBProcess,
+    keep_case: bool = True,
+) -> str:
+    """Read a null-terminated char * from memory at the given address or lldb.SBValue's load_addr
 
-            (char *) varname = 0x0000abcd "string value"
+    LLDB can already format char * variables, like so:
 
-        This gets just the "string value" char array.
+        (char *) varname = 0x0000abcd "string value"
+
+    This gets just the "string value" char array.
     """
     # If it's already a known char *, just parse its default LLDB summary,
     # which appears to be of the form '"some_str"'.
@@ -596,17 +637,17 @@ def read_cstring(addr: typing.Union[int, lldb.SBValue], len: str, process: lldb.
 
 
 def _unpack(s):
-    return 0xdfdfdfdfdfdfdfdf & struct.unpack('<Q', bytes(s, encoding='utf-8'))[0]
+    return 0xDFDFDFDFDFDFDFDF & struct.unpack("<Q", bytes(s, encoding="utf-8"))[0]
 
 
 def hash_string(s: str):
-    """ Hash a string as in hphp/util/hash-crc-x64.S """
+    """Hash a string as in hphp/util/hash-crc-x64.S"""
 
     size = len(s)
     tail_sz = size % 8
     size -= tail_sz
 
-    crc = 0xffffffff
+    crc = 0xFFFFFFFF
 
     for i in range(0, size, 8):
         crc = crc32q(crc, _unpack(s[i : i + 8]))
@@ -615,14 +656,14 @@ def hash_string(s: str):
         return crc >> 1
 
     shift = -((tail_sz - 8) << 3) & 0b111111
-    tail = _unpack(s[size:].ljust(8, '\0'))
+    tail = _unpack(s[size:].ljust(8, "\0"))
 
     crc = crc32q(crc, tail << shift)
     return crc >> 1
 
 
 def strinfo(s: lldb.SBValue, keep_case: bool = True):
-    """ Return the Python string and HHVM hash for `s`, or None if `s` is not a stringish lldb.Value """
+    """Return the Python string and HHVM hash for `s`, or None if `s` is not a stringish lldb.Value"""
 
     data = None
     h = None
@@ -630,11 +671,16 @@ def strinfo(s: lldb.SBValue, keep_case: bool = True):
     try:
         t = rawtype(s.type)
     except Exception as err:
-        print(f"error while trying to get the type of what we believe is a string-like value: {err}", file=sys.stderr)
+        print(
+            f"error while trying to get the type of what we believe is a string-like value: {err}",
+            file=sys.stderr,
+        )
         return None
 
-    if (t == Type("char", s.target).GetPointerType()
-          or re.match(r"char \[\d*\]$", t.name) is not None):
+    if (
+        t == Type("char", s.target).GetPointerType()
+        or re.match(r"char \[\d*\]$", t.name) is not None
+    ):
         # Note: 1024 is very arbitrary; the string may
         # very well be longer than this.
         data = read_cstring(s.deref.load_addr, 1024, s.process)
@@ -647,28 +693,28 @@ def strinfo(s: lldb.SBValue, keep_case: bool = True):
         elif ty_name == "HPHP::StrNR":
             sd = deref(get(sd, "m_px"))
 
-        if rawtype(sd.type).name != 'HPHP::StringData':
+        if rawtype(sd.type).name != "HPHP::StringData":
             return None
 
         data = string_data_val(sd)
 
         m_hash = get(sd.children[1], "m_hash").signed
         if m_hash != 0:
-            h = m_hash & 0x7fffffff
+            h = m_hash & 0x7FFFFFFF
 
     if data is None:
         return None
 
     assert isinstance(data, str)
     retval = {
-        'data': data if keep_case else data.lower(),
-        'hash': h if h is not None else hash_string(data),
+        "data": data if keep_case else data.lower(),
+        "hash": h if h is not None else hash_string(data),
     }
     return retval
 
 
 def string_data_val(val: lldb.SBValue, keep_case=True) -> str:
-    """ Convert an HPHP::StringData[*] to a Python string
+    """Convert an HPHP::StringData[*] to a Python string
 
     Arguments:
         val: A StringData* wrapped by an lldb.SBValue
@@ -683,16 +729,20 @@ def string_data_val(val: lldb.SBValue, keep_case=True) -> str:
     assert val.type.name == "HPHP::StringData"
 
     addr = val.load_addr
-    assert addr != lldb.LLDB_INVALID_ADDRESS, f"invalid string address 0x{val.load_addr:x}"
+    assert (
+        addr != lldb.LLDB_INVALID_ADDRESS
+    ), f"invalid string address 0x{val.load_addr:x}"
     addr += val.size
     m_len = val.children[1].GetChildMemberWithName("m_len").unsigned
     return read_cstring(addr, m_len + 1, val.process)
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # Resource helpers
 
+
 def pretty_resource_data(data: lldb.SBValue, print_header=False) -> str:
-    """ Convert an HPHP::ResourceData[*] to a Python string
+    """Convert an HPHP::ResourceData[*] to a Python string
 
     Arguments:
         val: A ResourceData* wrapped by an lldb.SBValue
@@ -710,7 +760,7 @@ def pretty_resource_data(data: lldb.SBValue, print_header=False) -> str:
 
 
 def pretty_resource_header(header: lldb.SBValue, print_data=True) -> str:
-    """ Convert an HPHP::ResourceHdr[*] to a Python string
+    """Convert an HPHP::ResourceHdr[*] to a Python string
 
     Arguments:
         val: A ResourceHdr* wrapped by an lldb.SBValue
@@ -723,12 +773,16 @@ def pretty_resource_header(header: lldb.SBValue, print_data=True) -> str:
     if header.type.IsPointerType():
         header = deref(header)
 
-    assert header.type.name == "HPHP::ResourceHdr", f"Expected HPHP::ResourceHdr, got {header.type.name}"
+    assert (
+        header.type.name == "HPHP::ResourceHdr"
+    ), f"Expected HPHP::ResourceHdr, got {header.type.name}"
     data = None
     if print_data:
         addr = header.load_addr
         addr += header.size
-        data = header.CreateValueFromAddress("data", addr, Type("HPHP::ResourceData", header.target))
+        data = header.CreateValueFromAddress(
+            "data", addr, Type("HPHP::ResourceData", header.target)
+        )
         data = pretty_resource_data(data)
 
     header = str(hex(header.load_addr))
@@ -736,13 +790,14 @@ def pretty_resource_header(header: lldb.SBValue, print_data=True) -> str:
     return f"(hdr = {header}" + (f", data = {data}" if data else "") + ")"
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # TypedValue helpers
 
 _Current_key = None
 
+
 def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
-    """ Get the pretty string representation of a TypedValue (or its subclasses)
+    """Get the pretty string representation of a TypedValue (or its subclasses)
 
     Note that calling str(val) on an SBValue will automatically use the
     pretty printer for that value, if present.
@@ -775,11 +830,15 @@ def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
         val = float(get(data, "dbl").value)
     elif typ.unsigned in (DT("String"), DT("PersistentString")):
         pstr = get(data, "pstr")
-        val = '\"%s\"' % string_data_val(pstr)
+        val = '"%s"' % string_data_val(pstr)
     elif typ.unsigned in (
-            DT("Dict"), DT("PersistentDict"),
-            DT("Vec"), DT("PersistentVec"),
-            DT("Keyset"), DT("PersistentKeyset")):
+        DT("Dict"),
+        DT("PersistentDict"),
+        DT("Vec"),
+        DT("PersistentVec"),
+        DT("Keyset"),
+        DT("PersistentKeyset"),
+    ):
         val = deref(get(data, "parr"))
     elif typ.unsigned == DT("Object"):
         val = get(data, "pobj")
@@ -795,44 +854,49 @@ def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
     elif typ.unsigned == DT("ClsMeth"):
         # For non-lowptr, m_data is a pointer, so try and dereference first
         val = referenced_value(get(data, "pclsmeth", "m_data"))
-        cls = unsigned_cast(get(val, "m_cls"), Type("HPHP::Class", target).GetPointerType())
-        func = unsigned_cast(get(val, "m_func"), Type("HPHP::Func", target).GetPointerType())
+        cls = unsigned_cast(
+            get(val, "m_cls"), Type("HPHP::Class", target).GetPointerType()
+        )
+        func = unsigned_cast(
+            get(val, "m_func"), Type("HPHP::Func", target).GetPointerType()
+        )
         name = f"{nameof(cls)}::{nameof(func)}"
     elif typ.unsigned == DT("RFunc"):
         val = get(data, "prfunc")
         func = get(val, "m_func")
-        #arr = get(val, "m_arr")  # TODO use to print array contents
+        # arr = get(val, "m_arr")  # TODO use to print array contents
         name = nameof(func)
     elif typ.unsigned == DT("RClsMeth"):
         val = get(data, "prclsmeth")
         cls = get(val, "m_cls")
         func = get(val, "m_func")
-        #arr = get(val, "m_arr")  # TODO use to print array contents
+        # arr = get(val, "m_arr")  # TODO use to print array contents
         name = f"{nameof(cls)}::{nameof(func)}"
     else:
         typ_as_int8_t = typ.Cast(Type("int8_t", target))
         num = get(data, "num").signed
-        typ = 'Invalid Type (%d)' % typ_as_int8_t.signed
-        val = '0x%x' % num
+        typ = "Invalid Type (%d)" % typ_as_int8_t.signed
+        val = "0x%x" % num
 
     if isinstance(typ, lldb.SBValue):
         typ = typ.value
 
     if val is None:
-        out = '{ %s }' % typ
+        out = "{ %s }" % typ
     elif name is None:
-        out = '{ %s, %s }' % (typ, str(val))
+        out = "{ %s, %s }" % (typ, str(val))
     else:
         out = '{ %s, %s ("%s") }' % (typ, str(val), name)
 
     return out
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Array helpers
 
+
 def has_array_kind(array_data: lldb.SBValue, *kinds: str) -> bool:
-    """ Determine if array_data has a particular kind (e.g. 'Vec', 'Keyset', etc.)
+    """Determine if array_data has a particular kind (e.g. 'Vec', 'Keyset', etc.)
 
     Arguments:
         array_data: an SBValue wrapping an ArrayData
@@ -846,7 +910,9 @@ def has_array_kind(array_data: lldb.SBValue, *kinds: str) -> bool:
     m_kind = get(heap_obj, "m_kind")
 
     for kind in kinds:
-        kind = Enum("HPHP::ArrayData::ArrayKind", "k" + kind + "Kind", array_data.target).unsigned
+        kind = Enum(
+            "HPHP::ArrayData::ArrayKind", "k" + kind + "Kind", array_data.target
+        ).unsigned
         if m_kind.unsigned == kind:
             return True
     return False
@@ -854,31 +920,43 @@ def has_array_kind(array_data: lldb.SBValue, *kinds: str) -> bool:
 
 def cast_as_specialized_array_data_kind(array_data: lldb.SBValue) -> lldb.SBValue:
     # Currently does *not* take in a pointer to an ArrayData, but rather the value itself
-    debug_print(f"cast_as_specialized_array_data_kind(array_data=0x{array_data.load_addr:x} (type={array_data.type.name}))")
+    debug_print(
+        f"cast_as_specialized_array_data_kind(array_data=0x{array_data.load_addr:x} (type={array_data.type.name}))"
+    )
     heap_obj = array_data.children[0].children[0]  # HPHP::HeapObject
     m_kind = get(heap_obj, "m_kind")
-    if has_array_kind(array_data, 'Vec'):
+    if has_array_kind(array_data, "Vec"):
         pass
-    elif has_array_kind(array_data, 'Dict'):
-        array_data = array_data.address_of.Cast(Type("HPHP::VanillaDict", array_data.target).GetPointerType()).deref
-    elif has_array_kind(array_data, 'Keyset'):
-        array_data = array_data.address_of.Cast(Type("HPHP::VanillaKeyset", array_data.target).GetPointerType()).deref
-    elif has_array_kind(array_data, 'BespokeVec', 'BespokeDict', 'BespokeKeyset'):
-        raise Exception(f"Unsupported bespoke array type ('{m_kind}')! Run `expression -R -- {array_data.path}` to see its raw form")
+    elif has_array_kind(array_data, "Dict"):
+        array_data = array_data.address_of.Cast(
+            Type("HPHP::VanillaDict", array_data.target).GetPointerType()
+        ).deref
+    elif has_array_kind(array_data, "Keyset"):
+        array_data = array_data.address_of.Cast(
+            Type("HPHP::VanillaKeyset", array_data.target).GetPointerType()
+        ).deref
+    elif has_array_kind(array_data, "BespokeVec", "BespokeDict", "BespokeKeyset"):
+        raise Exception(
+            f"Unsupported bespoke array type ('{m_kind}')! Run `expression -R -- {array_data.path}` to see its raw form"
+        )
     else:
-        raise Exception(f"Invalid array type ('{m_kind}')! Run `expression -R -- {array_data.path}` to see its raw form")
+        raise Exception(
+            f"Invalid array type ('{m_kind}')! Run `expression -R -- {array_data.path}` to see its raw form"
+        )
 
     if array_data.GetError().Fail():
-        raise Exception(f"Unable to properly cast array data to specialized type: {array_data.GetError().GetCString()}")
+        raise Exception(
+            f"Unable to properly cast array data to specialized type: {array_data.GetError().GetCString()}"
+        )
     return array_data
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Architecture
 
 
 def arch(target: lldb.SBTarget) -> str:
-    """ Get the current architecture (e.g. "x86_64" or "aarch64") """
+    """Get the current architecture (e.g. "x86_64" or "aarch64")"""
     try:
         return target.triple.split("-")[0]
     except Exception:
@@ -886,7 +964,7 @@ def arch(target: lldb.SBTarget) -> str:
 
 
 def arch_regs(target: lldb.SBTarget) -> typing.Dict[str, str]:
-    """ Get a mapping from common register names to the actual register names
+    """Get a mapping from common register names to the actual register names
         as used in either x86 or ARM
 
     Arguments:
@@ -899,27 +977,43 @@ def arch_regs(target: lldb.SBTarget) -> typing.Dict[str, str]:
 
     # TODO check that this is the architecture string returned from the first part
     #      of the `arch()` triple when running on ARM
-    if a == 'aarch64':
+    if a == "aarch64":
         return {
-            'fp': 'x29',
-            'sp': 'sp',
-            'ip': 'pc',
-            'cross_jit_save': ['x19', 'x20', 'x21', 'x22', 'x23',
-                               'x24', 'x25', 'x26', 'x27', 'x28',
-                               'd8', 'd9', 'd10', 'd11', 'd12',
-                               'd13', 'd14', 'd15'
+            "fp": "x29",
+            "sp": "sp",
+            "ip": "pc",
+            "cross_jit_save": [
+                "x19",
+                "x20",
+                "x21",
+                "x22",
+                "x23",
+                "x24",
+                "x25",
+                "x26",
+                "x27",
+                "x28",
+                "d8",
+                "d9",
+                "d10",
+                "d11",
+                "d12",
+                "d13",
+                "d14",
+                "d15",
             ],
         }
     else:
         return {
-            'fp': 'rbp',
-            'sp': 'rsp',
-            'ip': 'rip',
-            'cross_jit_save': ['rbx', 'r12', 'r13', 'r14', 'r15'],
+            "fp": "rbp",
+            "sp": "rsp",
+            "ip": "rip",
+            "cross_jit_save": ["rbx", "r12", "r13", "r14", "r15"],
         }
 
+
 def reg(name: str, frame: lldb.SBFrame) -> lldb.SBValue:
-    """ Get the value of a register given its common name (e.g. "fp", "sp", etc.)
+    """Get the value of a register given its common name (e.g. "fp", "sp", etc.)
 
     Arguments:
         name: Name of the register
@@ -933,14 +1027,17 @@ def reg(name: str, frame: lldb.SBFrame) -> lldb.SBValue:
     return frame.register[name]
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # General-purpose helpers
 
-def parse_argv(args: str, target: lldb.SBTarget, limit=None) -> typing.List[lldb.SBValue]:
-    """ Explode a LLDB argument string, then evaluate all args up to `limit`.
 
-        It assumes that each arg is space-separated, meaning e.g. "bc+bclen" is one argument,
-        but "bc + bclen" is three.
+def parse_argv(
+    args: str, target: lldb.SBTarget, limit=None
+) -> typing.List[lldb.SBValue]:
+    """Explode a LLDB argument string, then evaluate all args up to `limit`.
+
+    It assumes that each arg is space-separated, meaning e.g. "bc+bclen" is one argument,
+    but "bc + bclen" is three.
     """
 
     # I can't figure out a way to successfully catch lldb parse errors using normal
@@ -948,14 +1045,17 @@ def parse_argv(args: str, target: lldb.SBTarget, limit=None) -> typing.List[lldb
 
     if limit is None:
         limit = len(args)
-    return [target.EvaluateExpression(arg) if i < limit else arg
-            for i, arg in enumerate(shlex.split(args))]
+    return [
+        target.EvaluateExpression(arg) if i < limit else arg
+        for i, arg in enumerate(shlex.split(args))
+    ]
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Debugging
 
 _Debug = False
+
 
 class DebugCommand(Command):
     command = "debug"
@@ -964,9 +1064,9 @@ class DebugCommand(Command):
     @classmethod
     def create_parser(cls):
         parser = cls.default_parser()
-        subparsers = parser.add_subparsers(dest='cmd')
-        subparsers.add_parser('on', help='Enable LLDB script debugging information')
-        subparsers.add_parser('off', help='Disable LLDB script debugging information')
+        subparsers = parser.add_subparsers(dest="cmd")
+        subparsers.add_parser("on", help="Enable LLDB script debugging information")
+        subparsers.add_parser("off", help="Disable LLDB script debugging information")
         return parser
 
     def __init__(self, debugger, internal_dict):
@@ -981,9 +1081,9 @@ class DebugCommand(Command):
             return
 
         global _Debug
-        if options.cmd == 'on':
+        if options.cmd == "on":
             _Debug = True
-        elif options.cmd == 'off':
+        elif options.cmd == "off":
             _Debug = False
         else:
             result.SetError(f"Unexpected command {options.cmd}")
@@ -995,7 +1095,7 @@ def debug_print(message: str, file=sys.stderr) -> None:
 
 
 def __lldb_init_module(debugger, _internal_dict, top_module=""):
-    """ Register the commands in this file with the LLDB debugger.
+    """Register the commands in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows
     this script to be imported into LLDB separately; LLDB looks for a function with

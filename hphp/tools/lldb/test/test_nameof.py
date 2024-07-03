@@ -1,10 +1,11 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
-from . import base
+from . import base  # usort: skip (must be first, needed for sys.path side-effects)
+
 
 class NameOfCommandTestCase(base.TestHHVMTypesBinary):
     def setUp(self):
-        super().setUp(test_type = "nameof-values")
+        super().setUp(test_type="nameof-values")
 
     def test_nameof(self):
         with self.subTest("nameof Class"):

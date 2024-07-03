@@ -20,7 +20,7 @@ class ApcIterator:
         map_type = T("HPHP::ConcurrentTableSharedStore").pointer()
         apc_ptr = TL(symbol_name).address
 
-        self.apc_map = apc_ptr.cast(map_type)['m_vars']
+        self.apc_map = apc_ptr.cast(map_type)["m_vars"]
         self.bucket_idx = 0
         self.bucket = self.apc_map["my_embedded_segment"]
         self.node_ptr = self.bucket[self.bucket_idx]["node_list"]
@@ -41,7 +41,7 @@ class ApcIterator:
                 base = (1 << self.segment) & ~1
                 h = self.index - base
                 self.bucket_idx = h
-                self.bucket = self.apc_map['my_table'][self.segment]
+                self.bucket = self.apc_map["my_table"][self.segment]
 
             self.node_ptr = self.bucket[self.bucket_idx]["node_list"]
 
@@ -59,12 +59,12 @@ class ApcIterator:
         try:
             key = self.node_key().dereference()
         except gdb.MemoryError:
-            key = '<invalid>'
+            key = "<invalid>"
 
         try:
             val = self.node_value()
         except gdb.MemoryError:
-            val = '<invalid>'
+            val = "<invalid>"
 
         self.node_ptr = self.node_ptr["next"]
         if self.node_ptr == nullptr():
@@ -87,12 +87,12 @@ class DumpApcCommand(gdb.Command):
     """Dump the contents of APC in its entirety"""
 
     def __init__(self):
-        super(DumpApcCommand, self).__init__('info apc', gdb.COMMAND_STATUS)
+        super(DumpApcCommand, self).__init__("info apc", gdb.COMMAND_STATUS)
 
     @errorwrap
     def invoke(self, args, from_tty):
         apc_iter = ApcIterator("_ZN4HPHP12_GLOBAL__N_113s_apc_storageE")
-        for (key, val) in apc_iter:
+        for key, val in apc_iter:
             print(key)
             print(val)
             print("")

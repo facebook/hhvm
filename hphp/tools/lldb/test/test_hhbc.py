@@ -1,9 +1,9 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
-from . import base
-
-import hhvm_lldb.utils as utils
+from . import base  # usort: skip (must be first, needed for sys.path side-effects)
 import hhvm_lldb.hhbc as hhbc
+import hhvm_lldb.utils as utils
+
 
 # Only setting allocateBCRegion breakpoint
 # after we've inited the process and updated
@@ -20,69 +20,71 @@ commands_to_get_to_bc_region = [
     "continue",
 ]
 
+
 class HHBCTestCase(base.TestHHVMBinary):
     def setUp(self):
-        super().setUp(test_file="quick/asm_iterbreak.hhas", interp=True, allow_hhas=True)
+        super().setUp(
+            test_file="quick/asm_iterbreak.hhas", interp=True, allow_hhas=True
+        )
 
     def test_hhx(self):
         self.run_commands(commands_to_get_to_bc_region)
         _, output = self.run_commands(["hhx bc bc+bclen"])
         # TODO replace Ids in 'String <Id>' with actual string value when lookup_litstr works
         expected_bcs = [
-            '+0: NewDictArray 3',
-            '+2: String 0',  # 0=>"hello"
-            '+7: String 1',  # 1=>"world"
-            '+12: AddElemC',
-            '+13: String 2',  # 2=>"this"
-            '+18: String 3',  # 3=>"is"
-            '+23: AddElemC',
-            '+24: String 4',  # 4=>"a"
-            '+29: String 5',  # 5=>"test"
-            '+34: AddElemC',
-            '+35: SetL L:0',
-            '+37: PopC',
-            '+38: IterInit 0 K:2 V:1 L:0 109',
-            '+48: String 6',  # 6=>"\n"
-            '+53: CGetL2 L:1:1',
-            '+56: Concat',
-            '+57: Print',
-            '+58: PopC',
-            '+59: String 6',  # 6=>"\n"'
-            '+64: CGetL2 L:2:2',
-            '+67: Concat',
-            '+68: Print',
-            '+69: PopC',
-            '+70: IterInit 1 K:4 V:3 L:0 59',
-            '+80: String 6',  # 6=>"\n"
-            '+85: CGetL2 L:3:3',
-            '+88: Concat',
-            '+89: Print',
-            '+90: PopC',
-            '+91: String 6',  # 6=>"\n"
-            '+96: CGetL2 L:4:4',
-            '+99: Concat',
-            '+100: Print',
-            '+101: PopC',
-            '+102: IterFree 1',
-            '+104: IterFree 0',
-            '+106: Jmp 41',
-            '+111: IterNext 1 K:4 V:3 L:0 -31',
-            '+121: Jmp 8',
-            '+126: IterFree 1',
-            '+128: Throw',
-            '+129: IterNext 0 K:2 V:1 L:0 -81',
-            '+139: Jmp 8',
-            '+144: IterFree 0',
-            '+146: Throw',
-            '+147: Int 1',
-            '+156: RetC',
+            "+0: NewDictArray 3",
+            "+2: String 0",  # 0=>"hello"
+            "+7: String 1",  # 1=>"world"
+            "+12: AddElemC",
+            "+13: String 2",  # 2=>"this"
+            "+18: String 3",  # 3=>"is"
+            "+23: AddElemC",
+            "+24: String 4",  # 4=>"a"
+            "+29: String 5",  # 5=>"test"
+            "+34: AddElemC",
+            "+35: SetL L:0",
+            "+37: PopC",
+            "+38: IterInit 0 K:2 V:1 L:0 109",
+            "+48: String 6",  # 6=>"\n"
+            "+53: CGetL2 L:1:1",
+            "+56: Concat",
+            "+57: Print",
+            "+58: PopC",
+            "+59: String 6",  # 6=>"\n"'
+            "+64: CGetL2 L:2:2",
+            "+67: Concat",
+            "+68: Print",
+            "+69: PopC",
+            "+70: IterInit 1 K:4 V:3 L:0 59",
+            "+80: String 6",  # 6=>"\n"
+            "+85: CGetL2 L:3:3",
+            "+88: Concat",
+            "+89: Print",
+            "+90: PopC",
+            "+91: String 6",  # 6=>"\n"
+            "+96: CGetL2 L:4:4",
+            "+99: Concat",
+            "+100: Print",
+            "+101: PopC",
+            "+102: IterFree 1",
+            "+104: IterFree 0",
+            "+106: Jmp 41",
+            "+111: IterNext 1 K:4 V:3 L:0 -31",
+            "+121: Jmp 8",
+            "+126: IterFree 1",
+            "+128: Throw",
+            "+129: IterNext 0 K:2 V:1 L:0 -81",
+            "+139: Jmp 8",
+            "+144: IterFree 0",
+            "+146: Throw",
+            "+147: Int 1",
+            "+156: RetC",
         ]
         output_lines = output.strip().split("\n")
         self.assertEqual(len(output_lines), len(expected_bcs))
         for line, expected_bc in zip(output_lines, expected_bcs):
-            line = '+' + line.split("+")[1]
+            line = "+" + line.split("+")[1]
             self.assertEqual(line, expected_bc)
-
 
     def test_helper_functions(self):
         op_name_to_immeds = {
@@ -162,9 +164,9 @@ class HHBCTestCase2(base.TestHHVMBinary):
             "+1: NullUninit",
             "+2: String 0",  # 0=>"arr"
             "+7: String 1",  # 1=>"ClassWithArray"
-            "+12: ClassGetC 0", # 0=>"Normal"
+            "+12: ClassGetC 0",  # 0=>"Normal"
             "+14: CGetS 0",  # 0=>Any (a subop)
-            "+16: FCallFuncD <> 1 1 \"\" \"\" - \"\" 2",  # 2=>"var_dump"
+            '+16: FCallFuncD <> 1 1 "" "" - "" 2',  # 2=>"var_dump"
             "+23: PopC",
             "+24: String 1",  # 1=>"ClassWithArray"
             "+29: SetL L:0",
@@ -174,10 +176,10 @@ class HHBCTestCase2(base.TestHHVMBinary):
             "+34: String 0",  # 0=>"arr"
             "+39: Int 2",
             "+48: CGetL L:0:0",
-            "+51: ClassGetC 0", # 0=>"Normal"
+            "+51: ClassGetC 0",  # 0=>"Normal"
             "+53: BaseSC 2 0 1 0",  # 1=>Warn 0=>Any
             "+58: QueryM 3 0 EC:1 Any",  # 0=>CGet
-            "+64: FCallFuncD <> 1 1 \"\" \"\" - \"\" 2",  # 2=>"var_dump"
+            '+64: FCallFuncD <> 1 1 "" "" - "" 2',  # 2=>"var_dump"
             "+71: PopC",
             "+72: True",
             "+73: RetC",
@@ -186,7 +188,7 @@ class HHBCTestCase2(base.TestHHVMBinary):
         output_lines = output.strip().split("\n")
         self.assertEqual(len(output_lines), len(expected_bcs))
         for line, expected_bc in zip(output_lines, expected_bcs):
-            line = '+' + line.split("+")[1]
+            line = "+" + line.split("+")[1]
             self.assertEqual(line, expected_bc)
 
 
@@ -199,21 +201,21 @@ class HHBCTestCase3(base.TestHHVMBinary):
         _, output = self.run_commands(["hhx bc bc+bclen"])
         # TODO replace Ids in 'String <Id>' with actual string value when lookup_litstr works
         expected_bcs = [
-            "+0: Dict 0", # 0=>dict(0=>0,1=>1,2=>2,3=>3,4=>4)",
+            "+0: Dict 0",  # 0=>dict(0=>0,1=>1,2=>2,3=>3,4=>4)",
             "+5: SetL L:0",
             "+7: PopC",
             "+8: IterInit 0 NK V:1 L:0 109",
             "+18: CGetL L:1:1",
             "+21: Switch 0 0 <31 41 51 61 71>",  # 0=>Unbounded
-            "+52: String 0", # 0=>\"label_0\n\"
+            "+52: String 0",  # 0=>\"label_0\n\"
             "+57: Jmp 40",
-            "+62: String 1",  #1=>\"label_1\n\"
+            "+62: String 1",  # 1=>\"label_1\n\"
             "+67: Jmp 30",
-            "+72: String 2",  #2=>\"label_2\n\"
+            "+72: String 2",  # 2=>\"label_2\n\"
             "+77: Jmp 20",
-            "+82: String 3",  #3=>\"label_3\n\"
+            "+82: String 3",  # 3=>\"label_3\n\"
             "+87: Jmp 10",
-            "+92: String 4",  #4=>\"label_4\n\"
+            "+92: String 4",  # 4=>\"label_4\n\"
             "+97: Print",
             "+98: PopC",
             "+99: IterNext 0 NK V:1 L:0 -81",
@@ -227,7 +229,7 @@ class HHBCTestCase3(base.TestHHVMBinary):
         output_lines = output.strip().split("\n")
         self.assertEqual(len(output_lines), len(expected_bcs))
         for line, expected_bc in zip(output_lines, expected_bcs):
-            line = '+' + line.split("+")[1]
+            line = "+" + line.split("+")[1]
             self.assertEqual(line, expected_bc)
 
 
@@ -257,5 +259,5 @@ class HHBCTestCase4(base.TestHHVMBinary):
         output_lines = output.strip().split("\n")
         self.assertEqual(len(output_lines), len(expected_bcs))
         for line, expected_bc in zip(output_lines, expected_bcs):
-            line = '+' + line.split("+")[1]
+            line = "+" + line.split("+")[1]
             self.assertEqual(line, expected_bc)

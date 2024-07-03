@@ -1,9 +1,10 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
-import lldb
 import shlex
 import sys
 import typing
+
+import lldb
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
@@ -12,23 +13,29 @@ except ModuleNotFoundError:
     import hhvm_lldb.utils as utils
 
 
-def at(ptr: lldb.SBValue, idx: typing.Union[int, lldb.SBValue]) -> typing.Optional[lldb.SBValue]:
-    """ Access ptr[idx] """
+def at(
+    ptr: lldb.SBValue, idx: typing.Union[int, lldb.SBValue]
+) -> typing.Optional[lldb.SBValue]:
+    """Access ptr[idx]"""
 
     if isinstance(idx, lldb.SBValue):
         idx = idx.unsigned
 
     val = ptr.GetChildAtIndex(idx, lldb.eDynamicDontRunTarget, True)
 
-    utils.debug_print(f"idx.at(ptr={ptr} ({ptr.type.name}), idx={idx}) = {val.unsigned} (0x{val.unsigned:x}) (error={val.GetError()})")
+    utils.debug_print(
+        f"idx.at(ptr={ptr} ({ptr.type.name}), idx={idx}) = {val.unsigned} (0x{val.unsigned:x}) (error={val.GetError()})"
+    )
 
     if val.GetError().Fail():
         return None
     return val
 
 
-def atomic_low_ptr_vector_at(av: lldb.SBValue, idx: int, hasher=None) -> typing.Optional[lldb.SBValue]:
-    """ Get the value at idx in the atomic vector av
+def atomic_low_ptr_vector_at(
+    av: lldb.SBValue, idx: int, hasher=None
+) -> typing.Optional[lldb.SBValue]:
+    """Get the value at idx in the atomic vector av
 
     See hphp/util/atomic-vector.h
 
@@ -52,11 +59,15 @@ def atomic_low_ptr_vector_at(av: lldb.SBValue, idx: int, hasher=None) -> typing.
         unique_ptr = utils.rawptr(utils.get(av, "m_vals"))
         return at(unique_ptr, idx)
     else:
-        return atomic_low_ptr_vector_at(utils.atomic_get(utils.get(av, 'm_next')), idx - size)
+        return atomic_low_ptr_vector_at(
+            utils.atomic_get(utils.get(av, "m_next")), idx - size
+        )
 
 
-def fixed_vector_at(fv: lldb.SBValue, idx: int, hasher=None) -> typing.Optional[lldb.SBValue]:
-    """ Get the value at idx in the fixed vector fv
+def fixed_vector_at(
+    fv: lldb.SBValue, idx: int, hasher=None
+) -> typing.Optional[lldb.SBValue]:
+    """Get the value at idx in the fixed vector fv
 
     See hphp/util/fixed-vector.h
 
@@ -78,8 +89,10 @@ def fixed_vector_at(fv: lldb.SBValue, idx: int, hasher=None) -> typing.Optional[
     return at(ptr, idx)
 
 
-def compact_vector_at(cv: lldb.SBValue, idx: int, hasher=None) -> typing.Optional[lldb.SBValue]:
-    """ Get the value at idx in the compact vector cv
+def compact_vector_at(
+    cv: lldb.SBValue, idx: int, hasher=None
+) -> typing.Optional[lldb.SBValue]:
+    """Get the value at idx in the compact vector cv
 
     Arguments:
         cv: The vector, repesented as lldb.SBValue[HPHP::CompactVector]
@@ -113,7 +126,9 @@ def compact_vector_at(cv: lldb.SBValue, idx: int, hasher=None) -> typing.Optiona
         # of types with templates so do this manually instead
         offset = inner.size if inner.size > m_data.type.size else m_data.type.size
 
-    raw_ptr = utils.unsigned_cast(m_data, utils.Type("char", cv.target).GetPointerType())
+    raw_ptr = utils.unsigned_cast(
+        m_data, utils.Type("char", cv.target).GetPointerType()
+    )
     # utils.unsigned_cast won't work here because that function attempts to create
     # a value by evaluating an expression, and LLDB has issues looking up templated types,
     # even though we have a handle to the type via inner!
@@ -129,22 +144,28 @@ def idx_accessors():
         "HPHP::FixedVector": fixed_vector_at,
     }
 
+
 def _unaligned_tv_at_pos_to_tv(base: lldb.SBValue, idx: int) -> lldb.SBValue:
     utv_type = utils.Type("HPHP::UnalignedTypedValue", base.target)
     offset = utv_type.size * idx
 
-    utils.debug_print(f"Loading UnalignedTypedValue (base address: 0x{base.load_addr:x}, offset: {offset})")
+    utils.debug_print(
+        f"Loading UnalignedTypedValue (base address: 0x{base.load_addr:x}, offset: {offset})"
+    )
 
     # TODO(michristensen) I believe that creating a child at offset is the preferred way of
     # doing this, but it's not currently working (it's being filled with garbage).
     # utv = base.CreateChildAtOffset('[' + str(idx) + ']', offset, utv_type)
 
-    utv = base.CreateValueFromAddress('[' + str(idx) + ']', base.load_addr + offset, utv_type)
+    utv = base.CreateValueFromAddress(
+        "[" + str(idx) + "]", base.load_addr + offset, utv_type
+    )
 
     # Note that we're returning a lldb.SBValue, rather than printing the string,
     # because this is used by a synthetic child provider, and lldb will call the
     # pretty printer associated with it automatically.
     return utv
+
 
 def _aligned_tv_at_pos_to_tv(base: lldb.SBValue, idx: int) -> lldb.SBValue:
     target = base.target
@@ -165,20 +186,25 @@ def _aligned_tv_at_pos_to_tv(base: lldb.SBValue, idx: int) -> lldb.SBValue:
     assert success, "Couldn't construct a raw TypedValue"
 
     tv_type = utils.Type("HPHP::TypedValue", base.target)
-    tv = base.CreateValueFromData('[' + str(idx) + ']', data, tv_type)
+    tv = base.CreateValueFromData("[" + str(idx) + "]", data, tv_type)
 
     return tv
+
 
 def vec_at(base: lldb.SBValue, idx: int) -> lldb.SBValue:
     # base is a generic pointer to the start of the array of typed values
     try:
-        if utils.Global('HPHP::VanillaVec::stores_unaligned_typed_values', base.target):
+        if utils.Global("HPHP::VanillaVec::stores_unaligned_typed_values", base.target):
             return _unaligned_tv_at_pos_to_tv(base, idx)
         else:
             return _aligned_tv_at_pos_to_tv(base, idx)
     except Exception as ex:
-        print(f"error while trying to get element #{idx} of vec {str(base)}: {ex}", file=sys.stderr)
+        print(
+            f"error while trying to get element #{idx} of vec {str(base)}: {ex}",
+            file=sys.stderr,
+        )
         return None
+
 
 def dict_at(base, idx) -> (str, lldb.SBValue):
     vde_type = utils.Type("HPHP::VanillaDictElm", base.target)
@@ -188,8 +214,11 @@ def dict_at(base, idx) -> (str, lldb.SBValue):
     utils.debug_print(f"Element #{idx} address: 0x{elt.load_addr:x}")
 
     try:
-        if utils.get(elt, "data", "m_type").signed == utils.Global("HPHP::kInvalidDataType", base.target).signed:
-            rawkey = key = '<deleted>'
+        if (
+            utils.get(elt, "data", "m_type").signed
+            == utils.Global("HPHP::kInvalidDataType", base.target).signed
+        ):
+            rawkey = key = "<deleted>"
         elif utils.get(elt, "data", "m_aux", "u_hash").signed < 0:
             ikey = utils.get(elt, "ikey").signed
             rawkey = key = ikey
@@ -199,7 +228,7 @@ def dict_at(base, idx) -> (str, lldb.SBValue):
             key = f'"{rawkey}"'
     except Exception as e:
         print(f"Failed to get dictionary key with error: {str(e)}", file=sys.stderr)
-        rawkey = key = '<invalid>'
+        rawkey = key = "<invalid>"
 
     utils._Current_key = rawkey
 
@@ -221,6 +250,7 @@ def dict_at(base, idx) -> (str, lldb.SBValue):
 
     return data
 
+
 def keyset_at(base, idx):
     vde_type = utils.Type("HPHP::VanillaKeysetElm", base.target)
     utils.debug_print(f"Keyset base address (i.e. first element): 0x{base.load_addr:x}")
@@ -229,8 +259,11 @@ def keyset_at(base, idx):
     utils.debug_print(f"Element #{idx} address: 0x{elt.load_addr:x}")
 
     try:
-        if utils.get(elt, "tv", "m_type").signed == utils.Global("HPHP::kInvalidDataType", base.target).signed:
-            key = '<deleted>'
+        if (
+            utils.get(elt, "tv", "m_type").signed
+            == utils.Global("HPHP::kInvalidDataType", base.target).signed
+        ):
+            key = "<deleted>"
         else:
             key_raw = utils.get(elt, "tv")
             tv_type = utils.Type("HPHP::TypedValue", base.target)
@@ -262,7 +295,7 @@ def idx(container: lldb.SBValue, index, hasher=None):
     elif true_type in accessors:
         value = accessors[true_type](container, index, hasher)
     else:
-        print(f'idx: Unrecognized container ({container_type} - {true_type}).')
+        print(f"idx: Unrecognized container ({container_type} - {true_type}).")
         return None
 
     return value
@@ -287,19 +320,13 @@ hash, if valid, will be used instead of the default hash for the key type.
     @classmethod
     def create_parser(cls):
         parser = cls.default_parser()
-        parser.add_argument(
-            "container",
-            help="A container to index into"
-        )
-        parser.add_argument(
-            "key",
-            help="The index or data member to access"
-        )
+        parser.add_argument("container", help="A container to index into")
+        parser.add_argument("key", help="The index or data member to access")
         parser.add_argument(
             "hasher",
             default=id,
             nargs="?",
-            help="An optional hasher specification (a bare word string, such as \"id\" sans quotes)"
+            help='An optional hasher specification (a bare word string, such as "id" sans quotes)',
         )
         return parser
 
@@ -335,7 +362,7 @@ hash, if valid, will be used instead of the default hash for the key type.
 
 
 def __lldb_init_module(debugger, _internal_dict, top_module=""):
-    """ Register the commands in this file with the LLDB debugger.
+    """Register the commands in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows
     this script to be imported into LLDB separately; LLDB looks for a function with

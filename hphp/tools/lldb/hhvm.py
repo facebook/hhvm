@@ -3,12 +3,12 @@
 """ The main module you load in your .lldbinit. """
 
 
-import lldb
 import sys
 
 import cores
 import hhbc
 import idx
+import lldb
 import lookup
 import nameof
 import pretty
@@ -19,8 +19,8 @@ import utils
 
 
 def __lldb_init_module(debugger, internal_dict):
-    """ Load up the commands and pretty printers of each module.
-    
+    """Load up the commands and pretty printers of each module.
+
     Arguments:
         debugger: Current debugger object
         internal_dict: Dict for current script session. For internal use by LLDB only.

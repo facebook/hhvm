@@ -11,20 +11,20 @@ except ModuleNotFoundError:
     import hhvm_lldb.utils as utils
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # `nameof` command.
+
 
 class NameOfCommand(utils.Command):
     command = "nameof"
-    description = "Print the name of various HHVM objects, like functions, classes, or objects"
+    description = (
+        "Print the name of various HHVM objects, like functions, classes, or objects"
+    )
 
     @classmethod
     def create_parser(cls):
         parser = cls.default_parser()
-        parser.add_argument(
-            "object",
-            help="An HHVM object to get the name of"
-        )
+        parser.add_argument("object", help="An HHVM object to get the name of")
         return parser
 
     def __init__(self, debugger, internal_dict):
@@ -48,7 +48,7 @@ class NameOfCommand(utils.Command):
 
 
 def __lldb_init_module(debugger, _internal_dict, top_module=""):
-    """ Register the commands in this file with the LLDB debugger.
+    """Register the commands in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows
     this script to be imported into LLDB separately; LLDB looks for a function with

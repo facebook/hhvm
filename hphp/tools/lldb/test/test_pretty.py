@@ -1,11 +1,12 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
-from . import base
+from . import base  # usort: skip (must be first, needed for sys.path side-effects)
+
 
 class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
 
     def setUp(self):
-        super().setUp(test_type = "typed-values")
+        super().setUp(test_type="typed-values")
 
     def test_pp_tvs(self):
         # Printing all of them in one execution for efficiency.
@@ -17,10 +18,10 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
             _, output = self.run_commands(["frame variable tv"])
             expected_lines = [
                 "(HPHP::TypedValue) tv = { PersistentDict, (HPHP::ArrayData) *parr = 3 element(s) {",
-                "\"key1\" = { Int64, 42 }",
-                "\"key2\" = { Double, 3.14 }",
-                "\"key3\" = { PersistentString, \"Salutations, earth!\" }",
-                "} }"
+                '"key1" = { Int64, 42 }',
+                '"key2" = { Double, 3.14 }',
+                '"key3" = { PersistentString, "Salutations, earth!" }',
+                "} }",
             ]
             actual_lines = [line.strip() for line in output.split("\n") if line]
             self.assertEqual(actual_lines, expected_lines)
@@ -30,10 +31,10 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
             _, output = self.run_commands(["frame variable tv"])
             expected_lines = [
                 "(HPHP::TypedValue) tv = { Dict, (HPHP::ArrayData) *parr = 3 element(s) {",
-                "\"key1\" = { Int64, 1 }",
-                "\"key2\" = { Double, 2.718 }",
-                "\"key3\" = { String, \"Hello, world!\" }",
-                "} }"
+                '"key1" = { Int64, 1 }',
+                '"key2" = { Double, 2.718 }',
+                '"key3" = { String, "Hello, world!" }',
+                "} }",
             ]
             actual_lines = [line.strip() for line in output.split("\n") if line]
             self.assertEqual(actual_lines, expected_lines)
@@ -45,8 +46,8 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
                 "(HPHP::TypedValue) tv = { PersistentVec, (HPHP::ArrayData) *parr = 3 element(s) {",
                 "[0] = { Int64, 42 }",
                 "[1] = { Double, 3.14 }",
-                "[2] = { PersistentString, \"This is not a pipe\" }",
-                "} }"
+                '[2] = { PersistentString, "This is not a pipe" }',
+                "} }",
             ]
             actual_lines = [line.strip() for line in output.split("\n") if line]
             self.assertEqual(actual_lines, expected_lines)
@@ -59,7 +60,7 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
                 "[0] = { Int64, 1 }",
                 "[1] = { Int64, 2 }",
                 "[2] = { Int64, 3 }",
-                "} }"
+                "} }",
             ]
             actual_lines = [line.strip() for line in output.split("\n") if line]
             self.assertEqual(actual_lines, expected_lines)
@@ -78,7 +79,7 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
                 "= { Int64, 1 }",
                 "= { Int64, 2 }",
                 "= { Int64, 3 }",
-                "} }"
+                "} }",
             ]
             actual_lines = [line.strip() for line in output.split("\n") if line]
             self.assertEqual(actual_lines, expected_lines)
@@ -87,18 +88,18 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
             "PersistentString": r'\(HPHP::TypedValue\) tv = \{ PersistentString, "Hello, world!" \}',
             "String": r'\(HPHP::TypedValue\) tv = \{ String, "Hello, world!" \}',
             "Object": r'\(HPHP::TypedValue\) tv = \{ Object, \(HPHP::ObjectData \*\) pobj = 0x.* "InvalidArgumentException" \}',
-            "Resource": r'\(HPHP::TypedValue\) tv = \{ Resource, \(hdr = 0x.*, data = 0x.*\) *\}',
+            "Resource": r"\(HPHP::TypedValue\) tv = \{ Resource, \(hdr = 0x.*, data = 0x.*\) *\}",
             "RFunc": r'\(HPHP::TypedValue\) tv = \{ RFunc, \(HPHP::RFuncData \*\) prfunc = 0x.* \("Exception::__construct"\) \}',
             "RClsMeth": r'\(HPHP::TypedValue\) tv = \{ RClsMeth, \(HPHP::RClsMethData \*\) prclsmeth = 0x.* \("InvalidArgumentException::Exception::__construct"\) \}',
             "ClsMeth": r'\(HPHP::TypedValue\) tv = \{ ClsMeth, \(HPHP::ClsMethData(::cls_meth_t)?\) \*?m_data = \(m_cls = \d+, m_func = \d+\) \("InvalidArgumentException::Exception::__construct"\) \}',
-            "Boolean": r'\(HPHP::TypedValue\) tv = \{ Boolean, True \}',
-            "Int64": r'\(HPHP::TypedValue\) tv = \{ Int64, 42 \}',
-            "Double": r'\(HPHP::TypedValue\) tv = \{ Double, 3.1415 \}',
+            "Boolean": r"\(HPHP::TypedValue\) tv = \{ Boolean, True \}",
+            "Int64": r"\(HPHP::TypedValue\) tv = \{ Int64, 42 \}",
+            "Double": r"\(HPHP::TypedValue\) tv = \{ Double, 3.1415 \}",
             "Func": r'\(HPHP::TypedValue\) tv = \{ Func, \(const HPHP::Func \*\) pfunc = 0x.* "Exception::__construct" \}',
             "Class": r'\(HPHP::TypedValue\) tv = \{ Class, \(HPHP::Class \*\) pclass = 0x.* "InvalidArgumentException" \}',
             "LazyClass": r'\(HPHP::TypedValue\) tv = \{ LazyClass, \(HPHP::LazyClassData\) plazyclass = "SpecialLazyClass" \}',
-            "Uninit": r'\(HPHP::TypedValue\) tv = \{ Uninit \}',
-            "Null": r'\(HPHP::TypedValue\) tv = \{ Null \}',
+            "Uninit": r"\(HPHP::TypedValue\) tv = \{ Uninit \}",
+            "Null": r"\(HPHP::TypedValue\) tv = \{ Null \}",
         }
 
         for tv_name, expected_output in breakpoints_to_outputs.items():
@@ -126,20 +127,20 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
         with self.subTest("TypedValue (subclasses -- Variant)"):
             self.run_until_breakpoint("takeVariant")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = r'\(HPHP::Variant\) v = \{ Int64, 42 \}'
+            expected_output = r"\(HPHP::Variant\) v = \{ Int64, 42 \}"
             self.assertRegex(output.strip(), expected_output)
 
         with self.subTest("TypedValue (subclasses -- VarNR)"):
             self.run_until_breakpoint("takeVarNR")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = r'\(HPHP::VarNR\) v = \{ Double, 2.718 \}'
+            expected_output = r"\(HPHP::VarNR\) v = \{ Double, 2.718 \}"
             self.assertRegex(output.strip(), expected_output)
 
 
 class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
 
     def setUp(self):
-        super().setUp(test_type = "other-values")
+        super().setUp(test_type="other-values")
 
     def test_pp_other_values(self):
         with self.subTest("StringData"):
@@ -198,7 +199,9 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
         with self.subTest("OptResource *"):
             self.run_until_breakpoint("takePtrToResource")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = r"\(HPHP::OptResource \*\) v = 0x.* \(hdr = 0x.*, data = 0x.*\)"
+            expected_output = (
+                r"\(HPHP::OptResource \*\) v = 0x.* \(hdr = 0x.*, data = 0x.*\)"
+            )
             self.assertRegex(output.strip(), expected_output)
 
         with self.subTest("Object"):
@@ -210,25 +213,31 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
         with self.subTest("req::ptr"):
             self.run_until_breakpoint("takeReqPtr")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = '(HPHP::req::ptr<HPHP::ObjectData>) v = "InvalidArgumentException"'
+            expected_output = (
+                '(HPHP::req::ptr<HPHP::ObjectData>) v = "InvalidArgumentException"'
+            )
             self.assertEqual(output.strip(), expected_output)
 
         with self.subTest("HPHP::Optional (Some)"):
             self.run_until_breakpoint("takeOptional")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = '(HPHP::Optional<HPHP::String>) v = (HPHP::String) Value = "hello"'
+            expected_output = (
+                '(HPHP::Optional<HPHP::String>) v = (HPHP::String) Value = "hello"'
+            )
             self.assertEqual(output.strip(), expected_output)
 
         with self.subTest("HPHP::Optional (None)"):
             self.run_until_breakpoint("takeOptional")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = '(HPHP::Optional<HPHP::String>) v = None'
+            expected_output = "(HPHP::Optional<HPHP::String>) v = None"
             self.assertEqual(output.strip(), expected_output)
 
         with self.subTest("HPHP::LowPtr"):
             self.run_until_breakpoint("takeLowPtr")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = '(HPHP::LowPtr<HPHP::Class>) v = "InvalidArgumentException"'
+            expected_output = (
+                '(HPHP::LowPtr<HPHP::Class>) v = "InvalidArgumentException"'
+            )
             self.assertEqual(output.strip(), expected_output)
 
         with self.subTest("HPHP::LowPtr &"):
@@ -249,14 +258,14 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
         with self.subTest("HPHP::Extension"):
             self.run_until_breakpoint("takeExtension")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = '(HPHP::Extension) v = test-extension (version: 0.5, oncall: test-oncall)'
+            expected_output = "(HPHP::Extension) v = test-extension (version: 0.5, oncall: test-oncall)"
             self.assertEqual(output.strip(), expected_output)
 
         with self.subTest("HPHP::ArrayData"):
             self.run_until_breakpoint("takeArrayData")
 
             _, output = self.run_commands(["frame variable v"])
-            expected_output = r'\(HPHP::ArrayData \*\) v = 0x.* 4 element\(s\)'
+            expected_output = r"\(HPHP::ArrayData \*\) v = 0x.* 4 element\(s\)"
             self.assertRegex(output.strip(), expected_output)
 
             _, output = self.run_commands(["frame variable *v"])
@@ -266,7 +275,7 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
                 "[1] = { Int64, 2 }",
                 "[2] = { Int64, 3 }",
                 "[3] = { Int64, 4 }",
-                "}"
+                "}",
             ]
             actual_lines = [line.strip() for line in output.split("\n") if line]
             self.assertEqual(actual_lines, expected_lines)
@@ -280,7 +289,7 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
                 "[1] = { Int64, 2 }",
                 "[2] = { Int64, 3 }",
                 "[3] = { Int64, 4 }",
-                "}"
+                "}",
             ]
             actual_lines = [line.strip() for line in output.split("\n") if line]
             self.assertEqual(actual_lines, expected_lines)
@@ -291,11 +300,11 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
             expected_lines = [
                 "(HPHP::Array) v = 5 element(s) {",
                 "19122942 = { Boolean, True }",
-                "302 = { String, \"Salutations, earth!\" }",
+                '302 = { String, "Salutations, earth!" }',
                 "2 = { Double, 3.14 }",
-                "\"key4\" = { Double, 2.718 }",
-                "\"key5\" = { String, \"Hello, world!\" }",
-                "}"
+                '"key4" = { Double, 2.718 }',
+                '"key5" = { String, "Hello, world!" }',
+                "}",
             ]
             actual_lines = [line.strip() for line in output.split("\n") if line]
             self.assertEqual(actual_lines, expected_lines)
@@ -306,12 +315,12 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
             expected_lines = [
                 "(HPHP::Array) v = 6 element(s) {",
                 "= { Int64, 1 }",
-                "= { String, \"cats\" }",
+                '= { String, "cats" }',
                 "= { Int64, 2 }",
                 "= { Int64, 3 }",
-                "= { String, \"dogs\" }",
+                '= { String, "dogs" }',
                 "= { Int64, 42 }",
-                "}"
+                "}",
             ]
             actual_lines = [line.strip() for line in output.split("\n") if line]
             self.assertEqual(actual_lines, expected_lines)
@@ -319,7 +328,9 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
         with self.subTest("HPHP::Func"):
             self.run_until_breakpoint("takeFunc")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = r'\(const HPHP::Func \*\) v = 0x.* "Exception::__construct"'
+            expected_output = (
+                r'\(const HPHP::Func \*\) v = 0x.* "Exception::__construct"'
+            )
             self.assertRegex(output.strip(), expected_output)
 
         with self.subTest("HPHP::Class"):
@@ -337,7 +348,9 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
         with self.subTest("HPHP::ObjectData"):
             self.run_until_breakpoint("takeObjectData")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = r'\(HPHP::ObjectData \*\) v = 0x.* "InvalidArgumentException"'
+            expected_output = (
+                r'\(HPHP::ObjectData \*\) v = 0x.* "InvalidArgumentException"'
+            )
             self.assertRegex(output.strip(), expected_output)
 
         with self.subTest("HPHP::Op"):
@@ -349,12 +362,20 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
         with self.subTest("HPHP::HHBBC::Bytecode"):
             self.run_until_breakpoint("takeHhbbcBytecode")
             _, output = self.run_commands(["frame variable v"])
-            self.assertEqual(output.strip(), "(HPHP::HHBBC::Bytecode) v = bc::Nop { Nop = {} }")
+            self.assertEqual(
+                output.strip(), "(HPHP::HHBBC::Bytecode) v = bc::Nop { Nop = {} }"
+            )
 
             self.run_until_breakpoint("takeHhbbcBytecode")
             _, output = self.run_commands(["frame variable v"])
-            self.assertEqual(output.strip(), "(HPHP::HHBBC::Bytecode) v = bc::Int { Int = (arg1 = 42) }")
+            self.assertEqual(
+                output.strip(),
+                "(HPHP::HHBBC::Bytecode) v = bc::Int { Int = (arg1 = 42) }",
+            )
 
             self.run_until_breakpoint("takeHhbbcBytecode")
             _, output = self.run_commands(["frame variable v"])
-            self.assertEqual(output.strip(), "(HPHP::HHBBC::Bytecode) v = bc::CGetL { CGetL = {\n  nloc1 = (name = 1, id = 2)\n} }")
+            self.assertEqual(
+                output.strip(),
+                "(HPHP::HHBBC::Bytecode) v = bc::CGetL { CGetL = {\n  nloc1 = (name = 1, id = 2)\n} }",
+            )

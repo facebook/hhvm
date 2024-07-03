@@ -1,7 +1,7 @@
-from . import base
-
-import hhvm_lldb.utils as utils
+from . import base  # usort: skip (must be first, needed for sys.path side-effects)
 import hhvm_lldb.lookup as lookup
+import hhvm_lldb.utils as utils
+
 
 class LookupCommandTestCase(base.TestHHVMBinary):
 
@@ -13,7 +13,10 @@ class LookupCommandTestCase(base.TestHHVMBinary):
         # just need to make sure the functions are loaded.
         self.run_until_breakpoint("lookupObjMethod")
         _, output = self.run_commands(["lookup func 0"])
-        self.assertRegex(output.strip(), r"\(HPHP::Func \*\) (m_s|\$\d+) = (NULL|nullptr)")
+        self.assertRegex(
+            output.strip(), r"\(HPHP::Func \*\) (m_s|\$\d+) = (NULL|nullptr)"
+        )
+
 
 class LookupHelperTestCase(base.TestHHVMBinary):
 

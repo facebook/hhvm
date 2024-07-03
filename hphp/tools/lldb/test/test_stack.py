@@ -1,6 +1,7 @@
 import re
 
-from . import base
+from . import base  # usort: skip (must be first, needed for sys.path side-effects)
+
 
 class WalkStkCommandTestCase(base.TestHHVMBinary):
 

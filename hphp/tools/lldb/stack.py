@@ -1,10 +1,11 @@
 # Copyright 2022-present Facebook. All Rights Reserved
 
 import argparse
-import lldb
 import shlex
 import traceback
 import typing
+
+import lldb
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
@@ -16,11 +17,14 @@ except ModuleNotFoundError:
     import hhvm_lldb.idx as idx
     import hhvm_lldb.utils as utils
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Helpers.
 
-def function_name_for_rip(rip: typing.Union[int, lldb.SBValue], target: lldb.SBTarget) -> typing.Optional[str]:
-    """ Try getting the name of the function containing `rip`.
+
+def function_name_for_rip(
+    rip: typing.Union[int, lldb.SBValue], target: lldb.SBTarget
+) -> typing.Optional[str]:
+    """Try getting the name of the function containing `rip`.
 
     Arguments:
         rip: the instruction pointer (i.e. PC), either an an int or SBValue
@@ -42,7 +46,9 @@ def address_type(arg):
     try:
         return int(arg, 0)
     except ValueError:
-        raise argparse.ArgumentTypeError(f"cannot convert argument '{arg}' to valid numerical address")
+        raise argparse.ArgumentTypeError(
+            f"cannot convert argument '{arg}' to valid numerical address"
+        )
 
 
 class WalkstkCommand(utils.Command):
@@ -64,7 +70,7 @@ The output backtrace has the following format:
             type=address_type,
             nargs="?",
             help="Optional address to use as the starting frame pointer. "
-                 "If not given, walkstk will use the current thread's FP.",
+            "If not given, walkstk will use the current thread's FP.",
         )
         return parser
 
@@ -84,7 +90,7 @@ The output backtrace has the following format:
         # Find the starting native frame
         native_frame = exe_ctx.frame
         if not native_frame.IsValid():
-            result.SetError('walkstk: Cannot find any frames: corrupt stack?')
+            result.SetError("walkstk: Cannot find any frames: corrupt stack?")
             return
 
         rip_type = utils.Type("uintptr_t", exe_ctx.target)
@@ -101,8 +107,7 @@ The output backtrace has the following format:
             rip = utils.unsigned_cast(idx.at(fp, 1), rip_type)
 
             # Try to find a corresponding native frame
-            while (native_frame is not None
-                    and rip.unsigned != native_frame.parent.pc):
+            while native_frame is not None and rip.unsigned != native_frame.parent.pc:
                 native_frame = native_frame.parent
 
         # We do all of this by hand here specifically for ActRec struct types
@@ -133,9 +138,8 @@ The output backtrace has the following format:
             if t.GetName() == ar_type_name:
                 ar_type = t
 
-
         if ar_type is None:
-            result.SetError('walkstk: Cannot find ActRec type')
+            result.SetError("walkstk: Cannot find ActRec type")
             return
 
         utils.debug_print(f"Resolved ActRec type to {ar_type.GetDisplayTypeName()}")
@@ -161,18 +165,34 @@ The output backtrace has the following format:
                 rip = utils.unsigned_cast(idx.at(fp, 1), rip_type)
                 fp = utils.unsigned_cast(idx.at(fp, 0), fp_type)
 
-            utils.debug_print(f"walkstk(): rip=0x{rip.unsigned:x}, fp=0x{fp.unsigned:x}")
+            utils.debug_print(
+                f"walkstk(): rip=0x{rip.unsigned:x}, fp=0x{fp.unsigned:x}"
+            )
 
             # Try to get the PHP function name from the ActRec at `fp` if we're
             # executing in the TC.
             if frame.is_jitted(rip):
                 try:
-                    result.write(frame.stringify(frame.create_php(idx=i, ar=fp.Cast(ar_ptr_type), rip=rip)) + "\n")
+                    result.write(
+                        frame.stringify(
+                            frame.create_php(idx=i, ar=fp.Cast(ar_ptr_type), rip=rip)
+                        )
+                        + "\n"
+                    )
                 except Exception:
-                    utils.debug_print(f"#{i} Failed to create jitted frame (FP: 0x{fp.unsigned:x}, RIP: 0x{rip.unsigned:x})")
+                    utils.debug_print(
+                        f"#{i} Failed to create jitted frame (FP: 0x{fp.unsigned:x}, RIP: 0x{rip.unsigned:x})"
+                    )
                     if utils._Debug:
                         traceback.print_exc()
-                    result.write(frame.stringify(frame.create_native(idx=i, fp=fp, rip=rip, native_frame=native_frame)) + "\n")
+                    result.write(
+                        frame.stringify(
+                            frame.create_native(
+                                idx=i, fp=fp, rip=rip, native_frame=native_frame
+                            )
+                        )
+                        + "\n"
+                    )
 
                 if native_frame is not None:
                     native_frame = native_frame.parent
@@ -184,20 +204,27 @@ The output backtrace has the following format:
                     # don't seem to be in the TC, try to find the corresponding
                     # native frame.
                     native_frame = exe_ctx.frame
-                    while (native_frame is not None
-                           and rip.unsigned != native_frame.parent.pc):
+                    while (
+                        native_frame is not None
+                        and rip.unsigned != native_frame.parent.pc
+                    ):
                         native_frame = native_frame.parent
 
                 if native_frame is not None:
                     # Pop native frames until we hit our caller's rip.
                     frames = []
 
-                    while (native_frame.IsValid() and (fp.unsigned == 0x0 or idx.at(fp, 1).unsigned != native_frame.pc)):
-                        frames.append(frame.create_native(
-                            idx=i,
-                            fp='{inline frame}',
-                            rip=native_frame.pc,
-                            native_frame=native_frame))
+                    while native_frame.IsValid() and (
+                        fp.unsigned == 0x0 or idx.at(fp, 1).unsigned != native_frame.pc
+                    ):
+                        frames.append(
+                            frame.create_native(
+                                idx=i,
+                                fp="{inline frame}",
+                                rip=native_frame.pc,
+                                native_frame=native_frame,
+                            )
+                        )
 
                         native_frame = native_frame.parent
                         i += 1
@@ -216,11 +243,26 @@ The output backtrace has the following format:
                     # Just guess that the name of the frame is the same as the
                     # name of the block we're in.
                     try:
-                        result.write(frame.stringify(frame.create_native(
-                            idx=i, fp=fp, rip=rip, name=function_name_for_rip(rip, exe_ctx.target))) + "\n")
+                        result.write(
+                            frame.stringify(
+                                frame.create_native(
+                                    idx=i,
+                                    fp=fp,
+                                    rip=rip,
+                                    name=function_name_for_rip(rip, exe_ctx.target),
+                                )
+                            )
+                            + "\n"
+                        )
                     except Exception:
-                        result.write(frame.stringify(frame.create_native(
-                            idx=i, fp=fp, rip=rip, native_frame=None)) + "\n")
+                        result.write(
+                            frame.stringify(
+                                frame.create_native(
+                                    idx=i, fp=fp, rip=rip, native_frame=None
+                                )
+                            )
+                            + "\n"
+                        )
                     i += 1
 
             if fp.unsigned == 0:
@@ -248,14 +290,14 @@ The output backtrace has the following format:
             type=address_type,
             nargs="?",
             help="Optional address to use as the starting frame pointer. "
-                 "If not given, walkfp will use the current thread's FP.",
+            "If not given, walkfp will use the current thread's FP.",
         )
         parser.add_argument(
             "rip",
             type=address_type,
             nargs="?",
             help="Optional address of next instruction to execute. "
-                 "If not given, walkfp will use the current thread's RIP.",
+            "If not given, walkfp will use the current thread's RIP.",
         )
         return parser
 
@@ -320,15 +362,39 @@ The output backtrace has the following format:
 
             try:
                 if frame.is_jitted(rip):
-                    utils.debug_print(f"Frame #{i} with rip=0x{rip.unsigned:x} is jitted")
-                    result.write(frame.stringify(frame.create_php(idx=i, ar=utils.unsigned_cast(fp, ar_type), rip=rip)) + "\n")
+                    utils.debug_print(
+                        f"Frame #{i} with rip=0x{rip.unsigned:x} is jitted"
+                    )
+                    result.write(
+                        frame.stringify(
+                            frame.create_php(
+                                idx=i, ar=utils.unsigned_cast(fp, ar_type), rip=rip
+                            )
+                        )
+                        + "\n"
+                    )
                 else:
-                    utils.debug_print(f"Frame #{i} with rip=0x{rip.unsigned:x} is native")
-                    result.write(frame.stringify(frame.create_native(
-                        idx=i, fp=fp, rip=rip, name=function_name_for_rip(rip, target))) + "\n")
+                    utils.debug_print(
+                        f"Frame #{i} with rip=0x{rip.unsigned:x} is native"
+                    )
+                    result.write(
+                        frame.stringify(
+                            frame.create_native(
+                                idx=i,
+                                fp=fp,
+                                rip=rip,
+                                name=function_name_for_rip(rip, target),
+                            )
+                        )
+                        + "\n"
+                    )
             except Exception:
-                utils.debug_print(f"Failed to create_php frame or get function name for native frame (frame #{i})")
-                result.write(frame.stringify(frame.create_native(idx=i, fp=fp, rip=rip)) + "\n")
+                utils.debug_print(
+                    f"Failed to create_php frame or get function name for native frame (frame #{i})"
+                )
+                result.write(
+                    frame.stringify(frame.create_native(idx=i, fp=fp, rip=rip)) + "\n"
+                )
 
             i += 1
 
@@ -336,9 +402,8 @@ The output backtrace has the following format:
                 break
 
 
-
 def __lldb_init_module(debugger, _internal_dict, top_module=""):
-    """ Register the stack-related commands in this file with the LLDB debugger.
+    """Register the stack-related commands in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows
     this script to be imported into LLDB separately; LLDB looks for a function with

@@ -1,6 +1,7 @@
-import lldb
 import shlex
 import typing
+
+import lldb
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
@@ -16,7 +17,7 @@ except ModuleNotFoundError:
 
 
 def lookup_func(func_id: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
-    """ Find the function corresponding to a given FuncID
+    """Find the function corresponding to a given FuncID
 
     Args:
         func_id: A HPHP::FuncId wrapped in an lldb.SBValue
@@ -26,7 +27,9 @@ def lookup_func(func_id: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     """
 
     target = func_id.target
-    assert func_id.type.name == "HPHP::FuncId", f"invalid func_id, type given is {func_id.type.name} but expected HPHP::FuncId"
+    assert (
+        func_id.type.name == "HPHP::FuncId"
+    ), f"invalid func_id, type given is {func_id.type.name} but expected HPHP::FuncId"
 
     # If we fail to find this symbol, we're going to assume
     # failure is because it actually can't be found (which is the
@@ -39,22 +42,26 @@ def lookup_func(func_id: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
 
     if func_vec:
         # Non-LowPtr
-        utils.debug_print(f"lookup_func(func_id={func_id.signed}): identified we're in non-lowptr mode")
+        utils.debug_print(
+            f"lookup_func(func_id={func_id.signed}): identified we're in non-lowptr mode"
+        )
         func_id_val = utils.get(func_id, "m_id").unsigned
         result = idx.atomic_low_ptr_vector_at(func_vec, func_id_val)
     else:
         # LowPtr
-        utils.debug_print(f"lookup_func(func_id={func_id.signed}): identified we're in lowptr mode")
-        result = utils.rawptr(utils.get(func_id, 'm_id'))
+        utils.debug_print(
+            f"lookup_func(func_id={func_id.signed}): identified we're in lowptr mode"
+        )
+        result = utils.rawptr(utils.get(func_id, "m_id"))
 
-    func_ptr = result.Cast(utils.Type('HPHP::Func', target).GetPointerType())
+    func_ptr = result.Cast(utils.Type("HPHP::Func", target).GetPointerType())
     if func_ptr.GetError().Fail():
         return None
     return func_ptr
 
 
 def lookup_func_from_frame_pointer(fp: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
-    """ Get the jitted function pointed to by the given frame pointer.
+    """Get the jitted function pointed to by the given frame pointer.
 
     Args:
         fp: Activation record (HPHP::ActRec)
@@ -62,7 +69,7 @@ def lookup_func_from_frame_pointer(fp: lldb.SBValue) -> typing.Optional[lldb.SBV
     Returns:
         func: An SBValue representing a HPHP::Func*
     """
-    func_id = utils.get(fp, 'm_funcId')
+    func_id = utils.get(fp, "m_funcId")
     return lookup_func(func_id)
 
 
@@ -70,8 +77,10 @@ def load_litstr_from_repo(unit_sn, token) -> typing.Optional[lldb.SBValue]:
     raise NotImplementedError
 
 
-def lookup_litstr(str_id: lldb.SBValue, unit: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
-    """ Find the StringData* corresponding to a given Id
+def lookup_litstr(
+    str_id: lldb.SBValue, unit: lldb.SBValue
+) -> typing.Optional[lldb.SBValue]:
+    """Find the StringData* corresponding to a given Id
 
     Args:
         str_id: A HPHP::Id wrapped in an lldb.SBValue
@@ -87,7 +96,9 @@ def lookup_litstr(str_id: lldb.SBValue, unit: lldb.SBValue) -> typing.Optional[l
 
     try:
         elm = idx.compact_vector_at(m_litstrs, str_id.signed)
-        token_or_ptr_ty = utils.Type("HPHP::TokenOrPtr<const HPHP::StringData>", str_id.target)
+        token_or_ptr_ty = utils.Type(
+            "HPHP::TokenOrPtr<const HPHP::StringData>", str_id.target
+        )
         elm = elm.Cast(token_or_ptr_ty)
 
         if utils.TokenOrPtr.is_ptr(elm):
@@ -106,7 +117,7 @@ def lookup_litstr(str_id: lldb.SBValue, unit: lldb.SBValue) -> typing.Optional[l
 
 
 def lookup_array(array_id: lldb.SBValue) -> lldb.SBValue:
-    """ Find the ArrayData* corresponding to a given Id
+    """Find the ArrayData* corresponding to a given Id
 
     Args:
         array_id: A HPHP::Id wrapped in an lldb.SBValue
@@ -123,14 +134,18 @@ class LookupCommand(utils.Command):
 
     class ArgsNamespace:  # noqa: B903
         # argparse will add attributes to this class
-        def __init__(self, exe_ctx: lldb.SBExecutionContext, result: lldb.SBCommandReturnObject):
+        def __init__(
+            self, exe_ctx: lldb.SBExecutionContext, result: lldb.SBCommandReturnObject
+        ):
             self.exe_ctx = exe_ctx
             self.result = result
 
     @classmethod
     def create_parser(cls):
         parser = cls.default_parser()
-        subparsers = parser.add_subparsers(title="List of lookup subcommands", required=True, dest='command')
+        subparsers = parser.add_subparsers(
+            title="List of lookup subcommands", required=True, dest="command"
+        )
 
         func_cmd = subparsers.add_parser(
             "func",
@@ -138,7 +153,7 @@ class LookupCommand(utils.Command):
         )
         func_cmd.add_argument(
             "funcid",
-            help="A HPHP::FuncId (i.e. int) uniquely identifying a HPHP::Func*"
+            help="A HPHP::FuncId (i.e. int) uniquely identifying a HPHP::Func*",
         )
         func_cmd.set_defaults(func=cls._lookup_func_prep)
 
@@ -164,7 +179,7 @@ class LookupCommand(utils.Command):
         )
         array_cmd.add_argument(
             "arrayid",
-            help="A HPHP::Id (i.e. int) uniquely identifying a HPHP::ArrayData*"
+            help="A HPHP::Id (i.e. int) uniquely identifying a HPHP::ArrayData*",
         )
         array_cmd.add_argument(
             "unit",
@@ -191,10 +206,14 @@ class LookupCommand(utils.Command):
     @classmethod
     def _lookup_func_prep(cls, options):
         func_id_type = utils.Type("HPHP::FuncId", options.exe_ctx.target)
-        func_id = options.exe_ctx.frame.EvaluateExpression(options.funcid).Cast(func_id_type)
+        func_id = options.exe_ctx.frame.EvaluateExpression(options.funcid).Cast(
+            func_id_type
+        )
         res = lookup_func(func_id)
         if res is None:
-            options.result.SetError(f"cannot get function identified with FuncId {func_id}")
+            options.result.SetError(
+                f"cannot get function identified with FuncId {func_id}"
+            )
             return
 
         options.result.write(str(res))
@@ -206,8 +225,12 @@ class LookupCommand(utils.Command):
 
         unit_val = unit.cur_unit
         if options.unit:
-            unit_type = utils.Type("HPHP::Unit", options.exe_ctx.target).GetPointerType()
-            unit_val = options.exe_ctx.frame.EvaluateExpression(options.unit).Cast(unit_type)
+            unit_type = utils.Type(
+                "HPHP::Unit", options.exe_ctx.target
+            ).GetPointerType()
+            unit_val = options.exe_ctx.frame.EvaluateExpression(options.unit).Cast(
+                unit_type
+            )
 
         if unit_val is None:
             options.result.SetError("no Unit set")
@@ -231,8 +254,9 @@ class LookupCommand(utils.Command):
 
         options.result.write(str(res))
 
+
 def __lldb_init_module(debugger, _internal_dict, top_module=""):
-    """ Register the commands in this file with the LLDB debugger.
+    """Register the commands in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows
     this script to be imported into LLDB separately; LLDB looks for a function with

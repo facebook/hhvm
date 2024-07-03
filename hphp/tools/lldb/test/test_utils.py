@@ -1,14 +1,14 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
-
-from . import base
-
+from . import base  # usort: skip (must be first, needed for sys.path side-effects)
+import hhvm_lldb.utils as utils
 import lldb
 
-import hhvm_lldb.utils as utils
 
 class UtilsGivenTargetTestCase(base.TestHHVMBinary):
     def setUp(self):
-        super().setUp(launch_process=False) # No Hack file needed; just load HHVM target
+        super().setUp(
+            launch_process=False
+        )  # No Hack file needed; just load HHVM target
 
     def test_Type(self):
         # Make sure some base HPHP types can be found by the debugger
@@ -120,17 +120,17 @@ class UtilsGivenFrameTestCase(base.TestHHVMBinary):
     def test_arch_regs(self):
         # Make sure we're consistent with what LLDB is telling us are FP, PC, SP,
         # for both x86 and ARM
-        fp = utils.reg('fp', self.frame)
+        fp = utils.reg("fp", self.frame)
         self.assertEqual(fp.unsigned, self.frame.fp)
-        sp = utils.reg('sp', self.frame)
+        sp = utils.reg("sp", self.frame)
         self.assertEqual(sp.unsigned, self.frame.sp)
-        ip = utils.reg('ip', self.frame)
+        ip = utils.reg("ip", self.frame)
         self.assertEqual(ip.unsigned, self.frame.pc)
 
 
 class UtilsOnTypesBinaryTestCase(base.TestHHVMTypesBinary):
     def setUp(self):
-        super().setUp(test_type = "utility")
+        super().setUp(test_type="utility")
 
     def test_utility_functions(self):
         with self.subTest("HHVMString"):
@@ -160,7 +160,7 @@ class UtilsOnTypesBinaryTestCase(base.TestHHVMTypesBinary):
             info = utils.strinfo(s)
             self.assertEqual(info["data"], "lions and tigers")
             self.assertEqual(info["hash"], 2000936965)
-        
+
         with self.subTest("ptr_add"):
             self.run_until_breakpoint("takeStringData")
             s = self.frame.FindVariable("v")

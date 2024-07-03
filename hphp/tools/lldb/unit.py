@@ -47,7 +47,9 @@ class UnitCommand(utils.Command):
                 cur_unit = None
             else:
                 unit_type = utils.Type("HPHP::Unit", exe_ctx.target).GetPointerType()
-                cur_unit = exe_ctx.frame.EvaluateExpression(options.unit).Cast(unit_type)
+                cur_unit = exe_ctx.frame.EvaluateExpression(options.unit).Cast(
+                    unit_type
+                )
 
         if cur_unit:
             result.write(str(cur_unit))
@@ -56,7 +58,7 @@ class UnitCommand(utils.Command):
 
 
 def __lldb_init_module(debugger, _internal_dict, top_module=""):
-    """ Register the commands in this file with the LLDB debugger.
+    """Register the commands in this file with the LLDB debugger.
 
     Defining this in this module (in addition to the main hhvm module) allows
     this script to be imported into LLDB separately; LLDB looks for a function with

@@ -28,7 +28,9 @@ parser.add_argument(
     help="the type of data we want to extract",
 )
 parser.add_argument("outfile", help="the file to store the extracted data in")
-parser.add_argument("--hhvm_debuginfo", help="the debuginfo file associated with hhvm_binary")
+parser.add_argument(
+    "--hhvm_debuginfo", help="the debuginfo file associated with hhvm_binary"
+)
 args = parser.parse_args()
 
 if not os.path.exists(args.hhvm_binary):
@@ -66,11 +68,11 @@ if not process.IsValid():
 if args.hhvm_debuginfo:
     ret = lldb.SBCommandReturnObject()
     debugger.GetCommandInterpreter().HandleCommand(
-        f"target symbols add {args.hhvm_debuginfo}",
-        ret
+        f"target symbols add {args.hhvm_debuginfo}", ret
     )
     if not ret.Succeeded():
         raise RuntimeError(f"Unable to add debuginfo file: {ret.GetError()}")
+
 
 def read_memory(addr, size):
     err = lldb.SBError()
@@ -79,10 +81,13 @@ def read_memory(addr, size):
         raise RuntimeError(f"Error reading memory: {err}")
     return value
 
+
 start_var = f"s_{args.type}_start"
 start = target.FindFirstGlobalVariable(start_var)
 if start.GetError().Fail():
-    raise RuntimeError(f"Unable to access start variable '{start_var}': {start.GetError()}")
+    raise RuntimeError(
+        f"Unable to access start variable '{start_var}': {start.GetError()}"
+    )
 start_addr = int(start.GetValue(), 0)
 
 end_var = f"s_{args.type}_end"

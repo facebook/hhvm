@@ -35,7 +35,7 @@ def out2expectf_main():
             sys.exit(1)
 
         try:
-            test_file = args.test_directory / pl.Path(str(test) + '.out')
+            test_file = args.test_directory / pl.Path(str(test) + ".out")
             data = open(test_file).read()
         except IOError:
             print("%s doesn't exist, skipping" % test_file)
@@ -50,9 +50,13 @@ def out2expectf_main():
 
         # try to do relative paths
         data = re.sub(
-            r'string\(\d+\) "(#\d+) ' + root_re + r"(/hphp)?", r'string(%d) "\1 %s', data
+            r'string\(\d+\) "(#\d+) ' + root_re + r"(/hphp)?",
+            r'string(%d) "\1 %s',
+            data,
         )
-        data = re.sub(r'string\(\d+\) "' + root_re + r"(/hphp)?", r'string(%d) "%s', data)
+        data = re.sub(
+            r'string\(\d+\) "' + root_re + r"(/hphp)?", r'string(%d) "%s', data
+        )
         data = re.sub(root_re + r"(/hphp)?", r"%s", data)
 
         # The debugger prints the path given on the command line, which is often

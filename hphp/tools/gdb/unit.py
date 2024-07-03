@@ -10,7 +10,7 @@ import gdb
 from gdbutils import *
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 curunit = None
 
@@ -18,12 +18,13 @@ curunit = None
 class UnitCommand(gdb.Command):
     """Set the current translation unit.
 
-Use `unit none` to unset.  Just `unit` displays the current Unit.
-"""
+    Use `unit none` to unset.  Just `unit` displays the current Unit.
+    """
 
     def __init__(self):
-        super(UnitCommand, self).__init__('unit', gdb.COMMAND_DATA,
-                                          gdb.COMPLETE_NONE, True)
+        super(UnitCommand, self).__init__(
+            "unit", gdb.COMMAND_DATA, gdb.COMPLETE_NONE, True
+        )
 
     @errorwrap
     def invoke(self, args, from_tty):
@@ -32,20 +33,20 @@ Use `unit none` to unset.  Just `unit` displays the current Unit.
 
         if len(argv) == 0:
             if curunit is None:
-                print('unit: No Unit set.')
+                print("unit: No Unit set.")
             else:
                 gdbprint(curunit)
             return
 
         if len(argv) > 1:
-            print('Usage: unit [Unit*|none]')
+            print("Usage: unit [Unit*|none]")
             return
 
-        if argv[0] == 'none':
+        if argv[0] == "none":
             curunit = None
             return
         else:
-            unit_type = T('HPHP::Unit').const().pointer()
+            unit_type = T("HPHP::Unit").const().pointer()
             curunit = gdb.parse_and_eval(argv[0]).cast(unit_type)
 
         gdbprint(curunit)

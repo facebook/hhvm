@@ -27,6 +27,7 @@ struct MemcacheRequestCommon {
   3: optional string bucketId
   4: optional i64 productId
   5: optional i32 regionalizationEntity
+  6: optional i32_133 usecaseId
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);

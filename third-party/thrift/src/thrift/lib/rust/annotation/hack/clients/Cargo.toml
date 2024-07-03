@@ -25,7 +25,7 @@ futures = { version = "0.3.30", features = ["async-await", "compat"] }
 hack__types = { package = "hack", version = "0.0.1+unstable", path = ".." }
 scope = { version = "0.0.1+unstable", path = "../../scope" }
 scope_clients = { version = "0.0.1+unstable", path = "../../scope/clients" }
-tracing = { version = "0.1.40", features = ["attributes"] }
+tracing = { version = "0.1.40", features = ["attributes", "valuable"] }
 
 [build-dependencies]
 thrift_compiler = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }

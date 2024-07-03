@@ -27,7 +27,7 @@ scope_clients = { version = "0.0.1+unstable", path = "../../scope/clients" }
 scope_mocks = { version = "0.0.1+unstable", path = "../../scope/mocks" }
 thrift__clients = { package = "thrift_clients", version = "0.0.1+unstable", path = "../clients" }
 thrift__types = { package = "thrift", version = "0.0.1+unstable", path = ".." }
-tracing = { version = "0.1.40", features = ["attributes"] }
+tracing = { version = "0.1.40", features = ["attributes", "valuable"] }
 
 [build-dependencies]
 thrift_compiler = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }

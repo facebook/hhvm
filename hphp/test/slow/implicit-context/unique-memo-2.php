@@ -14,6 +14,7 @@ function f()[zoned] :mixed{
 
 final class ArraykeyContext extends HH\ImplicitContext {
   const type T = arraykey;
+  const bool IS_MEMO_SENSITIVE = true;
   public static function set($value, $fun) :mixed{ parent::runWith($value, $fun); }
 }
 

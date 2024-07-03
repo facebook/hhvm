@@ -133,6 +133,7 @@ function get_implicit_context_debug_info()[]: vec<string>;
 
 abstract class ImplicitContext {
   abstract const type T as nonnull;
+  abstract const bool IS_MEMO_SENSITIVE;
 
   protected static async function runWithAsync<Tout>(
     this::T $context,
@@ -142,7 +143,7 @@ abstract class ImplicitContext {
       ImplicitContext\_Private\create_implicit_context(
         nameof static,
         $context,
-        true,
+        static::IS_MEMO_SENSITIVE,
       ),
     );
     try {
@@ -163,7 +164,7 @@ abstract class ImplicitContext {
       ImplicitContext\_Private\create_implicit_context(
         nameof static,
         $context,
-        true,
+        static::IS_MEMO_SENSITIVE,
       ),
     );
     try {

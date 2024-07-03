@@ -2,6 +2,7 @@
 
 final class IntContext extends HH\ImplicitContext {
   const type T = int;
+  const bool IS_MEMO_SENSITIVE = true;
   public static async function setAsync(
     int $context,
     (function ()[_]: int) $f,

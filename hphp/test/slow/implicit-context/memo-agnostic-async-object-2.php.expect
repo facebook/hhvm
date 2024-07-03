@@ -1,0 +1,16 @@
+in f should be C got C
+in g should be C got C
+in lambda should be D got D
+in g should be C got C
+in g should be A got A
+in g should be B got B
+done with lambda should be D got D
+in g should be A got A
+done with concurrent should be A got A
+in g should be B got B
+done with concurrent should be B got B
+done with g should be A got A
+done with g should be B got B
+done with concurrent should be C got C
+done with g should be C got C
+done with f should be C got C

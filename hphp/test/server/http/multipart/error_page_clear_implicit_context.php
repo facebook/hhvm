@@ -16,6 +16,7 @@ function main_error() :mixed{
 
 abstract final class IntContext extends HH\ImplicitContext {
   const type T = int;
+  const bool IS_MEMO_SENSITIVE = true;
   public static function start<T>(int $context, mixed $f)[zoned, ctx $f]: T {
     return parent::runWith($context, $f);
   }

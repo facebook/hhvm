@@ -14,6 +14,7 @@ class D extends Base {}
 
 abstract final class IntContext extends HH\ImplicitContext {
   const type T = int;
+  const bool IS_MEMO_SENSITIVE = true;
   public static function start(int $context, (function (): int) $f)[zoned] {
     return parent::runWith($context, $f);
   }
@@ -24,6 +25,7 @@ abstract final class IntContext extends HH\ImplicitContext {
 
 trait ClassContextDefs {
   const type T = Base;
+  const bool IS_MEMO_SENSITIVE = true;
   public static function start(Base $context, (function (): int) $f)[zoned, ctx $f] {
     return parent::runWith($context, $f);
   }

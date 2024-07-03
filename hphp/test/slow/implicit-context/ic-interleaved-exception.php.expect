@@ -1,0 +1,16 @@
+int(2)
+int(1)
+string(7) "caught!"
+NULL
+int(1)
+string(13) "caught outer!"
+NULL
+Implicit context is set to inaccessible
+int(1)
+int(2)
+string(7) "caught!"
+int(1)
+Implicit context is set to inaccessible
+string(13) "caught outer!"
+NULL
+Implicit context is set to inaccessible

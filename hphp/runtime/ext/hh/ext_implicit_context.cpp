@@ -55,24 +55,22 @@ const StaticString
   s_ICStateInaccessible("INACCESSIBLE"),
   s_ICStateSoftInaccessible("SOFT_INACCESSIBLE");
 
-using ImplicitContextMap = req::hash_map<StringData*, ObjectData*, string_data_hash, string_data_same>;
+RDS_LOCAL(int64_t, rl_nextMemoKey);
+// key 0 reserved for all agnostic and empty ICs
+// so that they always map to the same int
+static constexpr int64_t kAgnosticMemoKey = 0;
 
-/*
- * Caution: This map holds the addresses of memokeys to ICs
- * We are storing the IC ObjectData* and Memokey StringData*,
- * Hence they are kept alive to the end of the request
- * If we start to properly refcount and free the IC objects,
- * we should refactor this to accommodate for that
- * (e.g. use a monotonically increasing int instead of the address of IC obj)
-*/
-RDS_LOCAL(ImplicitContextMap, s_memokey_to_IC);
+using ICMemoKeyToIntMap = req::hash_map<StringData*, int64_t, string_data_hash, string_data_same>;
+
+RDS_LOCAL(ICMemoKeyToIntMap, rl_memoKeyToInt);
 
 InitFiniNode s_clear_IC_map([]{
-  s_memokey_to_IC.destroy();
+  rl_memoKeyToInt.destroy();
 }, InitFiniNode::When::RequestFini, "s_clear_IC_map");
 
 InitFiniNode s_init_IC_map([]{
-  s_memokey_to_IC.create();
+  rl_memoKeyToInt.create();
+  *(rl_nextMemoKey) = kAgnosticMemoKey;
 }, InitFiniNode::When::RequestStart, "s_init_IC_map");
 
 
@@ -101,6 +99,13 @@ bool HHVM_FUNCTION(is_inaccessible) {
 
 Object initEmptyContext() {
   auto const obj = Object{ ImplicitContextLoader::classof() };
+  auto context = Native::data<ImplicitContext>(obj.get());
+  /*
+   * Special case: emptyCtx uses kAgnosticMemoKey
+   * because if context is attemped to be accessed 
+   * before any set occurs, the behavior should be inaccessible
+   */
+  context->m_memoKey = kAgnosticMemoKey;
   return obj;
 };
 
@@ -116,6 +121,7 @@ TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
   assertx(*ImplicitContext::activeCtx);
   auto const obj = *ImplicitContext::activeCtx;
   auto const context = Native::data<ImplicitContext>(obj);
+
   auto const it = context->m_map.find(key.get());
   if (it == context->m_map.end()) {
     throw_implicit_context_exception("Implicit context is set to inaccessible");
@@ -131,15 +137,11 @@ ObjectRet HHVM_FUNCTION(get_whole_implicit_context) {
   return Object{obj};
 }
 
-/*
- * Caution! This function relies on the assumption that
- * every IC is kept alive throughout the request lifetime
- * the IC should stay alive due to being stored in s_memokey_to_IC
-*/
 int64_t HHVM_FUNCTION(get_implicit_context_memo_key) {
   assertx(*ImplicitContext::activeCtx);
   auto const obj = *ImplicitContext::activeCtx;
-  return reinterpret_cast<int64_t>(obj);
+  auto const context = Native::data<ImplicitContext>(obj);
+  return context->m_memoKey;
 }
 
 /*
@@ -187,11 +189,9 @@ Object HHVM_FUNCTION(create_implicit_context, StringArg keyarg,
   req::vector<Elem> vec;
   auto memokey = Variant::attach(HHVM_FN(serialize_memoize_param)(data));
 
-  if (prev) {
-    auto& existing_m_map = Native::data<ImplicitContext>(prev)->m_map;
-    for (auto const& p : existing_m_map) {
-      vec.push_back(std::make_pair(p.first, p.second.second));
-    }
+  auto& existing_m_map = Native::data<ImplicitContext>(prev)->m_map;
+  for (auto const& p : existing_m_map) {
+    vec.push_back(std::make_pair(p.first, p.second.second));
   }
   vec.push_back(std::make_pair(key, *memokey.asTypedValue()));
   std::sort(vec.begin(), vec.end(), [](const Elem& e1, const Elem& e2) {
@@ -204,24 +204,28 @@ Object HHVM_FUNCTION(create_implicit_context, StringArg keyarg,
     serialize_memoize_tv(sb, 0, e.second);
   }
   auto target_memo_key = sb.detach();
-  auto& m_to_ic = *s_memokey_to_IC;
-  if (m_to_ic.find(target_memo_key.get()) != m_to_ic.end()) {
-    return Object{m_to_ic.at(target_memo_key.get())};
-  }
+  auto& m_to_int = *rl_memoKeyToInt;
 
-  // create a new IC since we did not find an existing one that matches the description
   auto obj = create_new_IC();
   auto const context = Native::data<ImplicitContext>(obj.get());
 
+  auto const it = m_to_int.find(target_memo_key.get());
+  if (it == m_to_int.end()) {
+    auto const memoKey = ++(*rl_nextMemoKey);
+    UNUSED auto ret = m_to_int.emplace(std::make_pair(target_memo_key.detach(),
+                                                      memoKey));
+    assertx(ret.second); // the emplace should always succeed
+    context->m_memoKey = memoKey;
+  } else {
+    context->m_memoKey = it->second;
+  }
+
+  context->m_map = Native::data<ImplicitContext>(prev)->m_map;
   // IncRef data and key as we are storing in the map
   if (isRefcountedType(data.m_type)) tvIncRefCountable(data);
   key->incRefCount();
-  if (prev) context->m_map = Native::data<ImplicitContext>(prev)->m_map;
   context->m_map.insert_or_assign(key, std::make_pair(data, memokey.detach()));
-
-  // Store new IC into the map
-  auto UNUSED ret = m_to_ic.emplace(std::make_pair(target_memo_key.detach(), Object(obj).detach()));
-  assertx(ret.second); // the emplace should always succeed
+  obj.get()->incRefCount();
   return obj;
 }
 

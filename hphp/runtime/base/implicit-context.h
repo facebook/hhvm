@@ -26,40 +26,50 @@ namespace HPHP {
 
 struct ImplicitContext {
 
-////////////////////////////////////////////////////////////////////////////
-// Members
-////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
+  // Members
+  ////////////////////////////////////////////////////////////////////////////
 
-// HashMap of TypedValues and their instance keys
-req::fast_map<const StringData*, std::pair<TypedValue, TypedValue>,
-              string_data_hash, string_data_same> m_map;
+  /*
+   * Holds an int memo key so that all IC objects with the same
+   * instance keys will map to the same memo key. The map from string
+   * instance keys to this memo key is maintained in ext_implicit_context
+  */
+  int64_t m_memoKey;
 
-////////////////////////////////////////////////////////////////////////////
-// Statics
-////////////////////////////////////////////////////////////////////////////
+  // HashMap of TypedValues and their instance keys
+  req::fast_map<const StringData*, std::pair<TypedValue, TypedValue>,
+                string_data_hash, string_data_same> m_map;
 
-static rds::Link<ObjectData*, rds::Mode::Normal> activeCtx;
-static rds::Link<ObjectData*, rds::Mode::Normal> emptyCtx;
+  ////////////////////////////////////////////////////////////////////////////
+  // Statics
+  ////////////////////////////////////////////////////////////////////////////
 
-static Variant getBlameVectors();
+  static rds::Link<ObjectData*, rds::Mode::Normal> activeCtx;
+  static rds::Link<ObjectData*, rds::Mode::Normal> emptyCtx;
 
-static void setActive(Object&&);
+  static Variant getBlameVectors();
 
-////////////////////////////////////////////////////////////////////////////
-// RAII wrappers
-////////////////////////////////////////////////////////////////////////////
+  static void setActive(Object&&);
 
-/*
- * RAII wrapper for saving implicit context
- */
-struct Saver {
-  Saver();
-  ~Saver();
+  static constexpr ptrdiff_t memoKeyOffset() {
+    return offsetof(ImplicitContext, m_memoKey);
+  }
 
-private:
-  ObjectData* m_context;
-};
+  ////////////////////////////////////////////////////////////////////////////
+  // RAII wrappers
+  ////////////////////////////////////////////////////////////////////////////
 
+  /*
+  * RAII wrapper for saving implicit context
+  */
+  struct Saver {
+    Saver();
+    ~Saver();
+
+  private:
+    ObjectData* m_context;
+  };
 };
 
 } // namespace HPHP

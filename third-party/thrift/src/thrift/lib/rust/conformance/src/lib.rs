@@ -23,3 +23,5 @@ mod universal_name;
 pub use any_registry::AnyRegistry;
 pub use any_registry::DeserializeSlice;
 pub use any_registry::SerializeRef;
+pub use any_registry::UNIVERSAL_HASH_PREFIX_SHA_256_LEN;
+pub use universal_name::get_universal_hash_prefix_sha_256;

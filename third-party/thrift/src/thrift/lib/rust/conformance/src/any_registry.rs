@@ -147,7 +147,7 @@ impl AnyRegistry {
     }
 }
 
-const UNIVERSAL_HASH_PREFIX_SHA_256_LEN: i8 = 16;
+pub const UNIVERSAL_HASH_PREFIX_SHA_256_LEN: i8 = 16;
 
 #[inline]
 fn hash_prefix(uri: &str) -> Result<Vec<u8>> {

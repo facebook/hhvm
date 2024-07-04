@@ -3707,41 +3707,60 @@ end = struct
         let (_generic_lower_bounds, other_lower_bounds) =
           generic_lower_bounds env ty_super
         in
-        let ( ||| ) = ( ||| ) ~fail in
         let subtype_env = Subtype_env.set_visited subtype_env new_visited in
+
         (* Collect all the lower bounds ("super" constraints) on the
          * generic parameter, and check ty_sub against each of them in turn
          * until one of them succeeds *)
-        let rec try_bounds tyl env =
-          match tyl with
+        let rec aux ty_supers ~env ~errs ~props =
+          match ty_supers with
           | [] ->
-            default_subtype
-              ~subtype_env
-              ~this_ty
-              ~fail
-              ~lhs:{ sub_supportdyn; ty_sub }
-              ~rhs:{ super_like; super_supportdyn = false; ty_super }
-              env
-          | ty :: tyl ->
-            let ty =
-              Prov.(update ty ~env ~f:(fun from -> flow ~from ~into:r_super))
+            let (env, prop) =
+              default_subtype
+                ~subtype_env
+                ~this_ty
+                ~fail
+                ~lhs:{ sub_supportdyn; ty_sub }
+                ~rhs:{ super_like; super_supportdyn = false; ty_super }
+                env
             in
-            simplify
-              ~subtype_env
-              ~this_ty
-              ~lhs:{ sub_supportdyn; ty_sub }
-              ~rhs:{ super_like; super_supportdyn = false; ty_super = ty }
-              env
-            ||| try_bounds tyl
+            if TL.is_valid prop then
+              (env, prop)
+            else
+              let (errs, props) =
+                match TL.get_error_if_unsat prop with
+                | Some err -> (err :: errs, props)
+                | _ -> (errs, prop :: props)
+              in
+              let err = Typing_error.intersect_opt @@ List.filter_opt errs in
+              (env, TL.Disj (err, props))
+          | ty_super :: ty_supers ->
+            let ty_super =
+              Prov.(
+                update ty_super ~env ~f:(fun from -> flow ~from ~into:r_super))
+            in
+            let (env, prop) =
+              simplify
+                ~subtype_env
+                ~this_ty
+                ~lhs:{ sub_supportdyn; ty_sub }
+                ~rhs:{ super_like; super_supportdyn = false; ty_super }
+                env
+            in
+            if TL.is_valid prop then
+              (env, prop)
+            else
+              let (errs, props) =
+                match TL.get_error_if_unsat prop with
+                | Some err -> (err :: errs, props)
+                | _ -> (errs, prop :: props)
+              in
+              aux ty_supers ~env ~errs ~props
         in
 
         (* Turn error into a generic error about the type parameter *)
         let bounds = Typing_set.elements other_lower_bounds in
-
-        let env_prop = try_bounds bounds env in
-
-        if_unsat (invalid ~fail) env_prop)
-    (* -- C-Nonnull-R ------------------------------------------------------- *)
+        aux bounds ~env ~errs:[fail] ~props:[])
     | ( ( _,
           ( Tprim
               Ast_defs.(

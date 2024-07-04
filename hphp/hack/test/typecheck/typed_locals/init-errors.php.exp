@@ -16,6 +16,18 @@ Typed locals can only be assigned values whose type is compatible with the decla
   Expected `T1`
   File "init-errors.php", line 5, characters 32-32:
   But got `T`
+ERROR: File "init-errors.php", line 7, characters 9-10:
+Typed locals can only be assigned values whose type is compatible with the declared type. (Typing[4110])
+  File "init-errors.php", line 7, characters 13-14:
+  Expected `T1`
+  File "init-errors.php", line 5, characters 32-32:
+  But got `mixed` arising from an implicit `as mixed` constraint on this type
+ERROR: File "init-errors.php", line 8, characters 9-10:
+Typed locals can only be assigned values whose type is compatible with the declared type. (Typing[4110])
+  File "init-errors.php", line 8, characters 13-13:
+  Expected `T`
+  File "init-errors.php", line 4, characters 15-17:
+  But got `int`
 ERROR: File "init-errors.php", line 8, characters 9-10:
 Typed locals can only be assigned values whose type is compatible with the declared type. (Typing[4110])
   File "init-errors.php", line 8, characters 13-13:

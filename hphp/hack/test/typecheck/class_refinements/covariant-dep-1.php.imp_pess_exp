@@ -1,3 +1,15 @@
+ERROR: File "covariant-dep-1.php", line 39, characters 15-18:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "covariant-dep-1.php", line 45, characters 15-18:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "covariant-dep-1.php", line 51, characters 15-18:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "covariant-dep-1.php", line 52, characters 12-36:
+Invalid return type (Typing[4110])
+  File "covariant-dep-1.php", line 51, characters 6-7:
+  Expected `T0`
+  File "covariant-dep-1.php", line 8, characters 23-23:
+  But got `mixed`
 ERROR: File "covariant-dep-1.php", line 52, characters 12-36:
 Invalid return type (Typing[4110])
   File "covariant-dep-1.php", line 51, characters 6-7:
@@ -26,9 +38,3 @@ Invalid return type (Typing[4110])
   by accessing the type constant `T`
   File "covariant-dep-1.php", line 51, characters 15-21:
   on a value of generic type TBox
-ERROR: File "covariant-dep-1.php", line 52, characters 12-36:
-Invalid return type (Typing[4110])
-  File "covariant-dep-1.php", line 51, characters 6-7:
-  Expected `T0`
-  File "covariant-dep-1.php", line 51, characters 21-21:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type

@@ -1,11 +1,33 @@
 ERROR: File "dict_index.bad.php", line 11, characters 5-22:
 Invalid assignment (Typing[4110])
   File "dict_index.bad.php", line 3, characters 9-10:
+  Expected `(Tk | not arraykey)`
+  File "dict_index.bad.php", line 5, characters 18-19:
+    via this generic `Tk`
+  File "dict_index.bad.php", line 10, characters 21-27:
+  But got `dynamic`
+ERROR: File "dict_index.bad.php", line 11, characters 5-22:
+Invalid assignment (Typing[4110])
+  File "dict_index.bad.php", line 3, characters 9-10:
+  Expected `Tk`
+  File "dict_index.bad.php", line 5, characters 18-19:
+    via this generic `Tk`
+  File "dict_index.bad.php", line 10, characters 21-27:
+  But got `dynamic`
+ERROR: File "dict_index.bad.php", line 11, characters 5-22:
+Invalid assignment (Typing[4110])
+  File "dict_index.bad.php", line 3, characters 9-10:
   Expected `Tk`
   File "dict_index.bad.php", line 5, characters 18-19:
     via this generic `Tk`
   File "dict_index.bad.php", line 11, characters 16-17:
   But got `(dynamic & arraykey)` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
+ERROR: File "dict_index.bad.php", line 11, characters 5-22:
+Invalid assignment (Typing[4110])
+  File "dict_index.bad.php", line 11, characters 16-17:
+  Expected `nothing` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
+  File "dict_index.bad.php", line 10, characters 21-27:
+  But got `dynamic`
 ERROR: File "dict_index.bad.php", line 12, characters 5-22:
 Invalid assignment (Typing[4110])
   File "dict_index.bad.php", line 7, characters 18-20:
@@ -27,6 +49,22 @@ Invalid assignment (Typing[4110])
 ERROR: File "dict_index.bad.php", line 14, characters 5-24:
 Invalid assignment (Typing[4110])
   File "dict_index.bad.php", line 3, characters 9-10:
+  Expected `(Tk | not arraykey)`
+  File "dict_index.bad.php", line 5, characters 18-19:
+    via this generic `Tk`
+  File "dict_index.bad.php", line 10, characters 21-27:
+  But got `dynamic`
+ERROR: File "dict_index.bad.php", line 14, characters 5-24:
+Invalid assignment (Typing[4110])
+  File "dict_index.bad.php", line 3, characters 9-10:
+  Expected `Tk`
+  File "dict_index.bad.php", line 5, characters 18-19:
+    via this generic `Tk`
+  File "dict_index.bad.php", line 10, characters 21-27:
+  But got `dynamic`
+ERROR: File "dict_index.bad.php", line 14, characters 5-24:
+Invalid assignment (Typing[4110])
+  File "dict_index.bad.php", line 3, characters 9-10:
   Expected `Tk`
   File "dict_index.bad.php", line 5, characters 18-19:
     via this generic `Tk`
@@ -38,6 +76,12 @@ Invalid assignment (Typing[4110])
   Expected `int`
   File "dict_index.bad.php", line 14, characters 22-24:
   But got `string`
+ERROR: File "dict_index.bad.php", line 14, characters 5-24:
+Invalid assignment (Typing[4110])
+  File "dict_index.bad.php", line 14, characters 16-17:
+  Expected `nothing` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
+  File "dict_index.bad.php", line 10, characters 21-27:
+  But got `dynamic`
 ERROR: File "dict_index.bad.php", line 15, characters 5-24:
 Invalid assignment (Typing[4110])
   File "dict_index.bad.php", line 6, characters 28-30:
@@ -71,6 +115,22 @@ Invalid assignment (Typing[4110])
 ERROR: File "dict_index.bad.php", line 17, characters 5-23:
 Invalid assignment (Typing[4110])
   File "dict_index.bad.php", line 3, characters 9-10:
+  Expected `(Tk | not arraykey)`
+  File "dict_index.bad.php", line 5, characters 18-19:
+    via this generic `Tk`
+  File "dict_index.bad.php", line 10, characters 21-27:
+  But got `dynamic`
+ERROR: File "dict_index.bad.php", line 17, characters 5-23:
+Invalid assignment (Typing[4110])
+  File "dict_index.bad.php", line 3, characters 9-10:
+  Expected `Tk`
+  File "dict_index.bad.php", line 5, characters 18-19:
+    via this generic `Tk`
+  File "dict_index.bad.php", line 10, characters 21-27:
+  But got `dynamic`
+ERROR: File "dict_index.bad.php", line 17, characters 5-23:
+Invalid assignment (Typing[4110])
+  File "dict_index.bad.php", line 3, characters 9-10:
   Expected `Tk`
   File "dict_index.bad.php", line 5, characters 18-19:
     via this generic `Tk`
@@ -80,6 +140,12 @@ ERROR: File "dict_index.bad.php", line 17, characters 5-23:
 Invalid assignment (Typing[4110])
   File "dict_index.bad.php", line 5, characters 22-24:
   Expected `int`
+  File "dict_index.bad.php", line 10, characters 21-27:
+  But got `dynamic`
+ERROR: File "dict_index.bad.php", line 17, characters 5-23:
+Invalid assignment (Typing[4110])
+  File "dict_index.bad.php", line 17, characters 16-17:
+  Expected `nothing` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
   File "dict_index.bad.php", line 10, characters 21-27:
   But got `dynamic`
 ERROR: File "dict_index.bad.php", line 18, characters 5-23:

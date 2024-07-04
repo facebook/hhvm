@@ -2,14 +2,20 @@ ERROR: File "super_constraint_5.php", line 9, characters 10-13:
 Invalid return type (Typing[4110])
   File "super_constraint_5.php", line 5, characters 38-40:
   Expected `Foo`
+  File "super_constraint_5.php", line 5, characters 43-44:
+  But got `mixed`
+ERROR: File "super_constraint_5.php", line 9, characters 10-13:
+Invalid return type (Typing[4110])
+  File "super_constraint_5.php", line 5, characters 38-40:
+  Expected `Foo`
   File "super_constraint_5.php", line 5, characters 49-51:
   But got `Ty1 where Ty1 super Ty, Ty1 super Foo`
 ERROR: File "super_constraint_5.php", line 9, characters 10-13:
 Invalid return type (Typing[4110])
   File "super_constraint_5.php", line 5, characters 38-40:
   Expected `Foo`
-  File "super_constraint_5.php", line 5, characters 49-51:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  File "super_constraint_5.php", line 5, characters 54-56:
+  But got `mixed`
 ERROR: File "super_constraint_5.php", line 9, characters 10-13:
 Invalid return type (Typing[4110])
   File "super_constraint_5.php", line 5, characters 38-40:
@@ -20,14 +26,20 @@ ERROR: File "super_constraint_5.php", line 9, characters 10-13:
 Invalid return type (Typing[4110])
   File "super_constraint_5.php", line 8, characters 4-5:
   Expected `Tx`
+  File "super_constraint_5.php", line 5, characters 43-44:
+  But got `mixed`
+ERROR: File "super_constraint_5.php", line 9, characters 10-13:
+Invalid return type (Typing[4110])
+  File "super_constraint_5.php", line 8, characters 4-5:
+  Expected `Tx`
   File "super_constraint_5.php", line 5, characters 49-51:
   But got `Ty1 where Ty1 super Ty, Ty1 super Foo`
 ERROR: File "super_constraint_5.php", line 9, characters 10-13:
 Invalid return type (Typing[4110])
   File "super_constraint_5.php", line 8, characters 4-5:
   Expected `Tx`
-  File "super_constraint_5.php", line 5, characters 49-51:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
+  File "super_constraint_5.php", line 5, characters 54-56:
+  But got `mixed`
 ERROR: File "super_constraint_5.php", line 9, characters 10-13:
 Invalid return type (Typing[4110])
   File "super_constraint_5.php", line 8, characters 4-5:

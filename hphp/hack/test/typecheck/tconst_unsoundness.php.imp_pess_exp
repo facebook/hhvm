@@ -6,6 +6,18 @@ ERROR: File "tconst_unsoundness.php", line 16, characters 10-11:
 Invalid return type (Typing[4110])
   File "tconst_unsoundness.php", line 14, characters 49-52:
   Expected `Tout`
+  File "tconst_unsoundness.php", line 5, characters 23-23:
+  But got `mixed`
+ERROR: File "tconst_unsoundness.php", line 16, characters 10-11:
+Invalid return type (Typing[4110])
+  File "tconst_unsoundness.php", line 14, characters 49-52:
+  Expected `Tout`
+  File "tconst_unsoundness.php", line 14, characters 21-23:
+  But got `mixed`
+ERROR: File "tconst_unsoundness.php", line 16, characters 10-11:
+Invalid return type (Typing[4110])
+  File "tconst_unsoundness.php", line 14, characters 49-52:
+  Expected `Tout`
   File "tconst_unsoundness.php", line 14, characters 40-42:
   But got `Tin = Tb::Ta::T`
 ERROR: File "tconst_unsoundness.php", line 16, characters 10-11:
@@ -32,12 +44,6 @@ Invalid return type (Typing[4110])
   by accessing the type constant `T`
   File "tconst_unsoundness.php", line 14, characters 60-68:
   on the expression dependent type Tb::Ta
-ERROR: File "tconst_unsoundness.php", line 16, characters 10-11:
-Invalid return type (Typing[4110])
-  File "tconst_unsoundness.php", line 14, characters 49-52:
-  Expected `Tout`
-  File "tconst_unsoundness.php", line 14, characters 68-68:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
 ERROR: File "tconst_unsoundness.php", line 16, characters 10-11:
 Invalid return type (Typing[4110])
   File "tconst_unsoundness.php", line 14, characters 49-52:

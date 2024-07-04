@@ -12,6 +12,12 @@ Invalid argument (Typing[4110])
   Expected `T#1` from this "as" assertion
   File "class3.php", line 26, characters 22-26:
   But got `mixed`
+ERROR: File "class3.php", line 15, characters 13-28:
+Invalid argument (Typing[4110])
+  File "class3.php", line 15, characters 13-23:
+  Expected `T#1` from this "as" assertion
+  File "class3.php", line 26, characters 22-26:
+  But got `mixed`
   File "class3.php", line 26, characters 22-26:
   This type argument to `B` must match exactly (it is invariant)
 ERROR: File "class3.php", line 16, characters 13-28:
@@ -38,6 +44,12 @@ Invalid argument (Typing[4110])
   This type argument to `B` must match exactly (it is invariant)
   File "class3.php", line 16, characters 13-23:
   But got `T#2` from this "as" assertion
+ERROR: File "class3.php", line 18, characters 13-31:
+Invalid argument (Typing[4110])
+  File "class3.php", line 18, characters 13-23:
+  Expected `T#3` from this "as" assertion
+  File "class3.php", line 26, characters 22-26:
+  But got `mixed`
 ERROR: File "class3.php", line 18, characters 13-31:
 Invalid argument (Typing[4110])
   File "class3.php", line 18, characters 13-23:

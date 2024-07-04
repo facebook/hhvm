@@ -1,5 +1,35 @@
 ERROR: File "super_constraint_4.php", line 12, characters 10-13:
 Invalid return type (Typing[4110])
+  File "super_constraint_4.php", line 8, characters 38-40:
+  Expected `Foo`
+  File "super_constraint_4.php", line 8, characters 49-51:
+  But got `Ty1 where Ty1 super Ty, Ty1 as Blah`
+ERROR: File "super_constraint_4.php", line 12, characters 10-13:
+Invalid return type (Typing[4110])
+  File "super_constraint_4.php", line 8, characters 38-40:
+  Expected `Foo`
+  File "super_constraint_4.php", line 8, characters 61-64:
+  But got `Blah`
+ERROR: File "super_constraint_4.php", line 12, characters 10-13:
+Invalid return type (Typing[4110])
+  File "super_constraint_4.php", line 8, characters 38-40:
+  Expected `Foo`
+  File "super_constraint_4.php", line 9, characters 3-4:
+  But got `Ty where Ty as Ty1, Ty as Blah`
+ERROR: File "super_constraint_4.php", line 12, characters 10-13:
+Invalid return type (Typing[4110])
+  File "super_constraint_4.php", line 11, characters 4-5:
+  Expected `Tx`
+  File "super_constraint_4.php", line 8, characters 49-51:
+  But got `Ty1 where Ty1 super Ty, Ty1 as Blah`
+ERROR: File "super_constraint_4.php", line 12, characters 10-13:
+Invalid return type (Typing[4110])
+  File "super_constraint_4.php", line 11, characters 4-5:
+  Expected `Tx`
+  File "super_constraint_4.php", line 8, characters 61-64:
+  But got `Blah`
+ERROR: File "super_constraint_4.php", line 12, characters 10-13:
+Invalid return type (Typing[4110])
   File "super_constraint_4.php", line 11, characters 4-5:
   Expected `Tx`
   File "super_constraint_4.php", line 9, characters 3-4:

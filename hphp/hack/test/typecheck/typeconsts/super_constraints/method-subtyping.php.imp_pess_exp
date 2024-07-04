@@ -23,8 +23,44 @@ ERROR: File "method-subtyping.php", line 28, characters 16-22:
 Invalid argument (Typing[4110])
   File "method-subtyping.php", line 10, characters 22-28:
   Expected `this::T`
+  File "method-subtyping.php", line 18, characters 23-24:
+  But got `mixed`
+ERROR: File "method-subtyping.php", line 28, characters 16-22:
+Invalid argument (Typing[4110])
+  File "method-subtyping.php", line 10, characters 22-28:
+  Expected `this::T`
   File "method-subtyping.php", line 27, characters 22-29:
   But got `this::T2 where this::T2 super this::T, this::T2 as B1::T2`
+ERROR: File "method-subtyping.php", line 28, characters 16-22:
+Invalid argument (Typing[4110])
+  File "method-subtyping.php", line 10, characters 22-28:
+  Expected `this::T`
+  File "method-subtyping.php", line 27, characters 28-29:
+  But got `B1::T2 where \B1::T2 super this::T, \B1::T2 super this::T2`
+  by accessing the type constant `T2`
+  File "method-subtyping.php", line 27, characters 22-29:
+  on the expression dependent type this
+ERROR: File "method-subtyping.php", line 28, characters 16-22:
+Invalid argument (Typing[4110])
+  File "method-subtyping.php", line 17, characters 31-33:
+  Expected `num`
+  File "method-subtyping.php", line 18, characters 23-24:
+  But got `mixed`
+ERROR: File "method-subtyping.php", line 28, characters 16-22:
+Invalid argument (Typing[4110])
+  File "method-subtyping.php", line 17, characters 31-33:
+  Expected `num`
+  File "method-subtyping.php", line 27, characters 22-29:
+  But got `this::T2 where this::T2 super this::T, this::T2 as B1::T2`
+ERROR: File "method-subtyping.php", line 28, characters 16-22:
+Invalid argument (Typing[4110])
+  File "method-subtyping.php", line 17, characters 31-33:
+  Expected `num`
+  File "method-subtyping.php", line 27, characters 28-29:
+  But got `B1::T2 where \B1::T2 super this::T, \B1::T2 super this::T2`
+  by accessing the type constant `T2`
+  File "method-subtyping.php", line 27, characters 22-29:
+  on the expression dependent type this
 ERROR: File "method-subtyping.php", line 29, characters 23-29:
 Invalid argument (Typing[4110])
   File "method-subtyping.php", line 12, characters 29-31:

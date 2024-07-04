@@ -25,6 +25,8 @@ But got `(A & I)`
 
 File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
 
+This error has 6 steps, a maximum depth of 0 and contains 0 reversals.
+
 Here's why: this hint
 
  7 | function inter_l(»(A & I)« $ai): C {
@@ -34,7 +36,7 @@ Here's why: this hint
 
 File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
 
-flows *into* this expression
+flows into this expression
 
  7 | function inter_l((A & I) »$ai«): C {
  8 |   $c = $ai;
@@ -43,7 +45,7 @@ flows *into* this expression
 
 File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = »$ai«;
@@ -52,7 +54,7 @@ which itself flows *into* this expression
 
 File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_l((A & I) $ai): C {
  8 |   »$c« = $ai;
@@ -61,7 +63,7 @@ which itself flows *into* this expression
 
 File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
@@ -70,7 +72,7 @@ which itself flows *into* this expression
 
 File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
@@ -79,7 +81,7 @@ which itself flows *into* this expression
 
 File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
 
-which itself flows *into* this hint
+which itself flows into this hint
 
  7 | function inter_l((A & I) $ai): »C« {
  8 |   $c = $ai;
@@ -115,6 +117,8 @@ But got `A`
 
 File "intersection_subtyping_l.php", line 7, character 19 - line 7, character 19:
 
+This error has 7 steps, a maximum depth of 1 and contains 0 reversals.
+
 Here's why: this hint
 
  7 | function inter_l((»A« & I) $ai): C {
@@ -124,7 +128,7 @@ Here's why: this hint
 
 File "intersection_subtyping_l.php", line 7, character 19 - line 7, character 19:
 
-flows *into* this hint, via the intersection type
+flows up into this hint as an element of the intersection type
 
  7 | function inter_l(»(A & I)« $ai): C {
  8 |   $c = $ai;
@@ -133,7 +137,7 @@ flows *into* this hint, via the intersection type
 
 File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_l((A & I) »$ai«): C {
  8 |   $c = $ai;
@@ -142,7 +146,7 @@ which itself flows *into* this expression
 
 File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = »$ai«;
@@ -151,7 +155,7 @@ which itself flows *into* this expression
 
 File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_l((A & I) $ai): C {
  8 |   »$c« = $ai;
@@ -160,7 +164,7 @@ which itself flows *into* this expression
 
 File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
@@ -169,7 +173,7 @@ which itself flows *into* this expression
 
 File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
@@ -178,7 +182,7 @@ which itself flows *into* this expression
 
 File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
 
-which itself flows *into* this hint
+which itself flows into this hint
 
  7 | function inter_l((A & I) $ai): »C« {
  8 |   $c = $ai;
@@ -214,6 +218,8 @@ But got `I`
 
 File "intersection_subtyping_l.php", line 7, character 23 - line 7, character 23:
 
+This error has 7 steps, a maximum depth of 1 and contains 0 reversals.
+
 Here's why: this hint
 
  7 | function inter_l((A & »I«) $ai): C {
@@ -223,7 +229,7 @@ Here's why: this hint
 
 File "intersection_subtyping_l.php", line 7, character 23 - line 7, character 23:
 
-flows *into* this hint, via the intersection type
+flows up into this hint as an element of the intersection type
 
  7 | function inter_l(»(A & I)« $ai): C {
  8 |   $c = $ai;
@@ -232,7 +238,7 @@ flows *into* this hint, via the intersection type
 
 File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_l((A & I) »$ai«): C {
  8 |   $c = $ai;
@@ -241,7 +247,7 @@ which itself flows *into* this expression
 
 File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = »$ai«;
@@ -250,7 +256,7 @@ which itself flows *into* this expression
 
 File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_l((A & I) $ai): C {
  8 |   »$c« = $ai;
@@ -259,7 +265,7 @@ which itself flows *into* this expression
 
 File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
@@ -268,7 +274,7 @@ which itself flows *into* this expression
 
 File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
@@ -277,7 +283,7 @@ which itself flows *into* this expression
 
 File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
 
-which itself flows *into* this hint
+which itself flows into this hint
 
  7 | function inter_l((A & I) $ai): »C« {
  8 |   $c = $ai;

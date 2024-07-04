@@ -20,13 +20,15 @@ But got `int`
 
 File "newtype1.php--file1.php", line 3, character 24 - line 3, character 26:
 
+This error has 7 steps, a maximum depth of 1 and contains 1 reversal.
+
 Here's why: this hint
 
  3 | newtype myint as int = »int«;
 
 File "newtype1.php--file1.php", line 3, character 24 - line 3, character 26:
 
-flows *into* this hint
+flows into this hint
 
  7 | function pass_my_int(»myint« $y) : bool {
  8 |   return expect_bool($y);
@@ -34,7 +36,7 @@ flows *into* this hint
 
 File "newtype1.php--file2.php", line 7, character 22 - line 7, character 26:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function pass_my_int(myint »$y«) : bool {
  8 |   return expect_bool($y);
@@ -42,7 +44,7 @@ which itself flows *into* this expression
 
 File "newtype1.php--file2.php", line 7, character 28 - line 7, character 29:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function pass_my_int(myint $y) : bool {
  8 |   return expect_bool(»$y«);
@@ -50,7 +52,7 @@ which itself flows *into* this expression
 
 File "newtype1.php--file2.php", line 8, character 22 - line 8, character 23:
 
-which itself flows *into* this expression, via the 1st function parameter
+which itself flows up into this expression as the 1st function parameter
 
  7 | function pass_my_int(myint $y) : bool {
  8 |   return »expect_bool«($y);
@@ -58,7 +60,7 @@ which itself flows *into* this expression, via the 1st function parameter
 
 File "newtype1.php--file2.php", line 8, character 10 - line 8, character 20:
 
-which itself flows *from* this function or method 
+which itself flows from this function or method 
 
  3 | function »expect_bool«(bool $x): bool {
  4 |   return $x;
@@ -66,13 +68,13 @@ which itself flows *from* this function or method
 
 File "newtype1.php--file2.php", line 3, character 10 - line 3, character 20:
 
-which itself flows *into* this hint, via the 1st function parameter
+which itself flows down into this hint as the 1st function parameter
 
  3 | newtype myint as »int« = int;
 
 File "newtype1.php--file1.php", line 3, character 18 - line 3, character 20:
 
-which itself flows *into* this hint
+which itself flows into this hint
 
  3 | function expect_bool(»bool« $x): bool {
  4 |   return $x;

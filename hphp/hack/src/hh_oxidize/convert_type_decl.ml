@@ -277,6 +277,9 @@ let denylisted_types () =
       ("typing_defs_core", "HasMember");
       ("typing_defs_core", "HasTypeMember");
       ("typing_defs_core", "InternalType");
+      ("typing_reason", "Stats");
+      ("typing_reason", "PathElem");
+      ("typing_reason", "Path");
       ("nast", "Defs");
     ]
   | Configuration.ByBox -> [])
@@ -292,6 +295,9 @@ let denylisted_types () =
       ("typing_defs", "WildcardAction");
       ("typing_reason", "DeclPhase");
       ("typing_reason", "LoclPhase");
+      ("typing_reason", "Stats");
+      ("typing_reason", "PathElem");
+      ("typing_reason", "Path");
     ]
 
 (* HACK: ignore anything beginning with the "decl" or "locl" prefix, since the

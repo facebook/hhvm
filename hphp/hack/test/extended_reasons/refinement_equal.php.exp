@@ -26,6 +26,8 @@ But got `?C`
 
 File "refinement_equal.php", line 6, character 22 - line 6, character 23:
 
+This error has 8 steps, a maximum depth of 0 and contains 0 reversals.
+
 Here's why: this hint
 
  6 | function inter_equal(»?A« $a, C $c): C {
@@ -36,7 +38,7 @@ Here's why: this hint
 
 File "refinement_equal.php", line 6, character 22 - line 6, character 23:
 
-flows *into* this expression
+flows into this expression
 
  6 | function inter_equal(?A »$a«, C $c): C {
  7 |   if($a == null) {
@@ -46,7 +48,7 @@ flows *into* this expression
 
 File "refinement_equal.php", line 6, character 25 - line 6, character 26:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  6 | function inter_equal(?A $a, C $c): C {
  7 |   if(»$a« == null) {
@@ -56,7 +58,7 @@ which itself flows *into* this expression
 
 File "refinement_equal.php", line 7, character 6 - line 7, character 7:
 
-which itself flows *into* this type variable
+which itself flows into this type variable
 
  6 | function inter_equal(?A $a, C $c): C {
  7 |   if(»$a == null«) {
@@ -66,7 +68,7 @@ which itself flows *into* this type variable
 
 File "refinement_equal.php", line 7, character 6 - line 7, character 15:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  6 | function inter_equal(?A $a, C $c): C {
  7 |   if($a == null) {
@@ -76,7 +78,7 @@ which itself flows *into* this expression
 
 File "refinement_equal.php", line 8, character 10 - line 8, character 11:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  6 | function inter_equal(?A $a, C $c): C {
  7 |   if($a == null) {
@@ -86,7 +88,7 @@ which itself flows *into* this expression
 
 File "refinement_equal.php", line 8, character 5 - line 8, character 6:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  11 |   }
  12 |   return »$z«;
@@ -94,7 +96,7 @@ which itself flows *into* this expression
 
 File "refinement_equal.php", line 12, character 10 - line 12, character 11:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  11 |   }
  12 |   »return $z;«
@@ -102,7 +104,7 @@ which itself flows *into* this expression
 
 File "refinement_equal.php", line 12, character 3 - line 12, character 12:
 
-which itself flows *into* this thing (`Rpessimised_return`)
+which itself flows into this thing (`Rpessimised_return`)
 
  6 | function inter_equal(?A $a, C $c): »C« {
  7 |   if($a == null) {

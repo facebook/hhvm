@@ -22,6 +22,8 @@ But got `A`
 
 File "union_subtyping_l.php", line 6, character 19 - line 6, character 19:
 
+This error has 5 steps, a maximum depth of 1 and contains 0 reversals.
+
 Here's why: this hint
 
  6 | function union_l((»A« | B) $ab): C {
@@ -30,7 +32,7 @@ Here's why: this hint
 
 File "union_subtyping_l.php", line 6, character 19 - line 6, character 19:
 
-flows *into* this hint, via the union type
+flows up into this hint as an element of the union type
 
  6 | function union_l(»(A | B)« $ab): C {
  7 |   return $ab;
@@ -38,7 +40,7 @@ flows *into* this hint, via the union type
 
 File "union_subtyping_l.php", line 6, character 18 - line 6, character 24:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  6 | function union_l((A | B) »$ab«): C {
  7 |   return $ab;
@@ -46,7 +48,7 @@ which itself flows *into* this expression
 
 File "union_subtyping_l.php", line 6, character 26 - line 6, character 28:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  6 | function union_l((A | B) $ab): C {
  7 |   return »$ab«;
@@ -54,7 +56,7 @@ which itself flows *into* this expression
 
 File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  6 | function union_l((A | B) $ab): C {
  7 |   »return $ab;«
@@ -62,7 +64,7 @@ which itself flows *into* this expression
 
 File "union_subtyping_l.php", line 7, character 3 - line 7, character 13:
 
-which itself flows *into* this hint
+which itself flows into this hint
 
  6 | function union_l((A | B) $ab): »C« {
  7 |   return $ab;
@@ -142,6 +144,8 @@ But got `B`
 
 File "union_subtyping_l.php", line 6, character 23 - line 6, character 23:
 
+This error has 5 steps, a maximum depth of 1 and contains 0 reversals.
+
 Here's why: this hint
 
  6 | function union_l((A | »B«) $ab): C {
@@ -150,7 +154,7 @@ Here's why: this hint
 
 File "union_subtyping_l.php", line 6, character 23 - line 6, character 23:
 
-flows *into* this hint, via the union type
+flows up into this hint as an element of the union type
 
  6 | function union_l(»(A | B)« $ab): C {
  7 |   return $ab;
@@ -158,7 +162,7 @@ flows *into* this hint, via the union type
 
 File "union_subtyping_l.php", line 6, character 18 - line 6, character 24:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  6 | function union_l((A | B) »$ab«): C {
  7 |   return $ab;
@@ -166,7 +170,7 @@ which itself flows *into* this expression
 
 File "union_subtyping_l.php", line 6, character 26 - line 6, character 28:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  6 | function union_l((A | B) $ab): C {
  7 |   return »$ab«;
@@ -174,7 +178,7 @@ which itself flows *into* this expression
 
 File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  6 | function union_l((A | B) $ab): C {
  7 |   »return $ab;«
@@ -182,7 +186,7 @@ which itself flows *into* this expression
 
 File "union_subtyping_l.php", line 7, character 3 - line 7, character 13:
 
-which itself flows *into* this hint
+which itself flows into this hint
 
  6 | function union_l((A | B) $ab): »C« {
  7 |   return $ab;

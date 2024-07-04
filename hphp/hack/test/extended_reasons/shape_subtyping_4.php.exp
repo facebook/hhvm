@@ -27,6 +27,8 @@ But got `bool`
 
 File "shape_subtyping_4.php", line 4, character 40 - line 4, character 43:
 
+This error has 9 steps, a maximum depth of 2 and contains 1 reversal.
+
 Here's why: this hint
 
  3 | type required_a_at_int = shape('a' => int);
@@ -39,7 +41,7 @@ Here's why: this hint
 
 File "shape_subtyping_4.php", line 4, character 40 - line 4, character 43:
 
-flows *into* this hint, via the required shape field `'a'`
+flows up into this hint as the required shape field `'a'`
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type required_a_at_bool = »shape('a' => bool)«;
@@ -51,7 +53,7 @@ flows *into* this hint, via the required shape field `'a'`
 
 File "shape_subtyping_4.php", line 4, character 27 - line 4, character 44:
 
-which itself flows *into* this hint
+which itself flows into this hint
 
  11 | function passes_required_a_at_bool_alias(
  12 |   »required_a_at_bool« $s,
@@ -61,7 +63,7 @@ which itself flows *into* this hint
 
 File "shape_subtyping_4.php", line 12, character 3 - line 12, character 20:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  11 | function passes_required_a_at_bool_alias(
  12 |   required_a_at_bool »$s«,
@@ -71,7 +73,7 @@ which itself flows *into* this expression
 
 File "shape_subtyping_4.php", line 12, character 22 - line 12, character 23:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  11 | function passes_required_a_at_bool_alias(
  12 |   required_a_at_bool $s,
@@ -81,7 +83,7 @@ which itself flows *into* this expression
 
 File "shape_subtyping_4.php", line 14, character 35 - line 14, character 36:
 
-which itself flows *into* this expression, via the 1st function parameter
+which itself flows up into this expression as the 1st function parameter
 
  11 | function passes_required_a_at_bool_alias(
  12 |   required_a_at_bool $s,
@@ -91,7 +93,7 @@ which itself flows *into* this expression, via the 1st function parameter
 
 File "shape_subtyping_4.php", line 14, character 3 - line 14, character 33:
 
-which itself flows *from* this function or method 
+which itself flows from this function or method 
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type required_a_at_bool = shape('a' => bool);
@@ -103,14 +105,14 @@ which itself flows *from* this function or method
 
 File "shape_subtyping_4.php", line 6, character 10 - line 6, character 40:
 
-which itself flows *into* this hint, via the 1st function parameter
+which itself flows down into this hint as the 1st function parameter
 
  3 | type required_a_at_int = »shape('a' => int)«;
  4 | type required_a_at_bool = shape('a' => bool);
 
 File "shape_subtyping_4.php", line 3, character 26 - line 3, character 42:
 
-which itself flows *into* this hint
+which itself flows into this hint
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type required_a_at_bool = shape('a' => bool);
@@ -122,7 +124,7 @@ which itself flows *into* this hint
 
 File "shape_subtyping_4.php", line 7, character 2 - line 7, character 18:
 
-which itself flows *into* this hint, via the required shape field `'a'`
+which itself flows down into this hint as the required shape field `'a'`
 
  3 | type required_a_at_int = shape('a' => »int«);
  4 | type required_a_at_bool = shape('a' => bool);

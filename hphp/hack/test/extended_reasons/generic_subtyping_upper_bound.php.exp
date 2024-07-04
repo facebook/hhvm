@@ -48,6 +48,8 @@ But got `A`
 
 File "generic_subtyping_upper_bound.php", line 9, character 49 - line 9, character 49:
 
+This error has 6 steps, a maximum depth of 1 and contains 1 reversal.
+
 Here's why: this hint
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
@@ -58,7 +60,7 @@ Here's why: this hint
 
 File "generic_subtyping_upper_bound.php", line 9, character 49 - line 9, character 49:
 
-flows *into* this hint
+flows into this hint
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
@@ -68,7 +70,7 @@ flows *into* this hint
 
 File "generic_subtyping_upper_bound.php", line 9, character 52 - line 9, character 52:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
@@ -78,7 +80,7 @@ which itself flows *into* this expression
 
 File "generic_subtyping_upper_bound.php", line 9, character 54 - line 9, character 55:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
@@ -88,7 +90,7 @@ which itself flows *into* this expression
 
 File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, character 21:
 
-which itself flows *into* this expression, via the 1st function parameter
+which itself flows up into this expression as the 1st function parameter
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
@@ -98,7 +100,7 @@ which itself flows *into* this expression, via the 1st function parameter
 
 File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, character 18:
 
-which itself flows *from* this function or method 
+which itself flows from this function or method 
 
  7 | function »rcvr_upper_bound«<T as B>(T $x): void {}
  8 | 
@@ -108,7 +110,7 @@ which itself flows *from* this function or method
 
 File "generic_subtyping_upper_bound.php", line 7, character 10 - line 7, character 25:
 
-which itself flows *into* the constraint on the generic parameter, via the 1st function parameter
+which itself flows down into the constraint on the generic parameter as the 1st function parameter
 
  7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
  8 | 
@@ -168,6 +170,8 @@ But got `T as A`
 
 File "generic_subtyping_upper_bound.php", line 9, character 52 - line 9, character 52:
 
+This error has 5 steps, a maximum depth of 1 and contains 1 reversal.
+
 Here's why: this hint
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
@@ -178,7 +182,7 @@ Here's why: this hint
 
 File "generic_subtyping_upper_bound.php", line 9, character 52 - line 9, character 52:
 
-flows *into* this expression
+flows into this expression
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
@@ -188,7 +192,7 @@ flows *into* this expression
 
 File "generic_subtyping_upper_bound.php", line 9, character 54 - line 9, character 55:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
@@ -198,7 +202,7 @@ which itself flows *into* this expression
 
 File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, character 21:
 
-which itself flows *into* this expression, via the 1st function parameter
+which itself flows up into this expression as the 1st function parameter
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
@@ -208,7 +212,7 @@ which itself flows *into* this expression, via the 1st function parameter
 
 File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, character 18:
 
-which itself flows *from* this function or method 
+which itself flows from this function or method 
 
  7 | function »rcvr_upper_bound«<T as B>(T $x): void {}
  8 | 
@@ -218,7 +222,7 @@ which itself flows *from* this function or method
 
 File "generic_subtyping_upper_bound.php", line 7, character 10 - line 7, character 25:
 
-which itself flows *into* the constraint on the generic parameter, via the 1st function parameter
+which itself flows down into the constraint on the generic parameter as the 1st function parameter
 
  7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
  8 | 

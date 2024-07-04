@@ -24,6 +24,8 @@ But got `Super`
 
 File "assign_obj_get.php", line 7, character 26 - line 7, character 30:
 
+This error has 6 steps, a maximum depth of 1 and contains 1 reversal.
+
 Here's why: this hint
 
  6 |   public function __construct(private Super $item) {}
@@ -33,7 +35,7 @@ Here's why: this hint
 
 File "assign_obj_get.php", line 7, character 26 - line 7, character 30:
 
-flows *into* this expression
+flows into this expression
 
  14 | function bar(SuperBox $f): void {
  15 |   $g = »$f->get()«;
@@ -42,7 +44,7 @@ flows *into* this expression
 
 File "assign_obj_get.php", line 15, character 8 - line 15, character 16:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  14 | function bar(SuperBox $f): void {
  15 |   »$g« = $f->get();
@@ -51,7 +53,7 @@ which itself flows *into* this expression
 
 File "assign_obj_get.php", line 15, character 3 - line 15, character 4:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  14 | function bar(SuperBox $f): void {
  15 |   $g = $f->get();
@@ -60,7 +62,7 @@ which itself flows *into* this expression
 
 File "assign_obj_get.php", line 16, character 7 - line 16, character 8:
 
-which itself flows *into* this expression, via the 1st function parameter
+which itself flows up into this expression as the 1st function parameter
 
  14 | function bar(SuperBox $f): void {
  15 |   $g = $f->get();
@@ -69,7 +71,7 @@ which itself flows *into* this expression, via the 1st function parameter
 
 File "assign_obj_get.php", line 16, character 3 - line 16, character 5:
 
-which itself flows *from* this function or method 
+which itself flows from this function or method 
 
  12 | function »foo«(Sub $_): void {}
  13 | 
@@ -77,7 +79,7 @@ which itself flows *from* this function or method
 
 File "assign_obj_get.php", line 12, character 10 - line 12, character 12:
 
-which itself flows *into* this hint, via the 1st function parameter
+which itself flows down into this hint as the 1st function parameter
 
  12 | function foo(»Sub« $_): void {}
  13 | 

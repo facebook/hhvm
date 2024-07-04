@@ -198,6 +198,20 @@ type prj_symm =
   | Prj_symm_fn_ret
 [@@deriving hash]
 
+let prj_symm_is_contra = function
+  | Prj_symm_class (_, _, var)
+  | Prj_symm_newtype (_, _, var) ->
+    cstr_variance_is_contra var
+  | Prj_symm_fn_param _
+  | Prj_symm_fn_param_inout (_, _, Contra) ->
+    true
+  | Prj_symm_fn_param_inout (_, _, Co)
+  | Prj_symm_fn_ret
+  | Prj_symm_neg
+  | Prj_symm_tuple _
+  | Prj_symm_shape _ ->
+    false
+
 let prj_symm_to_json = function
   | Prj_symm_neg -> Hh_json.JSON_String "Prj_symm_neg"
   | Prj_symm_class (nm, idx, variance) ->
@@ -274,35 +288,35 @@ let int_to_ordinal =
     in
     Format.sprintf "%d%s" n sfx
 
-let explain_symm_prj prj side =
+let explain_symm_prj prj ~side =
   match prj with
   | Prj_symm_neg -> "via the negation type"
   | Prj_symm_class (nm, idx, Inv dir) ->
     Format.sprintf
-      "via the invariant, %s type parameter of the class `%s`, when typing as %s"
+      "as the invariant, %s type parameter of the class `%s`, when typing as %s"
       (int_to_ordinal (idx + 1))
       nm
       (explain_variance_dir dir)
   | Prj_symm_class (nm, idx, Dir dir) ->
     Format.sprintf
-      "via the %s, %s type parameter of the class `%s`"
+      "as the %s, %s type parameter of the class `%s`"
       (explain_variance_dir dir)
       (int_to_ordinal (idx + 1))
       nm
   | Prj_symm_newtype (nm, idx, Inv dir) ->
     Format.sprintf
-      "via the invariant, %s type parameter of the type definition `%s`, when typing as %s"
+      "as the invariant, %s type parameter of the type definition `%s`, when typing as %s"
       (int_to_ordinal (idx + 1))
       nm
       (explain_variance_dir dir)
   | Prj_symm_newtype (nm, idx, Dir dir) ->
     Format.sprintf
-      "via the %s, %s type parameter of the type definition `%s`"
+      "as the %s, %s type parameter of the type definition `%s`"
       (explain_variance_dir dir)
       (int_to_ordinal (idx + 1))
       nm
   | Prj_symm_tuple idx ->
-    Format.sprintf "via the %s element of the tuple" (int_to_ordinal idx)
+    Format.sprintf "as the %s element of the tuple" (int_to_ordinal idx)
   | Prj_symm_shape (fld_nm, fld_kind_lhs, fld_kind_rhs) ->
     let fld_kind =
       match side with
@@ -310,7 +324,7 @@ let explain_symm_prj prj side =
       | `Rhs -> fld_kind_rhs
     in
     Format.sprintf
-      "via the %s shape field `'%s'`"
+      "as the %s shape field `'%s'`"
       (explain_field_kind fld_kind)
       fld_nm
   | Prj_symm_fn_param (idx_lhs, idx_rhs) ->
@@ -319,7 +333,7 @@ let explain_symm_prj prj side =
       | `Lhs -> idx_lhs
       | `Rhs -> idx_rhs
     in
-    Format.sprintf "via the %s function parameter" (int_to_ordinal (idx + 1))
+    Format.sprintf "as the %s function parameter" (int_to_ordinal (idx + 1))
   | Prj_symm_fn_param_inout (idx_lhs, idx_rhs, dir) ->
     let idx =
       match side with
@@ -327,10 +341,10 @@ let explain_symm_prj prj side =
       | `Rhs -> idx_rhs
     in
     Format.sprintf
-      "via the invariant, %s `inout` function parameter, when typing as %s"
+      "as the invariant, %s `inout` function parameter, when typing as %s"
       (int_to_ordinal (idx + 1))
       (explain_variance_dir dir)
-  | Prj_symm_fn_ret -> "via the function return type"
+  | Prj_symm_fn_ret -> "as the function return type"
 
 (** Asymmetric projections are those in which the same decomposition is applied
     to only one of the sub- or supertype during inference *)
@@ -347,9 +361,9 @@ let prj_asymm_to_json = function
 
 let explain_asymm_prj prj =
   match prj with
-  | Prj_asymm_union -> "via the union type"
-  | Prj_asymm_inter -> "via the intersection type"
-  | Prj_asymm_neg -> "via the negation type"
+  | Prj_asymm_union -> "as an element of the union type"
+  | Prj_asymm_inter -> "as an element of the intersection type"
+  | Prj_asymm_neg -> "as the inner type of a negation"
 
 (** For asymmetric projections we need to track which of the sub- or supertype
     was decomposed  *)
@@ -376,6 +390,17 @@ let prj_to_json = function
       JSON_Object
         [("Asymm", JSON_Array [side_to_json side; prj_asymm_to_json prj_asymm])])
 
+let prj_is_contra = function
+  | Asymm _ -> false
+  | Symm prj_symm -> prj_symm_is_contra prj_symm
+
+let explain_prj_left = function
+  | Symm prj -> explain_symm_prj prj ~side:`Lhs
+  | Asymm (_, prj) -> explain_asymm_prj prj
+
+let explain_prj_right = function
+  | Symm prj -> explain_symm_prj prj ~side:`Rhs
+  | Asymm (_, prj) -> explain_asymm_prj prj
 (* ~~ Reasons ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
 (* The phase below helps enforce that only Pos_or_decl.t positions end up in the heap.
@@ -2436,56 +2461,102 @@ type direction =
   | Fwd
   | Bwd
 
-let reverse_direction = function
+let flip = function
   | Fwd -> Bwd
   | Bwd -> Fwd
 
-(* TODO(mjt) encode the valid paths in the type *)
 type path_elem =
-  | Flow of direction
-  | Prj_symm_lhs of prj_symm
-  | Prj_symm_rhs of prj_symm
-  | Prj_asymm_left of prj_asymm
-  | Prj_asymm_right of prj_asymm
-  | Witness of locl_phase t_
+  | Edge of {
+      out_of: prj option;
+      dir: direction;
+      in_to: prj option;
+    }
+  | Node of locl_phase t_
 
-let project prj dir =
+let edge out_of dir in_to = Edge { out_of; dir; in_to }
+
+type stats = {
+  max_depth: int;
+  length: int;
+  reversals: int;
+}
+
+let explain_reversals n =
+  if n = 1 then
+    "1 reversal"
+  else
+    Format.sprintf "%d reversals" n
+
+let explain_stats { max_depth; length; reversals } =
+  Format.sprintf
+    "This error has %d steps, a maximum depth of %d and contains %s."
+    length
+    max_depth
+    (explain_reversals reversals)
+
+let empty_stats = { max_depth = 0; length = 0; reversals = 0 }
+
+let append_stats
+    { max_depth = d1; length = l1; reversals = r1 }
+    { max_depth = d2; length = l2; reversals = r2 } =
+  { max_depth = max d1 d2; length = l1 + l2; reversals = r1 + r2 }
+
+let incr_stats_length t = { t with length = t.length + 1 }
+
+type path = {
+  path_elems: path_elem list;
+  stats: stats;
+}
+
+let bracket prj =
   match prj with
-  | Prj_symm_class (_, _, var)
-  | Prj_symm_newtype (_, _, var) ->
-    if cstr_variance_is_contra var then
-      reverse_direction dir
-    else
-      dir
-  | Prj_symm_fn_param _
-  | Prj_symm_fn_param_inout (_, _, Contra) ->
-    reverse_direction dir
-  | Prj_symm_fn_param_inout (_, _, Co)
-  | Prj_symm_fn_ret
-  | Prj_symm_neg
-  | Prj_symm_tuple _
-  | Prj_symm_shape _ ->
-    dir
+  | Symm _ -> (Some prj, Some prj)
+  | Asymm (Sub, _) -> (Some prj, None)
+  | Asymm (Super, _) -> (None, Some prj)
 
+(** Convert a normalized [locl_phase t_] into a [path]  *)
 let to_path t =
-  let rec aux t ~dir ~k =
+  let rec aux t ~dir ~cur_depth =
     match t with
-    | Rflow (t1, t2) ->
-      aux t1 ~dir ~k:(fun p1 ->
-          aux t2 ~dir ~k:(fun p2 -> k @@ p1 @ (Flow dir :: p2)))
-    | Rprj (Symm prj, t) ->
-      let dir = project prj dir in
-      aux t ~dir ~k:(fun t -> k @@ (Prj_symm_lhs prj :: t) @ [Prj_symm_rhs prj])
-    | Rprj (Asymm (Sub, prj), t) ->
-      (* All asymmetric projections are covariant and preserve data flow direction *)
-      aux t ~dir ~k:(fun t -> k (Prj_asymm_left prj :: t))
-    | Rprj (Asymm (Super, prj), t) ->
-      (* All asymmetric projections are covariant and preserve data flow direction *)
-      aux t ~dir ~k:(fun t -> k (t @ [Prj_asymm_right prj]))
-    | Rrev _ -> failwith "expected a normalized reason"
-    | _ -> k @@ [Witness t]
+    | Rrev _ -> failwith "unnormalized reason"
+    | Rflow (l, r) ->
+      let (prj_ll_opt, elem_l, prj_lr_opt, stats_l, depth_l) =
+        aux l ~dir ~cur_depth
+      and (prj_rl_opt, elem_r, prj_rr_opt, stats_r, depth_r) =
+        aux r ~dir ~cur_depth
+      in
+      let stats = incr_stats_length @@ append_stats stats_l stats_r in
+      ( prj_ll_opt,
+        elem_l @ (edge prj_lr_opt dir prj_rl_opt :: elem_r),
+        prj_rr_opt,
+        stats,
+        max depth_l depth_r )
+    | Rprj (prj, t) ->
+      let (dir, flipped) =
+        if prj_is_contra prj then
+          (flip dir, true)
+        else
+          (dir, false)
+      in
+      let cur_depth = cur_depth + 1 in
+      (match aux t ~dir ~cur_depth with
+      | (None, elem, None, stats, max_depth) ->
+        let (prj_l_opt, prj_r_opt) = bracket prj in
+        let stats =
+          if flipped then
+            { stats with reversals = stats.reversals + 1 }
+          else
+            stats
+        in
+        (prj_l_opt, elem, prj_r_opt, stats, max_depth)
+      | _ -> failwith "ill formed path")
+    | witness -> (None, [Node witness], None, empty_stats, cur_depth)
   in
-  aux t ~dir:Fwd ~k:(fun x -> x)
+  match aux t ~dir:Fwd ~cur_depth:0 with
+  | (None, path_elems, None, stats, max_depth) ->
+    let stats = { stats with max_depth } in
+    { path_elems; stats }
+  | _ -> failwith "ill-formed path"
 
 (* TODO(mjt) refactor so that extended reasons use a separate type for witnesses
    and ensure we handle all cases statically *)
@@ -2524,127 +2595,57 @@ let rec explain_witness = function
   | r ->
     (to_raw_pos r, Format.sprintf "this thing (`%s`)" (to_constructor_string r))
 
-let explain_flow = function
-  | Fwd -> "flows *into*"
-  | Bwd -> "flows *from*"
+let explain_step (edge, node) ~prefix =
+  match (edge, node) with
+  | ((None, Fwd, None), rhs) ->
+    let (pos, expl) = explain_witness rhs in
+    (pos, Format.sprintf "%sflows into %s" prefix expl)
+  | ((None, Bwd, None), rhs) ->
+    let (pos, expl) = explain_witness rhs in
+    (pos, Format.sprintf "%sflows from %s" prefix expl)
+  | ((Some out_of, Fwd, None), rhs) ->
+    let prj_expl = explain_prj_right out_of in
+    let (pos, expl) = explain_witness rhs in
+    (pos, Format.sprintf "%sflows down into %s %s" prefix expl prj_expl)
+  | ((Some out_of, Bwd, None), rhs) ->
+    let prj_expl = explain_prj_right out_of in
+    let (pos, expl) = explain_witness rhs in
+    (pos, Format.sprintf "%sflows down from %s %s" prefix expl prj_expl)
+  | ((None, Fwd, Some in_to), rhs) ->
+    let prj_expl = explain_prj_left in_to in
+    let (pos, expl) = explain_witness rhs in
+    (pos, Format.sprintf "%sflows up into %s %s" prefix expl prj_expl)
+  | ((None, Bwd, Some in_to), rhs) ->
+    let prj_expl = explain_prj_left in_to in
+    let (pos, expl) = explain_witness rhs in
+    (pos, Format.sprintf "%sflows up from %s %s" prefix expl prj_expl)
+  | _ -> failwith "ill-formed path"
 
-let explain_path ps =
-  let prefix_first (pos, expl) ~first =
-    if first then
-      (pos, Format.sprintf "Here's why: %s" expl)
-    else
-      (pos, expl)
+let explain_path { path_elems; stats } =
+  let rec aux path_elems acc =
+    match path_elems with
+    | Edge { out_of; dir; in_to } :: Node rhs :: path_elems ->
+      let expl =
+        explain_step ~prefix:"which itself " ((out_of, dir, in_to), rhs)
+      in
+      aux path_elems (expl :: acc)
+    | [] -> List.rev acc
+    | _ -> failwith "ill-formed path"
   in
 
-  let rec aux ps ~first =
-    match ps with
-    | Witness lhs :: Flow dir :: Witness rhs :: rest ->
-      let expls = aux (Witness rhs :: rest) ~first:false in
-      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
-      let flow_expl = explain_flow dir in
-      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
-      let rhs_expl =
-        ( rhs_hint_pos,
-          if first then
-            Format.sprintf "%s %s" flow_expl rhs_hint_expl
-          else
-            Format.sprintf "which itself %s %s" flow_expl rhs_hint_expl )
-      in
-      if first then
-        lhs_expl :: rhs_expl :: expls
-      else
-        rhs_expl :: expls
-    | Witness lhs :: Flow dir :: Prj_symm_lhs prj :: Witness rhs :: rest ->
-      let expls = aux (Witness rhs :: rest) ~first:false in
-      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
-      let flow_expl = explain_flow dir in
-      let prj_expl = explain_symm_prj prj `Lhs in
-      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
-      let rhs_expl =
-        ( rhs_hint_pos,
-          if first then
-            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
-          else
-            Format.sprintf
-              "which itself %s %s, %s"
-              flow_expl
-              rhs_hint_expl
-              prj_expl )
-      in
-      if first then
-        lhs_expl :: rhs_expl :: expls
-      else
-        rhs_expl :: expls
-    | Witness lhs :: Prj_symm_rhs prj :: Flow dir :: Witness rhs :: rest ->
-      let expls = aux (Witness rhs :: rest) ~first:false in
-      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
-      let flow_expl = explain_flow dir in
-      let prj_expl = explain_symm_prj prj `Rhs in
-      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
-      let rhs_expl =
-        ( rhs_hint_pos,
-          if first then
-            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
-          else
-            Format.sprintf
-              "which itself %s %s, %s"
-              flow_expl
-              rhs_hint_expl
-              prj_expl )
-      in
-      if first then
-        lhs_expl :: rhs_expl :: expls
-      else
-        rhs_expl :: expls
-    | Witness lhs :: Flow dir :: Prj_asymm_left prj :: Witness rhs :: rest ->
-      let expls = aux (Witness rhs :: rest) ~first:false in
+  match path_elems with
+  | Node lhs :: Edge { out_of; dir; in_to } :: Node rhs :: path_elems ->
+    let (lhs_pos, lhs_expl) = explain_witness lhs in
+    let lhs_expl =
+      Format.sprintf "%s\n\nHere's why: %s" (explain_stats stats) lhs_expl
+    in
+    let (rhs_pos, rhs_expl) =
+      explain_step ~prefix:"" ((out_of, dir, in_to), rhs)
+    in
+    aux path_elems [(rhs_pos, rhs_expl); (lhs_pos, lhs_expl)]
+  | _ -> failwith "ill-formed path"
 
-      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
-
-      let flow_expl = explain_flow dir in
-      let prj_expl = explain_asymm_prj prj in
-      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
-      let rhs_expl =
-        ( rhs_hint_pos,
-          if first then
-            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
-          else
-            Format.sprintf
-              "which itself %s %s, %s"
-              flow_expl
-              rhs_hint_expl
-              prj_expl )
-      in
-      if first then
-        lhs_expl :: rhs_expl :: expls
-      else
-        rhs_expl :: expls
-    | Witness lhs :: Prj_asymm_right prj :: Flow dir :: Witness rhs :: rest ->
-      let expls = aux (Witness rhs :: rest) ~first:false in
-      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
-      let flow_expl = explain_flow dir in
-      let prj_expl = explain_asymm_prj prj in
-      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
-      let rhs_expl =
-        ( rhs_hint_pos,
-          if first then
-            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
-          else
-            Format.sprintf
-              "which itself %s %s, %s"
-              flow_expl
-              rhs_hint_expl
-              prj_expl )
-      in
-      if first then
-        lhs_expl :: rhs_expl :: expls
-      else
-        rhs_expl :: expls
-    (* TODO(mjt) the cases above are the only valid path prefixes; this should
-       be encoded in the type *)
-    | _ -> []
-  in
-  aux ps ~first:true
+(* ~~ Extended reasons rendering ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
 let explain t ~complexity:_ = explain_path @@ to_path @@ normalize t
 

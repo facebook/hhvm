@@ -25,6 +25,8 @@ But got `C`
 
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
+This error has 4 steps, a maximum depth of 0 and contains 0 reversals.
+
 Here's why: this hint
 
  5 | <<__NoAutoLikes>>
@@ -34,7 +36,7 @@ Here's why: this hint
 
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
-flows *into* this expression
+flows into this expression
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C »$c«): (A|B) {
@@ -43,7 +45,7 @@ flows *into* this expression
 
 File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
@@ -52,7 +54,7 @@ which itself flows *into* this expression
 
 File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
@@ -61,7 +63,7 @@ which itself flows *into* this expression
 
 File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
 
-which itself flows *into* this hint
+which itself flows into this hint
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): »(A|B)« {
@@ -97,6 +99,8 @@ But got `C`
 
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
+This error has 5 steps, a maximum depth of 1 and contains 0 reversals.
+
 Here's why: this hint
 
  5 | <<__NoAutoLikes>>
@@ -106,7 +110,7 @@ Here's why: this hint
 
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
-flows *into* this expression
+flows into this expression
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C »$c«): (A|B) {
@@ -115,7 +119,7 @@ flows *into* this expression
 
 File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
@@ -124,7 +128,7 @@ which itself flows *into* this expression
 
 File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
@@ -133,7 +137,7 @@ which itself flows *into* this expression
 
 File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
 
-which itself flows *into* this hint
+which itself flows into this hint
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): »(A|B)« {
@@ -142,7 +146,7 @@ which itself flows *into* this hint
 
 File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
 
-which itself flows *into* this hint, via the union type
+which itself flows down into this hint as an element of the union type
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (»A«|B) {
@@ -178,6 +182,8 @@ But got `C`
 
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
+This error has 5 steps, a maximum depth of 1 and contains 0 reversals.
+
 Here's why: this hint
 
  5 | <<__NoAutoLikes>>
@@ -187,7 +193,7 @@ Here's why: this hint
 
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
-flows *into* this expression
+flows into this expression
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C »$c«): (A|B) {
@@ -196,7 +202,7 @@ flows *into* this expression
 
 File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
@@ -205,7 +211,7 @@ which itself flows *into* this expression
 
 File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
@@ -214,7 +220,7 @@ which itself flows *into* this expression
 
 File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
 
-which itself flows *into* this hint
+which itself flows into this hint
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): »(A|B)« {
@@ -223,7 +229,7 @@ which itself flows *into* this hint
 
 File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
 
-which itself flows *into* this hint, via the union type
+which itself flows down into this hint as an element of the union type
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|»B«) {

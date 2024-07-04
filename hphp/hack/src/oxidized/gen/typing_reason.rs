@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<23951e47d906d6c60cfcc855c9b44b30>>
+// @generated SignedSource<<d5df68d0cfc46e51ff4450a30dbcab64>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -568,35 +568,6 @@ pub enum Direction {
 }
 impl TrivialDrop for Direction {}
 arena_deserializer::impl_deserialize_in_arena!(Direction);
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C, u8)]
-pub enum PathElem {
-    Flow(Direction),
-    #[rust_to_ocaml(name = "Prj_symm_lhs")]
-    PrjSymmLhs(PrjSymm),
-    #[rust_to_ocaml(name = "Prj_symm_rhs")]
-    PrjSymmRhs(PrjSymm),
-    #[rust_to_ocaml(name = "Prj_asymm_left")]
-    PrjAsymmLeft(PrjAsymm),
-    #[rust_to_ocaml(name = "Prj_asymm_right")]
-    PrjAsymmRight(PrjAsymm),
-    Witness(T_),
-}
 
 pub type Reason = T_;
 

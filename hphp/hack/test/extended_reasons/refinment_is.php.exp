@@ -22,6 +22,8 @@ But got `A`
 
 File "refinment_is.php", line 7, character 19 - line 7, character 19:
 
+This error has 9 steps, a maximum depth of 2 and contains 0 reversals.
+
 Here's why: this hint
 
  7 | function inter_is(»A« $a, C $c): C {
@@ -30,7 +32,7 @@ Here's why: this hint
 
 File "refinment_is.php", line 7, character 19 - line 7, character 19:
 
-flows *into* this expression
+flows into this expression
 
  7 | function inter_is(A »$a«, C $c): C {
  8 |   if($a is I) {
@@ -38,7 +40,7 @@ flows *into* this expression
 
 File "refinment_is.php", line 7, character 21 - line 7, character 22:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if(»$a« is I) {
@@ -51,7 +53,7 @@ which itself flows *into* this expression
 
 File "refinment_is.php", line 8, character 6 - line 8, character 7:
 
-which itself flows *into* this `is` expression, via the intersection type
+which itself flows up into this `is` expression as an element of the intersection type
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if(»$a is I«) {
@@ -64,7 +66,7 @@ which itself flows *into* this `is` expression, via the intersection type
 
 File "refinment_is.php", line 8, character 6 - line 8, character 12:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -77,7 +79,7 @@ which itself flows *into* this expression
 
 File "refinment_is.php", line 9, character 10 - line 9, character 11:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -90,7 +92,7 @@ which itself flows *into* this expression
 
 File "refinment_is.php", line 9, character 5 - line 9, character 6:
 
-which itself flows *into* this expression, via the union type
+which itself flows up into this expression as an element of the union type
 
   7 | function inter_is(A $a, C $c): C {
   8 |   »if($a is I) {
@@ -103,7 +105,7 @@ which itself flows *into* this expression, via the union type
 
 File "refinment_is.php", line 8, character 3 - line 12, character 3:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  12 |   }
  13 |   return »$z«;
@@ -111,7 +113,7 @@ which itself flows *into* this expression
 
 File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  12 |   }
  13 |   »return $z;«
@@ -119,7 +121,7 @@ which itself flows *into* this expression
 
 File "refinment_is.php", line 13, character 3 - line 13, character 12:
 
-which itself flows *into* this hint
+which itself flows into this hint
 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
@@ -156,6 +158,8 @@ But got `(A & I)` from this `is` expression test
 
 File "refinment_is.php", line 8, character 6 - line 8, character 12:
 
+This error has 6 steps, a maximum depth of 1 and contains 0 reversals.
+
 Here's why: this `is` expression
 
  7 | function inter_is(A $a, C $c): C {
@@ -169,7 +173,7 @@ Here's why: this `is` expression
 
 File "refinment_is.php", line 8, character 6 - line 8, character 12:
 
-flows *into* this expression
+flows into this expression
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -182,7 +186,7 @@ flows *into* this expression
 
 File "refinment_is.php", line 9, character 10 - line 9, character 11:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -195,7 +199,7 @@ which itself flows *into* this expression
 
 File "refinment_is.php", line 9, character 5 - line 9, character 6:
 
-which itself flows *into* this expression, via the union type
+which itself flows up into this expression as an element of the union type
 
   7 | function inter_is(A $a, C $c): C {
   8 |   »if($a is I) {
@@ -208,7 +212,7 @@ which itself flows *into* this expression, via the union type
 
 File "refinment_is.php", line 8, character 3 - line 12, character 3:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  12 |   }
  13 |   return »$z«;
@@ -216,7 +220,7 @@ which itself flows *into* this expression
 
 File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  12 |   }
  13 |   »return $z;«
@@ -224,7 +228,7 @@ which itself flows *into* this expression
 
 File "refinment_is.php", line 13, character 3 - line 13, character 12:
 
-which itself flows *into* this hint
+which itself flows into this hint
 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
@@ -261,6 +265,8 @@ But got `I`
 
 File "refinment_is.php", line 8, character 12 - line 8, character 12:
 
+This error has 7 steps, a maximum depth of 2 and contains 0 reversals.
+
 Here's why: this hint
 
  7 | function inter_is(A $a, C $c): C {
@@ -274,7 +280,7 @@ Here's why: this hint
 
 File "refinment_is.php", line 8, character 12 - line 8, character 12:
 
-flows *into* this `is` expression, via the intersection type
+flows up into this `is` expression as an element of the intersection type
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if(»$a is I«) {
@@ -287,7 +293,7 @@ flows *into* this `is` expression, via the intersection type
 
 File "refinment_is.php", line 8, character 6 - line 8, character 12:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -300,7 +306,7 @@ which itself flows *into* this expression
 
 File "refinment_is.php", line 9, character 10 - line 9, character 11:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -313,7 +319,7 @@ which itself flows *into* this expression
 
 File "refinment_is.php", line 9, character 5 - line 9, character 6:
 
-which itself flows *into* this expression, via the union type
+which itself flows up into this expression as an element of the union type
 
   7 | function inter_is(A $a, C $c): C {
   8 |   »if($a is I) {
@@ -326,7 +332,7 @@ which itself flows *into* this expression, via the union type
 
 File "refinment_is.php", line 8, character 3 - line 12, character 3:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  12 |   }
  13 |   return »$z«;
@@ -334,7 +340,7 @@ which itself flows *into* this expression
 
 File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
-which itself flows *into* this expression
+which itself flows into this expression
 
  12 |   }
  13 |   »return $z;«
@@ -342,7 +348,7 @@ which itself flows *into* this expression
 
 File "refinment_is.php", line 13, character 3 - line 13, character 12:
 
-which itself flows *into* this hint
+which itself flows into this hint
 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {

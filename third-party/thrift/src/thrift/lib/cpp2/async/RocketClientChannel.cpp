@@ -1228,5 +1228,7 @@ InteractionId RocketClientChannel::registerInteraction(
 int32_t RocketClientChannel::getServerVersion() const {
   return rocket::RocketClient::getServerVersion();
 }
+
+constexpr std::chrono::seconds RocketClientChannel::kDefaultRpcTimeout;
 } // namespace thrift
 } // namespace apache

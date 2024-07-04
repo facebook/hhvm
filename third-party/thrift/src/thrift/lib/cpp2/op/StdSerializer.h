@@ -64,13 +64,12 @@ class StdSerializer : public ProtocolSerializer<
 };
 
 template <typename Tag, type::StandardProtocol... Ps>
-void registerStdSerializers(
-    type::TypeRegistry& registry, bool skipDuplicates = false) {
+void registerStdSerializers(type::TypeRegistry& registry) {
   for (auto result :
        std::array<bool, sizeof...(Ps)>{{registry.registerSerializer(
            std::make_unique<StdSerializer<Tag, Ps>>(),
            type::Type::get<Tag>())...}}) {
-    if (!result && !skipDuplicates) {
+    if (!result) {
       folly::throw_exception<std::runtime_error>("Could not register type.");
     }
   }

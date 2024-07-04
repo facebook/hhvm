@@ -6185,7 +6185,12 @@ end = struct
       let cls = Env.get_class env enum_name in
       (match cls with
       | Decl_entry.Found cls ->
-        (match Env.get_const env cls name with
+        let maybe_const =
+          match Env.get_typeconst env cls name with
+          | Some _ -> None
+          | None -> Env.get_const env cls name
+        in
+        (match maybe_const with
         | Some const_def ->
           let dty = const_def.cc_type in
           let ety_env = { empty_expand_env with this_ty } in
@@ -6215,7 +6220,9 @@ end = struct
           let consts =
             Cls.consts cls
             |> List.filter ~f:(fun (name, _) ->
-                   not (String.equal name SN.Members.mClass))
+                   not
+                     (String.equal name SN.Members.mClass
+                     || Cls.has_typeconst cls name))
           in
           let fail =
             let open Option.Let_syntax in
@@ -6241,13 +6248,15 @@ end = struct
               | None -> (None, None)
             in
             let subtype_env =
-              Subtype_env.set_on_error subtype_env
-              @@ let* on_error = subtype_env.Subtype_env.on_error in
-                 let* quickfixes = quickfixes_opt in
-                 return
-                 @@ Typing_error.Reasons_callback.add_quickfixes
-                      on_error
-                      quickfixes
+              match quickfixes_opt with
+              | None -> subtype_env
+              | Some quickfixes ->
+                Subtype_env.set_on_error subtype_env
+                @@ let* on_error = subtype_env.Subtype_env.on_error in
+                   return
+                   @@ Typing_error.Reasons_callback.add_quickfixes
+                        on_error
+                        quickfixes
             in
             Subtype_env.fail_with_suffix
               subtype_env

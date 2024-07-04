@@ -250,6 +250,7 @@ typing_mutability_env::MutType
 typing_reason::ArgPosition
 typing_reason::Blame
 typing_reason::BlameSource
+typing_reason::CstrVariance
 typing_reason::DeclPhase
 typing_reason::ExprDepTypeReason
 typing_reason::FieldKind
@@ -257,8 +258,10 @@ typing_reason::LoclPhase
 typing_reason::PosId
 typing_reason::PrjAsymm
 typing_reason::PrjSymm
+typing_reason::Prj
 typing_reason::Reason
 typing_reason::T_
 typing_reason::Ureason
+typing_reason::VarianceDir
 xhp_attribute::Tag
 xhp_attribute::XhpAttribute

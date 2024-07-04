@@ -60,7 +60,7 @@ which itself flows *into* this expression
 
 File "assign_obj_get.php", line 16, character 7 - line 16, character 8:
 
-which itself flows *into* this expression, via the (contravariant) 1st function parameter
+which itself flows *into* this expression, via the 1st function parameter
 
  14 | function bar(SuperBox $f): void {
  15 |   $g = $f->get();
@@ -77,7 +77,7 @@ which itself flows *from* this function or method
 
 File "assign_obj_get.php", line 12, character 10 - line 12, character 12:
 
-which itself flows *into* this hint, via the (contravariant) 1st function parameter
+which itself flows *into* this hint, via the 1st function parameter
 
  12 | function foo(»Sub« $_): void {}
  13 | 

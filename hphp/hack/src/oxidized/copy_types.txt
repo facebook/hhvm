@@ -110,9 +110,12 @@ typing_defs_core::ShapeKind
 typing_defs_core::ValKind
 typing_reason::ArgPosition
 typing_reason::BlameSource
+typing_reason::CstrVariance
 typing_reason::Direction
 typing_reason::FieldKind
 typing_reason::PrjAsymm
+typing_reason::Side
+typing_reason::VarianceDir
 user_error::Level
 user_error::Severity
 xhp_attribute::Tag

@@ -58,7 +58,7 @@ which itself flows *into* this expression
 
 File "ctor_generic.php", line 21, character 29 - line 21, character 30:
 
-which itself flows *into* this expression, via the (contravariant) 2nd function parameter
+which itself flows *into* this expression, via the 2nd function parameter
 
  19 | final class TestServiceWA extends TestServiceBase<int, string> {
  20 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
@@ -77,7 +77,7 @@ which itself flows *from* this function or method
 
 File "ctor_generic.php", line 12, character 19 - line 12, character 29:
 
-which itself flows *into* the generic `TB` on `TestServiceBase`, via the (contravariant) 2nd function parameter
+which itself flows *into* the generic `TB` on `TestServiceBase`, via the 2nd function parameter
 
  19 | final class TestServiceWA extends TestServiceBase<int, string> {
  20 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {

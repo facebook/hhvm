@@ -128,8 +128,8 @@ Flow:
     {
       "Rflow":[
         {
-          "Rprj_asymm_right":[
-            "Prj_asymm_inter",
+          "Rprj":[
+            {"Asymm":["Super","Prj_asymm_inter"]},
             {
               "Rhint":[
                 {

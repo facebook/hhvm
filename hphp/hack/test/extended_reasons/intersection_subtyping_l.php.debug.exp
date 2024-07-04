@@ -302,8 +302,8 @@ Flow:
           ]
         },
         {
-          "Rprj_asymm_left":[
-            "Prj_asymm_inter",
+          "Rprj":[
+            {"Asymm":["Sub","Prj_asymm_inter"]},
             {
               "Rflow":[
                 {
@@ -519,8 +519,8 @@ Flow:
           ]
         },
         {
-          "Rprj_asymm_left":[
-            "Prj_asymm_inter",
+          "Rprj":[
+            {"Asymm":["Sub","Prj_asymm_inter"]},
             {
               "Rflow":[
                 {

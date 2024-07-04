@@ -34,13 +34,13 @@ Here's why: this hint
 
 File "fn_subtyping_contra_2.php", line 7, character 36 - line 7, character 40:
 
-flows *into* this hint, via the (contravariant) 1st function parameter
+flows *into* this hint, via the 1st function parameter
 
  5 | namespace HH {
  6 |   newtype supportdyn<+T> as T = »(T & dynamic)«;
  7 | }
 
-File "/tmp/jQVCN1H1fH/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
+File "/tmp/GoQFTceIlt/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
 
 which itself flows *from* this hint
 
@@ -69,13 +69,13 @@ which itself flows *from* this declaration
 
 File "fn_subtyping_contra_2.php", line 6, character 26 - line 6, character 46:
 
-which itself flows *from* this hint, via the (contravariant) 1st function parameter
+which itself flows *from* this hint, via the 1st function parameter
 
  5 | namespace HH {
  6 |   newtype supportdyn<+T> as T = »(T & dynamic)«;
  7 | }
 
-File "/tmp/jQVCN1H1fH/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
+File "/tmp/GoQFTceIlt/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
 
 which itself flows *into* this hint
 
@@ -104,7 +104,7 @@ which itself flows *into* this expression
 
 File "fn_subtyping_contra_2.php", line 8, character 9 - line 8, character 10:
 
-which itself flows *into* this expression, via the (contravariant) 1st function parameter
+which itself flows *into* this expression, via the 1st function parameter
 
  6 | function foo_2((function((function(Sub): void)): void) $_): void {}
  7 | function bar_2((function((function(Super): void)): void) $f): void {
@@ -122,7 +122,7 @@ which itself flows *from* this function or method
 
 File "fn_subtyping_contra_2.php", line 6, character 10 - line 6, character 14:
 
-which itself flows *into* this hint, via the (contravariant) 1st function parameter
+which itself flows *into* this hint, via the 1st function parameter
 
  6 | function foo_2((function((function(Sub): void)): void) $_): void {}
  7 | function bar_2(»(function((function(Super): void)): void)« $f): void {
@@ -155,9 +155,9 @@ which itself flows *into* this hint
  6 |   newtype supportdyn<+T> as T = »(T & dynamic)«;
  7 | }
 
-File "/tmp/jQVCN1H1fH/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
+File "/tmp/GoQFTceIlt/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
 
-which itself flows *from* this hint, via the (contravariant) 1st function parameter
+which itself flows *from* this hint, via the 1st function parameter
 
  6 | function foo_2((function(»(function(Sub): void)«): void) $_): void {}
  7 | function bar_2((function((function(Super): void)): void) $f): void {
@@ -172,9 +172,9 @@ which itself flows *from* this hint
  6 |   newtype supportdyn<+T> as T = »(T & dynamic)«;
  7 | }
 
-File "/tmp/jQVCN1H1fH/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
+File "/tmp/GoQFTceIlt/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
 
-which itself flows *into* this hint, via the (contravariant) 1st function parameter
+which itself flows *into* this hint, via the 1st function parameter
 
  6 | function foo_2((function((function(»Sub«): void)): void) $_): void {}
  7 | function bar_2((function((function(Super): void)): void) $f): void {
@@ -194,8 +194,8 @@ Flow:
           ]
         },
         {
-          "Rprj_symm":[
-            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+          "Rprj":[
+            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
             {
               "Rflow":[
                 {
@@ -205,7 +205,7 @@ Flow:
                         {
                           "Rhint":[
                             {
-                              "filename":"/tmp/jQVCN1H1fH/supportdynamic.hhi",
+                              "filename":"/tmp/GoQFTceIlt/supportdynamic.hhi",
                               "line":6,
                               "char_start":33,
                               "char_end":45
@@ -236,8 +236,8 @@ Flow:
                     {
                       "Rflow":[
                         {
-                          "Rprj_symm":[
-                            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                          "Rprj":[
+                            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
                             {
                               "Rflow":[
                                 {
@@ -253,7 +253,7 @@ Flow:
                                                     {
                                                       "Rhint":[
                                                         {
-                                                          "filename":"/tmp/jQVCN1H1fH/supportdynamic.hhi",
+                                                          "filename":"/tmp/GoQFTceIlt/supportdynamic.hhi",
                                                           "line":6,
                                                           "char_start":33,
                                                           "char_end":45
@@ -282,8 +282,8 @@ Flow:
                                           ]
                                         },
                                         {
-                                          "Rprj_symm":[
-                                            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                                          "Rprj":[
+                                            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
                                             {
                                               "Rflow":[
                                                 {
@@ -324,7 +324,7 @@ Flow:
                                         {
                                           "Rhint":[
                                             {
-                                              "filename":"/tmp/jQVCN1H1fH/supportdynamic.hhi",
+                                              "filename":"/tmp/GoQFTceIlt/supportdynamic.hhi",
                                               "line":6,
                                               "char_start":33,
                                               "char_end":45
@@ -349,7 +349,7 @@ Flow:
                             {
                               "Rhint":[
                                 {
-                                  "filename":"/tmp/jQVCN1H1fH/supportdynamic.hhi",
+                                  "filename":"/tmp/GoQFTceIlt/supportdynamic.hhi",
                                   "line":6,
                                   "char_start":33,
                                   "char_end":45

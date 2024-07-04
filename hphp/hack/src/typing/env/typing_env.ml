@@ -103,7 +103,7 @@ let expand_var env r v =
       (not (is_tyvar ty_solution))
       && TypecheckerOptions.using_extended_reasons env.genv.tcopt
     then
-      map_reason ty_solution ~f:(fun from -> Typing_reason.flow (from, r))
+      map_reason ty_solution ~f:(fun from -> Typing_reason.flow ~from ~into:r)
     else
       ty_solution
   in
@@ -1993,3 +1993,21 @@ module Log = struct
       (v : Tvid.t) =
     Inf.Log.tyvar_to_json p_locl_ty p_internal_type env.inference_env v
 end
+
+let update_reason { genv = { tcopt; _ }; _ } ty ~f =
+  if TypecheckerOptions.using_extended_reasons tcopt then
+    map_reason ty ~f
+  else
+    ty
+
+let update_cty_reason { genv = { tcopt; _ }; _ } cty ~f =
+  if TypecheckerOptions.using_extended_reasons tcopt then
+    let (r, cstr) = deref_constraint_type cty in
+    mk_constraint_type (f r, cstr)
+  else
+    cty
+
+let update_ity_reason t ity ~f =
+  match ity with
+  | LoclType lty -> LoclType (update_reason t lty ~f)
+  | ConstraintType cty -> ConstraintType (update_cty_reason t cty ~f)

@@ -69,7 +69,7 @@ which itself flows *into* this expression
 
 File "assign_local.php", line 11, character 7 - line 11, character 8:
 
-which itself flows *into* this expression, via the (contravariant) 1st function parameter
+which itself flows *into* this expression, via the 1st function parameter
 
   9 | function bar(Super $f): void {
  10 |   $g = $f;
@@ -86,7 +86,7 @@ which itself flows *from* this function or method
 
 File "assign_local.php", line 7, character 10 - line 7, character 12:
 
-which itself flows *into* this hint, via the (contravariant) 1st function parameter
+which itself flows *into* this hint, via the 1st function parameter
 
  7 | function foo(»Sub« $_): void {}
  8 | 
@@ -131,8 +131,8 @@ Flow:
           ]
         },
         {
-          "Rprj_symm":[
-            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+          "Rprj":[
+            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
             {
               "Rflow":[
                 {

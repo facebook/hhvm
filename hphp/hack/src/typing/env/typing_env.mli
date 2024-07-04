@@ -585,3 +585,21 @@ module Log : sig
 end
 
 val make_expression_id : env -> Expression_id.t
+
+val update_reason :
+  env ->
+  locl_ty ->
+  f:(locl_phase Typing_reason.t_ -> locl_phase Typing_reason.t_) ->
+  locl_ty
+
+val update_cty_reason :
+  env ->
+  constraint_type ->
+  f:(locl_phase Typing_reason.t_ -> locl_phase Typing_reason.t_) ->
+  constraint_type
+
+val update_ity_reason :
+  env ->
+  internal_type ->
+  f:(locl_phase Typing_reason.t_ -> locl_phase Typing_reason.t_) ->
+  internal_type

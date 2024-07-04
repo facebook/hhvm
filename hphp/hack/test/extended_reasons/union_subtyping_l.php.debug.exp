@@ -79,8 +79,8 @@ Flow:
           "Rhint":[{"filename":"union_subtyping_l.php","line":6,"char_start":19,"char_end":19}]
         },
         {
-          "Rprj_asymm_left":[
-            "Prj_asymm_union",
+          "Rprj":[
+            {"Asymm":["Sub","Prj_asymm_union"]},
             {
               "Rflow":[
                 {
@@ -199,8 +199,8 @@ Flow:
           "Rhint":[{"filename":"union_subtyping_l.php","line":6,"char_start":23,"char_end":23}]
         },
         {
-          "Rprj_asymm_left":[
-            "Prj_asymm_union",
+          "Rprj":[
+            {"Asymm":["Sub","Prj_asymm_union"]},
             {
               "Rflow":[
                 {

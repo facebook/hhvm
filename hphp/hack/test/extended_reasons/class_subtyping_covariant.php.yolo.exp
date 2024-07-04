@@ -38,7 +38,7 @@ Here's why: this hint
 
 File "class_subtyping_covariant.php", line 13, character 36 - line 13, character 40:
 
-flows *into* this hint, via the (covariant) 1st type parameter of the class `\MyA`
+flows *into* this hint, via the covariant, 1st type parameter of the class `\MyA`
 
  5 | class MyC<+T1, T2> extends »MyA<T1, Super, T2>« {}
  6 | 
@@ -76,7 +76,7 @@ which itself flows *into* this expression
 
 File "class_subtyping_covariant.php", line 14, character 14 - line 14, character 15:
 
-which itself flows *into* this expression, via the (contravariant) 1st function parameter
+which itself flows *into* this expression, via the 1st function parameter
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -96,7 +96,7 @@ which itself flows *from* this function or method
 
 File "class_subtyping_covariant.php", line 11, character 10 - line 11, character 19:
 
-which itself flows *into* this hint, via the (contravariant) 1st function parameter
+which itself flows *into* this hint, via the 1st function parameter
 
  11 | function takes_my_a(»MyA<Sub, Super, Super>« $_): void {}
  12 | 
@@ -106,7 +106,7 @@ which itself flows *into* this hint, via the (contravariant) 1st function parame
 
 File "class_subtyping_covariant.php", line 11, character 21 - line 11, character 42:
 
-which itself flows *into* this hint, via the (covariant) 1st type parameter of the class `\MyA`
+which itself flows *into* this hint, via the covariant, 1st type parameter of the class `\MyA`
 
  11 | function takes_my_a(MyA<»Sub«, Super, Super> $_): void {}
  12 | 
@@ -132,8 +132,8 @@ Flow:
           ]
         },
         {
-          "Rprj_symm":[
-            {"Prj_symm_class":["\\MyA",0,{"Covariant":[]}]},
+          "Rprj":[
+            {"Symm":[{"Prj_symm_class":["\\MyA",0,{"Dir":[{"Co":[]}]}]}]},
             {
               "Rflow":[
                 {
@@ -189,8 +189,8 @@ Flow:
                           ]
                         },
                         {
-                          "Rprj_symm":[
-                            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                          "Rprj":[
+                            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
                             {
                               "Rflow":[
                                 {

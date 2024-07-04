@@ -68,7 +68,7 @@ which itself flows *into* this expression
 
 File "generic_subtyping_caller_upper_bound.php", line 10, character 17 - line 10, character 18:
 
-which itself flows *into* this expression, via the (contravariant) 1st function parameter
+which itself flows *into* this expression, via the 1st function parameter
 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
@@ -88,7 +88,7 @@ which itself flows *from* this function or method
 
 File "generic_subtyping_caller_upper_bound.php", line 7, character 10 - line 7, character 22:
 
-which itself flows *into* this hint, via the (contravariant) 1st function parameter
+which itself flows *into* this hint, via the 1st function parameter
 
  7 | function rcvr_concrete(»B« $x): void {}
  8 | 
@@ -154,8 +154,8 @@ Flow:
               ]
             },
             {
-              "Rprj_symm":[
-                {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+              "Rprj":[
+                {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
                 {
                   "Rflow":[
                     {
@@ -262,7 +262,7 @@ which itself flows *into* this expression
 
 File "generic_subtyping_caller_upper_bound.php", line 10, character 17 - line 10, character 18:
 
-which itself flows *into* this expression, via the (contravariant) 1st function parameter
+which itself flows *into* this expression, via the 1st function parameter
 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
@@ -282,7 +282,7 @@ which itself flows *from* this function or method
 
 File "generic_subtyping_caller_upper_bound.php", line 7, character 10 - line 7, character 22:
 
-which itself flows *into* this hint, via the (contravariant) 1st function parameter
+which itself flows *into* this hint, via the 1st function parameter
 
  7 | function rcvr_concrete(»B« $x): void {}
  8 | 
@@ -336,8 +336,8 @@ Flow:
           ]
         },
         {
-          "Rprj_symm":[
-            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+          "Rprj":[
+            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
             {
               "Rflow":[
                 {

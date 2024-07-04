@@ -88,7 +88,7 @@ which itself flows *into* this expression
 
 File "generic_subtyping_upper_bound_2.php", line 12, character 20 - line 12, character 21:
 
-which itself flows *into* this expression, via the (contravariant) 1st function parameter
+which itself flows *into* this expression, via the 1st function parameter
 
   9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
  10 | 
@@ -108,7 +108,7 @@ which itself flows *from* this function or method
 
 File "generic_subtyping_upper_bound_2.php", line 9, character 10 - line 9, character 25:
 
-which itself flows *into* the constraint on the generic parameter, via the (contravariant) 1st function parameter
+which itself flows *into* the constraint on the generic parameter, via the 1st function parameter
 
  9 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
 10 | 
@@ -198,7 +198,7 @@ which itself flows *into* this expression
 
 File "generic_subtyping_upper_bound_2.php", line 12, character 20 - line 12, character 21:
 
-which itself flows *into* this expression, via the (contravariant) 1st function parameter
+which itself flows *into* this expression, via the 1st function parameter
 
   9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
  10 | 
@@ -218,7 +218,7 @@ which itself flows *from* this function or method
 
 File "generic_subtyping_upper_bound_2.php", line 9, character 10 - line 9, character 25:
 
-which itself flows *into* the constraint on the generic parameter, via the (contravariant) 1st function parameter
+which itself flows *into* the constraint on the generic parameter, via the 1st function parameter
 
  9 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
 10 | 

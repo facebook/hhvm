@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f67d74f6a0849845644bf9a4700589d1>>
+// @generated SignedSource<<43bf9447fcaac2f9d1c6b72bf0013ec1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -85,10 +85,43 @@ pub enum Blame<'a> {
 impl<'a> TrivialDrop for Blame<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Blame<'arena>);
 
+pub use oxidized::typing_reason::VarianceDir;
+
+/// When recording the decomposition of a type during inference we want to keep
+/// track of variance so we can give intuition about the direction of 'flow'.
+/// In the case of invariant type paramters, we record both the fact that it was
+/// invariant and the direction in which the error occurred
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[repr(C, u8)]
+pub enum CstrVariance<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Dir(&'a oxidized::typing_reason::VarianceDir),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Inv(&'a oxidized::typing_reason::VarianceDir),
+}
+impl<'a> TrivialDrop for CstrVariance<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(CstrVariance<'arena>);
+
 pub use oxidized::typing_reason::FieldKind;
 
-/// Symmetric projections are those applied to both sub-  and supertype during
-/// constraint solving
+/// Symmetric projections are those in which the same decomposition is applied
+/// to both sub- and supertype during inference
 #[derive(
     Clone,
     Copy,
@@ -113,11 +146,11 @@ pub enum PrjSymm<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Prj_symm_class")]
     #[rust_to_ocaml(inline_tuple)]
-    PrjSymmClass(&'a (&'a str, isize, oxidized::ast_defs::Variance)),
+    PrjSymmClass(&'a (&'a str, isize, CstrVariance<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Prj_symm_newtype")]
     #[rust_to_ocaml(inline_tuple)]
-    PrjSymmNewtype(&'a (&'a str, isize, oxidized::ast_defs::Variance)),
+    PrjSymmNewtype(&'a (&'a str, isize, CstrVariance<'a>)),
     #[rust_to_ocaml(name = "Prj_symm_tuple")]
     PrjSymmTuple(isize),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -131,18 +164,55 @@ pub enum PrjSymm<'a> {
         ),
     ),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Prj_symm_fn_arg")]
+    #[rust_to_ocaml(name = "Prj_symm_fn_param")]
     #[rust_to_ocaml(inline_tuple)]
-    PrjSymmFnArg(&'a (isize, isize, oxidized::ast_defs::Variance)),
+    PrjSymmFnParam(&'a (isize, isize)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Prj_symm_fn_param_inout")]
+    #[rust_to_ocaml(inline_tuple)]
+    PrjSymmFnParamInout(&'a (isize, isize, &'a oxidized::typing_reason::VarianceDir)),
     #[rust_to_ocaml(name = "Prj_symm_fn_ret")]
     PrjSymmFnRet,
-    #[rust_to_ocaml(name = "Prj_symm_access")]
-    PrjSymmAccess,
 }
 impl<'a> TrivialDrop for PrjSymm<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(PrjSymm<'arena>);
 
 pub use oxidized::typing_reason::PrjAsymm;
+pub use oxidized::typing_reason::Side;
+
+/// Top-level projections
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[repr(C, u8)]
+pub enum Prj<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Symm(&'a PrjSymm<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
+    Asymm(
+        &'a (
+            &'a oxidized::typing_reason::Side,
+            &'a oxidized::typing_reason::PrjAsymm,
+        ),
+    ),
+}
+impl<'a> TrivialDrop for Prj<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Prj<'arena>);
 
 /// The reason why something is expected to have a certain type
 #[derive(
@@ -499,17 +569,8 @@ pub enum T_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Rrev(&'a T_<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rprj_symm")]
     #[rust_to_ocaml(inline_tuple)]
-    RprjSymm(&'a (PrjSymm<'a>, T_<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rprj_asymm_left")]
-    #[rust_to_ocaml(inline_tuple)]
-    RprjAsymmLeft(&'a (&'a oxidized::typing_reason::PrjAsymm, T_<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rprj_asymm_right")]
-    #[rust_to_ocaml(inline_tuple)]
-    RprjAsymmRight(&'a (&'a oxidized::typing_reason::PrjAsymm, T_<'a>)),
+    Rprj(&'a (Prj<'a>, T_<'a>)),
     #[rust_to_ocaml(name = "Rmissing_field")]
     RmissingField,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

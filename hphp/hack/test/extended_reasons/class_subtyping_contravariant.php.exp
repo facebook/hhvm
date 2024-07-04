@@ -38,7 +38,7 @@ Here's why: this hint
 
 File "class_subtyping_contravariant.php", line 11, character 30 - line 11, character 34:
 
-flows *into* this hint, via the (contravariant) 2nd type parameter of the class `\MyA`
+flows *into* this hint, via the contravariant, 2nd type parameter of the class `\MyA`
 
  11 | function takes_my_a(»MyA<Sub, Super, Super>« $_): void {}
  12 | 
@@ -48,7 +48,7 @@ flows *into* this hint, via the (contravariant) 2nd type parameter of the class 
 
 File "class_subtyping_contravariant.php", line 11, character 21 - line 11, character 42:
 
-which itself flows *from* this function or method , via the (contravariant) 1st function parameter
+which itself flows *from* this function or method , via the 1st function parameter
 
  11 | function »takes_my_a«(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -68,7 +68,7 @@ which itself flows *into* this expression
 
 File "class_subtyping_contravariant.php", line 14, character 3 - line 14, character 12:
 
-which itself flows *from* this expression, via the (contravariant) 1st function parameter
+which itself flows *from* this expression, via the 1st function parameter
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -106,7 +106,7 @@ which itself flows *from* this hint
 
 File "class_subtyping_contravariant.php", line 5, character 28 - line 5, character 43:
 
-which itself flows *into* this hint, via the (contravariant) 2nd type parameter of the class `\MyA`
+which itself flows *into* this hint, via the contravariant, 2nd type parameter of the class `\MyA`
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 

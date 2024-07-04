@@ -24,7 +24,7 @@ But got `mixed`
  6 |   newtype supportdyn<+T> as T = »(T & dynamic)«;
  7 | }
 
-File "/tmp/KUAVgsec8T/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
+File "/tmp/CUUGqaLVgM/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
 
 Here's why: this hint
 
@@ -32,7 +32,7 @@ Here's why: this hint
  6 |   newtype supportdyn<+T> as T = »(T & dynamic)«;
  7 | }
 
-File "/tmp/KUAVgsec8T/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
+File "/tmp/CUUGqaLVgM/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
 
 flows *into* this hint
 
@@ -74,7 +74,7 @@ which itself flows *into* this expression
 
 File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 17 - line 10, character 18:
 
-which itself flows *into* this expression, via the (contravariant) 1st function parameter
+which itself flows *into* this expression, via the 1st function parameter
 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
@@ -94,13 +94,13 @@ which itself flows *from* this function or method
 
 File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 10 - line 7, character 22:
 
-which itself flows *into* this hint, via the (contravariant) 1st function parameter
+which itself flows *into* this hint, via the 1st function parameter
 
  5 | namespace HH {
  6 |   newtype supportdyn<+T> as T = »(T & dynamic)«;
  7 | }
 
-File "/tmp/KUAVgsec8T/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
+File "/tmp/CUUGqaLVgM/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
 
 which itself flows *into* this hint
 
@@ -182,7 +182,7 @@ which itself flows *into* this expression
 
 File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 17 - line 10, character 18:
 
-which itself flows *into* this expression, via the (contravariant) 1st function parameter
+which itself flows *into* this expression, via the 1st function parameter
 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
@@ -202,7 +202,7 @@ which itself flows *from* this function or method
 
 File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 10 - line 7, character 22:
 
-which itself flows *into* this hint, via the (contravariant) 1st function parameter
+which itself flows *into* this hint, via the 1st function parameter
 
  7 | function rcvr_concrete(»B« $x): void {}
  8 | 

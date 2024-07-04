@@ -50,7 +50,7 @@ which itself flows *into* this expression
 
 File "newtype1.php--file2.php", line 8, character 22 - line 8, character 23:
 
-which itself flows *into* this expression, via the (contravariant) 1st function parameter
+which itself flows *into* this expression, via the 1st function parameter
 
  7 | function pass_my_int(myint $y) : bool {
  8 |   return »expect_bool«($y);
@@ -66,7 +66,7 @@ which itself flows *from* this function or method
 
 File "newtype1.php--file2.php", line 3, character 10 - line 3, character 20:
 
-which itself flows *into* this hint, via the (contravariant) 1st function parameter
+which itself flows *into* this hint, via the 1st function parameter
 
  3 | newtype myint as »int« = int;
 
@@ -112,8 +112,8 @@ Flow:
               ]
             },
             {
-              "Rprj_symm":[
-                {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+              "Rprj":[
+                {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
                 {
                   "Rflow":[
                     {

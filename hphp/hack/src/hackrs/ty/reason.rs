@@ -250,9 +250,7 @@ pub trait Reason:
                 OR::Rpattern(pos) => RI::Rpattern(pos.into()),
                 OR::Rflow(_) => RI::Rnone,
                 OR::Rrev(_) => RI::Rnone,
-                OR::RprjAsymmLeft(_) => RI::Rnone,
-                OR::RprjAsymmRight(_) => RI::Rnone,
-                OR::RprjSymm(_) => RI::Rnone,
+                OR::Rprj(_) => RI::Rnone,
                 OR::RmissingField => RI::Rnone,
             }
         })

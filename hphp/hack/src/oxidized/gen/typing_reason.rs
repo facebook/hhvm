@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e79182329e5d0206b69f9abe429c3fa1>>
+// @generated SignedSource<<23951e47d906d6c60cfcc855c9b44b30>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -126,6 +126,60 @@ pub enum Blame {
     Blame(pos::Pos, BlameSource),
 }
 
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[repr(u8)]
+pub enum VarianceDir {
+    Co,
+    Contra,
+}
+impl TrivialDrop for VarianceDir {}
+arena_deserializer::impl_deserialize_in_arena!(VarianceDir);
+
+/// When recording the decomposition of a type during inference we want to keep
+/// track of variance so we can give intuition about the direction of 'flow'.
+/// In the case of invariant type paramters, we record both the fact that it was
+/// invariant and the direction in which the error occurred
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[repr(C, u8)]
+pub enum CstrVariance {
+    Dir(VarianceDir),
+    Inv(VarianceDir),
+}
+
 /// Shape field kinds
 #[derive(
     Clone,
@@ -154,8 +208,8 @@ pub enum FieldKind {
 impl TrivialDrop for FieldKind {}
 arena_deserializer::impl_deserialize_in_arena!(FieldKind);
 
-/// Symmetric projections are those applied to both sub-  and supertype during
-/// constraint solving
+/// Symmetric projections are those in which the same decomposition is applied
+/// to both sub- and supertype during inference
 #[derive(
     Clone,
     Debug,
@@ -177,23 +231,23 @@ pub enum PrjSymm {
     #[rust_to_ocaml(name = "Prj_symm_neg")]
     PrjSymmNeg,
     #[rust_to_ocaml(name = "Prj_symm_class")]
-    PrjSymmClass(String, isize, ast_defs::Variance),
+    PrjSymmClass(String, isize, CstrVariance),
     #[rust_to_ocaml(name = "Prj_symm_newtype")]
-    PrjSymmNewtype(String, isize, ast_defs::Variance),
+    PrjSymmNewtype(String, isize, CstrVariance),
     #[rust_to_ocaml(name = "Prj_symm_tuple")]
     PrjSymmTuple(isize),
     #[rust_to_ocaml(name = "Prj_symm_shape")]
     PrjSymmShape(String, FieldKind, FieldKind),
-    #[rust_to_ocaml(name = "Prj_symm_fn_arg")]
-    PrjSymmFnArg(isize, isize, ast_defs::Variance),
+    #[rust_to_ocaml(name = "Prj_symm_fn_param")]
+    PrjSymmFnParam(isize, isize),
+    #[rust_to_ocaml(name = "Prj_symm_fn_param_inout")]
+    PrjSymmFnParamInout(isize, isize, VarianceDir),
     #[rust_to_ocaml(name = "Prj_symm_fn_ret")]
     PrjSymmFnRet,
-    #[rust_to_ocaml(name = "Prj_symm_access")]
-    PrjSymmAccess,
 }
 
-/// Asymmetric projections are those applied to only one of the sub- or
-/// supertype during constraint solving
+/// Asymmetric projections are those in which the same decomposition is applied
+/// to only one of the sub- or supertype during inference
 #[derive(
     Clone,
     Copy,
@@ -223,6 +277,57 @@ pub enum PrjAsymm {
 }
 impl TrivialDrop for PrjAsymm {}
 arena_deserializer::impl_deserialize_in_arena!(PrjAsymm);
+
+/// For asymmetric projections we need to track which of the sub- or supertype
+/// was decomposed
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[repr(u8)]
+pub enum Side {
+    Sub,
+    Super,
+}
+impl TrivialDrop for Side {}
+arena_deserializer::impl_deserialize_in_arena!(Side);
+
+/// Top-level projections
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[repr(C, u8)]
+pub enum Prj {
+    Symm(PrjSymm),
+    Asymm(Side, PrjAsymm),
+}
 
 /// The reason why something is expected to have a certain type
 #[derive(
@@ -432,12 +537,7 @@ pub enum T_ {
     Rpattern(pos::Pos),
     Rflow(Box<T_>, Box<T_>),
     Rrev(Box<T_>),
-    #[rust_to_ocaml(name = "Rprj_symm")]
-    RprjSymm(PrjSymm, Box<T_>),
-    #[rust_to_ocaml(name = "Rprj_asymm_left")]
-    RprjAsymmLeft(PrjAsymm, Box<T_>),
-    #[rust_to_ocaml(name = "Rprj_asymm_right")]
-    RprjAsymmRight(PrjAsymm, Box<T_>),
+    Rprj(Prj, Box<T_>),
     #[rust_to_ocaml(name = "Rmissing_field")]
     RmissingField,
     #[rust_to_ocaml(name = "Rpessimised_this")]

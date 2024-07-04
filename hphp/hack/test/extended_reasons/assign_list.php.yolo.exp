@@ -123,7 +123,7 @@ which itself flows *into* this expression
 
 File "assign_list.php", line 10, character 7 - line 10, character 8:
 
-which itself flows *into* this expression, via the (contravariant) 1st function parameter
+which itself flows *into* this expression, via the 1st function parameter
 
  8 | function bar_1((string,Super,bool) $xyz): void {
  9 |   list($_, $y, $_) = $xyz;
@@ -140,7 +140,7 @@ which itself flows *from* this function or method
 
 File "assign_list.php", line 6, character 10 - line 6, character 12:
 
-which itself flows *into* this hint, via the (contravariant) 1st function parameter
+which itself flows *into* this hint, via the 1st function parameter
 
  6 | function foo(»Sub« $_): void {}
  7 | 
@@ -225,8 +225,8 @@ Flow:
               ]
             },
             {
-              "Rprj_symm":[
-                {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+              "Rprj":[
+                {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
                 {
                   "Rflow":[
                     {

@@ -38,7 +38,7 @@ Here's why: this hint
 
 File "class_subtyping_invariant.php", line 13, character 43 - line 13, character 45:
 
-flows *into* this hint, via the (covariant) 3rd type parameter of the class `\MyA`
+flows *into* this hint, via the invariant, 3rd type parameter of the class `\MyA`, when typing as covariant
 
  5 | class MyB<-T1, T2> extends »MyA<Sub, T1, T2>« {}
  6 | 
@@ -76,7 +76,7 @@ which itself flows *into* this expression
 
 File "class_subtyping_invariant.php", line 14, character 14 - line 14, character 15:
 
-which itself flows *into* this expression, via the (contravariant) 1st function parameter
+which itself flows *into* this expression, via the 1st function parameter
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -96,7 +96,7 @@ which itself flows *from* this function or method
 
 File "class_subtyping_invariant.php", line 11, character 10 - line 11, character 19:
 
-which itself flows *into* this hint, via the (contravariant) 1st function parameter
+which itself flows *into* this hint, via the 1st function parameter
 
  11 | function takes_my_a(»MyA<Sub, Super, Super>« $_): void {}
  12 | 
@@ -106,7 +106,7 @@ which itself flows *into* this hint, via the (contravariant) 1st function parame
 
 File "class_subtyping_invariant.php", line 11, character 21 - line 11, character 42:
 
-which itself flows *into* this hint, via the (covariant) 3rd type parameter of the class `\MyA`
+which itself flows *into* this hint, via the invariant, 3rd type parameter of the class `\MyA`, when typing as covariant
 
  11 | function takes_my_a(MyA<Sub, Super, »Super«> $_): void {}
  12 | 
@@ -132,8 +132,8 @@ Flow:
           ]
         },
         {
-          "Rprj_symm":[
-            {"Prj_symm_class":["\\MyA",2,{"Covariant":[]}]},
+          "Rprj":[
+            {"Symm":[{"Prj_symm_class":["\\MyA",2,{"Inv":[{"Co":[]}]}]}]},
             {
               "Rflow":[
                 {
@@ -189,8 +189,8 @@ Flow:
                           ]
                         },
                         {
-                          "Rprj_symm":[
-                            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                          "Rprj":[
+                            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
                             {
                               "Rflow":[
                                 {
@@ -293,7 +293,7 @@ Here's why: this hint
 
 File "class_subtyping_invariant.php", line 11, character 37 - line 11, character 41:
 
-flows *into* this hint, via the (contravariant) 3rd type parameter of the class `\MyA`
+flows *into* this hint, via the invariant, 3rd type parameter of the class `\MyA`, when typing as contravariant
 
  11 | function takes_my_a(»MyA<Sub, Super, Super>« $_): void {}
  12 | 
@@ -303,7 +303,7 @@ flows *into* this hint, via the (contravariant) 3rd type parameter of the class 
 
 File "class_subtyping_invariant.php", line 11, character 21 - line 11, character 42:
 
-which itself flows *from* this function or method , via the (contravariant) 1st function parameter
+which itself flows *from* this function or method , via the 1st function parameter
 
  11 | function »takes_my_a«(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -323,7 +323,7 @@ which itself flows *into* this expression
 
 File "class_subtyping_invariant.php", line 14, character 3 - line 14, character 12:
 
-which itself flows *from* this expression, via the (contravariant) 1st function parameter
+which itself flows *from* this expression, via the 1st function parameter
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -361,7 +361,7 @@ which itself flows *from* this hint
 
 File "class_subtyping_invariant.php", line 5, character 28 - line 5, character 43:
 
-which itself flows *into* this hint, via the (contravariant) 3rd type parameter of the class `\MyA`
+which itself flows *into* this hint, via the invariant, 3rd type parameter of the class `\MyA`, when typing as contravariant
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -387,8 +387,8 @@ Flow:
           ]
         },
         {
-          "Rprj_symm":[
-            {"Prj_symm_class":["\\MyA",2,{"Contravariant":[]}]},
+          "Rprj":[
+            {"Symm":[{"Prj_symm_class":["\\MyA",2,{"Inv":[{"Contr":[]}]}]}]},
             {
               "Rflow":[
                 {
@@ -406,8 +406,8 @@ Flow:
                     {
                       "Rflow":[
                         {
-                          "Rprj_symm":[
-                            {"Prj_symm_fn_arg":[0,0,{"Contravariant":[]}]},
+                          "Rprj":[
+                            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
                             {
                               "Rflow":[
                                 {

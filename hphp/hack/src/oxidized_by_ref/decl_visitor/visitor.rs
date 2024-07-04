@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8dc7ff79a0b758ff9a6b9ae13f840e35>>
+// @generated SignedSource<<56c992979c3b539316c21e4aa4a6a261>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -168,7 +168,13 @@ pub trait Visitor<'a> {
     fn visit_blame(&mut self, p: &'a Blame<'a>) {
         p.recurse(self.object())
     }
+    fn visit_cstr_variance(&mut self, p: &'a CstrVariance<'a>) {
+        p.recurse(self.object())
+    }
     fn visit_prj_symm(&mut self, p: &'a PrjSymm<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_prj(&mut self, p: &'a Prj<'a>) {
         p.recurse(self.object())
     }
     fn visit_t_(&mut self, p: &'a T_<'a>) {
@@ -216,10 +222,16 @@ pub trait Visitor<'a> {
     fn visit_blame_source(&mut self, p: &'a BlameSource) {
         p.recurse(self.object())
     }
+    fn visit_variance_dir(&mut self, p: &'a VarianceDir) {
+        p.recurse(self.object())
+    }
     fn visit_field_kind(&mut self, p: &'a FieldKind) {
         p.recurse(self.object())
     }
     fn visit_prj_asymm(&mut self, p: &'a PrjAsymm) {
+        p.recurse(self.object())
+    }
+    fn visit_side(&mut self, p: &'a Side) {
         p.recurse(self.object())
     }
     fn visit_tag(&mut self, p: &'a Tag) {

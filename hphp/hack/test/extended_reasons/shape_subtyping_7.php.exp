@@ -81,7 +81,7 @@ which itself flows *into* this expression
 
 File "shape_subtyping_7.php", line 14, character 35 - line 14, character 36:
 
-which itself flows *into* this expression, via the (contravariant) 1st function parameter
+which itself flows *into* this expression, via the 1st function parameter
 
  11 | function passes_missing_a_alias(
  12 |   missing_a $s,
@@ -103,7 +103,7 @@ which itself flows *from* this function or method
 
 File "shape_subtyping_7.php", line 6, character 10 - line 6, character 40:
 
-which itself flows *into* this hint, via the (contravariant) 1st function parameter
+which itself flows *into* this hint, via the 1st function parameter
 
  3 | type required_a_at_int = »shape('a' => int)«;
  4 | type missing_a = shape('b' => int);
@@ -203,7 +203,7 @@ which itself flows *into* this expression
 
 File "shape_subtyping_7.php", line 14, character 35 - line 14, character 36:
 
-which itself flows *into* this expression, via the (contravariant) 1st function parameter
+which itself flows *into* this expression, via the 1st function parameter
 
  11 | function passes_missing_a_alias(
  12 |   missing_a $s,
@@ -225,7 +225,7 @@ which itself flows *from* this function or method
 
 File "shape_subtyping_7.php", line 6, character 10 - line 6, character 40:
 
-which itself flows *into* this hint, via the (contravariant) 1st function parameter
+which itself flows *into* this hint, via the 1st function parameter
 
  3 | type required_a_at_int = »shape('a' => int)«;
  4 | type missing_a = shape('b' => int);

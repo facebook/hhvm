@@ -131,6 +131,43 @@ let _hash_fold_phase hsv _ = hsv
 
 (* ~~ projections ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+type variance_dir =
+  | Co
+  | Contra
+[@@deriving hash]
+
+let variance_dir_to_json = function
+  | Co -> Hh_json.(JSON_Object [("Co", JSON_Array [])])
+  | Contra -> Hh_json.(JSON_Object [("Contr", JSON_Array [])])
+
+let variance_dir_is_contra = function
+  | Contra -> true
+  | Co -> false
+
+let explain_variance_dir = function
+  | Contra -> "contravariant"
+  | Co -> "covariant"
+
+(** When recording the decomposition of a type during inference we want to keep
+    track of variance so we can give intuition about the direction of 'flow'.
+    In the case of invariant type paramters, we record both the fact that it was
+    invariant and the direction in which the error occurred *)
+type cstr_variance =
+  | Dir of variance_dir
+  | Inv of variance_dir
+[@@deriving hash]
+
+let cstr_variance_is_contra = function
+  | Dir dir
+  | Inv dir ->
+    variance_dir_is_contra dir
+
+let cstr_variance_to_json = function
+  | Dir dir ->
+    Hh_json.(JSON_Object [("Dir", JSON_Array [variance_dir_to_json dir])])
+  | Inv dir ->
+    Hh_json.(JSON_Object [("Inv", JSON_Array [variance_dir_to_json dir])])
+
 (** Shape field kinds *)
 type field_kind =
   | Absent
@@ -148,23 +185,17 @@ let explain_field_kind = function
   | Optional -> "optional"
   | Absent -> "non-existent"
 
-let variance_to_json = function
-  | Ast_defs.Covariant -> Hh_json.(JSON_Object [("Covariant", JSON_Array [])])
-  | Ast_defs.Contravariant ->
-    Hh_json.(JSON_Object [("Contravariant", JSON_Array [])])
-  | Ast_defs.Invariant -> Hh_json.(JSON_Object [("Invariant", JSON_Array [])])
-
-(** Symmetric projections are those applied to both sub-  and supertype during
-    constraint solving *)
+(** Symmetric projections are those in which the same decomposition is applied
+    to both sub- and supertype during inference *)
 type prj_symm =
   | Prj_symm_neg
-  | Prj_symm_class of string * int * Ast_defs.variance
-  | Prj_symm_newtype of string * int * Ast_defs.variance
+  | Prj_symm_class of string * int * cstr_variance
+  | Prj_symm_newtype of string * int * cstr_variance
   | Prj_symm_tuple of int
   | Prj_symm_shape of string * field_kind * field_kind
-  | Prj_symm_fn_arg of int * int * Ast_defs.variance
+  | Prj_symm_fn_param of int * int
+  | Prj_symm_fn_param_inout of int * int * variance_dir
   | Prj_symm_fn_ret
-  | Prj_symm_access
 [@@deriving hash]
 
 let prj_symm_to_json = function
@@ -178,7 +209,7 @@ let prj_symm_to_json = function
               [
                 JSON_String nm;
                 JSON_Number (string_of_int idx);
-                variance_to_json variance;
+                cstr_variance_to_json variance;
               ] );
         ])
   | Prj_symm_newtype (nm, idx, variance) ->
@@ -190,7 +221,7 @@ let prj_symm_to_json = function
               [
                 JSON_String nm;
                 JSON_Number (string_of_int idx);
-                variance_to_json variance;
+                cstr_variance_to_json variance;
               ] );
         ])
   | Prj_symm_tuple idx ->
@@ -207,20 +238,30 @@ let prj_symm_to_json = function
                 field_kind_to_json fld_kind_super;
               ] );
         ])
-  | Prj_symm_fn_arg (idx_sub, idx_sup, variance) ->
+  | Prj_symm_fn_param (idx_sub, idx_sup) ->
     Hh_json.(
       JSON_Object
         [
-          ( "Prj_symm_fn_arg",
+          ( "Prj_symm_fn_param",
             JSON_Array
               [
                 JSON_Number (string_of_int idx_sub);
                 JSON_Number (string_of_int idx_sup);
-                variance_to_json variance;
+              ] );
+        ])
+  | Prj_symm_fn_param_inout (idx_sub, idx_sup, variance) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Prj_symm_fn_param_inout",
+            JSON_Array
+              [
+                JSON_Number (string_of_int idx_sub);
+                JSON_Number (string_of_int idx_sup);
+                variance_dir_to_json variance;
               ] );
         ])
   | Prj_symm_fn_ret -> Hh_json.JSON_String "Prj_symm_fn_ret"
-  | Prj_symm_access -> Hh_json.JSON_String "Prj_symm_access"
 
 let int_to_ordinal =
   let sfxs = [| "th"; "st"; "nd"; "rd"; "th" |] in
@@ -233,24 +274,31 @@ let int_to_ordinal =
     in
     Format.sprintf "%d%s" n sfx
 
-let explain_variance = function
-  | Ast_defs.Contravariant -> "contravariant"
-  | Ast_defs.Covariant -> "covariant"
-  | Ast_defs.Invariant -> "invariant"
-
 let explain_symm_prj prj side =
   match prj with
   | Prj_symm_neg -> "via the negation type"
-  | Prj_symm_class (nm, idx, var) ->
+  | Prj_symm_class (nm, idx, Inv dir) ->
     Format.sprintf
-      "via the (%s) %s type parameter of the class `%s`"
-      (explain_variance var)
+      "via the invariant, %s type parameter of the class `%s`, when typing as %s"
       (int_to_ordinal (idx + 1))
       nm
-  | Prj_symm_newtype (nm, idx, var) ->
+      (explain_variance_dir dir)
+  | Prj_symm_class (nm, idx, Dir dir) ->
     Format.sprintf
-      "via the (%s) %s type parameter of the type definition `%s`"
-      (explain_variance var)
+      "via the %s, %s type parameter of the class `%s`"
+      (explain_variance_dir dir)
+      (int_to_ordinal (idx + 1))
+      nm
+  | Prj_symm_newtype (nm, idx, Inv dir) ->
+    Format.sprintf
+      "via the invariant, %s type parameter of the type definition `%s`, when typing as %s"
+      (int_to_ordinal (idx + 1))
+      nm
+      (explain_variance_dir dir)
+  | Prj_symm_newtype (nm, idx, Dir dir) ->
+    Format.sprintf
+      "via the %s, %s type parameter of the type definition `%s`"
+      (explain_variance_dir dir)
       (int_to_ordinal (idx + 1))
       nm
   | Prj_symm_tuple idx ->
@@ -265,21 +313,27 @@ let explain_symm_prj prj side =
       "via the %s shape field `'%s'`"
       (explain_field_kind fld_kind)
       fld_nm
-  | Prj_symm_fn_arg (idx_lhs, idx_rhs, var) ->
+  | Prj_symm_fn_param (idx_lhs, idx_rhs) ->
+    let idx =
+      match side with
+      | `Lhs -> idx_lhs
+      | `Rhs -> idx_rhs
+    in
+    Format.sprintf "via the %s function parameter" (int_to_ordinal (idx + 1))
+  | Prj_symm_fn_param_inout (idx_lhs, idx_rhs, dir) ->
     let idx =
       match side with
       | `Lhs -> idx_lhs
       | `Rhs -> idx_rhs
     in
     Format.sprintf
-      "via the (%s) %s function parameter"
-      (explain_variance var)
+      "via the invariant, %s `inout` function parameter, when typing as %s"
       (int_to_ordinal (idx + 1))
+      (explain_variance_dir dir)
   | Prj_symm_fn_ret -> "via the function return type"
-  | Prj_symm_access -> "via the type access"
 
-(** Asymmetric projections are those applied to only one of the sub- or
-    supertype during constraint solving *)
+(** Asymmetric projections are those in which the same decomposition is applied
+    to only one of the sub- or supertype during inference *)
 type prj_asymm =
   | Prj_asymm_union
   | Prj_asymm_inter
@@ -296,6 +350,31 @@ let explain_asymm_prj prj =
   | Prj_asymm_union -> "via the union type"
   | Prj_asymm_inter -> "via the intersection type"
   | Prj_asymm_neg -> "via the negation type"
+
+(** For asymmetric projections we need to track which of the sub- or supertype
+    was decomposed  *)
+type side =
+  | Sub
+  | Super
+[@@deriving hash]
+
+let side_to_json = function
+  | Sub -> Hh_json.JSON_String "Sub"
+  | Super -> Hh_json.JSON_String "Super"
+
+(** Top-level projections  *)
+type prj =
+  | Symm of prj_symm
+  | Asymm of side * prj_asymm
+[@@deriving hash]
+
+let prj_to_json = function
+  | Symm prj_symm ->
+    Hh_json.(JSON_Object [("Symm", JSON_Array [prj_symm_to_json prj_symm])])
+  | Asymm (side, prj_asymm) ->
+    Hh_json.(
+      JSON_Object
+        [("Asymm", JSON_Array [side_to_json side; prj_asymm_to_json prj_asymm])])
 
 (* ~~ Reasons ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
@@ -437,9 +516,7 @@ type _ t_ =
   | Rpattern : Pos.t -> locl_phase t_
   | Rflow : locl_phase t_ * locl_phase t_ -> locl_phase t_
   | Rrev : locl_phase t_ -> locl_phase t_
-  | Rprj_symm : prj_symm * locl_phase t_ -> locl_phase t_
-  | Rprj_asymm_left : prj_asymm * locl_phase t_ -> locl_phase t_
-  | Rprj_asymm_right : prj_asymm * locl_phase t_ -> locl_phase t_
+  | Rprj : prj * locl_phase t_ -> locl_phase t_
   | Rmissing_field : locl_phase t_
   | Rpessimised_this : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
 [@@deriving hash]
@@ -448,17 +525,13 @@ type _ t_ =
 let rec normalize : locl_phase t_ -> locl_phase t_ = function
   | Rflow (t1, t2) -> Rflow (normalize t1, normalize t2)
   | Rrev t -> reverse t
-  | Rprj_symm (prj, t) -> Rprj_symm (prj, normalize t)
-  | Rprj_asymm_left (prj, t) -> Rprj_asymm_left (prj, normalize t)
-  | Rprj_asymm_right (prj, t) -> Rprj_asymm_right (prj, normalize t)
+  | Rprj (prj, t) -> Rprj (prj, normalize t)
   | t -> t
 
 and reverse : locl_phase t_ -> locl_phase t_ = function
   | Rflow (t1, t2) -> Rflow (reverse t2, reverse t1)
   | Rrev t -> normalize t
-  | Rprj_symm (prj, t) -> Rprj_symm (prj, reverse t)
-  | Rprj_asymm_left (prj, t) -> Rprj_asymm_left (prj, reverse t)
-  | Rprj_asymm_right (prj, t) -> Rprj_asymm_right (prj, reverse t)
+  | Rprj (prj, t) -> Rprj (prj, reverse t)
   | t -> t
 
 let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
@@ -572,16 +645,11 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Runsafe_cast p -> Pos_or_decl.of_raw_pos p
   | Rflow (from, _into) -> to_raw_pos from
   | Rrev r -> to_raw_pos_rev r
-  | Rprj_symm (_prj, r) -> to_raw_pos r
-  | Rprj_asymm_left (_prj, r) -> to_raw_pos r
-  | Rprj_asymm_right (_prj, r) -> to_raw_pos r
+  | Rprj (_prj, r) -> to_raw_pos r
 
 and to_raw_pos_rev = function
-  | Rprj_symm (_, r)
+  | Rprj (_, r)
   | Rflow (_, r)
-  | Rprj_asymm_left (_, r)
-  | Rprj_asymm_right (_, r) ->
-    to_raw_pos_rev r
   | Rrev r
   | r ->
     to_raw_pos r
@@ -728,10 +796,7 @@ let rec map_pos :
   | Rflow (from, into) ->
     Rflow (map_pos pos pos_or_decl from, map_pos pos pos_or_decl into)
   | Rrev t -> Rrev (map_pos pos pos_or_decl t)
-  | Rprj_asymm_left (prj, t) -> Rprj_asymm_left (prj, map_pos pos pos_or_decl t)
-  | Rprj_asymm_right (prj, t) ->
-    Rprj_asymm_right (prj, map_pos pos pos_or_decl t)
-  | Rprj_symm (prj, t) -> Rprj_symm (prj, map_pos pos pos_or_decl t)
+  | Rprj (prj, t) -> Rprj (prj, map_pos pos pos_or_decl t)
 
 let to_constructor_string : type ph. ph t_ -> string = function
   | Rnone -> "Rnone"
@@ -834,9 +899,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rpattern _ -> "Rpattern"
   | Rflow _ -> "Rflow"
   | Rrev _ -> "Rrev"
-  | Rprj_symm _ -> "Rprj_symm"
-  | Rprj_asymm_left _ -> "Rprj_asymm_left"
-  | Rprj_asymm_right _ -> "Rprj_asymm_right"
+  | Rprj _ -> "Rprj"
   | Rmissing_field -> "Rmissing_field"
   | Rpessimised_this _ -> "Rpessimised_this"
 
@@ -1065,9 +1128,7 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
     | Runsafe_cast p -> Pos.pp fmt p
     | Rflow (from, _into) -> pp_t_ fmt from
     | Rrev t -> pp_t_ fmt @@ normalize t
-    | Rprj_symm (_, t) -> pp_t_ fmt t
-    | Rprj_asymm_left (_, t) -> pp_t_ fmt t
-    | Rprj_asymm_right (_, t) -> pp_t_ fmt t);
+    | Rprj (_, t) -> pp_t_ fmt t);
     Format.fprintf fmt "@])"
 
 and show_t_ : type ph. ph t_ -> string = (fun r -> Format.asprintf "%a" pp_t_ r)
@@ -1455,17 +1516,8 @@ let rec to_json : type a. a t_ -> Hh_json.json =
     Hh_json.(
       JSON_Object [("Rflow", JSON_Array [to_json r_from; to_json r_into])])
   | Rrev r -> Hh_json.(JSON_Object [("Rrev", JSON_Array [to_json r])])
-  | Rprj_symm (prj, r) ->
-    Hh_json.(
-      JSON_Object [("Rprj_symm", JSON_Array [prj_symm_to_json prj; to_json r])])
-  | Rprj_asymm_left (prj, r) ->
-    Hh_json.(
-      JSON_Object
-        [("Rprj_asymm_left", JSON_Array [prj_asymm_to_json prj; to_json r])])
-  | Rprj_asymm_right (prj, r) ->
-    Hh_json.(
-      JSON_Object
-        [("Rprj_asymm_right", JSON_Array [prj_asymm_to_json prj; to_json r])])
+  | Rprj (prj, r) ->
+    Hh_json.(JSON_Object [("Rprj", JSON_Array [prj_to_json prj; to_json r])])
   | Rmissing_field -> Hh_json.(JSON_Object [("Rmissing_field", JSON_Array [])])
   | Rpessimised_this pos_or_decl ->
     Hh_json.(
@@ -1933,9 +1985,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     [(Pos_or_decl.of_raw_pos p, prefix ^ " because of this pattern")]
   | Rflow (from, _into) -> to_string prefix from
   | Rrev r -> to_string prefix @@ reverse r
-  | Rprj_symm (_prj, r) -> to_string prefix r
-  | Rprj_asymm_left (_prj, r) -> to_string prefix r
-  | Rprj_asymm_right (_prj, r) -> to_string prefix r
+  | Rprj (_prj, r) -> to_string prefix r
 
 (* -- Constructors ---------------------------------------------------------- *)
 
@@ -2137,15 +2187,66 @@ let unsafe_cast p = Runsafe_cast p
 
 let pattern p = Rpattern p
 
-let flow (r1, r2) = Rflow (r1, r2)
+let flow ~from ~into = Rflow (from, into)
 
-let rev r = Rrev r
+let reverse r = Rrev r
 
-let prj_symm (p, r) = Rprj_symm (p, r)
+let prj_symm t ~prj = Rprj (Symm prj, t)
 
-let prj_asymm_left (p, r) = Rprj_asymm_left (p, r)
+let prj_class t ~nm ~idx ~var = prj_symm t ~prj:(Prj_symm_class (nm, idx, var))
 
-let prj_asymm_right (p, r) = Rprj_asymm_right (p, r)
+let prj_class_co t ~nm ~idx = prj_class t ~nm ~idx ~var:(Dir Co)
+
+let prj_class_contra t ~nm ~idx = prj_class t ~nm ~idx ~var:(Dir Contra)
+
+let prj_class_inv_co t ~nm ~idx = prj_class t ~nm ~idx ~var:(Inv Co)
+
+let prj_class_inv_contra t ~nm ~idx = prj_class t ~nm ~idx ~var:(Inv Contra)
+
+let prj_newtype t ~nm ~idx ~var =
+  prj_symm t ~prj:(Prj_symm_newtype (nm, idx, var))
+
+let prj_newtype_co t ~nm ~idx = prj_newtype t ~nm ~idx ~var:(Dir Co)
+
+let prj_newtype_contra t ~nm ~idx = prj_newtype t ~nm ~idx ~var:(Dir Contra)
+
+let prj_newtype_inv_co t ~nm ~idx = prj_newtype t ~nm ~idx ~var:(Inv Co)
+
+let prj_newtype_inv_contra t ~nm ~idx = prj_newtype t ~nm ~idx ~var:(Inv Contra)
+
+let prj_neg t = prj_symm t ~prj:Prj_symm_neg
+
+let prj_tuple t ~idx = prj_symm t ~prj:(Prj_symm_tuple idx)
+
+let prj_shape t ~lbl ~kind_sub ~kind_super =
+  prj_symm t ~prj:(Prj_symm_shape (lbl, kind_sub, kind_super))
+
+let prj_fn_param t ~idx_sub ~idx_super =
+  prj_symm t ~prj:(Prj_symm_fn_param (idx_sub, idx_super))
+
+let prj_fn_param_inout_co t ~idx_sub ~idx_super =
+  prj_symm t ~prj:(Prj_symm_fn_param_inout (idx_sub, idx_super, Co))
+
+let prj_fn_param_inout_contra t ~idx_sub ~idx_super =
+  prj_symm t ~prj:(Prj_symm_fn_param_inout (idx_sub, idx_super, Contra))
+
+let prj_fn_ret t = prj_symm t ~prj:Prj_symm_fn_ret
+
+let prj_asymm_sub t ~prj = Rprj (Asymm (Sub, prj), t)
+
+let prj_asymm_super t ~prj = Rprj (Asymm (Super, prj), t)
+
+let prj_union_sub t = prj_asymm_sub t ~prj:Prj_asymm_union
+
+let prj_union_super t = prj_asymm_super t ~prj:Prj_asymm_union
+
+let prj_inter_sub t = prj_asymm_sub t ~prj:Prj_asymm_inter
+
+let prj_inter_super t = prj_asymm_super t ~prj:Prj_asymm_inter
+
+let prj_neg_sub t = prj_asymm_sub t ~prj:Prj_asymm_neg
+
+let prj_neg_super t = prj_asymm_super t ~prj:Prj_asymm_neg
 
 let missing_field = Rmissing_field
 
@@ -2269,9 +2370,7 @@ module Visitor = struct
         | Rpattern x -> Rpattern x
         | Rflow (from, into) -> Rflow (this#on_reason from, this#on_reason into)
         | Rrev t -> Rrev (this#on_reason t)
-        | Rprj_symm (prj, t) -> Rprj_symm (prj, this#on_reason t)
-        | Rprj_asymm_left (prj, t) -> Rprj_asymm_left (prj, this#on_reason t)
-        | Rprj_asymm_right (prj, t) -> Rprj_asymm_right (prj, this#on_reason t)
+        | Rprj (prj, t) -> Rprj (prj, this#on_reason t)
         | Rpessimised_this x -> Rpessimised_this x
 
       method on_lazy l = l
@@ -2352,25 +2451,21 @@ type path_elem =
 
 let project prj dir =
   match prj with
-  (* Covariant projections preserve data flow direction *)
+  | Prj_symm_class (_, _, var)
+  | Prj_symm_newtype (_, _, var) ->
+    if cstr_variance_is_contra var then
+      reverse_direction dir
+    else
+      dir
+  | Prj_symm_fn_param _
+  | Prj_symm_fn_param_inout (_, _, Contra) ->
+    reverse_direction dir
+  | Prj_symm_fn_param_inout (_, _, Co)
+  | Prj_symm_fn_ret
   | Prj_symm_neg
   | Prj_symm_tuple _
-  | Prj_symm_shape _
-  | Prj_symm_fn_ret
-  | Prj_symm_access
-  | Prj_symm_class (_, _, Ast_defs.Covariant)
-  | Prj_symm_newtype (_, _, Ast_defs.Covariant)
-  | Prj_symm_fn_arg (_, _, Ast_defs.Covariant) ->
-    dir (* Contravariant projections reverse data flow direction *)
-  | Prj_symm_class (_, _, Ast_defs.Contravariant)
-  | Prj_symm_newtype (_, _, Ast_defs.Contravariant)
-  | Prj_symm_fn_arg (_, _, Ast_defs.Contravariant) ->
-    reverse_direction dir
-  (* We shouldn't see an invariant projections since we construct both the co- and contravariant propositions in these cases *)
-  | Prj_symm_class (_, _, Ast_defs.Invariant)
-  | Prj_symm_newtype (_, _, Ast_defs.Invariant)
-  | Prj_symm_fn_arg (_, _, Ast_defs.Invariant) ->
-    failwith "expected a normalized reason"
+  | Prj_symm_shape _ ->
+    dir
 
 let to_path t =
   let rec aux t ~dir ~k =
@@ -2378,13 +2473,13 @@ let to_path t =
     | Rflow (t1, t2) ->
       aux t1 ~dir ~k:(fun p1 ->
           aux t2 ~dir ~k:(fun p2 -> k @@ p1 @ (Flow dir :: p2)))
-    | Rprj_symm (prj, t) ->
+    | Rprj (Symm prj, t) ->
       let dir = project prj dir in
       aux t ~dir ~k:(fun t -> k @@ (Prj_symm_lhs prj :: t) @ [Prj_symm_rhs prj])
-    | Rprj_asymm_left (prj, t) ->
+    | Rprj (Asymm (Sub, prj), t) ->
       (* All asymmetric projections are covariant and preserve data flow direction *)
       aux t ~dir ~k:(fun t -> k (Prj_asymm_left prj :: t))
-    | Rprj_asymm_right (prj, t) ->
+    | Rprj (Asymm (Super, prj), t) ->
       (* All asymmetric projections are covariant and preserve data flow direction *)
       aux t ~dir ~k:(fun t -> k (t @ [Prj_asymm_right prj]))
     | Rrev _ -> failwith "expected a normalized reason"

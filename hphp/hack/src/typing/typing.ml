@@ -46,7 +46,6 @@ module MakeType = Typing_make_type
 module Cls = Folded_class
 module Fake = Typing_fake_members
 module ExpectedTy = Typing_helpers.ExpectedTy
-module Prov = Typing_helpers.Prov
 
 type newable_class_info =
   env
@@ -1328,10 +1327,10 @@ let fun_type_of_id env x tal el =
          and create the contravariant constraints with this path reversed so we
          construct that reversed path here. *)
       let fty =
-        Prov.(
-          update fty ~env ~f:(fun r_sub ->
+        Typing_env.(
+          update_reason env fty ~f:(fun r_sub ->
               let r_super = Reason.witness (fst x) in
-              flow ~from:r_super ~into:(rev r_sub)))
+              Typing_reason.(flow ~from:r_super ~into:(reverse r_sub))))
       in
       Option.iter
         ~f:(Typing_error_utils.add_typing_error ~env)
@@ -3470,9 +3469,9 @@ end = struct
           Env.get_local env x
       in
       let ty =
-        Prov.(
-          update ty ~env ~f:(fun from ->
-              flow ~from ~into:(Typing_reason.witness p)))
+        Typing_env.(
+          update_reason env ty ~f:(fun from ->
+              Typing_reason.(flow ~from ~into:(witness p))))
       in
       make_result env p (Aast.Lvar id) ty
     | Tuple el ->
@@ -3991,10 +3990,10 @@ end = struct
          Thas_member(m, #1) where #1 is a fresh type variable. *)
       let (env, mem_ty) = Env.fresh_type env p in
       let mem_ty =
-        Prov.(
-          update mem_ty ~env ~f:(fun into ->
+        Typing_env.(
+          update_reason env mem_ty ~f:(fun into ->
               let from = get_reason ty1 in
-              flow ~from ~into))
+              Typing_reason.flow ~from ~into))
       in
       let (_, p1, _) = e1 in
       let r = Reason.witness p1 in
@@ -4057,9 +4056,9 @@ end = struct
       (* Under extended reasons we record the flow into the entire Obj_get
          expression *)
       let result_ty =
-        Prov.(
-          update result_ty ~env ~f:(fun from ->
-              flow ~from ~into:(Typing_reason.witness p)))
+        Typing_env.(
+          update_reason env result_ty ~f:(fun from ->
+              Typing_reason.(flow ~from ~into:(witness p))))
       in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       let (env, inner_te) =
@@ -5957,10 +5956,8 @@ end = struct
              and create the contravariant constraints with this path reversed so we
              construct that reversed path here. *)
           let fty =
-            Prov.(
-              update fty ~env ~f:(fun r_sub ->
-                  let r_super = Reason.witness p in
-                  flow ~from:r_super ~into:(rev r_sub)))
+            Typing_env.update_reason env fty ~f:(fun r_sub ->
+                Typing_reason.(flow ~from:(witness p) ~into:(reverse r_sub)))
           in
           (env, fty)
         | _ ->
@@ -6401,24 +6398,21 @@ end = struct
                  we would have a contravariant function arg projection so
                  replicate that here *)
               let update_reason from =
-                Prov.(
+                Typing_reason.(
                   flow
                     ~from
                     ~into:
-                      (prj_fn_arg
-                         ~idx_sub:arg_idx
-                         ~idx_super:param_idx
-                         ~var:Ast_defs.Contravariant
+                      (prj_fn_param ~idx_sub:arg_idx ~idx_super:param_idx
                       @@ get_reason fty))
               in
-              let ty = Prov.update ty ~env ~f:update_reason in
+              let ty = Typing_env.update_reason env ty ~f:update_reason in
 
               (* We have to update the type on the expression too rather
                  than use the type above since it may be different for certain
                  special functions *)
               let te =
                 let (ty, pos, e) = te in
-                let ty = Prov.update ty ~env ~f:update_reason in
+                let ty = Typing_env.update_reason env ty ~f:update_reason in
                 (ty, pos, e)
               in
               let (env, ty_mismatch_opt, used_dynamic) =
@@ -6442,24 +6436,21 @@ end = struct
                  we would have a contravariant function arg projection so
                  replicate that here *)
               let update_reason from =
-                Prov.(
+                Typing_reason.(
                   flow
                     ~from
                     ~into:
-                      (prj_fn_arg
-                         ~idx_sub:arg_idx
-                         ~idx_super:param_idx
-                         ~var:Ast_defs.Contravariant
+                      (prj_fn_param ~idx_sub:arg_idx ~idx_super:param_idx
                       @@ get_reason fty))
               in
-              let ty = Prov.update ty ~env ~f:update_reason in
+              let ty = Typing_env.update_reason env ty ~f:update_reason in
 
               (* We have to update the type on the expression too rather
                  than use the type above since it may be different for certain
                  special functions *)
               let te =
                 let (ty, pos, e) = te in
-                let ty = Prov.update ty ~env ~f:update_reason in
+                let ty = Typing_env.update_reason env ty ~f:update_reason in
                 (ty, pos, e)
               in
               (env, Some (te, ty), false)
@@ -6761,9 +6752,9 @@ end = struct
             | _ -> ft.ft_ret
           in
           let ret =
-            Prov.(
-              update ret ~env ~f:(fun from ->
-                  flow ~from ~into:(Typing_reason.witness expr_pos)))
+            Typing_env.(
+              update_reason env ret ~f:(fun from ->
+                  Typing_reason.(flow ~from ~into:(witness expr_pos))))
           in
           (env, (tel, typed_unpack_element, ret, should_forget_fakes))
         | (r, Tnewtype (name, [ty], _))
@@ -6771,7 +6762,8 @@ end = struct
           (* Under extended-reasons we want to use the reason on the newtype since this is
              the type at which we recorded the contravariant flow from the decl *)
           let (env, ty) =
-            Env.expand_type env @@ Prov.(update ty ~env ~f:(fun _ -> r))
+            Env.expand_type env
+            @@ Typing_env.(update_reason env ty ~f:(fun _ -> r))
           in
           begin
             match get_node ty with
@@ -7524,16 +7516,16 @@ end = struct
           e
       in
       let rty =
-        Prov.(
-          update rty ~env ~f:(fun from ->
-              flow ~from ~into:(Typing_reason.witness pos)))
+        Typing_env.(
+          update_reason env rty ~f:(fun from ->
+              Typing_reason.(flow ~from ~into:(witness pos))))
       in
       let te =
         let (ty, pos, e) = te in
         let ty =
-          Prov.(
-            update ty ~env ~f:(fun from ->
-                flow ~from ~into:(Typing_reason.witness pos)))
+          Typing_env.(
+            update_reason env ty ~f:(fun from ->
+                Typing_reason.(flow ~from ~into:(witness pos))))
         in
         (ty, pos, e)
       in
@@ -8379,9 +8371,9 @@ end = struct
 
     (* Update the reason to record the flow from the parameter hint into the parameter *)
     let ty1 =
-      Prov.(
-        update ty1 ~env ~f:(fun from ->
-            flow ~from ~into:(Typing_reason.witness param.param_pos)))
+      Typing_env.(
+        update_reason env ty1 ~f:(fun from ->
+            Typing_reason.(flow ~from ~into:(witness param.param_pos))))
     in
     let param_te = Option.map param_te ~f:(fun (_, pos, e) -> (ty1, pos, e)) in
     let (env, user_attributes) =
@@ -10479,12 +10471,16 @@ end = struct
        with typed expression's annotation since these types are not necessarily
        the same for certain special functions*)
     let ty1 =
-      Prov.(update ty1 ~env ~f:(fun into -> flow ~into ~from:(get_reason ty2)))
+      Typing_env.(
+        update_reason env ty1 ~f:(fun into ->
+            Typing_reason.flow ~into ~from:(get_reason ty2)))
     in
     let te1 =
       let (ty, pos, e) = te1 in
       let ty =
-        Prov.(update ty ~env ~f:(fun into -> flow ~into ~from:(get_reason ty2)))
+        Typing_env.(
+          update_reason env ty ~f:(fun into ->
+              Typing_reason.flow ~into ~from:(get_reason ty2)))
       in
       (ty, pos, e)
     in
@@ -10527,9 +10523,9 @@ end = struct
         (* Since the lvar will be given the type [ty2] we need to update it
            to indicate it flows _into_ an local *)
         let ty =
-          Prov.(
-            update ty2 ~env ~f:(fun from ->
-                flow ~from ~into:(Reason.witness p1)))
+          Typing_env.(
+            update_reason env ty2 ~f:(fun from ->
+                Typing_reason.(flow ~from ~into:(witness p1))))
         in
         let env = set_valid_rvalue ~is_defined:true p env x None ty in
         let (env, te, ty) = make_result env p1 (Aast.Lvar id) ty in
@@ -10537,8 +10533,9 @@ end = struct
       | (_, _, Lplaceholder id) ->
         let placeholder_ty =
           let ty = MakeType.void (Reason.placeholder p) in
-          Prov.(
-            update ty ~env ~f:(fun into -> flow ~into ~from:(get_reason ty2)))
+          Typing_env.(
+            update_reason env ty ~f:(fun into ->
+                Typing_reason.flow ~into ~from:(get_reason ty2)))
         in
         let (_, p1, _) = e1 in
         let (env, te, ty) =
@@ -10560,9 +10557,9 @@ end = struct
         in
         let tyl =
           List.map tyl ~f:(fun ty ->
-              Prov.(
-                update ty ~env ~f:(fun into ->
-                    flow ~into ~from:(get_reason ty2))))
+              Typing_env.(
+                update_reason env ty ~f:(fun into ->
+                    Typing_reason.flow ~into ~from:(get_reason ty2))))
         in
         let (_, p1, _) = e1 in
         let destructure_ty =

@@ -10,9 +10,7 @@ impl Reason {
     pub fn rev_pos(&self) -> Option<&Pos> {
         match self {
             T_::Rflow(r, _) => r.rev_pos(),
-            T_::RprjSymm(_, r) => r.rev_pos(),
-            T_::RprjAsymmLeft(_, r) => r.rev_pos(),
-            T_::RprjAsymmRight(_, r) => r.rev_pos(),
+            T_::Rprj(_, r) => r.rev_pos(),
             T_::Rrev(r) => r.pos(),
             _ => self.pos(),
         }
@@ -123,9 +121,7 @@ impl Reason {
             RopaqueTypeFromModule(p, _, _) => Some(p),
             RdynamicCoercion(r) => r.pos(),
             Rflow(r, _) => r.pos(),
-            RprjSymm(_, r) => r.pos(),
-            RprjAsymmLeft(_, r) => r.pos(),
-            RprjAsymmRight(_, r) => r.pos(),
+            Rprj(_, r) => r.pos(),
             Rrev(r) => r.rev_pos(),
         }
     }

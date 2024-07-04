@@ -59,69 +59,6 @@ val hint_fun_decl :
   Typing_env_types.env ->
   Typing_defs.decl_ty option * Typing_defs.decl_ty option list
 
-(** Stuff about type provenance? *)
-module Prov : sig
-  val update :
-    Typing_defs.locl_ty ->
-    f:(Typing_reason.t -> Typing_reason.t) ->
-    env:Typing_env_types.env ->
-    Typing_defs.locl_ty
-
-  val update_cty :
-    Typing_defs.constraint_type ->
-    f:(Typing_reason.t -> Typing_reason.t) ->
-    env:Typing_env_types.env ->
-    Typing_defs.constraint_type
-
-  val update_ity :
-    Typing_defs.internal_type ->
-    f:(Typing_reason.t -> Typing_reason.t) ->
-    env:Typing_env_types.env ->
-    Typing_defs.internal_type
-
-  val flow : from:Typing_reason.t -> into:Typing_reason.t -> Typing_reason.t
-
-  val rev : Typing_reason.t -> Typing_reason.t
-
-  val prj_fn_arg :
-    Typing_reason.t ->
-    idx_sub:int ->
-    idx_super:int ->
-    var:Ast_defs.variance ->
-    Typing_reason.t
-
-  val prj_fn_ret : Typing_reason.t -> Typing_reason.t
-
-  val prj_union_left : Typing_reason.t -> Typing_reason.t
-
-  val prj_union_right : Typing_reason.t -> Typing_reason.t
-
-  val prj_intersection_left : Typing_reason.t -> Typing_reason.t
-
-  val prj_intersection_right : Typing_reason.t -> Typing_reason.t
-
-  val prj_class :
-    Typing_reason.t ->
-    nm:string ->
-    idx:int ->
-    var:Ast_defs.variance ->
-    Typing_reason.t
-
-  val prj_newtype :
-    Typing_reason.t ->
-    nm:string ->
-    idx:int ->
-    var:Ast_defs.variance ->
-    Typing_reason.t
-
-  val prj_shape :
-    Typing_reason.t ->
-    fld_nm:string ->
-    fld_kind_sub:Typing_reason.field_kind ->
-    fld_kind_super:Typing_reason.field_kind ->
-    Typing_reason.t
-end
-
 val refine_and_simplify_intersection :
   hint_first:bool ->
   Typing_env_types.env ->

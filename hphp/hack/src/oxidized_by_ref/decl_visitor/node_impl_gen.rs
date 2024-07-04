@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b4a83904b49f4cbd8889495a854579cd>>
+// @generated SignedSource<<08c279715f4f6360466f8d8b01c007e8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1064,6 +1064,17 @@ impl<'a> Node<'a> for Blame<'a> {
         }
     }
 }
+impl<'a> Node<'a> for CstrVariance<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_cstr_variance(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            CstrVariance::Dir(ref __binding_0) => __binding_0.accept(v),
+            CstrVariance::Inv(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
 impl<'a> Node<'a> for PrjSymm<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_prj_symm(self)
@@ -1075,9 +1086,20 @@ impl<'a> Node<'a> for PrjSymm<'a> {
             PrjSymm::PrjSymmNewtype(ref __binding_0) => __binding_0.accept(v),
             PrjSymm::PrjSymmTuple(ref __binding_0) => __binding_0.accept(v),
             PrjSymm::PrjSymmShape(ref __binding_0) => __binding_0.accept(v),
-            PrjSymm::PrjSymmFnArg(ref __binding_0) => __binding_0.accept(v),
+            PrjSymm::PrjSymmFnParam(ref __binding_0) => __binding_0.accept(v),
+            PrjSymm::PrjSymmFnParamInout(ref __binding_0) => __binding_0.accept(v),
             PrjSymm::PrjSymmFnRet => {}
-            PrjSymm::PrjSymmAccess => {}
+        }
+    }
+}
+impl<'a> Node<'a> for Prj<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_prj(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Prj::Symm(ref __binding_0) => __binding_0.accept(v),
+            Prj::Asymm(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -1187,9 +1209,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::Rpattern(ref __binding_0) => __binding_0.accept(v),
             T_::Rflow(ref __binding_0) => __binding_0.accept(v),
             T_::Rrev(ref __binding_0) => __binding_0.accept(v),
-            T_::RprjSymm(ref __binding_0) => __binding_0.accept(v),
-            T_::RprjAsymmLeft(ref __binding_0) => __binding_0.accept(v),
-            T_::RprjAsymmRight(ref __binding_0) => __binding_0.accept(v),
+            T_::Rprj(ref __binding_0) => __binding_0.accept(v),
             T_::RmissingField => {}
             T_::RpessimisedThis(ref __binding_0) => __binding_0.accept(v),
         }
@@ -1370,6 +1390,17 @@ impl<'a> Node<'a> for BlameSource {
         }
     }
 }
+impl<'a> Node<'a> for VarianceDir {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_variance_dir(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            VarianceDir::Co => {}
+            VarianceDir::Contra => {}
+        }
+    }
+}
 impl<'a> Node<'a> for FieldKind {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_field_kind(self)
@@ -1391,6 +1422,17 @@ impl<'a> Node<'a> for PrjAsymm {
             PrjAsymm::PrjAsymmUnion => {}
             PrjAsymm::PrjAsymmInter => {}
             PrjAsymm::PrjAsymmNeg => {}
+        }
+    }
+}
+impl<'a> Node<'a> for Side {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_side(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Side::Sub => {}
+            Side::Super => {}
         }
     }
 }

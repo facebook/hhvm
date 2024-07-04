@@ -86,14 +86,14 @@ StringPiece kP256DelegatedCredNoLabel = {
     "1AUqrX1gEw5DVBK8WQ3Q6pYSF4WI4gxIpvcCMEQ=="};
 
 StringPiece kP256DelegatedCred = {
-    "-----BEGIN FIZZ DELEGATED CREDENTIAL-----\n"
+    "-----BEGIN DELEGATED CREDENTIAL-----\n"
     "CI61NAQDAABbMFkwEwYHKoZIzj0CAQYIKoZIzj0"
     "DAQcDQgAE8mV/wDAabnJbPLuF/qd/FMIWHDlrJI"
     "97cwq4obtPHyKFF2ukoG+6/pXOUrEbsIH+/QBpZ"
     "snRHjvxryib97Ay+QQDAEcwRQIgUrbmZ9uq07B0"
     "Myg06hZj0uUq2f04eI4Ci0VIRP7XGhACIQDqckz"
     "1AUqrX1gEw5DVBK8WQ3Q6pYSF4WI4gxIpvcCMEQ==\n"
-    "-----END FIZZ DELEGATED CREDENTIAL-----\n"};
+    "-----END DELEGATED CREDENTIAL-----\n"};
 
 StringPiece kP256DelegatedCredBadLabel = {
     "-----BEGIN DC-----\n"
@@ -106,7 +106,7 @@ StringPiece kP256DelegatedCredBadLabel = {
     "-----END DC-----\n"};
 
 StringPiece kP384DelegatedCred = {
-    "-----BEGIN FIZZ DELEGATED CREDENTIAL-----\n"
+    "-----BEGIN DELEGATED CREDENTIAL-----\n"
     "CKpfvQUDAAB4MHYwEAYHKoZIzj0CAQYFK4EEACID"
     "YgAEfDkvSAjmCrrxRNEkpA52igKI5pnE9q/MiKHTJ"
     "/gfmJfhwK3IGI21+zs4DHvR2iowHSa5Ul+J5Fai9o"
@@ -114,7 +114,7 @@ StringPiece kP384DelegatedCred = {
     "NnfY98HJcBAMARjBEAiBmz7fIOTsAXTQG55zdTxBy"
     "QiUv7Ub3qtyYnJMaJKmx9gIgQiv40UZcP8GZkvDfg"
     "D/EqLaFsDaP4Fl2PGH9NgXkyo8=\n"
-    "-----END FIZZ DELEGATED CREDENTIAL-----\n"};
+    "-----END DELEGATED CREDENTIAL-----\n"};
 
 TEST(SerializationTest, testValidReadFromPem) {
   auto combinedPem = kP256DelegatedCred.toString() +

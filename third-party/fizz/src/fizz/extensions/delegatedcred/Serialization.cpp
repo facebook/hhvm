@@ -9,9 +9,9 @@ namespace extensions {
 
 namespace {
 static constexpr folly::StringPiece kDCHeader =
-    "-----BEGIN FIZZ DELEGATED CREDENTIAL-----\n";
+    "-----BEGIN DELEGATED CREDENTIAL-----\n";
 static constexpr folly::StringPiece kDCFooter =
-    "-----END FIZZ DELEGATED CREDENTIAL-----\n";
+    "-----END DELEGATED CREDENTIAL-----\n";
 } // namespace
 
 std::string generateDelegatedCredentialPEM(

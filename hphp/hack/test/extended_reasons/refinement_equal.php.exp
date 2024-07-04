@@ -12,6 +12,7 @@ Expected `~C` because the type of this return is implicitly a like-type
  7 |   if($a == null) {
  8 |     $z = $a;
  9 |   } else {
+10 |     $z = $c;
 
 File "refinement_equal.php", line 6, character 36 - line 6, character 36:
 
@@ -21,6 +22,7 @@ But got `?C`
  7 |   if($a == null) {
  8 |     $z = $a;
  9 |   } else {
+10 |     $z = $c;
 
 File "refinement_equal.php", line 6, character 22 - line 6, character 23:
 
@@ -30,6 +32,7 @@ Here's why: this hint
  7 |   if($a == null) {
  8 |     $z = $a;
  9 |   } else {
+10 |     $z = $c;
 
 File "refinement_equal.php", line 6, character 22 - line 6, character 23:
 
@@ -39,6 +42,7 @@ flows *into* this expression
  7 |   if($a == null) {
  8 |     $z = $a;
  9 |   } else {
+10 |     $z = $c;
 
 File "refinement_equal.php", line 6, character 25 - line 6, character 26:
 
@@ -48,8 +52,39 @@ which itself flows *into* this expression
  7 |   if(»$a« == null) {
  8 |     $z = $a;
  9 |   } else {
+10 |     $z = $c;
 
 File "refinement_equal.php", line 7, character 6 - line 7, character 7:
+
+which itself flows *into* this type variable
+
+ 6 | function inter_equal(?A $a, C $c): C {
+ 7 |   if(»$a == null«) {
+ 8 |     $z = $a;
+ 9 |   } else {
+10 |     $z = $c;
+
+File "refinement_equal.php", line 7, character 6 - line 7, character 15:
+
+which itself flows *into* this expression
+
+ 6 | function inter_equal(?A $a, C $c): C {
+ 7 |   if($a == null) {
+ 8 |     $z = »$a«;
+ 9 |   } else {
+10 |     $z = $c;
+
+File "refinement_equal.php", line 8, character 10 - line 8, character 11:
+
+which itself flows *into* this expression
+
+ 6 | function inter_equal(?A $a, C $c): C {
+ 7 |   if($a == null) {
+ 8 |     »$z« = $a;
+ 9 |   } else {
+10 |     $z = $c;
+
+File "refinement_equal.php", line 8, character 5 - line 8, character 6:
 
 which itself flows *into* this expression
 
@@ -73,6 +108,7 @@ which itself flows *into* this thing (`Rpessimised_return`)
  7 |   if($a == null) {
  8 |     $z = $a;
  9 |   } else {
+10 |     $z = $c;
 
 File "refinement_equal.php", line 6, character 36 - line 6, character 36:
 

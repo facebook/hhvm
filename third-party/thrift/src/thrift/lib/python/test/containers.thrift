@@ -41,6 +41,12 @@ enum OtherBar {
   TWO = 2,
 }
 
+enum Color {
+  red = 0,
+  blue = 1,
+  green = 2,
+}
+
 struct Lists {
   3: list<bool> boolList;
   14: list<byte> byteList;
@@ -53,6 +59,7 @@ struct Lists {
   97: list<binary> binaryList;
   93: list<IOBuf> iobufList;
   2: list<Foo> structList;
+  47: list<Color> colorList;
 }
 
 struct Sets {

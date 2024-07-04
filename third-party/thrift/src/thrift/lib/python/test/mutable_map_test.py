@@ -24,7 +24,6 @@ from thrift.python.mutable_containers import (
     MutableMap,
 )
 
-# pyre-ignore[21]
 from thrift.python.mutable_typeinfos import MutableListTypeInfo
 
 from thrift.python.types import typeinfo_i32, typeinfo_string
@@ -395,7 +394,7 @@ class MutableMapTest(unittest.TestCase):
         internal_map = {1: [1, 2, 3], 2: [4, 5], 3: [6]}
         mutable_map = MutableMap(
             typeinfo_i32,
-            # pyre-ignore[16]
+            # pyre-ignore[19]
             MutableListTypeInfo(typeinfo_i32),
             # pyre-ignore[6]
             internal_map,

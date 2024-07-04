@@ -32,7 +32,7 @@ from folly.iobuf import IOBuf
 
 from parameterized import parameterized_class
 
-from python_test.containers.thrift_types import Foo, Lists
+from python_test.containers.thrift_types import Color, Foo, Lists
 from python_test.lists.thrift_types import (
     easy,
     EasyList,
@@ -63,6 +63,7 @@ class ListTests(unittest.TestCase):
         # pyre-ignore[16]: has no attribute `containers_types`
         self.Foo: Type[Foo] = self.containers_types.Foo
         self.Lists: Type[Lists] = self.containers_types.Lists
+        self.Color: Type[Color] = self.containers_types.Color
 
     def test_negative_indexes(self) -> None:
         length = len(self.int_list)
@@ -126,6 +127,9 @@ class ListTests(unittest.TestCase):
             raise Exception(x.index(4, 0, 2))
 
         with self.assertRaises(ValueError):
+            x.index("lol")
+
+        with self.assertRaises(ValueError):
             y.index(4, 0, 2)
         self.assertEqual(x.index(4, -20, -2), y.index(4, -20, -2))
 
@@ -180,6 +184,21 @@ class ListTests(unittest.TestCase):
         y = list(x)
         self.assertEqual(x.count(2), y.count(2))
         self.assertEqual(x.count(5), y.count(5))
+        # pyre-ignore[6]: deliberate type mismatch
+        self.assertEqual(x.count("str"), 0)
+
+    def test_container_contains(self) -> None:
+        clist = self.Lists(colorList=[self.Color.red, self.Color.red, self.Color.blue])
+        self.assertIn(self.Color.red, clist.colorList)
+        self.assertIn(self.Color.blue, clist.colorList)
+        self.assertNotIn(self.Color.green, clist.colorList)
+        # TODO(T194526180): mutable thrift-python should not raise
+        # self.assertNotIn("str", clist.colorList)
+
+        # TODO(T194526180): mutable thrift-python should not raise
+        # this is also a behavior divergence from thrift-py3, which
+        # returns False (no implicit enum conversion)
+        # self.assertIn(0, clist.colorList)
 
     def test_struct_list(self) -> None:
         a = self.EasyList([self.easy()])

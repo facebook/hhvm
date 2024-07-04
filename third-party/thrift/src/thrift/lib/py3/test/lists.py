@@ -18,7 +18,16 @@
 import itertools
 import unittest
 
-from testing.types import easy, I32List, int_list, StringList, StrList2D, Uint32List
+from testing.types import (
+    Color,
+    ColorGroups,
+    easy,
+    I32List,
+    int_list,
+    StringList,
+    StrList2D,
+    Uint32List,
+)
 from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.types import Container
 
@@ -55,7 +64,7 @@ class ListTests(unittest.TestCase):
         other_list = [99, 88, 77, 66, 55]
         new_list = int_list + other_list
         self.assertIsInstance(new_list, type(int_list))
-        # Insure the items from both lists are in the new_list
+        # Ensure the items from both lists are in the new_list
         self.assertEqual(new_list, list(itertools.chain(int_list, other_list)))
 
     def test_list_radd(self) -> None:
@@ -85,6 +94,9 @@ class ListTests(unittest.TestCase):
         self.assertEqual(x.index(2, 0, 2), y.index(2, 0, 2))
         with self.assertRaises(ValueError):
             raise Exception(x.index(4, 0, 2))
+
+        with self.assertRaises(ValueError):
+            x.index("lol")
 
         with self.assertRaises(ValueError):
             y.index(4, 0, 2)
@@ -150,6 +162,47 @@ class ListTests(unittest.TestCase):
         StringList(["hello", "world"])
         with self.assertRaises(TypeError):
             StringList("hello")
+
+    def gen_colorgroups(self) -> ColorGroups:
+        clist = [Color.red, Color.green, Color.red]
+        return ColorGroups(
+            color_list=clist,
+            color_set=set(clist),
+            color_map={c: c for c in clist},
+        )
+
+    def test_container_contains(self) -> None:
+        groups = self.gen_colorgroups()
+        self.assertIn(Color.red, groups.color_list)
+        self.assertIn(Color.red, groups.color_set)
+        self.assertIn(Color.red, groups.color_map)
+        self.assertNotIn(Color.blue, groups.color_list)
+        self.assertNotIn(Color.blue, groups.color_set)
+        self.assertNotIn(Color.blue, groups.color_map)
+
+    @brokenInAutoMigrate()
+    def test_container_contains_type_mismatch(self) -> None:
+        groups = self.gen_colorgroups()
+        self.assertNotIn("str", groups.color_list)
+        self.assertNotIn("str", groups.color_set)
+        self.assertNotIn("str", groups.color_map)
+        # in auto-migrate, thrift-python allows implicit enum conversion
+        self.assertNotIn(0, groups.color_list)
+        self.assertNotIn(0, groups.color_set)
+        self.assertNotIn(0, groups.color_map)
+
+    @brokenInAutoMigrate()
+    def test_list_count(self) -> None:
+        clist = [Color.red, Color.red, Color.blue]
+        groups = ColorGroups(color_list=clist)
+
+        self.assertEqual(groups.color_list.count(Color.red), 2)
+        self.assertEqual(groups.color_list.count(Color.blue), 1)
+        self.assertEqual(groups.color_list.count(Color.green), 0)
+
+        self.assertEqual(groups.color_list.count("str"), 0)
+        # in auto-migrate, thrift-python allows implicit enum conversion
+        self.assertEqual(groups.color_list.count(int(Color.red)), 0)
 
     def test_custom_cpp_type_list(self) -> None:
         x = [1, 2, 3, 4]

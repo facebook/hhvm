@@ -38,9 +38,9 @@ using is_mutable_ref = folly::Conjunction<
     std::is_reference<T>,
     folly::Negation<std::is_const<std::remove_reference_t<T>>>>;
 
-// The type returned by the adapter for the given thrift type.
+// The type returned by the adapter for the given Thrift type.
 template <typename Adapter, typename ThriftT>
-using adapted_t = decltype(Adapter::fromThrift(std::declval<ThriftT&&>()));
+using adapted_t = decltype(Adapter::fromThrift(std::declval<ThriftT>()));
 
 // Used to detect if Adapter has the fromThriftField function which takes an
 // additional FieldContext argument.

@@ -38,14 +38,6 @@ File "fn_subtyping_variadic_1.php", line 6, character 40 - line 6, character 44:
 
 flows up into this hint as the 2nd function parameter
 
- 5 | namespace HH {
- 6 |   newtype supportdyn<+T> as T = »(T & dynamic)«;
- 7 | }
-
-File "/tmp/eM5gHKJvL6/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
-
-which itself flows from this hint
-
  6 | function foo_variadic_1(»(function(Sub, Super):void)« $_): void {}
  7 | function bar_variadic_1((function(Sub...):void) $x): void {
  8 |   foo_variadic_1($x);
@@ -115,14 +107,6 @@ which itself flows from this hint
  9 | }
 
 File "fn_subtyping_variadic_1.php", line 7, character 25 - line 7, character 47:
-
-which itself flows from this hint
-
- 5 | namespace HH {
- 6 |   newtype supportdyn<+T> as T = »(T & dynamic)«;
- 7 | }
-
-File "/tmp/eM5gHKJvL6/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
 
 which itself flows down into this hint as the 1st function parameter
 

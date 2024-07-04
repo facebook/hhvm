@@ -2627,9 +2627,27 @@ let explain_step (edge, node) ~prefix =
     (pos, Format.sprintf "%sflows up from %s %s" prefix expl prj_expl)
   | _ -> failwith "ill-formed path"
 
+let is_supportdyn_hint r =
+  match r with
+  | Rhint pos ->
+    String.equal
+      (Relative_path.suffix @@ Pos_or_decl.filename pos)
+      "supportdynamic.hhi"
+  | _ -> false
+
+(** For reporting purposed, drop expansion of `supportdyn` newtype *)
+let suppress_supportdyn = function
+  | (Edge { dir = Fwd; _ } as edge) :: Node rhs :: Edge _ :: path_elems
+    when is_supportdyn_hint rhs ->
+    edge :: path_elems
+  | Edge { dir = Bwd; _ } :: Node rhs :: path_elems when is_supportdyn_hint rhs
+    ->
+    path_elems
+  | path_elems -> path_elems
+
 let explain_path { path_elems; stats } =
   let rec aux path_elems acc =
-    match path_elems with
+    match suppress_supportdyn path_elems with
     | Edge { out_of; dir; in_to } :: Node rhs :: path_elems ->
       let expl =
         explain_step ~prefix:"which itself " ((out_of, dir, in_to), rhs)
@@ -2639,6 +2657,12 @@ let explain_path { path_elems; stats } =
     | _ -> failwith "ill-formed path"
   in
 
+  (* Handle supportdyn at the start of the path *)
+  let path_elems =
+    match path_elems with
+    | (Node _ as head) :: rest -> head :: suppress_supportdyn rest
+    | _ -> failwith "ill-formed path"
+  in
   match path_elems with
   | Node lhs :: Edge { out_of; dir; in_to } :: Node rhs :: path_elems ->
     let (lhs_pos, lhs_expl) = explain_witness lhs in

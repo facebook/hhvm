@@ -38,8 +38,28 @@ Some type arguments violate their constraints (Typing[4323])
   This type constraint is violated
   File "hackarray.hhi", line 43, characters 55-62:
   Expected `arraykey`
+  File "case_type_wellformed.php", line 4, characters 35-35:
+  But got `mixed`
+ERROR: File "case_type_wellformed.php", line 4, characters 40-48:
+Some type arguments violate their constraints (Typing[4323])
+  File "hackarray.hhi", line 43, characters 50-50:
+  `T` is a constrained type parameter
+  File "hackarray.hhi", line 43, characters 55-62:
+  This type constraint is violated
+  File "hackarray.hhi", line 43, characters 55-62:
+  Expected `arraykey`
   File "case_type_wellformed.php", line 4, characters 47-47:
   But got `T`
+ERROR: File "case_type_wellformed.php", line 4, characters 52-63:
+Some type arguments violate their constraints (Typing[4323])
+  File "hackarray.hhi", line 33, characters 24-25:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 33, characters 30-37:
+  This type constraint is violated
+  File "hackarray.hhi", line 33, characters 30-37:
+  Expected `arraykey`
+  File "case_type_wellformed.php", line 4, characters 35-35:
+  But got `mixed`
 ERROR: File "case_type_wellformed.php", line 4, characters 52-63:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 24-25:

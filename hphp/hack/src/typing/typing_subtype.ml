@@ -6757,57 +6757,75 @@ end = struct
            the generic parameter, and check each of these in turn against
            ty_super until one of them succeeds
         *)
-        let rec try_bounds tyl env =
-          match tyl with
+        let accumulate prop ~errs ~props =
+          if TL.is_valid prop then
+            Ok prop
+          else
+            match TL.get_error_if_unsat prop with
+            | Some err -> Error (err :: errs, props)
+            | None -> Error (errs, prop :: props)
+        in
+        let rec aux ty_subs ~env ~errs ~props =
+          match ty_subs with
           | [] ->
-            (* Try an implicit mixed = ?nonnull bound before giving up.
-               This can be useful when checking T <: t, where type t is
-               equivalent to but syntactically different from ?nonnull.
-               E.g., if t is a generic type parameter T with nonnull as
-               a lower bound.
-            *)
-            let r = Reason.implicit_upper_bound (get_pos lty_sub, "mixed") in
+            let err =
+              Typing_error.intersect_opt @@ List.filter_opt @@ List.rev errs
+            in
+            (env, TL.Disj (err, List.rev props))
+          | ty_sub :: ty_subs ->
+            let ty_sub = Prov.(update ty_sub ~env ~f:update_reason) in
+            let (env, prop) =
+              mk_prop
+                ~subtype_env
+                ~this_ty
+                ~lhs:{ sub_supportdyn; ty_sub }
+                ~rhs
+                env
+            in
+            (match accumulate prop ~errs ~props with
+            | Ok prop -> (env, prop)
+            | Error (errs, props) -> aux ty_subs ~env ~errs ~props)
+        in
 
-            let tmixed = MakeType.mixed r in
-            let ty_sub = Prov.(update tmixed ~env ~f:update_reason) in
+        let bounds =
+          Typing_set.elements
+            (Env.get_upper_bounds env generic_nm generic_ty_args)
+        in
+        (* TODO(mjt) We reverse bounds here to match the evaluation order
+           of older code; not doing so triggers errors due to incompleteness *)
+        match List.rev bounds with
+        | [] ->
+          (* Try an implicit mixed = ?nonnull bound before giving up.
+             This can be useful when checking T <: t, where type t is
+             equivalent to but syntactically different from ?nonnull.
+             E.g., if t is a generic type parameter T with nonnull as
+             a lower bound.
+          *)
+          let r = Reason.implicit_upper_bound (get_pos lty_sub, "mixed") in
+          let tmixed = MakeType.mixed r in
+          let ty_sub = Prov.(update tmixed ~env ~f:update_reason) in
+          let (env, prop) =
             mk_prop
               ~subtype_env
               ~this_ty
               ~lhs:{ sub_supportdyn; ty_sub }
               ~rhs:rhs_for_mixed
               env
-          | [ty] ->
-            let ty_sub = Prov.(update ty ~env ~f:update_reason) in
-            mk_prop
-              ~subtype_env
-              ~this_ty
-              ~lhs:{ sub_supportdyn; ty_sub }
-              ~rhs
-              env
-          | ty :: tyl ->
-            let ty_sub = Prov.(update ty ~env ~f:update_reason) in
-            let ( ||| ) = ( ||| ) ~fail in
-            try_bounds tyl env
-            ||| mk_prop
-                  ~subtype_env
-                  ~this_ty
-                  ~lhs:{ sub_supportdyn; ty_sub }
-                  ~rhs
-        in
-        let bounds =
-          Typing_set.elements
-            (Env.get_upper_bounds env generic_nm generic_ty_args)
-        in
-        try_bounds bounds env
+          in
+          if TL.is_valid prop then
+            (env, prop)
+          else
+            let (err, props) =
+              match TL.get_error_if_unsat prop with
+              | Some err ->
+                ( Typing_error.intersect_opt @@ List.filter_opt @@ [fail; err],
+                  [] )
+              | _ -> (fail, [prop])
+            in
+            (env, TL.Disj (err, props))
+        | bounds -> aux bounds ~env ~errs:[fail] ~props:[]
       in
-      if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-        (* Under exteded reasons, the failure on the type parameter is contained
-           in the failure for its bound
-           TODO(mjt): record disjunction here *)
-        (env, prop)
-      else
-        (* Turn error into a generic error about the type parameter *)
-        if_unsat (invalid ~fail) (env, prop)
+      (env, prop)
     end
 
   let simplify_newtype_l

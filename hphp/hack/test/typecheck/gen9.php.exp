@@ -6,6 +6,12 @@ Invalid return type (Typing[4110])
   But got `T3`
 ERROR: File "gen9.php", line 25, characters 10-11:
 Invalid return type (Typing[4110])
+  File "gen9.php", line 21, characters 15-17:
+  Expected `int`
+  File "gen9.php", line 23, characters 39-40:
+  But got `mixed` arising from an implicit `as mixed` constraint on this type
+ERROR: File "gen9.php", line 25, characters 10-11:
+Invalid return type (Typing[4110])
   File "gen9.php", line 23, characters 44-45:
   Expected `T3`
   File "gen9.php", line 21, characters 24-26:

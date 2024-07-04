@@ -8,6 +8,12 @@ ERROR: File "bool_error.php", line 11, characters 12-13:
 Invalid return type (Typing[4110])
   File "bool_error.php", line 6, characters 28-30:
   Expected `int`
+  File "bool_error.php", line 6, characters 17-18:
+  But got `mixed` arising from an implicit `as ?nonnull` constraint on this type
+ERROR: File "bool_error.php", line 11, characters 12-13:
+Invalid return type (Typing[4110])
+  File "bool_error.php", line 6, characters 28-30:
+  Expected `int`
   File "bool_error.php", line 6, characters 21-21:
   But got `T as CT`
 ERROR: File "bool_error.php", line 11, characters 12-13:

@@ -5486,9 +5486,10 @@ end = struct
         simplify ~subtype_env ~this_ty ~lhs ~rhs
       in
 
-      match get_node lty_sub with
-      | Tdynamic when Subtype_env.coercing_from_dynamic subtype_env -> valid env
-      | Tdynamic ->
+      match deref lty_sub with
+      | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
+        valid env
+      | (_, Tdynamic) ->
         subtype_with_dynamic
           ~subtype_env
           ~this_ty
@@ -5505,9 +5506,9 @@ end = struct
           ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
           ct
           env
-      | Tclass _
-      | Tvec_or_dict _
-      | Tany _ ->
+      | (_, Tclass _)
+      | (_, Tvec_or_dict _)
+      | (_, Tany _) ->
         let trav_ty = can_traverse_to_iface ct in
         Subtype.(
           simplify
@@ -5521,7 +5522,7 @@ end = struct
                 ty_super = trav_ty;
               }
             env)
-      | Tunion ty_subs ->
+      | (_, Tunion ty_subs) ->
         Common.simplify_union_l
           ~subtype_env
           ~this_ty
@@ -5533,7 +5534,7 @@ end = struct
           (sub_supportdyn, ty_subs)
           rhs
           env
-      | Tvar id ->
+      | (_, Tvar id) ->
         (* If the type is already in the upper bounds of the type variable,
            * then we already know that this subtype assertion is valid
         *)
@@ -5547,8 +5548,7 @@ end = struct
             env
             (LoclType lty_sub)
             (ConstraintType (mk_constraint_type (r, Tcan_traverse ct)))
-      | Tintersection ty_subs ->
-        let r_sub = get_reason lty_sub in
+      | (r_sub, Tintersection ty_subs) ->
         (* A & B <: C iif A <: C | !B *)
         (match Subtype_negation.find_type_with_exact_negation env ty_subs with
         | (env, Some non_ty, tyl) ->
@@ -5589,42 +5589,42 @@ end = struct
             (sub_supportdyn, ty_subs)
             rhs
             env)
-      | Tgeneric (generic_nm, generic_ty_args) ->
+      | (r_sub, Tgeneric (generic_nm, generic_ty_args)) ->
         Common.simplify_generic_l
           ~subtype_env
           ~this_ty
           ~fail
           ~mk_prop
-          (sub_supportdyn, r, generic_nm, generic_ty_args)
+          (sub_supportdyn, r_sub, generic_nm, generic_ty_args)
           rhs
           rhs
           env
-      | Tnewtype (alias_name, _, ty_newtype) ->
+      | (r_sub, Tnewtype (alias_name, _, ty_newtype)) ->
         Common.simplify_newtype_l
           ~subtype_env
           ~this_ty
           ~mk_prop
-          (sub_supportdyn, r, alias_name, ty_newtype)
+          (sub_supportdyn, r_sub, alias_name, ty_newtype)
           rhs
           env
-      | Tdependent (dep_ty, ty_inner) ->
+      | (r_sub, Tdependent (dep_ty, ty_inner)) ->
         Common.simplify_dependent_l
           ~subtype_env
           ~this_ty
           ~mk_prop
-          (sub_supportdyn, r, dep_ty, ty_inner)
+          (sub_supportdyn, r_sub, dep_ty, ty_inner)
           rhs
           env
-      | Toption _
-      | Tprim _
-      | Tnonnull
-      | Tneg _
-      | Tfun _
-      | Ttuple _
-      | Tshape _
-      | Taccess _
-      | Tlabel _
-      | Tunapplied_alias _ ->
+      | (_, Toption _)
+      | (_, Tprim _)
+      | (_, Tnonnull)
+      | (_, Tneg _)
+      | (_, Tfun _)
+      | (_, Ttuple _)
+      | (_, Tshape _)
+      | (_, Taccess _)
+      | (_, Tlabel _)
+      | (_, Tunapplied_alias _) ->
         invalid ~fail env
 end
 

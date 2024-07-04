@@ -124,7 +124,7 @@ which itself flows into this hint
 
 File "shape_subtyping_7.php", line 7, character 3 - line 7, character 19:
 
-which itself flows down into nothing as the non-existent shape field `'b'`
+which itself flows down into no type since the shape field `'b'` is not defined
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -239,12 +239,12 @@ File "shape_subtyping_7.php", line 3, character 32 - line 3, character 34:
 
 This error has 9 steps, a maximum depth of 2 and contains 1 reversal.
 
-Here's why: nothing
+Here's why: no type
 
 
 File "", line 0, character 0 - line 0, character -1:
 
-flows up into this hint as the non-existent shape field `'a'`
+flows up into this hint since the shape field `'a'` is not defined
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type missing_a = »shape('b' => int)«;

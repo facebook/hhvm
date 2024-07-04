@@ -104,7 +104,7 @@ which itself flows into this expression
 
 File "refinement_equal.php", line 12, character 3 - line 12, character 12:
 
-which itself flows into this thing (`Rpessimised_return`)
+which itself flows into this return hint
 
  6 | function inter_equal(?A $a, C $c): »C« {
  7 |   if($a == null) {

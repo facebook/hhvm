@@ -323,10 +323,14 @@ let explain_symm_prj prj ~side =
       | `Lhs -> fld_kind_lhs
       | `Rhs -> fld_kind_rhs
     in
-    Format.sprintf
-      "as the %s shape field `'%s'`"
-      (explain_field_kind fld_kind)
-      fld_nm
+    (match fld_kind with
+    | Absent ->
+      Format.sprintf "since the shape field `'%s'` is not defined" fld_nm
+    | _ ->
+      Format.sprintf
+        "as the %s shape field `'%s'`"
+        (explain_field_kind fld_kind)
+        fld_nm)
   | Prj_symm_fn_param (idx_lhs, idx_rhs) ->
     let idx =
       match side with
@@ -2564,9 +2568,10 @@ let rec explain_witness = function
   | Rhint pos -> (pos, "this hint")
   | Ris_refinement pos -> (Pos_or_decl.of_raw_pos pos, "this `is` expression")
   | Rwitness pos -> (Pos_or_decl.of_raw_pos pos, "this expression")
-  | Rmissing_field -> (Pos_or_decl.none, "nothing")
+  | Rmissing_field -> (Pos_or_decl.none, "no type")
   | Rwitness_from_decl pos -> (pos, "this declaration")
   | Rsupport_dynamic_type pos -> (pos, "this function or method ")
+  | Rpessimised_return pos -> (pos, "this return hint")
   | Rvar_param_from_decl pos -> (pos, "this variadic parameter declaration")
   | Rtype_variable pos -> (Pos_or_decl.of_raw_pos pos, "this type variable")
   | Rcstr_on_generics (pos, _) ->
@@ -2592,6 +2597,7 @@ let rec explain_witness = function
   | Rshape_literal pos -> (Pos_or_decl.of_raw_pos pos, "this shape literal")
   | Rtypeconst (_, (pos, _), _, _) -> (pos, "this type constant")
   | Rtype_access (r, _) -> explain_witness r
+  | Rexpr_dep_type (r, _, _) -> explain_witness r
   | r ->
     (to_raw_pos r, Format.sprintf "this thing (`%s`)" (to_constructor_string r))
 

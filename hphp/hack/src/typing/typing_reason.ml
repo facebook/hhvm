@@ -13,24 +13,37 @@ module SN = Naming_special_names
 let strip_ns id =
   id |> Utils.strip_ns |> Hh_autoimport.strip_HH_namespace_if_autoimport
 
+(* ~~ pos_id ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
 type pos_id = (Pos_or_decl.t[@hash.ignore]) * Ast_defs.id_
 [@@deriving eq, hash, ord, show]
+
+let positioned_id pos_or_decl (p, x) = (pos_or_decl p, x)
 
 let pos_id_to_json (pos_or_decl, str) =
   Hh_json.(
     JSON_Object
       [("Tuple2", JSON_Array [Pos_or_decl.json pos_or_decl; JSON_String str])])
 
+(* ~~ arg_position ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 type arg_position =
   | Aonly
   | Afirst
   | Asecond
 [@@deriving eq, hash, show]
 
+let arg_pos_str ap =
+  match ap with
+  | Aonly -> "only"
+  | Afirst -> "first"
+  | Asecond -> "second"
+
 let arg_position_to_json = function
   | Aonly -> Hh_json.(JSON_Object [("Aonly", JSON_Array [])])
   | Afirst -> Hh_json.(JSON_Object [("Afirst", JSON_Array [])])
   | Asecond -> Hh_json.(JSON_Object [("Asecond", JSON_Array [])])
+
+(* ~~ expr_dep_type_reason ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
 type expr_dep_type_reason =
   | ERexpr of Expression_id.t
@@ -55,6 +68,33 @@ let expr_dep_type_reason_to_json = function
     Hh_json.(JSON_Object [("ERself", JSON_Array [JSON_String str])])
   | ERpu str -> Hh_json.(JSON_Object [("ERpu", JSON_Array [JSON_String str])])
 
+let expr_dep_type_reason_string e =
+  match e with
+  | ERexpr id ->
+    "where "
+    ^ Markdown_lite.md_codify (Expression_id.display id)
+    ^ " is a reference to this expression"
+  | ERstatic ->
+    "where `<static>` refers to the late bound type of the enclosing class"
+  | ERclass c ->
+    "where the class "
+    ^ (strip_ns c |> Markdown_lite.md_codify)
+    ^ " was referenced here"
+  | ERparent p ->
+    "where the class "
+    ^ (strip_ns p |> Markdown_lite.md_codify)
+    ^ " (the parent of the enclosing) class was referenced here"
+  | ERself c ->
+    "where the class "
+    ^ (strip_ns c |> Markdown_lite.md_codify)
+    ^ " was referenced here via the keyword `self`"
+  | ERpu s ->
+    "where "
+    ^ Markdown_lite.md_codify s
+    ^ " is a type projected from this expression"
+
+(* ~~ blame_source ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
 type blame_source =
   | BScall
   | BSlambda
@@ -68,6 +108,8 @@ let blame_source_to_json = function
   | BSassignment -> Hh_json.(JSON_Object [("BSassignment", JSON_Array [])])
   | BSout_of_scope -> Hh_json.(JSON_Object [("BSout_of_scope", JSON_Array [])])
 
+(* ~~ blame ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
 type blame = Blame of Pos.t * blame_source [@@deriving eq, hash, show]
 
 let pos_to_json pos = Pos.(json @@ to_absolute pos)
@@ -77,6 +119,8 @@ let blame_to_json (Blame (pos, src)) =
     JSON_Object
       [("Blame", JSON_Array [pos_to_json pos; blame_source_to_json src])])
 
+(* ~~ phase indices ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
 (* create private types to represent the different type phases *)
 type decl_phase = private DeclPhase [@@deriving eq, hash, show]
 
@@ -85,12 +129,33 @@ type locl_phase = private LoclPhase [@@deriving eq, hash, show]
 (* This is to avoid a compile error with ppx_hash "Unbound value _hash_fold_phase". *)
 let _hash_fold_phase hsv _ = hsv
 
+(* ~~ projections ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+(** Shape field kinds *)
 type field_kind =
   | Absent
   | Optional
   | Required
 [@@deriving hash]
 
+let field_kind_to_json = function
+  | Absent -> Hh_json.(JSON_Object [("Absent", JSON_Array [])])
+  | Optional -> Hh_json.(JSON_Object [("Optional", JSON_Array [])])
+  | Required -> Hh_json.(JSON_Object [("Required", JSON_Array [])])
+
+let explain_field_kind = function
+  | Required -> "required"
+  | Optional -> "optional"
+  | Absent -> "non-existent"
+
+let variance_to_json = function
+  | Ast_defs.Covariant -> Hh_json.(JSON_Object [("Covariant", JSON_Array [])])
+  | Ast_defs.Contravariant ->
+    Hh_json.(JSON_Object [("Contravariant", JSON_Array [])])
+  | Ast_defs.Invariant -> Hh_json.(JSON_Object [("Invariant", JSON_Array [])])
+
+(** Symmetric projections are those applied to both sub-  and supertype during
+    constraint solving *)
 type prj_symm =
   | Prj_symm_neg
   | Prj_symm_class of string * int * Ast_defs.variance
@@ -101,23 +166,6 @@ type prj_symm =
   | Prj_symm_fn_ret
   | Prj_symm_access
 [@@deriving hash]
-
-type prj_asymm =
-  | Prj_asymm_union
-  | Prj_asymm_inter
-  | Prj_asymm_neg
-[@@deriving hash]
-
-let variance_to_json = function
-  | Ast_defs.Covariant -> Hh_json.(JSON_Object [("Covariant", JSON_Array [])])
-  | Ast_defs.Contravariant ->
-    Hh_json.(JSON_Object [("Contravariant", JSON_Array [])])
-  | Ast_defs.Invariant -> Hh_json.(JSON_Object [("Invariant", JSON_Array [])])
-
-let field_kind_to_json = function
-  | Absent -> Hh_json.(JSON_Object [("Absent", JSON_Array [])])
-  | Optional -> Hh_json.(JSON_Object [("Optional", JSON_Array [])])
-  | Required -> Hh_json.(JSON_Object [("Required", JSON_Array [])])
 
 let prj_symm_to_json = function
   | Prj_symm_neg -> Hh_json.JSON_String "Prj_symm_neg"
@@ -174,10 +222,82 @@ let prj_symm_to_json = function
   | Prj_symm_fn_ret -> Hh_json.JSON_String "Prj_symm_fn_ret"
   | Prj_symm_access -> Hh_json.JSON_String "Prj_symm_access"
 
+let int_to_ordinal =
+  let sfxs = [| "th"; "st"; "nd"; "rd"; "th" |] in
+  fun n ->
+    let sfx =
+      if n >= 10 && n <= 20 then
+        "th"
+      else
+        sfxs.(min 4 (n mod 10))
+    in
+    Format.sprintf "%d%s" n sfx
+
+let explain_variance = function
+  | Ast_defs.Contravariant -> "contravariant"
+  | Ast_defs.Covariant -> "covariant"
+  | Ast_defs.Invariant -> "invariant"
+
+let explain_symm_prj prj side =
+  match prj with
+  | Prj_symm_neg -> "via the negation type"
+  | Prj_symm_class (nm, idx, var) ->
+    Format.sprintf
+      "via the (%s) %s type parameter of the class `%s`"
+      (explain_variance var)
+      (int_to_ordinal (idx + 1))
+      nm
+  | Prj_symm_newtype (nm, idx, var) ->
+    Format.sprintf
+      "via the (%s) %s type parameter of the type definition `%s`"
+      (explain_variance var)
+      (int_to_ordinal (idx + 1))
+      nm
+  | Prj_symm_tuple idx ->
+    Format.sprintf "via the %s element of the tuple" (int_to_ordinal idx)
+  | Prj_symm_shape (fld_nm, fld_kind_lhs, fld_kind_rhs) ->
+    let fld_kind =
+      match side with
+      | `Lhs -> fld_kind_lhs
+      | `Rhs -> fld_kind_rhs
+    in
+    Format.sprintf
+      "via the %s shape field `'%s'`"
+      (explain_field_kind fld_kind)
+      fld_nm
+  | Prj_symm_fn_arg (idx_lhs, idx_rhs, var) ->
+    let idx =
+      match side with
+      | `Lhs -> idx_lhs
+      | `Rhs -> idx_rhs
+    in
+    Format.sprintf
+      "via the (%s) %s function parameter"
+      (explain_variance var)
+      (int_to_ordinal (idx + 1))
+  | Prj_symm_fn_ret -> "via the function return type"
+  | Prj_symm_access -> "via the type access"
+
+(** Asymmetric projections are those applied to only one of the sub- or
+    supertype during constraint solving *)
+type prj_asymm =
+  | Prj_asymm_union
+  | Prj_asymm_inter
+  | Prj_asymm_neg
+[@@deriving hash]
+
 let prj_asymm_to_json = function
   | Prj_asymm_union -> Hh_json.JSON_String "Prj_asymm_union"
   | Prj_asymm_inter -> Hh_json.JSON_String "Prj_asymm_inter"
   | Prj_asymm_neg -> Hh_json.JSON_String "Prj_asymm_neg"
+
+let explain_asymm_prj prj =
+  match prj with
+  | Prj_asymm_union -> "via the union type"
+  | Prj_asymm_inter -> "via the intersection type"
+  | Prj_asymm_neg -> "via the negation type"
+
+(* ~~ Reasons ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
 (* The phase below helps enforce that only Pos_or_decl.t positions end up in the heap.
  * To enforce that, any reason taking a Pos.t should be a locl_phase t_
@@ -324,6 +444,7 @@ type _ t_ =
   | Rpessimised_this : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
 [@@deriving hash]
 
+(** Perform actual reversal of reason flows *)
 let rec normalize : locl_phase t_ -> locl_phase t_ = function
   | Rflow (t1, t2) -> Rflow (normalize t1, normalize t2)
   | Rrev t -> reverse t
@@ -465,7 +586,20 @@ and to_raw_pos_rev = function
   | r ->
     to_raw_pos r
 
-let positioned_id pos_or_decl (p, x) = (pos_or_decl p, x)
+let compare : type phase. phase t_ -> phase t_ -> int =
+ fun r1 r2 ->
+  let get_pri : type ph. ph t_ -> int = function
+    | Rnone -> 0
+    | Rforeach _ -> 1
+    | Rwitness _ -> 3
+    | Rlost_info _ -> 5
+    | _ -> 2
+  in
+  let d = get_pri r2 - get_pri r1 in
+  if Int.( <> ) d 0 then
+    d
+  else
+    Pos_or_decl.compare (to_raw_pos r1) (to_raw_pos r2)
 
 let rec map_pos :
     type ph.
@@ -1338,382 +1472,12 @@ let rec to_json : type a. a t_ -> Hh_json.json =
       JSON_Object
         [("Rpessimised_this", JSON_Array [Pos_or_decl.json pos_or_decl])])
 
-type direction =
-  | Fwd
-  | Bwd
-
-let reverse_direction = function
-  | Fwd -> Bwd
-  | Bwd -> Fwd
-
-(* TODO(mjt) encode the valid paths in the type *)
-type path_elem =
-  | Flow of direction
-  | Prj_symm_lhs of prj_symm
-  | Prj_symm_rhs of prj_symm
-  | Prj_asymm_left of prj_asymm
-  | Prj_asymm_right of prj_asymm
-  | Witness of locl_phase t_
-
-let project prj dir =
-  match prj with
-  (* Covariant projections preserve data flow direction *)
-  | Prj_symm_neg
-  | Prj_symm_tuple _
-  | Prj_symm_shape _
-  | Prj_symm_fn_ret
-  | Prj_symm_access
-  | Prj_symm_class (_, _, Ast_defs.Covariant)
-  | Prj_symm_newtype (_, _, Ast_defs.Covariant)
-  | Prj_symm_fn_arg (_, _, Ast_defs.Covariant) ->
-    dir (* Contravariant projections reverse data flow direction *)
-  | Prj_symm_class (_, _, Ast_defs.Contravariant)
-  | Prj_symm_newtype (_, _, Ast_defs.Contravariant)
-  | Prj_symm_fn_arg (_, _, Ast_defs.Contravariant) ->
-    reverse_direction dir
-  (* We shouldn't see an invariant projections since we construct both the co- and contravariant propositions in these cases *)
-  | Prj_symm_class (_, _, Ast_defs.Invariant)
-  | Prj_symm_newtype (_, _, Ast_defs.Invariant)
-  | Prj_symm_fn_arg (_, _, Ast_defs.Invariant) ->
-    failwith "expected a normalized reason"
-
-let to_path t =
-  let rec aux t ~dir ~k =
-    match t with
-    | Rflow (t1, t2) ->
-      aux t1 ~dir ~k:(fun p1 ->
-          aux t2 ~dir ~k:(fun p2 -> k @@ p1 @ (Flow dir :: p2)))
-    | Rprj_symm (prj, t) ->
-      let dir = project prj dir in
-      aux t ~dir ~k:(fun t -> k @@ (Prj_symm_lhs prj :: t) @ [Prj_symm_rhs prj])
-    | Rprj_asymm_left (prj, t) ->
-      (* All asymmetric projections are covariant and preserve data flow direction *)
-      aux t ~dir ~k:(fun t -> k (Prj_asymm_left prj :: t))
-    | Rprj_asymm_right (prj, t) ->
-      (* All asymmetric projections are covariant and preserve data flow direction *)
-      aux t ~dir ~k:(fun t -> k (t @ [Prj_asymm_right prj]))
-    | Rrev _ -> failwith "expected a normalized reason"
-    | _ -> k @@ [Witness t]
-  in
-  aux t ~dir:Fwd ~k:(fun x -> x)
-
-let int_to_ordinal =
-  let sfxs = [| "th"; "st"; "nd"; "rd"; "th" |] in
-  fun n ->
-    let sfx =
-      if n >= 10 && n <= 20 then
-        "th"
-      else
-        sfxs.(min 4 (n mod 10))
-    in
-    Format.sprintf "%d%s" n sfx
-
-let explain_variance = function
-  | Ast_defs.Contravariant -> "contravariant"
-  | Ast_defs.Covariant -> "covariant"
-  | Ast_defs.Invariant -> "invariant"
-
-let explain_field_kind = function
-  | Required -> "required"
-  | Optional -> "optional"
-  | Absent -> "non-existent"
-
-let explain_symm_prj prj side =
-  match prj with
-  | Prj_symm_neg -> "via the negation type"
-  | Prj_symm_class (nm, idx, var) ->
-    Format.sprintf
-      "via the (%s) %s type parameter of the class `%s`"
-      (explain_variance var)
-      (int_to_ordinal (idx + 1))
-      nm
-  | Prj_symm_newtype (nm, idx, var) ->
-    Format.sprintf
-      "via the (%s) %s type parameter of the type definition `%s`"
-      (explain_variance var)
-      (int_to_ordinal (idx + 1))
-      nm
-  | Prj_symm_tuple idx ->
-    Format.sprintf "via the %s element of the tuple" (int_to_ordinal idx)
-  | Prj_symm_shape (fld_nm, fld_kind_lhs, fld_kind_rhs) ->
-    let fld_kind =
-      match side with
-      | `Lhs -> fld_kind_lhs
-      | `Rhs -> fld_kind_rhs
-    in
-    Format.sprintf
-      "via the %s shape field `'%s'`"
-      (explain_field_kind fld_kind)
-      fld_nm
-  | Prj_symm_fn_arg (idx_lhs, idx_rhs, var) ->
-    let idx =
-      match side with
-      | `Lhs -> idx_lhs
-      | `Rhs -> idx_rhs
-    in
-    Format.sprintf
-      "via the (%s) %s function parameter"
-      (explain_variance var)
-      (int_to_ordinal (idx + 1))
-  | Prj_symm_fn_ret -> "via the function return type"
-  | Prj_symm_access -> "via the type access"
-
-let explain_asymm_prj prj =
-  match prj with
-  | Prj_asymm_union -> "via the union type"
-  | Prj_asymm_inter -> "via the intersection type"
-  | Prj_asymm_neg -> "via the negation type"
-
-(* TODO(mjt) refactor so that extended reasons use a separate type for witnesses
-   and ensure we handle all cases statically *)
-let rec explain_witness = function
-  | Rhint pos -> (pos, "this hint")
-  | Ris_refinement pos -> (Pos_or_decl.of_raw_pos pos, "this `is` expression")
-  | Rwitness pos -> (Pos_or_decl.of_raw_pos pos, "this expression")
-  | Rmissing_field -> (Pos_or_decl.none, "nothing")
-  | Rwitness_from_decl pos -> (pos, "this declaration")
-  | Rsupport_dynamic_type pos -> (pos, "this function or method ")
-  | Rvar_param_from_decl pos -> (pos, "this variadic parameter declaration")
-  | Rtype_variable pos -> (Pos_or_decl.of_raw_pos pos, "this type variable")
-  | Rcstr_on_generics (pos, _) ->
-    (pos, "the constraint on the generic parameter")
-  | Rtype_variable_generics (pos, x, y) ->
-    (Pos_or_decl.of_raw_pos pos, Format.sprintf "the generic `%s` on `%s`" x y)
-  | Rimplicit_upper_bound (pos, nm) ->
-    ( pos,
-      Format.sprintf
-        "the implicit upper bound (`%s`) on the generic parameter"
-        nm )
-  | Runpack_param (pos, _, _) ->
-    (Pos_or_decl.of_raw_pos pos, "this unpacked parameter")
-  | Rbitwise pos -> (Pos_or_decl.of_raw_pos pos, "this expression")
-  | Rarith pos -> (Pos_or_decl.of_raw_pos pos, "this arithmetic expression")
-  | Rlambda_param (pos, _) ->
-    (Pos_or_decl.of_raw_pos pos, "this lambda parameter")
-  | Rinout_param pos -> (pos, "this inout parameter")
-  | Ridx_vector pos -> (Pos_or_decl.of_raw_pos pos, "this index expression")
-  | Ridx (pos, _) -> (Pos_or_decl.of_raw_pos pos, "this index expression")
-  | Rsplice pos -> (Pos_or_decl.of_raw_pos pos, "this splice expression")
-  | Rno_return pos -> (Pos_or_decl.of_raw_pos pos, "this declaration")
-  | Rshape_literal pos -> (Pos_or_decl.of_raw_pos pos, "this shape literal")
-  | Rtypeconst (_, (pos, _), _, _) -> (pos, "this type constant")
-  | Rtype_access (r, _) -> explain_witness r
-  | r ->
-    (to_raw_pos r, Format.sprintf "this thing (`%s`)" (to_constructor_string r))
-
-let explain_flow = function
-  | Fwd -> "flows *into*"
-  | Bwd -> "flows *from*"
-
-let explain_path ps =
-  let prefix_first (pos, expl) ~first =
-    if first then
-      (pos, Format.sprintf "Here's why: %s" expl)
-    else
-      (pos, expl)
-  in
-
-  let rec aux ps ~first =
-    match ps with
-    | Witness lhs :: Flow dir :: Witness rhs :: rest ->
-      let expls = aux (Witness rhs :: rest) ~first:false in
-      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
-      let flow_expl = explain_flow dir in
-      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
-      let rhs_expl =
-        ( rhs_hint_pos,
-          if first then
-            Format.sprintf "%s %s" flow_expl rhs_hint_expl
-          else
-            Format.sprintf "which itself %s %s" flow_expl rhs_hint_expl )
-      in
-      if first then
-        lhs_expl :: rhs_expl :: expls
-      else
-        rhs_expl :: expls
-    | Witness lhs :: Flow dir :: Prj_symm_lhs prj :: Witness rhs :: rest ->
-      let expls = aux (Witness rhs :: rest) ~first:false in
-      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
-      let flow_expl = explain_flow dir in
-      let prj_expl = explain_symm_prj prj `Lhs in
-      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
-      let rhs_expl =
-        ( rhs_hint_pos,
-          if first then
-            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
-          else
-            Format.sprintf
-              "which itself %s %s, %s"
-              flow_expl
-              rhs_hint_expl
-              prj_expl )
-      in
-      if first then
-        lhs_expl :: rhs_expl :: expls
-      else
-        rhs_expl :: expls
-    | Witness lhs :: Prj_symm_rhs prj :: Flow dir :: Witness rhs :: rest ->
-      let expls = aux (Witness rhs :: rest) ~first:false in
-      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
-      let flow_expl = explain_flow dir in
-      let prj_expl = explain_symm_prj prj `Rhs in
-      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
-      let rhs_expl =
-        ( rhs_hint_pos,
-          if first then
-            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
-          else
-            Format.sprintf
-              "which itself %s %s, %s"
-              flow_expl
-              rhs_hint_expl
-              prj_expl )
-      in
-      if first then
-        lhs_expl :: rhs_expl :: expls
-      else
-        rhs_expl :: expls
-    | Witness lhs :: Flow dir :: Prj_asymm_left prj :: Witness rhs :: rest ->
-      let expls = aux (Witness rhs :: rest) ~first:false in
-
-      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
-
-      let flow_expl = explain_flow dir in
-      let prj_expl = explain_asymm_prj prj in
-      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
-      let rhs_expl =
-        ( rhs_hint_pos,
-          if first then
-            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
-          else
-            Format.sprintf
-              "which itself %s %s, %s"
-              flow_expl
-              rhs_hint_expl
-              prj_expl )
-      in
-      if first then
-        lhs_expl :: rhs_expl :: expls
-      else
-        rhs_expl :: expls
-    | Witness lhs :: Prj_asymm_right prj :: Flow dir :: Witness rhs :: rest ->
-      let expls = aux (Witness rhs :: rest) ~first:false in
-      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
-      let flow_expl = explain_flow dir in
-      let prj_expl = explain_asymm_prj prj in
-      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
-      let rhs_expl =
-        ( rhs_hint_pos,
-          if first then
-            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
-          else
-            Format.sprintf
-              "which itself %s %s, %s"
-              flow_expl
-              rhs_hint_expl
-              prj_expl )
-      in
-      if first then
-        lhs_expl :: rhs_expl :: expls
-      else
-        rhs_expl :: expls
-    (* TODO(mjt) the cases above are the only valid path prefixes; this should
-       be encoded in the type *)
-    | _ -> []
-  in
-  aux ps ~first:true
-
-let explain t ~complexity:_ = explain_path @@ to_path @@ normalize t
-
-let debug t =
-  explain t ~complexity:0
-  @ [
-      ( Pos_or_decl.none,
-        Format.sprintf "Flow:\n%s"
-        @@ Hh_json.json_to_string ~pretty:true
-        @@ to_json
-        @@ normalize t );
-    ]
-
-type t = locl_phase t_
-
-let pp : type ph. _ -> ph t_ -> unit = (fun fmt r -> pp_t_ fmt r)
-
-let show r = Format.asprintf "%a" pp r
-
-type decl_t = decl_phase t_
-
-let rec localize : decl_phase t_ -> locl_phase t_ = function
-  | Rnone -> Rnone
-  | Ridx_vector_from_decl p -> Ridx_vector_from_decl p
-  | Rinout_param p -> Rinout_param p
-  | Rtypeconst (r1, p, q, r2) -> Rtypeconst (localize r1, p, q, localize r2)
-  | Rcstr_on_generics (a, b) -> Rcstr_on_generics (a, b)
-  | Rwitness_from_decl p -> Rwitness_from_decl p
-  | Rret_fun_kind_from_decl (p, r) -> Rret_fun_kind_from_decl (p, r)
-  | Rclass_class (p, r) -> Rclass_class (p, r)
-  | Rvar_param_from_decl p -> Rvar_param_from_decl p
-  | Rglobal_fun_param p -> Rglobal_fun_param p
-  | Renforceable p -> Renforceable p
-  | Rimplicit_upper_bound (p, q) -> Rimplicit_upper_bound (p, q)
-  | Rsolve_fail p -> Rsolve_fail p
-  | Rmissing_optional_field (p, q) -> Rmissing_optional_field (p, q)
-  | Rglobal_class_prop p -> Rglobal_class_prop p
-  | Rhint p -> Rhint p
-  | Rvarray_or_darray_key p -> Rvarray_or_darray_key p
-  | Rvec_or_dict_key p -> Rvec_or_dict_key p
-  | Rglobal_fun_ret p -> Rglobal_fun_ret p
-  | Rinstantiate (r1, s, r2) -> Rinstantiate (localize r1, s, localize r2)
-  | Rexpr_dep_type (r, s, t) -> Rexpr_dep_type (localize r, s, t)
-  | Rtconst_no_cstr id -> Rtconst_no_cstr id
-  | Rdefault_capability p -> Rdefault_capability p
-  | Rdynamic_coercion r -> Rdynamic_coercion r
-  | Rsupport_dynamic_type p -> Rsupport_dynamic_type p
-  | Rglobal_type_variable_generics (p, tp, n) ->
-    Rglobal_type_variable_generics (p, tp, n)
-  | Rinvalid -> Rinvalid
-  | Rpessimised_inout p -> Rpessimised_inout p
-  | Rpessimised_return p -> Rpessimised_return p
-  | Rpessimised_prop p -> Rpessimised_prop p
-  | Rpessimised_this p -> Rpessimised_this p
-
-let arg_pos_str ap =
-  match ap with
-  | Aonly -> "only"
-  | Afirst -> "first"
-  | Asecond -> "second"
-
 let to_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->
   if !Errors.report_pos_from_reason then
     Pos_or_decl.set_from_reason (to_raw_pos r)
   else
     to_raw_pos r
-
-let expr_dep_type_reason_string e =
-  match e with
-  | ERexpr id ->
-    "where "
-    ^ Markdown_lite.md_codify (Expression_id.display id)
-    ^ " is a reference to this expression"
-  | ERstatic ->
-    "where `<static>` refers to the late bound type of the enclosing class"
-  | ERclass c ->
-    "where the class "
-    ^ (strip_ns c |> Markdown_lite.md_codify)
-    ^ " was referenced here"
-  | ERparent p ->
-    "where the class "
-    ^ (strip_ns p |> Markdown_lite.md_codify)
-    ^ " (the parent of the enclosing) class was referenced here"
-  | ERself c ->
-    "where the class "
-    ^ (strip_ns c |> Markdown_lite.md_codify)
-    ^ " was referenced here via the keyword `self`"
-  | ERpu s ->
-    "where "
-    ^ Markdown_lite.md_codify s
-    ^ " is a type projected from this expression"
 
 (* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
@@ -2173,121 +1937,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   | Rprj_asymm_left (_prj, r) -> to_string prefix r
   | Rprj_asymm_right (_prj, r) -> to_string prefix r
 
-type ureason =
-  | URnone
-  | URassign
-  | URassign_inout
-  | URhint
-  | URreturn
-  | URforeach
-  | URthrow
-  | URvector
-  | URkey of string
-  | URvalue of string
-  | URawait
-  | URyield
-  | URxhp of string * string  (** Name of XHP class, Name of XHP attribute *)
-  | URxhp_spread
-  | URindex of string
-  | URelement of string
-  | URparam
-  | URparam_inout
-  | URarray_value
-  | URpair_value
-  | URtuple_access
-  | URpair_access
-  | URnewtype_cstr
-  | URclass_req
-  | URenum
-  | URenum_include
-  | URenum_cstr
-  | URenum_underlying
-  | URenum_incompatible_cstr
-  | URtypeconst_cstr
-  | URsubsume_tconst_cstr
-  | URsubsume_tconst_assign
-  | URclone
-  | URusing
-  | URstr_concat
-  | URstr_interp
-  | URdynamic_prop
-  | URlabel
-[@@deriving show]
-
-let index_array = URindex "array"
-
-let index_tuple = URindex "tuple"
-
-let index_class s = URindex (strip_ns s)
-
-let set_element s = URelement (strip_ns s)
-
-let string_of_ureason = function
-  | URnone -> "Typing error"
-  | URreturn -> "Invalid return type"
-  | URhint -> "Wrong type hint"
-  | URassign -> "Invalid assignment"
-  | URassign_inout -> "Invalid assignment to an `inout` parameter"
-  | URforeach -> "Invalid `foreach`"
-  | URthrow -> "Invalid exception"
-  | URvector -> "Some elements in this collection are incompatible"
-  | URkey s -> "The keys of this `" ^ strip_ns s ^ "` are incompatible"
-  | URvalue s -> "The values of this `" ^ strip_ns s ^ "` are incompatible"
-  | URawait -> "`await` can only operate on an `Awaitable`"
-  | URyield -> "Invalid `yield`"
-  | URxhp (cls, attr) ->
-    "Invalid xhp value for attribute "
-    ^ Markdown_lite.md_codify attr
-    ^ " in "
-    ^ (strip_ns cls |> Markdown_lite.md_codify)
-  | URxhp_spread -> "The attribute spread operator cannot be called on non-XHP"
-  | URindex s -> "Invalid index type for this " ^ strip_ns s
-  | URelement s -> "Invalid element type for this " ^ strip_ns s
-  | URparam -> "Invalid argument"
-  | URparam_inout -> "Invalid argument to an `inout` parameter"
-  | URarray_value -> "Incompatible field values"
-  | URpair_value -> "Incompatible pair values"
-  | URtuple_access ->
-    "Tuple elements can only be accessed with an integer literal"
-  | URpair_access ->
-    "Pair elements can only be accessed with an integer literal"
-  | URnewtype_cstr -> "Invalid constraint on `newtype`"
-  | URclass_req -> "Unable to satisfy trait/interface requirement"
-  | URenum -> "Constant does not match the type of the enum it is in"
-  | URenum_include -> "Inclusion of enum of incompatible type"
-  | URenum_cstr -> "Invalid constraint on enum"
-  | URenum_underlying -> "Invalid underlying type for enum"
-  | URenum_incompatible_cstr ->
-    "Underlying type for enum is incompatible with constraint"
-  | URtypeconst_cstr -> "Unable to satisfy constraint on this type constant"
-  | URsubsume_tconst_cstr ->
-    "The constraint on this type constant is inconsistent with its parent"
-  | URsubsume_tconst_assign ->
-    "The assigned type of this type constant is inconsistent with its parent"
-  | URclone -> "Clone cannot be called on non-object"
-  | URusing -> "Using cannot be used on non-disposable expression"
-  | URstr_concat ->
-    "String concatenation can only be performed on string and int arguments"
-  | URstr_interp ->
-    "Only string and int values can be used in string interpolation"
-  | URdynamic_prop -> "Dynamic access of property"
-  | URlabel ->
-    "This label is not a valid reference to a member of the given enum class"
-
-let compare : type phase. phase t_ -> phase t_ -> int =
- fun r1 r2 ->
-  let get_pri : type ph. ph t_ -> int = function
-    | Rnone -> 0
-    | Rforeach _ -> 1
-    | Rwitness _ -> 3
-    | Rlost_info _ -> 5
-    | _ -> 2
-  in
-  let d = get_pri r2 - get_pri r1 in
-  if Int.( <> ) d 0 then
-    d
-  else
-    Pos_or_decl.compare (to_raw_pos r1) (to_raw_pos r2)
+(* -- Constructors ---------------------------------------------------------- *)
 
 let none = Rnone
 
@@ -2501,6 +2151,7 @@ let missing_field = Rmissing_field
 
 let pessimised_this p = Rpessimised_this p
 
+(* -- Visitor --------------------------------------------------------------- *)
 module Visitor = struct
   class map =
     object (this)
@@ -2637,6 +2288,7 @@ let force_lazy_values r =
   in
   visitor#on_reason r
 
+(* -- Predicates ------------------------------------------------------------ *)
 module Predicates = struct
   let is_opaque_type_from_module r =
     match r with
@@ -2678,3 +2330,380 @@ module Predicates = struct
     | Rshape_literal p -> Some p
     | _ -> None
 end
+
+(* ~~ Path ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+type direction =
+  | Fwd
+  | Bwd
+
+let reverse_direction = function
+  | Fwd -> Bwd
+  | Bwd -> Fwd
+
+(* TODO(mjt) encode the valid paths in the type *)
+type path_elem =
+  | Flow of direction
+  | Prj_symm_lhs of prj_symm
+  | Prj_symm_rhs of prj_symm
+  | Prj_asymm_left of prj_asymm
+  | Prj_asymm_right of prj_asymm
+  | Witness of locl_phase t_
+
+let project prj dir =
+  match prj with
+  (* Covariant projections preserve data flow direction *)
+  | Prj_symm_neg
+  | Prj_symm_tuple _
+  | Prj_symm_shape _
+  | Prj_symm_fn_ret
+  | Prj_symm_access
+  | Prj_symm_class (_, _, Ast_defs.Covariant)
+  | Prj_symm_newtype (_, _, Ast_defs.Covariant)
+  | Prj_symm_fn_arg (_, _, Ast_defs.Covariant) ->
+    dir (* Contravariant projections reverse data flow direction *)
+  | Prj_symm_class (_, _, Ast_defs.Contravariant)
+  | Prj_symm_newtype (_, _, Ast_defs.Contravariant)
+  | Prj_symm_fn_arg (_, _, Ast_defs.Contravariant) ->
+    reverse_direction dir
+  (* We shouldn't see an invariant projections since we construct both the co- and contravariant propositions in these cases *)
+  | Prj_symm_class (_, _, Ast_defs.Invariant)
+  | Prj_symm_newtype (_, _, Ast_defs.Invariant)
+  | Prj_symm_fn_arg (_, _, Ast_defs.Invariant) ->
+    failwith "expected a normalized reason"
+
+let to_path t =
+  let rec aux t ~dir ~k =
+    match t with
+    | Rflow (t1, t2) ->
+      aux t1 ~dir ~k:(fun p1 ->
+          aux t2 ~dir ~k:(fun p2 -> k @@ p1 @ (Flow dir :: p2)))
+    | Rprj_symm (prj, t) ->
+      let dir = project prj dir in
+      aux t ~dir ~k:(fun t -> k @@ (Prj_symm_lhs prj :: t) @ [Prj_symm_rhs prj])
+    | Rprj_asymm_left (prj, t) ->
+      (* All asymmetric projections are covariant and preserve data flow direction *)
+      aux t ~dir ~k:(fun t -> k (Prj_asymm_left prj :: t))
+    | Rprj_asymm_right (prj, t) ->
+      (* All asymmetric projections are covariant and preserve data flow direction *)
+      aux t ~dir ~k:(fun t -> k (t @ [Prj_asymm_right prj]))
+    | Rrev _ -> failwith "expected a normalized reason"
+    | _ -> k @@ [Witness t]
+  in
+  aux t ~dir:Fwd ~k:(fun x -> x)
+
+(* TODO(mjt) refactor so that extended reasons use a separate type for witnesses
+   and ensure we handle all cases statically *)
+let rec explain_witness = function
+  | Rhint pos -> (pos, "this hint")
+  | Ris_refinement pos -> (Pos_or_decl.of_raw_pos pos, "this `is` expression")
+  | Rwitness pos -> (Pos_or_decl.of_raw_pos pos, "this expression")
+  | Rmissing_field -> (Pos_or_decl.none, "nothing")
+  | Rwitness_from_decl pos -> (pos, "this declaration")
+  | Rsupport_dynamic_type pos -> (pos, "this function or method ")
+  | Rvar_param_from_decl pos -> (pos, "this variadic parameter declaration")
+  | Rtype_variable pos -> (Pos_or_decl.of_raw_pos pos, "this type variable")
+  | Rcstr_on_generics (pos, _) ->
+    (pos, "the constraint on the generic parameter")
+  | Rtype_variable_generics (pos, x, y) ->
+    (Pos_or_decl.of_raw_pos pos, Format.sprintf "the generic `%s` on `%s`" x y)
+  | Rimplicit_upper_bound (pos, nm) ->
+    ( pos,
+      Format.sprintf
+        "the implicit upper bound (`%s`) on the generic parameter"
+        nm )
+  | Runpack_param (pos, _, _) ->
+    (Pos_or_decl.of_raw_pos pos, "this unpacked parameter")
+  | Rbitwise pos -> (Pos_or_decl.of_raw_pos pos, "this expression")
+  | Rarith pos -> (Pos_or_decl.of_raw_pos pos, "this arithmetic expression")
+  | Rlambda_param (pos, _) ->
+    (Pos_or_decl.of_raw_pos pos, "this lambda parameter")
+  | Rinout_param pos -> (pos, "this inout parameter")
+  | Ridx_vector pos -> (Pos_or_decl.of_raw_pos pos, "this index expression")
+  | Ridx (pos, _) -> (Pos_or_decl.of_raw_pos pos, "this index expression")
+  | Rsplice pos -> (Pos_or_decl.of_raw_pos pos, "this splice expression")
+  | Rno_return pos -> (Pos_or_decl.of_raw_pos pos, "this declaration")
+  | Rshape_literal pos -> (Pos_or_decl.of_raw_pos pos, "this shape literal")
+  | Rtypeconst (_, (pos, _), _, _) -> (pos, "this type constant")
+  | Rtype_access (r, _) -> explain_witness r
+  | r ->
+    (to_raw_pos r, Format.sprintf "this thing (`%s`)" (to_constructor_string r))
+
+let explain_flow = function
+  | Fwd -> "flows *into*"
+  | Bwd -> "flows *from*"
+
+let explain_path ps =
+  let prefix_first (pos, expl) ~first =
+    if first then
+      (pos, Format.sprintf "Here's why: %s" expl)
+    else
+      (pos, expl)
+  in
+
+  let rec aux ps ~first =
+    match ps with
+    | Witness lhs :: Flow dir :: Witness rhs :: rest ->
+      let expls = aux (Witness rhs :: rest) ~first:false in
+      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
+      let flow_expl = explain_flow dir in
+      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
+      let rhs_expl =
+        ( rhs_hint_pos,
+          if first then
+            Format.sprintf "%s %s" flow_expl rhs_hint_expl
+          else
+            Format.sprintf "which itself %s %s" flow_expl rhs_hint_expl )
+      in
+      if first then
+        lhs_expl :: rhs_expl :: expls
+      else
+        rhs_expl :: expls
+    | Witness lhs :: Flow dir :: Prj_symm_lhs prj :: Witness rhs :: rest ->
+      let expls = aux (Witness rhs :: rest) ~first:false in
+      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
+      let flow_expl = explain_flow dir in
+      let prj_expl = explain_symm_prj prj `Lhs in
+      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
+      let rhs_expl =
+        ( rhs_hint_pos,
+          if first then
+            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
+          else
+            Format.sprintf
+              "which itself %s %s, %s"
+              flow_expl
+              rhs_hint_expl
+              prj_expl )
+      in
+      if first then
+        lhs_expl :: rhs_expl :: expls
+      else
+        rhs_expl :: expls
+    | Witness lhs :: Prj_symm_rhs prj :: Flow dir :: Witness rhs :: rest ->
+      let expls = aux (Witness rhs :: rest) ~first:false in
+      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
+      let flow_expl = explain_flow dir in
+      let prj_expl = explain_symm_prj prj `Rhs in
+      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
+      let rhs_expl =
+        ( rhs_hint_pos,
+          if first then
+            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
+          else
+            Format.sprintf
+              "which itself %s %s, %s"
+              flow_expl
+              rhs_hint_expl
+              prj_expl )
+      in
+      if first then
+        lhs_expl :: rhs_expl :: expls
+      else
+        rhs_expl :: expls
+    | Witness lhs :: Flow dir :: Prj_asymm_left prj :: Witness rhs :: rest ->
+      let expls = aux (Witness rhs :: rest) ~first:false in
+
+      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
+
+      let flow_expl = explain_flow dir in
+      let prj_expl = explain_asymm_prj prj in
+      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
+      let rhs_expl =
+        ( rhs_hint_pos,
+          if first then
+            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
+          else
+            Format.sprintf
+              "which itself %s %s, %s"
+              flow_expl
+              rhs_hint_expl
+              prj_expl )
+      in
+      if first then
+        lhs_expl :: rhs_expl :: expls
+      else
+        rhs_expl :: expls
+    | Witness lhs :: Prj_asymm_right prj :: Flow dir :: Witness rhs :: rest ->
+      let expls = aux (Witness rhs :: rest) ~first:false in
+      let lhs_expl = prefix_first ~first @@ explain_witness lhs in
+      let flow_expl = explain_flow dir in
+      let prj_expl = explain_asymm_prj prj in
+      let (rhs_hint_pos, rhs_hint_expl) = explain_witness rhs in
+      let rhs_expl =
+        ( rhs_hint_pos,
+          if first then
+            Format.sprintf "%s %s, %s" flow_expl rhs_hint_expl prj_expl
+          else
+            Format.sprintf
+              "which itself %s %s, %s"
+              flow_expl
+              rhs_hint_expl
+              prj_expl )
+      in
+      if first then
+        lhs_expl :: rhs_expl :: expls
+      else
+        rhs_expl :: expls
+    (* TODO(mjt) the cases above are the only valid path prefixes; this should
+       be encoded in the type *)
+    | _ -> []
+  in
+  aux ps ~first:true
+
+let explain t ~complexity:_ = explain_path @@ to_path @@ normalize t
+
+let debug t =
+  explain t ~complexity:0
+  @ [
+      ( Pos_or_decl.none,
+        Format.sprintf "Flow:\n%s"
+        @@ Hh_json.json_to_string ~pretty:true
+        @@ to_json
+        @@ normalize t );
+    ]
+
+(* ~~ Aliases ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+type t = locl_phase t_
+
+let pp : type ph. _ -> ph t_ -> unit = (fun fmt r -> pp_t_ fmt r)
+
+let show r = Format.asprintf "%a" pp r
+
+type decl_t = decl_phase t_
+
+let rec localize : decl_phase t_ -> locl_phase t_ = function
+  | Rnone -> Rnone
+  | Ridx_vector_from_decl p -> Ridx_vector_from_decl p
+  | Rinout_param p -> Rinout_param p
+  | Rtypeconst (r1, p, q, r2) -> Rtypeconst (localize r1, p, q, localize r2)
+  | Rcstr_on_generics (a, b) -> Rcstr_on_generics (a, b)
+  | Rwitness_from_decl p -> Rwitness_from_decl p
+  | Rret_fun_kind_from_decl (p, r) -> Rret_fun_kind_from_decl (p, r)
+  | Rclass_class (p, r) -> Rclass_class (p, r)
+  | Rvar_param_from_decl p -> Rvar_param_from_decl p
+  | Rglobal_fun_param p -> Rglobal_fun_param p
+  | Renforceable p -> Renforceable p
+  | Rimplicit_upper_bound (p, q) -> Rimplicit_upper_bound (p, q)
+  | Rsolve_fail p -> Rsolve_fail p
+  | Rmissing_optional_field (p, q) -> Rmissing_optional_field (p, q)
+  | Rglobal_class_prop p -> Rglobal_class_prop p
+  | Rhint p -> Rhint p
+  | Rvarray_or_darray_key p -> Rvarray_or_darray_key p
+  | Rvec_or_dict_key p -> Rvec_or_dict_key p
+  | Rglobal_fun_ret p -> Rglobal_fun_ret p
+  | Rinstantiate (r1, s, r2) -> Rinstantiate (localize r1, s, localize r2)
+  | Rexpr_dep_type (r, s, t) -> Rexpr_dep_type (localize r, s, t)
+  | Rtconst_no_cstr id -> Rtconst_no_cstr id
+  | Rdefault_capability p -> Rdefault_capability p
+  | Rdynamic_coercion r -> Rdynamic_coercion r
+  | Rsupport_dynamic_type p -> Rsupport_dynamic_type p
+  | Rglobal_type_variable_generics (p, tp, n) ->
+    Rglobal_type_variable_generics (p, tp, n)
+  | Rinvalid -> Rinvalid
+  | Rpessimised_inout p -> Rpessimised_inout p
+  | Rpessimised_return p -> Rpessimised_return p
+  | Rpessimised_prop p -> Rpessimised_prop p
+  | Rpessimised_this p -> Rpessimised_this p
+
+(* -- ureason --------------------------------------------------------------- *)
+type ureason =
+  | URnone
+  | URassign
+  | URassign_inout
+  | URhint
+  | URreturn
+  | URforeach
+  | URthrow
+  | URvector
+  | URkey of string
+  | URvalue of string
+  | URawait
+  | URyield
+  | URxhp of string * string  (** Name of XHP class, Name of XHP attribute *)
+  | URxhp_spread
+  | URindex of string
+  | URelement of string
+  | URparam
+  | URparam_inout
+  | URarray_value
+  | URpair_value
+  | URtuple_access
+  | URpair_access
+  | URnewtype_cstr
+  | URclass_req
+  | URenum
+  | URenum_include
+  | URenum_cstr
+  | URenum_underlying
+  | URenum_incompatible_cstr
+  | URtypeconst_cstr
+  | URsubsume_tconst_cstr
+  | URsubsume_tconst_assign
+  | URclone
+  | URusing
+  | URstr_concat
+  | URstr_interp
+  | URdynamic_prop
+  | URlabel
+[@@deriving show]
+
+let index_array = URindex "array"
+
+let index_tuple = URindex "tuple"
+
+let index_class s = URindex (strip_ns s)
+
+let set_element s = URelement (strip_ns s)
+
+let string_of_ureason = function
+  | URnone -> "Typing error"
+  | URreturn -> "Invalid return type"
+  | URhint -> "Wrong type hint"
+  | URassign -> "Invalid assignment"
+  | URassign_inout -> "Invalid assignment to an `inout` parameter"
+  | URforeach -> "Invalid `foreach`"
+  | URthrow -> "Invalid exception"
+  | URvector -> "Some elements in this collection are incompatible"
+  | URkey s -> "The keys of this `" ^ strip_ns s ^ "` are incompatible"
+  | URvalue s -> "The values of this `" ^ strip_ns s ^ "` are incompatible"
+  | URawait -> "`await` can only operate on an `Awaitable`"
+  | URyield -> "Invalid `yield`"
+  | URxhp (cls, attr) ->
+    "Invalid xhp value for attribute "
+    ^ Markdown_lite.md_codify attr
+    ^ " in "
+    ^ (strip_ns cls |> Markdown_lite.md_codify)
+  | URxhp_spread -> "The attribute spread operator cannot be called on non-XHP"
+  | URindex s -> "Invalid index type for this " ^ strip_ns s
+  | URelement s -> "Invalid element type for this " ^ strip_ns s
+  | URparam -> "Invalid argument"
+  | URparam_inout -> "Invalid argument to an `inout` parameter"
+  | URarray_value -> "Incompatible field values"
+  | URpair_value -> "Incompatible pair values"
+  | URtuple_access ->
+    "Tuple elements can only be accessed with an integer literal"
+  | URpair_access ->
+    "Pair elements can only be accessed with an integer literal"
+  | URnewtype_cstr -> "Invalid constraint on `newtype`"
+  | URclass_req -> "Unable to satisfy trait/interface requirement"
+  | URenum -> "Constant does not match the type of the enum it is in"
+  | URenum_include -> "Inclusion of enum of incompatible type"
+  | URenum_cstr -> "Invalid constraint on enum"
+  | URenum_underlying -> "Invalid underlying type for enum"
+  | URenum_incompatible_cstr ->
+    "Underlying type for enum is incompatible with constraint"
+  | URtypeconst_cstr -> "Unable to satisfy constraint on this type constant"
+  | URsubsume_tconst_cstr ->
+    "The constraint on this type constant is inconsistent with its parent"
+  | URsubsume_tconst_assign ->
+    "The assigned type of this type constant is inconsistent with its parent"
+  | URclone -> "Clone cannot be called on non-object"
+  | URusing -> "Using cannot be used on non-disposable expression"
+  | URstr_concat ->
+    "String concatenation can only be performed on string and int arguments"
+  | URstr_interp ->
+    "Only string and int values can be used in string interpolation"
+  | URdynamic_prop -> "Dynamic access of property"
+  | URlabel ->
+    "This label is not a valid reference to a member of the given enum class"

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<782d3dc8821b811507054cbd42faf7b0>>
+// @generated SignedSource<<f67d74f6a0849845644bf9a4700589d1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -87,6 +87,8 @@ arena_deserializer::impl_deserialize_in_arena!(Blame<'arena>);
 
 pub use oxidized::typing_reason::FieldKind;
 
+/// Symmetric projections are those applied to both sub-  and supertype during
+/// constraint solving
 #[derive(
     Clone,
     Copy,

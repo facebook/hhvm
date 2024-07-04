@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<db871cfc03ca5f2503dcfe5ebdbc6a1a>>
+// @generated SignedSource<<e79182329e5d0206b69f9abe429c3fa1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -126,6 +126,7 @@ pub enum Blame {
     Blame(pos::Pos, BlameSource),
 }
 
+/// Shape field kinds
 #[derive(
     Clone,
     Copy,
@@ -153,6 +154,8 @@ pub enum FieldKind {
 impl TrivialDrop for FieldKind {}
 arena_deserializer::impl_deserialize_in_arena!(FieldKind);
 
+/// Symmetric projections are those applied to both sub-  and supertype during
+/// constraint solving
 #[derive(
     Clone,
     Debug,
@@ -189,6 +192,8 @@ pub enum PrjSymm {
     PrjSymmAccess,
 }
 
+/// Asymmetric projections are those applied to only one of the sub- or
+/// supertype during constraint solving
 #[derive(
     Clone,
     Copy,

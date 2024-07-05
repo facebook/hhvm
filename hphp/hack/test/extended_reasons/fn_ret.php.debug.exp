@@ -40,10 +40,12 @@ flows into this hint
 
 File "fn_ret.php", line 7, character 17 - line 7, character 20:
 
-Flow:
+Path:
 {
-  "Rflow":[
+  "stats":{"max_depth":0,"length":1,"reversals":0},
+  "path_elems":[
     {"Rhint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+    {"Edge":{"dir":"Fwd"}},
     {"Rhint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
   ]
 }
@@ -109,20 +111,16 @@ which itself flows into this hint
 
 File "fn_ret.php", line 7, character 17 - line 7, character 20:
 
-Flow:
+Path:
 {
-  "Rflow":[
-    {
-      "Rflow":[
-        {
-          "Rflow":[
-            {"Rhint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
-            {"Rwitness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]}
-          ]
-        },
-        {"Rwitness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]}
-      ]
-    },
+  "stats":{"max_depth":0,"length":3,"reversals":0},
+  "path_elems":[
+    {"Rhint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+    {"Edge":{"dir":"Fwd"}},
+    {"Rwitness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]},
+    {"Edge":{"dir":"Fwd"}},
+    {"Rwitness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]},
+    {"Edge":{"dir":"Fwd"}},
     {"Rhint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
   ]
 }

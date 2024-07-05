@@ -90,39 +90,24 @@ which itself flows down into this hint as the 1st function parameter
 
 File "fn_call.php", line 3, character 14 - line 3, character 19:
 
-Flow:
+Path:
 {
-  "Rflow":[
+  "stats":{"max_depth":1,"length":5,"reversals":1},
+  "path_elems":[
+    {"Rhint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]},
+    {"Edge":{"dir":"Fwd"}},
     {
-      "Rflow":[
-        {
-          "Rflow":[
-            {
-              "Rflow":[
-                {"Rhint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]},
-                {
-                  "Rwitness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]
-                }
-              ]
-            },
-            {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]}
-          ]
-        },
-        {
-          "Rprj":[
-            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-            {
-              "Rflow":[
-                {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":5}]},
-                {
-                  "Rsupport_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "Rwitness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]
     },
+    {"Edge":{"dir":"Fwd"}},
+    {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]},
+    {"Edge":{"dir":"Fwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":5}]},
+    {"Edge":{"dir":"Bwd"}},
+    {
+      "Rsupport_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
+    },
+    {"Edge":{"dir":"Fwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
     {"Rhint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}
   ]
 }

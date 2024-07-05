@@ -106,63 +106,47 @@ which itself flows down into this hint as the required shape field `'a'`
 
 File "shape_subtyping_1.php", line 4, character 16 - line 4, character 18:
 
-Flow:
+Path:
 {
-  "Rflow":[
+  "stats":{"max_depth":2,"length":7,"reversals":1},
+  "path_elems":[
     {
-      "Rflow":[
-        {
-          "Rhint":[{"filename":"shape_subtyping_1.php","line":9,"char_start":16,"char_end":19}]
-        },
-        {
-          "Rprj":[
-            {"Symm":[{" Prj_symm_shape":["a",{"Required":[]},{"Required":[]}]}]},
-            {
-              "Rflow":[
-                {
-                  "Rflow":[
-                    {
-                      "Rflow":[
-                        {
-                          "Rflow":[
-                            {
-                              "Rhint":[{"filename":"shape_subtyping_1.php","line":9,"char_start":3,"char_end":20}]
-                            },
-                            {
-                              "Rwitness":[{"filename":"shape_subtyping_1.php","line":9,"char_start":22,"char_end":23}]
-                            }
-                          ]
-                        },
-                        {
-                          "Rwitness":[{"filename":"shape_subtyping_1.php","line":11,"char_start":29,"char_end":30}]
-                        }
-                      ]
-                    },
-                    {
-                      "Rprj":[
-                        {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-                        {
-                          "Rflow":[
-                            {
-                              "Rwitness":[{"filename":"shape_subtyping_1.php","line":11,"char_start":3,"char_end":27}]
-                            },
-                            {
-                              "Rsupport_dynamic_type":[{"filename":"shape_subtyping_1.php","line":3,"char_start":10,"char_end":34}]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "Rhint":[{"filename":"shape_subtyping_1.php","line":4,"char_start":3,"char_end":19}]
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "Rhint":[{"filename":"shape_subtyping_1.php","line":9,"char_start":16,"char_end":19}]
+    },
+    {
+      "Edge":{
+        "dir":"Fwd",
+        "in_to":{"Symm":[{" Prj_symm_shape":["a",{"Required":[]},{"Required":[]}]}]}
+      }
+    },
+    {
+      "Rhint":[{"filename":"shape_subtyping_1.php","line":9,"char_start":3,"char_end":20}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"shape_subtyping_1.php","line":9,"char_start":22,"char_end":23}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"shape_subtyping_1.php","line":11,"char_start":29,"char_end":30}]
+    },
+    {"Edge":{"dir":"Fwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Rwitness":[{"filename":"shape_subtyping_1.php","line":11,"char_start":3,"char_end":27}]
+    },
+    {"Edge":{"dir":"Bwd"}},
+    {
+      "Rsupport_dynamic_type":[{"filename":"shape_subtyping_1.php","line":3,"char_start":10,"char_end":34}]
+    },
+    {"Edge":{"dir":"Fwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Rhint":[{"filename":"shape_subtyping_1.php","line":4,"char_start":3,"char_end":19}]
+    },
+    {
+      "Edge":{
+        "dir":"Fwd",
+        "out_of":{"Symm":[{" Prj_symm_shape":["a",{"Required":[]},{"Required":[]}]}]}
+      }
     },
     {
       "Rhint":[{"filename":"shape_subtyping_1.php","line":4,"char_start":16,"char_end":18}]

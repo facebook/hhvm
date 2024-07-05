@@ -129,78 +129,46 @@ which itself flows into this hint
 
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
-Flow:
+Path:
 {
-  "Rflow":[
+  "stats":{"max_depth":2,"length":9,"reversals":0},
+  "path_elems":[
     {
-      "Rflow":[
-        {
-          "Rflow":[
-            {
-              "Rflow":[
-                {
-                  "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
-                },
-                {
-                  "Rwitness":[{"filename":"refinment_is.php","line":7,"char_start":21,"char_end":22}]
-                }
-              ]
-            },
-            {
-              "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":7}]
-            }
-          ]
-        },
-        {
-          "Rprj":[
-            {"Asymm":["Sub","Prj_asymm_inter"]},
-            {
-              "Rflow":[
-                {
-                  "Rflow":[
-                    {
-                      "Rflow":[
-                        {
-                          "Ris_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
-                        },
-                        {
-                          "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
-                        }
-                      ]
-                    },
-                    {
-                      "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
-                    }
-                  ]
-                },
-                {
-                  "Rprj":[
-                    {"Asymm":["Sub","Prj_asymm_union"]},
-                    {
-                      "Rflow":[
-                        {
-                          "Rflow":[
-                            {
-                              "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
-                            },
-                            {
-                              "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
-                            }
-                          ]
-                        },
-                        {
-                          "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
     },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":7,"char_start":21,"char_end":22}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":7}]
+    },
+    {"Edge":{"dir":"Fwd","in_to":{"Asymm":["Sub","Prj_asymm_inter"]}}},
+    {
+      "Ris_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
+    },
+    {"Edge":{"dir":"Fwd","in_to":{"Asymm":["Sub","Prj_asymm_union"]}}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
+    },
+    {"Edge":{"dir":"Fwd"}},
     {
       "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
     }
@@ -317,52 +285,34 @@ which itself flows into this hint
 
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
-Flow:
+Path:
 {
-  "Rflow":[
+  "stats":{"max_depth":1,"length":6,"reversals":0},
+  "path_elems":[
     {
-      "Rflow":[
-        {
-          "Rflow":[
-            {
-              "Rflow":[
-                {
-                  "Ris_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
-                },
-                {
-                  "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
-                }
-              ]
-            },
-            {
-              "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
-            }
-          ]
-        },
-        {
-          "Rprj":[
-            {"Asymm":["Sub","Prj_asymm_union"]},
-            {
-              "Rflow":[
-                {
-                  "Rflow":[
-                    {
-                      "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
-                    },
-                    {
-                      "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
-                    }
-                  ]
-                },
-                {
-                  "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "Ris_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
     },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
+    },
+    {"Edge":{"dir":"Fwd","in_to":{"Asymm":["Sub","Prj_asymm_union"]}}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
+    },
+    {"Edge":{"dir":"Fwd"}},
     {
       "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
     }
@@ -492,64 +442,38 @@ which itself flows into this hint
 
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
-Flow:
+Path:
 {
-  "Rflow":[
+  "stats":{"max_depth":2,"length":7,"reversals":0},
+  "path_elems":[
     {
-      "Rflow":[
-        {
-          "Rhint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
-        },
-        {
-          "Rprj":[
-            {"Asymm":["Sub","Prj_asymm_inter"]},
-            {
-              "Rflow":[
-                {
-                  "Rflow":[
-                    {
-                      "Rflow":[
-                        {
-                          "Ris_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
-                        },
-                        {
-                          "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
-                        }
-                      ]
-                    },
-                    {
-                      "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
-                    }
-                  ]
-                },
-                {
-                  "Rprj":[
-                    {"Asymm":["Sub","Prj_asymm_union"]},
-                    {
-                      "Rflow":[
-                        {
-                          "Rflow":[
-                            {
-                              "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
-                            },
-                            {
-                              "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
-                            }
-                          ]
-                        },
-                        {
-                          "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "Rhint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
     },
+    {"Edge":{"dir":"Fwd","in_to":{"Asymm":["Sub","Prj_asymm_inter"]}}},
+    {
+      "Ris_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
+    },
+    {"Edge":{"dir":"Fwd","in_to":{"Asymm":["Sub","Prj_asymm_union"]}}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
+    },
+    {"Edge":{"dir":"Fwd"}},
     {
       "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
     }

@@ -99,58 +99,40 @@ which itself flows into this hint
 
 File "ctor_generic.php", line 20, character 63 - line 20, character 66:
 
-Flow:
+Path:
 {
-  "Rflow":[
+  "stats":{"max_depth":1,"length":6,"reversals":1},
+  "path_elems":[
     {
-      "Rflow":[
-        {
-          "Rflow":[
-            {
-              "Rflow":[
-                {
-                  "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":39,"char_end":44}]
-                },
-                {
-                  "Rwitness":[{"filename":"ctor_generic.php","line":20,"char_start":46,"char_end":47}]
-                }
-              ]
-            },
-            {
-              "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":29,"char_end":30}]
-            }
-          ]
-        },
-        {
-          "Rprj":[
-            {"Symm":[{"Prj_symm_fn_param":[1,1]}]},
-            {
-              "Rflow":[
-                {
-                  "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
-                },
-                {
-                  "Rsupport_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
-                }
-              ]
-            }
-          ]
-        }
+      "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":39,"char_end":44}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"ctor_generic.php","line":20,"char_start":46,"char_end":47}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":29,"char_end":30}]
+    },
+    {"Edge":{"dir":"Fwd","in_to":{"Symm":[{"Prj_symm_fn_param":[1,1]}]}}},
+    {
+      "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
+    },
+    {"Edge":{"dir":"Bwd"}},
+    {
+      "Rsupport_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
+    },
+    {"Edge":{"dir":"Fwd","out_of":{"Symm":[{"Prj_symm_fn_param":[1,1]}]}}},
+    {
+      "Rtype_variable_generics":[
+        {"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40},
+        "TB",
+        "TestServiceBase"
       ]
     },
+    {"Edge":{"dir":"Fwd"}},
     {
-      "Rflow":[
-        {
-          "Rtype_variable_generics":[
-            {"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40},
-            "TB",
-            "TestServiceBase"
-          ]
-        },
-        {
-          "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":63,"char_end":66}]
-        }
-      ]
+      "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":63,"char_end":66}]
     }
   ]
 }

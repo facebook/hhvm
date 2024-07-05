@@ -114,61 +114,42 @@ which itself flows into this hint
 
 File "refinement_equal.php", line 6, character 36 - line 6, character 36:
 
-Flow:
+Path:
 {
-  "Rflow":[
+  "stats":{"max_depth":0,"length":8,"reversals":0},
+  "path_elems":[
     {
-      "Rflow":[
-        {
-          "Rflow":[
-            {
-              "Rflow":[
-                {
-                  "Rflow":[
-                    {
-                      "Rflow":[
-                        {
-                          "Rhint":[{"filename":"refinement_equal.php","line":6,"char_start":22,"char_end":23}]
-                        },
-                        {
-                          "Rwitness":[{"filename":"refinement_equal.php","line":6,"char_start":25,"char_end":26}]
-                        }
-                      ]
-                    },
-                    {
-                      "Rwitness":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":7}]
-                    }
-                  ]
-                },
-                {
-                  "Rflow":[
-                    {
-                      "Rflow":[
-                        {
-                          "Rtype_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15}]
-                        },
-                        {
-                          "Rwitness":[{"filename":"refinement_equal.php","line":8,"char_start":10,"char_end":11}]
-                        }
-                      ]
-                    },
-                    {
-                      "Rwitness":[{"filename":"refinement_equal.php","line":8,"char_start":5,"char_end":6}]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "Rwitness":[{"filename":"refinement_equal.php","line":12,"char_start":10,"char_end":11}]
-            }
-          ]
-        },
-        {
-          "Rwitness":[{"filename":"refinement_equal.php","line":12,"char_start":3,"char_end":12}]
-        }
-      ]
+      "Rhint":[{"filename":"refinement_equal.php","line":6,"char_start":22,"char_end":23}]
     },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinement_equal.php","line":6,"char_start":25,"char_end":26}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":7}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rtype_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinement_equal.php","line":8,"char_start":10,"char_end":11}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinement_equal.php","line":8,"char_start":5,"char_end":6}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinement_equal.php","line":12,"char_start":10,"char_end":11}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"refinement_equal.php","line":12,"char_start":3,"char_end":12}]
+    },
+    {"Edge":{"dir":"Fwd"}},
     {
       "Rhint":[{"filename":"refinement_equal.php","line":6,"char_start":36,"char_end":36}]
     }

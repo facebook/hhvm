@@ -110,80 +110,65 @@ which itself flows down into the constraint on the generic parameter as the 1st 
 
 File "generic_subtyping_rcvr_upper_bound.php", line 7, character 32 - line 7, character 32:
 
-Flow:
+Path:
 {
-  "Rflow":[
+  "stats":{"max_depth":1,"length":5,"reversals":1},
+  "path_elems":[
     {
-      "Rflow":[
+      "Rhint":[
         {
-          "Rflow":[
-            {
-              "Rflow":[
-                {
-                  "Rhint":[
-                    {
-                      "filename":"generic_subtyping_rcvr_upper_bound.php",
-                      "line":9,
-                      "char_start":40,
-                      "char_end":40
-                    }
-                  ]
-                },
-                {
-                  "Rwitness":[
-                    {
-                      "filename":"generic_subtyping_rcvr_upper_bound.php",
-                      "line":9,
-                      "char_start":42,
-                      "char_end":43
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "Rwitness":[
-                {
-                  "filename":"generic_subtyping_rcvr_upper_bound.php",
-                  "line":10,
-                  "char_start":20,
-                  "char_end":21
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "Rprj":[
-            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-            {
-              "Rflow":[
-                {
-                  "Rwitness":[
-                    {
-                      "filename":"generic_subtyping_rcvr_upper_bound.php",
-                      "line":10,
-                      "char_start":3,
-                      "char_end":18
-                    }
-                  ]
-                },
-                {
-                  "Rsupport_dynamic_type":[
-                    {
-                      "filename":"generic_subtyping_rcvr_upper_bound.php",
-                      "line":7,
-                      "char_start":10,
-                      "char_end":25
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
+          "filename":"generic_subtyping_rcvr_upper_bound.php",
+          "line":9,
+          "char_start":40,
+          "char_end":40
         }
       ]
     },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[
+        {
+          "filename":"generic_subtyping_rcvr_upper_bound.php",
+          "line":9,
+          "char_start":42,
+          "char_end":43
+        }
+      ]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[
+        {
+          "filename":"generic_subtyping_rcvr_upper_bound.php",
+          "line":10,
+          "char_start":20,
+          "char_end":21
+        }
+      ]
+    },
+    {"Edge":{"dir":"Fwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Rwitness":[
+        {
+          "filename":"generic_subtyping_rcvr_upper_bound.php",
+          "line":10,
+          "char_start":3,
+          "char_end":18
+        }
+      ]
+    },
+    {"Edge":{"dir":"Bwd"}},
+    {
+      "Rsupport_dynamic_type":[
+        {
+          "filename":"generic_subtyping_rcvr_upper_bound.php",
+          "line":7,
+          "char_start":10,
+          "char_end":25
+        }
+      ]
+    },
+    {"Edge":{"dir":"Fwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
     {
       "Rcstr_on_generics":[
         {

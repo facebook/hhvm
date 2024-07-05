@@ -2465,6 +2465,10 @@ type direction =
   | Fwd
   | Bwd
 
+let direction_to_json = function
+  | Fwd -> Hh_json.string_ "Fwd"
+  | Bwd -> Hh_json.string_ "Bwd"
+
 let flip = function
   | Fwd -> Bwd
   | Bwd -> Fwd
@@ -2477,6 +2481,22 @@ type path_elem =
     }
   | Node of locl_phase t_
 
+let path_elem_to_json = function
+  | Edge { out_of; dir; in_to } ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Edge",
+            JSON_Object
+              (List.filter_opt
+                 [
+                   Some ("dir", direction_to_json dir);
+                   Option.map out_of ~f:(fun prj -> ("out_of", prj_to_json prj));
+                   Option.map in_to ~f:(fun prj -> ("in_to", prj_to_json prj));
+                 ]) );
+        ])
+  | Node witness -> to_json witness
+
 let edge out_of dir in_to = Edge { out_of; dir; in_to }
 
 type stats = {
@@ -2484,6 +2504,15 @@ type stats = {
   length: int;
   reversals: int;
 }
+
+let stats_to_json { max_depth; length; reversals } =
+  Hh_json.(
+    JSON_Object
+      [
+        ("max_depth", int_ max_depth);
+        ("length", int_ length);
+        ("reversals", int_ reversals);
+      ])
 
 let explain_reversals n =
   if n = 1 then
@@ -2511,6 +2540,14 @@ type path = {
   path_elems: path_elem list;
   stats: stats;
 }
+
+let path_to_json { stats; path_elems } =
+  Hh_json.(
+    JSON_Object
+      [
+        ("stats", stats_to_json stats);
+        ("path_elems", array_ path_elem_to_json path_elems);
+      ])
 
 let bracket prj =
   match prj with
@@ -2680,13 +2717,15 @@ let explain_path { path_elems; stats } =
 let explain t ~complexity:_ = explain_path @@ to_path @@ normalize t
 
 let debug t =
-  explain t ~complexity:0
+  let t = normalize t in
+  let path = to_path t in
+
+  explain_path path
   @ [
       ( Pos_or_decl.none,
-        Format.sprintf "Flow:\n%s"
+        Format.sprintf "Path:\n%s"
         @@ Hh_json.json_to_string ~pretty:true
-        @@ to_json
-        @@ normalize t );
+        @@ path_to_json path );
     ]
 
 (* ~~ Aliases ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)

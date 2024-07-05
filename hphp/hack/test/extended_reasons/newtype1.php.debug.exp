@@ -82,59 +82,38 @@ which itself flows into this hint
 
 File "newtype1.php--file2.php", line 3, character 22 - line 3, character 25:
 
-Flow:
+Path:
 {
-  "Rflow":[
+  "stats":{"max_depth":1,"length":7,"reversals":1},
+  "path_elems":[
     {
-      "Rflow":[
-        {
-          "Rflow":[
-            {
-              "Rflow":[
-                {
-                  "Rflow":[
-                    {
-                      "Rflow":[
-                        {
-                          "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":24,"char_end":26}]
-                        },
-                        {
-                          "Rhint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
-                        }
-                      ]
-                    },
-                    {
-                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
-                    }
-                  ]
-                },
-                {
-                  "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
-                }
-              ]
-            },
-            {
-              "Rprj":[
-                {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-                {
-                  "Rflow":[
-                    {
-                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":10,"char_end":20}]
-                    },
-                    {
-                      "Rsupport_dynamic_type":[{"filename":"newtype1.php--file2.php","line":3,"char_start":10,"char_end":20}]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":18,"char_end":20}]
-        }
-      ]
+      "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":24,"char_end":26}]
     },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rhint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
+    },
+    {"Edge":{"dir":"Fwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":10,"char_end":20}]
+    },
+    {"Edge":{"dir":"Bwd"}},
+    {
+      "Rsupport_dynamic_type":[{"filename":"newtype1.php--file2.php","line":3,"char_start":10,"char_end":20}]
+    },
+    {"Edge":{"dir":"Fwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":18,"char_end":20}]
+    },
+    {"Edge":{"dir":"Fwd"}},
     {
       "Rhint":[{"filename":"newtype1.php--file2.php","line":3,"char_start":22,"char_end":25}]
     }

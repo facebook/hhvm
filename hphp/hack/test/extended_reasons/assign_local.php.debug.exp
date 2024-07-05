@@ -96,59 +96,38 @@ which itself flows down into this hint as the 1st function parameter
 
 File "assign_local.php", line 7, character 14 - line 7, character 16:
 
-Flow:
+Path:
 {
-  "Rflow":[
+  "stats":{"max_depth":1,"length":7,"reversals":1},
+  "path_elems":[
     {
-      "Rflow":[
-        {
-          "Rflow":[
-            {
-              "Rflow":[
-                {
-                  "Rflow":[
-                    {
-                      "Rflow":[
-                        {
-                          "Rhint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
-                        },
-                        {
-                          "Rwitness":[{"filename":"assign_local.php","line":9,"char_start":20,"char_end":21}]
-                        }
-                      ]
-                    },
-                    {
-                      "Rwitness":[{"filename":"assign_local.php","line":10,"char_start":8,"char_end":9}]
-                    }
-                  ]
-                },
-                {
-                  "Rwitness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":4}]
-                }
-              ]
-            },
-            {
-              "Rwitness":[{"filename":"assign_local.php","line":11,"char_start":7,"char_end":8}]
-            }
-          ]
-        },
-        {
-          "Rprj":[
-            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-            {
-              "Rflow":[
-                {
-                  "Rwitness":[{"filename":"assign_local.php","line":11,"char_start":3,"char_end":5}]
-                },
-                {
-                  "Rsupport_dynamic_type":[{"filename":"assign_local.php","line":7,"char_start":10,"char_end":12}]
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "Rhint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
     },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"assign_local.php","line":9,"char_start":20,"char_end":21}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"assign_local.php","line":10,"char_start":8,"char_end":9}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":4}]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[{"filename":"assign_local.php","line":11,"char_start":7,"char_end":8}]
+    },
+    {"Edge":{"dir":"Fwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Rwitness":[{"filename":"assign_local.php","line":11,"char_start":3,"char_end":5}]
+    },
+    {"Edge":{"dir":"Bwd"}},
+    {
+      "Rsupport_dynamic_type":[{"filename":"assign_local.php","line":7,"char_start":10,"char_end":12}]
+    },
+    {"Edge":{"dir":"Fwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
     {
       "Rhint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
     }

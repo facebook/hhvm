@@ -72,87 +72,72 @@ which itself flows down into this hint as an element of the intersection type
 
 File "intersection_subtyping_r.php", line 7, character 31 - line 7, character 31:
 
-Flow:
+Path:
 {
-  "Rflow":[
+  "stats":{"max_depth":1,"length":5,"reversals":0},
+  "path_elems":[
     {
-      "Rflow":[
+      "Rhint":[
         {
-          "Rflow":[
-            {
-              "Rflow":[
-                {
-                  "Rhint":[
-                    {
-                      "filename":"intersection_subtyping_r.php",
-                      "line":7,
-                      "char_start":18,
-                      "char_end":18
-                    }
-                  ]
-                },
-                {
-                  "Rwitness":[
-                    {
-                      "filename":"intersection_subtyping_r.php",
-                      "line":7,
-                      "char_start":20,
-                      "char_end":21
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "Rwitness":[
-                {
-                  "filename":"intersection_subtyping_r.php",
-                  "line":8,
-                  "char_start":10,
-                  "char_end":11
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "Rwitness":[
-            {
-              "filename":"intersection_subtyping_r.php",
-              "line":8,
-              "char_start":3,
-              "char_end":12
-            }
-          ]
+          "filename":"intersection_subtyping_r.php",
+          "line":7,
+          "char_start":18,
+          "char_end":18
         }
       ]
     },
+    {"Edge":{"dir":"Fwd"}},
     {
-      "Rflow":[
+      "Rwitness":[
         {
-          "Rprj":[
-            {"Asymm":["Super","Prj_asymm_inter"]},
-            {
-              "Rhint":[
-                {
-                  "filename":"intersection_subtyping_r.php",
-                  "line":7,
-                  "char_start":26,
-                  "char_end":32
-                }
-              ]
-            }
-          ]
-        },
+          "filename":"intersection_subtyping_r.php",
+          "line":7,
+          "char_start":20,
+          "char_end":21
+        }
+      ]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[
         {
-          "Rhint":[
-            {
-              "filename":"intersection_subtyping_r.php",
-              "line":7,
-              "char_start":31,
-              "char_end":31
-            }
-          ]
+          "filename":"intersection_subtyping_r.php",
+          "line":8,
+          "char_start":10,
+          "char_end":11
+        }
+      ]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rwitness":[
+        {
+          "filename":"intersection_subtyping_r.php",
+          "line":8,
+          "char_start":3,
+          "char_end":12
+        }
+      ]
+    },
+    {"Edge":{"dir":"Fwd"}},
+    {
+      "Rhint":[
+        {
+          "filename":"intersection_subtyping_r.php",
+          "line":7,
+          "char_start":26,
+          "char_end":32
+        }
+      ]
+    },
+    {"Edge":{"dir":"Fwd","out_of":{"Asymm":["Super","Prj_asymm_inter"]}}},
+    {
+      "Rhint":[
+        {
+          "filename":"intersection_subtyping_r.php",
+          "line":7,
+          "char_start":31,
+          "char_end":31
         }
       ]
     }

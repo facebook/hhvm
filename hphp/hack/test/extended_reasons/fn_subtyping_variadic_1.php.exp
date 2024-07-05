@@ -45,7 +45,7 @@ flows up into this hint as the 2nd function parameter
 
 File "fn_subtyping_variadic_1.php", line 6, character 25 - line 6, character 51:
 
-which itself flows from this declaration
+which itself flows from this declaration because the type was decomposed
 
  6 | function foo_variadic_1(»(function(Sub, Super):void)« $_): void {}
  7 | function bar_variadic_1((function(Sub...):void) $x): void {
@@ -54,7 +54,7 @@ which itself flows from this declaration
 
 File "fn_subtyping_variadic_1.php", line 6, character 25 - line 6, character 51:
 
-which itself flows from this hint
+which itself flows from this hint because they are required to be subtypes
 
  6 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
  7 | function bar_variadic_1(»(function(Sub...):void)« $x): void {
@@ -72,7 +72,7 @@ which itself flows up from this function or method  as the 1st function paramete
 
 File "fn_subtyping_variadic_1.php", line 6, character 10 - line 6, character 23:
 
-which itself flows into this expression
+which itself flows into this expression because they are required to be subtypes
 
  6 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
  7 | function bar_variadic_1((function(Sub...):void) $x): void {
@@ -90,7 +90,7 @@ which itself flows down from this expression as the 1st function parameter
 
 File "fn_subtyping_variadic_1.php", line 8, character 18 - line 8, character 19:
 
-which itself flows from this expression
+which itself flows from this expression because the local variable has this type
 
  6 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
  7 | function bar_variadic_1((function(Sub...):void) »$x«): void {
@@ -99,7 +99,7 @@ which itself flows from this expression
 
 File "fn_subtyping_variadic_1.php", line 7, character 49 - line 7, character 50:
 
-which itself flows from this hint
+which itself flows from this hint because it is a parameter hint
 
  6 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
  7 | function bar_variadic_1(»(function(Sub...):void)« $x): void {

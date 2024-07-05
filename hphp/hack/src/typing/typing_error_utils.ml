@@ -5809,9 +5809,13 @@ end = struct
            ~f:(function
              | GlobalOptions.Extended complexity ->
                Typing_reason.(
-                 explain (flow ~from:r_sub ~into:r_super) ~complexity)
+                 explain
+                   (flow ~from:r_sub ~into:r_super ~kind:Flow_subtype_toplevel)
+                   ~complexity)
              | GlobalOptions.Debug ->
-               Typing_reason.(debug (flow ~from:r_sub ~into:r_super)))
+               Typing_reason.(
+                 debug
+                   (flow ~from:r_sub ~into:r_super ~kind:Flow_subtype_toplevel)))
            (TypecheckerOptions.tco_extended_reasons
               Typing_env_types.(env.genv.tcopt))
        in
@@ -5928,11 +5932,18 @@ end = struct
                | GlobalOptions.Extended complexity ->
                  Typing_reason.(
                    explain
-                     (flow ~from:reason_sub ~into:reason_super)
+                     (flow
+                        ~from:reason_sub
+                        ~into:reason_super
+                        ~kind:Flow_subtype_toplevel)
                      ~complexity)
                | GlobalOptions.Debug ->
                  Typing_reason.(
-                   debug (flow ~from:reason_sub ~into:reason_super)))
+                   debug
+                     (flow
+                        ~from:reason_sub
+                        ~into:reason_super
+                        ~kind:Flow_subtype_toplevel)))
              (TypecheckerOptions.tco_extended_reasons
                 Typing_env_types.(env.genv.tcopt)))
     in
@@ -6076,11 +6087,18 @@ end = struct
                | GlobalOptions.Extended complexity ->
                  Typing_reason.(
                    explain
-                     (flow ~from:reason_sub ~into:reason_super)
+                     (flow
+                        ~from:reason_sub
+                        ~into:reason_super
+                        ~kind:Flow_subtype_toplevel)
                      ~complexity)
                | GlobalOptions.Debug ->
                  Typing_reason.(
-                   debug (flow ~from:reason_sub ~into:reason_super)))
+                   debug
+                     (flow
+                        ~from:reason_sub
+                        ~into:reason_super
+                        ~kind:Flow_subtype_toplevel)))
              (TypecheckerOptions.tco_extended_reasons
                 Typing_env_types.(env.genv.tcopt)))
     in

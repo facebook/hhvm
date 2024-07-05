@@ -35,7 +35,7 @@ Here's why: this hint
 
 File "assign_list.php", line 8, character 24 - line 8, character 28:
 
-flows into this hint
+flows into this hint because they are required to be subtypes
 
  8 | function bar_1(»(string,Super,bool)« $xyz): void {
  9 |   list($_, $y, $_) = $xyz;
@@ -44,7 +44,7 @@ flows into this hint
 
 File "assign_list.php", line 8, character 16 - line 8, character 34:
 
-which itself flows into this expression
+which itself flows into this expression because it is a parameter hint
 
  8 | function bar_1((string,Super,bool) »$xyz«): void {
  9 |   list($_, $y, $_) = $xyz;
@@ -53,7 +53,7 @@ which itself flows into this expression
 
 File "assign_list.php", line 8, character 36 - line 8, character 39:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  8 | function bar_1((string,Super,bool) $xyz): void {
  9 |   list($_, $y, $_) = »$xyz«;
@@ -62,7 +62,7 @@ which itself flows into this expression
 
 File "assign_list.php", line 9, character 22 - line 9, character 25:
 
-which itself flows into this type variable
+which itself flows into this type variable because of an assignment
 
  8 | function bar_1((string,Super,bool) $xyz): void {
  9 |   list($_, »$y«, $_) = $xyz;
@@ -71,7 +71,7 @@ which itself flows into this type variable
 
 File "assign_list.php", line 9, character 12 - line 9, character 13:
 
-which itself flows into this hint
+which itself flows into this hint because of inference
 
  8 | function bar_1(»(string,Super,bool)« $xyz): void {
  9 |   list($_, $y, $_) = $xyz;
@@ -80,7 +80,7 @@ which itself flows into this hint
 
 File "assign_list.php", line 8, character 16 - line 8, character 34:
 
-which itself flows into this expression
+which itself flows into this expression because it is a parameter hint
 
  8 | function bar_1((string,Super,bool) »$xyz«): void {
  9 |   list($_, $y, $_) = $xyz;
@@ -89,7 +89,7 @@ which itself flows into this expression
 
 File "assign_list.php", line 8, character 36 - line 8, character 39:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  8 | function bar_1((string,Super,bool) $xyz): void {
  9 |   list($_, $y, $_) = »$xyz«;
@@ -98,7 +98,7 @@ which itself flows into this expression
 
 File "assign_list.php", line 9, character 22 - line 9, character 25:
 
-which itself flows into this type variable
+which itself flows into this type variable because of an assignment
 
  8 | function bar_1((string,Super,bool) $xyz): void {
  9 |   list($_, »$y«, $_) = $xyz;
@@ -107,7 +107,7 @@ which itself flows into this type variable
 
 File "assign_list.php", line 9, character 12 - line 9, character 13:
 
-which itself flows into this expression
+which itself flows into this expression because of an assignment
 
  8 | function bar_1((string,Super,bool) $xyz): void {
  9 |   list($_, »$y«, $_) = $xyz;
@@ -116,7 +116,7 @@ which itself flows into this expression
 
 File "assign_list.php", line 9, character 12 - line 9, character 13:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  8 | function bar_1((string,Super,bool) $xyz): void {
  9 |   list($_, $y, $_) = $xyz;
@@ -134,7 +134,7 @@ which itself flows up into this expression as the 1st function parameter
 
 File "assign_list.php", line 10, character 3 - line 10, character 5:
 
-which itself flows from this function or method 
+which itself flows from this function or method  because they are required to be subtypes
 
  6 | function »foo«(Sub $_): void {}
  7 | 
@@ -157,55 +157,63 @@ Path:
     {
       "Rhint":[{"filename":"assign_list.php","line":8,"char_start":24,"char_end":28}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype"}},
     {
       "Rhint":[{"filename":"assign_list.php","line":8,"char_start":16,"char_end":34}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rwitness":[{"filename":"assign_list.php","line":8,"char_start":36,"char_end":39}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"assign_list.php","line":9,"char_start":22,"char_end":25}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
     {
       "Rtype_variable":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_solved"}},
     {
       "Rhint":[{"filename":"assign_list.php","line":8,"char_start":16,"char_end":34}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rwitness":[{"filename":"assign_list.php","line":8,"char_start":36,"char_end":39}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"assign_list.php","line":9,"char_start":22,"char_end":25}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
     {
       "Rtype_variable":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
     {
       "Rwitness":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"assign_list.php","line":10,"char_start":7,"char_end":8}]
     },
-    {"Edge":{"dir":"Fwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
+    },
     {
       "Rwitness":[{"filename":"assign_list.php","line":10,"char_start":3,"char_end":5}]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
       "Rsupport_dynamic_type":[{"filename":"assign_list.php","line":6,"char_start":10,"char_end":12}]
     },
-    {"Edge":{"dir":"Fwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{
+        "dir":"Fwd",
+        "kind":"Flow_subtype_toplevel",
+        "out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
+      }
+    },
     {
       "Rhint":[{"filename":"assign_list.php","line":6,"char_start":14,"char_end":16}]
     }

@@ -48,7 +48,7 @@ flows up into this hint as the invariant, 3rd type parameter of the class `\MyA`
 
 File "class_subtyping_invariant.php", line 5, character 28 - line 5, character 43:
 
-which itself flows into this hint
+which itself flows into this hint because they are subclass and superclass
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -58,7 +58,7 @@ which itself flows into this hint
 
 File "class_subtyping_invariant.php", line 13, character 32 - line 13, character 46:
 
-which itself flows into this expression
+which itself flows into this expression because it is a parameter hint
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -68,7 +68,7 @@ which itself flows into this expression
 
 File "class_subtyping_invariant.php", line 13, character 48 - line 13, character 49:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -88,7 +88,7 @@ which itself flows up into this expression as the 1st function parameter
 
 File "class_subtyping_invariant.php", line 14, character 3 - line 14, character 12:
 
-which itself flows from this function or method 
+which itself flows from this function or method  because they are required to be subtypes
 
  11 | function »takes_my_a«(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -135,6 +135,7 @@ Path:
     {
       "Edge":{
         "dir":"Fwd",
+        "kind":"Flow_prj",
         "in_to":{"Symm":[{"Prj_symm_class":["\\MyA",2,{"Inv":[{"Co":[]}]}]}]}
       }
     },
@@ -148,7 +149,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_extends"}},
     {
       "Rhint":[
         {
@@ -159,7 +160,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rwitness":[
         {
@@ -170,7 +171,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[
         {
@@ -181,7 +182,9 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
+    },
     {
       "Rwitness":[
         {
@@ -192,7 +195,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
       "Rsupport_dynamic_type":[
         {
@@ -203,7 +206,13 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{
+        "dir":"Fwd",
+        "kind":"Flow_subtype",
+        "out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
+      }
+    },
     {
       "Rhint":[
         {
@@ -217,6 +226,7 @@ Path:
     {
       "Edge":{
         "dir":"Fwd",
+        "kind":"Flow_subtype_toplevel",
         "out_of":{"Symm":[{"Prj_symm_class":["\\MyA",2,{"Inv":[{"Co":[]}]}]}]}
       }
     },
@@ -298,7 +308,7 @@ which itself flows up from this function or method  as the 1st function paramete
 
 File "class_subtyping_invariant.php", line 11, character 10 - line 11, character 19:
 
-which itself flows into this expression
+which itself flows into this expression because they are required to be subtypes
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -318,7 +328,7 @@ which itself flows down from this expression as the 1st function parameter
 
 File "class_subtyping_invariant.php", line 14, character 14 - line 14, character 15:
 
-which itself flows from this expression
+which itself flows from this expression because the local variable has this type
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -328,7 +338,7 @@ which itself flows from this expression
 
 File "class_subtyping_invariant.php", line 13, character 48 - line 13, character 49:
 
-which itself flows from this hint
+which itself flows from this hint because it is a parameter hint
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -338,7 +348,7 @@ which itself flows from this hint
 
 File "class_subtyping_invariant.php", line 13, character 32 - line 13, character 46:
 
-which itself flows from this hint
+which itself flows from this hint because they are subclass and superclass
 
  5 | class MyB<-T1, T2> extends »MyA<Sub, T1, T2>« {}
  6 | 
@@ -373,6 +383,7 @@ Path:
     {
       "Edge":{
         "dir":"Fwd",
+        "kind":"Flow_prj",
         "in_to":{"Symm":[{"Prj_symm_class":["\\MyA",2,{"Inv":[{"Contr":[]}]}]}]}
       }
     },
@@ -386,7 +397,13 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{
+        "dir":"Bwd",
+        "kind":"Flow_subtype",
+        "in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
+      }
+    },
     {
       "Rsupport_dynamic_type":[
         {
@@ -397,7 +414,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype"}},
     {
       "Rwitness":[
         {
@@ -408,7 +425,9 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{"dir":"Bwd","kind":"Flow_prj","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
+    },
     {
       "Rwitness":[
         {
@@ -419,7 +438,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_local"}},
     {
       "Rwitness":[
         {
@@ -430,7 +449,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_param_hint"}},
     {
       "Rhint":[
         {
@@ -441,7 +460,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_extends"}},
     {
       "Rhint":[
         {
@@ -455,6 +474,7 @@ Path:
     {
       "Edge":{
         "dir":"Fwd",
+        "kind":"Flow_subtype_toplevel",
         "out_of":{"Symm":[{"Prj_symm_class":["\\MyA",2,{"Inv":[{"Contr":[]}]}]}]}
       }
     },

@@ -38,7 +38,7 @@ Here's why: this hint
 
 File "refinement_equal.php", line 6, character 22 - line 6, character 23:
 
-flows into this expression
+flows into this expression because it is a parameter hint
 
  6 | function inter_equal(?A »$a«, C $c): C {
  7 |   if($a == null) {
@@ -48,7 +48,7 @@ flows into this expression
 
 File "refinement_equal.php", line 6, character 25 - line 6, character 26:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  6 | function inter_equal(?A $a, C $c): C {
  7 |   if(»$a« == null) {
@@ -58,7 +58,7 @@ which itself flows into this expression
 
 File "refinement_equal.php", line 7, character 6 - line 7, character 7:
 
-which itself flows into this type variable
+which itself flows into this type variable because of inference
 
  6 | function inter_equal(?A $a, C $c): C {
  7 |   if(»$a == null«) {
@@ -68,7 +68,7 @@ which itself flows into this type variable
 
 File "refinement_equal.php", line 7, character 6 - line 7, character 15:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  6 | function inter_equal(?A $a, C $c): C {
  7 |   if($a == null) {
@@ -78,7 +78,7 @@ which itself flows into this expression
 
 File "refinement_equal.php", line 8, character 10 - line 8, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because of an assignment
 
  6 | function inter_equal(?A $a, C $c): C {
  7 |   if($a == null) {
@@ -88,7 +88,7 @@ which itself flows into this expression
 
 File "refinement_equal.php", line 8, character 5 - line 8, character 6:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  11 |   }
  12 |   return »$z«;
@@ -96,7 +96,7 @@ which itself flows into this expression
 
 File "refinement_equal.php", line 12, character 10 - line 12, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because it is a return hint
 
  11 |   }
  12 |   »return $z;«
@@ -104,7 +104,7 @@ which itself flows into this expression
 
 File "refinement_equal.php", line 12, character 3 - line 12, character 12:
 
-which itself flows into this hint
+which itself flows into this hint because they are required to be subtypes
 
  6 | function inter_equal(?A $a, C $c): »C« {
  7 |   if($a == null) {
@@ -121,35 +121,35 @@ Path:
     {
       "Rhint":[{"filename":"refinement_equal.php","line":6,"char_start":22,"char_end":23}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rwitness":[{"filename":"refinement_equal.php","line":6,"char_start":25,"char_end":26}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":7}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_solved"}},
     {
       "Rtype_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"refinement_equal.php","line":8,"char_start":10,"char_end":11}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
     {
       "Rwitness":[{"filename":"refinement_equal.php","line":8,"char_start":5,"char_end":6}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"refinement_equal.php","line":12,"char_start":10,"char_end":11}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
       "Rwitness":[{"filename":"refinement_equal.php","line":12,"char_start":3,"char_end":12}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
       "Rhint":[{"filename":"refinement_equal.php","line":6,"char_start":36,"char_end":36}]
     }

@@ -9,7 +9,7 @@ use crate::typing_reason::*;
 impl Reason {
     pub fn rev_pos(&self) -> Option<&Pos> {
         match self {
-            T_::Rflow(r, _) => r.rev_pos(),
+            T_::Rflow(r, _, _) => r.rev_pos(),
             T_::Rprj(_, r) => r.rev_pos(),
             T_::Rrev(r) => r.pos(),
             _ => self.pos(),
@@ -120,7 +120,7 @@ impl Reason {
             | RinvariantGeneric(r, _) => r.pos(),
             RopaqueTypeFromModule(p, _, _) => Some(p),
             RdynamicCoercion(r) => r.pos(),
-            Rflow(r, _) => r.pos(),
+            Rflow(r, _, _) => r.pos(),
             Rprj(_, r) => r.pos(),
             Rrev(r) => r.rev_pos(),
         }

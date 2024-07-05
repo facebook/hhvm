@@ -53,7 +53,7 @@ flows up into this hint as the required shape field `'a'`
 
 File "shape_subtyping_4.php", line 4, character 27 - line 4, character 44:
 
-which itself flows into this hint
+which itself flows into this hint because it is the definition
 
  11 | function passes_required_a_at_bool_alias(
  12 |   »required_a_at_bool« $s,
@@ -63,7 +63,7 @@ which itself flows into this hint
 
 File "shape_subtyping_4.php", line 12, character 3 - line 12, character 20:
 
-which itself flows into this expression
+which itself flows into this expression because it is a parameter hint
 
  11 | function passes_required_a_at_bool_alias(
  12 |   required_a_at_bool »$s«,
@@ -73,7 +73,7 @@ which itself flows into this expression
 
 File "shape_subtyping_4.php", line 12, character 22 - line 12, character 23:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  11 | function passes_required_a_at_bool_alias(
  12 |   required_a_at_bool $s,
@@ -93,7 +93,7 @@ which itself flows up into this expression as the 1st function parameter
 
 File "shape_subtyping_4.php", line 14, character 3 - line 14, character 33:
 
-which itself flows from this function or method 
+which itself flows from this function or method  because they are required to be subtypes
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type required_a_at_bool = shape('a' => bool);
@@ -112,7 +112,7 @@ which itself flows down into this hint as the 1st function parameter
 
 File "shape_subtyping_4.php", line 3, character 26 - line 3, character 42:
 
-which itself flows into this hint
+which itself flows into this hint because it is the definition
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type required_a_at_bool = shape('a' => bool);

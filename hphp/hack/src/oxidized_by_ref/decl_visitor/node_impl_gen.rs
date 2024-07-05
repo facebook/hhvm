@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<08c279715f4f6360466f8d8b01c007e8>>
+// @generated SignedSource<<785131864514477c59f8533c1eca9c5c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1433,6 +1433,29 @@ impl<'a> Node<'a> for Side {
         match self {
             Side::Sub => {}
             Side::Super => {}
+        }
+    }
+}
+impl<'a> Node<'a> for FlowKind {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_flow_kind(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            FlowKind::FlowAssign => {}
+            FlowKind::FlowLocal => {}
+            FlowKind::FlowSolved => {}
+            FlowKind::FlowSubtype => {}
+            FlowKind::FlowSubtypeToplevel => {}
+            FlowKind::FlowTypeDef => {}
+            FlowKind::FlowPrj => {}
+            FlowKind::FlowExtends => {}
+            FlowKind::FlowTransitive => {}
+            FlowKind::FlowFunReturn => {}
+            FlowKind::FlowParamHint => {}
+            FlowKind::FlowReturnHint => {}
+            FlowKind::FlowUpperBound => {}
+            FlowKind::FlowLowerBound => {}
         }
     }
 }

@@ -70,6 +70,23 @@ type field_kind =
   | Required
 [@@deriving hash]
 
+type flow_kind =
+  | Flow_assign
+  | Flow_local
+  | Flow_solved
+  | Flow_subtype
+  | Flow_subtype_toplevel
+  | Flow_type_def
+  | Flow_prj
+  | Flow_extends
+  | Flow_transitive
+  | Flow_fun_return
+  | Flow_param_hint
+  | Flow_return_hint
+  | Flow_upper_bound
+  | Flow_lower_bound
+[@@deriving hash, show]
+
 (** The reason why something is expected to have a certain type *)
 type _ t_ [@@deriving hash, show]
 
@@ -355,7 +372,8 @@ val pattern : Pos.t -> t
 
 (** Reasons record a linear path through the program, so we have a constructor
    to concatenate two paths *)
-val flow : from:locl_phase t_ -> into:locl_phase t_ -> locl_phase t_
+val flow :
+  from:locl_phase t_ -> into:locl_phase t_ -> kind:flow_kind -> locl_phase t_
 
 (** Paths are reversed with contravariance; we use this constructor to perform reversals lazily *)
 val reverse : locl_phase t_ -> locl_phase t_

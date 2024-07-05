@@ -36,7 +36,7 @@ Here's why: this hint
 
 File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
 
-flows into this expression
+flows into this expression because it is a parameter hint
 
  7 | function inter_l((A & I) »$ai«): C {
  8 |   $c = $ai;
@@ -45,7 +45,7 @@ flows into this expression
 
 File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = »$ai«;
@@ -54,7 +54,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
 
-which itself flows into this expression
+which itself flows into this expression because of an assignment
 
  7 | function inter_l((A & I) $ai): C {
  8 |   »$c« = $ai;
@@ -63,7 +63,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
@@ -72,7 +72,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because it is a return hint
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
@@ -81,7 +81,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
 
-which itself flows into this hint
+which itself flows into this hint because they are required to be subtypes
 
  7 | function inter_l((A & I) $ai): »C« {
  8 |   $c = $ai;
@@ -104,7 +104,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rwitness":[
         {
@@ -115,7 +115,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[
         {
@@ -126,7 +126,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
     {
       "Rwitness":[
         {
@@ -137,7 +137,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[
         {
@@ -148,7 +148,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
       "Rwitness":[
         {
@@ -159,7 +159,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
       "Rhint":[
         {
@@ -223,7 +223,7 @@ flows up into this hint as an element of the intersection type
 
 File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
 
-which itself flows into this expression
+which itself flows into this expression because it is a parameter hint
 
  7 | function inter_l((A & I) »$ai«): C {
  8 |   $c = $ai;
@@ -232,7 +232,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = »$ai«;
@@ -241,7 +241,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
 
-which itself flows into this expression
+which itself flows into this expression because of an assignment
 
  7 | function inter_l((A & I) $ai): C {
  8 |   »$c« = $ai;
@@ -250,7 +250,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
@@ -259,7 +259,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because it is a return hint
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
@@ -268,7 +268,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
 
-which itself flows into this hint
+which itself flows into this hint because they are required to be subtypes
 
  7 | function inter_l((A & I) $ai): »C« {
  8 |   $c = $ai;
@@ -291,7 +291,9 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd","in_to":{"Asymm":["Sub","Prj_asymm_inter"]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_inter"]}}
+    },
     {
       "Rhint":[
         {
@@ -302,7 +304,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rwitness":[
         {
@@ -313,7 +315,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[
         {
@@ -324,7 +326,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
     {
       "Rwitness":[
         {
@@ -335,7 +337,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[
         {
@@ -346,7 +348,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
       "Rwitness":[
         {
@@ -357,7 +359,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
       "Rhint":[
         {
@@ -421,7 +423,7 @@ flows up into this hint as an element of the intersection type
 
 File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
 
-which itself flows into this expression
+which itself flows into this expression because it is a parameter hint
 
  7 | function inter_l((A & I) »$ai«): C {
  8 |   $c = $ai;
@@ -430,7 +432,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = »$ai«;
@@ -439,7 +441,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
 
-which itself flows into this expression
+which itself flows into this expression because of an assignment
 
  7 | function inter_l((A & I) $ai): C {
  8 |   »$c« = $ai;
@@ -448,7 +450,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
@@ -457,7 +459,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because it is a return hint
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
@@ -466,7 +468,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
 
-which itself flows into this hint
+which itself flows into this hint because they are required to be subtypes
 
  7 | function inter_l((A & I) $ai): »C« {
  8 |   $c = $ai;
@@ -489,7 +491,9 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd","in_to":{"Asymm":["Sub","Prj_asymm_inter"]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_inter"]}}
+    },
     {
       "Rhint":[
         {
@@ -500,7 +504,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rwitness":[
         {
@@ -511,7 +515,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[
         {
@@ -522,7 +526,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
     {
       "Rwitness":[
         {
@@ -533,7 +537,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[
         {
@@ -544,7 +548,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
       "Rwitness":[
         {
@@ -555,7 +559,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
       "Rhint":[
         {

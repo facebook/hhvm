@@ -32,7 +32,7 @@ Here's why: this hint
 
 File "refinment_is.php", line 7, character 19 - line 7, character 19:
 
-flows into this expression
+flows into this expression because it is a parameter hint
 
  7 | function inter_is(A »$a«, C $c): C {
  8 |   if($a is I) {
@@ -40,7 +40,7 @@ flows into this expression
 
 File "refinment_is.php", line 7, character 21 - line 7, character 22:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if(»$a« is I) {
@@ -66,7 +66,7 @@ which itself flows up into this `is` expression as an element of the intersectio
 
 File "refinment_is.php", line 8, character 6 - line 8, character 12:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -79,7 +79,7 @@ which itself flows into this expression
 
 File "refinment_is.php", line 9, character 10 - line 9, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because of an assignment
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -105,7 +105,7 @@ which itself flows up into this expression as an element of the union type
 
 File "refinment_is.php", line 8, character 3 - line 12, character 3:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  12 |   }
  13 |   return »$z«;
@@ -113,7 +113,7 @@ which itself flows into this expression
 
 File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because it is a return hint
 
  12 |   }
  13 |   »return $z;«
@@ -121,7 +121,7 @@ which itself flows into this expression
 
 File "refinment_is.php", line 13, character 3 - line 13, character 12:
 
-which itself flows into this hint
+which itself flows into this hint because they are required to be subtypes
 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
@@ -136,39 +136,43 @@ Path:
     {
       "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rwitness":[{"filename":"refinment_is.php","line":7,"char_start":21,"char_end":22}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":7}]
     },
-    {"Edge":{"dir":"Fwd","in_to":{"Asymm":["Sub","Prj_asymm_inter"]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_inter"]}}
+    },
     {
       "Ris_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
     {
       "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
     },
-    {"Edge":{"dir":"Fwd","in_to":{"Asymm":["Sub","Prj_asymm_union"]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_union"]}}
+    },
     {
       "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
       "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
       "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
     }
@@ -222,7 +226,7 @@ Here's why: this `is` expression
 
 File "refinment_is.php", line 8, character 6 - line 8, character 12:
 
-flows into this expression
+flows into this expression because the local variable has this type
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -235,7 +239,7 @@ flows into this expression
 
 File "refinment_is.php", line 9, character 10 - line 9, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because of an assignment
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -261,7 +265,7 @@ which itself flows up into this expression as an element of the union type
 
 File "refinment_is.php", line 8, character 3 - line 12, character 3:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  12 |   }
  13 |   return »$z«;
@@ -269,7 +273,7 @@ which itself flows into this expression
 
 File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because it is a return hint
 
  12 |   }
  13 |   »return $z;«
@@ -277,7 +281,7 @@ which itself flows into this expression
 
 File "refinment_is.php", line 13, character 3 - line 13, character 12:
 
-which itself flows into this hint
+which itself flows into this hint because they are required to be subtypes
 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
@@ -292,27 +296,29 @@ Path:
     {
       "Ris_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
     {
       "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
     },
-    {"Edge":{"dir":"Fwd","in_to":{"Asymm":["Sub","Prj_asymm_union"]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_union"]}}
+    },
     {
       "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
       "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
       "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
     }
@@ -379,7 +385,7 @@ flows up into this `is` expression as an element of the intersection type
 
 File "refinment_is.php", line 8, character 6 - line 8, character 12:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -392,7 +398,7 @@ which itself flows into this expression
 
 File "refinment_is.php", line 9, character 10 - line 9, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because of an assignment
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -418,7 +424,7 @@ which itself flows up into this expression as an element of the union type
 
 File "refinment_is.php", line 8, character 3 - line 12, character 3:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  12 |   }
  13 |   return »$z«;
@@ -426,7 +432,7 @@ which itself flows into this expression
 
 File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because it is a return hint
 
  12 |   }
  13 |   »return $z;«
@@ -434,7 +440,7 @@ which itself flows into this expression
 
 File "refinment_is.php", line 13, character 3 - line 13, character 12:
 
-which itself flows into this hint
+which itself flows into this hint because they are required to be subtypes
 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
@@ -449,31 +455,35 @@ Path:
     {
       "Rhint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
     },
-    {"Edge":{"dir":"Fwd","in_to":{"Asymm":["Sub","Prj_asymm_inter"]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_inter"]}}
+    },
     {
       "Ris_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
     {
       "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
     },
-    {"Edge":{"dir":"Fwd","in_to":{"Asymm":["Sub","Prj_asymm_union"]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_union"]}}
+    },
     {
       "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
       "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
       "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
     }

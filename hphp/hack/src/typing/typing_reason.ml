@@ -405,6 +405,76 @@ let explain_prj_left = function
 let explain_prj_right = function
   | Symm prj -> explain_symm_prj prj ~side:`Rhs
   | Asymm (_, prj) -> explain_asymm_prj prj
+
+(* ~~ Flow kinds ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+type flow_kind =
+  | Flow_assign
+  | Flow_local
+  | Flow_solved
+  | Flow_subtype
+  | Flow_subtype_toplevel
+  | Flow_type_def
+  | Flow_prj
+  | Flow_extends
+  | Flow_transitive
+  | Flow_fun_return
+  | Flow_param_hint
+  | Flow_return_hint
+  | Flow_upper_bound
+  | Flow_lower_bound
+[@@deriving hash, show]
+
+let flow_kind_to_json = function
+  | Flow_assign -> Hh_json.string_ "Flow_assign"
+  | Flow_local -> Hh_json.string_ "Flow_local"
+  | Flow_solved -> Hh_json.string_ "Flow_solved"
+  | Flow_subtype -> Hh_json.string_ "Flow_subtype"
+  | Flow_subtype_toplevel -> Hh_json.string_ "Flow_subtype_toplevel"
+  | Flow_type_def -> Hh_json.string_ "Flow_type_def"
+  | Flow_prj -> Hh_json.string_ "Flow_prj"
+  | Flow_extends -> Hh_json.string_ "Flow_extends"
+  | Flow_transitive -> Hh_json.string_ "Flow_transitive"
+  | Flow_fun_return -> Hh_json.string_ "Flow_fun_return"
+  | Flow_param_hint -> Hh_json.string_ "Flow_param_hint"
+  | Flow_return_hint -> Hh_json.string_ "Flow_return_hint"
+  | Flow_upper_bound -> Hh_json.string_ "Flow_upper_bound"
+  | Flow_lower_bound -> Hh_json.string_ "Flow_lower_bound"
+
+let explain_flow_kind_fwd = function
+  | Flow_assign -> "because of an assignment"
+  | Flow_local -> "because the local variable has this type"
+  | Flow_solved -> "because of inference"
+  | Flow_subtype
+  | Flow_subtype_toplevel ->
+    "because they are required to be subtypes"
+  | Flow_type_def -> "because it is the definition"
+  | Flow_prj -> "because the type was decomposed"
+  | Flow_extends -> "because they are subclass and superclass"
+  | Flow_transitive -> "because of transitivity"
+  | Flow_fun_return -> "because of the functions return type"
+  | Flow_param_hint -> "because it is a parameter hint"
+  | Flow_return_hint -> "because it is a return hint"
+  | Flow_upper_bound -> "becuase it is the upper bound"
+  | Flow_lower_bound -> "because it is the lower bound"
+
+let explain_flow_kind_bwd = function
+  | Flow_assign -> "because of an assignment"
+  | Flow_local -> "because the local variable has this type"
+  | Flow_solved -> "because of inference"
+  | Flow_subtype
+  | Flow_subtype_toplevel ->
+    "because they are required to be subtypes"
+  | Flow_type_def -> "because it is the definition"
+  | Flow_prj -> "because the type was decomposed"
+  | Flow_extends -> "because they are subclass and superclass"
+  | Flow_transitive -> "because of transitivity"
+  | Flow_fun_return -> "because of the functions return type"
+  | Flow_param_hint -> "because it is a parameter hint"
+  | Flow_return_hint -> "because it is a return hint"
+  | Flow_upper_bound -> "becuase it is the upper bound"
+  | Flow_lower_bound -> "because it is the lower bound"
+
 (* ~~ Reasons ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
 (* The phase below helps enforce that only Pos_or_decl.t positions end up in the heap.
@@ -543,7 +613,7 @@ type _ t_ =
   | Rpessimised_prop : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
   | Runsafe_cast : Pos.t -> locl_phase t_
   | Rpattern : Pos.t -> locl_phase t_
-  | Rflow : locl_phase t_ * locl_phase t_ -> locl_phase t_
+  | Rflow : locl_phase t_ * flow_kind * locl_phase t_ -> locl_phase t_
   | Rrev : locl_phase t_ -> locl_phase t_
   | Rprj : prj * locl_phase t_ -> locl_phase t_
   | Rmissing_field : locl_phase t_
@@ -552,13 +622,13 @@ type _ t_ =
 
 (** Perform actual reversal of reason flows *)
 let rec normalize : locl_phase t_ -> locl_phase t_ = function
-  | Rflow (t1, t2) -> Rflow (normalize t1, normalize t2)
+  | Rflow (t1, kind, t2) -> Rflow (normalize t1, kind, normalize t2)
   | Rrev t -> reverse t
   | Rprj (prj, t) -> Rprj (prj, normalize t)
   | t -> t
 
 and reverse : locl_phase t_ -> locl_phase t_ = function
-  | Rflow (t1, t2) -> Rflow (reverse t2, reverse t1)
+  | Rflow (t1, kind, t2) -> Rflow (reverse t2, kind, reverse t1)
   | Rrev t -> normalize t
   | Rprj (prj, t) -> Rprj (prj, reverse t)
   | t -> t
@@ -672,13 +742,13 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Ropaque_type_from_module (p, _, _) -> p
   | Rmissing_class p -> Pos_or_decl.of_raw_pos p
   | Runsafe_cast p -> Pos_or_decl.of_raw_pos p
-  | Rflow (from, _into) -> to_raw_pos from
+  | Rflow (from, _kind, _into) -> to_raw_pos from
   | Rrev r -> to_raw_pos_rev r
   | Rprj (_prj, r) -> to_raw_pos r
 
 and to_raw_pos_rev = function
   | Rprj (_, r)
-  | Rflow (_, r)
+  | Rflow (_, _, r)
   | Rrev r
   | r ->
     to_raw_pos r
@@ -822,8 +892,8 @@ let rec map_pos :
   | Rpessimised_this p -> Rpessimised_this (pos_or_decl p)
   | Runsafe_cast p -> Runsafe_cast (pos p)
   | Rpattern p -> Rpattern (pos p)
-  | Rflow (from, into) ->
-    Rflow (map_pos pos pos_or_decl from, map_pos pos pos_or_decl into)
+  | Rflow (from, kind, into) ->
+    Rflow (map_pos pos pos_or_decl from, kind, map_pos pos pos_or_decl into)
   | Rrev t -> Rrev (map_pos pos pos_or_decl t)
   | Rprj (prj, t) -> Rprj (prj, map_pos pos pos_or_decl t)
 
@@ -1155,7 +1225,7 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
       pp_blame fmt b
     | Rdynamic_coercion r -> pp_t_ fmt r
     | Runsafe_cast p -> Pos.pp fmt p
-    | Rflow (from, _into) -> pp_t_ fmt from
+    | Rflow (from, _kind, _into) -> pp_t_ fmt from
     | Rrev t -> pp_t_ fmt @@ normalize t
     | Rprj (_, t) -> pp_t_ fmt t);
     Format.fprintf fmt "@])"
@@ -1541,9 +1611,14 @@ let rec to_json : type a. a t_ -> Hh_json.json =
     Hh_json.(JSON_Object [("Runsafe_cast", JSON_Array [pos_to_json pos])])
   | Rpattern pos ->
     Hh_json.(JSON_Object [("Rpattern", JSON_Array [pos_to_json pos])])
-  | Rflow (r_from, r_into) ->
+  | Rflow (r_from, kind, r_into) ->
     Hh_json.(
-      JSON_Object [("Rflow", JSON_Array [to_json r_from; to_json r_into])])
+      JSON_Object
+        [
+          ( "Rflow",
+            JSON_Array [to_json r_from; flow_kind_to_json kind; to_json r_into]
+          );
+        ])
   | Rrev r -> Hh_json.(JSON_Object [("Rrev", JSON_Array [to_json r])])
   | Rprj (prj, r) ->
     Hh_json.(JSON_Object [("Rprj", JSON_Array [prj_to_json prj; to_json r])])
@@ -2012,7 +2087,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     ]
   | Rpattern p ->
     [(Pos_or_decl.of_raw_pos p, prefix ^ " because of this pattern")]
-  | Rflow (from, _into) -> to_string prefix from
+  | Rflow (from, _kind, _into) -> to_string prefix from
   | Rrev r -> to_string prefix @@ reverse r
   | Rprj (_prj, r) -> to_string prefix r
 
@@ -2216,7 +2291,7 @@ let unsafe_cast p = Runsafe_cast p
 
 let pattern p = Rpattern p
 
-let flow ~from ~into = Rflow (from, into)
+let flow ~from ~into ~kind = Rflow (from, kind, into)
 
 let reverse r = Rrev r
 
@@ -2397,7 +2472,8 @@ module Visitor = struct
         | Rpessimised_prop x -> Rpessimised_prop x
         | Runsafe_cast x -> Runsafe_cast x
         | Rpattern x -> Rpattern x
-        | Rflow (from, into) -> Rflow (this#on_reason from, this#on_reason into)
+        | Rflow (from, kind, into) ->
+          Rflow (this#on_reason from, kind, this#on_reason into)
         | Rrev t -> Rrev (this#on_reason t)
         | Rprj (prj, t) -> Rprj (prj, this#on_reason t)
         | Rpessimised_this x -> Rpessimised_this x
@@ -2477,12 +2553,13 @@ type path_elem =
   | Edge of {
       out_of: prj option;
       dir: direction;
+      kind: flow_kind;
       in_to: prj option;
     }
   | Node of locl_phase t_
 
 let path_elem_to_json = function
-  | Edge { out_of; dir; in_to } ->
+  | Edge { out_of; dir; in_to; kind } ->
     Hh_json.(
       JSON_Object
         [
@@ -2491,13 +2568,14 @@ let path_elem_to_json = function
               (List.filter_opt
                  [
                    Some ("dir", direction_to_json dir);
+                   Some ("kind", flow_kind_to_json kind);
                    Option.map out_of ~f:(fun prj -> ("out_of", prj_to_json prj));
                    Option.map in_to ~f:(fun prj -> ("in_to", prj_to_json prj));
                  ]) );
         ])
   | Node witness -> to_json witness
 
-let edge out_of dir in_to = Edge { out_of; dir; in_to }
+let edge out_of dir kind in_to = Edge { out_of; dir; kind; in_to }
 
 type stats = {
   max_depth: int;
@@ -2560,7 +2638,7 @@ let to_path t =
   let rec aux t ~dir ~cur_depth =
     match t with
     | Rrev _ -> failwith "unnormalized reason"
-    | Rflow (l, r) ->
+    | Rflow (l, kind, r) ->
       let (prj_ll_opt, elem_l, prj_lr_opt, stats_l, depth_l) =
         aux l ~dir ~cur_depth
       and (prj_rl_opt, elem_r, prj_rr_opt, stats_r, depth_r) =
@@ -2568,7 +2646,7 @@ let to_path t =
       in
       let stats = incr_stats_length @@ append_stats stats_l stats_r in
       ( prj_ll_opt,
-        elem_l @ (edge prj_lr_opt dir prj_rl_opt :: elem_r),
+        elem_l @ (edge prj_lr_opt dir kind prj_rl_opt :: elem_r),
         prj_rr_opt,
         stats,
         max depth_l depth_r )
@@ -2640,25 +2718,28 @@ let rec explain_witness = function
 
 let explain_step (edge, node) ~prefix =
   match (edge, node) with
-  | ((None, Fwd, None), rhs) ->
+  | ((None, Fwd, None, kind), rhs) ->
     let (pos, expl) = explain_witness rhs in
-    (pos, Format.sprintf "%sflows into %s" prefix expl)
-  | ((None, Bwd, None), rhs) ->
+    let kind_expl = explain_flow_kind_fwd kind in
+    (pos, Format.sprintf "%sflows into %s %s" prefix expl kind_expl)
+  | ((None, Bwd, None, kind), rhs) ->
     let (pos, expl) = explain_witness rhs in
-    (pos, Format.sprintf "%sflows from %s" prefix expl)
-  | ((Some out_of, Fwd, None), rhs) ->
+    let kind_expl = explain_flow_kind_bwd kind in
+    (pos, Format.sprintf "%sflows from %s %s" prefix expl kind_expl)
+  (* For projections the flow kind is always `Flow_prj` so there is no need for further explanation *)
+  | ((Some out_of, Fwd, None, _), rhs) ->
     let prj_expl = explain_prj_right out_of in
     let (pos, expl) = explain_witness rhs in
     (pos, Format.sprintf "%sflows down into %s %s" prefix expl prj_expl)
-  | ((Some out_of, Bwd, None), rhs) ->
+  | ((Some out_of, Bwd, None, _), rhs) ->
     let prj_expl = explain_prj_right out_of in
     let (pos, expl) = explain_witness rhs in
     (pos, Format.sprintf "%sflows down from %s %s" prefix expl prj_expl)
-  | ((None, Fwd, Some in_to), rhs) ->
+  | ((None, Fwd, Some in_to, _), rhs) ->
     let prj_expl = explain_prj_left in_to in
     let (pos, expl) = explain_witness rhs in
     (pos, Format.sprintf "%sflows up into %s %s" prefix expl prj_expl)
-  | ((None, Bwd, Some in_to), rhs) ->
+  | ((None, Bwd, Some in_to, _), rhs) ->
     let prj_expl = explain_prj_left in_to in
     let (pos, expl) = explain_witness rhs in
     (pos, Format.sprintf "%sflows up from %s %s" prefix expl prj_expl)
@@ -2685,9 +2766,9 @@ let suppress_supportdyn = function
 let explain_path { path_elems; stats } =
   let rec aux path_elems acc =
     match suppress_supportdyn path_elems with
-    | Edge { out_of; dir; in_to } :: Node rhs :: path_elems ->
+    | Edge { out_of; dir; in_to; kind } :: Node rhs :: path_elems ->
       let expl =
-        explain_step ~prefix:"which itself " ((out_of, dir, in_to), rhs)
+        explain_step ~prefix:"which itself " ((out_of, dir, in_to, kind), rhs)
       in
       aux path_elems (expl :: acc)
     | [] -> List.rev acc
@@ -2701,13 +2782,13 @@ let explain_path { path_elems; stats } =
     | _ -> failwith "ill-formed path"
   in
   match path_elems with
-  | Node lhs :: Edge { out_of; dir; in_to } :: Node rhs :: path_elems ->
+  | Node lhs :: Edge { out_of; dir; in_to; kind } :: Node rhs :: path_elems ->
     let (lhs_pos, lhs_expl) = explain_witness lhs in
     let lhs_expl =
       Format.sprintf "%s\n\nHere's why: %s" (explain_stats stats) lhs_expl
     in
     let (rhs_pos, rhs_expl) =
-      explain_step ~prefix:"" ((out_of, dir, in_to), rhs)
+      explain_step ~prefix:"" ((out_of, dir, in_to, kind), rhs)
     in
     aux path_elems [(rhs_pos, rhs_expl); (lhs_pos, lhs_expl)]
   | _ -> failwith "ill-formed path"

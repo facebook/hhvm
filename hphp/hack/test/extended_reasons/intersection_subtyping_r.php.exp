@@ -32,7 +32,7 @@ Here's why: this hint
 
 File "intersection_subtyping_r.php", line 7, character 18 - line 7, character 18:
 
-flows into this expression
+flows into this expression because it is a parameter hint
 
  7 | function inter_r(C »$c«) : (A & I) {
  8 |   return $c;
@@ -40,7 +40,7 @@ flows into this expression
 
 File "intersection_subtyping_r.php", line 7, character 20 - line 7, character 21:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  7 | function inter_r(C $c) : (A & I) {
  8 |   return »$c«;
@@ -48,7 +48,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_r.php", line 8, character 10 - line 8, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because it is a return hint
 
  7 | function inter_r(C $c) : (A & I) {
  8 |   »return $c;«
@@ -56,7 +56,7 @@ which itself flows into this expression
 
 File "intersection_subtyping_r.php", line 8, character 3 - line 8, character 12:
 
-which itself flows into this hint
+which itself flows into this hint because they are required to be subtypes
 
  7 | function inter_r(C $c) : »(A & I)« {
  8 |   return $c;

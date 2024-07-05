@@ -506,7 +506,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
                 Typing_reason.localize
                 @@ Typing_defs.get_reason typedef_info.td_type
               in
-              Typing_reason.flow ~from ~into)
+              Typing_reason.(flow ~from ~into ~kind:Flow_type_def))
         in
         ((env, ty_err_opt), lty)
       | Decl_entry.DoesNotExist

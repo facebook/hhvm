@@ -45,7 +45,7 @@ flows up into this hint as the 1st function parameter
 
 File "fn_subtyping_contra_1.php", line 6, character 16 - line 6, character 38:
 
-which itself flows from this declaration
+which itself flows from this declaration because the type was decomposed
 
  6 | function foo_1(»(function(Super): void)« $_): void {}
  7 | function bar_1((function(Sub): void) $f): void {
@@ -54,7 +54,7 @@ which itself flows from this declaration
 
 File "fn_subtyping_contra_1.php", line 6, character 16 - line 6, character 38:
 
-which itself flows from this hint
+which itself flows from this hint because they are required to be subtypes
 
  6 | function foo_1((function(Super): void) $_): void {}
  7 | function bar_1(»(function(Sub): void)« $f): void {
@@ -72,7 +72,7 @@ which itself flows up from this function or method  as the 1st function paramete
 
 File "fn_subtyping_contra_1.php", line 6, character 10 - line 6, character 14:
 
-which itself flows into this expression
+which itself flows into this expression because they are required to be subtypes
 
  6 | function foo_1((function(Super): void) $_): void {}
  7 | function bar_1((function(Sub): void) $f): void {
@@ -90,7 +90,7 @@ which itself flows down from this expression as the 1st function parameter
 
 File "fn_subtyping_contra_1.php", line 8, character 9 - line 8, character 10:
 
-which itself flows from this expression
+which itself flows from this expression because the local variable has this type
 
  6 | function foo_1((function(Super): void) $_): void {}
  7 | function bar_1((function(Sub): void) »$f«): void {
@@ -99,7 +99,7 @@ which itself flows from this expression
 
 File "fn_subtyping_contra_1.php", line 7, character 38 - line 7, character 39:
 
-which itself flows from this hint
+which itself flows from this hint because it is a parameter hint
 
  6 | function foo_1((function(Super): void) $_): void {}
  7 | function bar_1(»(function(Sub): void)« $f): void {
@@ -126,75 +126,87 @@ Path:
         {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":26,"char_end":30}
       ]
     },
-    {"Edge":{"dir":"Fwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
+    },
     {
       "Rhint":[
         {
-          "filename":"/tmp/AwcePZighI/supportdynamic.hhi",
+          "filename":"/tmp/HikhPXBbn6/supportdynamic.hhi",
           "line":6,
           "char_start":33,
           "char_end":45
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_type_def"}},
     {
       "Rhint":[
         {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":16,"char_end":38}
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_prj"}},
     {
       "Rwitness_from_decl":[
         {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":16,"char_end":38}
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
       "Rhint":[
         {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":16,"char_end":36}
       ]
     },
-    {"Edge":{"dir":"Bwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{"dir":"Bwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
+    },
     {
       "Rsupport_dynamic_type":[
         {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":10,"char_end":14}
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype"}},
     {
       "Rwitness":[{"filename":"fn_subtyping_contra_1.php","line":8,"char_start":3,"char_end":7}]
     },
-    {"Edge":{"dir":"Bwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{"dir":"Bwd","kind":"Flow_prj","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
+    },
     {
       "Rwitness":[
         {"filename":"fn_subtyping_contra_1.php","line":8,"char_start":9,"char_end":10}
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_local"}},
     {
       "Rwitness":[
         {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":38,"char_end":39}
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_param_hint"}},
     {
       "Rhint":[
         {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":16,"char_end":36}
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_type_def"}},
     {
       "Rhint":[
         {
-          "filename":"/tmp/AwcePZighI/supportdynamic.hhi",
+          "filename":"/tmp/HikhPXBbn6/supportdynamic.hhi",
           "line":6,
           "char_start":33,
           "char_end":45
         }
       ]
     },
-    {"Edge":{"dir":"Fwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{
+        "dir":"Fwd",
+        "kind":"Flow_subtype_toplevel",
+        "out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
+      }
+    },
     {
       "Rhint":[
         {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":26,"char_end":28}

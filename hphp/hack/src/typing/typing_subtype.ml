@@ -1014,7 +1014,8 @@ end = struct
         ~update_reason:
           Typing_env.(
             update_reason ~f:(fun from ->
-                Typing_reason.(flow ~from ~into:(prj_union_sub r_sub))))
+                Typing_reason.(
+                  flow ~from ~into:(prj_union_sub r_sub) ~kind:Flow_prj)))
         (sub_supportdyn, tyl)
         rhs
         env
@@ -1077,7 +1078,8 @@ end = struct
           ~update_reason:
             Typing_env.(
               update_reason ~f:(fun from ->
-                  Typing_reason.(flow ~from ~into:(prj_inter_sub r_sub))))
+                  Typing_reason.(
+                    flow ~from ~into:(prj_inter_sub r_sub) ~kind:Flow_prj)))
           (sub_supportdyn, tyl)
           rhs
           env)
@@ -1393,7 +1395,8 @@ end = struct
           let ty_super =
             Typing_env.(
               update_reason env ty_super ~f:(fun into ->
-                  Typing_reason.(flow ~from:(prj_union_super r_super) ~into)))
+                  Typing_reason.(
+                    flow ~from:(prj_union_super r_super) ~into ~kind:Flow_prj)))
           in
           let (env, prop) =
             simplify
@@ -1433,7 +1436,11 @@ end = struct
                     ~from
                     ~into:
                       (prj_fn_param ~idx_sub:idx_super ~idx_super:idx_sub
-                      @@ flow ~from:r_super ~into:(reverse r_sub)))))
+                      @@ flow
+                           ~from:r_super
+                           ~into:(reverse r_sub)
+                           ~kind:Flow_subtype)
+                    ~kind:Flow_prj)))
         in
 
         simplify
@@ -1514,7 +1521,11 @@ end = struct
                     ~from
                     ~into:
                       (prj_fn_param ~idx_sub:idx_super ~idx_super:idx_sub
-                      @@ flow ~from:r_super ~into:(reverse r_sub)))))
+                      @@ flow
+                           ~from:r_super
+                           ~into:(reverse r_sub)
+                           ~kind:Flow_subtype)
+                    ~kind:Flow_prj)))
         in
 
         simplify
@@ -1958,7 +1969,8 @@ end = struct
           let ty_super =
             Typing_env.update_reason env ty_super ~f:(fun from ->
                 let inner =
-                  Typing_reason.(flow ~from:r_super ~into:(reverse r_sub))
+                  Typing_reason.(
+                    flow ~from:r_super ~into:(reverse r_sub) ~kind:Flow_subtype)
                 in
                 let into =
                   if is_inout then
@@ -1972,7 +1984,7 @@ end = struct
                       ~idx_sub:idx_super
                       ~idx_super:idx_sub
                 in
-                Typing_reason.flow ~from ~into)
+                Typing_reason.(flow ~from ~into ~kind:Flow_prj))
           in
           simplify
             ~subtype_env:subtype_env_for_param
@@ -2001,7 +2013,8 @@ end = struct
                       ~from
                       ~into:
                         (prj_fn_param_inout_co ~idx_sub ~idx_super
-                        @@ flow ~from:r_sub ~into:r_super)))
+                        @@ flow ~from:r_sub ~into:r_super ~kind:Flow_subtype)
+                      ~kind:Flow_prj))
             in
             simplify
               ~subtype_env:subtype_env_for_param
@@ -2087,7 +2100,12 @@ end = struct
       let ty_sub =
         Typing_env.update_reason env ft_sub.ft_ret ~f:(fun from ->
             Typing_reason.(
-              flow ~from ~into:(prj_fn_ret @@ flow ~from:r_sub ~into:r_super)))
+              flow
+                ~from
+                ~into:
+                  (prj_fn_ret
+                  @@ flow ~from:r_sub ~into:r_super ~kind:Flow_subtype)
+                ~kind:Flow_prj))
       in
       simplify
         ~subtype_env
@@ -2167,9 +2185,10 @@ end = struct
             Typing_env.update_reason env child ~f:(fun from ->
                 let into =
                   prj ~nm ~idx ~var:Typing_reason.(Dir Co)
-                  @@ Typing_reason.flow ~from:r_sub ~into:r_super
+                  @@ Typing_reason.(
+                       flow ~from:r_sub ~into:r_super ~kind:Flow_subtype)
                 in
-                Typing_reason.flow ~from ~into)
+                Typing_reason.(flow ~from ~into ~kind:Flow_prj))
           and ty_super = Sd.liken ~super_like env super in
           simplify_subtype_help ~sub_supportdyn ty_sub ty_super env
         | Ast_defs.Contravariant ->
@@ -2182,9 +2201,13 @@ end = struct
               map_reason super ~f:(fun from ->
                   let into =
                     prj ~nm ~idx ~var:Typing_reason.(Dir Contra)
-                    @@ Typing_reason.(flow ~from:r_super ~into:(reverse r_sub))
+                    @@ Typing_reason.(
+                         flow
+                           ~from:r_super
+                           ~into:(reverse r_sub)
+                           ~kind:Flow_subtype)
                   in
-                  Typing_reason.flow ~from ~into)
+                  Typing_reason.(flow ~from ~into ~kind:Flow_prj))
             else
               map_reason super ~f:(fun from ->
                   Typing_reason.contravariant_generic (from, nm))
@@ -2202,9 +2225,10 @@ end = struct
               Typing_env.update_reason env child ~f:(fun from ->
                   let into =
                     prj ~nm ~idx ~var:Typing_reason.(Inv Co)
-                    @@ Typing_reason.flow ~from:r_sub ~into:r_super
+                    @@ Typing_reason.(
+                         flow ~from:r_sub ~into:r_super ~kind:Flow_subtype)
                   in
-                  Typing_reason.flow ~from ~into)
+                  Typing_reason.(flow ~from ~into ~kind:Flow_prj))
             and ty_super = Sd.liken ~super_like env @@ map_reason super ~f in
             simplify_subtype_help ~sub_supportdyn ty_sub ty_super env
           and contravariant_prop env =
@@ -2212,9 +2236,13 @@ end = struct
               if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
                 let into =
                   prj ~nm ~idx ~var:Typing_reason.(Inv Contra)
-                  @@ Typing_reason.(flow ~from:r_super ~into:(reverse r_sub))
+                  @@ Typing_reason.(
+                       flow
+                         ~from:r_super
+                         ~into:(reverse r_sub)
+                         ~kind:Flow_subtype)
                 in
-                Typing_reason.flow ~from ~into
+                Typing_reason.(flow ~from ~into ~kind:Flow_prj)
               else
                 Typing_reason.invariant_generic (from, nm)
             in
@@ -2382,7 +2410,7 @@ end = struct
           in
           let up_obj =
             Typing_env.update_reason env up_obj ~f:(fun from ->
-                Typing_reason.flow ~from ~into:r_sub)
+                Typing_reason.(flow ~from ~into:r_sub ~kind:Flow_extends))
           in
           (match deref up_obj with
           | (r_sub, Tclass (class_id_sub, exact_sub, tyl_sub)) ->
@@ -2662,7 +2690,8 @@ end = struct
                           ~lbl:printable_name
                           ~kind_sub:Required
                           ~kind_super:Absent
-                       @@ flow ~from:r_sub ~into:r_super)))
+                       @@ flow ~from:r_sub ~into:r_super ~kind:Flow_subtype)
+                     ~kind:Flow_prj))
         and r_field_super = Typing_reason.missing_field in
         let ty_err_opt =
           Option.map
@@ -2693,7 +2722,8 @@ end = struct
                           ~lbl:printable_name
                           ~kind_sub:Optional
                           ~kind_super:Absent
-                       @@ flow ~from:r_sub ~into:r_super)))
+                       @@ flow ~from:r_sub ~into:r_super ~kind:Flow_subtype)
+                     ~kind:Flow_prj))
         and r_field_super = Typing_reason.missing_field in
         let ty_err_opt =
           Option.map
@@ -2725,7 +2755,8 @@ end = struct
                           ~lbl:printable_name
                           ~kind_sub:Optional
                           ~kind_super:Required
-                       @@ flow ~from:r_sub ~into:r_super)))
+                       @@ flow ~from:r_sub ~into:r_super ~kind:Flow_subtype)
+                     ~kind:Flow_prj))
         and r_field_super = get_reason ty_super in
         let ty_err_opt =
           Option.map
@@ -2773,7 +2804,8 @@ end = struct
                      ~lbl:printable_name
                      ~kind_sub:Typing_reason.Absent
                      ~kind_super:Typing_reason.Required
-                  @@ flow ~from:r_sub ~into:r_super))
+                  @@ flow ~from:r_sub ~into:r_super ~kind:Flow_subtype)
+                ~kind:Flow_prj)
           else
             from
         and r_field_super = get_reason ty_super in
@@ -2813,7 +2845,8 @@ end = struct
                 ~from
                 ~into:
                   (prj_shape ~lbl:printable_name ~kind_sub ~kind_super
-                  @@ flow ~from:r_sub ~into:r_super)))
+                  @@ flow ~from:r_sub ~into:r_super ~kind:Flow_subtype)
+                ~kind:Flow_prj))
       and ty_super = Sd.liken ~super_like env ty_super in
       let sub_supportdyn =
         if supportdyn_sub then
@@ -3008,7 +3041,8 @@ end = struct
         ~mk_prop
         ~update_reason:
           (Typing_env.update_reason ~f:(fun from ->
-               Typing_reason.(flow ~from ~into:(prj_union_sub r_sub))))
+               Typing_reason.(
+                 flow ~from ~into:(prj_union_sub r_sub) ~kind:Flow_prj)))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -3025,7 +3059,8 @@ end = struct
       List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_super ->
           let ty_super =
             Typing_env.update_reason env ty_super ~f:(fun into ->
-                Typing_reason.(flow ~from:(prj_inter_super r_super) ~into))
+                Typing_reason.(
+                  flow ~from:(prj_inter_super r_super) ~into ~kind:Flow_prj))
           in
           res
           &&& simplify
@@ -3046,7 +3081,8 @@ end = struct
         ~mk_prop
         ~update_reason:
           (Typing_env.update_reason ~f:(fun from ->
-               Typing_reason.(flow ~from ~into:(prj_union_sub r_sub))))
+               Typing_reason.(
+                 flow ~from ~into:(prj_union_sub r_sub) ~kind:Flow_prj)))
         (sub_supportdyn, tyl)
         rhs
         env
@@ -3062,7 +3098,8 @@ end = struct
         ~mk_prop
         ~update_reason:
           (Typing_env.update_reason ~f:(fun from ->
-               Typing_reason.(flow ~from ~into:(prj_inter_sub r_sub))))
+               Typing_reason.(
+                 flow ~from ~into:(prj_inter_sub r_sub) ~kind:Flow_prj)))
         (sub_supportdyn, tyl)
         rhs
         env
@@ -3198,7 +3235,8 @@ end = struct
           ~mk_prop
           ~update_reason:
             (Typing_env.update_reason ~f:(fun from ->
-                 Typing_reason.(flow ~from ~into:(prj_union_sub r_sub))))
+                 Typing_reason.(
+                   flow ~from ~into:(prj_union_sub r_sub) ~kind:Flow_prj)))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -3748,7 +3786,8 @@ end = struct
           | ty_super :: ty_supers ->
             let ty_super =
               Typing_env.update_reason env ty_super ~f:(fun from ->
-                  Typing_reason.flow ~from ~into:r_super)
+                  Typing_reason.(
+                    flow ~from ~into:r_super ~kind:Flow_lower_bound))
             in
             let (env, prop) =
               simplify
@@ -3784,9 +3823,10 @@ end = struct
     (* supportdyn<t> <: nonnull iff t <: nonnull *)
     | ((r, Tnewtype (name, [tyarg], _)), (r_nonnull, Tnonnull))
       when String.equal name SN.Classes.cSupportDyn ->
+      (* TODO(mjt) update to be an asymm projection *)
       let ty_sub =
         Typing_env.update_reason env tyarg ~f:(fun into ->
-            Typing_reason.flow ~from:r ~into)
+            Typing_reason.(flow ~from:r ~into ~kind:Flow_prj))
       in
       env
       |> simplify
@@ -3924,7 +3964,11 @@ end = struct
                     Typing_reason.(
                       flow
                         ~from
-                        ~into:(prj_fn_ret @@ flow ~from:r_sub ~into:r_dynamic)))
+                        ~into:
+                          (prj_fn_ret
+                          @@ flow ~from:r_sub ~into:r_dynamic ~kind:Flow_subtype
+                          )
+                        ~kind:Flow_prj))
               in
 
               simplify
@@ -4422,12 +4466,13 @@ end = struct
       match deref ty_sub with
       | (r, Tnewtype (name_sub, [tyarg_sub], _))
         when String.equal name_sub SN.Classes.cSupportDyn ->
+        (* TODO(mjt): update this to be a symmetric projection *)
         let ty_sub =
           Typing_env.update_reason env tyarg_sub ~f:(fun into ->
-              Typing_reason.flow ~from:r ~into)
+              Typing_reason.(flow ~from:r ~into ~kind:Flow_prj))
         and ty_super =
           Typing_env.update_reason env lty_inner ~f:(fun into ->
-              Typing_reason.flow ~from:r_supportdyn ~into)
+              Typing_reason.(flow ~from:r_supportdyn ~into ~kind:Flow_prj))
         in
         simplify
           ~subtype_env
@@ -4681,7 +4726,10 @@ end = struct
           ~update_reason:
             (Typing_env.update_reason ~f:(fun from ->
                  Typing_reason.(
-                   flow ~from ~into:(prj_union_sub @@ get_reason ty_sub))))
+                   flow
+                     ~from
+                     ~into:(prj_union_sub @@ get_reason ty_sub)
+                     ~kind:Flow_prj)))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -5158,7 +5206,8 @@ end = struct
         ~f:(fun res ty_from ty_into ->
           let ty_from =
             Typing_env.update_reason env ty_from ~f:(fun from ->
-                Typing_reason.flow ~from ~into:(get_reason ty_into))
+                Typing_reason.(
+                  flow ~from ~into:(get_reason ty_into) ~kind:Flow_subtype))
           in
           res
           &&& Subtype.(
@@ -5187,7 +5236,8 @@ end = struct
         ~f:(fun res ty_from ty_into ->
           let ty_from =
             Typing_env.update_reason env ty_from ~f:(fun from ->
-                Typing_reason.flow ~from ~into:(get_reason ty_into))
+                Typing_reason.(
+                  flow ~from ~into:(get_reason ty_into) ~kind:Flow_subtype))
           in
           res
           &&& Subtype.(
@@ -5210,7 +5260,7 @@ end = struct
             &&& Subtype.(
                   let ty_from =
                     Typing_env.update_reason env ty_from ~f:(fun from ->
-                        Typing_reason.flow ~from ~into)
+                        Typing_reason.(flow ~from ~into ~kind:Flow_subtype))
                   in
                   simplify
                     ~subtype_env
@@ -5293,7 +5343,8 @@ end = struct
           ~mk_prop:simplify
           ~update_reason:
             (Typing_env.update_reason ~f:(fun from ->
-                 Typing_reason.(flow ~from ~into:(prj_union_sub r_sub))))
+                 Typing_reason.(
+                   flow ~from ~into:(prj_union_sub r_sub) ~kind:Flow_prj)))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -5332,7 +5383,8 @@ end = struct
             ~mk_prop:simplify
             ~update_reason:
               (Typing_env.update_reason ~f:(fun from ->
-                   Typing_reason.(flow ~from ~into:(prj_inter_sub r_sub))))
+                   Typing_reason.(
+                     flow ~from ~into:(prj_inter_sub r_sub) ~kind:Flow_prj)))
             (sub_supportdyn, ty_subs)
             rhs
             env)
@@ -5572,7 +5624,10 @@ end = struct
           ~update_reason:
             (Typing_env.update_reason ~f:(fun from ->
                  Typing_reason.(
-                   flow ~from ~into:(prj_union_sub @@ get_reason lty_sub))))
+                   flow
+                     ~from
+                     ~into:(prj_union_sub @@ get_reason lty_sub)
+                     ~kind:Flow_prj)))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -5626,7 +5681,8 @@ end = struct
             ~mk_prop
             ~update_reason:
               (Typing_env.update_reason ~f:(fun from ->
-                   Typing_reason.(flow ~from ~into:(prj_inter_sub r_sub))))
+                   Typing_reason.(
+                     flow ~from ~into:(prj_inter_sub r_sub) ~kind:Flow_prj)))
             (sub_supportdyn, ty_subs)
             rhs
             env)
@@ -5859,7 +5915,8 @@ end = struct
         ~mk_prop:simplify
         ~update_reason:
           (Typing_env.update_reason ~f:(fun from ->
-               Typing_reason.(flow ~from ~into:(prj_union_sub r_sub))))
+               Typing_reason.(
+                 flow ~from ~into:(prj_union_sub r_sub) ~kind:Flow_prj)))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -5871,7 +5928,8 @@ end = struct
         ~mk_prop:simplify
         ~update_reason:
           (Typing_env.update_reason ~f:(fun from ->
-               Typing_reason.(flow ~from ~into:(prj_inter_sub r_sub))))
+               Typing_reason.(
+                 flow ~from ~into:(prj_inter_sub r_sub) ~kind:Flow_prj)))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -6076,7 +6134,8 @@ end = struct
         ~mk_prop:simplify
         ~update_reason:
           (Typing_env.update_reason ~f:(fun from ->
-               Typing_reason.(flow ~from ~into:(prj_union_sub r_sub))))
+               Typing_reason.(
+                 flow ~from ~into:(prj_union_sub r_sub) ~kind:Flow_prj)))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -6331,7 +6390,8 @@ end = struct
         ~mk_prop:simplify
         ~update_reason:
           (Typing_env.update_reason ~f:(fun from ->
-               Typing_reason.(flow ~from ~into:(prj_union_sub r_sub))))
+               Typing_reason.(
+                 flow ~from ~into:(prj_union_sub r_sub) ~kind:Flow_prj)))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -6366,7 +6426,8 @@ end = struct
           ~mk_prop:simplify
           ~update_reason:
             (Typing_env.update_reason ~f:(fun from ->
-                 Typing_reason.(flow ~from ~into:(prj_inter_sub r_sub))))
+                 Typing_reason.(
+                   flow ~from ~into:(prj_inter_sub r_sub) ~kind:Flow_prj)))
           (sub_supportdyn, ty_subs)
           rhs
           env)
@@ -6458,7 +6519,10 @@ end = struct
           ~update_reason:
             (Typing_env.update_reason ~f:(fun from ->
                  Typing_reason.(
-                   flow ~from ~into:(prj_union_sub @@ get_reason ty_sub))))
+                   flow
+                     ~from
+                     ~into:(prj_union_sub @@ get_reason ty_sub)
+                     ~kind:Flow_prj)))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -6795,7 +6859,8 @@ end = struct
         in
 
         let update_reason from =
-          Typing_reason.flow ~from ~into:reason_generic
+          (* TODO(mjt): is this the right direction? *)
+          Typing_reason.(flow ~from ~into:reason_generic ~kind:Flow_upper_bound)
         in
         (* Otherwise, we collect all the upper bounds ("as" constraints) on
            the generic parameter, and check each of these in turn against
@@ -6890,7 +6955,7 @@ end = struct
     in
     let ty_sub =
       Typing_env.update_reason env newtype_ty ~f:(fun into ->
-          Typing_reason.flow ~from:reason_newtype ~into)
+          Typing_reason.(flow ~from:reason_newtype ~into ~kind:Flow_upper_bound))
     in
     mk_prop ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs env
 
@@ -6967,7 +7032,8 @@ end = struct
         ~mk_prop:mk_prop_intersection
         ~update_reason:
           (Typing_env.update_reason ~f:(fun from ->
-               Typing_reason.(flow ~from ~into:(prj_inter_sub r_sub))))
+               Typing_reason.(
+                 flow ~from ~into:(prj_inter_sub r_sub) ~kind:Flow_prj)))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -6990,7 +7056,8 @@ end = struct
         ~mk_prop:mk_prop_union
         ~update_reason:
           (Typing_env.update_reason ~f:(fun from ->
-               Typing_reason.(flow ~from ~into:(prj_union_sub r_sub))))
+               Typing_reason.(
+                 flow ~from ~into:(prj_union_sub r_sub) ~kind:Flow_prj)))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -7481,7 +7548,8 @@ end = struct
              from the variable and into the bound *)
           let upper_bound =
             Typing_env.update_ity_reason env upper_bound ~f:(fun r_super ->
-                Typing_reason.flow ~from:r_sub ~into:r_super)
+                Typing_reason.(
+                  flow ~from:r_sub ~into:r_super ~kind:Flow_transitive))
           in
           let (env, ty_err_opt) =
             Typing_subtype_tconst.make_all_type_consts_equal
@@ -7547,7 +7615,8 @@ end = struct
                from the variable and into the bound *)
             let ty =
               Typing_env.update_reason env ty ~f:(fun r_super ->
-                  Typing_reason.flow ~from:r_sub ~into:r_super)
+                  Typing_reason.(
+                    flow ~from:r_sub ~into:r_super ~kind:Flow_transitive))
             in
             Some ty
           | _ -> failwith "constraint_type in added upperbounds")
@@ -7637,7 +7706,8 @@ end = struct
                from the bound and into the variable *)
             let ty =
               Typing_env.update_reason env ty ~f:(fun r_sub ->
-                  Typing_reason.flow ~from:r_sub ~into:r_sup)
+                  Typing_reason.(
+                    flow ~from:r_sub ~into:r_sup ~kind:Flow_transitive))
             in
             Some ty
           | _ -> failwith "constraint_type in added lowerbounds")

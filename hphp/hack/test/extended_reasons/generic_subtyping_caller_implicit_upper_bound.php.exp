@@ -24,7 +24,7 @@ But got `mixed`
  6 |   newtype supportdyn<+T> as T = »(T & dynamic)«;
  7 | }
 
-File "/tmp/FPErZCmw3R/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
+File "/tmp/yYMEYeO2A4/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
 
 This error has 9 steps, a maximum depth of 1 and contains 1 reversal.
 
@@ -34,9 +34,9 @@ Here's why: this hint
  6 |   newtype supportdyn<+T> as T = »(T & dynamic)«;
  7 | }
 
-File "/tmp/FPErZCmw3R/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
+File "/tmp/yYMEYeO2A4/supportdynamic.hhi", line 6, character 33 - line 6, character 45:
 
-flows into this hint
+flows into this hint because it is the definition
 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
@@ -46,7 +46,7 @@ flows into this hint
 
 File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 50 - line 9, character 50:
 
-which itself flows into this hint
+which itself flows into this hint becuase it is the upper bound
 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
@@ -56,7 +56,7 @@ which itself flows into this hint
 
 File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 53 - line 9, character 53:
 
-which itself flows into this expression
+which itself flows into this expression because it is a parameter hint
 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
@@ -66,7 +66,7 @@ which itself flows into this expression
 
 File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 55 - line 9, character 56:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
@@ -86,7 +86,7 @@ which itself flows up into this expression as the 1st function parameter
 
 File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 3 - line 10, character 15:
 
-which itself flows from this function or method 
+which itself flows from this function or method  because they are required to be subtypes
 
  7 | function »rcvr_concrete«(B $x): void {}
  8 | 
@@ -106,7 +106,7 @@ which itself flows down into this hint as the 1st function parameter
 
 File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 50 - line 9, character 50:
 
-which itself flows into this hint
+which itself flows into this hint because they are required to be subtypes
 
  7 | function rcvr_concrete(»B« $x): void {}
  8 | 
@@ -158,7 +158,7 @@ Here's why: this hint
 
 File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 53 - line 9, character 53:
 
-flows into this expression
+flows into this expression because it is a parameter hint
 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
@@ -168,7 +168,7 @@ flows into this expression
 
 File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 55 - line 9, character 56:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
@@ -188,7 +188,7 @@ which itself flows up into this expression as the 1st function parameter
 
 File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 3 - line 10, character 15:
 
-which itself flows from this function or method 
+which itself flows from this function or method  because they are required to be subtypes
 
  7 | function »rcvr_concrete«(B $x): void {}
  8 | 

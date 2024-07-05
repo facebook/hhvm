@@ -60,7 +60,7 @@ flows up into this hint as the optional shape field `'a'`
 
 File "shape_subtyping_6.php", line 4, character 27 - line 4, character 45:
 
-which itself flows into this hint
+which itself flows into this hint because it is the definition
 
  11 | function passes_optional_a_at_bool_alias(
  12 |   »optional_a_at_bool« $s,
@@ -70,7 +70,7 @@ which itself flows into this hint
 
 File "shape_subtyping_6.php", line 12, character 3 - line 12, character 20:
 
-which itself flows into this expression
+which itself flows into this expression because it is a parameter hint
 
  11 | function passes_optional_a_at_bool_alias(
  12 |   optional_a_at_bool »$s«,
@@ -80,7 +80,7 @@ which itself flows into this expression
 
 File "shape_subtyping_6.php", line 12, character 22 - line 12, character 23:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  11 | function passes_optional_a_at_bool_alias(
  12 |   optional_a_at_bool $s,
@@ -100,7 +100,7 @@ which itself flows up into this expression as the 1st function parameter
 
 File "shape_subtyping_6.php", line 14, character 3 - line 14, character 33:
 
-which itself flows from this function or method 
+which itself flows from this function or method  because they are required to be subtypes
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type optional_a_at_bool = shape(?'a' => bool);
@@ -119,7 +119,7 @@ which itself flows down into this hint as the 1st function parameter
 
 File "shape_subtyping_6.php", line 3, character 26 - line 3, character 42:
 
-which itself flows into this hint
+which itself flows into this hint because it is the definition
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type optional_a_at_bool = shape(?'a' => bool);
@@ -148,43 +148,53 @@ Path:
     {
       "Edge":{
         "dir":"Fwd",
+        "kind":"Flow_prj",
         "in_to":{"Symm":[{" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]}]}
       }
     },
     {
       "Rhint":[{"filename":"shape_subtyping_6.php","line":4,"char_start":27,"char_end":45}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_type_def"}},
     {
       "Rhint":[{"filename":"shape_subtyping_6.php","line":12,"char_start":3,"char_end":20}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rwitness":[{"filename":"shape_subtyping_6.php","line":12,"char_start":22,"char_end":23}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"shape_subtyping_6.php","line":14,"char_start":35,"char_end":36}]
     },
-    {"Edge":{"dir":"Fwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
+    },
     {
       "Rwitness":[{"filename":"shape_subtyping_6.php","line":14,"char_start":3,"char_end":33}]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
       "Rsupport_dynamic_type":[{"filename":"shape_subtyping_6.php","line":6,"char_start":10,"char_end":40}]
     },
-    {"Edge":{"dir":"Fwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{
+        "dir":"Fwd",
+        "kind":"Flow_subtype",
+        "out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
+      }
+    },
     {
       "Rhint":[{"filename":"shape_subtyping_6.php","line":3,"char_start":26,"char_end":42}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_type_def"}},
     {
       "Rhint":[{"filename":"shape_subtyping_6.php","line":7,"char_start":3,"char_end":19}]
     },
     {
       "Edge":{
         "dir":"Fwd",
+        "kind":"Flow_subtype_toplevel",
         "out_of":{"Symm":[{" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]}]}
       }
     },

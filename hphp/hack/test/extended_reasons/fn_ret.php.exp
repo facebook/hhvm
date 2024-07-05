@@ -32,7 +32,7 @@ Here's why: this hint
 
 File "fn_ret.php", line 3, character 17 - line 3, character 19:
 
-flows into this hint
+flows into this hint because they are required to be subtypes
 
  7 | function bar(): »bool« {
  8 |   return foo();
@@ -74,7 +74,7 @@ Here's why: this hint
 
 File "fn_ret.php", line 3, character 17 - line 3, character 19:
 
-flows into this expression
+flows into this expression because they are required to be subtypes
 
  7 | function bar(): bool {
  8 |   return »foo()«;
@@ -82,7 +82,7 @@ flows into this expression
 
 File "fn_ret.php", line 8, character 10 - line 8, character 14:
 
-which itself flows into this expression
+which itself flows into this expression because it is a return hint
 
  7 | function bar(): bool {
  8 |   »return foo();«
@@ -90,7 +90,7 @@ which itself flows into this expression
 
 File "fn_ret.php", line 8, character 3 - line 8, character 15:
 
-which itself flows into this hint
+which itself flows into this hint because they are required to be subtypes
 
  7 | function bar(): »bool« {
  8 |   return foo();

@@ -1330,7 +1330,8 @@ let fun_type_of_id env x tal el =
         Typing_env.(
           update_reason env fty ~f:(fun r_sub ->
               let r_super = Reason.witness (fst x) in
-              Typing_reason.(flow ~from:r_super ~into:(reverse r_sub))))
+              Typing_reason.(
+                flow ~from:r_super ~into:(reverse r_sub) ~kind:Flow_subtype)))
       in
       Option.iter
         ~f:(Typing_error_utils.add_typing_error ~env)
@@ -3471,7 +3472,7 @@ end = struct
       let ty =
         Typing_env.(
           update_reason env ty ~f:(fun from ->
-              Typing_reason.(flow ~from ~into:(witness p))))
+              Typing_reason.(flow ~from ~into:(witness p) ~kind:Flow_local)))
       in
       make_result env p (Aast.Lvar id) ty
     | Tuple el ->
@@ -3993,7 +3994,7 @@ end = struct
         Typing_env.(
           update_reason env mem_ty ~f:(fun into ->
               let from = get_reason ty1 in
-              Typing_reason.flow ~from ~into))
+              Typing_reason.(flow ~from ~into ~kind:Flow_solved)))
       in
       let (_, p1, _) = e1 in
       let r = Reason.witness p1 in
@@ -4058,7 +4059,7 @@ end = struct
       let result_ty =
         Typing_env.(
           update_reason env result_ty ~f:(fun from ->
-              Typing_reason.(flow ~from ~into:(witness p))))
+              Typing_reason.(flow ~from ~into:(witness p) ~kind:Flow_fun_return)))
       in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       let (env, inner_te) =
@@ -5957,7 +5958,11 @@ end = struct
              construct that reversed path here. *)
           let fty =
             Typing_env.update_reason env fty ~f:(fun r_sub ->
-                Typing_reason.(flow ~from:(witness p) ~into:(reverse r_sub)))
+                Typing_reason.(
+                  flow
+                    ~from:(witness p)
+                    ~into:(reverse r_sub)
+                    ~kind:Flow_subtype))
           in
           (env, fty)
         | _ ->
@@ -6403,7 +6408,8 @@ end = struct
                     ~from
                     ~into:
                       (prj_fn_param ~idx_sub:arg_idx ~idx_super:param_idx
-                      @@ get_reason fty))
+                      @@ get_reason fty)
+                    ~kind:Flow_prj)
               in
               let ty = Typing_env.update_reason env ty ~f:update_reason in
 
@@ -6441,7 +6447,8 @@ end = struct
                     ~from
                     ~into:
                       (prj_fn_param ~idx_sub:arg_idx ~idx_super:param_idx
-                      @@ get_reason fty))
+                      @@ get_reason fty)
+                    ~kind:Flow_prj)
               in
               let ty = Typing_env.update_reason env ty ~f:update_reason in
 
@@ -6754,7 +6761,8 @@ end = struct
           let ret =
             Typing_env.(
               update_reason env ret ~f:(fun from ->
-                  Typing_reason.(flow ~from ~into:(witness expr_pos))))
+                  Typing_reason.(
+                    flow ~from ~into:(witness expr_pos) ~kind:Flow_subtype)))
           in
           (env, (tel, typed_unpack_element, ret, should_forget_fakes))
         | (r, Tnewtype (name, [ty], _))
@@ -7518,14 +7526,16 @@ end = struct
       let rty =
         Typing_env.(
           update_reason env rty ~f:(fun from ->
-              Typing_reason.(flow ~from ~into:(witness pos))))
+              Typing_reason.(
+                flow ~from ~into:(witness pos) ~kind:Flow_return_hint)))
       in
       let te =
         let (ty, pos, e) = te in
         let ty =
           Typing_env.(
             update_reason env ty ~f:(fun from ->
-                Typing_reason.(flow ~from ~into:(witness pos))))
+                Typing_reason.(
+                  flow ~from ~into:(witness pos) ~kind:Flow_return_hint)))
         in
         (ty, pos, e)
       in
@@ -8373,7 +8383,8 @@ end = struct
     let ty1 =
       Typing_env.(
         update_reason env ty1 ~f:(fun from ->
-            Typing_reason.(flow ~from ~into:(witness param.param_pos))))
+            Typing_reason.(
+              flow ~from ~into:(witness param.param_pos) ~kind:Flow_param_hint)))
     in
     let param_te = Option.map param_te ~f:(fun (_, pos, e) -> (ty1, pos, e)) in
     let (env, user_attributes) =
@@ -10473,14 +10484,15 @@ end = struct
     let ty1 =
       Typing_env.(
         update_reason env ty1 ~f:(fun into ->
-            Typing_reason.flow ~into ~from:(get_reason ty2)))
+            Typing_reason.(flow ~into ~from:(get_reason ty2) ~kind:Flow_assign)))
     in
     let te1 =
       let (ty, pos, e) = te1 in
       let ty =
         Typing_env.(
           update_reason env ty ~f:(fun into ->
-              Typing_reason.flow ~into ~from:(get_reason ty2)))
+              Typing_reason.(
+                flow ~into ~from:(get_reason ty2) ~kind:Flow_assign)))
       in
       (ty, pos, e)
     in
@@ -10525,7 +10537,7 @@ end = struct
         let ty =
           Typing_env.(
             update_reason env ty2 ~f:(fun from ->
-                Typing_reason.(flow ~from ~into:(witness p1))))
+                Typing_reason.(flow ~from ~into:(witness p1) ~kind:Flow_assign)))
         in
         let env = set_valid_rvalue ~is_defined:true p env x None ty in
         let (env, te, ty) = make_result env p1 (Aast.Lvar id) ty in
@@ -10535,7 +10547,8 @@ end = struct
           let ty = MakeType.void (Reason.placeholder p) in
           Typing_env.(
             update_reason env ty ~f:(fun into ->
-                Typing_reason.flow ~into ~from:(get_reason ty2)))
+                Typing_reason.(
+                  flow ~into ~from:(get_reason ty2) ~kind:Flow_assign)))
         in
         let (_, p1, _) = e1 in
         let (env, te, ty) =
@@ -10559,7 +10572,8 @@ end = struct
           List.map tyl ~f:(fun ty ->
               Typing_env.(
                 update_reason env ty ~f:(fun into ->
-                    Typing_reason.flow ~into ~from:(get_reason ty2))))
+                    Typing_reason.(
+                      flow ~into ~from:(get_reason ty2) ~kind:Flow_assign))))
         in
         let (_, p1, _) = e1 in
         let destructure_ty =

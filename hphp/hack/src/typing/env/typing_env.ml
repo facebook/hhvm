@@ -103,7 +103,8 @@ let expand_var env r v =
       (not (is_tyvar ty_solution))
       && TypecheckerOptions.using_extended_reasons env.genv.tcopt
     then
-      map_reason ty_solution ~f:(fun from -> Typing_reason.flow ~from ~into:r)
+      map_reason ty_solution ~f:(fun from ->
+          Typing_reason.(flow ~from ~into:r ~kind:Flow_solved))
     else
       ty_solution
   in

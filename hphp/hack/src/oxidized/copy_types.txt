@@ -113,6 +113,7 @@ typing_reason::BlameSource
 typing_reason::CstrVariance
 typing_reason::Direction
 typing_reason::FieldKind
+typing_reason::FlowKind
 typing_reason::PrjAsymm
 typing_reason::Side
 typing_reason::VarianceDir

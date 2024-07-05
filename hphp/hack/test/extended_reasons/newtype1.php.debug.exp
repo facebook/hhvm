@@ -28,7 +28,7 @@ Here's why: this hint
 
 File "newtype1.php--file1.php", line 3, character 24 - line 3, character 26:
 
-flows into this hint
+flows into this hint because it is the definition
 
  7 | function pass_my_int(»myint« $y) : bool {
  8 |   return expect_bool($y);
@@ -36,7 +36,7 @@ flows into this hint
 
 File "newtype1.php--file2.php", line 7, character 22 - line 7, character 26:
 
-which itself flows into this expression
+which itself flows into this expression because it is a parameter hint
 
  7 | function pass_my_int(myint »$y«) : bool {
  8 |   return expect_bool($y);
@@ -44,7 +44,7 @@ which itself flows into this expression
 
 File "newtype1.php--file2.php", line 7, character 28 - line 7, character 29:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  7 | function pass_my_int(myint $y) : bool {
  8 |   return expect_bool(»$y«);
@@ -60,7 +60,7 @@ which itself flows up into this expression as the 1st function parameter
 
 File "newtype1.php--file2.php", line 8, character 10 - line 8, character 20:
 
-which itself flows from this function or method 
+which itself flows from this function or method  because they are required to be subtypes
 
  3 | function »expect_bool«(bool $x): bool {
  4 |   return $x;
@@ -74,7 +74,7 @@ which itself flows down into this hint as the 1st function parameter
 
 File "newtype1.php--file1.php", line 3, character 18 - line 3, character 20:
 
-which itself flows into this hint
+which itself flows into this hint because they are required to be subtypes
 
  3 | function expect_bool(»bool« $x): bool {
  4 |   return $x;
@@ -89,31 +89,39 @@ Path:
     {
       "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":24,"char_end":26}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_type_def"}},
     {
       "Rhint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rwitness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
     },
-    {"Edge":{"dir":"Fwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
+    },
     {
       "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":10,"char_end":20}]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
       "Rsupport_dynamic_type":[{"filename":"newtype1.php--file2.php","line":3,"char_start":10,"char_end":20}]
     },
-    {"Edge":{"dir":"Fwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{
+        "dir":"Fwd",
+        "kind":"Flow_upper_bound",
+        "out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
+      }
+    },
     {
       "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":18,"char_end":20}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
       "Rhint":[{"filename":"newtype1.php--file2.php","line":3,"char_start":22,"char_end":25}]
     }

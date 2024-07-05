@@ -60,7 +60,7 @@ Here's why: this hint
 
 File "generic_subtyping_upper_bound_2.php", line 11, character 49 - line 11, character 49:
 
-flows into this hint
+flows into this hint becuase it is the upper bound
 
   9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
  10 | 
@@ -70,7 +70,7 @@ flows into this hint
 
 File "generic_subtyping_upper_bound_2.php", line 11, character 52 - line 11, character 52:
 
-which itself flows into this expression
+which itself flows into this expression because it is a parameter hint
 
   9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
  10 | 
@@ -80,7 +80,7 @@ which itself flows into this expression
 
 File "generic_subtyping_upper_bound_2.php", line 11, character 54 - line 11, character 55:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
   9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
  10 | 
@@ -100,7 +100,7 @@ which itself flows up into this expression as the 1st function parameter
 
 File "generic_subtyping_upper_bound_2.php", line 12, character 3 - line 12, character 18:
 
-which itself flows from this function or method 
+which itself flows from this function or method  because they are required to be subtypes
 
  9 | function »rcvr_both_bounds«<T as D as B>(T $x): void {}
 10 | 
@@ -134,7 +134,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_upper_bound"}},
     {
       "Rhint":[
         {
@@ -145,7 +145,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rwitness":[
         {
@@ -156,7 +156,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[
         {
@@ -167,7 +167,9 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
+    },
     {
       "Rwitness":[
         {
@@ -178,7 +180,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
       "Rsupport_dynamic_type":[
         {
@@ -189,7 +191,13 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{
+        "dir":"Fwd",
+        "kind":"Flow_subtype_toplevel",
+        "out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
+      }
+    },
     {
       "Rcstr_on_generics":[
         {
@@ -279,7 +287,7 @@ Here's why: this hint
 
 File "generic_subtyping_upper_bound_2.php", line 11, character 52 - line 11, character 52:
 
-flows into this expression
+flows into this expression because it is a parameter hint
 
   9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
  10 | 
@@ -289,7 +297,7 @@ flows into this expression
 
 File "generic_subtyping_upper_bound_2.php", line 11, character 54 - line 11, character 55:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
   9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
  10 | 
@@ -309,7 +317,7 @@ which itself flows up into this expression as the 1st function parameter
 
 File "generic_subtyping_upper_bound_2.php", line 12, character 3 - line 12, character 18:
 
-which itself flows from this function or method 
+which itself flows from this function or method  because they are required to be subtypes
 
  9 | function »rcvr_both_bounds«<T as D as B>(T $x): void {}
 10 | 
@@ -343,7 +351,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rwitness":[
         {
@@ -354,7 +362,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[
         {
@@ -365,7 +373,9 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
+    },
     {
       "Rwitness":[
         {
@@ -376,7 +386,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
       "Rsupport_dynamic_type":[
         {
@@ -387,7 +397,13 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{
+        "dir":"Fwd",
+        "kind":"Flow_subtype_toplevel",
+        "out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
+      }
+    },
     {
       "Rcstr_on_generics":[
         {

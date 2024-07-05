@@ -60,7 +60,7 @@ which itself flows up from this function or method  as the 1st function paramete
 
 File "class_subtyping_contravariant.php", line 11, character 10 - line 11, character 19:
 
-which itself flows into this expression
+which itself flows into this expression because they are required to be subtypes
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -80,7 +80,7 @@ which itself flows down from this expression as the 1st function parameter
 
 File "class_subtyping_contravariant.php", line 14, character 14 - line 14, character 15:
 
-which itself flows from this expression
+which itself flows from this expression because the local variable has this type
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -90,7 +90,7 @@ which itself flows from this expression
 
 File "class_subtyping_contravariant.php", line 13, character 52 - line 13, character 53:
 
-which itself flows from this hint
+which itself flows from this hint because it is a parameter hint
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -100,7 +100,7 @@ which itself flows from this hint
 
 File "class_subtyping_contravariant.php", line 13, character 36 - line 13, character 50:
 
-which itself flows from this hint
+which itself flows from this hint because they are subclass and superclass
 
  5 | class MyB<-T1, T2> extends »MyA<Sub, T1, T2>« {}
  6 | 
@@ -135,6 +135,7 @@ Path:
     {
       "Edge":{
         "dir":"Fwd",
+        "kind":"Flow_prj",
         "in_to":{"Symm":[{"Prj_symm_class":["\\MyA",1,{"Dir":[{"Contr":[]}]}]}]}
       }
     },
@@ -148,7 +149,13 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{
+        "dir":"Bwd",
+        "kind":"Flow_subtype",
+        "in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
+      }
+    },
     {
       "Rsupport_dynamic_type":[
         {
@@ -159,7 +166,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype"}},
     {
       "Rwitness":[
         {
@@ -170,7 +177,9 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{"dir":"Bwd","kind":"Flow_prj","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
+    },
     {
       "Rwitness":[
         {
@@ -181,7 +190,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_local"}},
     {
       "Rwitness":[
         {
@@ -192,7 +201,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_param_hint"}},
     {
       "Rhint":[
         {
@@ -203,7 +212,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_extends"}},
     {
       "Rhint":[
         {
@@ -217,6 +226,7 @@ Path:
     {
       "Edge":{
         "dir":"Fwd",
+        "kind":"Flow_subtype_toplevel",
         "out_of":{"Symm":[{"Prj_symm_class":["\\MyA",1,{"Dir":[{"Contr":[]}]}]}]}
       }
     },

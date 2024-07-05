@@ -36,7 +36,7 @@ Here's why: this hint
 
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
-flows into this expression
+flows into this expression because it is a parameter hint
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C »$c«): (A|B) {
@@ -45,7 +45,7 @@ flows into this expression
 
 File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
@@ -54,7 +54,7 @@ which itself flows into this expression
 
 File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because it is a return hint
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
@@ -63,7 +63,7 @@ which itself flows into this expression
 
 File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
 
-which itself flows into this hint
+which itself flows into this hint because they are required to be subtypes
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): »(A|B)« {
@@ -79,19 +79,19 @@ Path:
     {
       "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
       "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
       "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
     }
@@ -139,7 +139,7 @@ Here's why: this hint
 
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
-flows into this expression
+flows into this expression because it is a parameter hint
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C »$c«): (A|B) {
@@ -148,7 +148,7 @@ flows into this expression
 
 File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
@@ -157,7 +157,7 @@ which itself flows into this expression
 
 File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because it is a return hint
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
@@ -166,7 +166,7 @@ which itself flows into this expression
 
 File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
 
-which itself flows into this hint
+which itself flows into this hint because they are required to be subtypes
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): »(A|B)« {
@@ -191,23 +191,25 @@ Path:
     {
       "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
       "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
       "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
     },
-    {"Edge":{"dir":"Fwd","out_of":{"Asymm":["Super","Prj_asymm_union"]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","out_of":{"Asymm":["Super","Prj_asymm_union"]}}
+    },
     {
       "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":26,"char_end":26}]
     }
@@ -255,7 +257,7 @@ Here's why: this hint
 
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
-flows into this expression
+flows into this expression because it is a parameter hint
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C »$c«): (A|B) {
@@ -264,7 +266,7 @@ flows into this expression
 
 File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
@@ -273,7 +275,7 @@ which itself flows into this expression
 
 File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because it is a return hint
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
@@ -282,7 +284,7 @@ which itself flows into this expression
 
 File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
 
-which itself flows into this hint
+which itself flows into this hint because they are required to be subtypes
 
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): »(A|B)« {
@@ -307,23 +309,25 @@ Path:
     {
       "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
       "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
       "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
     },
-    {"Edge":{"dir":"Fwd","out_of":{"Asymm":["Super","Prj_asymm_union"]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","out_of":{"Asymm":["Super","Prj_asymm_union"]}}
+    },
     {
       "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":28,"char_end":28}]
     }

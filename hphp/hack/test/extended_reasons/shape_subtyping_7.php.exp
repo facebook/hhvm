@@ -53,7 +53,7 @@ flows up into this hint as the required shape field `'b'`
 
 File "shape_subtyping_7.php", line 4, character 18 - line 4, character 34:
 
-which itself flows into this hint
+which itself flows into this hint because it is the definition
 
  11 | function passes_missing_a_alias(
  12 |   »missing_a« $s,
@@ -63,7 +63,7 @@ which itself flows into this hint
 
 File "shape_subtyping_7.php", line 12, character 3 - line 12, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because it is a parameter hint
 
  11 | function passes_missing_a_alias(
  12 |   missing_a »$s«,
@@ -73,7 +73,7 @@ which itself flows into this expression
 
 File "shape_subtyping_7.php", line 12, character 13 - line 12, character 14:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  11 | function passes_missing_a_alias(
  12 |   missing_a $s,
@@ -93,7 +93,7 @@ which itself flows up into this expression as the 1st function parameter
 
 File "shape_subtyping_7.php", line 14, character 3 - line 14, character 33:
 
-which itself flows from this function or method 
+which itself flows from this function or method  because they are required to be subtypes
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type missing_a = shape('b' => int);
@@ -112,7 +112,7 @@ which itself flows down into this hint as the 1st function parameter
 
 File "shape_subtyping_7.php", line 3, character 26 - line 3, character 42:
 
-which itself flows into this hint
+which itself flows into this hint because it is the definition
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type missing_a = shape('b' => int);
@@ -177,7 +177,7 @@ flows up into this hint since the shape field `'a'` is not defined
 
 File "shape_subtyping_7.php", line 4, character 18 - line 4, character 34:
 
-which itself flows into this hint
+which itself flows into this hint because it is the definition
 
  11 | function passes_missing_a_alias(
  12 |   »missing_a« $s,
@@ -187,7 +187,7 @@ which itself flows into this hint
 
 File "shape_subtyping_7.php", line 12, character 3 - line 12, character 11:
 
-which itself flows into this expression
+which itself flows into this expression because it is a parameter hint
 
  11 | function passes_missing_a_alias(
  12 |   missing_a »$s«,
@@ -197,7 +197,7 @@ which itself flows into this expression
 
 File "shape_subtyping_7.php", line 12, character 13 - line 12, character 14:
 
-which itself flows into this expression
+which itself flows into this expression because the local variable has this type
 
  11 | function passes_missing_a_alias(
  12 |   missing_a $s,
@@ -217,7 +217,7 @@ which itself flows up into this expression as the 1st function parameter
 
 File "shape_subtyping_7.php", line 14, character 3 - line 14, character 33:
 
-which itself flows from this function or method 
+which itself flows from this function or method  because they are required to be subtypes
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type missing_a = shape('b' => int);
@@ -236,7 +236,7 @@ which itself flows down into this hint as the 1st function parameter
 
 File "shape_subtyping_7.php", line 3, character 26 - line 3, character 42:
 
-which itself flows into this hint
+which itself flows into this hint because it is the definition
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type missing_a = shape('b' => int);

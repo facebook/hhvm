@@ -45,7 +45,7 @@ flows up into this hint as the 2nd function parameter
 
 File "fn_subtyping_variadic_1.php", line 6, character 25 - line 6, character 51:
 
-which itself flows from this declaration
+which itself flows from this declaration because the type was decomposed
 
  6 | function foo_variadic_1(»(function(Sub, Super):void)« $_): void {}
  7 | function bar_variadic_1((function(Sub...):void) $x): void {
@@ -54,7 +54,7 @@ which itself flows from this declaration
 
 File "fn_subtyping_variadic_1.php", line 6, character 25 - line 6, character 51:
 
-which itself flows from this hint
+which itself flows from this hint because they are required to be subtypes
 
  6 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
  7 | function bar_variadic_1(»(function(Sub...):void)« $x): void {
@@ -72,7 +72,7 @@ which itself flows up from this function or method  as the 1st function paramete
 
 File "fn_subtyping_variadic_1.php", line 6, character 10 - line 6, character 23:
 
-which itself flows into this expression
+which itself flows into this expression because they are required to be subtypes
 
  6 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
  7 | function bar_variadic_1((function(Sub...):void) $x): void {
@@ -90,7 +90,7 @@ which itself flows down from this expression as the 1st function parameter
 
 File "fn_subtyping_variadic_1.php", line 8, character 18 - line 8, character 19:
 
-which itself flows from this expression
+which itself flows from this expression because the local variable has this type
 
  6 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
  7 | function bar_variadic_1((function(Sub...):void) »$x«): void {
@@ -99,7 +99,7 @@ which itself flows from this expression
 
 File "fn_subtyping_variadic_1.php", line 7, character 49 - line 7, character 50:
 
-which itself flows from this hint
+which itself flows from this hint because it is a parameter hint
 
  6 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
  7 | function bar_variadic_1(»(function(Sub...):void)« $x): void {
@@ -131,18 +131,20 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd","in_to":{"Symm":[{"Prj_symm_fn_param":[1,0]}]}}},
+    {
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[1,0]}]}}
+    },
     {
       "Rhint":[
         {
-          "filename":"/tmp/AwcePZighI/supportdynamic.hhi",
+          "filename":"/tmp/HikhPXBbn6/supportdynamic.hhi",
           "line":6,
           "char_start":33,
           "char_end":45
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_type_def"}},
     {
       "Rhint":[
         {
@@ -153,7 +155,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_prj"}},
     {
       "Rwitness_from_decl":[
         {
@@ -164,7 +166,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
       "Rhint":[
         {
@@ -175,7 +177,9 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{"dir":"Bwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
+    },
     {
       "Rsupport_dynamic_type":[
         {
@@ -186,7 +190,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_subtype"}},
     {
       "Rwitness":[
         {
@@ -197,7 +201,9 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}},
+    {
+      "Edge":{"dir":"Bwd","kind":"Flow_prj","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
+    },
     {
       "Rwitness":[
         {
@@ -208,7 +214,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_local"}},
     {
       "Rwitness":[
         {
@@ -219,7 +225,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_param_hint"}},
     {
       "Rhint":[
         {
@@ -230,18 +236,24 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_type_def"}},
     {
       "Rhint":[
         {
-          "filename":"/tmp/AwcePZighI/supportdynamic.hhi",
+          "filename":"/tmp/HikhPXBbn6/supportdynamic.hhi",
           "line":6,
           "char_start":33,
           "char_end":45
         }
       ]
     },
-    {"Edge":{"dir":"Fwd","out_of":{"Symm":[{"Prj_symm_fn_param":[1,0]}]}}},
+    {
+      "Edge":{
+        "dir":"Fwd",
+        "kind":"Flow_subtype_toplevel",
+        "out_of":{"Symm":[{"Prj_symm_fn_param":[1,0]}]}
+      }
+    },
     {
       "Rhint":[
         {

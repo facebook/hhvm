@@ -6,7 +6,7 @@ error: Typing[4110] Invalid return type
 
 File "refinement_equal.php", line 12, character 10 - line 12, character 11:
 
-Expected `~C` because the type of this return is implicitly a like-type
+Expected `C`
 
  6 | function inter_equal(?A $a, C $c): »C« {
  7 |   if($a == null) {
@@ -16,7 +16,7 @@ Expected `~C` because the type of this return is implicitly a like-type
 
 File "refinement_equal.php", line 6, character 36 - line 6, character 36:
 
-But got `?C`
+But got `null`
 
  6 | function inter_equal(»?A« $a, C $c): C {
  7 |   if($a == null) {
@@ -104,7 +104,7 @@ which itself flows into this expression
 
 File "refinement_equal.php", line 12, character 3 - line 12, character 12:
 
-which itself flows into this return hint
+which itself flows into this hint
 
  6 | function inter_equal(?A $a, C $c): »C« {
  7 |   if($a == null) {

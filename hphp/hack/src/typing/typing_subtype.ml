@@ -965,13 +965,17 @@ end = struct
     end
     | (r_sub, Tprim Nast.Tvoid) ->
       let r = Reason.implicit_upper_bound (Reason.to_pos r_sub, "mixed") in
-      simplify
-        ~subtype_env
-        ~this_ty
-        ~lhs:{ sub_supportdyn = None; ty_sub = MakeType.mixed r }
-        ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-        env
-      |> if_unsat (invalid ~fail)
+      let prop =
+        simplify
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn = None; ty_sub = MakeType.mixed r }
+          ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+      in
+      if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
+        prop env
+      else
+        if_unsat (invalid ~fail) @@ prop env
     | (_, Tany _) ->
       if subtype_env.Subtype_env.no_top_bottom then
         mk_issubtype_prop
@@ -3266,14 +3270,21 @@ end = struct
       (* Likewise, reduce nullable on left to a union *)
       | (r, Toption ty) ->
         let ty_null = MakeType.null r in
-        if_unsat
-          (invalid ~fail)
-          (simplify
-             ~subtype_env
-             ~this_ty
-             ~lhs:{ sub_supportdyn; ty_sub = ty_null }
-             ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-             env)
+        let prop_null =
+          let prop =
+            simplify
+              ~subtype_env
+              ~this_ty
+              ~lhs:{ sub_supportdyn; ty_sub = ty_null }
+              ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+          in
+          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
+            prop
+          else
+            fun env ->
+          if_unsat (invalid ~fail) @@ prop env
+        in
+        prop_null env
         &&& simplify
               ~subtype_env
               ~this_ty
@@ -3818,17 +3829,21 @@ end = struct
       and ty_name = lazy (Pretty.describe_ty_default env (LoclType ty_sub))
       and pos = Reason.to_pos (get_reason ty_sub) in
       let postprocess =
-        if_unsat
-          (invalid
-             ~fail:
-               (Option.map
-                  subtype_env.Subtype_env.on_error
-                  ~f:
-                    Typing_error.(
-                      fun on_error ->
-                        apply_reasons ~on_error
-                        @@ Secondary.Not_sub_dynamic
-                             { pos; ty_name; dynamic_part })))
+        if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
+          fun prop ->
+        prop
+        else
+          if_unsat
+            (invalid
+               ~fail:
+                 (Option.map
+                    subtype_env.Subtype_env.on_error
+                    ~f:
+                      Typing_error.(
+                        fun on_error ->
+                          apply_reasons ~on_error
+                          @@ Secondary.Not_sub_dynamic
+                               { pos; ty_name; dynamic_part })))
       in
       postprocess
       @@
@@ -4508,14 +4523,21 @@ end = struct
       | (r, Toption ty_sub) ->
         let ty_null = MakeType.null r in
         (* Errors due to `null` should refer to full option type *)
-        if_unsat
-          (invalid ~fail)
-          (simplify
-             ~subtype_env
-             ~this_ty
-             ~lhs:{ sub_supportdyn; ty_sub = ty_null }
-             ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-             env)
+        let prop_null =
+          let prop =
+            simplify
+              ~subtype_env
+              ~this_ty
+              ~lhs:{ sub_supportdyn; ty_sub = ty_null }
+              ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+          in
+          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
+            prop
+          else
+            fun env ->
+          if_unsat (invalid ~fail) @@ prop env
+        in
+        prop_null env
         &&& simplify
               ~subtype_env
               ~this_ty
@@ -4523,23 +4545,24 @@ end = struct
               ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
       | (r, Tprim Aast.Tarraykey) ->
         let ty_string = MakeType.string r and ty_int = MakeType.int r in
+        let prop env =
+          env
+          |> simplify
+               ~subtype_env
+               ~this_ty
+               ~lhs:{ sub_supportdyn; ty_sub = ty_string }
+               ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+          &&& simplify
+                ~subtype_env
+                ~this_ty
+                ~lhs:{ sub_supportdyn; ty_sub = ty_int }
+                ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+        in
         (* Use `if_unsat` so we report arraykey in the error *)
-        if_unsat
-          (invalid ~fail)
-          begin
-            env
-            |> simplify
-                 ~subtype_env
-                 ~this_ty
-                 ~lhs:{ sub_supportdyn; ty_sub = ty_string }
-                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-            &&& simplify
-                  ~subtype_env
-                  ~this_ty
-                  ~lhs:{ sub_supportdyn; ty_sub = ty_int }
-                  ~rhs:
-                    { super_like = false; super_supportdyn = false; ty_super }
-          end
+        if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
+          prop env
+        else
+          if_unsat (invalid ~fail) @@ prop env
       | (_, Tgeneric _) when subtype_env.Subtype_env.require_completeness ->
         default_subtype
           ~subtype_env
@@ -6901,17 +6924,16 @@ end = struct
     match deref ty_sub with
     | (r, Toption ty) ->
       let ty_null = MakeType.null r in
-      if_unsat
-        (invalid ~fail)
-        (simplify_disj_r
-           ~subtype_env
-           ~this_ty
-           ~fail
-           ~lift_rhs
-           ~mk_prop
-           (sub_supportdyn, ty_null)
-           rhs
-           env
+      let prop env =
+        simplify_disj_r
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lift_rhs
+          ~mk_prop
+          (sub_supportdyn, ty_null)
+          rhs
+          env
         &&& simplify_disj_r
               ~subtype_env
               ~this_ty
@@ -6919,7 +6941,12 @@ end = struct
               ~lift_rhs
               ~mk_prop
               (sub_supportdyn, ty)
-              rhs)
+              rhs
+      in
+      if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
+        prop env
+      else
+        if_unsat (invalid ~fail) @@ prop env
     | (r_sub, Tintersection ty_subs) ->
       let mk_prop_intersection
           ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs env =

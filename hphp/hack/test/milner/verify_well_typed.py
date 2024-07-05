@@ -1,6 +1,7 @@
 # pyre-strict
 
 import concurrent.futures
+import itertools
 import os
 import subprocess
 from dataclasses import dataclass
@@ -56,40 +57,40 @@ def verify_well_typed(test_dir: str, milner_exe: str, hhstc_exe: str) -> int:
     # Iterate over each template file, in parallel generate programs with seeds
     # (1...100) with milner and verify that they are well-typed with
     # hh_single_type_check
-    for template_file in template_files:
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = []
-            for seed in range(1, 101):
-                futures.append(
-                    executor.submit(
-                        milner_and_type_check,
-                        milner_exe,
-                        hhstc_exe,
-                        template_file,
-                        seed,
-                    )
+    product = itertools.product(template_files, range(1, 101))
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = []
+        for template_file, seed in product:
+            futures.append(
+                executor.submit(
+                    milner_and_type_check,
+                    milner_exe,
+                    hhstc_exe,
+                    template_file,
+                    seed,
                 )
-            concurrent.futures.wait(futures)
+            )
+        concurrent.futures.wait(futures)
 
-            # If there were any errors, display the first failure and fail
-            for future in futures:
-                res: Failure = future.result()
-                if res is not None:
-                    print("***")
-                    print(f"* Error in {res.path}:")
-                    print("***")
-                    print("* File contents:")
-                    print("***")
-                    print(res.contents)
-                    print("***")
-                    print("* hh_single_type_check STDOUT:")
-                    print("***")
-                    print(res.stdout)
-                    print("***")
-                    print("* hh_single_type_check STDERR:")
-                    print("***")
-                    print(res.stderr)
-                    return 1
+        # If there were any errors, display the first failure and fail
+        for future in futures:
+            res: Failure = future.result()
+            if res is not None:
+                print("***")
+                print(f"* Error in {res.path}:")
+                print("***")
+                print("* File contents:")
+                print("***")
+                print(res.contents)
+                print("***")
+                print("* hh_single_type_check STDOUT:")
+                print("***")
+                print(res.stdout)
+                print("***")
+                print("* hh_single_type_check STDERR:")
+                print("***")
+                print(res.stderr)
+                return 1
 
     # If we made it here, then all templates only generated well-typed programs
     print("All templates passed verification!")

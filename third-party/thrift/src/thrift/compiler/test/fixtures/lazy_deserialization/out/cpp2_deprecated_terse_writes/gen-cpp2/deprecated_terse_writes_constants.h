@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/deprecated_terse_writes_types.h"
 
 namespace apache::thrift::test {
+namespace deprecated_terse_writes_constants {
 
-struct deprecated_terse_writes_constants {
 
-};
-
+} // namespace deprecated_terse_writes_constants
 } // namespace apache::thrift::test

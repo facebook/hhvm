@@ -11,15 +11,14 @@
 #include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_types.h"
 
 namespace module2 {
+namespace module2_constants {
 
-struct module2_constants {
+  ::module2::Struct const& c2();
 
-  static ::module2::Struct const& c2();
+  ::module2::Struct const& c3();
 
-  static ::module2::Struct const& c3();
+  ::module2::Struct const& c4();
 
-  static ::module2::Struct const& c4();
 
-};
-
+} // namespace module2_constants
 } // namespace module2

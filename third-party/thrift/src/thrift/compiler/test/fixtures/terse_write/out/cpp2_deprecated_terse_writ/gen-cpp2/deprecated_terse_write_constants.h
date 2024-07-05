@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/deprecated_terse_write_types.h"
 
 namespace facebook::thrift::test::terse_write::deprecated {
+namespace deprecated_terse_write_constants {
 
-struct deprecated_terse_write_constants {
 
-};
-
+} // namespace deprecated_terse_write_constants
 } // namespace facebook::thrift::test::terse_write::deprecated

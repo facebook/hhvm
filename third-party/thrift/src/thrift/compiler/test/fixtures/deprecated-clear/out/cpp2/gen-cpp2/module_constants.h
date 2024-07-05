@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/deprecated-clear/gen-cpp2/module_types.h"
 
 namespace apache::thrift::test {
+namespace module_constants {
 
-struct module_constants {
 
-};
-
+} // namespace module_constants
 } // namespace apache::thrift::test

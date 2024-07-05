@@ -11,16 +11,15 @@
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_types.h"
 
 namespace cpp2 {
+namespace includes_constants {
 
-struct includes_constants {
+  ::cpp2::Included const& ExampleIncluded();
 
-  static ::cpp2::Included const& ExampleIncluded();
-
-  static constexpr ::std::int64_t const IncludedConstant_ = static_cast<::std::int64_t>(42);
-  static constexpr ::std::int64_t IncludedConstant() {
+  constexpr ::std::int64_t const IncludedConstant_ = static_cast<::std::int64_t>(42);
+  constexpr ::std::int64_t IncludedConstant() {
     return IncludedConstant_;
   }
 
-};
 
+} // namespace includes_constants
 } // namespace cpp2

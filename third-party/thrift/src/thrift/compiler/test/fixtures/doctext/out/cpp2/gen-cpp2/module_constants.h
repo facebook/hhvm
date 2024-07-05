@@ -11,29 +11,28 @@
 #include "thrift/compiler/test/fixtures/doctext/gen-cpp2/module_types.h"
 
 namespace cpp2 {
+namespace module_constants {
 
-struct module_constants {
-
-  static constexpr char const * const FOO_ = "foo";
-  static constexpr char const * FOO() {
+  constexpr char const * const FOO_ = "foo";
+  constexpr char const * FOO() {
     return FOO_;
   }
 
-  static constexpr ::std::int32_t const BAR_ = static_cast<::std::int32_t>(123);
-  static constexpr ::std::int32_t BAR() {
+  constexpr ::std::int32_t const BAR_ = static_cast<::std::int32_t>(123);
+  constexpr ::std::int32_t BAR() {
     return BAR_;
   }
 
-  static constexpr ::std::int32_t const BIFF_ = static_cast<::std::int32_t>(0);
-  static constexpr ::std::int32_t BIFF() {
+  constexpr ::std::int32_t const BIFF_ = static_cast<::std::int32_t>(0);
+  constexpr ::std::int32_t BIFF() {
     return BIFF_;
   }
 
-  static constexpr ::std::int32_t const SHOUTY_ = static_cast<::std::int32_t>(11);
-  static constexpr ::std::int32_t SHOUTY() {
+  constexpr ::std::int32_t const SHOUTY_ = static_cast<::std::int32_t>(11);
+  constexpr ::std::int32_t SHOUTY() {
     return SHOUTY_;
   }
 
-};
 
+} // namespace module_constants
 } // namespace cpp2

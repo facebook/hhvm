@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_types.h"
 
 namespace apache::thrift::test {
+namespace simple_constants {
 
-struct simple_constants {
 
-};
-
+} // namespace simple_constants
 } // namespace apache::thrift::test

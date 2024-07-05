@@ -11,29 +11,28 @@
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/module_types.h"
 
 namespace test_cpp2::cpp_reflection {
+namespace module_constants {
 
-struct module_constants {
-
-  static constexpr ::std::int32_t const constant1_ = static_cast<::std::int32_t>(1357);
-  static constexpr ::std::int32_t constant1() {
+  constexpr ::std::int32_t const constant1_ = static_cast<::std::int32_t>(1357);
+  constexpr ::std::int32_t constant1() {
     return constant1_;
   }
 
-  static constexpr char const * const constant2_ = "hello";
-  static constexpr char const * constant2() {
+  constexpr char const * const constant2_ = "hello";
+  constexpr char const * constant2() {
     return constant2_;
   }
 
-  static constexpr ::test_cpp2::cpp_reflection::enum1 const constant3_ =  ::test_cpp2::cpp_reflection::enum1::field0;
-  static constexpr ::test_cpp2::cpp_reflection::enum1 constant3() {
+  constexpr ::test_cpp2::cpp_reflection::enum1 const constant3_ =  ::test_cpp2::cpp_reflection::enum1::field0;
+  constexpr ::test_cpp2::cpp_reflection::enum1 constant3() {
     return constant3_;
   }
 
-  static constexpr ::std::int32_t const constant_with_special_name_ = static_cast<::std::int32_t>(42);
-  static constexpr ::std::int32_t constant_with_special_name() {
+  constexpr ::std::int32_t const constant_with_special_name_ = static_cast<::std::int32_t>(42);
+  constexpr ::std::int32_t constant_with_special_name() {
     return constant_with_special_name_;
   }
 
-};
 
+} // namespace module_constants
 } // namespace test_cpp2::cpp_reflection

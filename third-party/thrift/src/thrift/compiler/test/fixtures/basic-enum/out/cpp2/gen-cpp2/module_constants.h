@@ -11,16 +11,15 @@
 #include "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_types.h"
 
 namespace test::fixtures::enumstrict {
+namespace module_constants {
 
-struct module_constants {
-
-  static constexpr ::test::fixtures::enumstrict::MyEnum const kOne_ =  ::test::fixtures::enumstrict::MyEnum::ONE;
-  static constexpr ::test::fixtures::enumstrict::MyEnum kOne() {
+  constexpr ::test::fixtures::enumstrict::MyEnum const kOne_ =  ::test::fixtures::enumstrict::MyEnum::ONE;
+  constexpr ::test::fixtures::enumstrict::MyEnum kOne() {
     return kOne_;
   }
 
-  static ::std::map<::test::fixtures::enumstrict::MyEnum, ::std::string> const& enumNames();
+  ::std::map<::test::fixtures::enumstrict::MyEnum, ::std::string> const& enumNames();
 
-};
 
+} // namespace module_constants
 } // namespace test::fixtures::enumstrict

@@ -11,313 +11,312 @@
 #include "thrift/compiler/test/fixtures/constants/gen-cpp2/module_types.h"
 
 namespace cpp2 {
+namespace module_constants {
 
-struct module_constants {
-
-  static constexpr ::std::int32_t const myInt_ = static_cast<::std::int32_t>(1337);
-  static constexpr ::std::int32_t myInt() {
+  constexpr ::std::int32_t const myInt_ = static_cast<::std::int32_t>(1337);
+  constexpr ::std::int32_t myInt() {
     return myInt_;
   }
 
-  static constexpr char const * const name_ = "Mark Zuckerberg";
-  static constexpr char const * name() {
+  constexpr char const * const name_ = "Mark Zuckerberg";
+  constexpr char const * name() {
     return name_;
   }
 
-  static constexpr char const * const multi_line_string_ = "This\nis a\nmulti line string.\n";
-  static constexpr char const * multi_line_string() {
+  constexpr char const * const multi_line_string_ = "This\nis a\nmulti line string.\n";
+  constexpr char const * multi_line_string() {
     return multi_line_string_;
   }
 
-  static ::std::vector<::std::map<::std::string, ::std::int32_t>> const& states();
+  ::std::vector<::std::map<::std::string, ::std::int32_t>> const& states();
 
-  static constexpr double const x_ = static_cast<double>(1);
-  static constexpr double x() {
+  constexpr double const x_ = static_cast<double>(1);
+  constexpr double x() {
     return x_;
   }
 
-  static constexpr double const y_ = static_cast<double>(1000000);
-  static constexpr double y() {
+  constexpr double const y_ = static_cast<double>(1000000);
+  constexpr double y() {
     return y_;
   }
 
-  static constexpr double const z_ = static_cast<double>(1000000000);
-  static constexpr double z() {
+  constexpr double const z_ = static_cast<double>(1000000000);
+  constexpr double z() {
     return z_;
   }
 
-  static constexpr double const zeroDoubleValue_ = static_cast<double>(0);
-  static constexpr double zeroDoubleValue() {
+  constexpr double const zeroDoubleValue_ = static_cast<double>(0);
+  constexpr double zeroDoubleValue() {
     return zeroDoubleValue_;
   }
 
-  static constexpr double const longDoubleValue_ = static_cast<double>(2.59961000990301e-05);
-  static constexpr double longDoubleValue() {
+  constexpr double const longDoubleValue_ = static_cast<double>(2.59961000990301e-05);
+  constexpr double longDoubleValue() {
     return longDoubleValue_;
   }
 
-  static constexpr std::string_view bin_{"a\000z", 3};
-  static constexpr std::string_view bin() {
+  constexpr std::string_view bin_{"a\000z", 3};
+  constexpr std::string_view bin() {
     return bin_;
   }
 
-  static constexpr ::cpp2::MyCompany const my_company_ =  ::cpp2::MyCompany::FACEBOOK;
-  static constexpr ::cpp2::MyCompany my_company() {
+  constexpr ::cpp2::MyCompany const my_company_ =  ::cpp2::MyCompany::FACEBOOK;
+  constexpr ::cpp2::MyCompany my_company() {
     return my_company_;
   }
 
-  static constexpr char const * const foo_ = "foo";
-  static constexpr char const * foo() {
+  constexpr char const * const foo_ = "foo";
+  constexpr char const * foo() {
     return foo_;
   }
 
-  static constexpr ::cpp2::MyIntIdentifier const bar_ = static_cast<::cpp2::MyIntIdentifier>(42);
-  static constexpr ::cpp2::MyIntIdentifier bar() {
+  constexpr ::cpp2::MyIntIdentifier const bar_ = static_cast<::cpp2::MyIntIdentifier>(42);
+  constexpr ::cpp2::MyIntIdentifier bar() {
     return bar_;
   }
 
-  static ::cpp2::MyMapIdentifier const& mymap();
+  ::cpp2::MyMapIdentifier const& mymap();
 
-  static ::cpp2::Internship const& instagram();
+  ::cpp2::Internship const& instagram();
 
-  static ::cpp2::Internship const& partial_const();
+  ::cpp2::Internship const& partial_const();
 
-  static ::std::vector<::cpp2::Range> const& kRanges();
+  ::std::vector<::cpp2::Range> const& kRanges();
 
-  static ::std::vector<::cpp2::Internship> const& internList();
+  ::std::vector<::cpp2::Internship> const& internList();
 
-  static ::cpp2::struct1 const& pod_0();
+  ::cpp2::struct1 const& pod_0();
 
-  static ::cpp2::struct1 const& pod_s_0();
+  ::cpp2::struct1 const& pod_s_0();
 
-  static ::cpp2::struct1 const& pod_1();
+  ::cpp2::struct1 const& pod_1();
 
-  static ::cpp2::struct1 const& pod_s_1();
+  ::cpp2::struct1 const& pod_s_1();
 
-  static ::cpp2::struct2 const& pod_2();
+  ::cpp2::struct2 const& pod_2();
 
-  static ::cpp2::struct2 const& pod_trailing_commas();
+  ::cpp2::struct2 const& pod_trailing_commas();
 
-  static ::cpp2::struct2 const& pod_s_2();
+  ::cpp2::struct2 const& pod_s_2();
 
-  static ::cpp2::struct3 const& pod_3();
+  ::cpp2::struct3 const& pod_3();
 
-  static ::cpp2::struct3 const& pod_s_3();
+  ::cpp2::struct3 const& pod_s_3();
 
-  static ::cpp2::struct4 const& pod_4();
+  ::cpp2::struct4 const& pod_4();
 
-  static ::cpp2::union1 const& u_1_1();
+  ::cpp2::union1 const& u_1_1();
 
-  static ::cpp2::union1 const& u_1_2();
+  ::cpp2::union1 const& u_1_2();
 
-  static ::cpp2::union1 const& u_1_3();
+  ::cpp2::union1 const& u_1_3();
 
-  static ::cpp2::union2 const& u_2_1();
+  ::cpp2::union2 const& u_2_1();
 
-  static ::cpp2::union2 const& u_2_2();
+  ::cpp2::union2 const& u_2_2();
 
-  static ::cpp2::union2 const& u_2_3();
+  ::cpp2::union2 const& u_2_3();
 
-  static ::cpp2::union2 const& u_2_4();
+  ::cpp2::union2 const& u_2_4();
 
-  static ::cpp2::union2 const& u_2_5();
+  ::cpp2::union2 const& u_2_5();
 
-  static ::cpp2::union2 const& u_2_6();
+  ::cpp2::union2 const& u_2_6();
 
-  static constexpr char const * const apostrophe_ = "'";
-  static constexpr char const * apostrophe() {
+  constexpr char const * const apostrophe_ = "'";
+  constexpr char const * apostrophe() {
     return apostrophe_;
   }
 
-  static constexpr char const * const tripleApostrophe_ = "'''";
-  static constexpr char const * tripleApostrophe() {
+  constexpr char const * const tripleApostrophe_ = "'''";
+  constexpr char const * tripleApostrophe() {
     return tripleApostrophe_;
   }
 
-  static constexpr char const * const quotationMark_ = "\"";
-  static constexpr char const * quotationMark() {
+  constexpr char const * const quotationMark_ = "\"";
+  constexpr char const * quotationMark() {
     return quotationMark_;
   }
 
-  static constexpr char const * const backslash_ = "\\";
-  static constexpr char const * backslash() {
+  constexpr char const * const backslash_ = "\\";
+  constexpr char const * backslash() {
     return backslash_;
   }
 
-  static constexpr char const * const escaped_a_ = "a";
-  static constexpr char const * escaped_a() {
+  constexpr char const * const escaped_a_ = "a";
+  constexpr char const * escaped_a() {
     return escaped_a_;
   }
 
-  static ::std::map<::std::string, ::std::int32_t> const& char2ascii();
+  ::std::map<::std::string, ::std::int32_t> const& char2ascii();
 
-  static ::std::vector<::std::string> const& escaped_strings();
+  ::std::vector<::std::string> const& escaped_strings();
 
-  static constexpr bool const false_c_ = false;
-  static constexpr bool false_c() {
+  constexpr bool const false_c_ = false;
+  constexpr bool false_c() {
     return false_c_;
   }
 
-  static constexpr bool const true_c_ = true;
-  static constexpr bool true_c() {
+  constexpr bool const true_c_ = true;
+  constexpr bool true_c() {
     return true_c_;
   }
 
-  static constexpr ::std::int8_t const zero_byte_ = static_cast<::std::int8_t>(0);
-  static constexpr ::std::int8_t zero_byte() {
+  constexpr ::std::int8_t const zero_byte_ = static_cast<::std::int8_t>(0);
+  constexpr ::std::int8_t zero_byte() {
     return zero_byte_;
   }
 
-  static constexpr ::std::int16_t const zero16_ = static_cast<::std::int16_t>(0);
-  static constexpr ::std::int16_t zero16() {
+  constexpr ::std::int16_t const zero16_ = static_cast<::std::int16_t>(0);
+  constexpr ::std::int16_t zero16() {
     return zero16_;
   }
 
-  static constexpr ::std::int32_t const zero32_ = static_cast<::std::int32_t>(0);
-  static constexpr ::std::int32_t zero32() {
+  constexpr ::std::int32_t const zero32_ = static_cast<::std::int32_t>(0);
+  constexpr ::std::int32_t zero32() {
     return zero32_;
   }
 
-  static constexpr ::std::int64_t const zero64_ = static_cast<::std::int64_t>(0);
-  static constexpr ::std::int64_t zero64() {
+  constexpr ::std::int64_t const zero64_ = static_cast<::std::int64_t>(0);
+  constexpr ::std::int64_t zero64() {
     return zero64_;
   }
 
-  static constexpr double const zero_dot_zero_ = static_cast<double>(0);
-  static constexpr double zero_dot_zero() {
+  constexpr double const zero_dot_zero_ = static_cast<double>(0);
+  constexpr double zero_dot_zero() {
     return zero_dot_zero_;
   }
 
-  static constexpr char const * const empty_string_ = "";
-  static constexpr char const * empty_string() {
+  constexpr char const * const empty_string_ = "";
+  constexpr char const * empty_string() {
     return empty_string_;
   }
 
-  static ::std::vector<::std::int32_t> const& empty_int_list();
+  ::std::vector<::std::int32_t> const& empty_int_list();
 
-  static ::std::vector<::std::string> const& empty_string_list();
+  ::std::vector<::std::string> const& empty_string_list();
 
-  static ::std::set<::std::int32_t> const& empty_int_set();
+  ::std::set<::std::int32_t> const& empty_int_set();
 
-  static ::std::set<::std::string> const& empty_string_set();
+  ::std::set<::std::string> const& empty_string_set();
 
-  static ::std::map<::std::int32_t, ::std::int32_t> const& empty_int_int_map();
+  ::std::map<::std::int32_t, ::std::int32_t> const& empty_int_int_map();
 
-  static ::std::map<::std::int32_t, ::std::string> const& empty_int_string_map();
+  ::std::map<::std::int32_t, ::std::string> const& empty_int_string_map();
 
-  static ::std::map<::std::string, ::std::int32_t> const& empty_string_int_map();
+  ::std::map<::std::string, ::std::int32_t> const& empty_string_int_map();
 
-  static ::std::map<::std::string, ::std::string> const& empty_string_string_map();
+  ::std::map<::std::string, ::std::string> const& empty_string_string_map();
 
-  static constexpr ::std::int64_t const maxIntDec_ = static_cast<::std::int64_t>(9223372036854775807);
-  static constexpr ::std::int64_t maxIntDec() {
+  constexpr ::std::int64_t const maxIntDec_ = static_cast<::std::int64_t>(9223372036854775807);
+  constexpr ::std::int64_t maxIntDec() {
     return maxIntDec_;
   }
 
-  static constexpr ::std::int64_t const maxIntOct_ = static_cast<::std::int64_t>(9223372036854775807);
-  static constexpr ::std::int64_t maxIntOct() {
+  constexpr ::std::int64_t const maxIntOct_ = static_cast<::std::int64_t>(9223372036854775807);
+  constexpr ::std::int64_t maxIntOct() {
     return maxIntOct_;
   }
 
-  static constexpr ::std::int64_t const maxIntHex_ = static_cast<::std::int64_t>(9223372036854775807);
-  static constexpr ::std::int64_t maxIntHex() {
+  constexpr ::std::int64_t const maxIntHex_ = static_cast<::std::int64_t>(9223372036854775807);
+  constexpr ::std::int64_t maxIntHex() {
     return maxIntHex_;
   }
 
-  static constexpr ::std::int64_t const maxIntBin_ = static_cast<::std::int64_t>(9223372036854775807);
-  static constexpr ::std::int64_t maxIntBin() {
+  constexpr ::std::int64_t const maxIntBin_ = static_cast<::std::int64_t>(9223372036854775807);
+  constexpr ::std::int64_t maxIntBin() {
     return maxIntBin_;
   }
 
-  static constexpr double const maxDub_ = static_cast<double>(1.7976931348623157e+308);
-  static constexpr double maxDub() {
+  constexpr double const maxDub_ = static_cast<double>(1.7976931348623157e+308);
+  constexpr double maxDub() {
     return maxDub_;
   }
 
-  static constexpr double const minDub_ = static_cast<double>(2.2250738585072014e-308);
-  static constexpr double minDub() {
+  constexpr double const minDub_ = static_cast<double>(2.2250738585072014e-308);
+  constexpr double minDub() {
     return minDub_;
   }
 
-  static constexpr double const minSDub_ = static_cast<double>(5e-324);
-  static constexpr double minSDub() {
+  constexpr double const minSDub_ = static_cast<double>(5e-324);
+  constexpr double minSDub() {
     return minSDub_;
   }
 
-  static constexpr ::std::int64_t const maxPIntDec_ = static_cast<::std::int64_t>(9223372036854775807);
-  static constexpr ::std::int64_t maxPIntDec() {
+  constexpr ::std::int64_t const maxPIntDec_ = static_cast<::std::int64_t>(9223372036854775807);
+  constexpr ::std::int64_t maxPIntDec() {
     return maxPIntDec_;
   }
 
-  static constexpr ::std::int64_t const maxPIntOct_ = static_cast<::std::int64_t>(9223372036854775807);
-  static constexpr ::std::int64_t maxPIntOct() {
+  constexpr ::std::int64_t const maxPIntOct_ = static_cast<::std::int64_t>(9223372036854775807);
+  constexpr ::std::int64_t maxPIntOct() {
     return maxPIntOct_;
   }
 
-  static constexpr ::std::int64_t const maxPIntHex_ = static_cast<::std::int64_t>(9223372036854775807);
-  static constexpr ::std::int64_t maxPIntHex() {
+  constexpr ::std::int64_t const maxPIntHex_ = static_cast<::std::int64_t>(9223372036854775807);
+  constexpr ::std::int64_t maxPIntHex() {
     return maxPIntHex_;
   }
 
-  static constexpr ::std::int64_t const maxPIntBin_ = static_cast<::std::int64_t>(9223372036854775807);
-  static constexpr ::std::int64_t maxPIntBin() {
+  constexpr ::std::int64_t const maxPIntBin_ = static_cast<::std::int64_t>(9223372036854775807);
+  constexpr ::std::int64_t maxPIntBin() {
     return maxPIntBin_;
   }
 
-  static constexpr double const maxPDub_ = static_cast<double>(1.7976931348623157e+308);
-  static constexpr double maxPDub() {
+  constexpr double const maxPDub_ = static_cast<double>(1.7976931348623157e+308);
+  constexpr double maxPDub() {
     return maxPDub_;
   }
 
-  static constexpr double const minPDub_ = static_cast<double>(2.2250738585072014e-308);
-  static constexpr double minPDub() {
+  constexpr double const minPDub_ = static_cast<double>(2.2250738585072014e-308);
+  constexpr double minPDub() {
     return minPDub_;
   }
 
-  static constexpr double const minPSDub_ = static_cast<double>(5e-324);
-  static constexpr double minPSDub() {
+  constexpr double const minPSDub_ = static_cast<double>(5e-324);
+  constexpr double minPSDub() {
     return minPSDub_;
   }
 
-  static constexpr ::std::int64_t const minIntDec_ = static_cast<::std::int64_t>(-9223372036854775808);
-  static constexpr ::std::int64_t minIntDec() {
+  constexpr ::std::int64_t const minIntDec_ = static_cast<::std::int64_t>(-9223372036854775808);
+  constexpr ::std::int64_t minIntDec() {
     return minIntDec_;
   }
 
-  static constexpr ::std::int64_t const minIntOct_ = static_cast<::std::int64_t>(-9223372036854775808);
-  static constexpr ::std::int64_t minIntOct() {
+  constexpr ::std::int64_t const minIntOct_ = static_cast<::std::int64_t>(-9223372036854775808);
+  constexpr ::std::int64_t minIntOct() {
     return minIntOct_;
   }
 
-  static constexpr ::std::int64_t const minIntHex_ = static_cast<::std::int64_t>(-9223372036854775808);
-  static constexpr ::std::int64_t minIntHex() {
+  constexpr ::std::int64_t const minIntHex_ = static_cast<::std::int64_t>(-9223372036854775808);
+  constexpr ::std::int64_t minIntHex() {
     return minIntHex_;
   }
 
-  static constexpr ::std::int64_t const minIntBin_ = static_cast<::std::int64_t>(-9223372036854775808);
-  static constexpr ::std::int64_t minIntBin() {
+  constexpr ::std::int64_t const minIntBin_ = static_cast<::std::int64_t>(-9223372036854775808);
+  constexpr ::std::int64_t minIntBin() {
     return minIntBin_;
   }
 
-  static constexpr double const maxNDub_ = static_cast<double>(-1.7976931348623157e+308);
-  static constexpr double maxNDub() {
+  constexpr double const maxNDub_ = static_cast<double>(-1.7976931348623157e+308);
+  constexpr double maxNDub() {
     return maxNDub_;
   }
 
-  static constexpr double const minNDub_ = static_cast<double>(-2.2250738585072014e-308);
-  static constexpr double minNDub() {
+  constexpr double const minNDub_ = static_cast<double>(-2.2250738585072014e-308);
+  constexpr double minNDub() {
     return minNDub_;
   }
 
-  static constexpr double const minNSDub_ = static_cast<double>(-5e-324);
-  static constexpr double minNSDub() {
+  constexpr double const minNSDub_ = static_cast<double>(-5e-324);
+  constexpr double minNSDub() {
     return minNSDub_;
   }
 
-  static ::std::map<::std::int32_t, bool> const& I2B();
+  ::std::map<::std::int32_t, bool> const& I2B();
 
-  static ::std::map<::std::int32_t, bool> const& I2B_REF();
+  ::std::map<::std::int32_t, bool> const& I2B_REF();
 
-};
 
+} // namespace module_constants
 } // namespace cpp2

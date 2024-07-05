@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_deprecated_terse_writes_types.h"
 
 namespace apache::thrift::test {
+namespace simple_deprecated_terse_writes_constants {
 
-struct simple_deprecated_terse_writes_constants {
 
-};
-
+} // namespace simple_deprecated_terse_writes_constants
 } // namespace apache::thrift::test

@@ -11,16 +11,15 @@
 #include "thrift/compiler/test/fixtures/complex-struct/gen-cpp2/module_types.h"
 
 namespace cpp2 {
+namespace module_constants {
 
-struct module_constants {
-
-  static constexpr ::std::int32_t const DEFAULT_PORT_NUM_ = static_cast<::std::int32_t>(3456);
-  static constexpr ::std::int32_t DEFAULT_PORT_NUM() {
+  constexpr ::std::int32_t const DEFAULT_PORT_NUM_ = static_cast<::std::int32_t>(3456);
+  constexpr ::std::int32_t DEFAULT_PORT_NUM() {
     return DEFAULT_PORT_NUM_;
   }
 
-  static ::cpp2::MyUnion const& constEnumUnion();
+  ::cpp2::MyUnion const& constEnumUnion();
 
-};
 
+} // namespace module_constants
 } // namespace cpp2

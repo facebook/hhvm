@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_structs_types.h"
 
 namespace cpp2 {
+namespace module_structs_constants {
 
-struct module_structs_constants {
 
-};
-
+} // namespace module_structs_constants
 } // namespace cpp2

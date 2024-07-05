@@ -26,30 +26,29 @@
 
 {{ > common/namespace_cpp2_begin}}
 
-
-struct {{program:name}}_constants {
+namespace {{program:name}}_constants {
 
 {{#program:constants}}{{#constant:type}}{{#constant:value}}
 {{^constant:outline_init?}}
 {{^type:binary?}}
-  static constexpr {{ > types/const_value_type}} const {{constant:name}}_ = {{ > common/const_value}};
+  constexpr {{ > types/const_value_type}} const {{constant:name}}_ = {{ > common/const_value}};
 {{/type:binary?}}
 {{#type:binary?}}
-  static constexpr std::string_view {{constant:name}}_{"{{value:string_value}}", {{value:string_length}}};
+  constexpr std::string_view {{constant:name}}_{"{{value:string_value}}", {{value:string_length}}};
 {{/type:binary?}}
-  static constexpr {{ > types/const_value_type}} {{constant:name}}() {
+  constexpr {{ > types/const_value_type}} {{constant:name}}() {
     return {{constant:name}}_;
   }
 {{/constant:outline_init?}}
 {{#constant:outline_init?}}
-  static {{constant:cpp_type}} const& {{constant:name}}();
+  {{constant:cpp_type}} const& {{constant:name}}();
 {{/constant:outline_init?}}
 
 {{/constant:value}}{{/constant:type}}{{/program:constants}}
 {{#program:interning?}}
 
-  static const ::apache::thrift::type::AnyValue& getValue(::apache::thrift::type::ValueId id);
+  const ::apache::thrift::type::AnyValue& getValue(::apache::thrift::type::ValueId id);
 {{/program:interning?}}
-};
 
+} // namespace {{program:name}}_constants
 {{ > common/namespace_cpp2_end}}

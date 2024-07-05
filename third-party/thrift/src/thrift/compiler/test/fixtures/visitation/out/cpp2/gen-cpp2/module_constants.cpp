@@ -11,9 +11,11 @@
 
 
 namespace test_cpp2::cpp_reflection {
+namespace module_constants {
 
 
 
 
 
+} // namespace module_constants
 } // namespace test_cpp2::cpp_reflection

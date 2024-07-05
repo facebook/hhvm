@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/service_types.h"
 
 namespace cpp2 {
+namespace service_constants {
 
-struct service_constants {
 
-};
-
+} // namespace service_constants
 } // namespace cpp2

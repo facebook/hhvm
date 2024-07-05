@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_types.h"
 
 namespace facebook::thrift::test::terse_write {
+namespace terse_write_constants {
 
-struct terse_write_constants {
 
-};
-
+} // namespace terse_write_constants
 } // namespace facebook::thrift::test::terse_write

@@ -13,20 +13,22 @@
 #include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_constants.h"
 
 namespace module2 {
+namespace module2_constants {
 
-::module2::Struct const& module2_constants::c2() {
+::module2::Struct const& c2() {
   static folly::Indestructible<::module2::Struct> const instance{ ::apache::thrift::detail::make_structured_constant<::module2::Struct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::first>(::module0::module0_constants::c0()), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::second>(::module1::module1_constants::c1())) };
   return *instance;
 }
 
-::module2::Struct const& module2_constants::c3() {
+::module2::Struct const& c3() {
   static folly::Indestructible<::module2::Struct> const instance{ ::module2::module2_constants::c2() };
   return *instance;
 }
 
-::module2::Struct const& module2_constants::c4() {
+::module2::Struct const& c4() {
   static folly::Indestructible<::module2::Struct> const instance{ ::module2::module2_constants::c2() };
   return *instance;
 }
 
+} // namespace module2_constants
 } // namespace module2

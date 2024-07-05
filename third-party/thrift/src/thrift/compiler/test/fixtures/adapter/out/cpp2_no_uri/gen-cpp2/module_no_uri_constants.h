@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_types.h"
 
 namespace cpp2 {
+namespace module_no_uri_constants {
 
-struct module_no_uri_constants {
 
-};
-
+} // namespace module_no_uri_constants
 } // namespace cpp2

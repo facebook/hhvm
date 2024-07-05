@@ -11,25 +11,27 @@
 
 
 namespace cpp2 {
+namespace module_constants {
 
-::cpp2::StructWithRef const& module_constants::kStructWithRef() {
+::cpp2::StructWithRef const& kStructWithRef() {
   static folly::Indestructible<::cpp2::StructWithRef> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::StructWithRef>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::def_field>(::apache::thrift::detail::make_structured_constant<::cpp2::Empty>()), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::opt_field>(::apache::thrift::detail::make_structured_constant<::cpp2::Empty>()), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::req_field>(::apache::thrift::detail::make_structured_constant<::cpp2::Empty>())) };
   return *instance;
 }
 
-::cpp2::StructWithRefTypeUnique const& module_constants::kStructWithRefTypeUnique() {
+::cpp2::StructWithRefTypeUnique const& kStructWithRefTypeUnique() {
   static folly::Indestructible<::cpp2::StructWithRefTypeUnique> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::StructWithRefTypeUnique>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::def_field>(::apache::thrift::detail::make_structured_constant<::cpp2::Empty>()), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::opt_field>(::apache::thrift::detail::make_structured_constant<::cpp2::Empty>()), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::req_field>(::apache::thrift::detail::make_structured_constant<::cpp2::Empty>())) };
   return *instance;
 }
 
-::cpp2::StructWithRefTypeShared const& module_constants::kStructWithRefTypeShared() {
+::cpp2::StructWithRefTypeShared const& kStructWithRefTypeShared() {
   static folly::Indestructible<::cpp2::StructWithRefTypeShared> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::StructWithRefTypeShared>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::def_field>(::apache::thrift::detail::make_structured_constant<::cpp2::Empty>()), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::opt_field>(::apache::thrift::detail::make_structured_constant<::cpp2::Empty>()), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::req_field>(::apache::thrift::detail::make_structured_constant<::cpp2::Empty>())) };
   return *instance;
 }
 
-::cpp2::StructWithRefTypeSharedConst const& module_constants::kStructWithRefTypeSharedConst() {
+::cpp2::StructWithRefTypeSharedConst const& kStructWithRefTypeSharedConst() {
   static folly::Indestructible<::cpp2::StructWithRefTypeSharedConst> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::StructWithRefTypeSharedConst>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::def_field>(::apache::thrift::detail::make_structured_constant<::cpp2::Empty>()), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::opt_field>(::apache::thrift::detail::make_structured_constant<::cpp2::Empty>()), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::req_field>(::apache::thrift::detail::make_structured_constant<::cpp2::Empty>())) };
   return *instance;
 }
 
+} // namespace module_constants
 } // namespace cpp2

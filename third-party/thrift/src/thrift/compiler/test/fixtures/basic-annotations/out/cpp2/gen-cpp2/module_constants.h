@@ -11,11 +11,10 @@
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_types.h"
 
 namespace cpp2 {
+namespace module_constants {
 
-struct module_constants {
+  ::cpp2::YourStruct const& myStruct();
 
-  static ::cpp2::YourStruct const& myStruct();
 
-};
-
+} // namespace module_constants
 } // namespace cpp2

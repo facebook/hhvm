@@ -11,6 +11,7 @@
 
 
 namespace cpp2 {
+namespace module_constants {
 
 
 
@@ -20,4 +21,5 @@ namespace cpp2 {
 
 
 
+} // namespace module_constants
 } // namespace cpp2

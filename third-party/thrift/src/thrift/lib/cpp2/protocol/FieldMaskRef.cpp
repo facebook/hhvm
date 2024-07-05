@@ -27,7 +27,7 @@
 #include <thrift/lib/thrift/gen-cpp2/field_mask_types.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 
-using apache::thrift::protocol::field_mask_constants;
+using namespace apache::thrift::protocol::field_mask_constants;
 
 namespace apache::thrift::protocol {
 

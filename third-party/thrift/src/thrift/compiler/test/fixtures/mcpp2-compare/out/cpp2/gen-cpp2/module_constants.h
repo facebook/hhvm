@@ -11,80 +11,79 @@
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_types.h"
 
 namespace some::valid::ns {
+namespace module_constants {
 
-struct module_constants {
-
-  static constexpr bool const aBool_ = true;
-  static constexpr bool aBool() {
+  constexpr bool const aBool_ = true;
+  constexpr bool aBool() {
     return aBool_;
   }
 
-  static constexpr ::std::int8_t const aByte_ = static_cast<::std::int8_t>(1);
-  static constexpr ::std::int8_t aByte() {
+  constexpr ::std::int8_t const aByte_ = static_cast<::std::int8_t>(1);
+  constexpr ::std::int8_t aByte() {
     return aByte_;
   }
 
-  static constexpr ::std::int16_t const a16BitInt_ = static_cast<::std::int16_t>(12);
-  static constexpr ::std::int16_t a16BitInt() {
+  constexpr ::std::int16_t const a16BitInt_ = static_cast<::std::int16_t>(12);
+  constexpr ::std::int16_t a16BitInt() {
     return a16BitInt_;
   }
 
-  static constexpr ::std::int32_t const a32BitInt_ = static_cast<::std::int32_t>(123);
-  static constexpr ::std::int32_t a32BitInt() {
+  constexpr ::std::int32_t const a32BitInt_ = static_cast<::std::int32_t>(123);
+  constexpr ::std::int32_t a32BitInt() {
     return a32BitInt_;
   }
 
-  static constexpr ::std::int64_t const a64BitInt_ = static_cast<::std::int64_t>(1234);
-  static constexpr ::std::int64_t a64BitInt() {
+  constexpr ::std::int64_t const a64BitInt_ = static_cast<::std::int64_t>(1234);
+  constexpr ::std::int64_t a64BitInt() {
     return a64BitInt_;
   }
 
-  static constexpr float const aFloat_ = static_cast<float>(0.1);
-  static constexpr float aFloat() {
+  constexpr float const aFloat_ = static_cast<float>(0.1);
+  constexpr float aFloat() {
     return aFloat_;
   }
 
-  static constexpr double const aDouble_ = static_cast<double>(0.12);
-  static constexpr double aDouble() {
+  constexpr double const aDouble_ = static_cast<double>(0.12);
+  constexpr double aDouble() {
     return aDouble_;
   }
 
-  static constexpr char const * const aString_ = "Joe Doe";
-  static constexpr char const * aString() {
+  constexpr char const * const aString_ = "Joe Doe";
+  constexpr char const * aString() {
     return aString_;
   }
 
-  static ::std::vector<bool> const& aList();
+  ::std::vector<bool> const& aList();
 
-  static ::std::map<::std::string, ::std::int32_t> const& anEmptyMap();
+  ::std::map<::std::string, ::std::int32_t> const& anEmptyMap();
 
-  static ::std::map<::std::int32_t, ::std::string> const& aMap();
+  ::std::map<::std::int32_t, ::std::string> const& aMap();
 
-  static ::std::set<::std::string> const& aSet();
+  ::std::set<::std::string> const& aSet();
 
-  static ::std::vector<::std::vector<::std::int32_t>> const& aListOfLists();
+  ::std::vector<::std::vector<::std::int32_t>> const& aListOfLists();
 
-  static ::std::vector<::std::map<::std::string, ::std::int32_t>> const& states();
+  ::std::vector<::std::map<::std::string, ::std::int32_t>> const& states();
 
-  static ::std::vector<::some::valid::ns::MyEnumA> const& AConstList();
+  ::std::vector<::some::valid::ns::MyEnumA> const& AConstList();
 
-  static constexpr ::std::int32_t const AnIntegerEnum2_ = static_cast<::std::int32_t>(2);
-  static constexpr ::std::int32_t AnIntegerEnum2() {
+  constexpr ::std::int32_t const AnIntegerEnum2_ = static_cast<::std::int32_t>(2);
+  constexpr ::std::int32_t AnIntegerEnum2() {
     return AnIntegerEnum2_;
   }
 
-  static ::std::vector<::std::int32_t> const& ListOfIntsFromEnums();
+  ::std::vector<::std::int32_t> const& ListOfIntsFromEnums();
 
-  static constexpr ::some::valid::ns::MyEnumA const constEnumA_ =  ::some::valid::ns::MyEnumA::fieldB;
-  static constexpr ::some::valid::ns::MyEnumA constEnumA() {
+  constexpr ::some::valid::ns::MyEnumA const constEnumA_ =  ::some::valid::ns::MyEnumA::fieldB;
+  constexpr ::some::valid::ns::MyEnumA constEnumA() {
     return constEnumA_;
   }
 
-  static constexpr ::some::valid::ns::MyEnumA const constEnumB_ = static_cast< ::some::valid::ns::MyEnumA>(3);
-  static constexpr ::some::valid::ns::MyEnumA constEnumB() {
+  constexpr ::some::valid::ns::MyEnumA const constEnumB_ = static_cast< ::some::valid::ns::MyEnumA>(3);
+  constexpr ::some::valid::ns::MyEnumA constEnumB() {
     return constEnumB_;
   }
 
-};
 
+} // namespace module_constants
 } // namespace some::valid::ns

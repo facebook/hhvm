@@ -12,6 +12,7 @@
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_constants.h"
 
 namespace some::valid::ns {
+namespace module_constants {
 
 
 
@@ -21,30 +22,30 @@ namespace some::valid::ns {
 
 
 
-::std::vector<bool> const& module_constants::aList() {
+::std::vector<bool> const& aList() {
   static folly::Indestructible<::std::vector<bool>> const instance{ std::initializer_list<bool>{ true,
   false } };
   return *instance;
 }
 
-::std::map<::std::string, ::std::int32_t> const& module_constants::anEmptyMap() {
+::std::map<::std::string, ::std::int32_t> const& anEmptyMap() {
   static folly::Indestructible<::std::map<::std::string, ::std::int32_t>> const instance{ std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{  } };
   return *instance;
 }
 
-::std::map<::std::int32_t, ::std::string> const& module_constants::aMap() {
+::std::map<::std::int32_t, ::std::string> const& aMap() {
   static folly::Indestructible<::std::map<::std::int32_t, ::std::string>> const instance{ std::initializer_list<::std::map<::std::int32_t, ::std::string>::value_type>{ { static_cast<::std::int32_t>(1), apache::thrift::StringTraits<std::string>::fromStringLiteral("foo") },
   { static_cast<::std::int32_t>(2), apache::thrift::StringTraits<std::string>::fromStringLiteral("bar") } } };
   return *instance;
 }
 
-::std::set<::std::string> const& module_constants::aSet() {
+::std::set<::std::string> const& aSet() {
   static folly::Indestructible<::std::set<::std::string>> const instance{ std::initializer_list<::std::string>{ apache::thrift::StringTraits<std::string>::fromStringLiteral("foo"),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("bar") } };
   return *instance;
 }
 
-::std::vector<::std::vector<::std::int32_t>> const& module_constants::aListOfLists() {
+::std::vector<::std::vector<::std::int32_t>> const& aListOfLists() {
   static folly::Indestructible<::std::vector<::std::vector<::std::int32_t>>> const instance{ std::initializer_list<::std::vector<::std::int32_t>>{ std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(5),
@@ -58,7 +59,7 @@ namespace some::valid::ns {
   return *instance;
 }
 
-::std::vector<::std::map<::std::string, ::std::int32_t>> const& module_constants::states() {
+::std::vector<::std::map<::std::string, ::std::int32_t>> const& states() {
   static folly::Indestructible<::std::vector<::std::map<::std::string, ::std::int32_t>>> const instance{ std::initializer_list<::std::map<::std::string, ::std::int32_t>>{ std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("San Diego"), static_cast<::std::int32_t>(3211000) },
   { apache::thrift::StringTraits<std::string>::fromStringLiteral("Sacramento"), static_cast<::std::int32_t>(479600) },
   { apache::thrift::StringTraits<std::string>::fromStringLiteral("SF"), static_cast<::std::int32_t>(837400) } },
@@ -67,7 +68,7 @@ namespace some::valid::ns {
   return *instance;
 }
 
-::std::vector<::some::valid::ns::MyEnumA> const& module_constants::AConstList() {
+::std::vector<::some::valid::ns::MyEnumA> const& AConstList() {
   static folly::Indestructible<::std::vector<::some::valid::ns::MyEnumA>> const instance{ std::initializer_list<::some::valid::ns::MyEnumA>{  ::some::valid::ns::MyEnumA::fieldA,
    ::some::valid::ns::MyEnumA::fieldB,
   static_cast< ::some::valid::ns::MyEnumA>(3) } };
@@ -75,7 +76,7 @@ namespace some::valid::ns {
 }
 
 
-::std::vector<::std::int32_t> const& module_constants::ListOfIntsFromEnums() {
+::std::vector<::std::int32_t> const& ListOfIntsFromEnums() {
   static folly::Indestructible<::std::vector<::std::int32_t>> const instance{ std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(1) } };
   return *instance;
@@ -83,4 +84,5 @@ namespace some::valid::ns {
 
 
 
+} // namespace module_constants
 } // namespace some::valid::ns

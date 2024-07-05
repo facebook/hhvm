@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_types.h"
 
 namespace some::ns {
+namespace include1_constants {
 
-struct include1_constants {
 
-};
-
+} // namespace include1_constants
 } // namespace some::ns

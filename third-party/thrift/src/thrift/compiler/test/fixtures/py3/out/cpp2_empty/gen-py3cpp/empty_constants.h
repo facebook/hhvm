@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_types.h"
 
 namespace cpp2 {
+namespace empty_constants {
 
-struct empty_constants {
 
-};
-
+} // namespace empty_constants
 } // namespace cpp2

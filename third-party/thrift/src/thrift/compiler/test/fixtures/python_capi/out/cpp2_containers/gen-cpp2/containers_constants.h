@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_types.h"
 
 namespace test::fixtures::python_capi {
+namespace containers_constants {
 
-struct containers_constants {
 
-};
-
+} // namespace containers_constants
 } // namespace test::fixtures::python_capi

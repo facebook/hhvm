@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/field_interceptor/gen-cpp2/module_types.h"
 
 namespace facebook::thrift::test {
+namespace module_constants {
 
-struct module_constants {
 
-};
-
+} // namespace module_constants
 } // namespace facebook::thrift::test

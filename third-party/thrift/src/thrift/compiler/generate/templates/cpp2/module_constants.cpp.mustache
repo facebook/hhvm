@@ -29,11 +29,12 @@
 
 {{ > common/namespace_cpp2_begin}}
 
+namespace {{program:name}}_constants {
 
 {{#program:constants}}{{#constant:type}}{{#constant:value}}
 {{#constant:outline_init?}}
   {{#value:enable_referencing}}
-{{constant:cpp_type}} const& {{program:name}}_constants::{{constant:name}}() {
+{{constant:cpp_type}} const& {{constant:name}}() {
 {{^constant:cpp_adapter}}
   static folly::Indestructible<{{type:cpp_type}}> const instance{ {{ > common/iterate_const_values_adapted}} };
 {{/constant:cpp_adapter}}
@@ -51,7 +52,7 @@
 {{/constant:value}}{{/constant:type}}{{/program:constants}}
 {{#program:interning?}}
 
-const ::apache::thrift::type::AnyValue& {{program:name}}_constants::getValue(::apache::thrift::type::ValueId vid) {
+const ::apache::thrift::type::AnyValue& getValue(::apache::thrift::type::ValueId vid) {
   if (vid == ::apache::thrift::type::ValueId{}) {
     throw std::out_of_range("Invalid ValueId");
   }
@@ -76,5 +77,6 @@ const ::apache::thrift::type::AnyValue& {{program:name}}_constants::getValue(::a
 }
 
 {{/program:interning?}}
+} // namespace {{program:name}}_constants
 {{ > common/namespace_cpp2_end}}
 {{/program:constants?}}

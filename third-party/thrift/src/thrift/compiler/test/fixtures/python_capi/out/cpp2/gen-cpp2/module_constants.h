@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_types.h"
 
 namespace test::fixtures::python_capi {
+namespace module_constants {
 
-struct module_constants {
 
-};
-
+} // namespace module_constants
 } // namespace test::fixtures::python_capi

@@ -11,7 +11,9 @@
 
 
 namespace apache::thrift::test {
+namespace simple_constants {
 
 
 
+} // namespace simple_constants
 } // namespace apache::thrift::test

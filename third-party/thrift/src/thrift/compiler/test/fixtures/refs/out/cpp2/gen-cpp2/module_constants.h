@@ -11,17 +11,16 @@
 #include "thrift/compiler/test/fixtures/refs/gen-cpp2/module_types.h"
 
 namespace cpp2 {
+namespace module_constants {
 
-struct module_constants {
+  ::cpp2::StructWithRef const& kStructWithRef();
 
-  static ::cpp2::StructWithRef const& kStructWithRef();
+  ::cpp2::StructWithRefTypeUnique const& kStructWithRefTypeUnique();
 
-  static ::cpp2::StructWithRefTypeUnique const& kStructWithRefTypeUnique();
+  ::cpp2::StructWithRefTypeShared const& kStructWithRefTypeShared();
 
-  static ::cpp2::StructWithRefTypeShared const& kStructWithRefTypeShared();
+  ::cpp2::StructWithRefTypeSharedConst const& kStructWithRefTypeSharedConst();
 
-  static ::cpp2::StructWithRefTypeSharedConst const& kStructWithRefTypeSharedConst();
 
-};
-
+} // namespace module_constants
 } // namespace cpp2

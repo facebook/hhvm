@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/module_types.h"
 
 namespace test::namespace_from_package_without_module_name {
+namespace module_constants {
 
-struct module_constants {
 
-};
-
+} // namespace module_constants
 } // namespace test::namespace_from_package_without_module_name

@@ -24,26 +24,15 @@
 #include <thrift/test/gen-cpp2/schema_constants.h>
 
 using namespace apache::thrift;
-using namespace facebook::thrift;
 using namespace facebook::thrift::test::schema;
 
-namespace {
-template <typename T, typename = void>
-struct has_schema {
-  constexpr static bool value = false;
-};
-template <typename T>
-struct has_schema<T, std::void_t<decltype(T::_fbthrift_schema)>> {
-  constexpr static bool value = true;
-};
-} // namespace
-
 TEST(SchemaTest, not_linked) {
-  EXPECT_FALSE(has_schema<annotation::thrift_constants>::value);
+  using namespace facebook::thrift::annotation::thrift_constants;
+  // This file compiles and doesn't contain the schema const, which we can't
+  // verify here.
 }
 
 TEST(SchemaTest, linked) {
-  EXPECT_TRUE(has_schema<schema_constants>::value);
   EXPECT_FALSE(schema_constants::_fbthrift_schema().empty());
   auto schema = apache::thrift::CompactSerializer::deserialize<type::Schema>(
       schema_constants::_fbthrift_schema());

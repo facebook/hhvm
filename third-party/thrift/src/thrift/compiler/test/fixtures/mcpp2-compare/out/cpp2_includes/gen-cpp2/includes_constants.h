@@ -11,14 +11,13 @@
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_types.h"
 
 namespace a::different::ns {
+namespace includes_constants {
 
-struct includes_constants {
-
-  static constexpr ::std::int64_t const IncludedConstant_ = static_cast<::std::int64_t>(42);
-  static constexpr ::std::int64_t IncludedConstant() {
+  constexpr ::std::int64_t const IncludedConstant_ = static_cast<::std::int64_t>(42);
+  constexpr ::std::int64_t IncludedConstant() {
     return IncludedConstant_;
   }
 
-};
 
+} // namespace includes_constants
 } // namespace a::different::ns

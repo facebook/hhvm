@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/default_values/gen-cpp2/module_types.h"
 
 namespace facebook::thrift::compiler::test::fixtures::default_values {
+namespace module_constants {
 
-struct module_constants {
 
-};
-
+} // namespace module_constants
 } // namespace facebook::thrift::compiler::test::fixtures::default_values

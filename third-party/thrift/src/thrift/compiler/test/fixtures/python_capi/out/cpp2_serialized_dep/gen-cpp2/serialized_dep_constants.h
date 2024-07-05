@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/serialized_dep_types.h"
 
 namespace test::fixtures::python_capi {
+namespace serialized_dep_constants {
 
-struct serialized_dep_constants {
 
-};
-
+} // namespace serialized_dep_constants
 } // namespace test::fixtures::python_capi

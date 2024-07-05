@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_types.h"
 
 namespace extra::svc {
+namespace extra_services_constants {
 
-struct extra_services_constants {
 
-};
-
+} // namespace extra_services_constants
 } // namespace extra::svc

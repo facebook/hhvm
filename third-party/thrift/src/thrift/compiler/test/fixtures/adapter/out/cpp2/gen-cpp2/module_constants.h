@@ -11,39 +11,38 @@
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_types.h"
 
 namespace facebook::thrift::test {
+namespace module_constants {
 
-struct module_constants {
+  ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::int32_t> const& var1();
 
-  static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::int32_t> const& var1();
+  ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::string> const& var2();
 
-  static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::string> const& var2();
+  ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::MyStruct> const& var3();
 
-  static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::MyStruct> const& var3();
+  ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::int32_t> const& var4();
 
-  static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::int32_t> const& var4();
+  ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::string> const& var5();
 
-  static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::string> const& var5();
+  ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::MyStruct> const& var6();
 
-  static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::MyStruct> const& var6();
+  ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::int32_t> const& timeout();
 
-  static ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::int32_t> const& timeout();
+  ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::string> const& msg();
 
-  static ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::string> const& msg();
+  ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::facebook::thrift::test::Person2> const& person();
 
-  static ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::facebook::thrift::test::Person2> const& person();
+  ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::int32_t> const& timeout_no_transitive();
 
-  static ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::int32_t> const& timeout_no_transitive();
+  ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::string> const& msg_no_transitive();
 
-  static ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::std::string> const& msg_no_transitive();
+  ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::facebook::thrift::test::Person2> const& person_no_transitive();
 
-  static ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::VariableAdapter, ::facebook::thrift::test::Person2> const& person_no_transitive();
+  ::facebook::thrift::test::AdaptedBool const& type_adapted();
 
-  static ::facebook::thrift::test::AdaptedBool const& type_adapted();
+  ::facebook::thrift::test::MoveOnly const& nested_adapted();
 
-  static ::facebook::thrift::test::MoveOnly const& nested_adapted();
+  ::std::vector<::facebook::thrift::test::AdaptedByte> const& container_of_adapted();
 
-  static ::std::vector<::facebook::thrift::test::AdaptedByte> const& container_of_adapted();
 
-};
-
+} // namespace module_constants
 } // namespace facebook::thrift::test

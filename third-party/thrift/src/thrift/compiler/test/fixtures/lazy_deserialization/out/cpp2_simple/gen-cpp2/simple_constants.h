@@ -11,19 +11,18 @@
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/simple_types.h"
 
 namespace apache::thrift::test {
+namespace simple_constants {
 
-struct simple_constants {
-
-  static constexpr ::std::int32_t const kSizeId_ = static_cast<::std::int32_t>(100);
-  static constexpr ::std::int32_t kSizeId() {
+  constexpr ::std::int32_t const kSizeId_ = static_cast<::std::int32_t>(100);
+  constexpr ::std::int32_t kSizeId() {
     return kSizeId_;
   }
 
-  static constexpr ::std::int32_t const kIndexId_ = static_cast<::std::int32_t>(101);
-  static constexpr ::std::int32_t kIndexId() {
+  constexpr ::std::int32_t const kIndexId_ = static_cast<::std::int32_t>(101);
+  constexpr ::std::int32_t kIndexId() {
     return kIndexId_;
   }
 
-};
 
+} // namespace simple_constants
 } // namespace apache::thrift::test

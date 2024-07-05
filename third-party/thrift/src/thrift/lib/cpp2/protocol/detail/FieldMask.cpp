@@ -24,7 +24,7 @@
 #include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/protocol/detail/FieldMask.h>
 
-using apache::thrift::protocol::field_mask_constants;
+namespace field_mask_constants = apache::thrift::protocol::field_mask_constants;
 
 namespace apache::thrift::protocol::detail {
 

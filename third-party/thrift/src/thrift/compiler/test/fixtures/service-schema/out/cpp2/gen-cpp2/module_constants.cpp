@@ -12,6 +12,8 @@
 #include "thrift/lib/thrift/gen-cpp2/schema_constants.h"
 
 namespace cpp2 {
+namespace module_constants {
 
 
+} // namespace module_constants
 } // namespace cpp2

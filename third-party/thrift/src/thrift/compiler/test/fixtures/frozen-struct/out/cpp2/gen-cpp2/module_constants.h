@@ -11,9 +11,8 @@
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/module_types.h"
 
 namespace some::ns {
+namespace module_constants {
 
-struct module_constants {
 
-};
-
+} // namespace module_constants
 } // namespace some::ns

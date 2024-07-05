@@ -737,7 +737,7 @@ class rust_mstch_program : public mstch_program {
         return true;
       }
     }
-    for (t_exception* strct : program_->xceptions()) {
+    for (t_exception* strct : program_->exceptions()) {
       if (!strct->has_annotation("rust.exhaustive") &&
           !strct->find_structured_annotation_or_null(kRustExhaustiveUri)) {
         return true;

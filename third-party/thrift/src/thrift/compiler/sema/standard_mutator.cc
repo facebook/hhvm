@@ -429,7 +429,7 @@ void inject_schema_const(
   cnst->set_uri("");
   cnst->set_src_range(prog.src_range());
   cnst->set_generated();
-  prog.add_const(std::move(cnst));
+  prog.add_definition(std::move(cnst));
 }
 
 } // namespace

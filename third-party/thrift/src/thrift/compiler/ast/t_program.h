@@ -320,35 +320,11 @@ class t_program : public t_named {
     set_name(compute_name_from_file_path(path_));
   }
 
-  // TODO(afuller): Remove everything below this comment. It is only provided
-  // for backwards compatibility.
+  // TODO (satishvk): There was a TODO from afuller here to remove other
+  // deprecated functions like add_service, etc. Did inherit_annotation_or_null
+  // accidentally end up at the bottom of the function below that TODO OR
+  // is it also meant to be removed?
  public:
-  void add_typedef(std::unique_ptr<t_typedef> node) {
-    add_definition(std::move(node));
-  }
-  void add_enum(std::unique_ptr<t_enum> node) {
-    add_definition(std::move(node));
-  }
-  void add_const(std::unique_ptr<t_const> node) {
-    add_definition(std::move(node));
-  }
-  void add_struct(std::unique_ptr<t_struct> node) {
-    add_definition(std::move(node));
-  }
-  void add_exception(std::unique_ptr<t_exception> node) {
-    add_definition(std::move(node));
-  }
-  void add_service(std::unique_ptr<t_service> node) {
-    add_definition(std::move(node));
-  }
-  void add_interaction(std::unique_ptr<t_interaction> node) {
-    add_definition(std::move(node));
-  }
-  void add_xception(std::unique_ptr<t_exception> tx) {
-    add_exception(std::move(tx));
-  }
-  const std::vector<t_exception*>& xceptions() const { return exceptions(); }
-
   // Looks for an annotation on the given node, then if not found, and the node
   // is not generated, looks for the same annotation on the program.
   const t_const* inherit_annotation_or_null(

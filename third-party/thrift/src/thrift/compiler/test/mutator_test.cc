@@ -31,15 +31,15 @@ using ::testing::UnorderedElementsAre;
 
 TEST(AstMutatorTest, Output) {
   ast_mutator mutator;
-  mutator.add_program_visitor([](diagnostic_context& ctx,
-                                 mutator_context& mctx,
-                                 t_program& program) {
-    ctx.report(program, diagnostic_level::info, "test");
-    EXPECT_EQ(mctx.current(), &program);
-    EXPECT_EQ(mctx.parent(), nullptr);
-    EXPECT_EQ(mctx.root(), &program);
-    program.add_service(std::make_unique<t_service>(&program, "MagicService"));
-  });
+  mutator.add_program_visitor(
+      [](diagnostic_context& ctx, mutator_context& mctx, t_program& program) {
+        ctx.report(program, diagnostic_level::info, "test");
+        EXPECT_EQ(mctx.current(), &program);
+        EXPECT_EQ(mctx.parent(), nullptr);
+        EXPECT_EQ(mctx.root(), &program);
+        program.add_definition(
+            std::make_unique<t_service>(&program, "MagicService"));
+      });
 
   t_program program("path/to/program.thrift");
   source_manager source_mgr;
@@ -90,7 +90,7 @@ TEST_F(StandardMutatorTest, TerseWriteField) {
   terse_field->add_structured_annotation(
       gen::thrift_annotation_builder::terse(*program).make());
   strct->append_field(std::move(terse_field));
-  program->add_struct(std::move(strct));
+  program->add_definition(std::move(strct));
 
   EXPECT_EQ(terse_field_ptr->qualifier(), t_field_qualifier::none);
 
@@ -122,7 +122,7 @@ TEST_F(StandardMutatorTest, TerseWriteStruct) {
   strct->append_field(std::move(terse_field));
   strct->append_field(std::move(optional_field));
   strct->append_field(std::move(required_field));
-  program->add_struct(std::move(strct));
+  program->add_definition(std::move(strct));
 
   EXPECT_EQ(terse_field_ptr->qualifier(), t_field_qualifier::none);
   EXPECT_EQ(optional_field_ptr->qualifier(), t_field_qualifier::optional);
@@ -167,7 +167,7 @@ TEST_F(StandardMutatorTest, Transitive) {
       gen::thrift_annotation_builder::transitive(*program).make());
 
   strct->append_field(std::move(terse_field));
-  program->add_struct(std::move(strct));
+  program->add_definition(std::move(strct));
   program->add_structured_annotation(std::make_unique<t_const>(
       program, *transitive_terse, "", std::make_unique<t_const_value>()));
 

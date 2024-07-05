@@ -238,7 +238,7 @@ TYPED_TEST(AstVisitorTest, Interaction) {
   EXPECT_CALL(this->mock_, visit_definition(interaction.get()));
   EXPECT_CALL(this->overload_mock_, visit_interaction(interaction.get()))
       .Times(3);
-  this->program_.add_interaction(std::move(interaction));
+  this->program_.add_definition(std::move(interaction));
 }
 
 TYPED_TEST(AstVisitorTest, Service) {
@@ -267,7 +267,7 @@ TYPED_TEST(AstVisitorTest, Service) {
   EXPECT_CALL(this->mock_, visit_root_definition(service.get()));
   EXPECT_CALL(this->mock_, visit_definition(service.get()));
   EXPECT_CALL(this->overload_mock_, visit_service(service.get())).Times(3);
-  this->program_.add_service(std::move(service));
+  this->program_.add_definition(std::move(service));
 }
 
 TYPED_TEST(AstVisitorTest, Struct) {
@@ -286,7 +286,7 @@ TYPED_TEST(AstVisitorTest, Struct) {
   EXPECT_CALL(this->mock_, visit_root_definition(tstruct.get()));
   EXPECT_CALL(this->mock_, visit_definition(tstruct.get()));
   EXPECT_CALL(this->overload_mock_, visit_structured(tstruct.get())).Times(3);
-  this->program_.add_struct(std::move(tstruct));
+  this->program_.add_definition(std::move(tstruct));
 }
 
 TYPED_TEST(AstVisitorTest, Union) {
@@ -305,7 +305,7 @@ TYPED_TEST(AstVisitorTest, Union) {
   EXPECT_CALL(this->mock_, visit_root_definition(tunion.get()));
   EXPECT_CALL(this->mock_, visit_definition(tunion.get()));
   EXPECT_CALL(this->overload_mock_, visit_union(tunion.get())).Times(3);
-  this->program_.add_struct(std::move(tunion));
+  this->program_.add_definition(std::move(tunion));
 }
 
 TYPED_TEST(AstVisitorTest, Exception) {
@@ -324,7 +324,7 @@ TYPED_TEST(AstVisitorTest, Exception) {
   EXPECT_CALL(this->mock_, visit_root_definition(except.get()));
   EXPECT_CALL(this->mock_, visit_definition(except.get()));
   EXPECT_CALL(this->overload_mock_, visit_exception(except.get())).Times(3);
-  this->program_.add_exception(std::move(except));
+  this->program_.add_definition(std::move(except));
 }
 
 TYPED_TEST(AstVisitorTest, Enum) {
@@ -341,7 +341,7 @@ TYPED_TEST(AstVisitorTest, Enum) {
   EXPECT_CALL(this->mock_, visit_root_definition(tenum.get()));
   EXPECT_CALL(this->mock_, visit_definition(tenum.get()));
   EXPECT_CALL(this->overload_mock_, visit_enum(tenum.get())).Times(2);
-  this->program_.add_enum(std::move(tenum));
+  this->program_.add_definition(std::move(tenum));
 }
 
 TYPED_TEST(AstVisitorTest, Const) {
@@ -352,7 +352,7 @@ TYPED_TEST(AstVisitorTest, Const) {
   EXPECT_CALL(this->mock_, visit_root_definition(tconst.get()));
   EXPECT_CALL(this->mock_, visit_definition(tconst.get()));
   EXPECT_CALL(this->overload_mock_, visit_const(tconst.get())).Times(2);
-  this->program_.add_const(std::move(tconst));
+  this->program_.add_definition(std::move(tconst));
 }
 
 TYPED_TEST(AstVisitorTest, Typedef) {
@@ -363,7 +363,7 @@ TYPED_TEST(AstVisitorTest, Typedef) {
   EXPECT_CALL(this->mock_, visit_root_definition(ttypedef.get()));
   EXPECT_CALL(this->mock_, visit_definition(ttypedef.get()));
   EXPECT_CALL(this->overload_mock_, visit_typedef(ttypedef.get())).Times(2);
-  this->program_.add_typedef(std::move(ttypedef));
+  this->program_.add_definition(std::move(ttypedef));
 }
 
 TYPED_TEST(AstVisitorTest, Set) {
@@ -408,7 +408,7 @@ TEST(AstVisitorTest, Sink) {
       &program, ret, "f1", nullptr, std::move(sink1)));
   service->add_function(std::make_unique<t_function>(
       &program, ret, "f2", nullptr, std::move(sink2)));
-  program.add_service(std::move(service));
+  program.add_definition(std::move(service));
 
   auto visitor = ast_visitor();
   auto responses = std::vector<const t_sink*>();
@@ -440,7 +440,7 @@ TEST(AstVisitorTest, StreamResponse) {
       &program, ret, "f1", nullptr, std::move(stream1)));
   service->add_function(std::make_unique<t_function>(
       &program, ret, "f2", nullptr, std::move(stream2)));
-  program.add_service(std::move(service));
+  program.add_definition(std::move(service));
 
   auto visitor = ast_visitor();
   auto responses = std::vector<const t_stream*>();

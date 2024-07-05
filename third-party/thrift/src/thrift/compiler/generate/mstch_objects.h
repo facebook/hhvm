@@ -456,7 +456,7 @@ class mstch_program : public mstch_base {
   mstch::node has_enums() { return !program_->enums().empty(); }
   mstch::node has_structs() {
     return !program_->structs_and_unions().empty() ||
-        !program_->xceptions().empty();
+        !program_->exceptions().empty();
   }
   mstch::node has_services() { return !program_->services().empty(); }
   mstch::node has_typedefs() { return !program_->typedefs().empty(); }

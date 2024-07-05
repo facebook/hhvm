@@ -19,8 +19,8 @@
 #include <sys/utsname.h>
 #include <assert.h>
 #include <cstring>
+#include <iomanip>
 
-#include <folly/Format.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -83,7 +83,11 @@ std::string aarch64ImplementerName(uint8_t implementer) {
     case 0xC0:
       return "Ampere Computing";
     default:
-      return folly::sformat("Unknown aarch64 0x{:02X}", implementer);
+      {
+        std::ostringstream os;
+        os << "Unknown aarch64 0x" << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << (int)implementer;
+        return os.str();
+      }
   }
 }
 #endif
@@ -126,11 +130,13 @@ std::string Process::GetCPUModel() {
   uint16_t partnum = (midr_el1 >> 4) & 0x0FFF;
   uint8_t revision = midr_el1 & 0x0F;
 
-  std::string model = folly::sformat("{} 0x{:01X} 0x{:03X} 0x{:01X}",
-      aarch64ImplementerName(implementer),
-      variant,
-      partnum,
-      revision);
+  std::ostringstream os;
+  os << aarch64ImplementerName(implementer)
+     << " 0x" << std::uppercase << std::hex << std::setw(1) << std::setfill('0') << (int)variant
+     << " 0x" << std::uppercase << std::hex << std::setw(3) << std::setfill('0') << (int)partnum
+     << " 0x" << std::uppercase << std::hex << std::setw(1) << std::setfill('0') << (int)revision;
+  std::string model = os.str();
+
   return model;
 
 #else

@@ -19,17 +19,11 @@ fn main() {
         PathBuf::from("ffi_bridge.h"),
         hphp.join("util/process-cpu.cpp"),
         hphp.join("util/process-cpu.h"),
-        hphp.join("util/process-host.cpp"),
-        hphp.join("util/process-host.h"),
     ];
 
     cxx_build::bridge("ffi_bridge.rs")
         .files(files.iter().filter(is_cpp))
         .include(fbcode)
-        .include(fbcode.join("third-party-buck/platform010/build/double_conversion/include"))
-        .include(fbcode.join("third-party-buck/platform010/build/fmt/include"))
-        .include(fbcode.join("third-party-buck/platform010/build/boost/167c64b/include"))
-        .include(fbcode.join("third-party-buck/platform010/build/jemalloc/include"))
         .define("NO_HHVM", "1")
         .warnings(false)
         .cpp(true)

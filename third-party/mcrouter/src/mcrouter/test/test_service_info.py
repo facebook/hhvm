@@ -9,7 +9,7 @@ from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
 class TestServiceInfo(McrouterTestCase):
-    config = './mcrouter/test/test_service_info.json'
+    config = "./mcrouter/test/test_service_info.json"
 
     def setUp(self):
         self.mc1 = self.add_server(Memcached())

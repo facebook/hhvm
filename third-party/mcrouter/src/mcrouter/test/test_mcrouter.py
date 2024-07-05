@@ -9,12 +9,11 @@ import time
 
 from mcrouter.test.MCProcess import Memcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
-from mcrouter.test.mock_servers import SleepServer
-from mcrouter.test.mock_servers import ConnectionErrorServer
+from mcrouter.test.mock_servers import ConnectionErrorServer, SleepServer
 
 
 class TestDevNull(McrouterTestCase):
-    config = './mcrouter/test/test_dev_null.json'
+    config = "./mcrouter/test/test_dev_null.json"
     extra_args = []
 
     def setUp(self):
@@ -41,63 +40,64 @@ class TestDevNull(McrouterTestCase):
         self.assertEqual(mcwild_val, "should_be_set_wild")
 
         self.assertEqual(mcr.delete("null:key2"), None)
-        self.assertEqual(int(mcr.stats('all')['dev_null_requests']), 2)
+        self.assertEqual(int(mcr.stats("all")["dev_null_requests"]), 2)
 
 
 class TestDuplicateServers(McrouterTestCase):
-    config = './mcrouter/test/test_duplicate_servers.json'
+    config = "./mcrouter/test/test_duplicate_servers.json"
     extra_args = []
 
     def setUp(self):
         self.wildcard = self.add_server(Memcached(), 12345)
 
     def get_mcrouter(self):
-        return self.add_mcrouter(
-            self.config, '/a/a/', extra_args=self.extra_args)
+        return self.add_mcrouter(self.config, "/a/a/", extra_args=self.extra_args)
 
     def test_duplicate_servers(self):
         mcr = self.get_mcrouter()
 
-        stats = mcr.stats('servers')
+        stats = mcr.stats("servers")
         # Check that only one proxy destination connection is made
         # for all the duplicate servers
         self.assertEqual(1, len(stats))
         # Hardcoding default server timeout
-        key = ('localhost:' + str(self.port_map[12345]) +
-               ':ascii:plain:notcompressed-1000')
+        key = (
+            "localhost:" + str(self.port_map[12345]) + ":ascii:plain:notcompressed-1000"
+        )
         self.assertTrue(key in stats)
 
 
 class TestDuplicateServersDiffTimeouts(McrouterTestCase):
-    config = './mcrouter/test/test_duplicate_servers_difftimeouts.json'
+    config = "./mcrouter/test/test_duplicate_servers_difftimeouts.json"
     extra_args = []
 
     def setUp(self):
         self.wildcard = self.add_server(Memcached(), 12345)
 
     def get_mcrouter(self):
-        return self.add_mcrouter(
-            self.config, '/a/a/', extra_args=self.extra_args)
+        return self.add_mcrouter(self.config, "/a/a/", extra_args=self.extra_args)
 
     def test_duplicate_servers_difftimeouts(self):
         mcr = self.get_mcrouter()
 
-        stats = mcr.stats('servers')
+        stats = mcr.stats("servers")
         # Check that only two proxy destination connections are made
         # for all the duplicate servers in pools with diff timeout
         self.assertEqual(2, len(stats))
         # Hardcoding default server timeout
-        key = ('localhost:' + str(self.port_map[12345]) +
-               ':ascii:plain:notcompressed-1000')
+        key = (
+            "localhost:" + str(self.port_map[12345]) + ":ascii:plain:notcompressed-1000"
+        )
         self.assertTrue(key in stats)
 
-        key = ('localhost:' + str(self.port_map[12345]) +
-               ':ascii:plain:notcompressed-2000')
+        key = (
+            "localhost:" + str(self.port_map[12345]) + ":ascii:plain:notcompressed-2000"
+        )
         self.assertTrue(key in stats)
 
 
 class TestPoolServerErrors(McrouterTestCase):
-    config = './mcrouter/test/test_pool_server_errors.json'
+    config = "./mcrouter/test/test_pool_server_errors.json"
 
     def setUp(self):
         self.mc1 = self.add_server(Memcached())
@@ -105,16 +105,16 @@ class TestPoolServerErrors(McrouterTestCase):
         self.mc3 = self.add_server(Memcached())
 
     def test_pool_server_errors(self):
-        mcr = self.add_mcrouter(self.config, '/a/a/')
-        self.assertIsNone(mcr.get('test'))
+        mcr = self.add_mcrouter(self.config, "/a/a/")
+        self.assertIsNone(mcr.get("test"))
 
-        stats = mcr.stats('servers')
+        stats = mcr.stats("servers")
         self.assertEqual(2, len(stats))
 
-        self.assertTrue(mcr.set('/b/b/abc', 'valueA'))
-        self.assertEqual(self.mc1.get('abc'), 'valueA')
+        self.assertTrue(mcr.set("/b/b/abc", "valueA"))
+        self.assertEqual(self.mc1.get("abc"), "valueA")
 
-        self.assertFalse(mcr.set('/b/b/a', 'valueB'))
+        self.assertFalse(mcr.set("/b/b/a", "valueB"))
 
-        self.assertTrue(mcr.set('/b/b/ab', 'valueC'))
-        self.assertEqual(self.mc3.get('ab'), 'valueC')
+        self.assertTrue(mcr.set("/b/b/ab", "valueC"))
+        self.assertEqual(self.mc3.get("ab"), "valueC")

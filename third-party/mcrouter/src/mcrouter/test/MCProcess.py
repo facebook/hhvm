@@ -12,18 +12,19 @@ import select
 import shutil
 import signal
 import socket
+import ssl
 import subprocess
 import sys
 import tempfile
 import time
-import ssl
 
 from carbon.carbon_result.thrift_types import Result
 from mcrouter.test.config import McrouterGlobals
 
+
 class BaseDirectory:
     def __init__(self, prefix="mctest"):
-        self.path = tempfile.mkdtemp(prefix=prefix + '.')
+        self.path = tempfile.mkdtemp(prefix=prefix + ".")
 
     def __del__(self):
         shutil.rmtree(self.path)
@@ -32,7 +33,8 @@ class BaseDirectory:
 def MCPopen(cmd, stdout=None, stderr=None, env=None, pass_fds=()):
     if sys.version_info >= (3, 2):  # Python 3.2 supports pass_fds
         return subprocess.Popen(
-            cmd, stdout=stdout, stderr=stderr, env=env, pass_fds=pass_fds)
+            cmd, stdout=stdout, stderr=stderr, env=env, pass_fds=pass_fds
+        )
     return subprocess.Popen(cmd, stdout=stdout, stderr=stderr, env=env)
 
 
@@ -45,28 +47,28 @@ class ProcessBase:
 
     def __init__(self, cmd, base_dir=None, junk_fill=False, pass_fds=(), stdout=None):
         if base_dir is None:
-            base_dir = BaseDirectory('ProcessBase')
+            base_dir = BaseDirectory("ProcessBase")
         self.base_dir = base_dir
 
-        self.cmd_line = 'no command line'
+        self.cmd_line = "no command line"
         if cmd:
-            self.cmd_line = ' '.join(cmd)
+            self.cmd_line = " ".join(cmd)
             for command in cmd:
-                if command == 'python':
+                if command == "python":
                     continue
-                if command.startswith('-'):
+                if command.startswith("-"):
                     continue
                 command = os.path.basename(command)
                 break
 
             try:
                 if junk_fill:
-                    env = {'MALLOC_CONF': 'junk:true'}
+                    env = {"MALLOC_CONF": "junk:true"}
                 else:
                     env = None
-                self.proc = MCPopen(cmd, stdout=stdout,
-                                    stderr=None, env=env,
-                                    pass_fds=pass_fds)
+                self.proc = MCPopen(
+                    cmd, stdout=stdout, stderr=None, env=env, pass_fds=pass_fds
+                )
 
             except OSError:
                 sys.exit("Fatal: Could not run " + repr(" ".join(cmd)))
@@ -93,10 +95,10 @@ class ProcessBase:
         return self.proc.returncode is None
 
     def get_log(self):
-        if hasattr(self, 'log'):
+        if hasattr(self, "log"):
             print(self.base_dir)
             try:
-                with open(self.log, 'r') as log_f:
+                with open(self.log, "r") as log_f:
                     log = log_f.read()
             except IOError:
                 log = ""
@@ -105,56 +107,58 @@ class ProcessBase:
         return log
 
     def dump(self):
-        """ dump stderr, stdout, and the log file to stdout with nice headers.
+        """dump stderr, stdout, and the log file to stdout with nice headers.
         This allows us to get all this information in a test failure (hidden by
-        default) so we can debug better. """
+        default) so we can debug better."""
 
         try:
             stdout, stderr = self.proc.communicate()
         except Exception:
-            stdout, stderr = b'', b''
+            stdout, stderr = b"", b""
 
         log = self.get_log()
         if log:
             print("{} ({}) log:\n{}".format(self, self.cmd_line, log))
         if stdout:
-            print("{} ({}) stdout:\n{}".format(self, self.cmd_line,
-                                               stdout.decode()))
+            print("{} ({}) stdout:\n{}".format(self, self.cmd_line, stdout.decode()))
         if stderr:
-            print("{} ({}) stderr:\n{}".format(self, self.cmd_line,
-                                               stderr.decode()))
+            print("{} ({}) stderr:\n{}".format(self, self.cmd_line, stderr.decode()))
 
 
 class MCProcess(ProcessBase):
     proc = None
 
-    def __init__(self, cmd, addr,
-            base_dir=None,
-            max_retries=100,
-            junk_fill=False,
-            pass_fds=(),
-            use_ssl=False,
-            versionPing=False,
-            thriftPort=None):
+    def __init__(
+        self,
+        cmd,
+        addr,
+        base_dir=None,
+        max_retries=100,
+        junk_fill=False,
+        pass_fds=(),
+        use_ssl=False,
+        versionPing=False,
+        thriftPort=None,
+    ):
         self.fd = None
         self.versionPing = versionPing
-        if cmd is not None and '-s' in cmd:
+        if cmd is not None and "-s" in cmd:
             if os.path.exists(addr):
-                raise Exception('file path {} already exists'.format(addr))
+                raise Exception("file path {} already exists".format(addr))
             self.addr = addr
             self.port = 0
             self.addr_family = socket.AF_UNIX
         else:
             port = int(addr)
-            self.addr = ('localhost', port)
+            self.addr = ("localhost", port)
             self.port = port
             self.addr_family = socket.AF_INET
         memcached = False
-        if cmd is not None and 'memcached' in cmd[0]:
+        if cmd is not None and "memcached" in cmd[0]:
             memcached = True
 
         if base_dir is None:
-            base_dir = BaseDirectory('MCProcess')
+            base_dir = BaseDirectory("MCProcess")
 
         ProcessBase.__init__(self, cmd, base_dir, junk_fill, pass_fds=pass_fds)
         # memcached could take little longer to initialize
@@ -175,19 +179,19 @@ class MCProcess(ProcessBase):
 
     def _sendall(self, s):
         if type(s) is not bytes:
-            s = s.encode('utf8')
+            s = s.encode("utf8")
         self.socket.sendall(s)
 
     def _fdread(self, n):
         data = self.fd.read(n)
         if data is not None and type(data) is not str:
-            data = data.decode('utf8', errors='backslashreplace')
+            data = data.decode("utf8", errors="backslashreplace")
         return data
 
     def _fdreadline(self):
         data = self.fd.readline()
         if data is not None and type(data) is not str:
-            data = data.decode('utf8')
+            data = data.decode("utf8")
         return data
 
     def getport(self):
@@ -227,7 +231,7 @@ class MCProcess(ProcessBase):
                     raise
                 retry_count += 1
                 # If we defined a retry count, retry until that's exceeded.
-                if (not self.max_retries or retry_count < self.max_retries):
+                if not self.max_retries or retry_count < self.max_retries:
                     time.sleep(1)
                     continue
                 raise
@@ -243,20 +247,24 @@ class MCProcess(ProcessBase):
                         break
                 retry_count += 1
                 if self.max_retries and retry_count >= self.max_retries:
-                    raise RuntimeError("MCProcess connected but did not respond to ping")
+                    raise RuntimeError(
+                        "MCProcess connected but did not respond to ping"
+                    )
                 time.sleep(1)
         if self.versionPing and self.thrift_client is not None:
             retry_count = 0
             while True:
                 try:
                     res = self.thrift_client.mcVersion()
-                    if (res == Result.OK):
+                    if res == Result.OK:
                         return
                 except Exception as e:
                     print("Error on sending mcVersion in Thrift: {}".format(e))
                 retry_count += 1
                 if self.max_retries and retry_count >= self.max_retries:
-                    raise RuntimeError("MCProcess connected but did not respond to ping")
+                    raise RuntimeError(
+                        "MCProcess connected but did not respond to ping"
+                    )
                 time.sleep(1)
 
     def disconnect(self):
@@ -276,7 +284,7 @@ class MCProcess(ProcessBase):
         if not self.proc:
             return None
 
-        if hasattr(self, 'socket'):
+        if hasattr(self, "socket"):
             self.disconnect()
 
         proc = self.proc
@@ -301,7 +309,7 @@ class MCProcess(ProcessBase):
 
         while True:
             line = self._fdreadline().strip()
-            if line == 'END':
+            if line == "END":
                 if multi:
                     return res
                 else:
@@ -317,43 +325,44 @@ class MCProcess(ProcessBase):
                 payload = self._fdread(n)
                 self._fdread(2)
                 if return_all_info:
-                    res[k] = dict({"key": k,
-                                  "flags": f,
-                                  "size": n,
-                                  "value": payload})
+                    res[k] = dict({"key": k, "flags": f, "size": n, "value": payload})
                     if expect_cas:
                         res[k]["cas"] = int(parts[4])
                 else:
                     res[k] = payload
             elif line.startswith("SERVER_ERROR"):
                 if hadValue:
-                    raise Exception('Received hit reply + SERVER_ERROR for '
-                                    'multiget request')
+                    raise Exception(
+                        "Received hit reply + SERVER_ERROR for " "multiget request"
+                    )
                 return line
             else:
                 self.connect()
-                raise Exception(
-                    'Unexpected response "{}" ({})'.format(line, keys))
+                raise Exception('Unexpected response "{}" ({})'.format(line, keys))
 
     def get(self, keys, return_all_info=False):
-        return self._get('get', keys, expect_cas=False,
-                         return_all_info=return_all_info)
+        return self._get("get", keys, expect_cas=False, return_all_info=return_all_info)
 
     def gets(self, keys):
-        return self._get('gets', keys, expect_cas=True, return_all_info=True)
+        return self._get("gets", keys, expect_cas=True, return_all_info=True)
 
     def gat(self, exptime, keys, return_all_info=False):
-        return self._get('gat ' + str(exptime), keys, expect_cas=False,
-                         return_all_info=return_all_info)
+        return self._get(
+            "gat " + str(exptime),
+            keys,
+            expect_cas=False,
+            return_all_info=return_all_info,
+        )
 
     def gats(self, exptime, keys):
-        return self._get('gats ' + str(exptime), keys, expect_cas=True,
-                         return_all_info=True)
+        return self._get(
+            "gats " + str(exptime), keys, expect_cas=True, return_all_info=True
+        )
 
     def metaget(self, keys):
         ## FIXME: Not supporting multi-metaget yet
-        #multi = True
-        #if not instance(keys, list):
+        # multi = True
+        # if not instance(keys, list):
         #    multi = False
         #    keys = [keys]
         res = {}
@@ -366,8 +375,7 @@ class MCProcess(ProcessBase):
             elif line.startswith("META"):
                 meta_list = line.split()
                 for i in range(1, len(meta_list) // 2):
-                    res[meta_list[2 * i].strip(':')] = \
-                        meta_list[2 * i + 1].strip(';')
+                    res[meta_list[2 * i].strip(":")] = meta_list[2 * i + 1].strip(";")
 
     def leaseGet(self, keys):
         multi = True
@@ -379,9 +387,9 @@ class MCProcess(ProcessBase):
 
         while True:
             line = self._fdreadline().strip()
-            if line == 'END':
+            if line == "END":
                 if multi:
-                    assert(len(res) == len(keys))
+                    assert len(res) == len(keys)
                     return res
                 else:
                     assert len(res) == 1
@@ -389,14 +397,12 @@ class MCProcess(ProcessBase):
             elif line.startswith("VALUE"):
                 v, k, f, n = line.split()
                 assert k in keys
-                res[k] = {"value": self._fdread(int(n)),
-                          "token": None}
+                res[k] = {"value": self._fdread(int(n)), "token": None}
                 self._fdread(2)
             elif line.startswith("LVALUE"):
                 v, k, t, f, n = line.split()
                 assert k in keys
-                res[k] = {"value": self._fdread(int(n)),
-                          "token": int(t)}
+                res[k] = {"value": self._fdread(int(n)), "token": int(t)}
 
     def expectNoReply(self):
         self.socket.settimeout(0.5)
@@ -407,19 +413,19 @@ class MCProcess(ProcessBase):
             pass
         return True
 
-    def _set(self, command, key, value, replicate=False, noreply=False,
-             exptime=0, flags=0):
+    def _set(
+        self, command, key, value, replicate=False, noreply=False, exptime=0, flags=0
+    ):
         value = str(value)
         flags = flags | (1024 if replicate else 0)
         self._sendall(
-            "{command} {key} {flags} {exptime} {size}{noreply}\r\n{value}\r\n"
-            .format(
+            "{command} {key} {flags} {exptime} {size}{noreply}\r\n{value}\r\n".format(
                 command=command,
                 key=key,
                 flags=flags,
                 exptime=exptime,
                 size=len(value),
-                noreply=' noreply' if noreply else '',
+                noreply=" noreply" if noreply else "",
                 value=value,
             )
         )
@@ -427,7 +433,7 @@ class MCProcess(ProcessBase):
             return self.expectNoReply()
 
         answer = self._fdreadline().strip()
-        if re.search('ERROR', answer):
+        if re.search("ERROR", answer):
             print(answer)
             self.connect()
             return None
@@ -437,21 +443,18 @@ class MCProcess(ProcessBase):
         value = str(value_token["value"])
         token = int(value_token["token"])
         flags = 0
-        cmd = (
-            "lease-set {key} {token} {flags} {exptime} {size}\r\n{value}\r\n"
-            .format(
-                key=key,
-                token=token,
-                flags=flags,
-                exptime=exptime,
-                size=len(value),
-                value=value,
-            )
+        cmd = "lease-set {key} {token} {flags} {exptime} {size}\r\n{value}\r\n".format(
+            key=key,
+            token=token,
+            flags=flags,
+            exptime=exptime,
+            size=len(value),
+            value=value,
         )
         self._sendall(cmd)
 
         answer = self._fdreadline().strip()
-        if re.search('ERROR', answer):
+        if re.search("ERROR", answer):
             print(answer)
             self.connect()
             return None
@@ -459,8 +462,7 @@ class MCProcess(ProcessBase):
             return re.match("STALE_STORED", answer)
         return re.match("STORED", answer)
 
-    def set(self, key, value, replicate=False, noreply=False, exptime=0,
-            flags=0):
+    def set(self, key, value, replicate=False, noreply=False, exptime=0, flags=0):
         return self._set("set", key, value, replicate, noreply, exptime, flags)
 
     def add(self, key, value, replicate=False, noreply=False):
@@ -470,11 +472,14 @@ class MCProcess(ProcessBase):
         return self._set("replace", key, value, replicate, noreply)
 
     def delete(self, key, exptime=None, noreply=False):
-        exptime_str = ''
+        exptime_str = ""
         if exptime is not None:
             exptime_str = " {}".format(exptime)
-        self._sendall("delete {}{}{}\r\n".format(
-                      key, exptime_str, (' noreply' if noreply else '')))
+        self._sendall(
+            "delete {}{}{}\r\n".format(
+                key, exptime_str, (" noreply" if noreply else "")
+            )
+        )
         self.deletes += 1
 
         if noreply:
@@ -486,8 +491,9 @@ class MCProcess(ProcessBase):
         return re.match("DELETED", answer)
 
     def touch(self, key, exptime, noreply=False):
-        self._sendall("touch {} {}{}\r\n".format(
-                      key, exptime, (' noreply' if noreply else '')))
+        self._sendall(
+            "touch {} {}{}\r\n".format(key, exptime, (" noreply" if noreply else ""))
+        )
 
         if noreply:
             return self.expectNoReply()
@@ -505,12 +511,14 @@ class MCProcess(ProcessBase):
         return None
 
     def _arith(self, cmd, key, value, noreply):
-        self._sendall("{cmd} {key} {value}{noreply}\r\n".format(
-            cmd=cmd,
-            key=key,
-            value=value,
-            noreply=' noreply' if noreply else '',
-        ))
+        self._sendall(
+            "{cmd} {key} {value}{noreply}\r\n".format(
+                cmd=cmd,
+                key=key,
+                value=value,
+                noreply=" noreply" if noreply else "",
+            )
+        )
         if noreply:
             return self.expectNoReply()
 
@@ -523,21 +531,20 @@ class MCProcess(ProcessBase):
             return int(answer)
 
     def incr(self, key, value=1, noreply=False):
-        return self._arith('incr', key, value, noreply)
+        return self._arith("incr", key, value, noreply)
 
     def decr(self, key, value=1, noreply=False):
-        return self._arith('decr', key, value, noreply)
+        return self._arith("decr", key, value, noreply)
 
     def _affix(self, cmd, key, value, noreply=False, flags=0, exptime=0):
         self._sendall(
-            "{cmd} {key} {flags} {exptime} {size}{noreply}\r\n{value}\r\n"
-            .format(
+            "{cmd} {key} {flags} {exptime} {size}{noreply}\r\n{value}\r\n".format(
                 cmd=cmd,
                 key=key,
                 flags=flags,
                 exptime=exptime,
                 size=len(value),
-                noreply=' noreply' if noreply else '',
+                noreply=" noreply" if noreply else "",
                 value=value,
             )
         )
@@ -557,31 +564,33 @@ class MCProcess(ProcessBase):
         return None
 
     def append(self, key, value, noreply=False, flags=0, exptime=0):
-        return self._affix('append', key, value, noreply, flags, exptime)
+        return self._affix("append", key, value, noreply, flags, exptime)
 
     def prepend(self, key, value, noreply=False, flags=0, exptime=0):
-        return self._affix('prepend', key, value, noreply, flags, exptime)
+        return self._affix("prepend", key, value, noreply, flags, exptime)
 
     def cas(self, key, value, cas_token):
         value = str(value)
-        self._sendall("cas {key} 0 0 {size} {token}\r\n{value}\r\n".format(
-            key=key,
-            size=len(value),
-            token=cas_token,
-            value=value,
-        ))
+        self._sendall(
+            "cas {key} 0 0 {size} {token}\r\n{value}\r\n".format(
+                key=key,
+                size=len(value),
+                token=cas_token,
+                value=value,
+            )
+        )
 
         answer = self._fdreadline().strip()
-        if re.search('ERROR', answer):
+        if re.search("ERROR", answer):
             print(answer)
             self.connect()
             return None
         return re.match("STORED", answer)
 
     def stats(self, spec=None):
-        q = 'stats\r\n'
+        q = "stats\r\n"
         if spec:
-            q = 'stats {spec}\r\n'.format(spec=spec)
+            q = "stats {spec}\r\n".format(spec=spec)
         self._sendall(q)
 
         s = {}
@@ -589,7 +598,7 @@ class MCProcess(ProcessBase):
         fds = select.select([self.fd], [], [], 20.0)
         if len(fds[0]) == 0:
             return None
-        while line != 'END':
+        while line != "END":
             line = self._fdreadline().strip()
             if len(line) == 0:
                 return None
@@ -600,9 +609,9 @@ class MCProcess(ProcessBase):
         return s
 
     def raw_stats(self, spec=None):
-        q = 'stats\r\n'
+        q = "stats\r\n"
         if spec:
-            q = 'stats {spec}\r\n'.format(spec=spec)
+            q = "stats {spec}\r\n".format(spec=spec)
         self._sendall(q)
 
         s = []
@@ -611,7 +620,7 @@ class MCProcess(ProcessBase):
         if len(fds[0]) == 0:
             self.terminate()
             raise RuntimeError("MCProcess failed to return stats")
-        while line != 'END':
+        while line != "END":
             line = self._fdreadline().strip()
             a = line.split(None, 1)
             if len(a) == 2:
@@ -630,10 +639,10 @@ class MCProcess(ProcessBase):
 
         answer = ""
         line = None
-        while line != 'END':
+        while line != "END":
             line = self._fdreadline().strip()
             # Handle error
-            if not answer and 'ERROR' in line:
+            if not answer and "ERROR" in line:
                 self.connect()
                 return line
             answer += line + "\r\n"
@@ -661,10 +670,10 @@ class MCProcess(ProcessBase):
         return self._fdreadline().rstrip()
 
 
-ATTR_PAT = '(?P<attr>(:([0-9a-z_])+){0,3})'
-IPV6_PAT = '\\[([A-Za-z:0-9]+)\\]'
-IPV6_SERVER_PAT = re.compile(f'^(?P<host>{IPV6_PAT}):(?P<port>[0-9]+){ATTR_PAT}$')
-SERVER_PAT = re.compile(f'^(?P<host>[0-9a-zA-Z_.]+):(?P<port>[0-9]+){ATTR_PAT}$')
+ATTR_PAT = "(?P<attr>(:([0-9a-z_])+){0,3})"
+IPV6_PAT = "\\[([A-Za-z:0-9]+)\\]"
+IPV6_SERVER_PAT = re.compile(f"^(?P<host>{IPV6_PAT}):(?P<port>[0-9]+){ATTR_PAT}$")
+SERVER_PAT = re.compile(f"^(?P<host>[0-9a-zA-Z_.]+):(?P<port>[0-9]+){ATTR_PAT}$")
 
 
 def parse_parts(s, pattern):
@@ -690,15 +699,17 @@ def sub_port(s, substitute_ports, port_map):
                     else:
                         if port not in substitute_ports:
                             raise Exception(
-                                "Port {} not in substitute port map"
-                                .format(port))
+                                "Port {} not in substitute port map".format(port)
+                            )
                         port_map[port] = substitute_ports[port]
                 else:
-                    raise Exception("Looking up port {}: config file has more "
-                                    "ports specified than the number of "
-                                    "mock servers started".format(port))
+                    raise Exception(
+                        "Looking up port {}: config file has more "
+                        "ports specified than the number of "
+                        "mock servers started".format(port)
+                    )
             parts[1] = str(port_map[port])
-            return ':'.join(parts)
+            return ":".join(parts)
         except (IndexError, ValueError):
             pass
     return s
@@ -730,7 +741,7 @@ def replace_ports(json, substitute_ports):
                 s = ""
                 state = STRING
         elif state == STRING:
-            if c == '\\':
+            if c == "\\":
                 s += c
                 state = ESCAPE
             elif c == '"':
@@ -744,13 +755,15 @@ def replace_ports(json, substitute_ports):
             state = NORMAL
 
     if len(port_map) < len(substitute_ports):
-        raise Exception("Config file has fewer ports specified than the number"
-                        " of mock servers started")
+        raise Exception(
+            "Config file has fewer ports specified than the number"
+            " of mock servers started"
+        )
     return out
 
 
 def replace_strings(json, replace_map):
-    for (key, value) in replace_map.items():
+    for key, value in replace_map.items():
         json = json.replace(key, str(value))
     return json
 
@@ -767,23 +780,33 @@ def create_listen_socket():
 class McrouterBase(MCProcess):
     def __init__(self, args, port=None, base_dir=None):
         if base_dir is None:
-            base_dir = BaseDirectory('mcrouter')
+            base_dir = BaseDirectory("mcrouter")
 
-        self.log = os.path.join(base_dir.path, 'mcrouter.log')
+        self.log = os.path.join(base_dir.path, "mcrouter.log")
 
-        self.async_spool = os.path.join(base_dir.path, 'spool.mcrouter')
+        self.async_spool = os.path.join(base_dir.path, "spool.mcrouter")
         os.mkdir(self.async_spool)
-        self.stats_dir = os.path.join(base_dir.path, 'stats')
+        self.stats_dir = os.path.join(base_dir.path, "stats")
         os.mkdir(self.stats_dir)
-        self.debug_fifo_root = os.path.join(base_dir.path, 'fifos')
+        self.debug_fifo_root = os.path.join(base_dir.path, "fifos")
         os.mkdir(self.debug_fifo_root)
 
-        args.extend(['-L', self.log,
-                     '-a', self.async_spool,
-                     '--stats-root', self.stats_dir,
-                     '--debug-fifo-root', self.debug_fifo_root,
-                     '--rss-limit-mb', '16384',
-                     '--fibers-stack-size', '65536'])
+        args.extend(
+            [
+                "-L",
+                self.log,
+                "-a",
+                self.async_spool,
+                "--stats-root",
+                self.stats_dir,
+                "--debug-fifo-root",
+                self.debug_fifo_root,
+                "--rss-limit-mb",
+                "16384",
+                "--fibers-stack-size",
+                "65536",
+            ]
+        )
 
         listen_sock = None
         pass_fds = []
@@ -791,15 +814,16 @@ class McrouterBase(MCProcess):
             listen_sock = create_listen_socket()
             port = listen_sock.getsockname()[1]
             listen_sock_fd = listen_sock.fileno()
-            args.extend(['--listen-sock-fd', str(listen_sock_fd)])
+            args.extend(["--listen-sock-fd", str(listen_sock_fd)])
             pass_fds.append(listen_sock_fd)
         else:
-            args.extend(['-p', str(port)])
+            args.extend(["-p", str(port)])
 
         args = McrouterGlobals.preprocessArgs(args)
 
-        MCProcess.__init__(self, args, port, base_dir, junk_fill=True,
-                           pass_fds=pass_fds)
+        MCProcess.__init__(
+            self, args, port, base_dir, junk_fill=True, pass_fds=pass_fds
+        )
 
         if listen_sock is not None:
             listen_sock.close()
@@ -812,48 +836,62 @@ class McrouterBase(MCProcess):
 
 
 class Mcrouter(McrouterBase):
-    def __init__(self, config, port=None, default_route=None, extra_args=None,  # noqa: C901
-                 base_dir=None, substitute_config_ports=None, substitute_config_smc_ports=None,
-                 substitute_port_map=None, replace_map=None, flavor=None,
-                 sr_mock_smc_config=None):
+    def __init__(
+        self,
+        config,
+        port=None,
+        default_route=None,
+        extra_args=None,  # noqa: C901
+        base_dir=None,
+        substitute_config_ports=None,
+        substitute_config_smc_ports=None,
+        substitute_port_map=None,
+        replace_map=None,
+        flavor=None,
+        sr_mock_smc_config=None,
+    ):
         if base_dir is None:
-            base_dir = BaseDirectory('mcrouter')
+            base_dir = BaseDirectory("mcrouter")
 
         if replace_map:
-            with open(config, 'r') as config_file:
-                replaced_config = replace_strings(config_file.read(),
-                                                  replace_map)
+            with open(config, "r") as config_file:
+                replaced_config = replace_strings(config_file.read(), replace_map)
             (_, config) = tempfile.mkstemp(dir=base_dir.path)
-            with open(config, 'w') as config_file:
+            with open(config, "w") as config_file:
                 config_file.write(replaced_config)
 
         if substitute_config_ports:
-            with open(config, 'r') as config_file:
-                replaced_config = replace_ports(config_file.read(),
-                                                substitute_config_ports)
+            with open(config, "r") as config_file:
+                replaced_config = replace_ports(
+                    config_file.read(), substitute_config_ports
+                )
             (_, config) = tempfile.mkstemp(dir=base_dir.path)
-            with open(config, 'w') as config_file:
+            with open(config, "w") as config_file:
                 config_file.write(replaced_config)
 
         self.config = config
-        if (flavor):
-            args = [McrouterGlobals.binPath('mcrouter'), 'file:' + flavor,
-                    '--config', 'file:' + config]
+        if flavor:
+            args = [
+                McrouterGlobals.binPath("mcrouter"),
+                "file:" + flavor,
+                "--config",
+                "file:" + config,
+            ]
         else:
-            args = [McrouterGlobals.binPath('mcrouter'),
-                    '--config', 'file:' + config]
+            args = [McrouterGlobals.binPath("mcrouter"), "--config", "file:" + config]
 
         if default_route:
-            args.extend(['-R', default_route])
+            args.extend(["-R", default_route])
 
         if extra_args:
             args.extend(extra_args)
 
-        if '-b' in args:
+        if "-b" in args:
+
             def get_pid():
                 stats = self.stats()
                 if stats:
-                    return int(stats['pid'])
+                    return int(stats["pid"])
                 return None
 
             def terminate():
@@ -871,14 +909,15 @@ class Mcrouter(McrouterBase):
             self.is_alive = is_alive
 
         if substitute_config_smc_ports and sr_mock_smc_config:
-            with open(sr_mock_smc_config, 'r') as config_file:
-                replaced_config = replace_ports(config_file.read(),
-                                                substitute_config_smc_ports)
+            with open(sr_mock_smc_config, "r") as config_file:
+                replaced_config = replace_ports(
+                    config_file.read(), substitute_config_smc_ports
+                )
             (_, sr_mock_smc_config) = tempfile.mkstemp(dir=base_dir.path)
-            with open(sr_mock_smc_config, 'w') as config_file:
+            with open(sr_mock_smc_config, "w") as config_file:
                 config_file.write(replaced_config)
-            self.sr_mock_smc_config = "file:" +sr_mock_smc_config
-            args.extend(['--debug-sr-host-list', self.sr_mock_smc_config])
+            self.sr_mock_smc_config = "file:" + sr_mock_smc_config
+            args.extend(["--debug-sr-host-list", self.sr_mock_smc_config])
 
         McrouterBase.__init__(self, args, port, base_dir)
 
@@ -904,17 +943,17 @@ class McrouterClients:
 
 class MockMemcached(MCProcess):
     def __init__(self, port=None):
-        args = [McrouterGlobals.binPath('mockmc')]
+        args = [McrouterGlobals.binPath("mockmc")]
         listen_sock = None
         pass_fds = []
         if port is None:
             listen_sock = create_listen_socket()
             port = listen_sock.getsockname()[1]
             listen_sock_fd = listen_sock.fileno()
-            args.extend(['-t', str(listen_sock_fd)])
+            args.extend(["-t", str(listen_sock_fd)])
             pass_fds.append(listen_sock_fd)
         else:
-            args.extend(['-P', str(port)])
+            args.extend(["-P", str(port)])
 
         MCProcess.__init__(self, args, port, pass_fds=pass_fds)
 
@@ -924,17 +963,17 @@ class MockMemcached(MCProcess):
 
 class MockMemcachedThrift(MCProcess):
     def __init__(self, port=None):
-        args = [McrouterGlobals.binPath('mockmcthrift')]
+        args = [McrouterGlobals.binPath("mockmcthrift")]
         listen_sock = None
         pass_fds = []
         if port is None:
             listen_sock = create_listen_socket()
             port = listen_sock.getsockname()[1]
             listen_sock_fd = listen_sock.fileno()
-            args.extend(['-t', str(listen_sock.fileno())])
+            args.extend(["-t", str(listen_sock.fileno())])
             pass_fds.append(listen_sock_fd)
         else:
-            args.extend(['-P', str(port)])
+            args.extend(["-P", str(port)])
 
         MCProcess.__init__(self, args, port, pass_fds=pass_fds)
 
@@ -943,17 +982,19 @@ class MockMemcachedThrift(MCProcess):
 
 
 class MockMemcachedDual(MCProcess):
-    def __init__(self, thriftPort=None, asyncPort=None, extra_args=None, mcrouterUseThrift=True):
-        args = [McrouterGlobals.binPath('mockmcdual')]
+    def __init__(
+        self, thriftPort=None, asyncPort=None, extra_args=None, mcrouterUseThrift=True
+    ):
+        args = [McrouterGlobals.binPath("mockmcdual")]
         pass_fds = []
         if thriftPort is None:
             listenSocketThrift = create_listen_socket()
             thriftPort = listenSocketThrift.getsockname()[1]
             sock_fd = listenSocketThrift.fileno()
-            args.extend(['-t', str(sock_fd)])
+            args.extend(["-t", str(sock_fd)])
             pass_fds.append(sock_fd)
         else:
-            args.extend(['-p', str(thriftPort)])
+            args.extend(["-p", str(thriftPort)])
         self.thriftPort = thriftPort
         self.mcrouterUseThrift = mcrouterUseThrift
 
@@ -961,10 +1002,10 @@ class MockMemcachedDual(MCProcess):
             listenSocketAsyncMc = create_listen_socket()
             asyncPort = listenSocketAsyncMc.getsockname()[1]
             sock_fd = listenSocketAsyncMc.fileno()
-            args.extend(['-T', str(sock_fd)])
+            args.extend(["-T", str(sock_fd)])
             pass_fds.append(sock_fd)
         else:
-            args.extend(['-P', str(asyncPort)])
+            args.extend(["-P", str(asyncPort)])
         self.asyncPort = asyncPort
 
         if extra_args:
@@ -985,60 +1026,65 @@ class Memcached(MCProcess):
     ssl_port = None
 
     def __init__(self, port=None, ssl_port=None, extra_args=None):
-        args = [McrouterGlobals.binPath('prodmc')]
+        args = [McrouterGlobals.binPath("prodmc")]
         listen_sock = None
         pass_fds = []
 
         # if mockmc is used here, we initialize the same way as MockMemcached
-        if McrouterGlobals.binPath('mockmc') == args[0]:
+        if McrouterGlobals.binPath("mockmc") == args[0]:
             if port is None:
                 listen_sock = create_listen_socket()
                 port = listen_sock.getsockname()[1]
                 listen_sock_fd = listen_sock.fileno()
-                args.extend(['-t', str(listen_sock_fd)])
+                args.extend(["-t", str(listen_sock_fd)])
                 pass_fds.append(listen_sock_fd)
             else:
-                args.extend(['-P', str(port)])
+                args.extend(["-P", str(port)])
 
             MCProcess.__init__(self, args, port, pass_fds=pass_fds)
 
             if listen_sock is not None:
                 listen_sock.close()
         else:
-            args.extend([
-                '-A',
-                '-g',
-                '-t', '1',
-                '--enable_hash_aliases',
-                '--enable_unchecked_l1_sentinel_reads',
-                '--items_reaper_interval_secs=1',
-                '--ini_hashpower=16',
-                '--num_listening_sockets=1',
-            ])
-            if (extra_args):
+            args.extend(
+                [
+                    "-A",
+                    "-g",
+                    "-t",
+                    "1",
+                    "--enable_hash_aliases",
+                    "--enable_unchecked_l1_sentinel_reads",
+                    "--items_reaper_interval_secs=1",
+                    "--ini_hashpower=16",
+                    "--num_listening_sockets=1",
+                ]
+            )
+            if extra_args:
                 args.extend(extra_args)
             if port is None:
                 listen_sock = create_listen_socket()
                 port = listen_sock.getsockname()[1]
                 listen_sock_fd = listen_sock.fileno()
-                args.extend(['--listen_sock_fd', str(listen_sock_fd)])
+                args.extend(["--listen_sock_fd", str(listen_sock_fd)])
                 pass_fds.append(listen_sock_fd)
             else:
-                args.extend(['-p', str(port)])
+                args.extend(["-p", str(port)])
 
             # Create a listen thrift socket to avoid port collision.
             # Not used in actual ASCII tests
             thrift_listen_sock = create_listen_socket()
             thrift_listen_sock_fd = thrift_listen_sock.fileno()
-            args.extend(['--thrift_listen_sock_fd', str(thrift_listen_sock_fd)])
+            args.extend(["--thrift_listen_sock_fd", str(thrift_listen_sock_fd)])
             pass_fds.append(thrift_listen_sock_fd)
             thrift_port = thrift_listen_sock.getsockname()[1]
 
             if ssl_port:
                 self.ssl_port = ssl_port
-                args.extend(['--ssl_port', str(self.ssl_port)])
+                args.extend(["--ssl_port", str(self.ssl_port)])
 
-            MCProcess.__init__(self, args, port, pass_fds=pass_fds, thriftPort=thrift_port)
+            MCProcess.__init__(
+                self, args, port, pass_fds=pass_fds, thriftPort=thrift_port
+            )
 
             thrift_listen_sock.close()
 
@@ -1049,7 +1095,7 @@ class Memcached(MCProcess):
             self.ensure_connected()
             tries = 10
             s = self.stats()
-            while ((not s or len(s) == 0) and tries > 0):
+            while (not s or len(s) == 0) and tries > 0:
                 # Note, we need to reconnect, because it's possible the
                 # server is still going to process previous requests.
                 self.ensure_connected()
@@ -1064,8 +1110,8 @@ class Memcached(MCProcess):
 
 class Mcpiper(ProcessBase):
     def __init__(self, fifos_dir, extra_args=None):
-        base_dir = BaseDirectory('mcpiper')
-        args = [McrouterGlobals.binPath('mcpiper'), '--fifo-root', fifos_dir]
+        base_dir = BaseDirectory("mcpiper")
+        args = [McrouterGlobals.binPath("mcpiper"), "--fifo-root", fifos_dir]
 
         if extra_args:
             args.extend(extra_args)
@@ -1075,9 +1121,9 @@ class Mcpiper(ProcessBase):
         super().__init__(args, base_dir, stdout=subprocess.PIPE)
 
     def output(self):
-        if not hasattr(self, 'stdout'):
+        if not hasattr(self, "stdout"):
             self.proc.terminate()
-            self.stdout = self.proc.stdout.read().decode('ascii', errors='ignore')
+            self.stdout = self.proc.stdout.read().decode("ascii", errors="ignore")
         return self.stdout
 
     def contains(self, needle):

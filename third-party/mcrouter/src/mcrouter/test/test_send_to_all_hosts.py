@@ -7,8 +7,9 @@
 from mcrouter.test.MCProcess import Memcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
+
 class TestSendToAllHosts(McrouterTestCase):
-    config = './mcrouter/test/test_send_to_all_hosts.json'
+    config = "./mcrouter/test/test_send_to_all_hosts.json"
     extra_args = []
 
     def setUp(self):
@@ -16,9 +17,9 @@ class TestSendToAllHosts(McrouterTestCase):
         self.cacheB1 = self.add_server(Memcached())
         self.cacheB2 = self.add_server(Memcached())
 
-        self.cacheA.set('ccw', 'cacheA')
-        self.cacheB1.set('ccw', 'cacheB1')
-        self.cacheB2.set('ccw', 'cacheB2')
+        self.cacheA.set("ccw", "cacheA")
+        self.cacheB1.set("ccw", "cacheB1")
+        self.cacheB2.set("ccw", "cacheB2")
 
     def test_regular_request(self):
         mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)

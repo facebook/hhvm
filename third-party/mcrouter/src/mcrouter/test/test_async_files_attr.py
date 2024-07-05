@@ -14,29 +14,37 @@ from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
 class TestAsyncFilesAttr(McrouterTestCase):
-    stat_prefix = 'libmcrouter.mcrouter.0.'
-    config = './mcrouter/test/mcrouter_test_basic_1_1_1.json'
+    stat_prefix = "libmcrouter.mcrouter.0."
+    config = "./mcrouter/test/mcrouter_test_basic_1_1_1.json"
     extra_args = [
-        '--stats-logging-interval',
-        '10', # logging stats every 10 ms
-        '--use-asynclog-version2',
+        "--stats-logging-interval",
+        "10",  # logging stats every 10 ms
+        "--use-asynclog-version2",
         "--server-timeout",
-        "10", # quickly timeout after 10 ms
+        "10",  # quickly timeout after 10 ms
     ]
 
     def check_stats(self, stats_dir):
-        file_stat = os.path.join(stats_dir, self.stat_prefix + 'stats')
+        file_stat = os.path.join(stats_dir, self.stat_prefix + "stats")
         file_startup_options = os.path.join(
-            stats_dir, self.stat_prefix + 'startup_options')
+            stats_dir, self.stat_prefix + "startup_options"
+        )
         file_config_sources = os.path.join(
-            stats_dir, self.stat_prefix + 'config_sources_info')
+            stats_dir, self.stat_prefix + "config_sources_info"
+        )
 
-        self.assertTrue(self.wait_for_file(file_stat, retries=10, interval=1),
-                        "{} doesn't exist".format(file_stat))
-        self.assertTrue(self.wait_for_file(file_startup_options, retries=10, interval=1),
-                        "{} doesn't exist".format(file_startup_options))
-        self.assertTrue(self.wait_for_file(file_config_sources, retries=10, interval=1),
-                        "{} doesn't exist".format(file_config_sources))
+        self.assertTrue(
+            self.wait_for_file(file_stat, retries=10, interval=1),
+            "{} doesn't exist".format(file_stat),
+        )
+        self.assertTrue(
+            self.wait_for_file(file_startup_options, retries=10, interval=1),
+            "{} doesn't exist".format(file_startup_options),
+        )
+        self.assertTrue(
+            self.wait_for_file(file_config_sources, retries=10, interval=1),
+            "{} doesn't exist".format(file_config_sources),
+        )
 
         return (file_stat, file_startup_options, file_config_sources)
 
@@ -48,7 +56,7 @@ class TestAsyncFilesAttr(McrouterTestCase):
         mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
         binary = parutil.get_file_path("mcrouter/client_binary")
         port = str(mcrouter.getport())
-        args = "'{\"key\":\"abcd\", \"attributes\":{\"a1\":1000, \"a2\":2000}}'"
+        args = '\'{"key":"abcd", "attributes":{"a1":1000, "a2":2000}}\''
         command = binary + " -p " + port + " delete " + args
 
         os.system(command)
@@ -67,32 +75,34 @@ class TestAsyncFilesAttr(McrouterTestCase):
         self.assertEqual(len(asynclog_files), 1)
 
         # asynclog v2 should have attributes
-        with open(asynclog_files[0], 'r') as f:
+        with open(asynclog_files[0], "r") as f:
             file_json = json.load(f)
             self.assertEqual(file_json[3]["a"]["a1"], 1000)
             self.assertEqual(file_json[3]["a"]["a2"], 2000)
             self.assertEqual(file_json[3]["a"]["al"], 1)
 
         # check stats
-        (file_stat, file_startup_options, file_config_sources) = \
-            self.check_stats(mcrouter.stats_dir)
+        (file_stat, file_startup_options, file_config_sources) = self.check_stats(
+            mcrouter.stats_dir
+        )
 
         with open(file_stat) as f:
             stat_json = json.load(f)
-            self.assertGreaterEqual(stat_json[self.stat_prefix + 'uptime'], 0)
+            self.assertGreaterEqual(stat_json[self.stat_prefix + "uptime"], 0)
 
         with open(file_startup_options) as f:
             startup_json = json.load(f)
-            self.assertEqual(startup_json['default_route'], '/././')
+            self.assertEqual(startup_json["default_route"], "/././")
 
         with open(file_config_sources) as f:
             sources_json = json.load(f)
-            self.assertEqual(sources_json['mcrouter_config'],
-                             '837ae7d82f2fe7cb785b941dae505811')
+            self.assertEqual(
+                sources_json["mcrouter_config"], "837ae7d82f2fe7cb785b941dae505811"
+            )
 
         # check stats are up-to-date
         now = time.time()
-        time.sleep(.2)
+        time.sleep(0.2)
 
         self.assertGreater(os.path.getmtime(file_stat), now)
         self.assertGreater(os.path.getmtime(file_startup_options), now)

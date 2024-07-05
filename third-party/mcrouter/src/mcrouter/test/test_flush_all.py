@@ -9,8 +9,9 @@ import time
 from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
+
 class TestMcrouterRoutingPrefixAscii(McrouterTestCase):
-    config = './mcrouter/test/mcrouter_test_basic_2_1_1.json'
+    config = "./mcrouter/test/mcrouter_test_basic_2_1_1.json"
 
     def setUp(self):
         # The order here corresponds to the order of hosts in the .json
@@ -18,10 +19,10 @@ class TestMcrouterRoutingPrefixAscii(McrouterTestCase):
         self.mc2 = self.add_server(MockMemcached())
 
     def get_mcrouter(self, enableFlush):
-        args = ['--server-timeout', '2000']
+        args = ["--server-timeout", "2000"]
         if enableFlush:
-            args.append('--enable-flush-cmd')
-        return self.add_mcrouter(self.config, '/a/a/', extra_args=args)
+            args.append("--enable-flush-cmd")
+        return self.add_mcrouter(self.config, "/a/a/", extra_args=args)
 
     def test_flush_all_disabled(self):
         mcr = self.get_mcrouter(enableFlush=False)

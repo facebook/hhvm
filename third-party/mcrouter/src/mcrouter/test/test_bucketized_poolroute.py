@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from mcrouter.test.MCProcess import  Memcached
+from mcrouter.test.MCProcess import Memcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
@@ -37,6 +37,7 @@ class TestBucketizedPoolRoute(McrouterTestCase):
         self.assertFalse(self.mc3.get(key))
         self.assertFalse(self.mc4.get(key))
         self.assertEqual(self.mc5.get(key), val)
+
 
 class TestNonBucketizedPoolRoute(McrouterTestCase):
     config = "./mcrouter/test/mcrouter_test_bucketized_poolroute_nonbucketized.json"

@@ -11,19 +11,16 @@ from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
 class TestLatencyInjectionRoute(McrouterTestCase):
-    config_latency_before = './mcrouter/test/test_latency_injection_before.json'
-    config_latency_after = './mcrouter/test/test_latency_injection_after.json'
-    config_latency_total = './mcrouter/test/test_latency_injection_total.json'
+    config_latency_before = "./mcrouter/test/test_latency_injection_before.json"
+    config_latency_after = "./mcrouter/test/test_latency_injection_after.json"
+    config_latency_total = "./mcrouter/test/test_latency_injection_total.json"
 
     def setUp(self) -> None:
         self.mc = self.add_server(Memcached())
 
-        self.mcrouter_latency_before =\
-            self.add_mcrouter(self.config_latency_before)
-        self.mcrouter_latency_after =\
-            self.add_mcrouter(self.config_latency_after)
-        self.mcrouter_latency_total =\
-            self.add_mcrouter(self.config_latency_total)
+        self.mcrouter_latency_before = self.add_mcrouter(self.config_latency_before)
+        self.mcrouter_latency_after = self.add_mcrouter(self.config_latency_after)
+        self.mcrouter_latency_total = self.add_mcrouter(self.config_latency_total)
 
     def test_latency_before(self) -> None:
         self.mc.set("key1", "value1")

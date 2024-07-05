@@ -4,11 +4,11 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import time
+
 from mcrouter.test.MCProcess import Mcrouter
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 from mcrouter.test.mock_servers import SleepServer
-
-import time
 
 
 class TestRendezvousFailoverNoFailure(McrouterTestCase):

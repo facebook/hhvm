@@ -5,17 +5,17 @@
 # LICENSE file in the root directory of this source tree.
 
 
-from mcrouter.test.MCProcess import Memcached, McrouterClients
+from mcrouter.test.MCProcess import McrouterClients, Memcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
 class TestLeasePairing(McrouterTestCase):
-    config_pairing_basic = './mcrouter/test/test_lease_pairing_basic.json'
-    config_pairing_disabled = './mcrouter/test/test_lease_pairing_disabled.json'
-    config_pairing_nested = './mcrouter/test/test_lease_pairing_nested.json'
+    config_pairing_basic = "./mcrouter/test/test_lease_pairing_basic.json"
+    config_pairing_disabled = "./mcrouter/test/test_lease_pairing_disabled.json"
+    config_pairing_nested = "./mcrouter/test/test_lease_pairing_nested.json"
 
     def create_mcrouter(self, config, num_memcached=2):
-        extra_args = ['--proxy-threads', '2']
+        extra_args = ["--proxy-threads", "2"]
 
         self.memcacheds = []
         for _ in range(num_memcached):
@@ -41,8 +41,9 @@ class TestLeasePairing(McrouterTestCase):
         self.memcacheds[0].resume()
 
         # lease set should go to the same server as lease get - memcache[1]
-        set_reply = self.clients[1].leaseSet("key",
-                {"value": "abc", "token": get_reply['token']})
+        set_reply = self.clients[1].leaseSet(
+            "key", {"value": "abc", "token": get_reply["token"]}
+        )
         self.assertTrue(set_reply is not None)
         self.assertTrue(self.memcacheds[0].get("key") is None)
         self.assertTrue(self.memcacheds[1].get("key") is not None)
@@ -65,8 +66,9 @@ class TestLeasePairing(McrouterTestCase):
         self.memcacheds[0].resume()
 
         # lease set should go to the same server as lease get - memcache[1]
-        set_reply = self.clients[1].leaseSet("key",
-                {"value": "abc", "token": get_reply['token']})
+        set_reply = self.clients[1].leaseSet(
+            "key", {"value": "abc", "token": get_reply["token"]}
+        )
         self.assertTrue(set_reply is not None)
         self.assertTrue(self.memcacheds[0].get("key") is None)
         self.assertTrue(self.memcacheds[1].get("key") is not None)
@@ -94,8 +96,9 @@ class TestLeasePairing(McrouterTestCase):
         self.memcacheds[2].resume()
 
         # lease set should go to the same server as lease get - memcache[3]
-        set_reply = self.clients[1].leaseSet("key",
-                {"value": "abc", "token": get_reply['token']})
+        set_reply = self.clients[1].leaseSet(
+            "key", {"value": "abc", "token": get_reply["token"]}
+        )
         self.assertTrue(set_reply is not None)
         self.assertTrue(self.memcacheds[0].get("key") is None)
         self.assertTrue(self.memcacheds[1].get("key") is None)

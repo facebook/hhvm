@@ -13,23 +13,26 @@ from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
 class TestDumpConfig(McrouterTestCase):
-    valid_config = './mcrouter/test/mcrouter_test_basic_1_1_1.json'
-    invalid_config = './mcrouter/test/test_dump_config_invalid.json'
+    valid_config = "./mcrouter/test/mcrouter_test_basic_1_1_1.json"
+    invalid_config = "./mcrouter/test/test_dump_config_invalid.json"
 
     def setUp(self):
-        self.config_dump_root = BaseDirectory('config_dump')
+        self.config_dump_root = BaseDirectory("config_dump")
 
     def get_mcrouter(self, config, mc_extra_args=None):
         extra_args = mc_extra_args or []
         # we don't want to create Memcache instances here to avoid
         # creating a new config file with port substitution.
-        extra_args = extra_args + ['--proxy-threads', '1',
-                                   '--config-dump-root',
-                                   self.config_dump_root.path]
+        extra_args = extra_args + [
+            "--proxy-threads",
+            "1",
+            "--config-dump-root",
+            self.config_dump_root.path,
+        ]
         return self.add_mcrouter(config, extra_args=extra_args)
 
     def _get_valid_config(self, base_dir):
-        config_path = os.path.join(base_dir.path, 'config.json')
+        config_path = os.path.join(base_dir.path, "config.json")
         shutil.copyfile(self.valid_config, config_path)
         return config_path
 
@@ -38,7 +41,7 @@ class TestDumpConfig(McrouterTestCase):
         shutil.copyfile(self.invalid_config, config_path)
 
     def _get_dumped_config_root(self):
-        return '{}/mcrouter/0'.format(self.config_dump_root.path)
+        return "{}/mcrouter/0".format(self.config_dump_root.path)
 
     def test_dump_config(self):
         """
@@ -57,8 +60,7 @@ class TestDumpConfig(McrouterTestCase):
         dumped_config_files = os.listdir(dumped_config_root)
         self.assertEqual(1, len(dumped_config_files))
 
-        dumped_config_file = '{}/{}'.format(
-            dumped_config_root, dumped_config_files[0])
+        dumped_config_file = "{}/{}".format(dumped_config_root, dumped_config_files[0])
         with open(mcrouter.config) as original_file:
             with open(dumped_config_file) as dumped_file:
                 self.assertEqual(original_file.read(), dumped_file.read())
@@ -68,7 +70,7 @@ class TestDumpConfig(McrouterTestCase):
         Ensures that mcrouter do not dump invalid configs.
         """
         # first, copy valid config to a temp file, as we need to modify it later
-        base_dir = BaseDirectory('McConfigs')
+        base_dir = BaseDirectory("McConfigs")
         config_path = self._get_valid_config(base_dir)
 
         # create mcrouter with a valid config (mcrouter will dump it to disk).
@@ -87,8 +89,7 @@ class TestDumpConfig(McrouterTestCase):
         dumped_config_root = self._get_dumped_config_root()
         dumped_config_files = os.listdir(dumped_config_root)
         self.assertEqual(1, len(dumped_config_files))
-        dumped_config_file = '{}/{}'.format(
-            dumped_config_root, dumped_config_files[0])
+        dumped_config_file = "{}/{}".format(dumped_config_root, dumped_config_files[0])
         with open(self.valid_config) as original_file:
             with open(dumped_config_file) as dumped_file:
                 self.assertEqual(original_file.read(), dumped_file.read())
@@ -99,7 +100,7 @@ class TestDumpConfig(McrouterTestCase):
         when a bad config file if pushed.
         """
         # first, copy valid config to a temp file, as we need to modify it later
-        base_dir = BaseDirectory('McConfigs')
+        base_dir = BaseDirectory("McConfigs")
         config_path = self._get_valid_config(base_dir)
 
         # create mcrouter with a valid config (mcrouter will dump it to disk).
@@ -123,7 +124,7 @@ class TestDumpConfig(McrouterTestCase):
         to be trusted.
         """
         # first, copy valid config to a temp file, as we need to modify it later
-        base_dir = BaseDirectory('McConfigs')
+        base_dir = BaseDirectory("McConfigs")
         config_path = self._get_valid_config(base_dir)
 
         # create mcrouter with a valid config (mcrouter will dump it to disk).
@@ -140,8 +141,7 @@ class TestDumpConfig(McrouterTestCase):
         # sleep for 2 seconds and forbid mcrouter from using backup configs
         # that were dumped more than 1 second ago.
         time.sleep(2)
-        mcrouter = self.get_mcrouter(config_path,
-                                     ['--max-dumped-config-age', '1'])
+        mcrouter = self.get_mcrouter(config_path, ["--max-dumped-config-age", "1"])
 
         # Mcrouter should not be running this time
         self.assertFalse(self._is_mcrouter_running(mcrouter))

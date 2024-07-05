@@ -10,12 +10,11 @@ import time
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 from mcrouter.test.mock_servers import SleepServer
 
+
 class TestProbeTimeout(McrouterTestCase):
-    config = './mcrouter/test/test_probe_timeout.json'
-    config_noservers = './mcrouter/test/test_probe_timeout_reconfig.json'
-    extra_args = ['-t', '2000',
-                  '--timeouts-until-tko', '1',
-                  '-r', '100']
+    config = "./mcrouter/test/test_probe_timeout.json"
+    config_noservers = "./mcrouter/test/test_probe_timeout_reconfig.json"
+    extra_args = ["-t", "2000", "--timeouts-until-tko", "1", "-r", "100"]
 
     def setUp(self):
         # The order here must corresponds to the order of hosts in the .json
@@ -42,5 +41,6 @@ class TestProbeTimeout(McrouterTestCase):
         # check that mcrouter is still alive
         self.assertTrue(mcrouter.is_alive())
 
+
 class TestRequestTimeout(TestProbeTimeout):
-    extra_args = ['-t', '2000', '--timeouts-until-tko', '2', '-r', '100']
+    extra_args = ["-t", "2000", "--timeouts-until-tko", "2", "-r", "100"]

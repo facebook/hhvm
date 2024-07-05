@@ -11,13 +11,12 @@ from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
 class TestModifyKey(McrouterTestCase):
-    config = './mcrouter/test/test_modify_key.json'
+    config = "./mcrouter/test/test_modify_key.json"
     extra_args = []
 
     def setUp(self):
         self.mc = self.add_server(Memcached())
-        self.mcr = self.add_mcrouter(
-            self.config, '/a/a/', extra_args=self.extra_args)
+        self.mcr = self.add_mcrouter(self.config, "/a/a/", extra_args=self.extra_args)
 
     def test_modify_key(self):
         self.assertTrue(self.mcr.set("key", "value"))

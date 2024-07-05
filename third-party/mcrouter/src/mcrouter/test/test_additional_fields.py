@@ -9,7 +9,7 @@ from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
 class TestAdditionalFields(McrouterTestCase):
-    config = './mcrouter/test/test_basic_caret.json'
+    config = "./mcrouter/test/test_basic_caret.json"
 
     def setUp(self):
         self.mc = self.add_server(Memcached())

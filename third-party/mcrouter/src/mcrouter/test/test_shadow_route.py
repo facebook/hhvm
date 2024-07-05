@@ -12,7 +12,7 @@ from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
 class TestShadowRoute(McrouterTestCase):
-    config = './mcrouter/test/test_shadow_route.json'
+    config = "./mcrouter/test/test_shadow_route.json"
 
     def setUp(self):
         # The order here must corresponds to the order of hosts in the .json
@@ -24,7 +24,7 @@ class TestShadowRoute(McrouterTestCase):
 
     def test_shadow_route(self):
         shadow_list = [5, 7, 13, 33, 43, 46, 58, 71, 83, 85, 89, 91, 93]
-        kv = [('f' + str(i), 'value' + str(i)) for i in range(100)]
+        kv = [("f" + str(i), "value" + str(i)) for i in range(100)]
         shadow_keys = [kv[i][0] for i in shadow_list]
 
         for key, value in kv:
@@ -47,22 +47,22 @@ class TestShadowRoute(McrouterTestCase):
                 self.assertIsNone(self.mc_bar_shadow.get(key))
 
     def test_shadow_route_leases(self):
-        kv = [('g' + str(i), 'value' + str(i)) for i in range(1, 20)]
+        kv = [("g" + str(i), "value" + str(i)) for i in range(1, 20)]
 
         # Send a few lease-get misses to the shadow in order to ensure primary
         # and shadow hosts don't issue lease tokens in lockstep later on.
         current_shadow_token = 0
         for i in range(100, 500):
-            k = 'warmup' + str(i)
-            current_shadow_token = self.mc_foo_shadow.leaseGet(k)['token']
+            k = "warmup" + str(i)
+            current_shadow_token = self.mc_foo_shadow.leaseGet(k)["token"]
 
         self.assertGreater(
             current_shadow_token,
-            self.mc_foo_0.leaseGet('a')['token'],
+            self.mc_foo_0.leaseGet("a")["token"],
         )
         self.assertGreater(
             current_shadow_token,
-            self.mc_foo_1.leaseGet('a')['token'],
+            self.mc_foo_1.leaseGet("a")["token"],
         )
 
         for key, value in kv:
@@ -70,13 +70,15 @@ class TestShadowRoute(McrouterTestCase):
             self.assertIsNone(self.mc_foo_1.get(key))
             self.assertIsNone(self.mc_foo_shadow.get(key))
 
-            token = self.mcrouter.leaseGet(key)['token']
+            token = self.mcrouter.leaseGet(key)["token"]
             self.assertGreater(token, 1)
 
-            self.assertTrue(self.mcrouter.leaseSet(
-                key,
-                {'value': value, 'token': token},
-            ))
+            self.assertTrue(
+                self.mcrouter.leaseSet(
+                    key,
+                    {"value": value, "token": token},
+                )
+            )
             self.assertTrue(self.mcrouter.set(key, value))
 
             self.assertEqual(

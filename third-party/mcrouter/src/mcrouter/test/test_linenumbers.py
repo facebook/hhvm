@@ -6,14 +6,14 @@
 
 import signal
 import subprocess
-import unittest
 import tempfile
+import unittest
 
 from mcrouter.test.config import McrouterGlobals
 
 
 class OutputCheckerTestCase(unittest.TestCase):
-    config_str = '''{
+    config_str = """{
           "route": {
             "type": "XYZRoute",
             "pool": {
@@ -26,12 +26,12 @@ class OutputCheckerTestCase(unittest.TestCase):
             },
           }
         }
-    '''
+    """
 
     def setUp(self):
         self.proc = None
         (_, config) = tempfile.mkstemp("")
-        with open(config, 'w') as config_file:
+        with open(config, "w") as config_file:
             config_file.write(self.config_str)
         self.config = config
 
@@ -51,17 +51,21 @@ class OutputCheckerTestCase(unittest.TestCase):
         for line in self.proc.stderr:
             line = line.decode()
             if "Unknown RouteHandle: XYZRoute line: 3" in line:
-                    return True
+                return True
         return False
 
 
 class TestLineNumbers(OutputCheckerTestCase):
     def test_linenumbers(self):
-        args = McrouterGlobals.preprocessArgs([
-            McrouterGlobals.binPath('mcrouter'),
-            '--config', 'file:' + self.config,
-            '-p', str(5721)
-        ])
+        args = McrouterGlobals.preprocessArgs(
+            [
+                McrouterGlobals.binPath("mcrouter"),
+                "--config",
+                "file:" + self.config,
+                "-p",
+                str(5721),
+            ]
+        )
 
         self.spawn(args)
         self.assertTrue(self.check_for_error_line_number())

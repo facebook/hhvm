@@ -12,7 +12,7 @@ from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
 class TestMcrouterRoutingPrefixAscii(McrouterTestCase):
-    config = './mcrouter/test/routing_prefix_test_ascii.json'
+    config = "./mcrouter/test/routing_prefix_test_ascii.json"
     extra_args = []
 
     def setUp(self):
@@ -22,8 +22,7 @@ class TestMcrouterRoutingPrefixAscii(McrouterTestCase):
             self.allhosts.append(self.add_server(Memcached()))
 
     def get_mcrouter(self):
-        return self.add_mcrouter(
-            self.config, '/a/a/', extra_args=self.extra_args)
+        return self.add_mcrouter(self.config, "/a/a/", extra_args=self.extra_args)
 
     def test_routing_prefix(self):
         mcr = self.get_mcrouter()
@@ -49,19 +48,19 @@ class TestMcrouterRoutingPrefixAscii(McrouterTestCase):
 
 
 class TestMcrouterRoutingPrefixCaret(TestMcrouterRoutingPrefixAscii):
-    config = './mcrouter/test/routing_prefix_test_caret.json'
+    config = "./mcrouter/test/routing_prefix_test_caret.json"
 
 
 class TestMcrouterRoutingPrefixOldNaming(TestMcrouterRoutingPrefixAscii):
-    config = './mcrouter/test/routing_prefix_test_old_naming.json'
+    config = "./mcrouter/test/routing_prefix_test_old_naming.json"
 
 
 class TestMcrouterRoutingPrefixSimpleRoutes(TestMcrouterRoutingPrefixAscii):
-    config = './mcrouter/test/routing_prefix_test_simple_routes.json'
+    config = "./mcrouter/test/routing_prefix_test_simple_routes.json"
 
 
 class TestFallbackRouting(McrouterTestCase):
-    config = './mcrouter/test/routing_prefix_test_fallback_route.json'
+    config = "./mcrouter/test/routing_prefix_test_fallback_route.json"
     extra_args = []
 
     def setUp(self):
@@ -71,8 +70,7 @@ class TestFallbackRouting(McrouterTestCase):
         self.bb = self.add_server(Memcached())
 
     def get_mcrouter(self):
-        return self.add_mcrouter(
-            self.config, '/a/a/', extra_args=self.extra_args)
+        return self.add_mcrouter(self.config, "/a/a/", extra_args=self.extra_args)
 
     def test_fallback_routing(self):
         mcr = self.get_mcrouter()
@@ -82,23 +80,23 @@ class TestFallbackRouting(McrouterTestCase):
 
         mcr.set(key, orig_value)
         time.sleep(1)
-        self.assertEqual(self.aa.get('key'), orig_value)
-        self.assertEqual(self.ab.get('key'), orig_value)
-        self.assertEqual(self.ba.get('key'), orig_value)
-        self.assertEqual(self.bb.get('key'), orig_value)
+        self.assertEqual(self.aa.get("key"), orig_value)
+        self.assertEqual(self.ab.get("key"), orig_value)
+        self.assertEqual(self.ba.get("key"), orig_value)
+        self.assertEqual(self.bb.get("key"), orig_value)
 
         key = "/a/foobar/key"
         value1 = "value1"
         mcr.set(key, value1)
         time.sleep(1)
-        self.assertEqual(self.ab.get('key'), orig_value)
-        self.assertEqual(self.ba.get('key'), orig_value)
-        self.assertEqual(self.bb.get('key'), orig_value)
-        self.assertEqual(self.aa.get('key'), value1)
+        self.assertEqual(self.ab.get("key"), orig_value)
+        self.assertEqual(self.ba.get("key"), orig_value)
+        self.assertEqual(self.bb.get("key"), orig_value)
+        self.assertEqual(self.aa.get("key"), value1)
 
 
 class TestCustomRoutingPrefixes(McrouterTestCase):
-    config = './mcrouter/test/routing_prefix_test_custom.json'
+    config = "./mcrouter/test/routing_prefix_test_custom.json"
     extra_args = []
 
     def setUp(self):
@@ -108,8 +106,7 @@ class TestCustomRoutingPrefixes(McrouterTestCase):
         self.bb = self.add_server(Memcached())
 
     def get_mcrouter(self):
-        return self.add_mcrouter(
-            self.config, '/a/a/', extra_args=self.extra_args)
+        return self.add_mcrouter(self.config, "/a/a/", extra_args=self.extra_args)
 
     def test_custom_routing_prefix(self):
         mcr = self.get_mcrouter()
@@ -119,17 +116,17 @@ class TestCustomRoutingPrefixes(McrouterTestCase):
 
         mcr.set(key, value)
         time.sleep(1)
-        self.assertEqual(self.aa.get('key'), value)
-        self.assertEqual(self.ba.get('key'), value)
+        self.assertEqual(self.aa.get("key"), value)
+        self.assertEqual(self.ba.get("key"), value)
 
         key = "/b*/*/key"
         value = "value2"
         mcr.set(key, value)
         time.sleep(1)
-        self.assertEqual(self.ba.get('key'), value)
-        self.assertEqual(self.bb.get('key'), value)
+        self.assertEqual(self.ba.get("key"), value)
+        self.assertEqual(self.bb.get("key"), value)
 
         key = "/b/*b*/key"
         value = "value3"
         mcr.set(key, value)
-        self.assertEqual(self.bb.get('key'), value)
+        self.assertEqual(self.bb.get("key"), value)

@@ -6,8 +6,9 @@
 
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
+
 class TestEmptyPool(McrouterTestCase):
-    config = './mcrouter/test/test_empty_pool.json'
+    config = "./mcrouter/test/test_empty_pool.json"
     extra_args = []
 
     def get_mcrouter(self, extra_args=()):
@@ -15,6 +16,6 @@ class TestEmptyPool(McrouterTestCase):
 
     def test_empty_pool(self):
         # Start a mcrouter without route handles
-        key = 'foo'
+        key = "foo"
         mcrouter_w_rh = self.get_mcrouter()
         self.assertIsNone(mcrouter_w_rh.get(key))

@@ -10,6 +10,7 @@ import time
 from mcrouter.test.MCProcess import Memcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
+
 class TestConfigParams(McrouterTestCase):
     ROUTING_CONFIG = """
 {
@@ -29,32 +30,39 @@ class TestConfigParams(McrouterTestCase):
     }
 }
 """
+
     def setUp(self):
         (_, config) = tempfile.mkstemp("")
-        with open(config, 'w') as config_file:
+        with open(config, "w") as config_file:
             config_file.write(self.ROUTING_CONFIG)
         self.config = config
 
     def test_client_params(self):
         self.mcrouter = self.add_mcrouter(self.config)
         retries = 10
-        while self.mcrouter.is_alive() and self.mcrouter.version() is None and retries > 0:
+        while (
+            self.mcrouter.is_alive() and self.mcrouter.version() is None and retries > 0
+        ):
             time.sleep(1)
             retries -= 1
-        res = self.mcrouter.issue_command_and_read_all(
-            'get __mcrouter__.route_handles(get,abc)\r\n'
-        ).split()[-2].split('|')[-1]
-        self.assertEqual(res, 'Memcache')
+        res = (
+            self.mcrouter.issue_command_and_read_all(
+                "get __mcrouter__.route_handles(get,abc)\r\n"
+            )
+            .split()[-2]
+            .split("|")[-1]
+        )
+        self.assertEqual(res, "Memcache")
 
 
 class TestConstShardHash(McrouterTestCase):
-    config = './mcrouter/test/test_config_params.json'
+    config = "./mcrouter/test/test_config_params.json"
 
     def test_config_params(self):
         mc = self.add_server(Memcached())
         self.port_map = {}
-        extra_args = ['--config-params', 'PORT:{},POOL:A'.format(mc.getport())]
+        extra_args = ["--config-params", "PORT:{},POOL:A".format(mc.getport())]
         mcrouter = self.add_mcrouter(self.config, extra_args=extra_args)
 
-        self.assertTrue(mcrouter.set('key', 'value'))
-        self.assertEqual(mcrouter.get('key'), 'value')
+        self.assertTrue(mcrouter.set("key", "value"))
+        self.assertEqual(mcrouter.get("key"), "value")

@@ -9,17 +9,18 @@ import time
 
 from mcrouter.test.MCProcess import Memcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
-from mcrouter.test.mock_servers import SleepServer
-from mcrouter.test.mock_servers import ConnectionErrorServer
+from mcrouter.test.mock_servers import ConnectionErrorServer, SleepServer
+
 
 def wait_until(target_time, increment):
     curr_time = int(time.time())
-    while (int(target_time) > curr_time):
+    while int(target_time) > curr_time:
         time.sleep(increment)
         curr_time = int(time.time())
 
+
 class TestMigratedPoolsFailover(McrouterTestCase):
-    config = './mcrouter/test/test_migrated_pools_failover.json'
+    config = "./mcrouter/test/test_migrated_pools_failover.json"
     extra_args = []
 
     def setUp(self):
@@ -30,8 +31,10 @@ class TestMigratedPoolsFailover(McrouterTestCase):
 
     def get_mcrouter(self, start_time):
         return self.add_mcrouter(
-            self.config, extra_args=self.extra_args,
-            replace_map={"START_TIME": start_time})
+            self.config,
+            extra_args=self.extra_args,
+            replace_map={"START_TIME": start_time},
+        )
 
     def test_migrated_pools_failover(self):
         phase_1_time = int(time.time())
@@ -41,7 +44,7 @@ class TestMigratedPoolsFailover(McrouterTestCase):
 
         mcr = self.get_mcrouter(phase_2_time)
 
-        #set keys that should be deleted in later phases
+        # set keys that should be deleted in later phases
         for phase in range(1, 5):
             self.a_old.set("get-key-" + str(phase), str(phase))
             self.a_new.set("get-key-" + str(phase), str(phase * 10))
@@ -83,7 +86,7 @@ class TestMigratedPoolsFailover(McrouterTestCase):
 
 
 class TestSamePoolFailover(McrouterTestCase):
-    config = './mcrouter/test/test_same_pool_failover.json'
+    config = "./mcrouter/test/test_same_pool_failover.json"
     extra_args = []
 
     def setUp(self):
@@ -95,15 +98,15 @@ class TestSamePoolFailover(McrouterTestCase):
     def test_same_pool_failover(self):
         mcr = self.get_mcrouter()
 
-        self.assertEqual(mcr.get('foobar'), None)
-        self.assertTrue(mcr.set('foobar', 'bizbang'))
-        self.assertEqual(mcr.get('foobar'), 'bizbang')
-        mcr.delete('foobar')
-        self.assertEqual(mcr.get('foobar'), None)
+        self.assertEqual(mcr.get("foobar"), None)
+        self.assertTrue(mcr.set("foobar", "bizbang"))
+        self.assertEqual(mcr.get("foobar"), "bizbang")
+        mcr.delete("foobar")
+        self.assertEqual(mcr.get("foobar"), None)
 
 
 class TestGetFailover(McrouterTestCase):
-    config = './mcrouter/test/test_get_failover.json'
+    config = "./mcrouter/test/test_get_failover.json"
     extra_args = []
 
     def setUp(self):
@@ -117,40 +120,40 @@ class TestGetFailover(McrouterTestCase):
         self.mcr = self.get_mcrouter()
 
         self.assertEqual(self.mcr.get(key), None)
-        self.assertTrue(self.mcr.set(key, 'bizbang'))
-        self.assertEqual(self.mcr.get(key), 'bizbang')
+        self.assertTrue(self.mcr.set(key, "bizbang"))
+        self.assertEqual(self.mcr.get(key), "bizbang")
 
         # kill the main host so everything failsover to gut
         self.wildcard.terminate()
 
         self.assertEqual(self.mcr.get(key), None)
-        self.assertTrue(self.mcr.set(key, 'bizbang-fail'))
-        self.assertEqual(self.mcr.get(key), 'bizbang-fail')
+        self.assertTrue(self.mcr.set(key, "bizbang-fail"))
+        self.assertEqual(self.mcr.get(key), "bizbang-fail")
 
     def test_get_failover(self):
-        self.failover_common('testkey')
+        self.failover_common("testkey")
         # the failover should have set it with a much shorter TTL
         # so make sure that we can't get the value after the TTL
         # has expired
         time.sleep(4)
-        self.assertEqual(self.mcr.get('testkey'), None)
+        self.assertEqual(self.mcr.get("testkey"), None)
 
 
 class TestGetFailoverWithFailoverTag(TestGetFailover):
-    config = './mcrouter/test/test_get_failover_with_failover_tag.json'
+    config = "./mcrouter/test/test_get_failover_with_failover_tag.json"
 
     def test_get_failover(self):
-        key = 'testkey|#|extra=1'
+        key = "testkey|#|extra=1"
         self.failover_common(key)
 
         # Verify the failover tag was appended
         fail_key = key + ":failover=1"
-        self.assertEqual(self.mcr.get(key), 'bizbang-fail')
-        self.assertEqual(self.gut.get(fail_key), 'bizbang-fail')
+        self.assertEqual(self.mcr.get(key), "bizbang-fail")
+        self.assertEqual(self.gut.get(fail_key), "bizbang-fail")
 
 
 class TestLeaseGetFailover(McrouterTestCase):
-    config = './mcrouter/test/test_get_failover.json'
+    config = "./mcrouter/test/test_get_failover.json"
     extra_args = []
 
     def setUp(self):
@@ -164,37 +167,37 @@ class TestLeaseGetFailover(McrouterTestCase):
         mcr = self.get_mcrouter()
 
         get_res = {}
-        get_res['testkey'] = mcr.leaseGet('testkey')
-        get_res['testkey']['value'] = 'bizbang-lease'
-        self.assertGreater(get_res['testkey']['token'], 0)
-        self.assertTrue(mcr.leaseSet('testkey', get_res['testkey']))
-        get_res['testkey'] = mcr.leaseGet('testkey')
-        self.assertFalse(get_res['testkey']['token'])
-        self.assertEqual(get_res['testkey']['value'], 'bizbang-lease')
+        get_res["testkey"] = mcr.leaseGet("testkey")
+        get_res["testkey"]["value"] = "bizbang-lease"
+        self.assertGreater(get_res["testkey"]["token"], 0)
+        self.assertTrue(mcr.leaseSet("testkey", get_res["testkey"]))
+        get_res["testkey"] = mcr.leaseGet("testkey")
+        self.assertFalse(get_res["testkey"]["token"])
+        self.assertEqual(get_res["testkey"]["value"], "bizbang-lease")
 
         # kill the main host so everything failsover to mctestc00.gut
         self.wildcard.terminate()
 
-        get_res['testkey'] = mcr.leaseGet('testkey')
-        get_res['testkey']['value'] = 'bizbang-lease-fail'
-        self.assertGreater(get_res['testkey']['token'], 0)
-        self.assertTrue(mcr.leaseSet('testkey', get_res['testkey']))
+        get_res["testkey"] = mcr.leaseGet("testkey")
+        get_res["testkey"]["value"] = "bizbang-lease-fail"
+        self.assertGreater(get_res["testkey"]["token"], 0)
+        self.assertTrue(mcr.leaseSet("testkey", get_res["testkey"]))
 
-        get_res['testkey'] = mcr.leaseGet('testkey')
-        self.assertFalse(get_res['testkey']['token'])
-        self.assertEqual(get_res['testkey']['value'], 'bizbang-lease-fail')
+        get_res["testkey"] = mcr.leaseGet("testkey")
+        self.assertFalse(get_res["testkey"]["token"])
+        self.assertEqual(get_res["testkey"]["value"], "bizbang-lease-fail")
 
         # the failover should have set it with a much shorter TTL
         # so make sure that we can't get the value after the TTL
         # has expired
         time.sleep(4)
-        get_res['testkey'] = mcr.leaseGet('testkey')
-        self.assertGreater(get_res['testkey']['token'], 0)
-        self.assertFalse(get_res['testkey']['value'])
+        get_res["testkey"] = mcr.leaseGet("testkey")
+        self.assertGreater(get_res["testkey"]["token"], 0)
+        self.assertFalse(get_res["testkey"]["value"])
 
 
 class TestMetaGetFailover(McrouterTestCase):
-    config = './mcrouter/test/test_get_failover.json'
+    config = "./mcrouter/test/test_get_failover.json"
     extra_args = []
 
     def setUp(self):
@@ -210,32 +213,31 @@ class TestMetaGetFailover(McrouterTestCase):
         get_res = {}
 
         key_set_time = int(time.time())
-        self.assertTrue(mcr.set('testkey', 'bizbang', exptime=100))
+        self.assertTrue(mcr.set("testkey", "bizbang", exptime=100))
         key_after_set_time = int(time.time())
 
-        get_res = mcr.metaget('testkey')
-        self.assertIn(int(get_res['exptime']),
-                      range(key_set_time + 100, key_after_set_time + 101))
+        get_res = mcr.metaget("testkey")
+        self.assertIn(
+            int(get_res["exptime"]), range(key_set_time + 100, key_after_set_time + 101)
+        )
 
         self.wildcard.terminate()
 
-        self.assertTrue(mcr.set('testkey', 'bizbang-fail'))
-        self.assertEqual(mcr.get('testkey'), 'bizbang-fail')
-        get_res = mcr.metaget('testkey')
-        self.assertAlmostEqual(int(get_res['exptime']),
-                               int(time.time()) + 3,
-                               delta=1)
+        self.assertTrue(mcr.set("testkey", "bizbang-fail"))
+        self.assertEqual(mcr.get("testkey"), "bizbang-fail")
+        get_res = mcr.metaget("testkey")
+        self.assertAlmostEqual(int(get_res["exptime"]), int(time.time()) + 3, delta=1)
 
         # the failover should have set it with a much shorter TTL
         # so make sure that we can't get the value after the TTL
         # has expired
         time.sleep(4)
-        self.assertEqual(mcr.metaget('testkey'), {})
-        self.assertEqual(mcr.get('testkey'), None)
+        self.assertEqual(mcr.metaget("testkey"), {})
+        self.assertEqual(mcr.get("testkey"), None)
 
 
 class TestFailoverWithLimit(McrouterTestCase):
-    config = './mcrouter/test/test_failover_limit.json'
+    config = "./mcrouter/test/test_failover_limit.json"
 
     def setUp(self):
         self.gut = self.add_server(Memcached())
@@ -247,21 +249,21 @@ class TestFailoverWithLimit(McrouterTestCase):
         mcr = self.get_mcrouter()
 
         # first 12 requests should succeed (9.8 - 1 + 0.2 * 11 - 11 = 0)
-        self.assertTrue(mcr.set('key', 'value.gut'))
+        self.assertTrue(mcr.set("key", "value.gut"))
         for _ in range(11):
-            self.assertEqual(mcr.get('key'), 'value.gut')
+            self.assertEqual(mcr.get("key"), "value.gut")
         # now every 5th request should succeed
         for _ in range(10):
             for _ in range(4):
-                self.assertIsNone(mcr.get('key'))
-            self.assertEqual(mcr.get('key'), 'value.gut')
+                self.assertIsNone(mcr.get("key"))
+            self.assertEqual(mcr.get("key"), "value.gut")
 
 
 # this test behaves exactly like TestFailoverWithLimit test above because
 # TKO errors are ignored in the ratelim calcualtions
 class TestFailoverWithLimitWithTKO(McrouterTestCase):
-    config = './mcrouter/test/test_failover_limit_error.json'
-    extra_args = ['--timeouts-until-tko', '5']
+    config = "./mcrouter/test/test_failover_limit_error.json"
+    extra_args = ["--timeouts-until-tko", "5"]
 
     def setUp(self):
         self.gutA = self.add_server(ConnectionErrorServer())
@@ -274,20 +276,20 @@ class TestFailoverWithLimitWithTKO(McrouterTestCase):
     def test_failover_limit(self):
         mcr = self.get_mcrouter()
 
-        self.assertTrue(mcr.set('key', 'value.gut'))
+        self.assertTrue(mcr.set("key", "value.gut"))
         for _ in range(11):
-            self.assertEqual(mcr.get('key'), 'value.gut')
+            self.assertEqual(mcr.get("key"), "value.gut")
         # now every 5th request should succeed
         for _ in range(10):
             for _ in range(4):
-                self.assertIsNone(mcr.get('key'))
-            self.assertEqual(mcr.get('key'), 'value.gut')
+                self.assertIsNone(mcr.get("key"))
+            self.assertEqual(mcr.get("key"), "value.gut")
 
 
 # Create two sleep servers which generates timeout errors
 class TestFailoverWithLimitWithErrors(McrouterTestCase):
-    config = './mcrouter/test/test_failover_limit_error.json'
-    extra_args = ['--timeouts-until-tko', '5']
+    config = "./mcrouter/test/test_failover_limit_error.json"
+    extra_args = ["--timeouts-until-tko", "5"]
 
     def setUp(self):
         self.gutA = self.add_server(SleepServer())
@@ -303,27 +305,27 @@ class TestFailoverWithLimitWithErrors(McrouterTestCase):
         # Each operation takes 3 token because first two tries would
         # fail due to timeout errors. So only 3 (one set and two get
         # operations would succeed before rate limiting kicks in)
-        self.assertTrue(mcr.set('key', 'value.gut'))
+        self.assertTrue(mcr.set("key", "value.gut"))
         for _ in range(2):
-            self.assertEqual(mcr.get('key'), 'value.gut')
+            self.assertEqual(mcr.get("key"), "value.gut")
 
         # all subsequest requests would fail until timeouts become
         # as TKOs
         for _ in range(18):
-            self.assertIsNone(mcr.get('key'))
+            self.assertIsNone(mcr.get("key"))
 
         # From here it should behave like the testcase above because
         # all destinations are declared TKO and ratelimiting is not
         # applicable to those
         for _ in range(10):
-            self.assertEqual(mcr.get('key'), 'value.gut')
+            self.assertEqual(mcr.get("key"), "value.gut")
             for _ in range(4):
-                self.assertIsNone(mcr.get('key'))
+                self.assertIsNone(mcr.get("key"))
 
 
 class TestFailoverWithLimitWithTKOAndErrors(McrouterTestCase):
-    config = './mcrouter/test/test_failover_limit_error.json'
-    extra_args = ['--timeouts-until-tko', '5']
+    config = "./mcrouter/test/test_failover_limit_error.json"
+    extra_args = ["--timeouts-until-tko", "5"]
 
     def setUp(self):
         self.gutA = self.add_server(SleepServer())
@@ -336,15 +338,15 @@ class TestFailoverWithLimitWithTKOAndErrors(McrouterTestCase):
     def test_failover_limit(self):
         mcr = self.get_mcrouter()
 
-        self.assertTrue(mcr.set('key', 'value.gut'))
+        self.assertTrue(mcr.set("key", "value.gut"))
         # Each operation takes 3 token because first two tries would
         # fail due to timeout errors. So only 5 (one set and two get
         # operations would succeed before rate limiting kicks in)
         for _ in range(4):
-            self.assertEqual(mcr.get('key'), 'value.gut')
-        self.assertIsNone(mcr.get('key'))
+            self.assertEqual(mcr.get("key"), "value.gut")
+        self.assertIsNone(mcr.get("key"))
         # All dests are TKO now, so now every 5th request should succeed
         for _ in range(10):
-            self.assertEqual(mcr.get('key'), 'value.gut')
+            self.assertEqual(mcr.get("key"), "value.gut")
             for _ in range(4):
-                self.assertIsNone(mcr.get('key'))
+                self.assertIsNone(mcr.get("key"))

@@ -7,8 +7,9 @@
 from mcrouter.test.MCProcess import Memcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
+
 class TestConstShardHash(McrouterTestCase):
-    config = './mcrouter/test/test_const_shard_hash.json'
+    config = "./mcrouter/test/test_const_shard_hash.json"
     extra_args = []
 
     def test_const_shard_hash(self):
@@ -16,13 +17,13 @@ class TestConstShardHash(McrouterTestCase):
         mc2 = self.add_server(Memcached())
         mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
-        key = 'foo:0:test'
-        value = 'value0'
+        key = "foo:0:test"
+        value = "value0"
         mcrouter.set(key, value)
         self.assertEqual(mc1.get(key), value)
         self.assertIsNone(mc2.get(key))
-        key = 'foo:1:test'
-        value = 'value1'
+        key = "foo:1:test"
+        value = "value1"
         mcrouter.set(key, value)
         self.assertIsNone(mc1.get(key))
         self.assertEqual(mc2.get(key), value)

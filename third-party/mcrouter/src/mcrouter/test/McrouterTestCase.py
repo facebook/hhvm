@@ -5,8 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 
 import os
-import unittest
 import time
+import unittest
 
 from mcrouter.test.MCProcess import Mcrouter, Memcached, MockMemcached
 
@@ -17,11 +17,11 @@ class McrouterTestCase(unittest.TestCase):
         self.use_mock_mc = False
 
     def ensureClassVariables(self):
-        if 'open_servers' not in self.__dict__:
+        if "open_servers" not in self.__dict__:
             self.open_servers = []
-        if 'open_ports' not in self.__dict__:
+        if "open_ports" not in self.__dict__:
             self.open_ports = []
-        if 'open_ports_sr' not in self.__dict__:
+        if "open_ports_sr" not in self.__dict__:
             self.open_ports_sr = []
 
     @classmethod
@@ -53,7 +53,7 @@ class McrouterTestCase(unittest.TestCase):
         server.ensure_connected()
         self.open_servers.append(server)
         if sr_routing:
-                self.open_ports_sr.append(server.get_secondary_port())
+            self.open_ports_sr.append(server.get_secondary_port())
         else:
             if server.getsslport() is not None:
                 self.open_ports.append(server.getsslport())
@@ -61,40 +61,50 @@ class McrouterTestCase(unittest.TestCase):
                 self.open_ports.append(server.getport())
 
         if logical_port:
-            if 'port_map' not in self.__dict__:
+            if "port_map" not in self.__dict__:
                 self.port_map = {}
             if logical_port in self.port_map:
-                raise Exception("logical_port %d was already used"
-                                % logical_port)
+                raise Exception("logical_port %d was already used" % logical_port)
             self.port_map[logical_port] = server.getport()
 
         return server
 
-    def add_mcrouter(self, config, route=None, extra_args=None,
-                     replace_map=None, bg_mcrouter=False, replace_ports=True,
-                     flavor=None, sr_mock_smc_config=None, base_dir=None):
+    def add_mcrouter(
+        self,
+        config,
+        route=None,
+        extra_args=None,
+        replace_map=None,
+        bg_mcrouter=False,
+        replace_ports=True,
+        flavor=None,
+        sr_mock_smc_config=None,
+        base_dir=None,
+    ):
         self.ensureClassVariables()
         substitute_ports = None
         if replace_ports:
-            substitute_ports = (self.open_ports
-                                if 'port_map' not in self.__dict__
-                                else self.port_map)
+            substitute_ports = (
+                self.open_ports if "port_map" not in self.__dict__ else self.port_map
+            )
 
-        mcrouter = Mcrouter(config,
-                            substitute_config_ports=substitute_ports,
-                            substitute_config_smc_ports=self.open_ports_sr,
-                            default_route=route,
-                            extra_args=extra_args,
-                            replace_map=replace_map,
-                            flavor=flavor,
-                            sr_mock_smc_config=sr_mock_smc_config,
-                            base_dir=base_dir)
+        mcrouter = Mcrouter(
+            config,
+            substitute_config_ports=substitute_ports,
+            substitute_config_smc_ports=self.open_ports_sr,
+            default_route=route,
+            extra_args=extra_args,
+            replace_map=replace_map,
+            flavor=flavor,
+            sr_mock_smc_config=sr_mock_smc_config,
+            base_dir=base_dir,
+        )
         mcrouter.ensure_connected()
 
         if bg_mcrouter:
             self.open_ports.append(mcrouter.getport())
 
-        if 'open_mcrouters' not in self.__dict__:
+        if "open_mcrouters" not in self.__dict__:
             self.open_mcrouters = []
         self.open_mcrouters.append(mcrouter)
         return mcrouter
@@ -109,11 +119,11 @@ class McrouterTestCase(unittest.TestCase):
     def tearDown(self):
         # Stop mcrouters first to close connections to servers
         # (some mock severs might be blocked on recv() calls)
-        if 'open_mcrouters' in self.__dict__:
+        if "open_mcrouters" in self.__dict__:
             for mcr in self.open_mcrouters:
                 mcr.terminate()
 
-        if 'open_servers' in self.__dict__:
+        if "open_servers" in self.__dict__:
             for server in self.open_servers:
                 server.terminate()
 
@@ -121,7 +131,7 @@ class McrouterTestCase(unittest.TestCase):
         start_time = time.time()
         interval = 0.5
         while retries > 0:
-            if (self.mc.get(key) == expVal):
+            if self.mc.get(key) == expVal:
                 return True
             time.sleep(interval)
             retries -= 1
@@ -129,18 +139,17 @@ class McrouterTestCase(unittest.TestCase):
 
     def assert_eventually_true(self, condition):
         retry = 0
-        max_retry = 6 # don't increase too much, at worst with 6 it takes ~1 minute
+        max_retry = 6  # don't increase too much, at worst with 6 it takes ~1 minute
         sleep_time = 1
         result = False
         while retry < max_retry:
-            if (condition()):
+            if condition():
                 result = True
                 break
             retry += 1
             time.sleep(sleep_time)
             sleep_time *= 2
         self.assertTrue(result)
-
 
     def _is_mcrouter_running(self, mcrouter):
         try:

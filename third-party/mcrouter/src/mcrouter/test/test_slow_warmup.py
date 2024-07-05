@@ -7,8 +7,9 @@
 from mcrouter.test.MCProcess import Memcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
+
 class TestSlowWarmUp(McrouterTestCase):
-    config = './mcrouter/test/test_slow_warmup.json'
+    config = "./mcrouter/test/test_slow_warmup.json"
 
     def setUp(self):
         self.memcached = self.add_server(Memcached())

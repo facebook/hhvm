@@ -12,6 +12,7 @@ import unittest
 
 from mcrouter.test.config import McrouterGlobals
 
+
 class OutputCheckerTestCase(unittest.TestCase):
     def setUp(self):
         self.proc = None
@@ -49,20 +50,24 @@ class OutputCheckerTestCase(unittest.TestCase):
 
         self.fail("no good or bad matches in output: " + stderr)
 
+
 class TestBadParams(OutputCheckerTestCase):
     def test_bad_config(self):
         listen_sock = socket.socket()
         listen_sock.listen(100)
-        args = McrouterGlobals.preprocessArgs([
-            McrouterGlobals.binPath('mcrouter'),
-            '-f', "/dev/null/doesnotexist",
-            '--listen-sock-fd', str(listen_sock.fileno())
-        ])
+        args = McrouterGlobals.preprocessArgs(
+            [
+                McrouterGlobals.binPath("mcrouter"),
+                "-f",
+                "/dev/null/doesnotexist",
+                "--listen-sock-fd",
+                str(listen_sock.fileno()),
+            ]
+        )
 
         self.spawn(args)
         self.check_for_message(
-                good='Can not read config',
-                bad='reconfigured with',
-                timeout=10)
+            good="Can not read config", bad="reconfigured with", timeout=10
+        )
 
         listen_sock.close()

@@ -9,13 +9,12 @@ from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
 class TestMemcacheRouter(McrouterTestCase):
-    config = './mcrouter/test/test_basic_caret.json'
-    extra_args = ['--carbon-router-name', 'Memcache']
+    config = "./mcrouter/test/test_basic_caret.json"
+    extra_args = ["--carbon-router-name", "Memcache"]
 
     def setUp(self) -> None:
         self.mc = self.add_server(Memcached())
-        self.mcrouter = self.add_mcrouter(self.config,
-                                          extra_args=self.extra_args)
+        self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
     def test_basic(self) -> None:
         self.assertTrue(self.mcrouter.set("abc", "def"))

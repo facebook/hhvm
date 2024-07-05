@@ -7,9 +7,10 @@
 from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
+
 class TestMcrouterAsciiMultigetSanityMock(McrouterTestCase):
-    config = './mcrouter/test/mcrouter_test_basic_1_1_1.json'
-    extra_args = ['--disable-miss-on-get-errors']
+    config = "./mcrouter/test/mcrouter_test_basic_1_1_1.json"
+    extra_args = ["--disable-miss-on-get-errors"]
 
     def setUp(self):
         self.add_server(MockMemcached(), logical_port=12345)
@@ -18,11 +19,14 @@ class TestMcrouterAsciiMultigetSanityMock(McrouterTestCase):
     def test_multiget_sanity(self):
         m = self.mcrouter
 
-        self.assertTrue(m.set('test:multiget:1', 'A'))
+        self.assertTrue(m.set("test:multiget:1", "A"))
         # Test multiget with one miss.
-        self.assertEqual(m.get(['test:multiget:1', 'test:multiget:2']),
-                          {'test:multiget:1': 'A',
-                           'test:multiget:2': None})
+        self.assertEqual(
+            m.get(["test:multiget:1", "test:multiget:2"]),
+            {"test:multiget:1": "A", "test:multiget:2": None},
+        )
         # Test multiget with one timeout.
-        self.assertEqual(m.get(['test:multiget:1', '__mockmc__.want_timeout']),
-                          'SERVER_ERROR timeout')
+        self.assertEqual(
+            m.get(["test:multiget:1", "__mockmc__.want_timeout"]),
+            "SERVER_ERROR timeout",
+        )

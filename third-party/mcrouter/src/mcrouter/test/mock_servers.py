@@ -39,14 +39,12 @@ class MockServer(threading.Thread):
 
     def run(self):
         if socket.has_ipv6:
-            self.listen_socket = socket.socket(socket.AF_INET6,
-                                               socket.SOCK_STREAM)
+            self.listen_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
         else:
-            self.listen_socket = socket.socket(socket.AF_INET,
-                                               socket.SOCK_STREAM)
+            self.listen_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.listen_socket.setblocking(False)
         self.listen_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.listen_socket.bind(('', self.port))
+        self.listen_socket.bind(("", self.port))
         self.listen_socket.listen(5)
         self.port = self.listen_socket.getsockname()[1]
         self.port_event.set()
@@ -74,18 +72,23 @@ class MockServer(threading.Thread):
 
 class SleepServer(MockServer):
     """A mock server that listens on a port, but always times out"""
+
     def runServer(self, client_socket, client_address):
         self.wait_until_stopped()
 
+
 class ConnectionErrorServer(MockServer):
     """A mock server that returns error on connections"""
+
     def ensure_connected(self):
         self.start()
+
 
 class CustomErrorServer(MockServer):
     """A server that responds with a custom message after reading expected
     amount of bytes"""
-    def __init__(self, expected_bytes=0, error_message='SERVER_ERROR'):
+
+    def __init__(self, expected_bytes=0, error_message="SERVER_ERROR"):
         super().__init__()
         self.expected_bytes = expected_bytes
         self.reply_after = expected_bytes
@@ -120,6 +123,7 @@ class CustomErrorServer(MockServer):
 class StoreServer(MockServer):
     """A server that responds to requests with 'STORED' after reading expected
     amount of bytes"""
+
     def __init__(self, expected_key, expected_value):
         super().__init__()
         self.expected_bytes = len("set  0 0 \r\n\r\n")
@@ -127,14 +131,15 @@ class StoreServer(MockServer):
 
     def runServer(self, client_socket, client_address):
         client_socket.recv(self.expected_bytes)
-        client_socket.send(b'STORED\r\n')
+        client_socket.send(b"STORED\r\n")
+
 
 class DeadServer(MockServer):
-    """ Simple server that hard fails all the time """
+    """Simple server that hard fails all the time"""
 
     secondaryPort = None
 
-    def __init__(self, secondaryPort = None):
+    def __init__(self, secondaryPort=None):
         self.secondaryPort = secondaryPort
         super().__init__()
 
@@ -146,7 +151,7 @@ class DeadServer(MockServer):
 
 
 class TkoServer(MockServer):
-    def __init__(self, period, phase=0, tmo=0.5, hitcmd='hit'):
+    def __init__(self, period, phase=0, tmo=0.5, hitcmd="hit"):
         """Simple server stub that alternatively responds to requests
         with or withoud a delay.
 
@@ -162,29 +167,30 @@ class TkoServer(MockServer):
 
     def runServer(self, client_socket, client_address):
         while not self.is_stopped():
-            f = client_socket.makefile(mode='rb')
+            f = client_socket.makefile(mode="rb")
             cmd = f.readline().decode()
             f.close()
             if not cmd:
                 continue
-            if cmd == 'version\r\n':
-                client_socket.send(b'VERSION TKO_SERVER\r\n')
+            if cmd == "version\r\n":
+                client_socket.send(b"VERSION TKO_SERVER\r\n")
                 continue
             # fast 'period' times in a row, then slow 'period' times in a row
             if self.step % (2 * self.period) >= self.period:
                 time.sleep(self.tmo)
             self.step += 1
-            if cmd.startswith('get {}\r\n'.format(self.hitcmd)):
-                msg = 'VALUE hit 0 {}\r\n{}\r\nEND\r\n'.format(
+            if cmd.startswith("get {}\r\n".format(self.hitcmd)):
+                msg = "VALUE hit 0 {}\r\n{}\r\nEND\r\n".format(
                     len(str(self.port)),
                     str(self.port),
                 )
                 client_socket.send(msg.encode())
-            elif cmd.startswith('get'):
-                client_socket.send(b'END\r\n')
+            elif cmd.startswith("get"):
+                client_socket.send(b"END\r\n")
+
 
 class HardTkoRestoringServer(MockServer):
-    def __init__(self, tko_responses = 1):
+    def __init__(self, tko_responses=1):
         """Simple server stub that initially responds to requests
         with server error, causing it to hard tko.
         The number of times to respond as error = tkoResponses.
@@ -193,20 +199,20 @@ class HardTkoRestoringServer(MockServer):
         self.tko_responses = tko_responses
 
     def runServer(self, client_socket, client_address):
-        f = client_socket.makefile(mode='rb')
+        f = client_socket.makefile(mode="rb")
         cmd = f.readline().decode()
         f.close()
         if not cmd:
             return
-        if cmd == 'version\r\n':
-            client_socket.send(b'VERSION TKO_SERVER\r\n')
+        if cmd == "version\r\n":
+            client_socket.send(b"VERSION TKO_SERVER\r\n")
             return
         if self.tko_responses > 0:
             self.tko_responses -= 1
-            error_message = 'hard_tko\r\n' # the content doesn't really matter
+            error_message = "hard_tko\r\n"  # the content doesn't really matter
             if type(error_message) is not bytes:
                 error_message = error_message.encode()
             client_socket.send(error_message)
             return
-        if cmd.startswith('get'):
-            client_socket.send(b'END\r\n')
+        if cmd.startswith("get"):
+            client_socket.send(b"END\r\n")

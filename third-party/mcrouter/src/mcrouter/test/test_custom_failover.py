@@ -11,7 +11,7 @@ from mcrouter.test.mock_servers import CustomErrorServer
 
 
 class TestCustomFailover(McrouterTestCase):
-    config = './mcrouter/test/test_custom_failover.json'
+    config = "./mcrouter/test/test_custom_failover.json"
     extra_args = []
 
     def setUp(self):
@@ -30,8 +30,9 @@ class TestCustomFailover(McrouterTestCase):
         self.assertTrue(self.mc2.set("key", "value1"))
         self.assertEqual(self.mcr.get("key"), None)
 
+
 class TestCustomFailoverOverride(McrouterTestCase):
-    config = './mcrouter/test/test_custom_failover_override.json'
+    config = "./mcrouter/test/test_custom_failover_override.json"
     extra_args = []
 
     def setUp(self):

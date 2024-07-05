@@ -9,7 +9,7 @@ from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 
 class TestNoReplyBase(McrouterTestCase):
-    config = './mcrouter/test/test_noreply.json'
+    config = "./mcrouter/test/test_noreply.json"
 
     def setUp(self):
         # The order here must corresponds to the order of hosts in the .json

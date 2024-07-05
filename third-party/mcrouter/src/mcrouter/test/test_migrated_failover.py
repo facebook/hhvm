@@ -7,12 +7,10 @@
 from mcrouter.test.MCProcess import Memcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
+
 class TestMigratedFailover(McrouterTestCase):
-    config = './mcrouter/test/test_migrated_failover.json'
-    extra_args = [
-        '--probe-timeout-initial=100',
-        '--probe-timeout-max=100'
-    ]
+    config = "./mcrouter/test/test_migrated_failover.json"
+    extra_args = ["--probe-timeout-initial=100", "--probe-timeout-max=100"]
 
     def get_mcrouter(self):
         return self.add_mcrouter(self.config, extra_args=self.extra_args)

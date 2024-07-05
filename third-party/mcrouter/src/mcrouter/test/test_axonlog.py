@@ -7,20 +7,20 @@
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 from mcrouter.test.mock_servers import DeadServer
 
+
 class TestAxonLogBase(McrouterTestCase):
     config = "./mcrouter/test/test_axon_log.json"
     extra_args = ["--enable-axonlog"]
 
     def setUp(self):
-        self.mr = self.add_mcrouter(self.config,
-            extra_args=self.extra_args)
+        self.mr = self.add_mcrouter(self.config, extra_args=self.extra_args)
+
 
 class TestAxonProxyFailedDelete(TestAxonLogBase):
 
     def setUp(self):
         self.mc1 = self.add_server(DeadServer(5000))
-        self.mr = self.add_mcrouter(self.config,
-            extra_args=self.extra_args)
+        self.mr = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
     def test_failed_del(self):
         for i in range(1000):
@@ -39,13 +39,12 @@ class TestAxonProxyFailedDelete(TestAxonLogBase):
         self.assert_eventually_true(condition)
 
 
-
 class TestAxonLogAllDelete(TestAxonLogBase):
     config = "./mcrouter/test/test_axon_log_alldelete.json"
 
     def setUp(self):
-        self.mr = self.add_mcrouter(self.config,
-            extra_args=self.extra_args)
+        self.mr = self.add_mcrouter(self.config, extra_args=self.extra_args)
+
     def test_all_delete(self):
         for i in range(1000):
             self.mr.delete(f"key_del{i}")

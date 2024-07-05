@@ -217,6 +217,9 @@ struct ProfDataShutdownDeleter {
   }
 } s_profDataShutdownDeleter;
 
+// In case we want to keep ProfData till end of the process.
+std::unique_ptr<ProfData> s_profDataHolder{nullptr};
+
 /*
  * Used to free ProfData from the Treadmill.
  */
@@ -270,14 +273,15 @@ void discardProfData() {
 
   // Make sure s_profData is nullptr so any new requests won't try to use the
   // object we're deleting, then send it to the Treadmill for deletion.
-  std::unique_ptr<ProfData> data{
-    s_profData.exchange(nullptr, std::memory_order_acq_rel)
-  };
+  auto data = s_profData.exchange(nullptr, std::memory_order_acq_rel);
   if (data != nullptr) {
-    if (RuntimeOption::ServerExecutionMode()) {
-      Logger::Info("Putting JIT ProfData on Treadmill");
+    s_profDataHolder.reset(data);
+    if (!RO::KeepProfData) {
+      if (RuntimeOption::ServerExecutionMode()) {
+        Logger::Info("Putting JIT ProfData on Treadmill");
+      }
+      Treadmill::enqueue(ProfDataTreadmillDeleter{std::move(s_profDataHolder)});
     }
-    Treadmill::enqueue(ProfDataTreadmillDeleter{std::move(data)});
   }
   Treadmill::enqueue(VasmBlockCounters::free);
 }

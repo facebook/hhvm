@@ -609,6 +609,8 @@ bool RuntimeOption::EnableZendIniCompat = true;
 bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::DumpPreciseProfData = true;
+bool RuntimeOption::KeepProfData = arch_any(Arch::ARM);
+
 JitSerdesMode RuntimeOption::EvalJitSerdesMode{};
 int RuntimeOption::ProfDataTTLHours = 24;
 std::string RuntimeOption::ProfDataTag;
@@ -1661,6 +1663,7 @@ void RuntimeOption::Load(
     Config::Bind(ProfDataTTLHours, ini, config,
                  "Eval.ProfDataTTLHours", ProfDataTTLHours);
     Config::Bind(ProfDataTag, ini, config, "Eval.ProfDataTag", ProfDataTag);
+    Config::Bind(KeepProfData, ini, config, "Eval.KeepProfData", KeepProfData);
 
     Config::Bind(CheckSymLink, ini, config, "Eval.CheckSymLink", true);
     Config::Bind(TrustAutoloaderPath, ini, config,
@@ -1974,7 +1977,7 @@ void RuntimeOption::Load(
                  "ThriftFBServer.WorkerThreads", 1);
     Config::Bind(ThriftFBServerPoolThreads, ini, config, "ThriftFBServer.PoolThreads",
                  1);
-                 
+
     // Fb303Server
     Config::Bind(EnableFb303Server, ini, config, "Fb303Server.Enable",
                  EnableFb303Server);

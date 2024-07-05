@@ -316,11 +316,6 @@ let tco_extended_reasons t = t.GlobalOptions.tco_extended_reasons
 
 let using_extended_reasons t = Option.is_some @@ tco_extended_reasons t
 
-let yolo_extended_reasons t =
-  Option.value_map (tco_extended_reasons t) ~default:false ~f:(function
-      | GlobalOptions.Yolo -> true
-      | _ -> false)
-
 let enable_abstract_method_optional_parameters t =
   t.GlobalOptions.tco_enable_abstract_method_optional_parameters
 

@@ -424,7 +424,6 @@ impl HhConfig {
                 Ok (n) => Some(ExtendedReasonsConfig::Extended(n)),
                 Err(data) => {
                     if data.eq("debug") { Some(ExtendedReasonsConfig::Debug) }
-                    else if data.eq("yolo") { Some(ExtendedReasonsConfig::Yolo) }
                     else { None }
                 }
             }),

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<be047afcd99351fbc52c4dc004ea645e>>
+// @generated SignedSource<<5b7f689f094e618c3c680b04dd1c598c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -108,7 +108,6 @@ pub enum AllOrSome<A> {
 pub enum ExtendedReasonsConfig {
     Extended(isize),
     Debug,
-    Yolo,
 }
 
 /// Naming conventions for fields in this struct:

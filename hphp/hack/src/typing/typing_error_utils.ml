@@ -5810,8 +5810,7 @@ end = struct
              | GlobalOptions.Extended complexity ->
                Typing_reason.(
                  explain (flow ~from:r_sub ~into:r_super) ~complexity)
-             | GlobalOptions.Debug
-             | GlobalOptions.Yolo ->
+             | GlobalOptions.Debug ->
                Typing_reason.(debug (flow ~from:r_sub ~into:r_super)))
            (TypecheckerOptions.tco_extended_reasons
               Typing_env_types.(env.genv.tcopt))
@@ -5931,8 +5930,7 @@ end = struct
                    explain
                      (flow ~from:reason_sub ~into:reason_super)
                      ~complexity)
-               | GlobalOptions.Debug
-               | GlobalOptions.Yolo ->
+               | GlobalOptions.Debug ->
                  Typing_reason.(
                    debug (flow ~from:reason_sub ~into:reason_super)))
              (TypecheckerOptions.tco_extended_reasons
@@ -6080,8 +6078,7 @@ end = struct
                    explain
                      (flow ~from:reason_sub ~into:reason_super)
                      ~complexity)
-               | GlobalOptions.Debug
-               | GlobalOptions.Yolo ->
+               | GlobalOptions.Debug ->
                  Typing_reason.(
                    debug (flow ~from:reason_sub ~into:reason_super)))
              (TypecheckerOptions.tco_extended_reasons

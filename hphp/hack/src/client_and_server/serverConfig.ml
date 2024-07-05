@@ -261,8 +261,6 @@ let reasons_config_opt config =
   Option.bind (string_opt "extended_reasons" config) ~f:(fun data_str ->
       if String.equal data_str "debug" then
         Some GlobalOptions.Debug
-      else if String.equal data_str "yolo" then
-        Some GlobalOptions.Yolo
       else
         Option.map ~f:(fun n -> GlobalOptions.Extended n)
         @@ int_of_string_opt data_str)

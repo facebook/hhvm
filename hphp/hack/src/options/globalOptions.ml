@@ -74,7 +74,6 @@ let with_zstd_decompress_by_file zstd_decompress_by_file ss =
 type extended_reasons_config =
   | Extended of int
   | Debug
-  | Yolo
 [@@deriving eq, show]
 
 (** Naming conventions for fields in this struct:

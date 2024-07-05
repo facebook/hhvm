@@ -54,35 +54,45 @@ let process_xml_attrs class_name attrs =
 
 let clean_member_name name = String_utils.lstrip name "$"
 
-let process_member ?(is_declaration = false) recv_class id ~is_method ~is_const
-    =
+let process_member ?(is_declaration = false) recv_class id ~kind =
   let member_name = snd id in
   let type_ =
-    if is_const then
-      ClassConst (recv_class, member_name)
-    else if is_method then
-      Method (recv_class, member_name)
-    else
+    match kind with
+    | `Const -> Some (ClassConst (recv_class, member_name))
+    | `Method -> Some (Method (recv_class, member_name))
+    | `EnumClassLabel ->
+      (match recv_class with
+      | ClassName cls -> Some (EnumClassLabel (cls, member_name))
+      | UnknownClass -> None)
+    | `Property ->
       (*
         Per comment in symbolOcurrence.mli, XhpLiteralAttr
         is only used for attributes in XHP literals. Since
         process_member is not being used to handle XML attributes
         it is fine to define every symbol as Property.
       *)
-      Property (recv_class, member_name)
+      Some (Property (recv_class, member_name))
   in
   let c_name =
     match recv_class with
     | ClassName name -> name
     | UnknownClass -> "_"
   in
-  Result_set.singleton
-    {
-      name = c_name ^ "::" ^ clean_member_name member_name;
-      type_;
-      is_declaration;
-      pos = fst id;
-    }
+  match type_ with
+  | None -> Result_set.empty
+  | Some type_ ->
+    let delimiter =
+      match kind with
+      | `EnumClassLabel -> "#"
+      | _ -> "::"
+    in
+    Result_set.singleton
+      {
+        name = c_name ^ delimiter ^ clean_member_name member_name;
+        type_;
+        is_declaration;
+        pos = fst id;
+      }
 
 (* If there's an exact class name can find for this type, return its name. *)
 let concrete_cls_name_from_ty enclosing_class_name ty : string option =
@@ -208,8 +218,7 @@ let process_class class_ =
              (ClassName c_name)
              method_.Aast.m_name
              ~is_declaration:true
-             ~is_method:true
-             ~is_const:false)
+             ~kind:`Method)
   in
   let all_props = class_.Aast.c_vars in
   let acc =
@@ -219,8 +228,7 @@ let process_class class_ =
              (ClassName c_name)
              prop.Aast.cv_id
              ~is_declaration:true
-             ~is_method:false
-             ~is_const:false)
+             ~kind:`Property)
   in
   let acc =
     List.fold class_.Aast.c_consts ~init:acc ~f:(fun acc const ->
@@ -229,8 +237,7 @@ let process_class class_ =
              (ClassName c_name)
              const.Aast.cc_id
              ~is_declaration:true
-             ~is_method:false
-             ~is_const:true)
+             ~kind:`Const)
   in
   let acc =
     List.fold class_.Aast.c_typeconsts ~init:acc ~f:(fun acc typeconst ->
@@ -251,15 +258,10 @@ let process_class class_ =
   | Some method_ ->
     let id = (fst method_.Aast.m_name, SN.Members.__construct) in
     Result_set.union acc
-    @@ process_member
-         (ClassName c_name)
-         id
-         ~is_declaration:true
-         ~is_method:true
-         ~is_const:false
+    @@ process_member (ClassName c_name) id ~is_declaration:true ~kind:`Method
   | None -> acc
 
-let typed_member_id env receiver_ty mid ~is_method ~is_const =
+let typed_member_id env receiver_ty mid ~kind =
   Tast_env.get_receiver_ids env receiver_ty
   |> List.map ~f:(function
          | Tast_env.RIclass cid -> ClassName cid
@@ -267,14 +269,14 @@ let typed_member_id env receiver_ty mid ~is_method ~is_const =
          | Tast_env.RIerr
          | Tast_env.RIany ->
            UnknownClass)
-  |> List.map ~f:(fun rid -> process_member rid mid ~is_method ~is_const)
+  |> List.map ~f:(fun rid -> process_member rid mid ~kind)
   |> List.fold ~init:Result_set.empty ~f:Result_set.union
 
-let typed_method = typed_member_id ~is_method:true ~is_const:false
+let typed_method = typed_member_id ~kind:`Method
 
-let typed_const = typed_member_id ~is_method:false ~is_const:true
+let typed_const = typed_member_id ~kind:`Const
 
-let typed_property = typed_member_id ~is_method:false ~is_const:false
+let typed_property = typed_member_id ~kind:`Property
 
 let typed_constructor env ty pos =
   typed_method env ty (pos, SN.Members.__construct)
@@ -347,8 +349,7 @@ let visitor =
           + process_member
               (ClassName cid)
               (remove_apostrophes_from_function_eval mid)
-              ~is_method:true
-              ~is_const:false
+              ~kind:`Method
         | Aast.ValCollection ((_, kind), _, _) ->
           let type_name =
             match kind with
@@ -372,21 +373,12 @@ let visitor =
           match enum_name with
           | None ->
             let (ety, _, _) = expr in
-            let ty = Typing_defs_core.get_node ety in
-            (match ty with
-            | Tnewtype (_, [ty_enum_class; _], _) ->
-              (match get_node ty_enum_class with
-              | Tclass ((_, enum_class_name), _, _)
-              | Tgeneric (enum_class_name, _) ->
-                Result_set.singleton
-                  {
-                    name = Utils.strip_ns enum_class_name ^ "#" ^ label_name;
-                    type_ = EnumClassLabel (enum_class_name, label_name);
-                    is_declaration = false;
-                    pos;
-                  }
-              | _ -> self#zero)
-            | _ -> self#zero)
+            let (env, ty_enum_class) = Tast_env.get_label_receiver_ty env ety in
+            typed_member_id
+              ~kind:`EnumClassLabel
+              env
+              ty_enum_class
+              (pos, label_name)
           | Some ((_, enum_name) as enum_id) ->
             process_class_id enum_id
             + Result_set.singleton
@@ -803,7 +795,7 @@ let visitor =
     method! on_SFclass_const env cid mid =
       let ( + ) = Result_set.union in
       process_class_id cid
-      + process_member (ClassName (snd cid)) mid ~is_method:false ~is_const:true
+      + process_member (ClassName (snd cid)) mid ~kind:`Const
       + super#on_SFclass_const env cid mid
 
     method! on_method_ env m =

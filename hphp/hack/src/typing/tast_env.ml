@@ -160,6 +160,23 @@ let get_class_ids env ty =
          | RIclass cid -> Some cid
          | _ -> None)
 
+let get_label_receiver_ty env ty =
+  let env = Typing_env.open_tyvars env Pos.none in
+  let (env, ty_in) = Typing_env.fresh_type env Pos.none in
+  let label_ty =
+    Typing_defs.(
+      mk
+        ( Reason.none,
+          Tnewtype
+            ( Naming_special_names.Classes.cEnumClassLabel,
+              [ty_in; Typing_make_type.nothing Reason.none],
+              Typing_make_type.mixed Reason.none ) ))
+  in
+  let env = Typing_env.set_tyvar_variance ~flip:true env label_ty in
+  let (env, _) = Typing_subtype.sub_type env label_ty ty None in
+  let (env, _ty_err) = Typing_solver.close_tyvars_and_solve env in
+  Typing_env.expand_type env ty_in
+
 let non_null = Typing_solver.non_null
 
 let get_concrete_supertypes =

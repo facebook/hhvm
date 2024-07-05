@@ -1,13 +1,13 @@
  == 
 
-FileConst::FileConst = 'asdfasdf'
+FileConst::FileConst = "asdfasdf"
 Random::X = 42
-Random::S = 'foo'
+Random::S = "foo"
 FilePermission::Read = 4
 FilePermission::Write = FilePermission::Read >> 1
 FilePermission::Execute = FilePermission::Read >> 2
-FilePermission::SomeStr = 'asdf'
-MyClass::MY_CONSTANT_STR = 'abc'
+FilePermission::SomeStr = "asdf"
+MyClass::MY_CONSTANT_STR = "abc"
 MyClass::MY_CONSTANT_INT = 1234
 MyClass::MY_CONSTANT_FLOAT = 0.314
 MyClass::MY_CONSTANT_BOOL = false
@@ -24,3 +24,4 @@ $str = 'asdf'
 $emptyvec = vec[]
 $vecint = vec[10,20]
 $someshape = shape("yes" => true)
+string(4) "'\''"

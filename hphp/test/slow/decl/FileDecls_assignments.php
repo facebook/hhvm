@@ -52,7 +52,7 @@ function main(): void {
     private function fnWithOptional(
       int $nodefault,
       ?int $nullint = null,
-      ?string $str = "asdf",
+      ?string $str = \'asdf\',
       mixed $emptyvec = vec[],
       vec<int> $vecint = vec[10,20],
       shape(...) $someshape = shape("yes" => true)
@@ -71,4 +71,11 @@ function main(): void {
       echo $x['name'].' = '.($x['default_value'] ?? '(no value)')."\n";
     }
   }
+
+  $instance = HH\FileDecls::parseText("
+    enum EnumWithQuoteEscape: string {
+      X = '\'';
+    }
+  ");
+  var_dump($instance->getConsts("EnumWithQuoteEscape")[0]["value"]);
 }

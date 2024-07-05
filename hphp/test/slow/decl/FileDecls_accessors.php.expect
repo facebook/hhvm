@@ -96,7 +96,7 @@ vec(2) {
     ["type"]=>
     string(6) "string"
     ["value"]=>
-    string(5) "'abc'"
+    string(5) ""abc""
   }
   dict(3) {
     ["name"]=>
@@ -113,7 +113,7 @@ dict(3) {
   ["type"]=>
   string(6) "string"
   ["value"]=>
-  string(5) "'abc'"
+  string(5) ""abc""
 }
 NULL
 NULL
@@ -252,7 +252,7 @@ vec(2) {
     ["type"]=>
     string(6) "string"
     ["value"]=>
-    string(5) "'one'"
+    string(5) ""one""
   }
   dict(3) {
     ["name"]=>

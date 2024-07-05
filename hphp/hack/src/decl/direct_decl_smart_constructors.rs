@@ -1422,10 +1422,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             // Simple literals (99% of the cases)
             aast::Expr_::Int(s) => s,
             aast::Expr_::Float(s) => s,
-            aast::Expr_::String(s) => {
-                // Always use single quotes for strings
-                bumpalo::format!(in self.arena, "'{}'", s).into_bump_str()
-            }
             aast::Expr_::True => "true",
             aast::Expr_::False => "false",
             aast::Expr_::Null => "null",

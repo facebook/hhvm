@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+namespace py3 ""
+
 struct Old {
   1: string unqualified_to_unqualified;
   2: string unqualified_to_optional;
@@ -55,4 +57,23 @@ struct New {
   24: required string required_new;
   // 25: required string required_removed
   26: required string required_added;
+}
+
+union MyUnion_V1 {
+  1: i32 i32_field;
+}
+
+struct MyStruct_V1 {
+  1: i32 i32_field;
+  2: MyUnion_V1 union_field;
+}
+
+union MyUnion_V2 {
+  1: i32 i32_field;
+  2: string string_field;
+}
+
+struct MyStruct_V2 {
+  1: i32 i32_field;
+  2: MyUnion_V2 union_field;
 }

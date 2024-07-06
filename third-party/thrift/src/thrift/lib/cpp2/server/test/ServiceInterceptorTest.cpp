@@ -27,12 +27,10 @@
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/server/test/gen-cpp2/ServiceInterceptor_clients.h>
 #include <thrift/lib/cpp2/server/test/gen-cpp2/ServiceInterceptor_handlers.h>
-#include <thrift/lib/cpp2/test/util/TrackingTProcessorEventHandler.h>
 #include <thrift/lib/cpp2/transport/http2/common/HTTP2RoutingHandler.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 using namespace apache::thrift;
-using apache::thrift::test::TrackingTProcessorEventHandler;
 using namespace ::testing;
 
 namespace {

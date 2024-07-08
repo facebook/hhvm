@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-#![feature(trait_alias)]
-
-mod any_registry;
-
-pub use any_registry::AnyRegistry;
-pub use any_registry::DeserializeSlice;
-pub use any_registry::SerializeRef;
+mod bridge;
+pub mod universal_name;
+pub use universal_name::get_universal_hash_prefix_sha_256;
+pub const UNIVERSAL_HASH_PREFIX_SHA_256_LEN: i8 = 16;

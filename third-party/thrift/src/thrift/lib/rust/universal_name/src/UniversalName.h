@@ -14,10 +14,25 @@
  * limitations under the License.
  */
 
-#![feature(trait_alias)]
+#pragma once
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
 
-mod any_registry;
+#include <thrift/lib/cpp2/type/UniversalHashAlgorithm.h>
 
-pub use any_registry::AnyRegistry;
-pub use any_registry::DeserializeSlice;
-pub use any_registry::SerializeRef;
+#include "rust/cxx.h" // @manual=fbsource//third-party/rust:cxx-core
+
+namespace universal_name {
+
+std::unique_ptr<std::string> getUniversalHash(
+    apache::thrift::type::UniversalHashAlgorithm alg, const std::string& uri);
+
+std::unique_ptr<std::string> getUniversalHashPrefix(
+    const std::string& universalHash, int8_t hashBytes);
+
+bool matchesUniversalHash(
+    const std::string& universalHash, const std::string& prefix);
+
+} // namespace universal_name

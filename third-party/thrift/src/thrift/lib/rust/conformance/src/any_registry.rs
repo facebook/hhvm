@@ -27,8 +27,7 @@ use fbthrift::simplejson_protocol;
 use fbthrift::GetUri;
 use itertools::Itertools;
 use protocol::StandardProtocol;
-
-use crate::universal_name::get_universal_hash_prefix_sha_256;
+use universal_name::get_universal_hash_prefix_sha_256;
 
 pub struct AnyRegistry {
     uri_to_typeid: HashMap<&'static str, TypeId>,

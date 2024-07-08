@@ -52,9 +52,9 @@ pub fn make_thrift_any_type_union<T: fbthrift::GetUri>() -> ThriftAnyType {
 
 fn check_uri_consistency(uri: &TypeUri, other: &TypeUri) -> Result<()> {
     fn get_hash_prefix(s: &str) -> Result<Vec<u8>> {
-        fbthrift_conformance::get_universal_hash_prefix_sha_256(
+        universal_name::get_universal_hash_prefix_sha_256(
             s,
-            fbthrift_conformance::UNIVERSAL_HASH_PREFIX_SHA_256_LEN,
+            universal_name::UNIVERSAL_HASH_PREFIX_SHA_256_LEN,
         )
     }
     if !(match (uri, other) {

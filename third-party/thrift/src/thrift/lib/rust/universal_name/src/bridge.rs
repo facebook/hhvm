@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#[cxx::bridge(namespace = fbthrift_conformance::rust)]
+#[cxx::bridge(namespace = universal_name)]
 pub mod ffi {
     #[namespace = "apache::thrift::type"]
     #[derive(Hash)]
@@ -24,7 +24,7 @@ pub mod ffi {
     }
 
     unsafe extern "C++" {
-        include!("thrift/lib/rust/conformance/include/UniversalName.h");
+        include!("thrift/lib/rust/universal_name/src/UniversalName.h");
 
         #[namespace = "apache::thrift::type"]
         type UniversalHashAlgorithm;

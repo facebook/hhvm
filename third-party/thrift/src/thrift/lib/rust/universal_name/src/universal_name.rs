@@ -40,6 +40,7 @@ pub fn get_universal_hash_prefix_sha_256(uri: &str, hash_bytes: i8) -> Result<Ve
     let hash = get_universal_hash(UniversalHashAlgorithm::Sha2_256, uri)?;
     Ok(get_universal_hash_prefix(&hash, hash_bytes))
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;

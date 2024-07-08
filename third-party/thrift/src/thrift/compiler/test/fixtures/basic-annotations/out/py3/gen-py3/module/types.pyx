@@ -24,9 +24,9 @@ from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as _
 from thrift.py3.types cimport (
     cSetOp as __cSetOp,
     richcmp as __richcmp,
-    list_getitem as __list_getitem,
     set_op as __set_op,
     setcmp as __setcmp,
+    init_unicode_from_cpp as __init_unicode_from_cpp,
     set_iter as __set_iter,
     map_iter as __map_iter,
     map_contains as __map_contains,
@@ -385,10 +385,8 @@ cdef std_deque_std_string std_deque_std_string__List__string__make_instance(obje
 cdef object std_deque_std_string__List__string__from_cpp(const std_deque_std_string& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef string citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(bytes(citem).decode('UTF-8'))
+        py_list.append(__init_unicode_from_cpp(c_vec[idx]))
     return std_deque_std_string__List__string(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 

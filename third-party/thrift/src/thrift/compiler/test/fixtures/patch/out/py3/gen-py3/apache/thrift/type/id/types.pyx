@@ -24,9 +24,9 @@ from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as _
 from thrift.py3.types cimport (
     cSetOp as __cSetOp,
     richcmp as __richcmp,
-    list_getitem as __list_getitem,
     set_op as __set_op,
     setcmp as __setcmp,
+    init_unicode_from_cpp as __init_unicode_from_cpp,
     set_iter as __set_iter,
     map_iter as __map_iter,
     map_contains as __map_contains,

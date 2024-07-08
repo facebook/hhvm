@@ -24,9 +24,9 @@ from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as _
 from thrift.py3.types cimport (
     cSetOp as __cSetOp,
     richcmp as __richcmp,
-    list_getitem as __list_getitem,
     set_op as __set_op,
     setcmp as __setcmp,
+    init_unicode_from_cpp as __init_unicode_from_cpp,
     set_iter as __set_iter,
     map_iter as __map_iter,
     map_contains as __map_contains,
@@ -4500,10 +4500,8 @@ cdef vector[cint64_t] List__i64__make_instance(object items) except *:
 cdef object List__i64__from_cpp(const vector[cint64_t]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef cint64_t citem = 0
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(citem)
+        py_list.append(c_vec[idx])
     return List__i64(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)
@@ -4617,10 +4615,8 @@ cdef vector[cint32_t] List__i32__make_instance(object items) except *:
 cdef object List__i32__from_cpp(const vector[cint32_t]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef cint32_t citem = 0
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(citem)
+        py_list.append(c_vec[idx])
     return List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
@@ -4637,10 +4633,8 @@ cdef std_list[cint32_t] std_list__List__i32__make_instance(object items) except 
 cdef object std_list__List__i32__from_cpp(const std_list[cint32_t]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef cint32_t citem = 0
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(citem)
+        py_list.append(c_vec[idx])
     return std_list__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
@@ -4657,10 +4651,8 @@ cdef std_deque[cint32_t] std_deque__List__i32__make_instance(object items) excep
 cdef object std_deque__List__i32__from_cpp(const std_deque[cint32_t]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef cint32_t citem = 0
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(citem)
+        py_list.append(c_vec[idx])
     return std_deque__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
@@ -4677,10 +4669,8 @@ cdef folly_fbvector[cint32_t] folly_fbvector__List__i32__make_instance(object it
 cdef object folly_fbvector__List__i32__from_cpp(const folly_fbvector[cint32_t]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef cint32_t citem = 0
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(citem)
+        py_list.append(c_vec[idx])
     return folly_fbvector__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
@@ -4697,10 +4687,8 @@ cdef folly_small_vector[cint32_t] folly_small_vector__List__i32__make_instance(o
 cdef object folly_small_vector__List__i32__from_cpp(const folly_small_vector[cint32_t]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef cint32_t citem = 0
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(citem)
+        py_list.append(c_vec[idx])
     return folly_small_vector__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)
@@ -4896,10 +4884,8 @@ cdef std_list_int32_t std_list_int32_t__List__i32__make_instance(object items) e
 cdef object std_list_int32_t__List__i32__from_cpp(const std_list_int32_t& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef cint32_t citem = 0
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(citem)
+        py_list.append(c_vec[idx])
     return std_list_int32_t__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)
@@ -5014,10 +5000,8 @@ cdef vector[std_unordered_map[cint32_t,string]] List__std_unordered_map__Map__i3
 cdef object List__std_unordered_map__Map__i32_string__from_cpp(const vector[std_unordered_map[cint32_t,string]]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef shared_ptr[std_unordered_map[cint32_t,string]] citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+        py_list.append(std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[std_unordered_map[cint32_t,string]](c_vec[idx])))
     return List__std_unordered_map__Map__i32_string(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)
@@ -5227,10 +5211,8 @@ cdef _std_list[cIncompleteListDep] _std_list__List__IncompleteListDep__make_inst
 cdef object _std_list__List__IncompleteListDep__from_cpp(const _std_list[cIncompleteListDep]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef shared_ptr[cIncompleteListDep] citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(IncompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+        py_list.append(IncompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cIncompleteListDep](c_vec[idx])))
     return _std_list__List__IncompleteListDep(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
@@ -5246,10 +5228,8 @@ cdef folly_small_vector[cCompleteListDep] folly_small_vector__List__CompleteList
 cdef object folly_small_vector__List__CompleteListDep__from_cpp(const folly_small_vector[cCompleteListDep]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef shared_ptr[cCompleteListDep] citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(CompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+        py_list.append(CompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cCompleteListDep](c_vec[idx])))
     return folly_small_vector__List__CompleteListDep(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
@@ -5265,10 +5245,8 @@ cdef vector[cAdaptedListDep] List__AdaptedListDep__make_instance(object items) e
 cdef object List__AdaptedListDep__from_cpp(const vector[cAdaptedListDep]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef shared_ptr[cAdaptedListDep] citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(AdaptedListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+        py_list.append(AdaptedListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cAdaptedListDep](c_vec[idx])))
     return List__AdaptedListDep(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
@@ -5284,10 +5262,8 @@ cdef vector[cDependentAdaptedListDep] List__DependentAdaptedListDep__make_instan
 cdef object List__DependentAdaptedListDep__from_cpp(const vector[cDependentAdaptedListDep]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef shared_ptr[cDependentAdaptedListDep] citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(DependentAdaptedListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+        py_list.append(DependentAdaptedListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cDependentAdaptedListDep](c_vec[idx])))
     return List__DependentAdaptedListDep(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)

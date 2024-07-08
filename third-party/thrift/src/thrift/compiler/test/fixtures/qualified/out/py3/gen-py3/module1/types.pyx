@@ -24,9 +24,9 @@ from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as _
 from thrift.py3.types cimport (
     cSetOp as __cSetOp,
     richcmp as __richcmp,
-    list_getitem as __list_getitem,
     set_op as __set_op,
     setcmp as __setcmp,
+    init_unicode_from_cpp as __init_unicode_from_cpp,
     set_iter as __set_iter,
     map_iter as __map_iter,
     map_contains as __map_contains,
@@ -266,10 +266,8 @@ cdef vector[cEnum] List__Enum__make_instance(object items) except *:
 cdef object List__Enum__from_cpp(const vector[cEnum]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef cEnum citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(translate_cpp_enum_to_python(Enum, <int> citem))
+        py_list.append(translate_cpp_enum_to_python(Enum, <int> c_vec[idx]))
     return List__Enum(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 

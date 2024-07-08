@@ -53,9 +53,9 @@ from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as _
 from thrift.py3.types cimport (
     cSetOp as __cSetOp,
     richcmp as __richcmp,
-    list_getitem as __list_getitem,
     set_op as __set_op,
     setcmp as __setcmp,
+    init_unicode_from_cpp as __init_unicode_from_cpp,
     set_iter as __set_iter,
     map_iter as __map_iter,
     map_contains as __map_contains,
@@ -805,11 +805,8 @@ cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_ve
     cdef list py_list = []
     cdef int idx = 0
     {{#type:list_elem_type}}
-    cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
-        }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append({{> types/container_cython_cpp_to_python_item}})
+        py_list.append({{> types/vector_cpp_to_python }})
     {{/type:list_elem_type}}
     return {{type:flat_name}}(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 {{/type:list?}}

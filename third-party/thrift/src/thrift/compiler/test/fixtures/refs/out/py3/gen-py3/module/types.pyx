@@ -24,9 +24,9 @@ from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as _
 from thrift.py3.types cimport (
     cSetOp as __cSetOp,
     richcmp as __richcmp,
-    list_getitem as __list_getitem,
     set_op as __set_op,
     setcmp as __setcmp,
+    init_unicode_from_cpp as __init_unicode_from_cpp,
     set_iter as __set_iter,
     map_iter as __map_iter,
     map_contains as __map_contains,
@@ -3157,10 +3157,8 @@ cdef vector[cRecursiveStruct] List__RecursiveStruct__make_instance(object items)
 cdef object List__RecursiveStruct__from_cpp(const vector[cRecursiveStruct]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef shared_ptr[cRecursiveStruct] citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(RecursiveStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+        py_list.append(RecursiveStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cRecursiveStruct](c_vec[idx])))
     return List__RecursiveStruct(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
@@ -3177,10 +3175,8 @@ cdef vector[cint32_t] List__i32__make_instance(object items) except *:
 cdef object List__i32__from_cpp(const vector[cint32_t]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef cint32_t citem = 0
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(citem)
+        py_list.append(c_vec[idx])
     return List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)
@@ -3377,10 +3373,8 @@ cdef vector[cint64_t] List__i64__make_instance(object items) except *:
 cdef object List__i64__from_cpp(const vector[cint64_t]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef cint64_t citem = 0
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(citem)
+        py_list.append(c_vec[idx])
     return List__i64(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 

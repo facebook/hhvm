@@ -180,19 +180,6 @@ std::shared_ptr<T> set_op(
   }
 }
 
-template <typename T, typename V>
-void list_getitem(const T& cpp_vec, int index, std::shared_ptr<V>& out) {
-  // the caller need to make sure index is valid
-  DCHECK(index >= 0 && index < cpp_vec.size());
-  out = std::make_shared<V>(cpp_vec[index]);
-}
-template <typename T, typename V>
-void list_getitem(const T& cpp_vec, int index, V& out) {
-  // the caller need to make sure index is valid
-  DCHECK(index >= 0 && index < cpp_vec.size());
-  out = cpp_vec[index];
-}
-
 template <typename T>
 struct set_iter {
   set_iter() = default;
@@ -204,7 +191,7 @@ struct set_iter {
     ++it;
   }
   template <typename V>
-  void genNext(const std::shared_ptr<T>& cpp_obj, V& out) {
+  void genNext(const std::shared_ptr<T>&, V& out) {
     out = *it;
     ++it;
   }
@@ -241,7 +228,7 @@ struct map_iter {
     ++it;
   }
   template <typename K>
-  void genNextKey(const std::shared_ptr<T>& cpp_obj, K& out) {
+  void genNextKey(const std::shared_ptr<T>&, K& out) {
     out = it->first;
     ++it;
   }
@@ -252,13 +239,12 @@ struct map_iter {
     ++it;
   }
   template <typename V>
-  void genNextValue(const std::shared_ptr<T>& cpp_obj, V& out) {
+  void genNextValue(const std::shared_ptr<T>&, V& out) {
     out = it->second;
     ++it;
   }
   template <typename K, typename V>
-  void genNextItem(
-      const std::shared_ptr<T>& cpp_obj, K& key_out, V& value_out) {
+  void genNextItem(const std::shared_ptr<T>&, K& key_out, V& value_out) {
     key_out = it->first;
     value_out = it->second;
     ++it;
@@ -334,6 +320,11 @@ void assign_shared_const_ptr(
 template <typename T, typename U>
 T* get_union_field_value(apache::thrift::union_field_ref<U&> ref) {
   return &ref.value();
+}
+
+template <typename T>
+PyObject* init_unicode_from_cpp(const T& str) {
+  return PyUnicode_FromStringAndSize(str.data(), str.size());
 }
 
 } // namespace py3

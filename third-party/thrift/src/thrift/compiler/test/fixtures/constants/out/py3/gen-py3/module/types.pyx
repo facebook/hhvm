@@ -24,9 +24,9 @@ from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as _
 from thrift.py3.types cimport (
     cSetOp as __cSetOp,
     richcmp as __richcmp,
-    list_getitem as __list_getitem,
     set_op as __set_op,
     setcmp as __setcmp,
+    init_unicode_from_cpp as __init_unicode_from_cpp,
     set_iter as __set_iter,
     map_iter as __map_iter,
     map_contains as __map_contains,
@@ -1548,10 +1548,8 @@ cdef vector[cint32_t] List__i32__make_instance(object items) except *:
 cdef object List__i32__from_cpp(const vector[cint32_t]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef cint32_t citem = 0
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(citem)
+        py_list.append(c_vec[idx])
     return List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)
@@ -1666,10 +1664,8 @@ cdef vector[cmap[string,cint32_t]] List__Map__string_i32__make_instance(object i
 cdef object List__Map__string_i32__from_cpp(const vector[cmap[string,cint32_t]]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef shared_ptr[cmap[string,cint32_t]] citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+        py_list.append(Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cmap[string,cint32_t]](c_vec[idx])))
     return List__Map__string_i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)
@@ -1781,10 +1777,8 @@ cdef vector[cRange] List__Range__make_instance(object items) except *:
 cdef object List__Range__from_cpp(const vector[cRange]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef shared_ptr[cRange] citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(Range._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+        py_list.append(Range._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cRange](c_vec[idx])))
     return List__Range(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
@@ -1800,10 +1794,8 @@ cdef vector[cInternship] List__Internship__make_instance(object items) except *:
 cdef object List__Internship__from_cpp(const vector[cInternship]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef shared_ptr[cInternship] citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(Internship._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+        py_list.append(Internship._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cInternship](c_vec[idx])))
     return List__Internship(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
@@ -1821,10 +1813,8 @@ cdef vector[string] List__string__make_instance(object items) except *:
 cdef object List__string__from_cpp(const vector[string]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef string citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(bytes(citem).decode('UTF-8'))
+        py_list.append(__init_unicode_from_cpp(c_vec[idx]))
     return List__string(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)

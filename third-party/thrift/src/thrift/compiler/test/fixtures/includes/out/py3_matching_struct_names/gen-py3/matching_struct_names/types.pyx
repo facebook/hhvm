@@ -24,9 +24,9 @@ from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as _
 from thrift.py3.types cimport (
     cSetOp as __cSetOp,
     richcmp as __richcmp,
-    list_getitem as __list_getitem,
     set_op as __set_op,
     setcmp as __setcmp,
+    init_unicode_from_cpp as __init_unicode_from_cpp,
     set_iter as __set_iter,
     map_iter as __map_iter,
     map_contains as __map_contains,
@@ -359,10 +359,8 @@ cdef vector[cMyStruct] List__MyStruct__make_instance(object items) except *:
 cdef object List__MyStruct__from_cpp(const vector[cMyStruct]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef shared_ptr[cMyStruct] citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+        py_list.append(MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cMyStruct](c_vec[idx])))
     return List__MyStruct(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
@@ -380,10 +378,8 @@ cdef vector[vector[cMyStruct]] List__List__MyStruct__make_instance(object items)
 cdef object List__List__MyStruct__from_cpp(const vector[vector[cMyStruct]]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef vector[cMyStruct] citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(List__MyStruct__from_cpp(citem))
+        py_list.append(List__MyStruct__from_cpp(c_vec[idx]))
     return List__List__MyStruct(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
@@ -399,10 +395,8 @@ cdef vector[_module_types.cMyStruct] List__module_MyStruct__make_instance(object
 cdef object List__module_MyStruct__from_cpp(const vector[_module_types.cMyStruct]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef shared_ptr[_module_types.cMyStruct] citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(_module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+        py_list.append(_module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_types.cMyStruct](c_vec[idx])))
     return List__module_MyStruct(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
@@ -420,10 +414,8 @@ cdef vector[vector[_module_types.cMyStruct]] List__List__module_MyStruct__make_i
 cdef object List__List__module_MyStruct__from_cpp(const vector[vector[_module_types.cMyStruct]]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    cdef vector[_module_types.cMyStruct] citem
     for idx in range(c_vec.size()):
-        __list_getitem(c_vec, idx, citem)
-        py_list.append(List__module_MyStruct__from_cpp(citem))
+        py_list.append(List__module_MyStruct__from_cpp(c_vec[idx]))
     return List__List__module_MyStruct(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 

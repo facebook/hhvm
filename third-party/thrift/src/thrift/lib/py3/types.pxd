@@ -72,11 +72,11 @@ cdef extern from "thrift/lib/py3/types.h" namespace "::thrift::py3" nogil:
     bint richcmp[T](const shared_ptr[T]& a, const shared_ptr[T]& b, int op)
     bint setcmp[T](const shared_ptr[T]& a, const shared_ptr[T]& b, int op)
     shared_ptr[T] set_op[T](const shared_ptr[T]& a, const shared_ptr[T]& b, cSetOp op)
-    void list_getitem[T](T& cpp_obj, int index, ...)
     bint map_contains[T](const shared_ptr[T]& cpp_obj, ...)
     void map_getitem[T](const shared_ptr[T]& cpp_obj, ...)
     void reset_field[T](T& obj, uint16_t index) except +
     string_view get_field_name_by_index[T](size_t idx) except +
+    object init_unicode_from_cpp(...)
     T* get_union_field_value[T](...) except +
 
     cdef cppclass set_iter[T]:

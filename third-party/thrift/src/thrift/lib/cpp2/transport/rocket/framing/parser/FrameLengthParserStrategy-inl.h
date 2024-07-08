@@ -89,11 +89,13 @@ void FrameLengthParserStrategy<T>::drainReadBufQueue() {
     // split out frame
     auto frame = readBufQueue_.split(frameLength_);
 
+    SCOPE_EXIT {
+      // reset the frame length fields
+      resetFrameLength();
+    };
+
     // hand frame off
     owner_.handleFrame(std::move(frame));
-
-    // reset the frame length fields
-    resetFrameLength();
   }
 }
 

@@ -83,7 +83,7 @@ class FakeServerObserver : public apache::thrift::server::TServerObserver {
 
   void taskTimeout() override { ++taskTimeout_; }
 
-  void serverOverloaded() override {
+  void serverOverloaded(apache::thrift::LoadShedder /*loadShedder*/) override {
     // TODO: T24439936 - Implement LOADSHEDDING
     ++serverOverloaded_;
   }

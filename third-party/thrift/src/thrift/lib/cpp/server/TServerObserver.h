@@ -26,6 +26,8 @@
 #include <folly/Optional.h>
 #include <wangle/acceptor/TransportInfo.h>
 
+#include <thrift/lib/cpp2/server/Overload.h>
+
 namespace apache {
 namespace thrift {
 namespace server {
@@ -171,7 +173,7 @@ class TServerObserver {
 
   virtual void taskTimeout() {}
 
-  virtual void serverOverloaded() {}
+  virtual void serverOverloaded(apache::thrift::LoadShedder /*loadShedder*/) {}
 
   virtual void receivedRequest(const std::string* /*method*/) {}
 

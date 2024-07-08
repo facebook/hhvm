@@ -753,10 +753,8 @@ void ThriftRocketServerHandler::handleDecompressionFailure(
 void ThriftRocketServerHandler::handleRequestOverloadedServer(
     ThriftRequestCoreUniquePtr request, OverloadResult&& overloadResult) {
   if (auto* observer = serverConfigs_->getObserver()) {
-    observer->serverOverloaded();
+    observer->serverOverloaded(overloadResult.loadShedder);
   }
-  metricCollector_.requestRejected(
-      {RequestRejectedScope::ServerOverloaded{overloadResult.loadShedder}});
 
   request->sendErrorWrapped(
       folly::make_exception_wrapper<TApplicationException>(

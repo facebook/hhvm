@@ -351,10 +351,8 @@ void Cpp2Connection::killRequestServerOverloaded(
     OverloadResult&& overloadResult) {
   auto server = worker_->getServer();
   if (auto* observer = server->getObserver()) {
-    observer->serverOverloaded();
+    observer->serverOverloaded(overloadResult.loadShedder);
   }
-  metricCollector_.requestRejected(
-      {RequestRejectedScope::ServerOverloaded{overloadResult.loadShedder}});
 
   // Nothing to do for Thrift oneway request.
   if (req->isOneway()) {

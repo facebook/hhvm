@@ -101,8 +101,16 @@ TClientBase::TClientBase(Options options) {
   std::shared_lock lock{getRWMutex()};
 
   auto& handlers = getHandlers();
-  auto globalHandlers =
-      apache::thrift::runtime::getGlobalLegacyClientEventHandlers();
+  folly::Range<std::shared_ptr<TProcessorEventHandler>*> globalHandlers;
+  if (apache::thrift::runtime::wasInitialized()) {
+    // If we reach this point, it's likely that an AsyncClient object is being
+    // used very early in the program's lifetime, possibly before the main
+    // function has been called. In such situations, calling
+    // TProcessorEventHandlers can lead to circular dependencies and may result
+    // in a deadlock at startup, which can be difficult to debug.
+    globalHandlers =
+        apache::thrift::runtime::getGlobalLegacyClientEventHandlers();
+  }
   size_t capacity = handlers.size() + globalHandlers.size();
 
   if (capacity != 0) {

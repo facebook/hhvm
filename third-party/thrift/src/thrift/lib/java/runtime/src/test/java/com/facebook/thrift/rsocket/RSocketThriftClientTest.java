@@ -173,6 +173,10 @@ public class RSocketThriftClientTest {
     client.pingVoid(new PingRequest.Builder().setRequest("ping").build()).block();
   }
 
+  // Set 50000 to global constant so it's easier to maintain.
+
+  private static final int EXHUAUST_CLIENT_CALL_THRESHOLD = 50000;
+
   @Test
   public void testSocketExhaustWhenDestExist() {
     System.out.println("create server handler");
@@ -203,9 +207,7 @@ public class RSocketThriftClientTest {
             .setProtocolId(ProtocolId.BINARY)
             .build(factory, address);
 
-    /// Send 50K calls and test it doesn't exhaust the client ports as there are ~33K available
-    // ports
-    for (int i = 0; i < 50000; i++) {
+    for (int i = 0; i < EXHUAUST_CLIENT_CALL_THRESHOLD; i++) {
       client.ping(new PingRequest.Builder().setRequest("ping").build()).block();
       System.out.println("Sent call " + i);
     }
@@ -230,8 +232,7 @@ public class RSocketThriftClientTest {
             .setProtocolId(ProtocolId.BINARY)
             .build(factory, address);
 
-    // Send 50K calls and test it doesn't exhaust the client ports as there are ~33K available ports
-    for (int i = 0; i < 50000; i++) {
+    for (int i = 0; i < EXHUAUST_CLIENT_CALL_THRESHOLD; i++) {
       try {
         client.ping(new PingRequest.Builder().setRequest("ping").build()).block();
       } catch (Exception e) {
@@ -256,7 +257,7 @@ public class RSocketThriftClientTest {
             .build(factory, address);
 
     // These calls should succeed.
-    for (int i = 0; i < 50000; i++) {
+    for (int i = 0; i < EXHUAUST_CLIENT_CALL_THRESHOLD; i++) {
       client.ping(new PingRequest.Builder().setRequest("ping").build()).block();
       System.out.println("Sent call " + i);
     }

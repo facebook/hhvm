@@ -164,6 +164,11 @@ bool SQLite::isReadOnly(const char* dbName) const {
 
 std::string SQLite::errMsg() const noexcept { return {sqlite3_errmsg(m_dbc)}; }
 
+bool SQLite::hasTable(const char* tableName) const {
+  return SQLITE_OK == sqlite3_table_column_metadata(m_dbc, "main", tableName, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr);
+}
+
 SQLite::SQLite(sqlite3* dbc)
     : m_dbc{dbc},
       m_beginStmt{*this, "BEGIN"},

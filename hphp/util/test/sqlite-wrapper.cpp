@@ -146,3 +146,19 @@ TEST(SQLiteWrapperTest, ReadOnlyDB) {
     EXPECT_EQ(query.getInt(0), i);
   }
 }
+
+TEST(SQLiteWrapperTest, HasTable) {
+  folly::test::TemporaryDirectory m_tmpdir{"sqlite-wrapper-readonly"};
+  auto dbPath = m_tmpdir.path() / "db.sql3";
+
+  SQLite db = SQLite::connect(dbPath.native());
+  ASSERT_FALSE(db.hasTable("foo"));
+
+  {
+    SQLiteTxn txn = db.begin();
+    txn.exec("CREATE TABLE foo (bar)");
+    txn.commit();
+  }
+  ASSERT_TRUE(db.hasTable("foo"));
+  ASSERT_FALSE(db.hasTable("not_found"));
+}

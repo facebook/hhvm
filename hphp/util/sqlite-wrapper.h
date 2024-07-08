@@ -192,6 +192,11 @@ struct SQLite {
    */
   std::string errMsg() const noexcept;
 
+  /**
+   * Does a table with this name exist in the db.
+   */
+  bool hasTable(const char* tableName) const;
+
  private:
   friend struct SQLiteStmt;
   friend struct SQLiteTxn;

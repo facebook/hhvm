@@ -953,12 +953,12 @@ int ConnectOperation::mysqlCertValidator(
 
   // Hold a shared pointer to the Operation object while running the callback
   auto weak_self = self->weak_from_this();
-  if (weak_self.expired()) {
+  auto guard = weak_self.lock();
+  if (guard == nullptr) {
     LOG(ERROR) << "ConnectOperation object " << self
                << " is already deallocated";
     return 0;
   }
-  auto guard = weak_self.lock();
 
   const CertValidatorCallback callback =
       self->conn_options_.getCertValidationCallback();

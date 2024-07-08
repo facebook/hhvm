@@ -38,7 +38,8 @@ in the client or server source rather than the type definition source.
   }}{{> types/cython_python_type}}{{!
 }}{{/type:struct}}{{!
 }}{{#type:container?}}{{!
-  }}{{> types/cython_python_type}}{{!
+  }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
+  }}{{type:flat_name}}{{!
 }}{{/type:container?}}{{!
 }}{{#type:enum}}{{!
   }}{{> types/cython_python_type}}{{!

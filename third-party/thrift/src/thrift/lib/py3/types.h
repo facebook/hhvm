@@ -180,59 +180,17 @@ std::shared_ptr<T> set_op(
   }
 }
 
-template <typename T>
-std::optional<size_t> list_index(
-    const std::shared_ptr<T>& list,
-    int start,
-    int stop,
-    const typename T::value_type& item) {
-  if (start >= stop) {
-    return std::nullopt;
-  }
-  auto end = std::next(list->begin(), stop);
-  auto found = std::find(std::next(list->begin(), start), end, item);
-  return found != end ? std::optional{std::distance(list->begin(), found)}
-                      : std::nullopt;
-}
-
-template <typename T>
-size_t list_count(
-    const std::shared_ptr<T>& list, const typename T::value_type& item) {
-  return std::count(list->begin(), list->end(), item);
-}
-
-template <typename T>
-std::shared_ptr<T> list_slice(
-    const std::shared_ptr<T>& cpp_obj, int start, int stop, int step) {
-  DCHECK(step != 0 && start >= -1 && stop >= -1);
-  T res{};
-  if (step > 0) {
-    for (auto it = std::next(cpp_obj->begin(), start); start < stop;
-         start += step, it += step) {
-      res.push_back(*it);
-    }
-  } else {
-    for (auto it = std::next(cpp_obj->rbegin(), cpp_obj->size() - start - 1);
-         start > stop;
-         start += step, it -= step) {
-      res.push_back(*it);
-    }
-  }
-  return std::make_shared<T>(std::move(res));
-}
-
 template <typename T, typename V>
-void list_getitem(
-    const std::shared_ptr<T>& cpp_obj, int index, std::shared_ptr<V>& out) {
+void list_getitem(const T& cpp_vec, int index, std::shared_ptr<V>& out) {
   // the caller need to make sure index is valid
-  DCHECK(index >= 0 && index < cpp_obj->size());
-  out = std::shared_ptr<V>(cpp_obj, &cpp_obj->operator[](index));
+  DCHECK(index >= 0 && index < cpp_vec.size());
+  out = std::make_shared<V>(cpp_vec[index]);
 }
 template <typename T, typename V>
-void list_getitem(const std::shared_ptr<T>& cpp_obj, int index, V& out) {
+void list_getitem(const T& cpp_vec, int index, V& out) {
   // the caller need to make sure index is valid
-  DCHECK(index >= 0 && index < cpp_obj->size());
-  out = cpp_obj->operator[](index);
+  DCHECK(index >= 0 && index < cpp_vec.size());
+  out = cpp_vec[index];
 }
 
 template <typename T>

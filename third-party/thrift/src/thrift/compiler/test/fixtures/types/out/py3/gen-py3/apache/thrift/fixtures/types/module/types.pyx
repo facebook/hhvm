@@ -5,7 +5,7 @@
 #  @generated
 #
 cimport cython as __cython
-from cpython.object cimport PyTypeObject, Py_LT, Py_LE, Py_EQ, Py_NE, Py_GT, Py_GE
+from cpython.object cimport PyTypeObject
 from libcpp.memory cimport shared_ptr, make_shared, unique_ptr
 from libcpp.optional cimport optional as __optional
 from libcpp.string cimport string
@@ -24,12 +24,9 @@ from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as _
 from thrift.py3.types cimport (
     cSetOp as __cSetOp,
     richcmp as __richcmp,
+    list_getitem as __list_getitem,
     set_op as __set_op,
     setcmp as __setcmp,
-    list_index as __list_index,
-    list_count as __list_count,
-    list_slice as __list_slice,
-    list_getitem as __list_getitem,
     set_iter as __set_iter,
     map_iter as __map_iter,
     map_contains as __map_contains,
@@ -40,12 +37,14 @@ from thrift.py3.types cimport (
     translate_cpp_enum_to_python,
     SetMetaClass as __SetMetaClass,
     const_pointer_cast,
+    make_const_shared,
     constant_shared_ptr,
     NOTSET as __NOTSET,
     EnumData as __EnumData,
     EnumFlagsData as __EnumFlagsData,
     UnionTypeEnumData as __UnionTypeEnumData,
     createEnumDataForUnionType as __createEnumDataForUnionType,
+    BadEnum as __BadEnum,
 )
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
@@ -58,8 +57,25 @@ import sys
 from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
+import importlib
 cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
+
+from apache.thrift.fixtures.types.module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+    List__i64,
+    List__i32,
+    std_list__List__i32,
+    std_deque__List__i32,
+    folly_fbvector__List__i32,
+    folly_small_vector__List__i32,
+    std_list_int32_t__List__i32,
+    List__std_unordered_map__Map__i32_string,
+    _std_list__List__IncompleteListDep,
+    folly_small_vector__List__CompleteListDep,
+    List__AdaptedListDep,
+    List__DependentAdaptedListDep,
+)
+
 
 
 cdef __EnumData __has_bitwise_ops_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[chas_bitwise_ops](), has_bitwise_ops)
@@ -334,6 +350,7 @@ cdef class empty_struct(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.empty_struct, self)
+
 @__cython.auto_pickle(False)
 cdef class decorated_struct(thrift.py3.types.Struct):
     def __init__(decorated_struct self, **kwargs):
@@ -450,6 +467,7 @@ cdef class decorated_struct(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.decorated_struct, self)
+
 @__cython.auto_pickle(False)
 cdef class ContainerStruct(thrift.py3.types.Struct):
     def __init__(ContainerStruct self, **kwargs):
@@ -491,7 +509,7 @@ cdef class ContainerStruct(thrift.py3.types.Struct):
     cdef inline fieldA_impl(self):
 
         if self.__fbthrift_cached_fieldA is None:
-            self.__fbthrift_cached_fieldA = List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldA_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_fieldA = List__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldA_ref().ref())
         return self.__fbthrift_cached_fieldA
 
     @property
@@ -501,7 +519,7 @@ cdef class ContainerStruct(thrift.py3.types.Struct):
     cdef inline fieldB_impl(self):
 
         if self.__fbthrift_cached_fieldB is None:
-            self.__fbthrift_cached_fieldB = std_list__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldB_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_fieldB = std_list__List__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldB_ref().ref())
         return self.__fbthrift_cached_fieldB
 
     @property
@@ -511,7 +529,7 @@ cdef class ContainerStruct(thrift.py3.types.Struct):
     cdef inline fieldC_impl(self):
 
         if self.__fbthrift_cached_fieldC is None:
-            self.__fbthrift_cached_fieldC = std_deque__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldC_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_fieldC = std_deque__List__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldC_ref().ref())
         return self.__fbthrift_cached_fieldC
 
     @property
@@ -521,7 +539,7 @@ cdef class ContainerStruct(thrift.py3.types.Struct):
     cdef inline fieldD_impl(self):
 
         if self.__fbthrift_cached_fieldD is None:
-            self.__fbthrift_cached_fieldD = folly_fbvector__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldD_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_fieldD = folly_fbvector__List__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldD_ref().ref())
         return self.__fbthrift_cached_fieldD
 
     @property
@@ -531,7 +549,7 @@ cdef class ContainerStruct(thrift.py3.types.Struct):
     cdef inline fieldE_impl(self):
 
         if self.__fbthrift_cached_fieldE is None:
-            self.__fbthrift_cached_fieldE = folly_small_vector__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldE_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_fieldE = folly_small_vector__List__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldE_ref().ref())
         return self.__fbthrift_cached_fieldE
 
     @property
@@ -645,6 +663,7 @@ cdef class ContainerStruct(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.ContainerStruct, self)
+
 @__cython.auto_pickle(False)
 cdef class CppTypeStruct(thrift.py3.types.Struct):
     def __init__(CppTypeStruct self, **kwargs):
@@ -679,7 +698,7 @@ cdef class CppTypeStruct(thrift.py3.types.Struct):
     cdef inline fieldA_impl(self):
 
         if self.__fbthrift_cached_fieldA is None:
-            self.__fbthrift_cached_fieldA = std_list_int32_t__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldA_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_fieldA = std_list_int32_t__List__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldA_ref().ref())
         return self.__fbthrift_cached_fieldA
 
     @property
@@ -763,6 +782,7 @@ cdef class CppTypeStruct(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.CppTypeStruct, self)
+
 @__cython.auto_pickle(False)
 cdef class VirtualStruct(thrift.py3.types.Struct):
     def __init__(VirtualStruct self, **kwargs):
@@ -879,6 +899,7 @@ cdef class VirtualStruct(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.VirtualStruct, self)
+
 @__cython.auto_pickle(False)
 cdef class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
     def __init__(MyStructWithForwardRefEnum self, **kwargs):
@@ -1008,6 +1029,7 @@ cdef class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructWithForwardRefEnum, self)
+
 @__cython.auto_pickle(False)
 cdef class TrivialNumeric(thrift.py3.types.Struct):
     def __init__(TrivialNumeric self, **kwargs):
@@ -1133,6 +1155,7 @@ cdef class TrivialNumeric(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.TrivialNumeric, self)
+
 @__cython.auto_pickle(False)
 cdef class TrivialNestedWithDefault(thrift.py3.types.Struct):
     def __init__(TrivialNestedWithDefault self, **kwargs):
@@ -1260,6 +1283,7 @@ cdef class TrivialNestedWithDefault(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.TrivialNestedWithDefault, self)
+
 @__cython.auto_pickle(False)
 cdef class ComplexString(thrift.py3.types.Struct):
     def __init__(ComplexString self, **kwargs):
@@ -1387,6 +1411,7 @@ cdef class ComplexString(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.ComplexString, self)
+
 @__cython.auto_pickle(False)
 cdef class ComplexNestedWithDefault(thrift.py3.types.Struct):
     def __init__(ComplexNestedWithDefault self, **kwargs):
@@ -1514,6 +1539,7 @@ cdef class ComplexNestedWithDefault(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.ComplexNestedWithDefault, self)
+
 @__cython.auto_pickle(False)
 cdef class MinPadding(thrift.py3.types.Struct):
     def __init__(MinPadding self, **kwargs):
@@ -1666,6 +1692,7 @@ cdef class MinPadding(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MinPadding, self)
+
 @__cython.auto_pickle(False)
 cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
     def __init__(MinPaddingWithCustomType self, **kwargs):
@@ -1813,6 +1840,7 @@ cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MinPaddingWithCustomType, self)
+
 @__cython.auto_pickle(False)
 cdef class MyStruct(thrift.py3.types.Struct):
     def __init__(MyStruct self, **kwargs):
@@ -1953,6 +1981,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
+
 @__cython.auto_pickle(False)
 cdef class MyDataItem(thrift.py3.types.Struct):
     def __init__(MyDataItem self, **kwargs):
@@ -2048,6 +2077,7 @@ cdef class MyDataItem(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataItem, self)
+
 @__cython.auto_pickle(False)
 cdef class Renaming(thrift.py3.types.Struct):
     def __init__(Renaming self, **kwargs):
@@ -2164,6 +2194,7 @@ cdef class Renaming(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Renaming, self)
+
 @__cython.auto_pickle(False)
 cdef class AnnotatedTypes(thrift.py3.types.Struct):
     def __init__(AnnotatedTypes self, **kwargs):
@@ -2207,7 +2238,7 @@ cdef class AnnotatedTypes(thrift.py3.types.Struct):
     cdef inline list_field_impl(self):
 
         if self.__fbthrift_cached_list_field is None:
-            self.__fbthrift_cached_list_field = List__std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_field_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_list_field = List__std_unordered_map__Map__i32_string__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_field_ref().ref())
         return self.__fbthrift_cached_list_field
 
     @property
@@ -2291,6 +2322,7 @@ cdef class AnnotatedTypes(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.AnnotatedTypes, self)
+
 @__cython.auto_pickle(False)
 cdef class ForwardUsageRoot(thrift.py3.types.Struct):
     def __init__(ForwardUsageRoot self, **kwargs):
@@ -2423,6 +2455,7 @@ cdef class ForwardUsageRoot(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.ForwardUsageRoot, self)
+
 @__cython.auto_pickle(False)
 cdef class ForwardUsageStruct(thrift.py3.types.Struct):
     def __init__(ForwardUsageStruct self, **kwargs):
@@ -2542,6 +2575,7 @@ cdef class ForwardUsageStruct(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.ForwardUsageStruct, self)
+
 @__cython.auto_pickle(False)
 cdef class ForwardUsageByRef(thrift.py3.types.Struct):
     def __init__(ForwardUsageByRef self, **kwargs):
@@ -2661,6 +2695,7 @@ cdef class ForwardUsageByRef(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.ForwardUsageByRef, self)
+
 @__cython.auto_pickle(False)
 cdef class IncompleteMap(thrift.py3.types.Struct):
     def __init__(IncompleteMap self, **kwargs):
@@ -2781,6 +2816,7 @@ cdef class IncompleteMap(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.IncompleteMap, self)
+
 @__cython.auto_pickle(False)
 cdef class IncompleteMapDep(thrift.py3.types.Struct):
     def __init__(IncompleteMapDep self, **kwargs):
@@ -2881,6 +2917,7 @@ cdef class IncompleteMapDep(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.IncompleteMapDep, self)
+
 @__cython.auto_pickle(False)
 cdef class CompleteMap(thrift.py3.types.Struct):
     def __init__(CompleteMap self, **kwargs):
@@ -3001,6 +3038,7 @@ cdef class CompleteMap(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.CompleteMap, self)
+
 @__cython.auto_pickle(False)
 cdef class CompleteMapDep(thrift.py3.types.Struct):
     def __init__(CompleteMapDep self, **kwargs):
@@ -3101,6 +3139,7 @@ cdef class CompleteMapDep(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.CompleteMapDep, self)
+
 @__cython.auto_pickle(False)
 cdef class IncompleteList(thrift.py3.types.Struct):
     def __init__(IncompleteList self, **kwargs):
@@ -3137,7 +3176,7 @@ cdef class IncompleteList(thrift.py3.types.Struct):
             return None
 
         if self.__fbthrift_cached_field is None:
-            self.__fbthrift_cached_field = _std_list__List__IncompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field_ref().ref_unchecked(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_field = _std_list__List__IncompleteListDep__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field_ref().ref_unchecked())
         return self.__fbthrift_cached_field
 
     @property
@@ -3221,6 +3260,7 @@ cdef class IncompleteList(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.IncompleteList, self)
+
 @__cython.auto_pickle(False)
 cdef class IncompleteListDep(thrift.py3.types.Struct):
     def __init__(IncompleteListDep self, **kwargs):
@@ -3321,6 +3361,7 @@ cdef class IncompleteListDep(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.IncompleteListDep, self)
+
 @__cython.auto_pickle(False)
 cdef class CompleteList(thrift.py3.types.Struct):
     def __init__(CompleteList self, **kwargs):
@@ -3357,7 +3398,7 @@ cdef class CompleteList(thrift.py3.types.Struct):
             return None
 
         if self.__fbthrift_cached_field is None:
-            self.__fbthrift_cached_field = folly_small_vector__List__CompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field_ref().ref_unchecked(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_field = folly_small_vector__List__CompleteListDep__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field_ref().ref_unchecked())
         return self.__fbthrift_cached_field
 
     @property
@@ -3441,6 +3482,7 @@ cdef class CompleteList(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.CompleteList, self)
+
 @__cython.auto_pickle(False)
 cdef class CompleteListDep(thrift.py3.types.Struct):
     def __init__(CompleteListDep self, **kwargs):
@@ -3541,6 +3583,7 @@ cdef class CompleteListDep(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.CompleteListDep, self)
+
 @__cython.auto_pickle(False)
 cdef class AdaptedList(thrift.py3.types.Struct):
     def __init__(AdaptedList self, **kwargs):
@@ -3577,7 +3620,7 @@ cdef class AdaptedList(thrift.py3.types.Struct):
             return None
 
         if self.__fbthrift_cached_field is None:
-            self.__fbthrift_cached_field = List__AdaptedListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field_ref().ref_unchecked(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_field = List__AdaptedListDep__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field_ref().ref_unchecked())
         return self.__fbthrift_cached_field
 
     @property
@@ -3661,6 +3704,7 @@ cdef class AdaptedList(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedList, self)
+
 @__cython.auto_pickle(False)
 cdef class DependentAdaptedList(thrift.py3.types.Struct):
     def __init__(DependentAdaptedList self, **kwargs):
@@ -3697,7 +3741,7 @@ cdef class DependentAdaptedList(thrift.py3.types.Struct):
             return None
 
         if self.__fbthrift_cached_field is None:
-            self.__fbthrift_cached_field = List__DependentAdaptedListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field_ref().ref_unchecked(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_field = List__DependentAdaptedListDep__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field_ref().ref_unchecked())
         return self.__fbthrift_cached_field
 
     @property
@@ -3781,6 +3825,7 @@ cdef class DependentAdaptedList(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.DependentAdaptedList, self)
+
 @__cython.auto_pickle(False)
 cdef class AllocatorAware(thrift.py3.types.Struct):
     def __init__(AllocatorAware self, **kwargs):
@@ -3819,7 +3864,7 @@ cdef class AllocatorAware(thrift.py3.types.Struct):
     cdef inline aa_list_impl(self):
 
         if self.__fbthrift_cached_aa_list is None:
-            self.__fbthrift_cached_aa_list = List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).aa_list_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_aa_list = List__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).aa_list_ref().ref())
         return self.__fbthrift_cached_aa_list
 
     @property
@@ -3963,6 +4008,7 @@ cdef class AllocatorAware(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.AllocatorAware, self)
+
 @__cython.auto_pickle(False)
 cdef class AllocatorAware2(thrift.py3.types.Struct):
     def __init__(AllocatorAware2 self, **kwargs):
@@ -4090,6 +4136,7 @@ cdef class AllocatorAware2(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.AllocatorAware2, self)
+
 @__cython.auto_pickle(False)
 cdef class TypedefStruct(thrift.py3.types.Struct):
     def __init__(TypedefStruct self, **kwargs):
@@ -4224,6 +4271,7 @@ cdef class TypedefStruct(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.TypedefStruct, self)
+
 @__cython.auto_pickle(False)
 cdef class StructWithDoubleUnderscores(thrift.py3.types.Struct):
     def __init__(StructWithDoubleUnderscores self, **kwargs):
@@ -4340,6 +4388,7 @@ cdef class StructWithDoubleUnderscores(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithDoubleUnderscores, self)
+
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
@@ -4436,83 +4485,26 @@ cdef shared_ptr[std_unordered_map[cint32_t,string]] std_unordered_map__Map__i32_
             deref(c_inst)[key] = item.encode('UTF-8')
     return cmove(c_inst)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class List__i64(thrift.py3.types.List):
-    def __init__(self, items=None):
-        if isinstance(items, List__i64):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<List__i64> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = List__i64__make_instance(items)
-
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint64_t]] c_items):
-        __fbthrift_inst = <List__i64>List__i64.__new__(List__i64)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(List__i64 self):
-        cdef shared_ptr[vector[cint64_t]] cpp_obj = make_shared[vector[cint64_t]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return List__i64._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _get_slice(self, slice index_obj):
-        cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        return List__i64._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[vector[cint64_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
-        )
-
-    cdef _get_single_item(self, size_t index):
-        cdef cint64_t citem = 0
-        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
-        return citem
-
-    cdef _check_item_type(self, item):
-        if not self or item is None:
-            return
-        if isinstance(item, int):
-            return item
-
-    def index(self, item, start=0, stop=None):
-        err = ValueError(f'{item} is not in list')
-        item = self._check_item_type(item)
-        if item is None:
-            raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        cdef cint64_t citem = item
-        cdef __optional[size_t] found = __list_index[vector[cint64_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
-        if not found.has_value():
-            raise err
-        return found.value()
-
-    def count(self, item):
-        item = self._check_item_type(item)
-        if item is None:
-            return 0
-        cdef cint64_t citem = item
-        return __list_count[vector[cint64_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__List__i64()
 
 
-Sequence.register(List__i64)
-
-cdef shared_ptr[vector[cint64_t]] List__i64__make_instance(object items) except *:
-    cdef shared_ptr[vector[cint64_t]] c_inst = make_shared[vector[cint64_t]]()
+cdef vector[cint64_t] List__i64__make_instance(object items) except *:
+    cdef vector[cint64_t] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, int):
                 raise TypeError(f"{item!r} is not of type int")
             item = <cint64_t> item
-            deref(c_inst).push_back(item)
+            c_inst.push_back(item)
     return cmove(c_inst)
+
+cdef object List__i64__from_cpp(const vector[cint64_t]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    cdef cint64_t citem = 0
+    for idx in range(c_vec.size()):
+        __list_getitem(c_vec, idx, citem)
+        py_list.append(citem)
+    return List__i64(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -4610,395 +4602,106 @@ cdef shared_ptr[cmap[string,cint64_t]] Map__binary_i64__make_instance(object ite
             deref(c_inst)[key] = item
     return cmove(c_inst)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class List__i32(thrift.py3.types.List):
-    def __init__(self, items=None):
-        if isinstance(items, List__i32):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<List__i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = List__i32__make_instance(items)
-
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint32_t]] c_items):
-        __fbthrift_inst = <List__i32>List__i32.__new__(List__i32)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(List__i32 self):
-        cdef shared_ptr[vector[cint32_t]] cpp_obj = make_shared[vector[cint32_t]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _get_slice(self, slice index_obj):
-        cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        return List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[vector[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
-        )
-
-    cdef _get_single_item(self, size_t index):
-        cdef cint32_t citem = 0
-        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
-        return citem
-
-    cdef _check_item_type(self, item):
-        if not self or item is None:
-            return
-        if isinstance(item, int):
-            return item
-
-    def index(self, item, start=0, stop=None):
-        err = ValueError(f'{item} is not in list')
-        item = self._check_item_type(item)
-        if item is None:
-            raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        cdef cint32_t citem = item
-        cdef __optional[size_t] found = __list_index[vector[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
-        if not found.has_value():
-            raise err
-        return found.value()
-
-    def count(self, item):
-        item = self._check_item_type(item)
-        if item is None:
-            return 0
-        cdef cint32_t citem = item
-        return __list_count[vector[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__List__i32()
 
 
-Sequence.register(List__i32)
-
-cdef shared_ptr[vector[cint32_t]] List__i32__make_instance(object items) except *:
-    cdef shared_ptr[vector[cint32_t]] c_inst = make_shared[vector[cint32_t]]()
+cdef vector[cint32_t] List__i32__make_instance(object items) except *:
+    cdef vector[cint32_t] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, int):
                 raise TypeError(f"{item!r} is not of type int")
             item = <cint32_t> item
-            deref(c_inst).push_back(item)
+            c_inst.push_back(item)
     return cmove(c_inst)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class std_list__List__i32(thrift.py3.types.List):
-    def __init__(self, items=None):
-        if isinstance(items, std_list__List__i32):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<std_list__List__i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = std_list__List__i32__make_instance(items)
-
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[std_list[cint32_t]] c_items):
-        __fbthrift_inst = <std_list__List__i32>std_list__List__i32.__new__(std_list__List__i32)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(std_list__List__i32 self):
-        cdef shared_ptr[std_list[cint32_t]] cpp_obj = make_shared[std_list[cint32_t]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return std_list__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _get_slice(self, slice index_obj):
-        cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        return std_list__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[std_list[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
-        )
-
-    cdef _get_single_item(self, size_t index):
-        cdef cint32_t citem = 0
-        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
-        return citem
-
-    cdef _check_item_type(self, item):
-        if not self or item is None:
-            return
-        if isinstance(item, int):
-            return item
-
-    def index(self, item, start=0, stop=None):
-        err = ValueError(f'{item} is not in list')
-        item = self._check_item_type(item)
-        if item is None:
-            raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        cdef cint32_t citem = item
-        cdef __optional[size_t] found = __list_index[std_list[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
-        if not found.has_value():
-            raise err
-        return found.value()
-
-    def count(self, item):
-        item = self._check_item_type(item)
-        if item is None:
-            return 0
-        cdef cint32_t citem = item
-        return __list_count[std_list[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__std_list__List__i32()
+cdef object List__i32__from_cpp(const vector[cint32_t]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    cdef cint32_t citem = 0
+    for idx in range(c_vec.size()):
+        __list_getitem(c_vec, idx, citem)
+        py_list.append(citem)
+    return List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
-Sequence.register(std_list__List__i32)
-
-cdef shared_ptr[std_list[cint32_t]] std_list__List__i32__make_instance(object items) except *:
-    cdef shared_ptr[std_list[cint32_t]] c_inst = make_shared[std_list[cint32_t]]()
+cdef std_list[cint32_t] std_list__List__i32__make_instance(object items) except *:
+    cdef std_list[cint32_t] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, int):
                 raise TypeError(f"{item!r} is not of type int")
             item = <cint32_t> item
-            deref(c_inst).push_back(item)
+            c_inst.push_back(item)
     return cmove(c_inst)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class std_deque__List__i32(thrift.py3.types.List):
-    def __init__(self, items=None):
-        if isinstance(items, std_deque__List__i32):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<std_deque__List__i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = std_deque__List__i32__make_instance(items)
-
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[std_deque[cint32_t]] c_items):
-        __fbthrift_inst = <std_deque__List__i32>std_deque__List__i32.__new__(std_deque__List__i32)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(std_deque__List__i32 self):
-        cdef shared_ptr[std_deque[cint32_t]] cpp_obj = make_shared[std_deque[cint32_t]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return std_deque__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _get_slice(self, slice index_obj):
-        cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        return std_deque__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[std_deque[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
-        )
-
-    cdef _get_single_item(self, size_t index):
-        cdef cint32_t citem = 0
-        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
-        return citem
-
-    cdef _check_item_type(self, item):
-        if not self or item is None:
-            return
-        if isinstance(item, int):
-            return item
-
-    def index(self, item, start=0, stop=None):
-        err = ValueError(f'{item} is not in list')
-        item = self._check_item_type(item)
-        if item is None:
-            raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        cdef cint32_t citem = item
-        cdef __optional[size_t] found = __list_index[std_deque[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
-        if not found.has_value():
-            raise err
-        return found.value()
-
-    def count(self, item):
-        item = self._check_item_type(item)
-        if item is None:
-            return 0
-        cdef cint32_t citem = item
-        return __list_count[std_deque[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__std_deque__List__i32()
+cdef object std_list__List__i32__from_cpp(const std_list[cint32_t]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    cdef cint32_t citem = 0
+    for idx in range(c_vec.size()):
+        __list_getitem(c_vec, idx, citem)
+        py_list.append(citem)
+    return std_list__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
-Sequence.register(std_deque__List__i32)
-
-cdef shared_ptr[std_deque[cint32_t]] std_deque__List__i32__make_instance(object items) except *:
-    cdef shared_ptr[std_deque[cint32_t]] c_inst = make_shared[std_deque[cint32_t]]()
+cdef std_deque[cint32_t] std_deque__List__i32__make_instance(object items) except *:
+    cdef std_deque[cint32_t] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, int):
                 raise TypeError(f"{item!r} is not of type int")
             item = <cint32_t> item
-            deref(c_inst).push_back(item)
+            c_inst.push_back(item)
     return cmove(c_inst)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class folly_fbvector__List__i32(thrift.py3.types.List):
-    def __init__(self, items=None):
-        if isinstance(items, folly_fbvector__List__i32):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<folly_fbvector__List__i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = folly_fbvector__List__i32__make_instance(items)
-
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[folly_fbvector[cint32_t]] c_items):
-        __fbthrift_inst = <folly_fbvector__List__i32>folly_fbvector__List__i32.__new__(folly_fbvector__List__i32)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(folly_fbvector__List__i32 self):
-        cdef shared_ptr[folly_fbvector[cint32_t]] cpp_obj = make_shared[folly_fbvector[cint32_t]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return folly_fbvector__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _get_slice(self, slice index_obj):
-        cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        return folly_fbvector__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[folly_fbvector[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
-        )
-
-    cdef _get_single_item(self, size_t index):
-        cdef cint32_t citem = 0
-        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
-        return citem
-
-    cdef _check_item_type(self, item):
-        if not self or item is None:
-            return
-        if isinstance(item, int):
-            return item
-
-    def index(self, item, start=0, stop=None):
-        err = ValueError(f'{item} is not in list')
-        item = self._check_item_type(item)
-        if item is None:
-            raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        cdef cint32_t citem = item
-        cdef __optional[size_t] found = __list_index[folly_fbvector[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
-        if not found.has_value():
-            raise err
-        return found.value()
-
-    def count(self, item):
-        item = self._check_item_type(item)
-        if item is None:
-            return 0
-        cdef cint32_t citem = item
-        return __list_count[folly_fbvector[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__folly_fbvector__List__i32()
+cdef object std_deque__List__i32__from_cpp(const std_deque[cint32_t]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    cdef cint32_t citem = 0
+    for idx in range(c_vec.size()):
+        __list_getitem(c_vec, idx, citem)
+        py_list.append(citem)
+    return std_deque__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
-Sequence.register(folly_fbvector__List__i32)
-
-cdef shared_ptr[folly_fbvector[cint32_t]] folly_fbvector__List__i32__make_instance(object items) except *:
-    cdef shared_ptr[folly_fbvector[cint32_t]] c_inst = make_shared[folly_fbvector[cint32_t]]()
+cdef folly_fbvector[cint32_t] folly_fbvector__List__i32__make_instance(object items) except *:
+    cdef folly_fbvector[cint32_t] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, int):
                 raise TypeError(f"{item!r} is not of type int")
             item = <cint32_t> item
-            deref(c_inst).push_back(item)
+            c_inst.push_back(item)
     return cmove(c_inst)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class folly_small_vector__List__i32(thrift.py3.types.List):
-    def __init__(self, items=None):
-        if isinstance(items, folly_small_vector__List__i32):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<folly_small_vector__List__i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = folly_small_vector__List__i32__make_instance(items)
-
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[folly_small_vector[cint32_t]] c_items):
-        __fbthrift_inst = <folly_small_vector__List__i32>folly_small_vector__List__i32.__new__(folly_small_vector__List__i32)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(folly_small_vector__List__i32 self):
-        cdef shared_ptr[folly_small_vector[cint32_t]] cpp_obj = make_shared[folly_small_vector[cint32_t]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return folly_small_vector__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _get_slice(self, slice index_obj):
-        cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        return folly_small_vector__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[folly_small_vector[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
-        )
-
-    cdef _get_single_item(self, size_t index):
-        cdef cint32_t citem = 0
-        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
-        return citem
-
-    cdef _check_item_type(self, item):
-        if not self or item is None:
-            return
-        if isinstance(item, int):
-            return item
-
-    def index(self, item, start=0, stop=None):
-        err = ValueError(f'{item} is not in list')
-        item = self._check_item_type(item)
-        if item is None:
-            raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        cdef cint32_t citem = item
-        cdef __optional[size_t] found = __list_index[folly_small_vector[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
-        if not found.has_value():
-            raise err
-        return found.value()
-
-    def count(self, item):
-        item = self._check_item_type(item)
-        if item is None:
-            return 0
-        cdef cint32_t citem = item
-        return __list_count[folly_small_vector[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__folly_small_vector__List__i32()
+cdef object folly_fbvector__List__i32__from_cpp(const folly_fbvector[cint32_t]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    cdef cint32_t citem = 0
+    for idx in range(c_vec.size()):
+        __list_getitem(c_vec, idx, citem)
+        py_list.append(citem)
+    return folly_fbvector__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
-Sequence.register(folly_small_vector__List__i32)
-
-cdef shared_ptr[folly_small_vector[cint32_t]] folly_small_vector__List__i32__make_instance(object items) except *:
-    cdef shared_ptr[folly_small_vector[cint32_t]] c_inst = make_shared[folly_small_vector[cint32_t]]()
+cdef folly_small_vector[cint32_t] folly_small_vector__List__i32__make_instance(object items) except *:
+    cdef folly_small_vector[cint32_t] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, int):
                 raise TypeError(f"{item!r} is not of type int")
             item = <cint32_t> item
-            deref(c_inst).push_back(item)
+            c_inst.push_back(item)
     return cmove(c_inst)
+
+cdef object folly_small_vector__List__i32__from_cpp(const folly_small_vector[cint32_t]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    cdef cint32_t citem = 0
+    for idx in range(c_vec.size()):
+        __list_getitem(c_vec, idx, citem)
+        py_list.append(citem)
+    return folly_small_vector__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -5080,6 +4783,7 @@ cdef shared_ptr[folly_sorted_vector_set[cint32_t]] folly_sorted_vector_set__Set_
             item = <cint32_t> item
             deref(c_inst).insert(item)
     return cmove(c_inst)
+
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -5177,83 +4881,26 @@ cdef shared_ptr[cmap[cint32_t,string]] Map__i32_string__make_instance(object ite
             deref(c_inst)[key] = item.encode('UTF-8')
     return cmove(c_inst)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class std_list_int32_t__List__i32(thrift.py3.types.List):
-    def __init__(self, items=None):
-        if isinstance(items, std_list_int32_t__List__i32):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<std_list_int32_t__List__i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = std_list_int32_t__List__i32__make_instance(items)
-
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[std_list_int32_t] c_items):
-        __fbthrift_inst = <std_list_int32_t__List__i32>std_list_int32_t__List__i32.__new__(std_list_int32_t__List__i32)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(std_list_int32_t__List__i32 self):
-        cdef shared_ptr[std_list_int32_t] cpp_obj = make_shared[std_list_int32_t](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return std_list_int32_t__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _get_slice(self, slice index_obj):
-        cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        return std_list_int32_t__List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[std_list_int32_t](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
-        )
-
-    cdef _get_single_item(self, size_t index):
-        cdef cint32_t citem = 0
-        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
-        return citem
-
-    cdef _check_item_type(self, item):
-        if not self or item is None:
-            return
-        if isinstance(item, int):
-            return item
-
-    def index(self, item, start=0, stop=None):
-        err = ValueError(f'{item} is not in list')
-        item = self._check_item_type(item)
-        if item is None:
-            raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        cdef cint32_t citem = item
-        cdef __optional[size_t] found = __list_index[std_list_int32_t](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
-        if not found.has_value():
-            raise err
-        return found.value()
-
-    def count(self, item):
-        item = self._check_item_type(item)
-        if item is None:
-            return 0
-        cdef cint32_t citem = item
-        return __list_count[std_list_int32_t](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__std_list_int32_t__List__i32()
 
 
-Sequence.register(std_list_int32_t__List__i32)
-
-cdef shared_ptr[std_list_int32_t] std_list_int32_t__List__i32__make_instance(object items) except *:
-    cdef shared_ptr[std_list_int32_t] c_inst = make_shared[std_list_int32_t]()
+cdef std_list_int32_t std_list_int32_t__List__i32__make_instance(object items) except *:
+    cdef std_list_int32_t c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, int):
                 raise TypeError(f"{item!r} is not of type int")
             item = <cint32_t> item
-            deref(c_inst).push_back(item)
+            c_inst.push_back(item)
     return cmove(c_inst)
+
+cdef object std_list_int32_t__List__i32__from_cpp(const std_list_int32_t& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    cdef cint32_t citem = 0
+    for idx in range(c_vec.size()):
+        __list_getitem(c_vec, idx, citem)
+        py_list.append(citem)
+    return std_list_int32_t__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -5351,88 +4998,27 @@ cdef shared_ptr[cmap[string,cint32_t]] Map__string_i32__make_instance(object ite
             deref(c_inst)[key.encode('UTF-8')] = item
     return cmove(c_inst)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
-    def __init__(self, items=None):
-        if isinstance(items, List__std_unordered_map__Map__i32_string):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<List__std_unordered_map__Map__i32_string> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = List__std_unordered_map__Map__i32_string__make_instance(items)
-
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[std_unordered_map[cint32_t,string]]] c_items):
-        __fbthrift_inst = <List__std_unordered_map__Map__i32_string>List__std_unordered_map__Map__i32_string.__new__(List__std_unordered_map__Map__i32_string)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(List__std_unordered_map__Map__i32_string self):
-        cdef shared_ptr[vector[std_unordered_map[cint32_t,string]]] cpp_obj = make_shared[vector[std_unordered_map[cint32_t,string]]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return List__std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _get_slice(self, slice index_obj):
-        cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        return List__std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[vector[std_unordered_map[cint32_t,string]]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
-        )
-
-    cdef _get_single_item(self, size_t index):
-        cdef shared_ptr[std_unordered_map[cint32_t,string]] citem
-        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
-        return std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
-
-    cdef _check_item_type(self, item):
-        if not self or item is None:
-            return
-        if isinstance(item, std_unordered_map__Map__i32_string):
-            return item
-        try:
-            return std_unordered_map__Map__i32_string(item)
-        except:
-            pass
-
-    def index(self, item, start=0, stop=None):
-        err = ValueError(f'{item} is not in list')
-        item = self._check_item_type(item)
-        if item is None:
-            raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        cdef std_unordered_map[cint32_t,string] citem = deref((<std_unordered_map__Map__i32_string>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef __optional[size_t] found = __list_index[vector[std_unordered_map[cint32_t,string]]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
-        if not found.has_value():
-            raise err
-        return found.value()
-
-    def count(self, item):
-        item = self._check_item_type(item)
-        if item is None:
-            return 0
-        cdef std_unordered_map[cint32_t,string] citem = deref((<std_unordered_map__Map__i32_string>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        return __list_count[vector[std_unordered_map[cint32_t,string]]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__List__std_unordered_map__Map__i32_string()
 
 
-Sequence.register(List__std_unordered_map__Map__i32_string)
-
-cdef shared_ptr[vector[std_unordered_map[cint32_t,string]]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *:
-    cdef shared_ptr[vector[std_unordered_map[cint32_t,string]]] c_inst = make_shared[vector[std_unordered_map[cint32_t,string]]]()
+cdef vector[std_unordered_map[cint32_t,string]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *:
+    cdef vector[std_unordered_map[cint32_t,string]] c_inst
     if items is not None:
         for item in items:
             if item is None:
                 raise TypeError("None is not of the type _typing.Mapping[int, str]")
             if not isinstance(item, std_unordered_map__Map__i32_string):
                 item = std_unordered_map__Map__i32_string(item)
-            deref(c_inst).push_back(deref((<std_unordered_map__Map__i32_string>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            c_inst.push_back(deref((<std_unordered_map__Map__i32_string>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
+
+cdef object List__std_unordered_map__Map__i32_string__from_cpp(const vector[std_unordered_map[cint32_t,string]]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    cdef shared_ptr[std_unordered_map[cint32_t,string]] citem
+    for idx in range(c_vec.size()):
+        __list_getitem(c_vec, idx, citem)
+        py_list.append(std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+    return List__std_unordered_map__Map__i32_string(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -5530,6 +5116,7 @@ cdef shared_ptr[cmap[cint32_t,cIncompleteMapDep]] Map__i32_IncompleteMapDep__mak
             deref(c_inst)[key] = deref((<IncompleteMapDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
+
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class std_unordered_map__Map__i32_CompleteMapDep(thrift.py3.types.Map):
@@ -5626,313 +5213,82 @@ cdef shared_ptr[std_unordered_map[cint32_t,cCompleteMapDep]] std_unordered_map__
             deref(c_inst)[key] = deref((<CompleteMapDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class _std_list__List__IncompleteListDep(thrift.py3.types.List):
-    def __init__(self, items=None):
-        if isinstance(items, _std_list__List__IncompleteListDep):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<_std_list__List__IncompleteListDep> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = _std_list__List__IncompleteListDep__make_instance(items)
-
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_std_list[cIncompleteListDep]] c_items):
-        __fbthrift_inst = <_std_list__List__IncompleteListDep>_std_list__List__IncompleteListDep.__new__(_std_list__List__IncompleteListDep)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(_std_list__List__IncompleteListDep self):
-        cdef shared_ptr[_std_list[cIncompleteListDep]] cpp_obj = make_shared[_std_list[cIncompleteListDep]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return _std_list__List__IncompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _get_slice(self, slice index_obj):
-        cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        return _std_list__List__IncompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[_std_list[cIncompleteListDep]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
-        )
-
-    cdef _get_single_item(self, size_t index):
-        cdef shared_ptr[cIncompleteListDep] citem
-        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
-        return IncompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
-
-    cdef _check_item_type(self, item):
-        if not self or item is None:
-            return
-        if isinstance(item, IncompleteListDep):
-            return item
-
-    def index(self, item, start=0, stop=None):
-        err = ValueError(f'{item} is not in list')
-        item = self._check_item_type(item)
-        if item is None:
-            raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        cdef cIncompleteListDep citem = deref((<IncompleteListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef __optional[size_t] found = __list_index[_std_list[cIncompleteListDep]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
-        if not found.has_value():
-            raise err
-        return found.value()
-
-    def count(self, item):
-        item = self._check_item_type(item)
-        if item is None:
-            return 0
-        cdef cIncompleteListDep citem = deref((<IncompleteListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        return __list_count[_std_list[cIncompleteListDep]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection___std_list__List__IncompleteListDep()
 
 
-Sequence.register(_std_list__List__IncompleteListDep)
-
-cdef shared_ptr[_std_list[cIncompleteListDep]] _std_list__List__IncompleteListDep__make_instance(object items) except *:
-    cdef shared_ptr[_std_list[cIncompleteListDep]] c_inst = make_shared[_std_list[cIncompleteListDep]]()
+cdef _std_list[cIncompleteListDep] _std_list__List__IncompleteListDep__make_instance(object items) except *:
+    cdef _std_list[cIncompleteListDep] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, IncompleteListDep):
                 raise TypeError(f"{item!r} is not of type IncompleteListDep")
-            deref(c_inst).push_back(deref((<IncompleteListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            c_inst.push_back(deref((<IncompleteListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class folly_small_vector__List__CompleteListDep(thrift.py3.types.List):
-    def __init__(self, items=None):
-        if isinstance(items, folly_small_vector__List__CompleteListDep):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<folly_small_vector__List__CompleteListDep> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = folly_small_vector__List__CompleteListDep__make_instance(items)
-
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[folly_small_vector[cCompleteListDep]] c_items):
-        __fbthrift_inst = <folly_small_vector__List__CompleteListDep>folly_small_vector__List__CompleteListDep.__new__(folly_small_vector__List__CompleteListDep)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(folly_small_vector__List__CompleteListDep self):
-        cdef shared_ptr[folly_small_vector[cCompleteListDep]] cpp_obj = make_shared[folly_small_vector[cCompleteListDep]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return folly_small_vector__List__CompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _get_slice(self, slice index_obj):
-        cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        return folly_small_vector__List__CompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[folly_small_vector[cCompleteListDep]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
-        )
-
-    cdef _get_single_item(self, size_t index):
-        cdef shared_ptr[cCompleteListDep] citem
-        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
-        return CompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
-
-    cdef _check_item_type(self, item):
-        if not self or item is None:
-            return
-        if isinstance(item, CompleteListDep):
-            return item
-
-    def index(self, item, start=0, stop=None):
-        err = ValueError(f'{item} is not in list')
-        item = self._check_item_type(item)
-        if item is None:
-            raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        cdef cCompleteListDep citem = deref((<CompleteListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef __optional[size_t] found = __list_index[folly_small_vector[cCompleteListDep]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
-        if not found.has_value():
-            raise err
-        return found.value()
-
-    def count(self, item):
-        item = self._check_item_type(item)
-        if item is None:
-            return 0
-        cdef cCompleteListDep citem = deref((<CompleteListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        return __list_count[folly_small_vector[cCompleteListDep]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__folly_small_vector__List__CompleteListDep()
+cdef object _std_list__List__IncompleteListDep__from_cpp(const _std_list[cIncompleteListDep]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    cdef shared_ptr[cIncompleteListDep] citem
+    for idx in range(c_vec.size()):
+        __list_getitem(c_vec, idx, citem)
+        py_list.append(IncompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+    return _std_list__List__IncompleteListDep(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
-Sequence.register(folly_small_vector__List__CompleteListDep)
-
-cdef shared_ptr[folly_small_vector[cCompleteListDep]] folly_small_vector__List__CompleteListDep__make_instance(object items) except *:
-    cdef shared_ptr[folly_small_vector[cCompleteListDep]] c_inst = make_shared[folly_small_vector[cCompleteListDep]]()
+cdef folly_small_vector[cCompleteListDep] folly_small_vector__List__CompleteListDep__make_instance(object items) except *:
+    cdef folly_small_vector[cCompleteListDep] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, CompleteListDep):
                 raise TypeError(f"{item!r} is not of type CompleteListDep")
-            deref(c_inst).push_back(deref((<CompleteListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            c_inst.push_back(deref((<CompleteListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class List__AdaptedListDep(thrift.py3.types.List):
-    def __init__(self, items=None):
-        if isinstance(items, List__AdaptedListDep):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<List__AdaptedListDep> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = List__AdaptedListDep__make_instance(items)
-
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cAdaptedListDep]] c_items):
-        __fbthrift_inst = <List__AdaptedListDep>List__AdaptedListDep.__new__(List__AdaptedListDep)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(List__AdaptedListDep self):
-        cdef shared_ptr[vector[cAdaptedListDep]] cpp_obj = make_shared[vector[cAdaptedListDep]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return List__AdaptedListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _get_slice(self, slice index_obj):
-        cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        return List__AdaptedListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[vector[cAdaptedListDep]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
-        )
-
-    cdef _get_single_item(self, size_t index):
-        cdef shared_ptr[cAdaptedListDep] citem
-        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
-        return AdaptedListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
-
-    cdef _check_item_type(self, item):
-        if not self or item is None:
-            return
-        if isinstance(item, AdaptedListDep):
-            return item
-
-    def index(self, item, start=0, stop=None):
-        err = ValueError(f'{item} is not in list')
-        item = self._check_item_type(item)
-        if item is None:
-            raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        cdef cAdaptedListDep citem = deref((<AdaptedListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef __optional[size_t] found = __list_index[vector[cAdaptedListDep]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
-        if not found.has_value():
-            raise err
-        return found.value()
-
-    def count(self, item):
-        item = self._check_item_type(item)
-        if item is None:
-            return 0
-        cdef cAdaptedListDep citem = deref((<AdaptedListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        return __list_count[vector[cAdaptedListDep]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__List__AdaptedListDep()
+cdef object folly_small_vector__List__CompleteListDep__from_cpp(const folly_small_vector[cCompleteListDep]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    cdef shared_ptr[cCompleteListDep] citem
+    for idx in range(c_vec.size()):
+        __list_getitem(c_vec, idx, citem)
+        py_list.append(CompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+    return folly_small_vector__List__CompleteListDep(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
-Sequence.register(List__AdaptedListDep)
-
-cdef shared_ptr[vector[cAdaptedListDep]] List__AdaptedListDep__make_instance(object items) except *:
-    cdef shared_ptr[vector[cAdaptedListDep]] c_inst = make_shared[vector[cAdaptedListDep]]()
+cdef vector[cAdaptedListDep] List__AdaptedListDep__make_instance(object items) except *:
+    cdef vector[cAdaptedListDep] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, AdaptedListDep):
                 raise TypeError(f"{item!r} is not of type AdaptedListDep")
-            deref(c_inst).push_back(deref((<AdaptedListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            c_inst.push_back(deref((<AdaptedListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class List__DependentAdaptedListDep(thrift.py3.types.List):
-    def __init__(self, items=None):
-        if isinstance(items, List__DependentAdaptedListDep):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<List__DependentAdaptedListDep> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = List__DependentAdaptedListDep__make_instance(items)
-
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cDependentAdaptedListDep]] c_items):
-        __fbthrift_inst = <List__DependentAdaptedListDep>List__DependentAdaptedListDep.__new__(List__DependentAdaptedListDep)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(List__DependentAdaptedListDep self):
-        cdef shared_ptr[vector[cDependentAdaptedListDep]] cpp_obj = make_shared[vector[cDependentAdaptedListDep]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return List__DependentAdaptedListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _get_slice(self, slice index_obj):
-        cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        return List__DependentAdaptedListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[vector[cDependentAdaptedListDep]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
-        )
-
-    cdef _get_single_item(self, size_t index):
-        cdef shared_ptr[cDependentAdaptedListDep] citem
-        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
-        return DependentAdaptedListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
-
-    cdef _check_item_type(self, item):
-        if not self or item is None:
-            return
-        if isinstance(item, DependentAdaptedListDep):
-            return item
-
-    def index(self, item, start=0, stop=None):
-        err = ValueError(f'{item} is not in list')
-        item = self._check_item_type(item)
-        if item is None:
-            raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        cdef cDependentAdaptedListDep citem = deref((<DependentAdaptedListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef __optional[size_t] found = __list_index[vector[cDependentAdaptedListDep]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
-        if not found.has_value():
-            raise err
-        return found.value()
-
-    def count(self, item):
-        item = self._check_item_type(item)
-        if item is None:
-            return 0
-        cdef cDependentAdaptedListDep citem = deref((<DependentAdaptedListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        return __list_count[vector[cDependentAdaptedListDep]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__List__DependentAdaptedListDep()
+cdef object List__AdaptedListDep__from_cpp(const vector[cAdaptedListDep]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    cdef shared_ptr[cAdaptedListDep] citem
+    for idx in range(c_vec.size()):
+        __list_getitem(c_vec, idx, citem)
+        py_list.append(AdaptedListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+    return List__AdaptedListDep(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
-Sequence.register(List__DependentAdaptedListDep)
-
-cdef shared_ptr[vector[cDependentAdaptedListDep]] List__DependentAdaptedListDep__make_instance(object items) except *:
-    cdef shared_ptr[vector[cDependentAdaptedListDep]] c_inst = make_shared[vector[cDependentAdaptedListDep]]()
+cdef vector[cDependentAdaptedListDep] List__DependentAdaptedListDep__make_instance(object items) except *:
+    cdef vector[cDependentAdaptedListDep] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, DependentAdaptedListDep):
                 raise TypeError(f"{item!r} is not of type DependentAdaptedListDep")
-            deref(c_inst).push_back(deref((<DependentAdaptedListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            c_inst.push_back(deref((<DependentAdaptedListDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
+
+cdef object List__DependentAdaptedListDep__from_cpp(const vector[cDependentAdaptedListDep]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    cdef shared_ptr[cDependentAdaptedListDep] citem
+    for idx in range(c_vec.size()):
+        __list_getitem(c_vec, idx, citem)
+        py_list.append(DependentAdaptedListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+    return List__DependentAdaptedListDep(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -6014,6 +5370,7 @@ cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *:
             item = <cint32_t> item
             deref(c_inst).insert(item)
     return cmove(c_inst)
+
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -6111,6 +5468,8 @@ cdef shared_ptr[cmap[cint32_t,cint32_t]] Map__i32_i32__make_instance(object item
 
             deref(c_inst)[key] = item
     return cmove(c_inst)
+
+
 
 TBinary = bytes
 IntTypedef = int

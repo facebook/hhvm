@@ -24,10 +24,15 @@ it in the self.value variable.
 }}if not deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().has_value():
     self.value = None
 else:
-    {{! Use an aliasing constructor since the object we're returning is still
+{{#type:list?}}
+    self.value = {{> types/container_from_cpp }}({{!
+      }}deref(__get_union_field_value[{{> types/cython_cpp_type}}](deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref()))){{!
+}}{{/type:list?}}{{^type:list?}}{{!
+  }}{{! Use an aliasing constructor since the object we're returning is still
         managed by the top-level object, possible via a unique_ptr }}
     self.value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
       }}deref(__get_union_field_value[{{> types/cython_cpp_type}}](deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref())), self.{{> types/cpp_obj}})){{!
+}}{{/type:list?}}{{!
 }}{{/field:reference?}}{{!
 }}{{^field:reference?}}{{!
 }}{{#type:bool?}}{{!
@@ -73,11 +78,15 @@ else:
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value())){{!
 }}{{/type:struct?}}{{!
-}}{{#type:container?}}{{!
+}}{{#type:list?}}{{!
+}}self.value = {{> types/container_from_cpp }}({{!
+  }}deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value()){{!
+}}{{/type:list?}}{{!
+}}{{#type:container?}}{{^type:list?}}{{!
 }}self.value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value())){{!
-}}{{/type:container?}}{{!
+}}{{/type:list?}}{{/type:container?}}{{!
 }}{{/field:reference?}}{{!
 }}{{/field:has_ref_api?}}{{!
 }}{{#field:has_ref_api?}}{{!
@@ -85,10 +94,15 @@ else:
 }}if not deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}():
     self.value = None
 else:
-    {{! Use an aliasing constructor since the object we're returning is still
+{{#type:list?}}
+    self.value = {{> types/container_from_cpp }}({{!
+      }}deref(deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}())){{!
+}}{{/type:list?}}{{^type:list?}}{{!
+  }}{{! Use an aliasing constructor since the object we're returning is still
         managed by the top-level object, possible via a unique_ptr }}
     self.value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
       }}deref(deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}()), self.{{> types/cpp_obj}})){{!
+}}{{/type:list?}}{{!
 }}{{/field:reference?}}{{!
 }}{{^field:reference?}}{{!
 }}{{#type:bool?}}{{!
@@ -134,10 +148,14 @@ else:
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}())){{!
 }}{{/type:struct?}}{{!
-}}{{#type:container?}}{{!
+}}{{#type:list?}}{{!
+}}self.value = {{> types/container_from_cpp}}({{!
+  }}deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}()){{!
+}}{{/type:list?}}{{!
+}}{{#type:container?}}{{^type:list?}}{{!
 }}self.value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}())){{!
-}}{{/type:container?}}{{!
+}}{{/type:list?}}{{/type:container?}}{{!
 }}{{/field:reference?}}{{!
 }}{{/field:has_ref_api?}}

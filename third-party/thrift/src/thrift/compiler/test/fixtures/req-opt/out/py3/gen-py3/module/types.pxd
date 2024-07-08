@@ -84,27 +84,17 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef inline object myString_impl(self)
     cdef inline object myBools_impl(self)
     cdef inline object myNumbers_impl(self)
-    cdef List__bool __fbthrift_cached_myBools
-    cdef List__i32 __fbthrift_cached_myNumbers
+    cdef object __fbthrift_cached_myBools
+    cdef object __fbthrift_cached_myNumbers
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFoo])
 
 
-cdef class List__bool(thrift.py3.types.List):
-    cdef shared_ptr[vector[cbool]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cbool]])
-    cdef _check_item_type(self, item)
+cdef vector[cbool] List__bool__make_instance(object items) except *
+cdef object List__bool__from_cpp(const vector[cbool]&) except *
 
-cdef shared_ptr[vector[cbool]] List__bool__make_instance(object items) except *
-
-cdef class List__i32(thrift.py3.types.List):
-    cdef shared_ptr[vector[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint32_t]])
-    cdef _check_item_type(self, item)
-
-cdef shared_ptr[vector[cint32_t]] List__i32__make_instance(object items) except *
+cdef vector[cint32_t] List__i32__make_instance(object items) except *
+cdef object List__i32__from_cpp(const vector[cint32_t]&) except *
 
 

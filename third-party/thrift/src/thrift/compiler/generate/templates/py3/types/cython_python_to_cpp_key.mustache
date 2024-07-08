@@ -37,7 +37,10 @@ keys (conventionally used for sets, lists, and map values).
 }}{{#type:struct}}{{!
   }}deref((<{{> types/cython_python_type}}>key).{{> types/cpp_obj}}){{!
 }}{{/type:struct}}{{!
-}}{{#type:container?}}{{!
+}}{{#type:list?}}{{!
+  }}{{> types/container_to_cpp}}(key){{!
+}}{{/type:list?}}{{!
+}}{{#type:container?}}{{^type:list?}}{{!
   }}deref((<{{> types/cython_python_type}}>key).{{> types/cpp_obj}}){{!
-}}{{/type:container?}}{{!
+}}{{/type:list?}}{{/type:container?}}{{!
 }}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>key{{/type:enum?}}

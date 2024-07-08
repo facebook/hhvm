@@ -13,6 +13,8 @@ from thrift.py3.types cimport (
     assign_shared_const_ptr,
     bytes_to_string,
     make_unique,
+    make_shared,
+    make_const_shared,
 )
 cimport thrift.py3.types
 from thrift.py3.types cimport (
@@ -67,12 +69,12 @@ cdef class __Foo_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cFoo](deref(self._struct_cpp_obj), 2)
             return
-        deref(self._struct_cpp_obj).myBools_ref().assign(deref(_module_types.List__bool(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).myBools_ref().assign(_module_types.List__bool__make_instance(_fbthrift_value))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field myNumbers
         if _fbthrift_value is None:
             __reset_field[_module_types.cFoo](deref(self._struct_cpp_obj), 3)
             return
-        deref(self._struct_cpp_obj).myNumbers_ref().assign(deref(_module_types.List__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).myNumbers_ref().assign(_module_types.List__i32__make_instance(_fbthrift_value))
 

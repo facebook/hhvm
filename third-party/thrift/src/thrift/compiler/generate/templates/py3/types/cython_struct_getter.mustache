@@ -46,8 +46,14 @@ return self.__fbthrift_cached_{{field:py_name}}{{!
         return None
     {{! Use an aliasing constructor since the object we're returning is still
         managed by the top-level object, possible via a unique_ptr }}
-    self.__fbthrift_cached_{{field:py_name}} = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
-      }}deref(deref(self.{{> types/cpp_obj}}).{{> types/cython_field_value_ref}}_ref()), self.{{> types/cpp_obj}}))
+    self.__fbthrift_cached_{{field:py_name}} = {{!
+      }}{{#type:list?}}{{!
+      }}{{> types/container_from_cpp }}({{!
+        }}deref(deref(self.{{> types/cpp_obj}}).{{> types/cython_field_value_ref}}_ref())){{!
+      }}{{/type:list?}}{{^type:list?}}{{!
+      }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
+        }}deref(deref(self.{{> types/cpp_obj}}).{{> types/cython_field_value_ref}}_ref()), self.{{> types/cpp_obj}})){{!
+      }}{{/type:list?}}
 return self.__fbthrift_cached_{{field:py_name}}{{!
 }}{{/field:reference?}}{{!
 }}{{^field:reference?}}{{!
@@ -66,10 +72,13 @@ return self.__fbthrift_cached_{{field:py_name}}{{!
         }}<int>({{!
         }}deref(self.{{> types/cpp_obj}}).{{> types/cython_field_value_ref}}{{!
       }})){{/type:enum?}}{{!
-      }}{{^type:enum?}}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
+      }}{{#type:list?}}{{> types/container_from_cpp }}({{!
+        }}deref(self.{{> types/cpp_obj}}).{{> types/cython_field_ref}}){{!
+      }}{{/type:list?}}{{!
+      }}{{^type:enum?}}{{^type:list?}}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
       }}deref(self.{{> types/cpp_obj}}).{{> types/cython_field_ref}}, {{!
       }}self.{{> types/cpp_obj}}{{!
-      }})){{/type:enum?}}
+      }})){{/type:list?}}{{/type:enum?}}
 return self.__fbthrift_cached_{{field:py_name}}{{!
 }}{{/type:base?}}{{!
 }}{{/field:reference?}}{{!

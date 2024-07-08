@@ -52,13 +52,8 @@ cdef extern from "thrift/compiler/test/fixtures/params/gen-py3/module/types.h":
 
 
 
-cdef class List__i32(thrift.py3.types.List):
-    cdef shared_ptr[vector[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cint32_t]])
-    cdef _check_item_type(self, item)
-
-cdef shared_ptr[vector[cint32_t]] List__i32__make_instance(object items) except *
+cdef vector[cint32_t] List__i32__make_instance(object items) except *
+cdef object List__i32__from_cpp(const vector[cint32_t]&) except *
 
 cdef class Map__i32_List__i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint32_t,vector[cint32_t]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -91,21 +86,11 @@ cdef class Map__i32_i32(thrift.py3.types.Map):
 
 cdef shared_ptr[cmap[cint32_t,cint32_t]] Map__i32_i32__make_instance(object items) except *
 
-cdef class List__Map__i32_i32(thrift.py3.types.List):
-    cdef shared_ptr[vector[cmap[cint32_t,cint32_t]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cmap[cint32_t,cint32_t]]])
-    cdef _check_item_type(self, item)
+cdef vector[cmap[cint32_t,cint32_t]] List__Map__i32_i32__make_instance(object items) except *
+cdef object List__Map__i32_i32__from_cpp(const vector[cmap[cint32_t,cint32_t]]&) except *
 
-cdef shared_ptr[vector[cmap[cint32_t,cint32_t]]] List__Map__i32_i32__make_instance(object items) except *
-
-cdef class List__Set__i32(thrift.py3.types.List):
-    cdef shared_ptr[vector[cset[cint32_t]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cset[cint32_t]]])
-    cdef _check_item_type(self, item)
-
-cdef shared_ptr[vector[cset[cint32_t]]] List__Set__i32__make_instance(object items) except *
+cdef vector[cset[cint32_t]] List__Set__i32__make_instance(object items) except *
+cdef object List__Set__i32__from_cpp(const vector[cset[cint32_t]]&) except *
 
 cdef class Map__i32_Map__i32_Set__i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -115,20 +100,10 @@ cdef class Map__i32_Map__i32_Set__i32(thrift.py3.types.Map):
 
 cdef shared_ptr[cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]] Map__i32_Map__i32_Set__i32__make_instance(object items) except *
 
-cdef class List__Map__i32_Map__i32_Set__i32(thrift.py3.types.List):
-    cdef shared_ptr[vector[cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]]])
-    cdef _check_item_type(self, item)
+cdef vector[cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]] List__Map__i32_Map__i32_Set__i32__make_instance(object items) except *
+cdef object List__Map__i32_Map__i32_Set__i32__from_cpp(const vector[cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]]&) except *
 
-cdef shared_ptr[vector[cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]]] List__Map__i32_Map__i32_Set__i32__make_instance(object items) except *
-
-cdef class List__List__Map__i32_Map__i32_Set__i32(thrift.py3.types.List):
-    cdef shared_ptr[vector[vector[cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[vector[cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]]]])
-    cdef _check_item_type(self, item)
-
-cdef shared_ptr[vector[vector[cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]]]] List__List__Map__i32_Map__i32_Set__i32__make_instance(object items) except *
+cdef vector[vector[cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]]] List__List__Map__i32_Map__i32_Set__i32__make_instance(object items) except *
+cdef object List__List__Map__i32_Map__i32_Set__i32__from_cpp(const vector[vector[cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]]]&) except *
 
 

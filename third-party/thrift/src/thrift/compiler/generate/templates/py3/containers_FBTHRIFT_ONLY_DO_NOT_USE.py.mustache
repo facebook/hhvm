@@ -1,0 +1,131 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Python wrappers of the structs defined in the services files. This file is
+compiled into it's own module to be included by clients and services and
+end-user code. It's one of the more complicated files, as it has to map
+Pythonic APIs to C++ objects and back.
+
+One of the nastier things in this file is the definition of containers.
+A separate container wrapper has to be defined for each type of contained
+attribute because Cython can't template C++ classes. So, for example, we need
+a List__int16 or a List__string or a Map__string_mystruct instance for each
+container/type combination. Consider that containers can contain other containers
+or structs that contain containers and you realize how messy this can get.
+Further, we'd prefer to have the end user freed from having to know about these
+container types, so we'll need to define factories for them based on what they
+want to include.
+
+}}
+{{> common/auto_generated_py}}
+
+import thrift.py3.types
+import importlib
+from collections.abc import Sequence
+
+"""
+    This is a helper module to define py3 container types.
+    All types defined here are re-exported in the parent `.types` module.
+    Only `import` types defined here via the parent `.types` module.
+    If you `import` them directly from here, you will get nasty import errors.
+"""
+
+import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
+{{#program:includeNamespaces}}
+{{#hasTypes?}}
+import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+{{/hasTypes?}}
+{{/program:includeNamespaces}}
+
+def get_types_reflection():
+    return importlib.import_module(
+        "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
+    )
+
+__all__ = []
+
+{{#program:containerTypes}}
+{{#type:list?}}
+class {{type:flat_name}}(thrift.py3.types.List):
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
+            {{!
+                For internal use only, when items list has been created internally
+                and each item has been converted from cpp so we can trust the type.
+                Do not use with user-exposed `list` to avoid accidental mutability.
+            }}
+            _py_obj = items
+        elif isinstance(items, {{type:flat_name}}):
+            _py_obj = list(items)
+        elif items:
+            {{#type:containerOfString?}}
+            if isinstance(items, str):
+                raise TypeError("If you really want to pass a string into a {{> types/pep484_type}} field, explicitly convert it first.")
+            {{/type:containerOfString?}}
+            check_method = {{type:flat_name}}._check_item_type_or_raise
+            _py_obj = [check_method(item) for item in items]
+        else:
+            _py_obj = []
+
+        super().__init__(_py_obj, {{type:flat_name}})
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+    {{#type:list_elem_type}}
+    {{#type:container?}}
+        if item is None:
+            raise TypeError("None is not of the type {{> types/pep484_type}}")
+        if not isinstance(item, {{> types/python_type}}):
+            item = {{> types/python_type}}(item)
+    {{/type:container?}}
+    {{^type:container?}}
+        if not (
+            isinstance(item, {{> types/python_is_instance_type}}){{#type:enum?}} or
+            isinstance(item, thrift.py3.types.BadEnum){{/type:enum?}}
+        ):
+            raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
+    {{/type:container?}}
+    {{/type:list_elem_type}}
+        return item
+
+    {{! the __contains__, index, and count APIs don't raise TypeError}}
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        {{#type:list_elem_type}}
+        if isinstance(item, {{> types/python_type}}):
+            return item
+        {{#type:container?}}
+        try:
+            return {{> types/python_type}}(item)
+        except:
+            pass
+        {{/type:container?}}
+        {{/type:list_elem_type}}
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__{{type:flat_name}}()
+
+
+Sequence.register({{type:flat_name}})
+__all__.append('{{type:flat_name}}')
+
+{{/type:list?}}
+{{/program:containerTypes}}

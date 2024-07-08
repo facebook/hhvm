@@ -281,11 +281,23 @@ cdef class Container:
     def __len__(self):
         raise NotImplementedError()
 
+cdef class _ListPrivateCtorToken:
+    pass
+
+_fbthrift_list_private_ctor = _ListPrivateCtorToken()
+
 @cython.auto_pickle(False)
 cdef class List(Container):
     """
     Base class for all thrift lists
     """
+
+    def __init__(self, list py_obj not None, child_cls not None):
+        self._py_obj = py_obj
+        self._child_cls = child_cls
+
+    def __len__(self):
+        return len(self._py_obj)
 
     def __hash__(self):
         return super().__hash__()
@@ -326,8 +338,9 @@ cdef class List(Container):
 
     def __getitem__(self, object index_obj):
         if isinstance(index_obj, slice):
-            return self._get_slice(index_obj)
-        return self._get_single_item(self._normalize_index(<int?>index_obj))
+            return self._child_cls(self._py_obj[index_obj])
+        cdef int norm_index = self._normalize_index(<int?>index_obj)
+        return self._py_obj[norm_index]
 
     def __contains__(self, item):
         try:
@@ -337,12 +350,25 @@ cdef class List(Container):
         return True
 
     def __iter__(self):
-        for i in range(len(self)):
-            yield self._get_single_item(i)
+        yield from self._py_obj
 
     def __reversed__(self):
-        for i in reversed(range(len(self))):
-            yield self._get_single_item(i)
+        yield from reversed(self._py_obj)
+
+    def index(self, item, start=0, stop=None):
+        item = self._child_cls._check_item_type_or_none(item)
+        if not self or item is None:
+            raise ValueError(f'{item} is not in list')
+        if stop is None:
+            return self._py_obj.index(item, start)
+        else:
+            return self._py_obj.index(item, start, stop)
+
+    def count(self, item):
+        item = self._child_cls._check_item_type_or_none(item)
+        if item is None:
+            return 0
+        return self._py_obj.count(item)
 
     cdef int _normalize_index(self, int index) except *:
         cdef int size = len(self)
@@ -352,12 +378,6 @@ cdef class List(Container):
         if index >= size or index < 0:
             raise IndexError('list index out of range')
         return index
-
-    cdef _get_slice(self, slice index_obj):
-        raise NotImplementedError()
-
-    cdef _get_single_item(self, size_t index):
-        raise NotImplementedError()
 
 
 @cython.auto_pickle(False)

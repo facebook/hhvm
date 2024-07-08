@@ -5,7 +5,7 @@
 #  @generated
 #
 cimport cython as __cython
-from cpython.object cimport PyTypeObject, Py_LT, Py_LE, Py_EQ, Py_NE, Py_GT, Py_GE
+from cpython.object cimport PyTypeObject
 from libcpp.memory cimport shared_ptr, make_shared, unique_ptr
 from libcpp.optional cimport optional as __optional
 from libcpp.string cimport string
@@ -24,12 +24,9 @@ from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as _
 from thrift.py3.types cimport (
     cSetOp as __cSetOp,
     richcmp as __richcmp,
+    list_getitem as __list_getitem,
     set_op as __set_op,
     setcmp as __setcmp,
-    list_index as __list_index,
-    list_count as __list_count,
-    list_slice as __list_slice,
-    list_getitem as __list_getitem,
     set_iter as __set_iter,
     map_iter as __map_iter,
     map_contains as __map_contains,
@@ -40,12 +37,14 @@ from thrift.py3.types cimport (
     translate_cpp_enum_to_python,
     SetMetaClass as __SetMetaClass,
     const_pointer_cast,
+    make_const_shared,
     constant_shared_ptr,
     NOTSET as __NOTSET,
     EnumData as __EnumData,
     EnumFlagsData as __EnumFlagsData,
     UnionTypeEnumData as __UnionTypeEnumData,
     createEnumDataForUnionType as __createEnumDataForUnionType,
+    BadEnum as __BadEnum,
 )
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
@@ -58,6 +57,12 @@ import sys
 from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
+import importlib
+
+from module1.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+    List__Enum,
+)
+
 
 
 cdef __EnumData __Enum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cEnum](), Enum)
@@ -247,82 +252,26 @@ cdef class Struct(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module1.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Struct, self)
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class List__Enum(thrift.py3.types.List):
-    def __init__(self, items=None):
-        if isinstance(items, List__Enum):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<List__Enum> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = List__Enum__make_instance(items)
-
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[cEnum]] c_items):
-        __fbthrift_inst = <List__Enum>List__Enum.__new__(List__Enum)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(List__Enum self):
-        cdef shared_ptr[vector[cEnum]] cpp_obj = make_shared[vector[cEnum]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return List__Enum._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _get_slice(self, slice index_obj):
-        cdef int start, stop, step
-        start, stop, step = index_obj.indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        return List__Enum._create_FBTHRIFT_ONLY_DO_NOT_USE(
-            __list_slice[vector[cEnum]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, start, stop, step)
-        )
-
-    cdef _get_single_item(self, size_t index):
-        cdef cEnum citem
-        __list_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, index, citem)
-        return translate_cpp_enum_to_python(Enum, <int> citem)
-
-    cdef _check_item_type(self, item):
-        if not self or item is None:
-            return
-        if isinstance(item, Enum):
-            return item
-
-    def index(self, item, start=0, stop=None):
-        err = ValueError(f'{item} is not in list')
-        item = self._check_item_type(item)
-        if item is None:
-            raise err
-        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size())
-        cdef cEnum citem = <cEnum><int>item
-        cdef __optional[size_t] found = __list_index[vector[cEnum]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, indices[0], indices[1], citem)
-        if not found.has_value():
-            raise err
-        return found.value()
-
-    def count(self, item):
-        item = self._check_item_type(item)
-        if item is None:
-            return 0
-        cdef cEnum citem = <cEnum><int>item
-        return __list_count[vector[cEnum]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__List__Enum()
 
 
-Sequence.register(List__Enum)
-
-cdef shared_ptr[vector[cEnum]] List__Enum__make_instance(object items) except *:
-    cdef shared_ptr[vector[cEnum]] c_inst = make_shared[vector[cEnum]]()
+cdef vector[cEnum] List__Enum__make_instance(object items) except *:
+    cdef vector[cEnum] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, Enum):
                 raise TypeError(f"{item!r} is not of type Enum")
-            deref(c_inst).push_back(<cEnum><int>item)
+            c_inst.push_back(<cEnum><int>item)
     return cmove(c_inst)
 
+cdef object List__Enum__from_cpp(const vector[cEnum]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    cdef cEnum citem
+    for idx in range(c_vec.size()):
+        __list_getitem(c_vec, idx, citem)
+        py_list.append(translate_cpp_enum_to_python(Enum, <int> citem))
+    return List__Enum(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+
 c1 = Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(cc1()))
-e1s = List__Enum._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(ce1s()))
+e1s = List__Enum__from_cpp(ce1s())

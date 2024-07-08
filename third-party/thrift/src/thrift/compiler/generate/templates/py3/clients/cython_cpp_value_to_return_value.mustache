@@ -40,10 +40,16 @@ to a python type.
 }}{{#type:binary?}}result.value(){{/type:binary?}}{{!
 }}{{#type:struct}}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
-  }}cmove(result.value()))){{/type:struct}}{{!
-}}{{#type:container?}}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
+  }}cmove(result.value()))){{!
+}}{{/type:struct}}{{!
+}}{{#type:list?}}{{!
+  }}{{> types/container_from_cpp}}(cmove(result.value())){{!
+}}{{/type:list?}}{{!
+}}{{#type:container?}}{{^type:list?}}{{!
+  }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
-  }}cmove(result.value()))){{/type:container?}}{{!
+  }}cmove(result.value()))){{!
+}}{{/type:list?}}{{/type:container?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!
 }}{{#type:enum}}{{> types/cython_python_type}}(<int> result.value()){{/type:enum}}{{!
 }}{{/type:hasCustomTypeBehavior?}}{{!

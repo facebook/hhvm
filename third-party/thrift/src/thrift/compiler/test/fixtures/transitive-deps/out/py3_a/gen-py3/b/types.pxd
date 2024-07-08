@@ -53,12 +53,7 @@ cdef extern from "thrift/compiler/test/fixtures/transitive-deps/gen-py3/b/types.
 
 
 
-cdef class List__c_C(thrift.py3.types.List):
-    cdef shared_ptr[vector[_c_types.cC]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[vector[_c_types.cC]])
-    cdef _check_item_type(self, item)
-
-cdef shared_ptr[vector[_c_types.cC]] List__c_C__make_instance(object items) except *
+cdef vector[_c_types.cC] List__c_C__make_instance(object items) except *
+cdef object List__c_C__from_cpp(const vector[_c_types.cC]&) except *
 
 

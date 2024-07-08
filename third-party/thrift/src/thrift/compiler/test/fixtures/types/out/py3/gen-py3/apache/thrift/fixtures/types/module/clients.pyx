@@ -144,7 +144,7 @@ cdef class SomeService(thrift.py3.client.Client):
         bridgeFutureWith[cmap[string,cint64_t]](
             self._executor,
             down_cast_ptr[cSomeServiceClientWrapper, cClientWrapper](self._client.get()).binary_keyed_map(rpc_options._cpp_obj, 
-                deref((<_apache_thrift_fixtures_types_module_types.List__i64>r)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
+                _apache_thrift_fixtures_types_module_types.List__i64__make_instance(r),
             ),
             SomeService_binary_keyed_map_callback,
             <PyObject *> __userdata

@@ -87,6 +87,7 @@ RocketServerConnection::RocketServerConnection(
       socketDrainer_(*this),
       ingressMemoryTracker_(ingressMemoryTracker),
       egressMemoryTracker_(egressMemoryTracker),
+      enableObservers_(THRIFT_FLAG(enable_rocket_connection_observers)),
       observerContainer_(this) {
   CHECK(socket_);
   CHECK(frameHandler_);

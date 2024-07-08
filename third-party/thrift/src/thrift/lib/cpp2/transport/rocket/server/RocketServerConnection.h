@@ -302,7 +302,7 @@ class RocketServerConnection final
    * available.
    */
   RocketServerConnectionObserverContainer* getObserverContainer() const {
-    if (THRIFT_FLAG(enable_rocket_connection_observers)) {
+    if (enableObservers_) {
       return const_cast<RocketServerConnectionObserverContainer*>(
           &observerContainer_);
     }
@@ -627,6 +627,7 @@ class RocketServerConnection final
 
   friend class RocketServerFrameContext;
 
+  const bool enableObservers_;
   // Container of observers for the RocketServerConnection.
   //
   // This member MUST be last in the list of members to ensure it is destroyed

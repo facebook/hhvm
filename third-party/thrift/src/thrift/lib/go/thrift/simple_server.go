@@ -70,11 +70,6 @@ func simpleServerOptions(options ...func(*ServerOptions)) *ServerOptions {
 	return opts
 }
 
-// Addr returns the server listener's Addr
-func (p *SimpleServer) Addr() net.Addr {
-	return p.listener.Addr()
-}
-
 // acceptLoopContext takes a context that will be decorated with ConnInfo and passed down to new clients.
 func (p *SimpleServer) acceptLoopContext(ctx context.Context) error {
 	for {

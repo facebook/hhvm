@@ -1205,9 +1205,9 @@ namespace detail {
 // These functions allow calling the function within generated code since
 // the corresponding functions are protected in HandlerCallbackBase
 
+#if FOLLY_HAS_COROUTINES
 bool shouldProcessServiceInterceptorsOnRequest(HandlerCallbackBase&);
 
-#if FOLLY_HAS_COROUTINES
 folly::coro::Task<void> processServiceInterceptorsOnRequest(
     HandlerCallbackBase&,
     detail::ServiceInterceptorOnRequestArguments arguments);
@@ -1458,13 +1458,13 @@ class HandlerCallbackBase {
   bool fulfillTilePromise(std::unique_ptr<Tile> ptr);
   void breakTilePromise();
 
+#if FOLLY_HAS_COROUTINES
   bool shouldProcessServiceInterceptorsOnRequest() const;
   friend bool detail::shouldProcessServiceInterceptorsOnRequest(
       HandlerCallbackBase&);
 
   bool shouldProcessServiceInterceptorsOnResponse() const;
 
-#if FOLLY_HAS_COROUTINES
   folly::coro::Task<void> processServiceInterceptorsOnRequest(
       detail::ServiceInterceptorOnRequestArguments arguments);
   folly::coro::Task<void> processServiceInterceptorsOnResponse();

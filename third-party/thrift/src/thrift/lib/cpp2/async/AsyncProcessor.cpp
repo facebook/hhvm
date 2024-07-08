@@ -1065,6 +1065,7 @@ void HandlerCallback<void>::doDone() {
   sendReply(std::move(queue));
 }
 
+#if FOLLY_HAS_COROUTINES
 bool HandlerCallbackBase::shouldProcessServiceInterceptorsOnRequest() const {
   // The chain of objects can be null in unit tests when these objects are
   // mocked.
@@ -1094,7 +1095,6 @@ bool HandlerCallbackBase::shouldProcessServiceInterceptorsOnResponse() const {
   return true;
 }
 
-#if FOLLY_HAS_COROUTINES
 folly::coro::Task<void>
 HandlerCallbackBase::processServiceInterceptorsOnRequest(
     detail::ServiceInterceptorOnRequestArguments arguments) {
@@ -1181,11 +1181,11 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse() {
 
 namespace detail {
 
+#if FOLLY_HAS_COROUTINES
 bool shouldProcessServiceInterceptorsOnRequest(HandlerCallbackBase& callback) {
   return callback.shouldProcessServiceInterceptorsOnRequest();
 }
 
-#if FOLLY_HAS_COROUTINES
 folly::coro::Task<void> processServiceInterceptorsOnRequest(
     HandlerCallbackBase& callback,
     detail::ServiceInterceptorOnRequestArguments arguments) {

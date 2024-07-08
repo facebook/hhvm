@@ -208,6 +208,10 @@ class WildMatchExpr : public QueryExpr {
     return std::vector<std::string>{
         trimGlobAfterDoubleStar(outputPattern).string()};
   }
+
+  ReturnOnlyFiles listOnlyFiles() const override {
+    return ReturnOnlyFiles::Unrelated;
+  }
 };
 W_TERM_PARSER(match, WildMatchExpr::parseMatch);
 W_TERM_PARSER(imatch, WildMatchExpr::parseIMatch);

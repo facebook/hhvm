@@ -166,6 +166,10 @@ class SinceExpr : public QueryExpr {
     // `since` doesn't constrain the path.
     return std::nullopt;
   }
+
+  ReturnOnlyFiles listOnlyFiles() const override {
+    return ReturnOnlyFiles::Unrelated;
+  }
 };
 W_TERM_PARSER(since, SinceExpr::parse);
 

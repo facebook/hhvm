@@ -50,6 +50,20 @@ class NotExpr : public QueryExpr {
     // the inner expression is.
     return std::nullopt;
   }
+
+  /**
+   * Inverts the result of the subexpression.
+   * Expressions that are unrelated stay unrelated.
+   */
+  ReturnOnlyFiles listOnlyFiles() const override {
+    auto subExprValue = expr->listOnlyFiles();
+    if (subExprValue == ReturnOnlyFiles::Yes) {
+      return ReturnOnlyFiles::No;
+    } else if (subExprValue == ReturnOnlyFiles::No) {
+      return ReturnOnlyFiles::Yes;
+    }
+    return ReturnOnlyFiles::Unrelated;
+  }
 };
 
 W_TERM_PARSER(not, NotExpr::parse);
@@ -69,6 +83,10 @@ class TrueExpr : public QueryExpr {
     // We will match every path --> unbounded.
     return std::nullopt;
   }
+
+  ReturnOnlyFiles listOnlyFiles() const override {
+    return ReturnOnlyFiles::Unrelated;
+  }
 };
 
 W_TERM_PARSER(true, TrueExpr::parse);
@@ -87,6 +105,10 @@ class FalseExpr : public QueryExpr {
       CaseSensitivity) const override {
     // We will not match any path --> bounded by an empty list of globs.
     return std::vector<std::string>{};
+  }
+
+  ReturnOnlyFiles listOnlyFiles() const override {
+    return ReturnOnlyFiles::Unrelated;
   }
 };
 
@@ -236,6 +258,59 @@ class ListExpr : public QueryExpr {
 
     return std::vector<std::string>(
         unionOfUpperBounds.begin(), unionOfUpperBounds.end());
+  }
+  /**
+   * Combines the results of the subexpressions.
+   * For allof, the result needs to satisfy each subexpression.
+   * - If any subexpression requests non-file data, the whole expression must
+   *   also contain non-file data. Therefore we return No if any subexpression
+   *   requests non-file data.
+   * - If any subexpression requests only file data, the whole expression must
+   *   also contain only file data. Therefore we return Yes if one subexpression
+   *   requests only file data. and there is no subexpression requesting
+   *    non-file data.
+   * - We return No if there are both Yes and No subexpressions because
+   *   we want expressions that exclude groups of types like
+   *   ["not", ["allof", ["type", "l"], ["type", "d"]]]
+   *   to return Yes if we are excluding directories.
+   * For anyof, the result can satisfy any subexpression.
+   * - If any subexpression requests non-file data, the whole expression could
+   *   also contain non-file data. Therefore we return No if any subexpression
+   *   requests non-file data.
+   * - The only way for the whole expression to contain only file data is if
+   *   each subexpression contains only file data. Therefore we return Yes only
+   * if each subexpression is Yes.
+   */
+  ReturnOnlyFiles listOnlyFiles() const override {
+    ReturnOnlyFiles result = ReturnOnlyFiles::Unrelated;
+    if (allof) {
+      for (auto& subExpr : exprs) {
+        auto value = subExpr->listOnlyFiles();
+        if (value == ReturnOnlyFiles::Yes) {
+          result = ReturnOnlyFiles::Yes;
+        } else if (value == ReturnOnlyFiles::No) {
+          return ReturnOnlyFiles::No;
+        }
+      }
+    } else {
+      bool allYes = exprs.empty()
+          ? false
+          : exprs[0]->listOnlyFiles() == ReturnOnlyFiles::Yes;
+      for (auto& subExpr : exprs) {
+        auto value = subExpr->listOnlyFiles();
+        if (value == ReturnOnlyFiles::Yes) {
+          // Keep checking the remaining subexprs
+        } else if (value == ReturnOnlyFiles::No) {
+          return ReturnOnlyFiles::No;
+        } else {
+          allYes = false;
+        }
+      }
+      if (allYes) {
+        return ReturnOnlyFiles::Yes;
+      }
+    }
+    return result;
   }
 };
 

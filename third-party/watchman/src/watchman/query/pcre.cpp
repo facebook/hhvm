@@ -153,6 +153,10 @@ class PcreExpr : public QueryExpr {
 
     return std::nullopt;
   }
+
+  ReturnOnlyFiles listOnlyFiles() const override {
+    return ReturnOnlyFiles::Unrelated;
+  }
 };
 W_TERM_PARSER(pcre, PcreExpr::parsePcre);
 W_TERM_PARSER(ipcre, PcreExpr::parseIPcre);

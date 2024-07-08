@@ -652,7 +652,8 @@ std::vector<NameAndDType> globNameAndDType(
     const std::string& mountPoint,
     const std::vector<std::string>& globPatterns,
     bool includeDotfiles,
-    bool splitGlobPattern = false) {
+    bool splitGlobPattern = false,
+    bool listOnlyFiles = false) {
   // TODO(xavierd): Once the config: "eden_split_glob_pattern" is rolled out
   // everywhere, remove this code.
   if (splitGlobPattern && globPatterns.size() > 1) {
@@ -667,6 +668,7 @@ std::vector<NameAndDType> globNameAndDType(
       params.globs() = std::vector<std::string>{globPattern};
       params.includeDotfiles() = includeDotfiles;
       params.wantDtype() = true;
+      params.listOnlyFiles() = listOnlyFiles;
       params.sync() = getSyncBehavior();
 
       globFutures.emplace_back(
@@ -685,6 +687,7 @@ std::vector<NameAndDType> globNameAndDType(
     params.globs() = globPatterns;
     params.includeDotfiles() = includeDotfiles;
     params.wantDtype() = true;
+    params.listOnlyFiles() = listOnlyFiles;
     params.sync() = getSyncBehavior();
 
     Glob glob;
@@ -865,12 +868,18 @@ class EdenView final : public QueryableView {
       bool includeDir = true) const {
     auto client = getEdenClient(thriftChannel_);
 
+    bool listOnlyFiles = false;
+    if (ctx->query->expr) {
+      listOnlyFiles =
+          ctx->query->expr->listOnlyFiles() == QueryExpr::ReturnOnlyFiles::Yes;
+    }
     auto fileInfo = globNameAndDType(
         client.get(),
         mountPoint_,
         globStrings,
         includeDotfiles,
-        splitGlobPattern_);
+        splitGlobPattern_,
+        listOnlyFiles);
 
     // Filter out any ignored files
     filterOutPaths(fileInfo, ctx);

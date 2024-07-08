@@ -30,6 +30,10 @@ class ExistsExpr : public QueryExpr {
     // `exists` doesn't constrain the path.
     return std::nullopt;
   }
+
+  ReturnOnlyFiles listOnlyFiles() const override {
+    return ReturnOnlyFiles::Unrelated;
+  }
 };
 W_TERM_PARSER(exists, ExistsExpr::parse);
 
@@ -70,6 +74,10 @@ class EmptyExpr : public QueryExpr {
       CaseSensitivity) const override {
     // `empty` doesn't constrain the path.
     return std::nullopt;
+  }
+
+  ReturnOnlyFiles listOnlyFiles() const override {
+    return ReturnOnlyFiles::Unrelated;
   }
 };
 W_TERM_PARSER(empty, EmptyExpr::parse);

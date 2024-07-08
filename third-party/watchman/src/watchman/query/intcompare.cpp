@@ -128,6 +128,10 @@ class SizeExpr : public QueryExpr {
     // `size` doesn't constrain the path.
     return std::nullopt;
   }
+
+  ReturnOnlyFiles listOnlyFiles() const override {
+    return ReturnOnlyFiles::Unrelated;
+  }
 };
 W_TERM_PARSER(size, SizeExpr::parse);
 

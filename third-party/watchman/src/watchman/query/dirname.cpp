@@ -174,6 +174,10 @@ class DirNameExpr : public QueryExpr {
 
     return std::vector<std::string>{outputPattern.string() + "/**"};
   }
+
+  ReturnOnlyFiles listOnlyFiles() const override {
+    return ReturnOnlyFiles::Unrelated;
+  }
 };
 
 W_TERM_PARSER(dirname, DirNameExpr::parseDirName);

@@ -182,6 +182,10 @@ class NameExpr : public QueryExpr {
     return std::vector<std::string>(
         globUpperBound.begin(), globUpperBound.end());
   }
+
+  ReturnOnlyFiles listOnlyFiles() const override {
+    return ReturnOnlyFiles::Unrelated;
+  }
 };
 
 W_TERM_PARSER(name, NameExpr::parseName);

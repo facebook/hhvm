@@ -77,6 +77,15 @@ class QueryExpr {
    */
   virtual std::optional<std::vector<std::string>> computeGlobUpperBound(
       CaseSensitivity) const = 0;
+
+  enum ReturnOnlyFiles { No, Yes, Unrelated };
+
+  /**
+   * Returns whether this expression only returns files.
+   * Used to determine if Eden can use the faster server-based
+   * method to handle this query.
+   */
+  virtual ReturnOnlyFiles listOnlyFiles() const = 0;
 };
 
 } // namespace watchman

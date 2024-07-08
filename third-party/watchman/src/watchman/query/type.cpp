@@ -108,6 +108,17 @@ class TypeExpr : public QueryExpr {
     // `type` doesn't constrain the path.
     return std::nullopt;
   }
+
+  /**
+   * Determines if this expression will return only files.
+   * An expression returns files if is not type 'd', for directories.
+   */
+  ReturnOnlyFiles listOnlyFiles() const override {
+    if (arg == 'd') {
+      return ReturnOnlyFiles::No;
+    }
+    return ReturnOnlyFiles::Yes;
+  }
 };
 W_TERM_PARSER(type, TypeExpr::parse);
 

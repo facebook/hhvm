@@ -96,6 +96,10 @@ class SuffixExpr : public QueryExpr {
     // it as unbounded.
     return std::nullopt;
   }
+
+  ReturnOnlyFiles listOnlyFiles() const override {
+    return ReturnOnlyFiles::Unrelated;
+  }
 };
 W_TERM_PARSER(suffix, SuffixExpr::parse);
 W_CAP_REG("suffix-set")

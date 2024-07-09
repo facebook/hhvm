@@ -78,6 +78,7 @@ struct Sets {
   93: set<IOBuf> iobufSet;
   # @lint-ignore THRIFTCHECKS
   2: set<Foo> structSet;
+  47: set<Color> colorSet;
 }
 
 struct Maps {
@@ -96,4 +97,5 @@ struct Maps {
   93: map<IOBuf, IOBuf> iobufMap;
   # @lint-ignore THRIFTCHECKS
   2: map<Foo, Foo> structMap;
+  47: map<Color, Color> colorMap;
 }

@@ -33,7 +33,11 @@ from folly.iobuf import IOBuf
 
 from parameterized import parameterized_class
 
-from python_test.containers.thrift_types import Foo as FooType, Maps as MapsType
+from python_test.containers.thrift_types import (
+    Color as ColorType,
+    Foo as FooType,
+    Maps as MapsType,
+)
 from python_test.maps.thrift_types import (
     easy as easyType,
     F14MapFollyString as F14MapFollyStringType,
@@ -80,6 +84,7 @@ class MapTests(unittest.TestCase):
         # pyre-ignore[16]: has no attribute `containers_types`
         self.Foo: Type[FooType] = self.containers_types.Foo
         self.Maps: Type[MapsType] = self.containers_types.Maps
+        self.Color: Type[ColorType] = self.containers_types.Color
 
     def test_recursive_const_map(self) -> None:
         self.assertEqual(self.LocationMap[1][1], 1)
@@ -118,6 +123,12 @@ class MapTests(unittest.TestCase):
         self.assertIn("test", x)
         self.assertNotIn(5, x)
         self.assertNotIn(x, x)
+
+    def test_contains_enum(self) -> None:
+        cmap = self.Maps(colorMap={c: c for c in [self.Color.red, self.Color.blue]})
+        self.assertIn(self.Color.red, cmap.colorMap)
+        self.assertIn(self.Color.blue, cmap.colorMap)
+        self.assertNotIn(self.Color.green, cmap.colorMap)
 
     def test_items_values(self) -> None:
         x = {"test": "value"}
@@ -232,3 +243,47 @@ class MapTests(unittest.TestCase):
             self.assertIs(
                 s.structMap[self.Foo(value=2)], s.structMap[self.Foo(value=2)]
             )
+
+
+# TODO: Collapse these two test cases into parameterized test above
+class MapImmutablePythonTests(unittest.TestCase):
+    Color = immutable_containers_types.Color
+    Maps = immutable_containers_types.Maps
+
+    def test_contains_enum(self) -> None:
+        cmap = self.Maps(colorMap={c: c for c in [self.Color.red, self.Color.blue]})
+        self.assertNotIn("str", cmap.colorMap)
+
+        # This behavior is more permissive than thrift-py3
+        # which implicitly converts int to enum
+        self.assertIn(0, cmap.colorMap)
+        self.assertIn(1, cmap.colorMap)
+        self.assertNotIn(2, cmap.colorMap)
+        # gross
+        self.assertEqual(cmap.colorMap[0], self.Color.red)
+        self.assertEqual(cmap.colorMap[1], self.Color.blue)
+
+        self.assertEqual(cmap.colorMap.get(0), self.Color.red)
+        self.assertEqual(cmap.colorMap.get(1), self.Color.blue)
+        self.assertEqual(cmap.colorMap.get(2), None)
+
+
+# TODO: Collapse these two test cases into parameterized test above
+class MapMutablePythonTests(unittest.TestCase):
+    # pyre-ignore
+    Color = mutable_containers_types.Color
+    # pyre-ignore
+    Maps = mutable_containers_types.Maps
+
+    # this test case documents behavior divergences from thrift-python
+    @unittest.expectedFailure
+    def test_contains_enum(self) -> None:
+        cmap = self.Maps(colorMap={c: c for c in [self.Color.red, self.Color.blue]})
+        # TODO(T194526180): mutable thrift-python should not raise
+        self.assertNotIn("str", cmap.colorMap)
+        # TODO(T194526180): mutable thrift-python should not raise
+        self.assertIn(0, cmap.colorMap)
+
+        self.assertEqual(cmap.colorMap.get(0), self.Color.red)
+        self.assertEqual(cmap.colorMap.get(1), self.Color.blue)
+        self.assertEqual(cmap.colorMap.get(2), None)

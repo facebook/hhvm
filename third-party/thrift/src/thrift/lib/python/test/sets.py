@@ -32,7 +32,7 @@ from folly.iobuf import IOBuf
 
 from parameterized import parameterized_class
 
-from python_test.containers.thrift_types import Foo, Sets
+from python_test.containers.thrift_types import Color, Foo, Sets
 from python_test.sets.thrift_types import (
     easy,
     EasySet,
@@ -60,6 +60,7 @@ class SetTests(unittest.TestCase):
         # pyre-ignore[16]: has no attribute `containers_types`
         self.Foo: Type[Foo] = self.containers_types.Foo
         self.Sets: Type[Sets] = self.containers_types.Sets
+        self.Color: Type[Color] = self.containers_types.Color
 
     def test_and(self) -> None:
         x = self.SetI32({1, 3, 4, 5})
@@ -100,6 +101,12 @@ class SetTests(unittest.TestCase):
         self.assertEqual(z - x, set(y) - set(x))
         self.assertEqual(x - z, set(x) - set(y))
         self.assertEqual(x.difference(y), set(x) - set(y))
+
+    def test_contains_enum(self) -> None:
+        cset = self.Sets(colorSet={self.Color.red, self.Color.blue})
+        self.assertIn(self.Color.red, cset.colorSet)
+        self.assertIn(self.Color.blue, cset.colorSet)
+        self.assertNotIn(self.Color.green, cset.colorSet)
 
     def test_comparisons(self) -> None:
         x = self.SetI32({1, 2, 3, 4})
@@ -254,3 +261,36 @@ class ImmutableSetTests(unittest.TestCase):
         self.assertLessEqual(a, f)
         self.assertGreaterEqual(a, d)
         self.assertGreaterEqual(f, a)
+
+
+# TODO: Collapse these two test cases into parameterized test above
+class SetImmutablePythonTests(unittest.TestCase):
+    Color = immutable_containers_types.Color
+    Sets = immutable_containers_types.Sets
+
+    def test_contains_enum(self) -> None:
+        cset = self.Sets(colorSet={self.Color.red, self.Color.blue})
+        self.assertNotIn("str", cset.colorSet)
+
+        # This behavior is more permissive than thrift-py3
+        # which implicitly converts int to enum
+        self.assertIn(0, cset.colorSet)
+        self.assertIn(1, cset.colorSet)
+        self.assertNotIn(2, cset.colorSet)
+
+
+# TODO: Collapse these two test cases into parameterized test above
+class SetMutablePythonTests(unittest.TestCase):
+    # pyre-ignore
+    Color = mutable_containers_types.Color
+    # pyre-ignore
+    Sets = mutable_containers_types.Sets
+
+    # this test case documents behavior divergences from thrift-python
+    @unittest.expectedFailure
+    def test_contains_enum(self) -> None:
+        cset = self.Sets(colorSet={self.Color.red, self.Color.blue})
+        # TODO(T194526180): mutable thrift-python should not raise
+        self.assertNotIn("str", cset.colorSet)
+        # TODO(T194526180): mutable thrift-python should not raise
+        self.assertIn(0, cset.colorSet)

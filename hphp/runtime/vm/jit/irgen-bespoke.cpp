@@ -1195,7 +1195,7 @@ bool canSpecializeCall(const IRGS& env, SrcKey sk) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void translateDispatchBespoke(IRGS& env, const NormalizedInstruction& ni) {
+void emitBespoke(IRGS& env, const NormalizedInstruction& ni) {
   auto const DEBUG_ONLY sk = ni.source;
   FTRACE_MOD(Trace::hhir, 2, "At {}: {}: perform bespoke translation\n",
              sk.offset(), opcodeToName(sk.op()));
@@ -1373,7 +1373,7 @@ jit::ArrayLayout guardToLayout(
         if (emitVanilla && target == bespoke) {
           emitVanilla(env);
         } else {
-          translateDispatchBespoke(env, ni);
+          emitBespoke(env, ni);
         }
         auto const next = [&]{
           IRUnit::Hinter next_hinter(env.irb->unit(), next_hint);
@@ -1395,10 +1395,10 @@ void guardToMultipleLayoutsAndEmit(
     const bespoke::SinkLayouts& sinkLayouts) {
   assertx(sinkLayouts.layouts.size() > 1);
 
-  auto const emitTranslation = [&](const bool vanilla){
-    vanilla && emitVanilla ?
-      emitVanilla(env) :
-      translateDispatchBespoke(env, ni);
+  auto const emitTranslation = [&](const bool vanilla) {
+    vanilla && emitVanilla
+      ? emitVanilla(env)
+      : emitBespoke(env, ni);
   };
 
   auto const kind = env.context.kind;
@@ -1537,7 +1537,7 @@ void emitLoggingDiamond(
       assertTypeLocation(env, loc, type);
 
       try {
-        translateDispatchBespoke(env, ni);
+        emitBespoke(env, ni);
       } catch (const FailedIRGen& exn) {
         FTRACE_MOD(Trace::region, 1,
           "bespoke irgen for {} failed with {} while vanilla irgen succeeded\n",
@@ -1850,7 +1850,7 @@ void handleSink(IRGS& env, const NormalizedInstruction& ni,
     assertx(sinkLayouts.layouts.size() > 0);
     if (sinkLayouts.layouts.size() == 1) {
       guardToLayout(env, ni, loc, type, nullptr, sinkLayouts);
-      translateDispatchBespoke(env, ni);
+      emitBespoke(env, ni);
     } else {
       guardToMultipleLayoutsAndEmit(env, ni, loc, type, nullptr, sinkLayouts);
     }
@@ -1872,7 +1872,7 @@ void handleSink(IRGS& env, const NormalizedInstruction& ni,
       if (layout.vanilla()) {
         emitVanilla(env);
       } else {
-        translateDispatchBespoke(env, ni);
+        emitBespoke(env, ni);
       }
     } else {
       guardToMultipleLayoutsAndEmit(env, ni, loc, type, emitVanilla, sinkLayouts);

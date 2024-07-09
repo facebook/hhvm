@@ -59,3 +59,26 @@ func TestNewSocketUnix(t *testing.T) {
 	}
 	defer s.Close()
 }
+
+func TestSocketClose(t *testing.T) {
+	listener, err := NewListener(":0")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	conn, err := net.Dial("tcp", listener.Addr().String())
+	if err != nil {
+		t.Fatalf("unexpected err: %+v", err)
+	}
+	sock, err := NewSocket(SocketConn(conn))
+	if err != nil {
+		t.Fatalf("unexpected err: %+v", err)
+	}
+	buf := make([]byte, 200)
+
+	go sock.Close()
+	_, err = sock.Read(buf)
+	if err == nil {
+		t.Fatalf("expected error reading closed socket, got nothing")
+	}
+}

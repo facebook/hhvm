@@ -161,6 +161,13 @@ class RpcOptions {
   RpcOptions& setFdsToSend(folly::SocketFds::ToSend);
   folly::SocketFds copySocketFdsToSend() const;
 
+  /**
+   * In the routing layer, this key can be used to create or select specific
+   * connections to a server.
+   */
+  RpcOptions& setConnectionKey(std::string key);
+  std::string_view getConnectionKey() const;
+
  private:
   using timeout_ms_t = uint32_t;
   timeout_ms_t timeout_{0};
@@ -178,6 +185,7 @@ class RpcOptions {
 
   std::string routingKey_;
   std::string shardId_;
+  std::string connectionKey_;
 
   // For sending and receiving headers.
   std::optional<transport::THeader::StringToStringMap> writeHeaders_;

@@ -282,5 +282,14 @@ folly::SocketFds RpcOptions::copySocketFdsToSend() const {
   return folly::SocketFds{fdsToSend_};
 }
 
+RpcOptions& RpcOptions::setConnectionKey(std::string key) {
+  connectionKey_ = std::move(key);
+  return *this;
+}
+
+std::string_view RpcOptions::getConnectionKey() const {
+  return connectionKey_;
+}
+
 } // namespace thrift
 } // namespace apache

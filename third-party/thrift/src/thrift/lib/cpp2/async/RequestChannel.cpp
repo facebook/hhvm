@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataPlugins.h>
 
+THRIFT_FLAG_DEFINE_int64(thrift_client_checksum_sampling_rate, 0);
+
 namespace apache {
 namespace thrift {
+
+RequestChannel::RequestChannel() {
+  setChecksumSamplingRate(THRIFT_FLAG(thrift_client_checksum_sampling_rate));
+}
 
 void RequestChannel::sendRequestResponse(
     const RpcOptions& rpcOptions,

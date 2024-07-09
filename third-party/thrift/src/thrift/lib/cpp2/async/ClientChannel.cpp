@@ -20,10 +20,6 @@
 #include <sys/utsname.h>
 #endif
 
-#include <thrift/lib/cpp2/Flags.h>
-
-THRIFT_FLAG_DEFINE_int64(thrift_client_checksum_sampling_rate, 0);
-
 namespace apache {
 namespace thrift {
 

@@ -36,6 +36,7 @@
 #include <thrift/lib/cpp/Thrift.h>
 #include <thrift/lib/cpp/concurrency/Thread.h>
 
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/MessageChannel.h>
 #include <thrift/lib/cpp2/async/RequestCallback.h>
@@ -46,6 +47,8 @@
 #include <thrift/lib/cpp2/util/Checksum.h>
 #include <thrift/lib/cpp2/util/MethodMetadata.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
+
+THRIFT_FLAG_DECLARE_int64(thrift_client_checksum_sampling_rate);
 
 namespace folly {
 class IOBuf;
@@ -99,6 +102,7 @@ using ChannelSendFunc = void (RequestChannel::*)(
  */
 class RequestChannel : virtual public folly::DelayedDestruction {
  protected:
+  RequestChannel();
   ~RequestChannel() override {}
 
  public:

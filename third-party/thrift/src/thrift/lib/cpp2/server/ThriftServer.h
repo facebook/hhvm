@@ -2136,8 +2136,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
  public:
   ThriftServer();
 
-  explicit ThriftServer(const ThriftServerInitialConfig& initialConfig);
-
  private:
   // method to encapsulate the default setup needed for the construction of
   // ThriftServer. Should be called in all ctors not calling the default ctor

@@ -278,24 +278,6 @@ ThriftServer::ThriftServer()
   initializeDefaults();
 }
 
-ThriftServer::ThriftServer(const ThriftServerInitialConfig& initialConfig)
-    : thriftConfig_(initialConfig),
-      adaptiveConcurrencyController_{
-          apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
-          thriftConfig_.getMaxRequests().getObserver(),
-          detail::getThriftServerConfig(*this)},
-      cpuConcurrencyController_{
-          detail::makeCPUConcurrencyControllerConfig(this),
-          *this,
-          detail::getThriftServerConfig(*this)},
-      addresses_(1),
-      wShutdownSocketSet_(folly::tryGetShutdownSocketSet()),
-      lastRequestTime_(
-          std::chrono::steady_clock::now().time_since_epoch().count()) {
-  tracker_.emplace(instrumentation::kThriftServerTrackerKey, *this);
-  initializeDefaults();
-}
-
 void ThriftServer::initializeDefaults() {
   if (FLAGS_thrift_ssl_policy == "required") {
     sslPolicy_ = SSLPolicy::REQUIRED;

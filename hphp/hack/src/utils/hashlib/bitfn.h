@@ -68,11 +68,7 @@ static inline uint64_t swap64(uint64_t a)
 #endif
 
 /* big endian to cpu */
-#ifdef __FreeBSD__
-#include <sys/endian.h>
-#else
 #include <endian.h>
-#endif
 
 #if LITTLE_ENDIAN == BYTE_ORDER
 #define be32_to_cpu(a) swap32(a)

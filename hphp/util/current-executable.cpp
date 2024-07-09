@@ -17,10 +17,6 @@
 #include "hphp/util/current-executable.h"
 #include <limits.h>
 
-#ifdef __FreeBSD__
-#include <sys/sysctl.h>
-#endif
-
 #include <folly/portability/Unistd.h>
 
 namespace HPHP {
@@ -30,20 +26,6 @@ std::string current_executable_path() {
   char result[PATH_MAX];
   ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
   return std::string(result, (count > 0) ? count : 0);
-#elif defined(__FreeBSD__)
-  char result[PATH_MAX];
-  size_t size = sizeof(result);
-  int mib[4];
-
-  mib[0] = CTL_KERN;
-  mib[1] = KERN_PROC;
-  mib[2] = KERN_PROC_PATHNAME;
-  mib[3] = -1;
-
-  if (sysctl(mib, 4, result, &size, nullptr, 0) < 0) {
-      return std::string();
-  }
-  return std::string(result, (size > 0) ? size : 0);
 #else
   // XXX: How do you do this on your platform?
   return std::string();
@@ -51,7 +33,7 @@ std::string current_executable_path() {
 }
 
 std::string current_executable_directory() {
-#if defined(__linux__) || defined(__FreeBSD__)
+#if defined(__linux__) 
   std::string path = current_executable_path();
   return path.substr(0, path.find_last_of("/"));
 #else

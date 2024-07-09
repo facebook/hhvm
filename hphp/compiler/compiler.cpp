@@ -482,19 +482,6 @@ RepoGlobalData getGlobalData() {
 }
 
 void setCoredumps(CompilerOptions& po) {
-#ifdef __FreeBSD__
-  struct rlimit rl;
-  getrlimit(RLIMIT_CORE, &rl);
-  if (!po.coredump) {
-    po.coredump = rl.rlim_cur > 0;
-    return;
-  }
-  rl.rlim_cur = 80000000LL;
-  if (rl.rlim_max < rl.rlim_cur) {
-    rl.rlim_max = rl.rlim_cur;
-  }
-  setrlimit(RLIMIT_CORE, &rl);
-#else
   struct rlimit64 rl;
   getrlimit64(RLIMIT_CORE, &rl);
   if (!po.coredump) {
@@ -506,7 +493,6 @@ void setCoredumps(CompilerOptions& po) {
     rl.rlim_max = rl.rlim_cur;
   }
   setrlimit64(RLIMIT_CORE, &rl);
-#endif
 }
 
 int prepareOptions(CompilerOptions &po, int argc, char **argv) {

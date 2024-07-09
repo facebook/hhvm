@@ -34,14 +34,6 @@ std::shared_ptr<T> getSingleton() {
 
 #define PHP_DIR_SEPARATOR '/'
 
-#if defined(__FreeBSD__)
-char *strndup(const char* str, size_t len);
-int dprintf(int fd, ATTRIBUTE_PRINTF_STRING const char *format, ...)
-  ATTRIBUTE_PRINTF(2,3);
-
-int pipe2(int pipefd[2], int flags);
-#endif
-
 /*
  * Drop the cached pages associated with the file from the file system
  * cache, if supported on our build target.

@@ -152,7 +152,7 @@ void init(const std::string& extractPath,
   // problems. Fixed in https://reviews.llvm.org/D56928. Clang builds also
   // need -fstandalone-debug to emit full types in DWARF.
   return;
-#elif defined(__linux__) || defined(__FreeBSD__)
+#elif defined(__linux__) 
 
   using init_func_t = const Metadata*(*)(std::size_t&);
 

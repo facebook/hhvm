@@ -120,7 +120,7 @@ std::string Type::toString() const {
 
 std::unique_ptr<TypeParser> TypeParser::make(const std::string& filename,
                                              int num_threads) {
-#if defined(__linux__) || defined(__FreeBSD__)
+#if defined(__linux__)
   std::unique_ptr<TypeParser> make_dwarf_type_parser(const std::string&,
                                                      int);
   return make_dwarf_type_parser(filename, num_threads);
@@ -130,7 +130,7 @@ std::unique_ptr<TypeParser> TypeParser::make(const std::string& filename,
 }
 
 std::unique_ptr<Printer> Printer::make(const std::string& filename) {
-#if defined(__linux__) || defined(__FreeBSD__)
+#if defined(__linux__)
   std::unique_ptr<Printer> make_dwarf_printer(const std::string&);
   return make_dwarf_printer(filename);
 #else

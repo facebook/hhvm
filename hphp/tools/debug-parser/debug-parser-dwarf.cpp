@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#if defined(__linux__) || defined(__FreeBSD__)
+#if defined(__linux__) 
 
 #include <folly/Demangle.h>
 #include <folly/Format.h>

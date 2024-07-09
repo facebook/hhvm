@@ -15,6 +15,7 @@ class Containers;
 class MyDataItem;
 class MyUnion;
 class MyException;
+class MyExceptionWithMessage;
 class ReservedKeyword;
 class UnionToBeRenamed;
 } // namespace test::fixtures::basic

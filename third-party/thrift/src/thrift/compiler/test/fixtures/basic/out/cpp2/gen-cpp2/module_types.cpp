@@ -751,6 +751,158 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::test::fixtures::basic::MyExceptionWithMessage>::translateFieldName(
+    std::string_view _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test::fixtures::basic {
+
+const char* MyExceptionWithMessage::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic/MyExceptionWithMessage";
+}
+
+std::string_view MyExceptionWithMessage::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyExceptionWithMessage>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view MyExceptionWithMessage::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyExceptionWithMessage>::name;
+}
+
+MyExceptionWithMessage::MyExceptionWithMessage(const MyExceptionWithMessage&) = default;
+MyExceptionWithMessage& MyExceptionWithMessage::operator=(const MyExceptionWithMessage&) = default;
+MyExceptionWithMessage::MyExceptionWithMessage() :
+      __fbthrift_field_MyIntField() {
+}
+
+MyExceptionWithMessage::MyExceptionWithMessage(std::string __message) : MyExceptionWithMessage() {
+  __fbthrift_field_MyStringField = std::move(__message);
+}
+
+
+MyExceptionWithMessage::~MyExceptionWithMessage() {}
+
+MyExceptionWithMessage::MyExceptionWithMessage([[maybe_unused]] MyExceptionWithMessage&& other) noexcept :
+    __fbthrift_field_MyIntField(std::move(other.__fbthrift_field_MyIntField)),
+    __fbthrift_field_MyStringField(std::move(other.__fbthrift_field_MyStringField)),
+    __fbthrift_field_myStruct(std::move(other.__fbthrift_field_myStruct)),
+    __fbthrift_field_myUnion(std::move(other.__fbthrift_field_myUnion)),
+    __isset(other.__isset) {
+}
+
+MyExceptionWithMessage& MyExceptionWithMessage::operator=([[maybe_unused]] MyExceptionWithMessage&& other) noexcept {
+    this->__fbthrift_field_MyIntField = std::move(other.__fbthrift_field_MyIntField);
+    this->__fbthrift_field_MyStringField = std::move(other.__fbthrift_field_MyStringField);
+    this->__fbthrift_field_myStruct = std::move(other.__fbthrift_field_myStruct);
+    this->__fbthrift_field_myUnion = std::move(other.__fbthrift_field_myUnion);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+MyExceptionWithMessage::MyExceptionWithMessage(apache::thrift::FragileConstructor, ::std::int64_t MyIntField__arg, ::std::string MyStringField__arg, ::test::fixtures::basic::MyStruct myStruct__arg, ::test::fixtures::basic::MyUnion myUnion__arg) :
+    __fbthrift_field_MyIntField(std::move(MyIntField__arg)),
+    __fbthrift_field_MyStringField(std::move(MyStringField__arg)),
+    __fbthrift_field_myStruct(std::move(myStruct__arg)),
+    __fbthrift_field_myUnion(std::move(myUnion__arg)) { 
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+}
+
+
+void MyExceptionWithMessage::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_MyIntField = ::std::int64_t();
+  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  ::apache::thrift::clear(this->__fbthrift_field_myStruct);
+  ::apache::thrift::clear(this->__fbthrift_field_myUnion);
+  __isset = {};
+}
+
+void MyExceptionWithMessage::__fbthrift_clear_terse_fields() {
+}
+
+bool MyExceptionWithMessage::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool MyExceptionWithMessage::operator==([[maybe_unused]] const MyExceptionWithMessage& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool MyExceptionWithMessage::operator<([[maybe_unused]] const MyExceptionWithMessage& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::test::fixtures::basic::MyStruct& MyExceptionWithMessage::get_myStruct() const& {
+  return __fbthrift_field_myStruct;
+}
+
+::test::fixtures::basic::MyStruct MyExceptionWithMessage::get_myStruct() && {
+  return std::move(__fbthrift_field_myStruct);
+}
+
+const ::test::fixtures::basic::MyUnion& MyExceptionWithMessage::get_myUnion() const& {
+  return __fbthrift_field_myUnion;
+}
+
+::test::fixtures::basic::MyUnion MyExceptionWithMessage::get_myUnion() && {
+  return std::move(__fbthrift_field_myUnion);
+}
+
+
+void swap([[maybe_unused]] MyExceptionWithMessage& a, [[maybe_unused]] MyExceptionWithMessage& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_MyIntField, b.__fbthrift_field_MyIntField);
+  swap(a.__fbthrift_field_MyStringField, b.__fbthrift_field_MyStringField);
+  swap(a.__fbthrift_field_myStruct, b.__fbthrift_field_myStruct);
+  swap(a.__fbthrift_field_myUnion, b.__fbthrift_field_myUnion);
+  swap(a.__isset, b.__isset);
+}
+
+template void MyExceptionWithMessage::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyExceptionWithMessage::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyExceptionWithMessage::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyExceptionWithMessage::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyExceptionWithMessage::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyExceptionWithMessage::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyExceptionWithMessage::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyExceptionWithMessage::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyExceptionWithMessage,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic::MyStruct>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyExceptionWithMessage,
+        ::apache::thrift::type_class::variant,
+        ::test::fixtures::basic::MyUnion>,
+    "inconsistent use of json option");
+
+} // namespace test::fixtures::basic
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::test::fixtures::basic::ReservedKeyword>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,

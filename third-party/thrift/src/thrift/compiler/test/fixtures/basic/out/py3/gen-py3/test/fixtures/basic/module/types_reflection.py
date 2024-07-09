@@ -324,6 +324,66 @@ def get_reflection__MyException() -> __StructSpec:
         ),
     )
     return spec
+def get_reflection__MyExceptionWithMessage() -> __StructSpec:
+    spec: __StructSpec = __StructSpec._fbthrift_create(
+        name="MyExceptionWithMessage",
+        kind=__StructType.EXCEPTION,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="MyIntField",
+            py_name="MyIntField",
+            type=int,
+            kind=__NumberType.I64,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=2,
+            name="MyStringField",
+            py_name="MyStringField",
+            type=str,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=3,
+            name="myStruct",
+            py_name="myStruct",
+            type=_test_fixtures_basic_module_types.MyStruct,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=4,
+            name="myUnion",
+            py_name="myUnion",
+            type=_test_fixtures_basic_module_types.MyUnion,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
 def get_reflection__ReservedKeyword() -> __StructSpec:
     spec: __StructSpec = __StructSpec._fbthrift_create(
         name="ReservedKeyword",

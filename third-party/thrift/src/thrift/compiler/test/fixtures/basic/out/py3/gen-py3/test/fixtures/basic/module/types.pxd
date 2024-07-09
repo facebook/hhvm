@@ -165,6 +165,21 @@ cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types_cust
         __field_ref[cMyUnion] myUnion_ref "myUnion_ref" ()
 
 
+    cdef cppclass cMyExceptionWithMessage "::test::fixtures::basic::MyExceptionWithMessage"(cTException):
+        cMyExceptionWithMessage() except +
+        cMyExceptionWithMessage(const cMyExceptionWithMessage&) except +
+        bint operator==(cMyExceptionWithMessage&)
+        bint operator!=(cMyExceptionWithMessage&)
+        bint operator<(cMyExceptionWithMessage&)
+        bint operator>(cMyExceptionWithMessage&)
+        bint operator<=(cMyExceptionWithMessage&)
+        bint operator>=(cMyExceptionWithMessage&)
+        __field_ref[cint64_t] MyIntField_ref "MyIntField_ref" ()
+        __field_ref[string] MyStringField_ref "MyStringField_ref" ()
+        __field_ref[cMyStruct] myStruct_ref "myStruct_ref" ()
+        __field_ref[cMyUnion] myUnion_ref "myUnion_ref" ()
+
+
     cdef cppclass cReservedKeyword "::test::fixtures::basic::ReservedKeyword":
         cReservedKeyword() except +
         cReservedKeyword(const cReservedKeyword&) except +
@@ -277,6 +292,21 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyException])
+
+
+
+cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
+    cdef shared_ptr[cMyExceptionWithMessage] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef _fbthrift_types_fields.__MyExceptionWithMessage_FieldsSetter _fields_setter
+    cdef inline object MyIntField_impl(self)
+    cdef inline object MyStringField_impl(self)
+    cdef inline object myStruct_impl(self)
+    cdef inline object myUnion_impl(self)
+    cdef MyStruct __fbthrift_cached_myStruct
+    cdef MyUnion __fbthrift_cached_myUnion
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyExceptionWithMessage])
 
 
 

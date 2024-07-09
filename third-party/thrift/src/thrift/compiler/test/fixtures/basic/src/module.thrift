@@ -22,6 +22,7 @@ namespace java.swift test.fixtures.basic
 namespace hack.module hack.module.test
 
 include "thrift/annotation/hack.thrift"
+include "thrift/annotation/thrift.thrift"
 
 const bool FLAG = true;
 const byte OFFSET = -10; // byte is an 8-bit signed integer
@@ -77,6 +78,14 @@ union MyUnion {
 
 exception MyException {
   1: i64 MyIntField;
+  2: string MyStringField;
+  3: MyStruct myStruct;
+  4: MyUnion myUnion;
+}
+
+exception MyExceptionWithMessage {
+  1: i64 MyIntField;
+  @thrift.ExceptionMessage
   2: string MyStringField;
   3: MyStruct myStruct;
   4: MyUnion myUnion;

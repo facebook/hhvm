@@ -95,6 +95,22 @@ class MyException_Builder(thrift.py3.builder.StructBuilder):
         yield "myStruct", self.myStruct
         yield "myUnion", self.myUnion
 
+_fbthrift_struct_type__MyExceptionWithMessage = _test_fixtures_basic_module_types.MyExceptionWithMessage
+class MyExceptionWithMessage_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__MyExceptionWithMessage
+
+    def __init__(self):
+        self.MyIntField: _typing.Optional[int] = None
+        self.MyStringField: _typing.Optional[str] = None
+        self.myStruct: _typing.Any = None
+        self.myUnion: _typing.Any = None
+
+    def __iter__(self):
+        yield "MyIntField", self.MyIntField
+        yield "MyStringField", self.MyStringField
+        yield "myStruct", self.myStruct
+        yield "myUnion", self.myUnion
+
 _fbthrift_struct_type__ReservedKeyword = _test_fixtures_basic_module_types.ReservedKeyword
 class ReservedKeyword_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__ReservedKeyword

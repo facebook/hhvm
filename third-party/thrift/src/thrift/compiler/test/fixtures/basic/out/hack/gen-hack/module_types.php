@@ -1219,6 +1219,212 @@ class MyException extends \TException implements \IThriftSyncStruct, \IThriftExc
 }
 
 /**
+ * Original thrift exception:-
+ * MyExceptionWithMessage
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/MyExceptionWithMessage'))>>
+class MyExceptionWithMessage extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'MyIntField',
+      'type' => \TType::I64,
+    ),
+    2 => shape(
+      'var' => 'MyStringField',
+      'type' => \TType::STRING,
+    ),
+    3 => shape(
+      'var' => 'myStruct',
+      'type' => \TType::STRUCT,
+      'class' => \test\fixtures\basic\MyStruct::class,
+    ),
+    4 => shape(
+      'var' => 'myUnion',
+      'type' => \TType::STRUCT,
+      'class' => \test\fixtures\basic\MyUnion::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'MyIntField' => 1,
+    'MyStringField' => 2,
+    'myStruct' => 3,
+    'myUnion' => 4,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'MyIntField' => ?int,
+    ?'MyStringField' => ?string,
+    ?'myStruct' => ?\test\fixtures\basic\MyStruct,
+    ?'myUnion' => ?\test\fixtures\basic\MyUnion,
+  );
+
+  const int STRUCTURAL_ID = 6170249099518146787;
+  /**
+   * Original thrift field:-
+   * 1: i64 MyIntField
+   */
+  public int $MyIntField;
+  /**
+   * Original thrift field:-
+   * 2: string MyStringField
+   */
+  public string $MyStringField;
+  /**
+   * Original thrift field:-
+   * 3: module.MyStruct myStruct
+   */
+  public ?\test\fixtures\basic\MyStruct $myStruct;
+  /**
+   * Original thrift field:-
+   * 4: module.MyUnion myUnion
+   */
+  public ?\test\fixtures\basic\MyUnion $myUnion;
+
+  public function __construct(?int $MyIntField = null, ?string $MyStringField = null, ?\test\fixtures\basic\MyStruct $myStruct = null, ?\test\fixtures\basic\MyUnion $myUnion = null)[] {
+    parent::__construct();
+    $this->MyIntField = $MyIntField ?? 0;
+    $this->MyStringField = $MyStringField ?? '';
+    $this->myStruct = $myStruct;
+    $this->myUnion = $myUnion;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'MyIntField'),
+      Shapes::idx($shape, 'MyStringField'),
+      Shapes::idx($shape, 'myStruct'),
+      Shapes::idx($shape, 'myUnion'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'MyExceptionWithMessage';
+  }
+
+  <<__Override>>
+  public function getMessage()[]: string {
+    return $this->MyStringField ?? '';
+  }
+
+  public static function getExceptionMetadata()[]: \tmeta_ThriftException {
+    return \tmeta_ThriftException::fromShape(
+      shape(
+        "name" => "module.MyExceptionWithMessage",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "MyIntField",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "MyStringField",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.MyStruct",
+                    )
+                  ),
+                )
+              ),
+              "name" => "myStruct",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 4,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.MyUnion",
+                    )
+                  ),
+                )
+              ),
+              "name" => "myUnion",
+            )
+          ),
+        ],
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+        'MyStringField' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'MyIntField') !== null) {
+      $this->MyIntField = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['MyIntField']);
+    }
+    if (idx($parsed, 'MyStringField') !== null) {
+      $this->MyStringField = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['MyStringField']);
+    }
+    if (idx($parsed, 'myStruct') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyStruct>($parsed['myStruct']));
+      $_tmp1 = \test\fixtures\basic\MyStruct::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->myStruct = $_tmp1;
+    }
+    if (idx($parsed, 'myUnion') !== null) {
+      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyUnion>($parsed['myUnion']));
+      $_tmp3 = \test\fixtures\basic\MyUnion::withDefaultValues();
+      $_tmp3->readFromJson($_tmp2);
+      $this->myUnion = $_tmp3;
+    }
+  }
+
+}
+
+/**
  * Original thrift struct:-
  * ReservedKeyword
  */

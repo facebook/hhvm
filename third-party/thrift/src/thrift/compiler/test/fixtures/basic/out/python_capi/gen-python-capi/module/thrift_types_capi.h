@@ -174,6 +174,37 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::test::fixtures::basic::MyExceptionWithMessage>
+    : public BaseExtractor<::test::fixtures::basic::MyExceptionWithMessage> {
+  static const bool kUsingMarshal = true;
+  ExtractorResult<::test::fixtures::basic::MyExceptionWithMessage> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::MyExceptionWithMessage>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::MyExceptionWithMessage>> {
+  ExtractorResult<::test::fixtures::basic::MyExceptionWithMessage> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::basic::MyExceptionWithMessage>
+    : public BaseConstructor<::test::fixtures::basic::MyExceptionWithMessage> {
+  static const bool kUsingMarshal = true;
+  PyObject* operator()(const ::test::fixtures::basic::MyExceptionWithMessage& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::MyExceptionWithMessage>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::MyExceptionWithMessage>> {
+  PyObject* operator()(const ::test::fixtures::basic::MyExceptionWithMessage& val);
+};
+
+template <>
 struct Extractor<::test::fixtures::basic::ReservedKeyword>
     : public BaseExtractor<::test::fixtures::basic::ReservedKeyword> {
   static const bool kUsingMarshal = true;

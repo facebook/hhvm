@@ -1015,6 +1015,148 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyException, self)
 
 @__cython.auto_pickle(False)
+cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
+    def __init__(MyExceptionWithMessage self, *args, **kwargs):
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyExceptionWithMessage]()
+        self._fields_setter = _fbthrift_types_fields.__MyExceptionWithMessage_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+        super().__init__( *args, **kwargs)
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return _fbthrift_IsSet("MyExceptionWithMessage", {
+          "MyIntField": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyIntField_ref().has_value(),
+          "MyStringField": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyStringField_ref().has_value(),
+          "myStruct": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myStruct_ref().has_value(),
+          "myUnion": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myUnion_ref().has_value(),
+        })
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyExceptionWithMessage] cpp_obj):
+        __fbthrift_inst = <MyExceptionWithMessage>MyExceptionWithMessage.__new__(MyExceptionWithMessage, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
+        _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
+        return __fbthrift_inst
+
+    cdef inline MyIntField_impl(self):
+
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyIntField_ref().value()
+
+    @property
+    def MyIntField(self):
+        return self.MyIntField_impl()
+
+    cdef inline MyStringField_impl(self):
+
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyStringField_ref().value()).decode('UTF-8')
+
+    @property
+    def MyStringField(self):
+        return self.MyStringField_impl()
+
+    cdef inline myStruct_impl(self):
+
+        if self.__fbthrift_cached_myStruct is None:
+            self.__fbthrift_cached_myStruct = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myStruct_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        return self.__fbthrift_cached_myStruct
+
+    @property
+    def myStruct(self):
+        return self.myStruct_impl()
+
+    cdef inline myUnion_impl(self):
+
+        if self.__fbthrift_cached_myUnion is None:
+            self.__fbthrift_cached_myUnion = MyUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myUnion_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        return self.__fbthrift_cached_myUnion
+
+    @property
+    def myUnion(self):
+        return self.myUnion_impl()
+
+
+    def __hash__(MyExceptionWithMessage self):
+        return super().__hash__()
+
+    def __repr__(MyExceptionWithMessage self):
+        return super().__repr__()
+
+    def __str__(MyExceptionWithMessage self):
+        field = self.MyStringField
+        if field is None:
+            return str(field)
+        return field
+
+
+    def __copy__(MyExceptionWithMessage self):
+        cdef shared_ptr[cMyExceptionWithMessage] cpp_obj = make_shared[cMyExceptionWithMessage](
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        )
+        return MyExceptionWithMessage._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cMyExceptionWithMessage](
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<MyExceptionWithMessage>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__MyExceptionWithMessage()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        ExceptionMetadata[cMyExceptionWithMessage].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyExceptionWithMessage"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cMyExceptionWithMessage](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 4
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MyExceptionWithMessage self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cMyExceptionWithMessage](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(MyExceptionWithMessage self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyExceptionWithMessage]()
+        with nogil:
+            needed = serializer.cdeserialize[cMyExceptionWithMessage](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+        return needed
+
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "test.fixtures.basic.module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.MyExceptionWithMessage, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyExceptionWithMessage, self)
+
+@__cython.auto_pickle(False)
 cdef class ReservedKeyword(thrift.py3.types.Struct):
     def __init__(ReservedKeyword self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cReservedKeyword]()

@@ -187,6 +187,29 @@ class MyException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatib
     def _to_py_deprecated(self) -> "module.ttypes.MyException": ...  # type: ignore
 
 
+class _fbthrift_compatible_with_MyExceptionWithMessage:
+    pass
+
+
+class MyExceptionWithMessage(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_MyExceptionWithMessage):
+    MyIntField: _typing.Final[int] = ...
+    MyStringField: _typing.Final[str] = ...
+    myStruct: _typing.Final[MyStruct] = ...
+    myUnion: _typing.Final[MyUnion] = ...
+    def __init__(
+        self, *,
+        MyIntField: _typing.Optional[int]=...,
+        MyStringField: _typing.Optional[str]=...,
+        myStruct: _typing.Optional[_fbthrift_compatible_with_MyStruct]=...,
+        myUnion: _typing.Optional[_fbthrift_compatible_with_MyUnion]=...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyStruct, MyUnion]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.basic.module.types.MyExceptionWithMessage": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.MyExceptionWithMessage": ...  # type: ignore
+
+
 class _fbthrift_compatible_with_ReservedKeyword:
     pass
 

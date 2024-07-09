@@ -25,6 +25,9 @@ cdef object MyUnion_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyUnion]& c_stru
 cdef shared_ptr[_fbthrift_ctypes.cMyException] MyException_convert_to_cpp(object inst) except*
 cdef object MyException_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyException]& c_struct)
 
+cdef shared_ptr[_fbthrift_ctypes.cMyExceptionWithMessage] MyExceptionWithMessage_convert_to_cpp(object inst) except*
+cdef object MyExceptionWithMessage_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyExceptionWithMessage]& c_struct)
+
 cdef shared_ptr[_fbthrift_ctypes.cReservedKeyword] ReservedKeyword_convert_to_cpp(object inst) except*
 cdef object ReservedKeyword_from_cpp(const shared_ptr[_fbthrift_ctypes.cReservedKeyword]& c_struct)
 

@@ -69,6 +69,17 @@ struct ForEachField<::test::fixtures::basic::MyException> {
 };
 
 template <>
+struct ForEachField<::test::fixtures::basic::MyExceptionWithMessage> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).MyIntField_ref()...);
+    f(1, static_cast<T&&>(t).MyStringField_ref()...);
+    f(2, static_cast<T&&>(t).myStruct_ref()...);
+    f(3, static_cast<T&&>(t).myUnion_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::test::fixtures::basic::ReservedKeyword> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {

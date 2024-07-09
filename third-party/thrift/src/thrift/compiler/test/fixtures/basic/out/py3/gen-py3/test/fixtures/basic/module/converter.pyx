@@ -38,6 +38,12 @@ cdef shared_ptr[_fbthrift_ctypes.cMyException] MyException_convert_to_cpp(object
 
 cdef object MyException_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyException]& c_struct):
     return _fbthrift_ctypes.MyException._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+cdef shared_ptr[_fbthrift_ctypes.cMyExceptionWithMessage] MyExceptionWithMessage_convert_to_cpp(object inst) except*:
+    return (<_fbthrift_ctypes.MyExceptionWithMessage?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+
+
+cdef object MyExceptionWithMessage_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyExceptionWithMessage]& c_struct):
+    return _fbthrift_ctypes.MyExceptionWithMessage._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 cdef shared_ptr[_fbthrift_ctypes.cReservedKeyword] ReservedKeyword_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.ReservedKeyword?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 

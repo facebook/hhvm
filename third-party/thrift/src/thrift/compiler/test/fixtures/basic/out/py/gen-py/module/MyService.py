@@ -16,7 +16,7 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
-from .ttypes import UTF8STRINGS, MyEnum, HackEnum, MyStruct, Containers, MyDataItem, MyUnion, MyException, ReservedKeyword, UnionToBeRenamed, MyEnumAlias, MyDataItemAlias
+from .ttypes import UTF8STRINGS, MyEnum, HackEnum, MyStruct, Containers, MyDataItem, MyUnion, MyException, MyExceptionWithMessage, ReservedKeyword, UnionToBeRenamed, MyEnumAlias, MyDataItemAlias
 from thrift.Thrift import TProcessor
 import pprint
 import warnings

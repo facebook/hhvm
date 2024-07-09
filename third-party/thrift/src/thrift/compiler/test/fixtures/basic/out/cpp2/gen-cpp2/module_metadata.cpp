@@ -155,6 +155,29 @@ StructMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metada
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.MyExceptionWithMessage", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_MyExceptionWithMessage = res.first->second;
+  module_MyExceptionWithMessage.name() = "module.MyExceptionWithMessage";
+  module_MyExceptionWithMessage.is_union() = false;
+  static const auto* const
+  module_MyExceptionWithMessage_fields = new std::array<EncodedThriftField, 4>{ {
+    { 1, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "MyStringField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct_ref(), }},    { 3, "myStruct", false, std::make_unique<Struct<::test::fixtures::basic::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{ }},    { 4, "myUnion", false, std::make_unique<Union<::test::fixtures::basic::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{ }},  }};
+  for (const auto& f : *module_MyExceptionWithMessage_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_MyExceptionWithMessage.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::ReservedKeyword>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.ReservedKeyword", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
@@ -220,6 +243,25 @@ void ExceptionMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     module_MyException.fields()->push_back(std::move(field));
+  }
+}
+void ExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.exceptions()->emplace("module.MyExceptionWithMessage", ::apache::thrift::metadata::ThriftException{});
+  if (!res.second) {
+    return;
+  }
+  ::apache::thrift::metadata::ThriftException& module_MyExceptionWithMessage = res.first->second;
+  module_MyExceptionWithMessage.name() = "module.MyExceptionWithMessage";
+  static const auto* const
+  module_MyExceptionWithMessage_fields = new std::array<EncodedThriftField, 4>{ {
+    { 1, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "MyStringField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct_ref(), }},    { 3, "myStruct", false, std::make_unique<Struct<::test::fixtures::basic::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{ }},    { 4, "myUnion", false, std::make_unique<Union<::test::fixtures::basic::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{ }},  }};
+  for (const auto& f : *module_MyExceptionWithMessage_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    module_MyExceptionWithMessage.fields()->push_back(std::move(field));
   }
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>>::gen_simple_rpc([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {

@@ -138,6 +138,25 @@ inline void reset_field<::test::fixtures::basic::MyException>(
 }
 
 template<>
+inline void reset_field<::test::fixtures::basic::MyExceptionWithMessage>(
+    ::test::fixtures::basic::MyExceptionWithMessage& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.MyIntField_ref().copy_from(default_inst<::test::fixtures::basic::MyExceptionWithMessage>().MyIntField_ref());
+      return;
+    case 1:
+      obj.MyStringField_ref().copy_from(default_inst<::test::fixtures::basic::MyExceptionWithMessage>().MyStringField_ref());
+      return;
+    case 2:
+      obj.myStruct_ref().copy_from(default_inst<::test::fixtures::basic::MyExceptionWithMessage>().myStruct_ref());
+      return;
+    case 3:
+      obj.myUnion_ref().copy_from(default_inst<::test::fixtures::basic::MyExceptionWithMessage>().myUnion_ref());
+      return;
+  }
+}
+
+template<>
 inline void reset_field<::test::fixtures::basic::ReservedKeyword>(
     ::test::fixtures::basic::ReservedKeyword& obj, uint16_t index) {
   switch (index) {
@@ -190,6 +209,16 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::basic::MyException>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::test::fixtures::basic::MyExceptionWithMessage>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

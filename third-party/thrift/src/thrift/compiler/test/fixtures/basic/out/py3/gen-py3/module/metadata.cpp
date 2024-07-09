@@ -20,6 +20,7 @@ namespace basic {
   ::apache::thrift::detail::md::StructMetadata<MyDataItem>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyUnion>::gen(metadata);
   ::apache::thrift::detail::md::ExceptionMetadata<MyException>::gen(metadata);
+  ::apache::thrift::detail::md::ExceptionMetadata<MyExceptionWithMessage>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ReservedKeyword>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<UnionToBeRenamed>::gen(metadata);
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>>::gen(response);

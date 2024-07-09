@@ -38,6 +38,11 @@ cdef api int can_extract__test__fixtures__basic__module__MyException(object) exc
 
 cdef api object init__test__fixtures__basic__module__MyException(object data)
 
+cdef api int can_extract__test__fixtures__basic__module__MyExceptionWithMessage(object) except -1
+
+
+cdef api object init__test__fixtures__basic__module__MyExceptionWithMessage(object data)
+
 cdef api int can_extract__test__fixtures__basic__module__ReservedKeyword(object) except -1
 
 

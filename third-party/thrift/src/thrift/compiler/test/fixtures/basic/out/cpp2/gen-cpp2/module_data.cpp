@@ -193,6 +193,38 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures:
   3,
 }};
 
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::name = "MyExceptionWithMessage";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::fields_names = { {
+  "MyIntField"sv,
+  "MyStringField"sv,
+  "myStruct"sv,
+  "myUnion"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::fields_ids = { {
+  1,
+  2,
+  3,
+  4,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::fields_types = { {
+  TType::T_I64,
+  TType::T_STRING,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+}};
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::storage_names = { {
+  "__fbthrift_field_MyIntField"sv,
+  "__fbthrift_field_MyStringField"sv,
+  "__fbthrift_field_myStruct"sv,
+  "__fbthrift_field_myUnion"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::isset_indexes = { {
+  0,
+  1,
+  2,
+  3,
+}};
+
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::name = "ReservedKeyword";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_names = { {
   "reserved_field"sv,

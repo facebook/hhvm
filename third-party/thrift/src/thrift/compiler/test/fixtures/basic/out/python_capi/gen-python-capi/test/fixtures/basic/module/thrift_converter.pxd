@@ -18,6 +18,8 @@ cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h":
         cMyUnion()
     cdef cppclass cMyException "::test::fixtures::basic::MyException":
         cMyException()
+    cdef cppclass cMyExceptionWithMessage "::test::fixtures::basic::MyExceptionWithMessage":
+        cMyExceptionWithMessage()
     cdef cppclass cReservedKeyword "::test::fixtures::basic::ReservedKeyword":
         cReservedKeyword()
     cdef cppclass cUnionToBeRenamed "::test::fixtures::basic::UnionToBeRenamed":
@@ -42,6 +44,9 @@ cdef object MyUnion_from_cpp(const cMyUnion& c_struct)
 
 cdef cMyException MyException_convert_to_cpp(object inst) except*
 cdef object MyException_from_cpp(const cMyException& c_struct)
+
+cdef cMyExceptionWithMessage MyExceptionWithMessage_convert_to_cpp(object inst) except*
+cdef object MyExceptionWithMessage_from_cpp(const cMyExceptionWithMessage& c_struct)
 
 cdef cReservedKeyword ReservedKeyword_convert_to_cpp(object inst) except*
 cdef object ReservedKeyword_from_cpp(const cReservedKeyword& c_struct)

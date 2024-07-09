@@ -1985,6 +1985,344 @@ func (x *MyException) Error() string {
     return x.String()
 }
 
+type MyExceptionWithMessage struct {
+    MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
+    MyStringField string `thrift:"MyStringField,2" json:"MyStringField" db:"MyStringField"`
+    MyStruct *MyStruct `thrift:"myStruct,3" json:"myStruct" db:"myStruct"`
+    MyUnion *MyUnion `thrift:"myUnion,4" json:"myUnion" db:"myUnion"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*MyExceptionWithMessage)(nil)
+
+func NewMyExceptionWithMessage() *MyExceptionWithMessage {
+    return (&MyExceptionWithMessage{}).
+        SetMyIntFieldNonCompat(0).
+        SetMyStringFieldNonCompat("").
+        SetMyStructNonCompat(*NewMyStruct()).
+        SetMyUnionNonCompat(*NewMyUnion())
+}
+
+func (x *MyExceptionWithMessage) GetMyIntField() int64 {
+    return x.MyIntField
+}
+
+func (x *MyExceptionWithMessage) GetMyStringField() string {
+    return x.MyStringField
+}
+
+func (x *MyExceptionWithMessage) GetMyStruct() *MyStruct {
+    if !x.IsSetMyStruct() {
+        return nil
+    }
+
+    return x.MyStruct
+}
+
+func (x *MyExceptionWithMessage) GetMyUnion() *MyUnion {
+    if !x.IsSetMyUnion() {
+        return nil
+    }
+
+    return x.MyUnion
+}
+
+func (x *MyExceptionWithMessage) SetMyIntFieldNonCompat(value int64) *MyExceptionWithMessage {
+    x.MyIntField = value
+    return x
+}
+
+func (x *MyExceptionWithMessage) SetMyIntField(value int64) *MyExceptionWithMessage {
+    x.MyIntField = value
+    return x
+}
+
+func (x *MyExceptionWithMessage) SetMyStringFieldNonCompat(value string) *MyExceptionWithMessage {
+    x.MyStringField = value
+    return x
+}
+
+func (x *MyExceptionWithMessage) SetMyStringField(value string) *MyExceptionWithMessage {
+    x.MyStringField = value
+    return x
+}
+
+func (x *MyExceptionWithMessage) SetMyStructNonCompat(value MyStruct) *MyExceptionWithMessage {
+    x.MyStruct = &value
+    return x
+}
+
+func (x *MyExceptionWithMessage) SetMyStruct(value *MyStruct) *MyExceptionWithMessage {
+    x.MyStruct = value
+    return x
+}
+
+func (x *MyExceptionWithMessage) SetMyUnionNonCompat(value MyUnion) *MyExceptionWithMessage {
+    x.MyUnion = &value
+    return x
+}
+
+func (x *MyExceptionWithMessage) SetMyUnion(value *MyUnion) *MyExceptionWithMessage {
+    x.MyUnion = value
+    return x
+}
+
+func (x *MyExceptionWithMessage) IsSetMyStruct() bool {
+    return x != nil && x.MyStruct != nil
+}
+
+func (x *MyExceptionWithMessage) IsSetMyUnion() bool {
+    return x != nil && x.MyUnion != nil
+}
+
+func (x *MyExceptionWithMessage) writeField1(p thrift.Format) error {  // MyIntField
+    if err := p.WriteFieldBegin("MyIntField", thrift.I64, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.MyIntField
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyExceptionWithMessage) writeField2(p thrift.Format) error {  // MyStringField
+    if err := p.WriteFieldBegin("MyStringField", thrift.STRING, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.MyStringField
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyExceptionWithMessage) writeField3(p thrift.Format) error {  // MyStruct
+    if !x.IsSetMyStruct() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("myStruct", thrift.STRUCT, 3); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.MyStruct
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyExceptionWithMessage) writeField4(p thrift.Format) error {  // MyUnion
+    if !x.IsSetMyUnion() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("myUnion", thrift.STRUCT, 4); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.MyUnion
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyExceptionWithMessage) readField1(p thrift.Format) error {  // MyIntField
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.MyIntField = result
+    return nil
+}
+
+func (x *MyExceptionWithMessage) readField2(p thrift.Format) error {  // MyStringField
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.MyStringField = result
+    return nil
+}
+
+func (x *MyExceptionWithMessage) readField3(p thrift.Format) error {  // MyStruct
+    result := *NewMyStruct()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.MyStruct = &result
+    return nil
+}
+
+func (x *MyExceptionWithMessage) readField4(p thrift.Format) error {  // MyUnion
+    result := *NewMyUnion()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.MyUnion = &result
+    return nil
+}
+
+func (x *MyExceptionWithMessage) toString1() string {  // MyIntField
+    return fmt.Sprintf("%v", x.MyIntField)
+}
+
+func (x *MyExceptionWithMessage) toString2() string {  // MyStringField
+    return fmt.Sprintf("%v", x.MyStringField)
+}
+
+func (x *MyExceptionWithMessage) toString3() string {  // MyStruct
+    return fmt.Sprintf("%v", x.MyStruct)
+}
+
+func (x *MyExceptionWithMessage) toString4() string {  // MyUnion
+    return fmt.Sprintf("%v", x.MyUnion)
+}
+
+// Deprecated: Use NewMyExceptionWithMessage().GetMyStruct() instead.
+func (x *MyExceptionWithMessage) DefaultGetMyStruct() *MyStruct {
+    if !x.IsSetMyStruct() {
+        return NewMyStruct()
+    }
+    return x.MyStruct
+}
+
+// Deprecated: Use NewMyExceptionWithMessage().GetMyUnion() instead.
+func (x *MyExceptionWithMessage) DefaultGetMyUnion() *MyUnion {
+    if !x.IsSetMyUnion() {
+        return NewMyUnion()
+    }
+    return x.MyUnion
+}
+
+
+
+func (x *MyExceptionWithMessage) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("MyExceptionWithMessage"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField3(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField4(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyExceptionWithMessage) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // MyIntField
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // MyStringField
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        case (id == 3 && wireType == thrift.Type(thrift.STRUCT)):  // myStruct
+            if err := x.readField3(p); err != nil {
+                return err
+            }
+        case (id == 4 && wireType == thrift.Type(thrift.STRUCT)):  // myUnion
+            if err := x.readField4(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *MyExceptionWithMessage) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyExceptionWithMessage({")
+    sb.WriteString(fmt.Sprintf("MyIntField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("MyStringField:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("MyStruct:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("MyUnion:%s", x.toString4()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *MyExceptionWithMessage) Error() string {
+    return x.String()
+}
+
 type ReservedKeyword struct {
     ReservedField int32 `thrift:"reserved_field,1" json:"reserved_field" db:"reserved_field"`
 }
@@ -2280,6 +2618,7 @@ func RegisterTypes(registry interface {
     registry.RegisterType("test.dev/fixtures/basic/MyDataItem", func() any { return NewMyDataItem() })
     registry.RegisterType("test.dev/fixtures/basic/MyUnion", func() any { return NewMyUnion() })
     registry.RegisterType("test.dev/fixtures/basic/MyException", func() any { return NewMyException() })
+    registry.RegisterType("test.dev/fixtures/basic/MyExceptionWithMessage", func() any { return NewMyExceptionWithMessage() })
     registry.RegisterType("test.dev/fixtures/basic/ReservedKeyword", func() any { return NewReservedKeyword() })
     registry.RegisterType("test.dev/fixtures/basic/UnionToBeRenamed", func() any { return NewUnionToBeRenamed() })
 

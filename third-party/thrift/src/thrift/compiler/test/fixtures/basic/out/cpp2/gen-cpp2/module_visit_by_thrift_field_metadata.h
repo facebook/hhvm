@@ -109,6 +109,25 @@ struct VisitByFieldId<::test::fixtures::basic::MyException> {
 };
 
 template <>
+struct VisitByFieldId<::test::fixtures::basic::MyExceptionWithMessage> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).MyIntField_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).MyStringField_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).myStruct_ref());
+    case 4:
+      return f(3, static_cast<T&&>(t).myUnion_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic::MyExceptionWithMessage");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::test::fixtures::basic::ReservedKeyword> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {

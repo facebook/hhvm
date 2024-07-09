@@ -180,6 +180,39 @@ def gen_metadata_exception_MyException() -> _fbthrift_metadata.ThriftMetadata:
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
+def _fbthrift_gen_metadata_exception_MyExceptionWithMessage(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.MyExceptionWithMessage"
+
+    if qualified_name in metadata_struct.exceptions:
+        return metadata_struct
+    fields = [
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I64_TYPE), name="MyIntField", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="MyStringField", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.ExceptionMessage"), fields= {  }),
+        ]),
+        _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.MyStruct")), name="myStruct", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=4, type=_fbthrift_metadata.ThriftType(t_union=_fbthrift_metadata.ThriftUnionType(name="module.MyUnion")), name="myUnion", is_optional=False, structured_annotations=[
+        ]),
+    ]
+    struct_dict = dict(metadata_struct.exceptions)
+    struct_dict[qualified_name] = _fbthrift_metadata.ThriftException(name=qualified_name, fields=fields,
+        structured_annotations=[
+        ])
+    new_struct = metadata_struct(exceptions=struct_dict)
+
+     # MyIntField
+     # MyStringField
+    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # myStruct
+    new_struct = _fbthrift_gen_metadata_struct_MyUnion(new_struct) # myUnion
+
+    return new_struct
+def gen_metadata_exception_MyExceptionWithMessage() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_exception_MyExceptionWithMessage(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+# TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
+# instead of re-generating thrift structs
 def _fbthrift_gen_metadata_struct_ReservedKeyword(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
     qualified_name = "module.ReservedKeyword"
 
@@ -544,6 +577,7 @@ def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_gen_metadata_struct_MyDataItem(meta)
     meta = _fbthrift_gen_metadata_struct_MyUnion(meta)
     meta = _fbthrift_gen_metadata_exception_MyException(meta)
+    meta = _fbthrift_gen_metadata_exception_MyExceptionWithMessage(meta)
     meta = _fbthrift_gen_metadata_struct_ReservedKeyword(meta)
     meta = _fbthrift_gen_metadata_struct_UnionToBeRenamed(meta)
     meta = _fbthrift_gen_metadata_service_FooService(meta)

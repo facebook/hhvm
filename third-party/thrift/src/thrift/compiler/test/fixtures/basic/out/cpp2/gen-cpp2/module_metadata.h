@@ -73,6 +73,11 @@ class StructMetadata<::test::fixtures::basic::MyException> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::test::fixtures::basic::MyExceptionWithMessage> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class StructMetadata<::test::fixtures::basic::ReservedKeyword> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
@@ -84,6 +89,11 @@ class StructMetadata<::test::fixtures::basic::UnionToBeRenamed> {
 };
 template <>
 class ExceptionMetadata<::test::fixtures::basic::MyException> {
+ public:
+  static void gen(ThriftMetadata& metadata);
+};
+template <>
+class ExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage> {
  public:
   static void gen(ThriftMetadata& metadata);
 };

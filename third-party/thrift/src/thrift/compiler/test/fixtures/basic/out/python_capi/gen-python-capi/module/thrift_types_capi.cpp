@@ -34,6 +34,9 @@ bool ensure_module_imported() {
   static constexpr std::int16_t _fbthrift__MyException__tuple_pos[4] = {
     1, 2, 3, 4
   };
+  static constexpr std::int16_t _fbthrift__MyExceptionWithMessage__tuple_pos[4] = {
+    1, 2, 3, 4
+  };
   static constexpr std::int16_t _fbthrift__ReservedKeyword__tuple_pos[1] = {
     1
   };
@@ -630,6 +633,127 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       setStructField(
           *fbthrift_data,
           _fbthrift__MyException__tuple_pos[3],
+          *_fbthrift__myUnion) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
+}
+
+
+ExtractorResult<::test::fixtures::basic::MyExceptionWithMessage>
+Extractor<::test::fixtures::basic::MyExceptionWithMessage>::operator()(PyObject* obj) {
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a MyExceptionWithMessage");
+      }
+      return extractorError<::test::fixtures::basic::MyExceptionWithMessage>(
+          "Marshal error: MyExceptionWithMessage");
+  }
+  StrongRef fbThriftData(getExceptionThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::basic::MyExceptionWithMessage>>{}(*fbThriftData);
+}
+
+ExtractorResult<::test::fixtures::basic::MyExceptionWithMessage>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::basic::MyExceptionWithMessage>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::basic::MyExceptionWithMessage cpp;
+  std::optional<std::string_view> error;
+  Extractor<int64_t>{}.extractInto(
+      cpp.MyIntField_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyExceptionWithMessage__tuple_pos[0]),
+      error);
+  Extractor<Bytes>{}.extractInto(
+      cpp.MyStringField_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyExceptionWithMessage__tuple_pos[1]),
+      error);
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct>>{}.extractInto(
+      cpp.myStruct_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyExceptionWithMessage__tuple_pos[2]),
+      error);
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyUnion>>{}.extractInto(
+      cpp.myUnion_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyExceptionWithMessage__tuple_pos[3]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+
+
+int Extractor<::test::fixtures::basic::MyExceptionWithMessage>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic__module__MyExceptionWithMessage(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: MyExceptionWithMessage");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic::MyExceptionWithMessage>::operator()(
+    const ::test::fixtures::basic::MyExceptionWithMessage& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::MyExceptionWithMessage>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
+  return init__test__fixtures__basic__module__MyExceptionWithMessage(*fbthrift_data);
+}
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::MyExceptionWithMessage>>::operator()(
+    [[maybe_unused]] const ::test::fixtures::basic::MyExceptionWithMessage& val) {
+  StrongRef fbthrift_data(createStructTuple(4));
+  StrongRef _fbthrift__MyIntField(
+    Constructor<int64_t>{}
+    .constructFrom(val.MyIntField_ref()));
+  if (!_fbthrift__MyIntField ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__MyExceptionWithMessage__tuple_pos[0],
+          *_fbthrift__MyIntField) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__MyStringField(
+    Constructor<Bytes>{}
+    .constructFrom(val.MyStringField_ref()));
+  if (!_fbthrift__MyStringField ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__MyExceptionWithMessage__tuple_pos[1],
+          *_fbthrift__MyStringField) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__myStruct(
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct>>{}
+    .constructFrom(val.myStruct_ref()));
+  if (!_fbthrift__myStruct ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__MyExceptionWithMessage__tuple_pos[2],
+          *_fbthrift__myStruct) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__myUnion(
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyUnion>>{}
+    .constructFrom(val.myUnion_ref()));
+  if (!_fbthrift__myUnion ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__MyExceptionWithMessage__tuple_pos[3],
           *_fbthrift__myUnion) == -1) {
     return nullptr;
   }

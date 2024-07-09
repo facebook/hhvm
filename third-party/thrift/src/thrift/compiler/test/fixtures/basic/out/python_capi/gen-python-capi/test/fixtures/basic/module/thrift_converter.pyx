@@ -42,6 +42,12 @@ cdef cMyException MyException_convert_to_cpp(object inst) except *:
 cdef object MyException_from_cpp(const cMyException& c_struct):
     return cpp_to_python[cMyException](c_struct)
 
+cdef cMyExceptionWithMessage MyExceptionWithMessage_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cMyExceptionWithMessage](inst))
+
+cdef object MyExceptionWithMessage_from_cpp(const cMyExceptionWithMessage& c_struct):
+    return cpp_to_python[cMyExceptionWithMessage](c_struct)
+
 cdef cReservedKeyword ReservedKeyword_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cReservedKeyword](inst))
 

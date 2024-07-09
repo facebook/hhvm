@@ -16,6 +16,10 @@ namespace HH {
     'stack' => vec<mixed>,
     'ioWaitSample' => bool,
     'sourceType' => string,
+    ?'PageletWorkers' => int,
+    ?'XboxWorkers' => int,
+    ?'HttpWorkers' => int,
+    ?'CliWorkers' => int,
   );
 
   /**

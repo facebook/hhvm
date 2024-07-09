@@ -165,16 +165,18 @@ struct AdaptTemplatedNestedTestStruct {
   1: AdaptTemplatedTestStruct adaptedStruct;
 }
 
+@cpp.Name{value = "ThriftAdaptTestUnion"}
 union AdaptTestUnion {
   1: DurationMs delay;
   2: CustomProtocolType custom;
   @cpp.Adapter{name = "::apache::thrift::test::I32ToStringAdapter"}
   3: i32 i32_string_field;
-} (cpp.name = "ThriftAdaptTestUnion")
+}
 
+@cpp.Name{value = "ThriftAdaptedStruct"}
 struct AdaptedStruct {
   1: i64 data;
-} (cpp.name = "ThriftAdaptedStruct")
+}
 
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef AdaptedStruct AdaptedTypedef

@@ -71,28 +71,9 @@ template <>
 struct PatchType<type::binary_t> {
   using type = op::BinaryPatch;
 };
-template <class T>
-struct PatchType<type::struct_t<T>> {
-  using type = StructPatch<
-      ::apache::thrift::detail::st::private_access::patch_struct<T>>;
-};
-template <class T>
-struct PatchType<type::union_t<T>> {
-  using type =
-      UnionPatch<::apache::thrift::detail::st::private_access::patch_struct<T>>;
-};
 
 template <class T>
 struct SafePatchType {};
-
-template <class T>
-struct SafePatchType<type::struct_t<T>> {
-  using type = ::apache::thrift::detail::st::private_access::safe_patch<T>;
-};
-template <class T>
-struct SafePatchType<type::union_t<T>> {
-  using type = ::apache::thrift::detail::st::private_access::safe_patch<T>;
-};
 
 } // namespace detail
 

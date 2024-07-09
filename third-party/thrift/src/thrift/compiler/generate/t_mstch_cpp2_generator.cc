@@ -1194,7 +1194,6 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::scoped_enum_as_union_type},
             {"struct:extra_namespace", &cpp_mstch_struct::extra_namespace},
             {"struct:type_tag", &cpp_mstch_struct::type_tag},
-            {"struct:patch?", &cpp_mstch_struct::patch},
             {"struct:use_op_encode?", &cpp_mstch_struct::use_op_encode},
             {"struct:is_trivially_destructible?",
              &cpp_mstch_struct::is_trivially_destructible},
@@ -1650,12 +1649,6 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node any() {
     return struct_->uri() != "" &&
         !struct_->has_annotation("cpp.detail.no_any");
-  }
-
-  mstch::node patch() {
-    return !struct_->is_exception() &&
-        struct_->program()->inherit_annotation_or_null(
-            *struct_, kGeneratePatchUri) != nullptr;
   }
 
   mstch::node is_trivially_destructible() {
@@ -2780,17 +2773,6 @@ void validate_lazy_fields(diagnostic_context& ctx, const t_field& field) {
   }
 }
 
-void disallow_deprecated_generate_patch(
-    diagnostic_context& ctx, const t_structured& node) {
-  if (ctx.program().inherit_annotation_or_null(node, kGeneratePatchUri)) {
-    ctx.report(
-        node,
-        "no-generate-patch",
-        diagnostic_level::error,
-        "@patch.GeneratePatch is disallowed in C++");
-  }
-}
-
 void t_mstch_cpp2_generator::fill_validator_visitors(
     ast_validator& validator) const {
   validator.add_structured_definition_visitor(std::bind(
@@ -2801,8 +2783,6 @@ void t_mstch_cpp2_generator::fill_validator_visitors(
   validator.add_program_visitor(
       validate_splits(get_split_count(options()), client_name_to_split_count_));
   validator.add_field_visitor(validate_lazy_fields);
-  validator.add_structured_definition_visitor(
-      disallow_deprecated_generate_patch);
 }
 
 THRIFT_REGISTER_GENERATOR(mstch_cpp2, "cpp2", "");

@@ -192,11 +192,12 @@ class ServerConfigs {
 
   void setEnabled(bool enabled) { enabled_ = enabled; }
 
-  const std::unordered_set<std::string>& getInternalMethods() const {
+  const folly::sorted_vector_set<std::string>& getInternalMethods() const {
     return internalMethods_;
   }
 
-  void setInternalMethods(std::unordered_set<std::string> internalMethods) {
+  void setInternalMethods(
+      folly::sorted_vector_set<std::string> internalMethods) {
     internalMethods_ = std::move(internalMethods);
   }
 
@@ -258,7 +259,7 @@ class ServerConfigs {
   bool disableActiveRequestsTracking_{false};
   bool rejectRequestsUntilStarted_{false};
   std::atomic<bool> enabled_{true};
-  std::unordered_set<std::string> internalMethods_;
+  folly::sorted_vector_set<std::string> internalMethods_;
 };
 
 } // namespace server

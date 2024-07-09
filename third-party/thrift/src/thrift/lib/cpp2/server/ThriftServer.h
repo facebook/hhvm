@@ -2221,6 +2221,14 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     namedFactory->setNamePrefix(cpp2WorkerThreadName);
   }
 
+ private:
+  bool methodShouldBypassPreprocess(const std::string& method) const;
+
+  bool methodShouldBypassCheckOverload(const std::string& method) const;
+
+  bool methodShouldBypassCheckOverload(const std::string* method) const;
+
+ public:
   // if overloaded, returns applicable overloaded exception code.
   folly::Optional<OverloadResult> checkOverload(
       const transport::THeader::StringToStringMap* readHeaders = nullptr,

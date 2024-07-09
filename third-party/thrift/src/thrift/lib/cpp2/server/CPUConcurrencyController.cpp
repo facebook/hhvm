@@ -43,12 +43,14 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 CPUConcurrencyController::CPUConcurrencyController(
     folly::observer::Observer<Config> config,
     apache::thrift::server::ServerConfigs& serverConfigs,
-    apache::thrift::ThriftServerConfig& thriftServerConfig)
+    apache::thrift::ThriftServerConfig& thriftServerConfig,
+    std::optional<LoadFunc> loadFunc)
     : config_{(*config).getShared()},
       enabled_{(*config_.rlock())->enabled()},
       method_{(*config_.rlock())->method},
       serverConfigs_(serverConfigs),
-      thriftServerConfig_(thriftServerConfig) {
+      thriftServerConfig_(thriftServerConfig),
+      loadFunc_(std::move(loadFunc)) {
   scheduler_.setThreadName("CPUConcurrencyController-loop");
   scheduler_.start();
   configSchedulerCallback_ = config.addCallback(
@@ -329,10 +331,15 @@ bool CPUConcurrencyController::isRefractoryPeriodInternal(
 
 int64_t CPUConcurrencyController::getLoadInternal(
     const std::shared_ptr<const Config>& config) const {
+  auto& refreshPeriodMs = config->refreshPeriodMs;
+  auto& cpuLoadSource = config->cpuLoadSource;
+
+  if (loadFunc_) {
+    return std::clamp<int64_t>(
+        (*loadFunc_)(refreshPeriodMs, cpuLoadSource), 0, 100);
+  }
   return std::clamp<int64_t>(
-      detail::getCPULoadCounter(config->refreshPeriodMs, config->cpuLoadSource),
-      0,
-      100);
+      detail::getCPULoadCounter(refreshPeriodMs, cpuLoadSource), 0, 100);
 }
 
 uint32_t CPUConcurrencyController::getConcurrencyUpperBoundInternal(

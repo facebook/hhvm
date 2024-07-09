@@ -47,6 +47,9 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
 
 class CPUConcurrencyController {
  public:
+  using LoadFunc =
+      std::function<int64_t(std::chrono::milliseconds, CPULoadSource)>;
+
   enum class Mode : uint8_t {
     DISABLED,
     DRY_RUN,
@@ -125,7 +128,8 @@ class CPUConcurrencyController {
   CPUConcurrencyController(
       folly::observer::Observer<Config> config,
       apache::thrift::server::ServerConfigs& serverConfigs,
-      apache::thrift::ThriftServerConfig& thriftServerConfig);
+      apache::thrift::ThriftServerConfig& thriftServerConfig,
+      std::optional<LoadFunc> loadFunc = std::nullopt);
 
   ~CPUConcurrencyController();
 
@@ -162,6 +166,10 @@ class CPUConcurrencyController {
   std::shared_ptr<const Config> config() const { return config_.copy(); }
 
   serverdbginfo::CPUConcurrencyControllerDbgInfo getDbgInfo() const;
+
+  /* Allows to set custom LoadFunc for this CPU-CC. If function is not set we'll
+   * falback to THRIFT_PLUGGABLE_FUNCTION called getCPULoadCounter() */
+  void setLoadFunc(LoadFunc loadFunc) { loadFunc_ = std::move(loadFunc); }
 
  private:
   void cycleOnce();
@@ -210,6 +218,8 @@ class CPUConcurrencyController {
   folly::relaxed_atomic<bool> recentShedRequest_{false};
   std::chrono::steady_clock::time_point lastTotalRequestReset_{
       std::chrono::steady_clock::now()};
+
+  std::optional<LoadFunc> loadFunc_;
 };
 
 class ThriftServer;

@@ -643,7 +643,7 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
                          Block* done, SSATmp* base) {
   // We don't need to specialize on key type for value-only iterators.
   // However, we still need to call accessor.check to rule out tombstones.
-  auto const arr = accessor.checkBase(env, base, makeExitSlow(env));
+  auto const arr = accessor.checkBase(env, base, makeExit(env));
   auto const size = gen(env, Count, arr);
 
   ifThen(env,
@@ -727,7 +727,7 @@ Block* emitSpecializedHeader(IRGS& env, const Accessor& accessor,
 void emitSpecializedNext(IRGS& env, const Accessor& accessor,
                          const IterArgs& data, Block* footer,
                          SSATmp* base) {
-  base = accessor.checkBase(env, base, makeExitSlow(env));
+  base = accessor.checkBase(env, base, makeExit(env));
 
   auto const asIterPosType = [&](SSATmp* iterPos) {
     if (!accessor.isPtrIter()) return iterPos;

@@ -101,33 +101,19 @@ func (p *SimpleServer) addConnInfo(ctx context.Context, conn net.Conn) context.C
 	return WithConnInfo(ctx, conn)
 }
 
-// Serve starts listening on the transport and accepting new connections
-// and blocks until Stop is called or an error occurs.
-func (p *SimpleServer) Serve() error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	return p.ServeContext(ctx)
-}
-
 // ServeContext starts listening on the transport and accepting new connections
-// and blocks until Stop is called or an error occurs.
+// and blocks until cancel is called via context or an error occurs.
 func (p *SimpleServer) ServeContext(ctx context.Context) error {
 	go func() {
 		<-ctx.Done()
-		p.Stop()
+		p.quit <- struct{}{}
+		p.listener.Close()
 	}()
 	err := p.acceptLoopContext(ctx)
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}
 	return err
-}
-
-// Stop stops the server
-func (p *SimpleServer) Stop() error {
-	p.quit <- struct{}{}
-	p.listener.Close()
-	return nil
 }
 
 func (p *SimpleServer) processRequests(ctx context.Context, client net.Conn) error {

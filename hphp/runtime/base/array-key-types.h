@@ -108,6 +108,10 @@ struct ArrayKeyTypes {
     return m_bits;
   }
 
+  uint8_t toMissingBits() const {
+    return (~m_bits) & kAnyKey;
+  }
+
   /*
    * Call these methods when performing the appropriate bulk operation.
    */

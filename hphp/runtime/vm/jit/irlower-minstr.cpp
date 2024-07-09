@@ -544,7 +544,8 @@ void cgKeysetIterEnd(IRLS& env, const IRInstruction* inst) {
 
 void cgCheckDictKeys(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0).reg();
-  auto const mask = ~inst->extra<CheckDictKeys>()->keyTypes.toBits();
+  auto const mask = inst->extra<CheckDictKeys>()->keyTypes.toMissingBits();
+  assertx(mask != 0);  // Do not emit pointless checks.
 
   auto& v = vmain(env);
   auto const sf = v.makeReg();

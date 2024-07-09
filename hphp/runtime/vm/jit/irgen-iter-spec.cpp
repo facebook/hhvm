@@ -337,8 +337,10 @@ struct DictAccessor : public Accessor {
 
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
     auto const arr = gen(env, CheckType, exit, arrType(), base);
-    auto const data = ArrayKeyTypesData{m_keyTypes};
-    gen(env, CheckDictKeys, exit, data, m_keyJitType, arr);
+    if (m_keyTypes != ArrayKeyTypes::Any()) {
+      auto const data = ArrayKeyTypesData{m_keyTypes};
+      gen(env, CheckDictKeys, exit, data, m_keyJitType, arr);
+    }
     return arr;
   }
 

@@ -16,6 +16,8 @@
 
 cpp_include "folly/sorted_vector_types.h"
 
+include "thrift/annotation/cpp.thrift"
+
 struct StructA {
   1: bool fieldA;
   2: i32 fieldB;
@@ -29,18 +31,18 @@ struct StructA {
   10: map<list<set<i32>>, set<list<i32>>> fieldJ;
 }
 
-typedef map<i32, string> (cpp.template = "folly::sorted_vector_map") folly_map
-typedef set<i32> (cpp.template = "folly::sorted_vector_set") folly_set
-typedef set<folly_set> (cpp.template = "folly::sorted_vector_set") folly_set_set
-typedef map<folly_map, folly_map> (
-  cpp.template = "folly::sorted_vector_map",
-) folly_map_map
-typedef set<list<i32>> (
-  cpp.template = "folly::sorted_vector_set",
-) folly_list_set
-typedef map<list<folly_set>, folly_list_set> (
-  cpp.template = "folly::sorted_vector_map",
-) folly_list_set_map
+@cpp.Type{template = "folly::sorted_vector_map"}
+typedef map<i32, string> folly_map
+@cpp.Type{template = "folly::sorted_vector_set"}
+typedef set<i32> folly_set
+@cpp.Type{template = "folly::sorted_vector_set"}
+typedef set<folly_set> folly_set_set
+@cpp.Type{template = "folly::sorted_vector_map"}
+typedef map<folly_map, folly_map> folly_map_map
+@cpp.Type{template = "folly::sorted_vector_set"}
+typedef set<list<i32>> folly_list_set
+@cpp.Type{template = "folly::sorted_vector_map"}
+typedef map<list<folly_set>, folly_list_set> folly_list_set_map
 
 struct StructB {
   1: bool fieldA;
@@ -56,6 +58,5 @@ struct StructB {
 }
 
 // The following were automatically generated and may benefit from renaming.
-typedef set<folly_set_set> (
-  cpp.template = "folly::sorted_vector_set",
-) set_folly_set_set_4532
+@cpp.Type{template = "folly::sorted_vector_set"}
+typedef set<folly_set_set> set_folly_set_set_4532

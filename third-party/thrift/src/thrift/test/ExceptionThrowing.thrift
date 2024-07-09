@@ -17,9 +17,12 @@
 namespace cpp thrift.test
 namespace cpp2 thrift.test.cpp2
 
+include "thrift/annotation/thrift.thrift"
+
 exception SimpleException {
+  @thrift.ExceptionMessage
   1: required string message;
-} (message = 'message')
+}
 
 service ExceptionThrowingService {
   string echo(1: required string req);

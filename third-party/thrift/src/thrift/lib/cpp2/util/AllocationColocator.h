@@ -105,13 +105,7 @@
  * when `RootObject` is destroyed.
  *
  * For any Locator type, the `Builder` can be used to retrieve uninitialized
- * memory by caling `uninitialized(Locator)`.
- *
- * To avoid initialization complexity, `array<T>(N)` only provides uninitialized
- * access. This makes dealing with non-trivial typed arrays very cumbersome so
- * only trivially constructible and destructible types are allowed. The backdoor
- * for managing arrays of complex objects is to use `uninitialized` and manually
- * manage the memory.
+ * memory by calling `uninitialized(Locator)`.
  *
  * `object<T>` produces T* for trivially destructible types. For other types, it
  * returns an AllocationColocator<>::Ptr<T> which will call the destructor but

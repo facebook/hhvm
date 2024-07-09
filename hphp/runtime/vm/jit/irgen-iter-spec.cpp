@@ -785,17 +785,11 @@ Block* emitSpecializedFooter(IRGS& env, const Accessor& accessor,
   return footer;
 }
 
-// Use bespoke profiling (if enabled) to choose a layout.
-ArrayLayout getProfiledLayout(IRGS& env, SSATmp* base) {
+ArrayLayout getBaseLayout(SSATmp* base) {
   auto const baseDT = dt_modulo_persistence(base->type().toDataType());
   if (!allowBespokeArrayLikes()) return ArrayLayout::Vanilla();
   if (!arrayTypeCouldBeBespoke(baseDT)) return ArrayLayout::Vanilla();
-
-  auto const knownLayout = base->type().arrSpec().layout();
-  auto const sl = bespoke::layoutsForSink(
-    env.profTransIDs, curSrcKey(env), knownLayout);
-  assertx(sl.layouts.size() == 1);
-  return sl.layouts[0].layout;
+  return base->type().arrSpec().layout();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -817,7 +811,7 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
   auto const body = getBlock(env, nextSrcKey(env));
   auto const done = getBlock(env, bcOff(env) + doneOffset);
   auto const keyTypes = profiledResult.key_types;
-  auto const layout = getProfiledLayout(env, base);
+  auto const layout = getBaseLayout(base);
 
   FTRACE(2, "Trying to specialize IterInit: {} @ {}\n",
          keyTypes.show(), layout.describe());
@@ -877,7 +871,7 @@ bool specializeIterNext(IRGS& env, Offset loopOffset,
       auto const l = it->second.layout & base->type().arrSpec().layout();
       if (l != ArrayLayout::Bottom()) return l;
     }
-    return getProfiledLayout(env, base);
+    return getBaseLayout(base);
   }();
 
   FTRACE(2, "Trying to specialize IterNext: {} @ {}\n",

@@ -1186,6 +1186,8 @@ void emitBespoke(IRGS& env, const NormalizedInstruction& ni,
   FTRACE_MOD(Trace::hhir, 2, "At {}: {}: perform bespoke translation\n",
              sk.offset(), opcodeToName(sk.op()));
   switch (ni.op()) {
+    case Op::IterInit:
+    case Op::IterNext:
     case Op::UnsetM:
       // Standard implementation of these bytecodes handles all situations,
       // but benefits from specialized array typing.
@@ -1544,7 +1546,10 @@ void emitLoggingDiamond(
         // IncDecM and SetOpM might produce worse stack types right
         // now, as irgen-minstr optimizes certain cases while
         // irgen-bespoke does not yet.
-        if (ni.op() != Op::IncDecM && ni.op() != Op::SetOpM) {
+        // IterInit and IterNext might produce back control flow edges that
+        // reset type information.
+        if (ni.op() != Op::IncDecM && ni.op() != Op::SetOpM &&
+            !isIteratorOp(ni.op())) {
           for (uint32_t i = 0; i < vanillaLocalTypes.size(); i ++) {
             always_assert_flog(
               env.irb->fs().local(i).type <= vanillaLocalTypes[i],
@@ -1832,9 +1837,7 @@ void handleSink(IRGS& env, const NormalizedInstruction& ni,
   auto const sinkLayouts = bespoke::layoutsForSink(
     env.profTransIDs, ni.source, type.arrSpec().layout());
 
-  if (isIteratorOp(sk.op())) {
-    emitVanilla(env);
-  } else if (isFCall(sk.op())) {
+  if (isFCall(sk.op())) {
     assertx(sinkLayouts.layouts.size() > 0);
     if (sinkLayouts.layouts.size() == 1) {
       guardToLayout(env, ni, loc, type, nullptr, sinkLayouts);

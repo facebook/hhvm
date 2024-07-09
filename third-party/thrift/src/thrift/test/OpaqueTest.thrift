@@ -19,12 +19,16 @@ namespace cpp2 apache.thrift.test
 cpp_include "<unordered_map>"
 cpp_include "thrift/test/OpaqueTest.h"
 
-typedef double (cpp.type = "OpaqueDouble1", cpp.indirection) OpaqueDouble1
-typedef double (cpp.type = "OpaqueDouble2", cpp.indirection) OpaqueDouble2
-typedef i64 (cpp.type = "NonConvertibleId", cpp.indirection) NonConvertibleId
-typedef map<i32, OpaqueDouble1> (
-  cpp.template = "std::unordered_map",
-) OpaqueValuedMap
+include "thrift/annotation/cpp.thrift"
+
+@cpp.Type{name = "OpaqueDouble1"}
+typedef double (cpp.indirection) OpaqueDouble1
+@cpp.Type{name = "OpaqueDouble2"}
+typedef double (cpp.indirection) OpaqueDouble2
+@cpp.Type{name = "NonConvertibleId"}
+typedef i64 (cpp.indirection) NonConvertibleId
+@cpp.Type{template = "std::unordered_map"}
+typedef map<i32, OpaqueDouble1> OpaqueValuedMap
 
 struct OpaqueTestStruct {
   1: OpaqueDouble1 d1;

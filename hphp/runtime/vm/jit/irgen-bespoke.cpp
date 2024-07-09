@@ -504,23 +504,6 @@ void emitBespokeSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   emitSetElem(env, key, value, finish);
 }
 
-void emitBespokeUnsetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
-  auto const key = memberKey(env, mk);
-
-  assertx(key->type().isKnownDataType());
-
-  auto const arr = extractBase(env);
-
-  if (!key->isA(TInt | TStr)) {
-    gen(env, ThrowInvalidArrayKey, arr, key);
-  } else {
-    auto const newArr = gen(env, BespokeUnset, arr, key);
-    gen(env, StMem, ldMBase(env), newArr);
-  }
-
-  mFinalImpl(env, nDiscard, nullptr);
-}
-
 template <typename Finish>
 void structDictIncDec(IRGS& env, IncDecOp op, SSATmp* arr, SSATmp* key,
                       Finish finish) {
@@ -1195,20 +1178,25 @@ bool canSpecializeCall(const IRGS& env, SrcKey sk) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitBespoke(IRGS& env, const NormalizedInstruction& ni) {
+// This mechanism is deprecated and being removed. Implement bespoke handling
+// as part of regular bytecode implementation.
+void emitBespoke(IRGS& env, const NormalizedInstruction& ni,
+                 std::function<void(IRGS&)> emit) {
   auto const DEBUG_ONLY sk = ni.source;
   FTRACE_MOD(Trace::hhir, 2, "At {}: {}: perform bespoke translation\n",
              sk.offset(), opcodeToName(sk.op()));
   switch (ni.op()) {
+    case Op::UnsetM:
+      // Standard implementation of these bytecodes handles all situations,
+      // but benefits from specialized array typing.
+      emit(env);
+      return;
     case Op::QueryM:
       emitBespokeQueryM(env, ni.imm[0].u_IVA, (QueryMOp) ni.imm[1].u_OA,
                         ni.imm[2].u_KA);
       return;
     case Op::SetM:
       emitBespokeSetM(env, ni.imm[0].u_IVA, ni.imm[1].u_KA);
-      return;
-    case Op::UnsetM:
-      emitBespokeUnsetM(env, ni.imm[0].u_IVA, ni.imm[1].u_KA);
       return;
     case Op::IncDecM:
       emitBespokeIncDecM(env, ni.imm[0].u_IVA, (IncDecOp)ni.imm[1].u_OA,
@@ -1373,7 +1361,7 @@ jit::ArrayLayout guardToLayout(
         if (emitVanilla && target == bespoke) {
           emitVanilla(env);
         } else {
-          emitBespoke(env, ni);
+          emitBespoke(env, ni, emitVanilla);
         }
         auto const next = [&]{
           IRUnit::Hinter next_hinter(env.irb->unit(), next_hint);
@@ -1398,7 +1386,7 @@ void guardToMultipleLayoutsAndEmit(
   auto const emitTranslation = [&](const bool vanilla) {
     vanilla && emitVanilla
       ? emitVanilla(env)
-      : emitBespoke(env, ni);
+      : emitBespoke(env, ni, emitVanilla);
   };
 
   auto const kind = env.context.kind;
@@ -1537,7 +1525,7 @@ void emitLoggingDiamond(
       assertTypeLocation(env, loc, type);
 
       try {
-        emitBespoke(env, ni);
+        emitBespoke(env, ni, emitVanilla);
       } catch (const FailedIRGen& exn) {
         FTRACE_MOD(Trace::region, 1,
           "bespoke irgen for {} failed with {} while vanilla irgen succeeded\n",
@@ -1846,11 +1834,11 @@ void handleSink(IRGS& env, const NormalizedInstruction& ni,
 
   if (isIteratorOp(sk.op())) {
     emitVanilla(env);
-  } else if (isFCall(sk.op()) || sk.op() == OpUnsetM) {
+  } else if (isFCall(sk.op())) {
     assertx(sinkLayouts.layouts.size() > 0);
     if (sinkLayouts.layouts.size() == 1) {
       guardToLayout(env, ni, loc, type, nullptr, sinkLayouts);
-      emitBespoke(env, ni);
+      emitBespoke(env, ni, emitVanilla);
     } else {
       guardToMultipleLayoutsAndEmit(env, ni, loc, type, nullptr, sinkLayouts);
     }
@@ -1872,7 +1860,7 @@ void handleSink(IRGS& env, const NormalizedInstruction& ni,
       if (layout.vanilla()) {
         emitVanilla(env);
       } else {
-        emitBespoke(env, ni);
+        emitBespoke(env, ni, emitVanilla);
       }
     } else {
       guardToMultipleLayoutsAndEmit(env, ni, loc, type, emitVanilla, sinkLayouts);

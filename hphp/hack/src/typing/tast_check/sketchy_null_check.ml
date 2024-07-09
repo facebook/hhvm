@@ -15,7 +15,7 @@ module Env = Tast_env
 
 let warning_kind = Typing_warning.Sketchy_null_check
 
-let error_code = Typing_warning_utils.code warning_kind
+let error_codes = Typing_warning_utils.codes warning_kind
 
 let get_lvar_name = function
   | Lvar (_, id) -> Some (Local_id.get_name id)

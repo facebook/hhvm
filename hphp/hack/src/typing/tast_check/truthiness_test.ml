@@ -17,7 +17,7 @@ module MakeType = Typing_make_type
 
 let warning_kind = Typing_warning.Truthiness_test
 
-let error_code = Typing_warning_utils.code warning_kind
+let error_codes = Typing_warning_utils.codes warning_kind
 
 let add_warning env ~as_lint pos kind ty =
   Typing_warning_utils.add_for_migration

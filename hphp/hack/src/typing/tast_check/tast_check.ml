@@ -57,7 +57,11 @@ let visitor ctx =
 
   let warning_handlers =
     List.filter_map warning_checks ~f:(fun (module M) ->
-        if Typing_warning_utils.code_is_enabled tcopt M.error_code then
+        if
+          List.exists
+            M.error_codes
+            ~f:(Typing_warning_utils.code_is_enabled tcopt)
+        then
           Some (M.handler ~as_lint:false)
         else
           None)

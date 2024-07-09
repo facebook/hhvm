@@ -14,7 +14,7 @@ module Cls = Folded_class
 
 let warning_kind = Typing_warning.Duplicate_properties
 
-let error_code = Typing_warning_utils.code warning_kind
+let error_codes = Typing_warning_utils.codes warning_kind
 
 (* efficient check for List.length l > 1 *)
 let more_than_one l =

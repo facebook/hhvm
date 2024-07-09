@@ -15,7 +15,7 @@ module T = Typing_defs
 
 let warning_kind = Typing_warning.Is_as_always
 
-let error_code = Typing_warning_utils.code warning_kind
+let error_codes = Typing_warning_utils.codes warning_kind
 
 let nothing_ty = Typing_make_type.nothing Typing_reason.none
 

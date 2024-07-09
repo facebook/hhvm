@@ -13,7 +13,7 @@ module Env = Tast_env
 
 let warning_kind = Typing_warning.Cast_non_primitive
 
-let error_code = Typing_warning_utils.code warning_kind
+let error_codes = Typing_warning_utils.codes warning_kind
 
 let is_always_castable env ty =
   let open Typing_make_type in

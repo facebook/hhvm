@@ -21,7 +21,12 @@ let untyped_linters =
 let typed_linters tcopt =
   let warning_handlers =
     List.filter_map Tast_check.warning_checks ~f:(fun (module M) ->
-        if not @@ Typing_warning_utils.code_is_enabled tcopt M.error_code then
+        if
+          (* If at least one code is not checked as a hack warning,
+             then check it as a legacy lint. *)
+          List.exists M.error_codes ~f:(fun code ->
+              not @@ Typing_warning_utils.code_is_enabled tcopt code)
+        then
           Some (M.handler ~as_lint:true)
         else
           None)

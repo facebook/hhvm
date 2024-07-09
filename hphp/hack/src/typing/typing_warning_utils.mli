@@ -5,7 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-val code : ('x, 'a) Typing_warning.kind -> Error_codes.Warning.t
+val codes : ('x, 'a) Typing_warning.kind -> Error_codes.Warning.t list
 
 val code_is_enabled : GlobalOptions.t -> Error_codes.Warning.t -> bool
 

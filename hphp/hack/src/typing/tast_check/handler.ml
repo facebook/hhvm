@@ -12,7 +12,7 @@ end
 
 module Warning = struct
   module type S = sig
-    val error_code : Error_codes.Warning.t
+    val error_codes : Error_codes.Warning.t list
 
     val handler : as_lint:bool -> Tast_visitor.handler
   end

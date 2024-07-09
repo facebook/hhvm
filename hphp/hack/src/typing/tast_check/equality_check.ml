@@ -19,7 +19,7 @@ module SN = Naming_special_names
 
 let warning_kind = Typing_warning.Equality_check
 
-let error_code = Typing_warning_utils.code warning_kind
+let error_codes = Typing_warning_utils.codes warning_kind
 
 (** Warns when comparing two expression whose types are disjoint *)
 

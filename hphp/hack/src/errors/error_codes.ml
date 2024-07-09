@@ -781,13 +781,16 @@ end
 module Warning = struct
   type t =
     | SketchyEquality [@value 12001]
-    | IsAsAlways [@value 12002]
     | SketchyNullCheck [@value 12003]
     | NonDisjointCheck [@value 12004]
     | CastNonPrimitive [@value 12005]
     | TruthinessTest [@value 12006]
     | EqualityCheck [@value 12007]
     | Duplicate_properties [@value 12008]
+    | IsIsAlwaysTrue [@value 12009]
+    | IsIsAlwaysFalse [@value 12010]
+    | AsAlwaysSucceeds [@value 12011]
+    | AsAlwaysFails [@value 12012]
   [@@deriving enum, show { with_path = false }]
 end
 

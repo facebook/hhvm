@@ -16,7 +16,9 @@ module type Warning = sig
 
   val claim : t -> string
 
-  val code : Codes.t
+  val code : t -> Codes.t
+
+  val codes : Codes.t list
 
   val reasons : t -> Pos_or_decl.t Message.t list
 
@@ -37,6 +39,10 @@ module SketchyEquality = struct
   type t = Typing_warning.SketchyEquality.t
 
   let code = Codes.SketchyEquality
+
+  let codes = [code]
+
+  let code _ = code
 
   let claim { Typing_warning.SketchyEquality.result; _ } =
     let b =
@@ -67,7 +73,20 @@ end
 module IsAsAlways = struct
   type t = Typing_warning.IsAsAlways.t
 
-  let code = Codes.IsAsAlways
+  let code { Typing_warning.IsAsAlways.kind; _ } =
+    match kind with
+    | Typing_warning.IsAsAlways.Is_is_always_true -> Codes.IsIsAlwaysTrue
+    | Typing_warning.IsAsAlways.Is_is_always_false -> Codes.IsIsAlwaysFalse
+    | Typing_warning.IsAsAlways.As_always_succeeds _ -> Codes.AsAlwaysSucceeds
+    | Typing_warning.IsAsAlways.As_always_fails -> Codes.AsAlwaysFails
+
+  let codes =
+    [
+      Codes.IsIsAlwaysTrue;
+      Codes.IsIsAlwaysFalse;
+      Codes.AsAlwaysSucceeds;
+      Codes.AsAlwaysFails;
+    ]
 
   let lint_severity _ = Lints_core.Lint_warning
 
@@ -114,6 +133,10 @@ module SketchyNullCheck = struct
 
   let code = Codes.SketchyNullCheck
 
+  let codes = [code]
+
+  let code _ = code
+
   let lint_code _ = Lints_codes.Codes.sketchy_null_check
 
   let lint_severity _ = Lints_core.Lint_warning
@@ -145,6 +168,10 @@ module NonDisjointCheck = struct
 
   let code = Codes.NonDisjointCheck
 
+  let codes = [code]
+
+  let code _ = code
+
   let lint_code _ = Lints_codes.Codes.invalid_disjointness_check
 
   let lint_severity _ = Lints_core.Lint_warning
@@ -172,6 +199,10 @@ module CastNonPrimitive = struct
 
   let code = Codes.CastNonPrimitive
 
+  let codes = [code]
+
+  let code _ = code
+
   let lint_code _ = Lints_codes.Codes.cast_non_primitive
 
   let lint_severity _ = Lints_core.Lint_error
@@ -197,6 +228,10 @@ module TruthinessTest = struct
   type t = Typing_warning.TruthinessTest.t
 
   let code = Codes.TruthinessTest
+
+  let codes = [code]
+
+  let code _ = code
 
   let lint_code { kind; _ } =
     match kind with
@@ -245,6 +280,10 @@ module EqualityCheck = struct
 
   let code = Codes.EqualityCheck
 
+  let codes = [code]
+
+  let code _ = code
+
   let lint_code { kind; _ } =
     match kind with
     | Equality _ -> Lints_codes.Codes.non_equatable_comparison
@@ -286,6 +325,10 @@ module DuplicatedProperties = struct
   type t = Typing_warning.DuplicateProperties.t
 
   let code = Codes.Duplicate_properties
+
+  let codes = [code]
+
+  let code _ = code
 
   let lint_code { initialized_with_constant; _ } =
     if initialized_with_constant then
@@ -367,11 +410,11 @@ let code_is_enabled tcopt code =
 let add tcopt (type a x) ((pos, kind, warning) : (x, a) Typing_warning.t) : unit
     =
   let (module M) = module_of kind in
-  if code_is_enabled tcopt M.code then
+  if code_is_enabled tcopt (M.code warning) then
     Errors.add_error
       {
         User_error.severity;
-        code = Codes.to_enum M.code;
+        code = Codes.to_enum (M.code warning);
         claim = (pos, M.claim warning);
         reasons = M.reasons warning;
         quickfixes = M.quickfixes warning;
@@ -400,7 +443,7 @@ let add_for_migration
 
 let add env warning = add (Typing_env.get_tcopt env) warning
 
-let code (type a x) (kind : (x, a) Typing_warning.kind) : Error_codes.Warning.t
-    =
+let codes (type a x) (kind : (x, a) Typing_warning.kind) :
+    Error_codes.Warning.t list =
   let (module M) = module_of kind in
-  M.code
+  M.codes

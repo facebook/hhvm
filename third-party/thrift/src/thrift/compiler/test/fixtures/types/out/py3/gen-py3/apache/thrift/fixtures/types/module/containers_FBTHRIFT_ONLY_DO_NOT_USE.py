@@ -27,6 +27,8 @@ def get_types_reflection():
 __all__ = []
 
 class List__i64(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -64,6 +66,8 @@ Sequence.register(List__i64)
 __all__.append('List__i64')
 
 class List__i32(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -101,6 +105,8 @@ Sequence.register(List__i32)
 __all__.append('List__i32')
 
 class std_list__List__i32(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -138,6 +144,8 @@ Sequence.register(std_list__List__i32)
 __all__.append('std_list__List__i32')
 
 class std_deque__List__i32(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -175,6 +183,8 @@ Sequence.register(std_deque__List__i32)
 __all__.append('std_deque__List__i32')
 
 class folly_fbvector__List__i32(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -212,6 +222,8 @@ Sequence.register(folly_fbvector__List__i32)
 __all__.append('folly_fbvector__List__i32')
 
 class folly_small_vector__List__i32(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -249,6 +261,8 @@ Sequence.register(folly_small_vector__List__i32)
 __all__.append('folly_small_vector__List__i32')
 
 class std_list_int32_t__List__i32(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -286,6 +300,8 @@ Sequence.register(std_list_int32_t__List__i32)
 __all__.append('std_list_int32_t__List__i32')
 
 class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -327,6 +343,8 @@ Sequence.register(List__std_unordered_map__Map__i32_string)
 __all__.append('List__std_unordered_map__Map__i32_string')
 
 class _std_list__List__IncompleteListDep(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -364,6 +382,8 @@ Sequence.register(_std_list__List__IncompleteListDep)
 __all__.append('_std_list__List__IncompleteListDep')
 
 class folly_small_vector__List__CompleteListDep(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -401,6 +421,8 @@ Sequence.register(folly_small_vector__List__CompleteListDep)
 __all__.append('folly_small_vector__List__CompleteListDep')
 
 class List__AdaptedListDep(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -438,6 +460,8 @@ Sequence.register(List__AdaptedListDep)
 __all__.append('List__AdaptedListDep')
 
 class List__DependentAdaptedListDep(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items

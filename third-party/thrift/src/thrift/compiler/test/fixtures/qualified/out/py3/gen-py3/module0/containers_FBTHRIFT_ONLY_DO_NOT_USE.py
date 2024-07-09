@@ -26,6 +26,8 @@ def get_types_reflection():
 __all__ = []
 
 class List__Enum(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items

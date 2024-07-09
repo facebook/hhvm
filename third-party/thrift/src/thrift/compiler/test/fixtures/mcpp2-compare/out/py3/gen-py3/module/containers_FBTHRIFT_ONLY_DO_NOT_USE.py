@@ -27,6 +27,8 @@ def get_types_reflection():
 __all__ = []
 
 class List__Map__Empty_MyStruct(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -68,6 +70,8 @@ Sequence.register(List__Map__Empty_MyStruct)
 __all__.append('List__Map__Empty_MyStruct')
 
 class List__List__Map__Empty_MyStruct(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -109,6 +113,8 @@ Sequence.register(List__List__Map__Empty_MyStruct)
 __all__.append('List__List__Map__Empty_MyStruct')
 
 class List__List__List__Map__Empty_MyStruct(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -150,6 +156,8 @@ Sequence.register(List__List__List__Map__Empty_MyStruct)
 __all__.append('List__List__List__Map__Empty_MyStruct')
 
 class List__MyEnumA(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -188,6 +196,8 @@ Sequence.register(List__MyEnumA)
 __all__.append('List__MyEnumA')
 
 class List__ComplexUnion(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -225,6 +235,8 @@ Sequence.register(List__ComplexUnion)
 __all__.append('List__ComplexUnion')
 
 class List__string(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -264,6 +276,8 @@ Sequence.register(List__string)
 __all__.append('List__string')
 
 class List__bool(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -301,6 +315,8 @@ Sequence.register(List__bool)
 __all__.append('List__bool')
 
 class List__i32(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -338,6 +354,8 @@ Sequence.register(List__i32)
 __all__.append('List__i32')
 
 class List__List__i32(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -379,6 +397,8 @@ Sequence.register(List__List__i32)
 __all__.append('List__List__i32')
 
 class List__List__List__i32(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -420,6 +440,8 @@ Sequence.register(List__List__List__i32)
 __all__.append('List__List__List__i32')
 
 class List__List__List__List__i32(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -461,6 +483,8 @@ Sequence.register(List__List__List__List__i32)
 __all__.append('List__List__List__List__i32')
 
 class List__Set__string(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -502,6 +526,8 @@ Sequence.register(List__Set__string)
 __all__.append('List__Set__string')
 
 class List__binary(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -541,6 +567,8 @@ Sequence.register(List__binary)
 __all__.append('List__binary')
 
 class List__SimpleUnion(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -578,6 +606,8 @@ Sequence.register(List__SimpleUnion)
 __all__.append('List__SimpleUnion')
 
 class List__Set__SimpleUnion(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -619,6 +649,8 @@ Sequence.register(List__Set__SimpleUnion)
 __all__.append('List__Set__SimpleUnion')
 
 class List__Set__i32(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -660,6 +692,8 @@ Sequence.register(List__Set__i32)
 __all__.append('List__Set__i32')
 
 class folly_small_vector_int64_t_8__List__i64(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -697,6 +731,8 @@ Sequence.register(folly_small_vector_int64_t_8__List__i64)
 __all__.append('folly_small_vector_int64_t_8__List__i64')
 
 class std_list__List__i32(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -734,6 +770,8 @@ Sequence.register(std_list__List__i32)
 __all__.append('std_list__List__i32')
 
 class std_deque__List__string(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -773,6 +811,8 @@ Sequence.register(std_deque__List__string)
 __all__.append('std_deque__List__string')
 
 class List__Bar__double(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -810,6 +850,8 @@ Sequence.register(List__Bar__double)
 __all__.append('List__Bar__double')
 
 class List__Map__string_i32(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -851,6 +893,8 @@ Sequence.register(List__Map__string_i32)
 __all__.append('List__Map__string_i32')
 
 class List__Map__i16_string(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items
@@ -892,6 +936,8 @@ Sequence.register(List__Map__i16_string)
 __all__.append('List__Map__i16_string')
 
 class List__MyStruct(thrift.py3.types.List):
+    __slots__ = []
+
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
             _py_obj = items

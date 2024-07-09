@@ -18,11 +18,7 @@
 #include <sys/sysinfo.h>
 #endif
 
-#ifdef _WIN32
-#include <windows.h>
-#else
 #include <unistd.h>
-#endif
 
 // This function returns an option of a 9-int-member struct
 value hh_sysinfo(void) {
@@ -53,23 +49,13 @@ value hh_sysinfo(void) {
 
 CAMLprim value hh_sysinfo_is_apple_os(void) {
   CAMLparam0();
-#ifdef __APPLE__
-  return Val_bool(1);
-#else
   return Val_bool(0);
-#endif
 }
 
 value hh_nproc(void) {
   CAMLparam0();
   CAMLlocal1(result);
-#ifdef _WIN32
-  SYSTEM_INFO sysinfo;
-  GetSystemInfo(&sysinfo);
-  result = Val_long(sysinfo.dwNumberOfProcessors);
-#else
   result = Val_long(sysconf(_SC_NPROCESSORS_ONLN));
-#endif
   CAMLreturn(result);
 }
 
@@ -90,18 +76,10 @@ value hh_nproc(void) {
  */
 value pid_of_handle(value handle) {
   CAMLparam1(handle);
-#ifdef _WIN32
-  CAMLreturn(Val_int(GetProcessId((HANDLE)Long_val(handle))));
-#else
   CAMLreturn(handle);
-#endif
 }
 
 value handle_of_pid_for_termination(value pid) {
   CAMLparam1(pid);
-#ifdef _WIN32
-  CAMLreturn(Val_int(OpenProcess(PROCESS_TERMINATE, FALSE, Int_val(pid))));
-#else
   CAMLreturn(pid);
-#endif
 }

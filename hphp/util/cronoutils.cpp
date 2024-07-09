@@ -476,20 +476,7 @@ start_of_this_period(time_t start_time, PERIODICITY periodicity, int period_mult
     struct tm	tm_adjusted;
     int		expected_mday;
 
-#ifndef _WIN32
     localtime_r(&start_time, &tm_initial);
-#else
-    struct tm * tempTime;
-
-    tempTime = localtime(&start_time);
-    if (nullptr != tempTime)
-    {
-        memcpy(&tm_initial, tempTime, sizeof(struct tm));
-
-        free(tempTime);
-        tempTime = nullptr;
-    }
-#endif
     switch (periodicity)
     {
     case YEARLY:
@@ -545,18 +532,7 @@ start_of_this_period(time_t start_time, PERIODICITY periodicity, int period_mult
 	 * adjusted back to the previous day so add 24 hours worth of
 	 * seconds.
 	 */
-#ifndef _WIN32
 	localtime_r(&start_time, &tm_adjusted);
-#else
-	tempTime = localtime(&start_time);
-	if (nullptr != tempTime)
-	{
-	    memcpy(&tm_adjusted, tempTime, sizeof(struct tm));
-
-	    free(tempTime);
-	    tempTime = nullptr;
-	}
-#endif
 	if (   (tm_adjusted.tm_hour != 0)
 	    || (tm_adjusted.tm_min  != 0)
 	    || (tm_adjusted.tm_sec  != 0))

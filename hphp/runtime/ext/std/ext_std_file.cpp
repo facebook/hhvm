@@ -1405,9 +1405,6 @@ static bool do_chown(const String& filename,
     return false;
   }
 
-#ifdef WIN32
-  return false;
-#else
   int uid;
   if (user.isString()) {
     String suser = user.toString();
@@ -1435,7 +1432,6 @@ static bool do_chown(const String& filename,
     CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), uid, (gid_t)-1));
   }
   return true;
-#endif
 }
 
 bool HHVM_FUNCTION(chown,
@@ -1448,12 +1444,8 @@ bool HHVM_FUNCTION(chown,
 bool HHVM_FUNCTION(lchown,
                    const String& filename,
                    const Variant& user) {
-#ifdef WIN32
-  return false;
-#else
   CHECK_PATH_FALSE(filename, 1);
   return do_chown(filename, user, true, "lchown");
-#endif
 }
 
 static bool do_chgrp(const String& filename,
@@ -1474,9 +1466,6 @@ static bool do_chgrp(const String& filename,
     return false;
   }
 
-#ifdef WIN32
-  return false;
-#else
   int gid;
   if (group.isString()) {
     String sgroup = group.toString();
@@ -1516,7 +1505,6 @@ static bool do_chgrp(const String& filename,
     CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), (uid_t)-1, gid));
   }
   return true;
-#endif
 }
 
 bool HHVM_FUNCTION(chgrp,
@@ -1529,12 +1517,8 @@ bool HHVM_FUNCTION(chgrp,
 bool HHVM_FUNCTION(lchgrp,
                    const String& filename,
                    const Variant& group) {
-#ifdef WIN32
-  return false;
-#else
   CHECK_PATH_FALSE(filename, 1);
   return do_chgrp(filename, group, true, "lchgrp");
-#endif
 }
 
 bool HHVM_FUNCTION(touch,
@@ -1934,7 +1918,6 @@ bool HHVM_FUNCTION(chdir,
   return true;
 }
 
-#ifndef WIN32
 bool HHVM_FUNCTION(chroot,
                    const String& directory) {
   CHECK_PATH_FALSE(directory, 1);
@@ -1942,7 +1925,6 @@ bool HHVM_FUNCTION(chroot,
   CHECK_SYSTEM(chdir("/"));
   return true;
 }
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -2251,9 +2233,7 @@ void StandardExtension::registerNativeFile() {
   HHVM_FE(dirname);
   HHVM_FE(getcwd);
   HHVM_FE(chdir);
-#ifndef WIN32
   HHVM_FE(chroot);
-#endif
   HHVM_FE(dir);
   HHVM_FE(opendir);
   HHVM_FE(readdir);

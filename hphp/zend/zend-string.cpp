@@ -26,12 +26,7 @@
 
 #include <folly/portability/Unistd.h>
 
-#if defined(_MSC_VER) || defined(__APPLE__)
-# include "hphp/zend/php-crypt_r.h"
-# define USE_PHP_CRYPT_R 1
-#else
 # include <crypt.h>
-#endif
 
 namespace HPHP {
 

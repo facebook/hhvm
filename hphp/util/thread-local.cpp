@@ -77,16 +77,6 @@ ThreadLocalManager& ThreadLocalManager::GetManager() {
   return m;
 }
 
-#ifdef __APPLE__
-ThreadLocalManager::ThreadLocalList::ThreadLocalList() {
-  pthread_t self = pthread_self();
-  handler.__routine = ThreadLocalManager::OnThreadExit;
-  handler.__arg = this;
-  handler.__next = self->__cleanup_stack;
-  self->__cleanup_stack = &handler;
-}
-#endif
-
 #endif
 
 #ifdef HAVE_ARCH_PRCTL

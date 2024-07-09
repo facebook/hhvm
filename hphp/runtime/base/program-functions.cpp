@@ -1432,15 +1432,10 @@ static void set_stack_size() {
   if (getrlimit(RLIMIT_STACK, &rlim) != 0) return;
 
   if (rlim.rlim_cur < kStackSizeMinimum || rlim.rlim_cur == RLIM_INFINITY) {
-#ifdef _WIN32
-    Logger::Error("stack limit too small, use peflags -x to increase %zd\n",
-                  kStackSizeMinimum);
-#else
     rlim.rlim_cur = kStackSizeMinimum;
     if (setrlimit(RLIMIT_STACK, &rlim)) {
       Logger::Error("failed to set stack limit to %zd\n", kStackSizeMinimum);
     }
-#endif
   }
 }
 

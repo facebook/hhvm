@@ -90,24 +90,19 @@
 #include <caml/fail.h>
 #include <caml/unixsupport.h>
 #include <caml/intext.h>
-
-#ifdef _WIN32
-#  include <windows.h>
-#else
-#  include <fcntl.h>
-#  include <pthread.h>
-#  include <signal.h>
-#  include <stdint.h>
-#  include <stdio.h>
-#  include <string.h>
-#  include <sys/errno.h>
-#  include <sys/mman.h>
-#  include <sys/resource.h>
-#  include <sys/stat.h>
-#  include <sys/syscall.h>
-#  include <sys/types.h>
-#  include <unistd.h>
-#endif
+#include <fcntl.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/errno.h>
+#include <sys/mman.h>
+#include <sys/resource.h>
+#include <sys/stat.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <inttypes.h>
 #include <lz4.h>
@@ -130,16 +125,8 @@
 #define UNUSED5(a, b, c, d, e) \
     (UNUSED(a), UNUSED(b), UNUSED(c), UNUSED(d), UNUSED(e))
 
-
-// Ideally these would live in a handle.h file but our internal build system
-// can't support that at the moment. These are shared with handle_stubs.c
-#ifdef _WIN32
-#  define Val_handle(fd) (win_alloc_handle(fd))
-#else
 #  define Handle_val(fd) (Long_val(fd))
 #  define Val_handle(fd) (Val_long(fd))
-#endif
-
 
 #define HASHTBL_WRITE_IN_PROGRESS ((heap_entry_t*)1)
 
@@ -196,15 +183,6 @@
 #ifdef __MINGW64__
 typedef unsigned __int32 uint32_t;
 typedef unsigned __int64 uint64_t;
-#endif
-
-#ifdef _WIN32
-static int win32_getpagesize(void) {
-  SYSTEM_INFO siSysInfo;
-  GetSystemInfo(&siSysInfo);
-  return siSysInfo.dwPageSize;
-}
-#  define getpagesize win32_getpagesize
 #endif
 
 
@@ -267,10 +245,7 @@ typedef enum {
 
 /* Fix the location of our shared memory so we can save and restore the
  * hashtable easily */
-#ifdef _WIN32
-/* We have to set differently our shared memory location on Windows. */
-#  define SHARED_MEM_INIT ((char *) 0x48047e00000ll)
-#elif defined __aarch64__
+#ifdef __aarch64__
 /* CentOS 7.3.1611 kernel does not support a full 48-bit VA space, so choose a
  * value low enough that the 100 GB's mmapped in do not interfere with anything
  * growing down from the top. 1 << 36 works. */
@@ -478,14 +453,6 @@ CAMLprim value hh_hash_slots(void) {
   CAMLreturn(Val_long(hashtbl_size));
 }
 
-#ifdef _WIN32
-
-static struct timeval log_duration(const char *prefix, struct timeval start_t) {
-   return start_t; // TODO
-}
-
-#else
-
 static struct timeval log_duration(const char *prefix, struct timeval start_t) {
   struct timeval end_t = {0};
   gettimeofday(&end_t, NULL);
@@ -495,47 +462,6 @@ static struct timeval log_duration(const char *prefix, struct timeval start_t) {
   fprintf(stderr, "%s took %.2lfs\n", prefix, time_taken);
   return end_t;
 }
-
-#endif
-
-#ifdef _WIN32
-
-static HANDLE memfd;
-
-/**************************************************************************
- * We create an anonymous memory file, whose `handle` might be
- * inherited by subprocesses.
- *
- * This memory file is tagged "reserved" but not "committed". This
- * means that the memory space will be reserved in the virtual memory
- * table but the pages will not be bound to any physical memory
- * yet. Further calls to 'VirtualAlloc' will "commit" pages, meaning
- * they will be bound to physical memory.
- *
- * This is behavior that should reflect the 'MAP_NORESERVE' flag of
- * 'mmap' on Unix. But, on Unix, the "commit" is implicit.
- *
- * Committing the whole shared heap at once would require the same
- * amount of free space in memory (or in swap file).
- **************************************************************************/
-static void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
-  memfd = CreateFileMapping(
-    INVALID_HANDLE_VALUE,
-    NULL,
-    PAGE_READWRITE | SEC_RESERVE,
-    shared_mem_size >> 32, shared_mem_size & ((1ll << 32) - 1),
-    NULL);
-  if (memfd == NULL) {
-    win32_maperr(GetLastError());
-    uerror("CreateFileMapping", Nothing);
-  }
-  if (!SetHandleInformation(memfd, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT)) {
-    win32_maperr(GetLastError());
-    uerror("SetHandleInformation", Nothing);
-  }
-}
-
-#else
 
 static int memfd_shared_mem = -1;
 static int memfd_shmffi = -1;
@@ -575,35 +501,7 @@ static int memfd_create_helper(const char *name, const char *shm_dir, size_t sha
 #if defined(MEMFD_CREATE)
     memfd = memfd_create(name, 0);
 #endif
-#if defined(__APPLE__)
-    if (memfd < 0) {
-      char memname[255];
-      snprintf(memname, sizeof(memname), "/%s.%d", name, getpid());
-      // the ftruncate below will fail with errno EINVAL if you try to
-      // ftruncate the same sharedmem fd more than once. We're seeing this in
-      // some tests, which might imply that two flow processes with the same
-      // pid are starting up. This shm_unlink should prevent that from
-      // happening. Here's a stackoverflow about it
-      // http://stackoverflow.com/questions/25502229/ftruncate-not-working-on-posix-shared-memory-in-mac-os-x
-      shm_unlink(memname);
-      memfd = shm_open(memname, O_CREAT | O_RDWR, 0666);
-      if (memfd < 0) {
-          uerror("shm_open", Nothing);
-      }
-
-      // shm_open sets FD_CLOEXEC automatically. This is undesirable, because
-      // we want this fd to be open for other processes, so that they can
-      // reconnect to the shared memory.
-      int fcntl_flags = fcntl(memfd, F_GETFD);
-      if (fcntl_flags == -1) {
-        printf("Error with fcntl(memfd): %s\n", strerror(errno));
-        uerror("fcntl", Nothing);
-      }
-      // Unset close-on-exec
-      fcntl(memfd, F_SETFD, fcntl_flags & ~FD_CLOEXEC);
-    }
-#endif
-    if (memfd < 0) {
+  if (memfd < 0) {
       raise_failed_anonymous_memfd_init();
     }
   } else {
@@ -651,32 +549,12 @@ static void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t min
   }
 }
 
-#endif
-
 
 /*****************************************************************************/
 /* Given a pointer to the shared memory address space, initializes all
  * the globals that live in shared memory.
  */
 /*****************************************************************************/
-
-#ifdef _WIN32
-
-static char *memfd_map(HANDLE memfd, char *mem_addr, size_t shared_mem_size) {
-  char *mem = NULL;
-  mem = MapViewOfFileEx(
-    memfd,
-    FILE_MAP_ALL_ACCESS,
-    0, 0, 0,
-    (char *)mem_addr);
-  if (mem != mem_addr) {
-    win32_maperr(GetLastError());
-    uerror("MapViewOfFileEx", Nothing);
-  }
-  return mem;
-}
-
-#else
 
 static char *memfd_map(int memfd, char *mem_addr, size_t shared_mem_size) {
   char *mem = NULL;
@@ -695,8 +573,6 @@ static char *memfd_map(int memfd, char *mem_addr, size_t shared_mem_size) {
   return mem;
 }
 
-#endif
-
 /****************************************************************************
  * The function memfd_reserve force allocation of (mem -> mem+sz) in
  * the shared heap. This is mandatory on Windows. This is optional on
@@ -713,40 +589,6 @@ static void raise_out_of_shared_memory(void)
   caml_raise_constant(*exn);
 }
 
-#ifdef _WIN32
-
-/* Reserves memory. This is required on Windows */
-static void win_reserve(char * mem, size_t sz) {
-  if (!VirtualAlloc(mem, sz, MEM_COMMIT, PAGE_READWRITE)) {
-    win32_maperr(GetLastError());
-    raise_out_of_shared_memory();
-  }
-}
-
-/* On Linux, memfd_reserve is only used to reserve memory that is mmap'd to the
- * memfd file. Memory outside of that mmap does not need to be reserved, so we
- * don't call memfd_reserve on things like the temporary mmap used by
- * hh_collect. Instead, they use win_reserve() */
-static void memfd_reserve(int memfd, char * mem, size_t sz) {
-  (void)memfd;
-  win_reserve(mem, sz);
-}
-
-#elif defined(__APPLE__)
-
-/* So OSX lacks fallocate, but in general you can do
- * fcntl(fd, F_PREALLOCATE, &store)
- * however it doesn't seem to work for a shm_open fd, so this function is
- * currently a no-op. This means that our OOM handling for OSX is a little
- * weaker than the other OS's */
-static void memfd_reserve(int memfd, char * mem, size_t sz) {
-  (void)memfd;
-  (void)mem;
-  (void)sz;
-}
-
-#else
-
 static void memfd_reserve(int memfd, char *mem, size_t sz) {
   off_t offset = (off_t)(mem - shared_mem);
   int err;
@@ -757,8 +599,6 @@ static void memfd_reserve(int memfd, char *mem, size_t sz) {
     raise_out_of_shared_memory();
   }
 }
-
-#endif
 
 // DON'T WRITE TO THE SHARED MEMORY IN THIS FUNCTION!!!  This function just
 // calculates where the memory is and sets local globals. The shared memory
@@ -841,16 +681,6 @@ static void define_globals(char * shared_mem_init) {
   /* Heap */
   heap_init = mem;
   heap_max = heap_init + heap_size;
-
-#ifdef _WIN32
-  /* Reserve all memory space except the "huge" `global_size_b`. This is
-   * required for Windows but we don't do this for Linux since it lets us run
-   * more processes in parallel without running out of memory immediately
-   * (though we do risk it later on) */
-  memfd_reserve(memfd_shared_mem, (char *)global_storage, sizeof(global_storage[0]));
-  memfd_reserve(memfd_shared_mem, (char *)heap, heap_init - (char *)heap);
-#endif
-
 }
 
 /* The total size of the shared memory.  Most of it is going to remain
@@ -990,14 +820,8 @@ CAMLprim value hh_shared_init(
     shmffi_init(mem_addr, SHARDED_HASHTBL_MEM_SIZE, shm_cache_size_b);
   }
 
-  // Keeping the pids around to make asserts.
-#ifdef _WIN32
-  *master_pid = 0;
-  my_pid = *master_pid;
-#else
   *master_pid = getpid();
   my_pid = *master_pid;
-#endif
 
   init_shared_globals(
     Long_val(Field(config_val, 7)),
@@ -1008,7 +832,6 @@ CAMLprim value hh_shared_init(
   // Checking that we did the maths correctly.
   assert(*heap + heap_size == shared_mem + shared_mem_size);
 
-#ifndef _WIN32
   // Uninstall ocaml's segfault handler. It's supposed to throw an exception on
   // stack overflow, but we don't actually handle that exception, so what
   // happens in practice is we terminate at toplevel with an unhandled exception
@@ -1018,7 +841,6 @@ CAMLprim value hh_shared_init(
   sigemptyset(&sigact.sa_mask);
   sigact.sa_flags = 0;
   sigaction(SIGSEGV, &sigact, NULL);
-#endif
 
   CAMLreturn(hh_get_handle());
 }
@@ -1037,11 +859,7 @@ value hh_connect(value connector, value worker_id_val) {
   shm_cache_size_b = Long_val(Field(connector, 6));
   memfd_shmffi = Handle_val(Field(connector, 7));
   worker_id = Long_val(worker_id_val);
-#ifdef _WIN32
-  my_pid = 1; // Trick
-#else
   my_pid = getpid();
-#endif
   assert(memfd_shared_mem >= 0);
   char *shared_mem_init = memfd_map(memfd_shared_mem, SHARED_MEM_INIT, shared_mem_size);
   define_globals(shared_mem_init);

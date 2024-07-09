@@ -62,11 +62,7 @@ gdImageStringTTF (gdImage * im, int *brect, int fg, char *fontlist,
  * if building this version of gd separate from graphviz.
  */
 #ifndef DEFAULT_FONTPATH
-#if defined(__APPLE__) || (defined(__MWERKS__) && defined(macintosh))
-#define DEFAULT_FONTPATH "/usr/share/fonts/truetype:/System/Library/Fonts:/Library/Fonts"
-#else
 #define DEFAULT_FONTPATH "/usr/share/fonts/truetype"
-#endif
 #endif
 #ifndef PATHSEPARATOR
 #define PATHSEPARATOR ":"

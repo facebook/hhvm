@@ -1105,14 +1105,6 @@ int LightProcess::createDelegate() {
     }
 
     close(pair[0]);
-#ifdef __APPLE__
-    {
-      int newfd = dup2(pair[1], 0);
-      always_assert(newfd == 0);
-    }
-    close(pair[1]);
-    pair[1] = 0;
-#endif
     runShadow(pair[1]);
   }
 

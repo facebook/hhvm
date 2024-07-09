@@ -482,12 +482,7 @@ RepoGlobalData getGlobalData() {
 }
 
 void setCoredumps(CompilerOptions& po) {
-#ifdef _MSC_VER
-/**
- * Windows actually does core dump size and control at a system, not an app
- * level. So we do nothing here and are at the mercy of Dr. Watson.
- */
-#elif defined(__APPLE__) || defined(__FreeBSD__)
+#ifdef __FreeBSD__
   struct rlimit rl;
   getrlimit(RLIMIT_CORE, &rl);
   if (!po.coredump) {

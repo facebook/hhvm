@@ -17,10 +17,6 @@
 #include "hphp/util/current-executable.h"
 #include <limits.h>
 
-#ifdef __APPLE__
-#include <mach-o/dyld.h>
-#endif
-
 #ifdef __FreeBSD__
 #include <sys/sysctl.h>
 #endif
@@ -34,11 +30,6 @@ std::string current_executable_path() {
   char result[PATH_MAX];
   ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
   return std::string(result, (count > 0) ? count : 0);
-#elif defined(__APPLE__)
-  char result[PATH_MAX];
-  uint32_t size = sizeof(result);
-  uint32_t success = _NSGetExecutablePath(result, &size);
-  return std::string(success == 0 ? result : "");
 #elif defined(__FreeBSD__)
   char result[PATH_MAX];
   size_t size = sizeof(result);
@@ -60,7 +51,7 @@ std::string current_executable_path() {
 }
 
 std::string current_executable_directory() {
-#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(__linux__) || defined(__FreeBSD__)
   std::string path = current_executable_path();
   return path.substr(0, path.find_last_of("/"));
 #else

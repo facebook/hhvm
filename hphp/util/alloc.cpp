@@ -23,10 +23,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#ifdef __APPLE__
-#include <sys/sysctl.h>
-#endif
-
 #include <folly/portability/SysMman.h>
 #include <folly/portability/SysResource.h>
 
@@ -74,35 +70,9 @@ void init_stack_limits(pthread_attr_t* attr) {
   void *stackaddr;
   struct rlimit rlim;
 
-#ifndef __APPLE__
   if (pthread_attr_getstack(attr, &stackaddr, &stacksize) != 0) {
     always_assert(false);
   }
-#else
-  // We must use the following (undocumented) APIs because pthread_attr_getstack
-  // returns incorrect values on OSX.
-  pthread_t self = pthread_self();
-  stackaddr = pthread_get_stackaddr_np(self);
-  stacksize = pthread_get_stacksize_np(self);
-
-  // On OSX 10.9, we are lied to about the main thread's stack size.  Set it to
-  // the minimum stack size, which is set earlier by execute_program_impl.
-  if (pthread_main_np() == 1) {
-    if (s_stackSize < kStackSizeMinimum) {
-      char osRelease[256];
-      size_t osReleaseSize = sizeof(osRelease);
-      if (sysctlbyname("kern.osrelease", osRelease, &osReleaseSize,
-                       nullptr, 0) == 0) {
-        if (atoi(osRelease) >= 13) {
-          stacksize = kStackSizeMinimum;
-        }
-      }
-    }
-  }
-
-  // stackaddr is not base, but top of the stack. Yes, really.
-  stackaddr = ((char*) stackaddr) - stacksize;
-#endif
 
   // Get the guard page's size, because the stack address returned
   // above starts at the guard page, so the thread's stack limit is

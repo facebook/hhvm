@@ -256,3 +256,16 @@ class MutableListTest(unittest.TestCase):
         self.assertEqual(list(range(200)), result)
         self.assertIsInstance(result, MutableList)
         self.assertIsNot(result, mutable_list)
+
+    def test_count(self) -> None:
+        mutable_list = MutableList(typeinfo_i32, [1, 2, 1, 1, 3, 2])
+
+        self.assertEqual(3, mutable_list.count(1))
+        self.assertEqual(2, mutable_list.count(2))
+        self.assertEqual(1, mutable_list.count(3))
+
+    def test_count_wrong_type(self) -> None:
+        mutable_list = MutableList(typeinfo_i32, [1, 2, 1, 1, 3, 2])
+
+        self.assertEqual(0, mutable_list.count("Not an Integer"))
+        self.assertEqual(0, mutable_list.count(2**31))

@@ -127,6 +127,14 @@ cdef class MutableList:
         lst.extend(other)
         return lst
 
+    def count(self, value):
+        try:
+            internal_value = self._val_typeinfo.to_internal_data(value)
+        except (TypeError, OverflowError):
+            return 0
+
+        return self._list_data.count(internal_value)
+
 
 MutableSequence.register(MutableList)
 

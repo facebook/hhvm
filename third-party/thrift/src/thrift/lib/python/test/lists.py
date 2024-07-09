@@ -113,7 +113,7 @@ class ListTests(unittest.TestCase):
     def test_hashability(self) -> None:
         # Mutable types do not support hashing
         # pyre-ignore[16]: has no attribute `lists_types`
-        if self.lists_types.__name__.endswith("immutable_types"):
+        if not self.lists_types.__name__.endswith("thrift_mutable_types"):
             hash(self.easy().val_list)
             hash(self.I32List(range(10)))
 
@@ -242,9 +242,25 @@ class ListTests(unittest.TestCase):
         # DO_BEFORE(alperyoney,20240701): Figure out whether mutable containers
         # should cache the instance.
         # pyre-ignore[16]: has no attribute `containers_types`
-        if self.containers_types.__name__.endswith("immutable_types"):
+        if not self.containers_types.__name__.endswith("thrift_mutable_types"):
             self.assertIs(s.structList[0], s.structList[0])
             self.assertIs(s.structList[1], s.structList[1])
+
+    def test_count_enum(self) -> None:
+        clist = self.Lists(colorList=[self.Color.red, self.Color.red, self.Color.blue])
+        self.assertEqual(clist.colorList.count(self.Color.red), 2)
+        self.assertEqual(clist.colorList.count(self.Color.blue), 1)
+        self.assertEqual(clist.colorList.count(self.Color.green), 0)
+        # pyre-ignore[16]: has no attribute `containers_types`
+        if self.containers_types.__name__.endswith("thrift_mutable_types"):
+            self.assertEqual(clist.colorList.count(0), 0)
+            self.assertEqual(clist.colorList.count(1), 0)
+            self.assertEqual(clist.colorList.count(2), 0)
+        else:
+            # gross
+            self.assertEqual(clist.colorList.count(0), 2)
+            self.assertEqual(clist.colorList.count(1), 1)
+            self.assertEqual(clist.colorList.count(2), 0)
 
 
 # TODO: Collapse these two test cases into parameterized test above
@@ -267,16 +283,6 @@ class ListImmutablePythonTests(unittest.TestCase):
         # gross
         self.assertEqual(clist.colorList[clist.colorList.index(0)], self.Color.red)
         self.assertEqual(clist.colorList[clist.colorList.index(1)], self.Color.blue)
-
-    def test_count_enum(self) -> None:
-        clist = self.Lists(colorList=[self.Color.red, self.Color.red, self.Color.blue])
-        self.assertEqual(clist.colorList.count(self.Color.red), 2)
-        self.assertEqual(clist.colorList.count(self.Color.blue), 1)
-        self.assertEqual(clist.colorList.count(self.Color.green), 0)
-        # gross
-        self.assertEqual(clist.colorList.count(0), 2)
-        self.assertEqual(clist.colorList.count(1), 1)
-        self.assertEqual(clist.colorList.count(2), 0)
 
 
 # TODO: Collapse these two test cases into parameterized test above
@@ -301,15 +307,3 @@ class ListMutablePythonTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             clist.colorList.index(2)
-
-    @unittest.expectedFailure
-    def test_count_enum(self) -> None:
-        clist = self.Lists(colorList=[self.Color.red, self.Color.red, self.Color.blue])
-        # TODO(T194919234): not implemented yet in mutable python
-        self.assertEqual(clist.colorList.count(self.Color.red), 2)
-        self.assertEqual(clist.colorList.count(self.Color.blue), 1)
-        self.assertEqual(clist.colorList.count(self.Color.green), 0)
-        # gross
-        self.assertEqual(clist.colorList.count(0), 2)
-        self.assertEqual(clist.colorList.count(1), 1)
-        self.assertEqual(clist.colorList.count(2), 0)

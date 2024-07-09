@@ -17,11 +17,14 @@
 namespace cpp2 thrift.py3.test.included
 namespace py3 thrift.py3.test.included
 
+include "thrift/annotation/python.thrift"
+
 typedef i64 IncludedInt64
 
 const i64 IncludedConstant = 42;
 
 struct Included {
-  1: IncludedInt64 from (py3.name = "from_");
+  @python.Name{name = "from_"}
+  1: IncludedInt64 from;
   2: IncludedInt64 to = IncludedConstant;
 }

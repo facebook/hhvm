@@ -18,6 +18,7 @@ namespace cpp2 testing
 namespace py3 testing
 
 include "thrift/lib/py3/test/mixin/b.thrift"
+include "thrift/annotation/thrift.thrift"
 
 struct Mixin3Base {
   1: string field3;
@@ -32,7 +33,10 @@ union Union {
 
 struct Foo {
   1: string field4;
-  2: b.Mixin2 m2 (cpp.mixin);
-  3: Mixin3 m3 (cpp.mixin);
-  4: Union u (cpp.mixin);
+  @thrift.Mixin
+  2: b.Mixin2 m2;
+  @thrift.Mixin
+  3: Mixin3 m3;
+  @thrift.Mixin
+  4: Union u;
 }

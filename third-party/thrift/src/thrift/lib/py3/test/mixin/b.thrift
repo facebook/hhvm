@@ -17,11 +17,14 @@
 namespace cpp2 testing
 namespace py3 testing
 
+include "thrift/annotation/thrift.thrift"
+
 struct Mixin1 {
   1: string field1;
 }
 
 struct Mixin2 {
-  1: Mixin1 m1 (cpp.mixin);
+  @thrift.Mixin
+  1: Mixin1 m1;
   2: optional string field2;
 }

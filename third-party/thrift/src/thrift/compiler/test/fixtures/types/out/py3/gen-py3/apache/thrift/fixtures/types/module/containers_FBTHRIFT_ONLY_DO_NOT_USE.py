@@ -32,11 +32,11 @@ class List__i64(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__i64):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__i64._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__i64)
 
@@ -69,11 +69,11 @@ class List__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__i32)
 
@@ -106,11 +106,11 @@ class std_list__List__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, std_list__List__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = std_list__List__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, std_list__List__i32)
 
@@ -143,11 +143,11 @@ class std_deque__List__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, std_deque__List__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = std_deque__List__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, std_deque__List__i32)
 
@@ -180,11 +180,11 @@ class folly_fbvector__List__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, folly_fbvector__List__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = folly_fbvector__List__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, folly_fbvector__List__i32)
 
@@ -217,11 +217,11 @@ class folly_small_vector__List__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, folly_small_vector__List__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = folly_small_vector__List__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, folly_small_vector__List__i32)
 
@@ -254,11 +254,11 @@ class std_list_int32_t__List__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, std_list_int32_t__List__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = std_list_int32_t__List__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, std_list_int32_t__List__i32)
 
@@ -291,11 +291,11 @@ class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__std_unordered_map__Map__i32_string):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__std_unordered_map__Map__i32_string._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__std_unordered_map__Map__i32_string)
 
@@ -332,11 +332,11 @@ class _std_list__List__IncompleteListDep(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, _std_list__List__IncompleteListDep):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = _std_list__List__IncompleteListDep._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, _std_list__List__IncompleteListDep)
 
@@ -369,11 +369,11 @@ class folly_small_vector__List__CompleteListDep(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, folly_small_vector__List__CompleteListDep):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = folly_small_vector__List__CompleteListDep._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, folly_small_vector__List__CompleteListDep)
 
@@ -406,11 +406,11 @@ class List__AdaptedListDep(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__AdaptedListDep):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__AdaptedListDep._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__AdaptedListDep)
 
@@ -443,11 +443,11 @@ class List__DependentAdaptedListDep(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__DependentAdaptedListDep):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__DependentAdaptedListDep._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__DependentAdaptedListDep)
 

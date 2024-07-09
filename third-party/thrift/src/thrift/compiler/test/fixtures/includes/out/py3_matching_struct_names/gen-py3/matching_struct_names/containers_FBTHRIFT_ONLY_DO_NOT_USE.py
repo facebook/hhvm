@@ -32,11 +32,11 @@ class List__MyStruct(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__MyStruct):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__MyStruct._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__MyStruct)
 
@@ -69,11 +69,11 @@ class List__List__MyStruct(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__List__MyStruct):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__List__MyStruct._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__List__MyStruct)
 
@@ -110,11 +110,11 @@ class List__module_MyStruct(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__module_MyStruct):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__module_MyStruct._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__module_MyStruct)
 
@@ -147,11 +147,11 @@ class List__List__module_MyStruct(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__List__module_MyStruct):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__List__module_MyStruct._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__List__module_MyStruct)
 

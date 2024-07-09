@@ -72,15 +72,15 @@ class {{type:flat_name}}(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, {{type:flat_name}}):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             {{#type:containerOfString?}}
             if isinstance(items, str):
                 raise TypeError("If you really want to pass a string into a {{> types/pep484_type}} field, explicitly convert it first.")
             {{/type:containerOfString?}}
             check_method = {{type:flat_name}}._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, {{type:flat_name}})
 

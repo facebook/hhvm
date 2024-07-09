@@ -31,11 +31,11 @@ class List__i16(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__i16):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__i16._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__i16)
 
@@ -68,11 +68,11 @@ class List__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__i32)
 
@@ -105,11 +105,11 @@ class List__i64(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__i64):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__i64._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__i64)
 
@@ -142,13 +142,13 @@ class List__string(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__string):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             if isinstance(items, str):
                 raise TypeError("If you really want to pass a string into a _typing.Sequence[str] field, explicitly convert it first.")
             check_method = List__string._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__string)
 
@@ -181,11 +181,11 @@ class List__SimpleStruct(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__SimpleStruct):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__SimpleStruct._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__SimpleStruct)
 
@@ -218,11 +218,11 @@ class List__List__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__List__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__List__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__List__i32)
 
@@ -259,11 +259,11 @@ class List__Set__string(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__Set__string):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__Set__string._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__Set__string)
 
@@ -300,11 +300,11 @@ class List__List__string(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__List__string):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__List__string._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__List__string)
 
@@ -341,11 +341,11 @@ class List__Set__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__Set__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__Set__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__Set__i32)
 
@@ -382,11 +382,11 @@ class List__Map__string_string(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__Map__string_string):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__Map__string_string._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__Map__string_string)
 
@@ -423,13 +423,13 @@ class List__binary(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__binary):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             if isinstance(items, str):
                 raise TypeError("If you really want to pass a string into a _typing.Sequence[bytes] field, explicitly convert it first.")
             check_method = List__binary._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__binary)
 
@@ -462,11 +462,11 @@ class List__AnEnum(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__AnEnum):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__AnEnum._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__AnEnum)
 
@@ -500,11 +500,11 @@ class List__Map__i32_double(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__Map__i32_double):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__Map__i32_double._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__Map__i32_double)
 

@@ -31,11 +31,11 @@ class List__i64(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__i64):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__i64._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__i64)
 
@@ -68,13 +68,13 @@ class List__string(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__string):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             if isinstance(items, str):
                 raise TypeError("If you really want to pass a string into a _typing.Sequence[str] field, explicitly convert it first.")
             check_method = List__string._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__string)
 

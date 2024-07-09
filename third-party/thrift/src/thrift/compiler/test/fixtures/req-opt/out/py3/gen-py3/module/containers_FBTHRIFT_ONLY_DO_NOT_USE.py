@@ -31,11 +31,11 @@ class List__bool(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__bool):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__bool._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__bool)
 
@@ -68,11 +68,11 @@ class List__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__i32)
 

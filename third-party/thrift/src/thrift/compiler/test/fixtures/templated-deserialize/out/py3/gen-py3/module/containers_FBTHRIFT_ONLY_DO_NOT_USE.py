@@ -31,11 +31,11 @@ class List__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__i32)
 
@@ -68,11 +68,11 @@ class List__List__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__List__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__List__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__List__i32)
 
@@ -109,11 +109,11 @@ class List__List__List__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__List__List__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__List__List__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__List__List__i32)
 
@@ -150,11 +150,11 @@ class List__Set__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__Set__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__Set__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__Set__i32)
 
@@ -191,11 +191,11 @@ class List__List__List__List__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__List__List__List__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__List__List__List__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__List__List__List__i32)
 
@@ -232,11 +232,11 @@ class List__Set__string(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__Set__string):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__Set__string._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__Set__string)
 
@@ -273,11 +273,11 @@ class List__Foo__i64(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__Foo__i64):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__Foo__i64._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__Foo__i64)
 
@@ -310,11 +310,11 @@ class List__Bar__double(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__Bar__double):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__Bar__double._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__Bar__double)
 
@@ -347,11 +347,11 @@ class List__Baz__i32(thrift.py3.types.List):
             _py_obj = items
         elif isinstance(items, List__Baz__i32):
             _py_obj = list(items)
-        elif items:
+        elif items is None:
+            _py_obj = []
+        else:
             check_method = List__Baz__i32._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
-        else:
-            _py_obj = []
 
         super().__init__(_py_obj, List__Baz__i32)
 

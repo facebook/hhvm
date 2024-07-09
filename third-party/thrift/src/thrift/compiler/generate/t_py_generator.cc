@@ -1097,6 +1097,9 @@ void t_py_generator::generate_enum(const t_enum* tenum) {
  * Generate a constant value
  */
 void t_py_generator::generate_const(const t_const* tconst) {
+  if (tconst->generated()) {
+    return;
+  }
   const t_type* type = tconst->type();
   string name = rename_reserved_keywords(tconst->get_name());
   const t_const_value* value = tconst->value();

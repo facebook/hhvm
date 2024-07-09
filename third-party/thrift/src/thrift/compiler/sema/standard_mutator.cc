@@ -23,7 +23,6 @@
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/schematizer.h>
 #include <thrift/compiler/lib/uri.h>
-#include <thrift/compiler/sema/patch_mutator.h>
 #include <thrift/compiler/sema/standard_mutator_stage.h>
 
 namespace apache {

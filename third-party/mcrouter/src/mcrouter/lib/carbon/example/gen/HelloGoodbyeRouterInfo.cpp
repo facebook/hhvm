@@ -206,4 +206,9 @@ HelloGoodbyeRouterInfo::buildRouteMapWithProxy() {
 HelloGoodbyeRouterInfo::buildRouteMapForWrapper() {
   return RouteHandleFactoryMapForWrapper();
 }
+
+/* static */ bool HelloGoodbyeRouterInfo::isSRLinked() {
+    return false;
+}
+    
 } // namespace hellogoodbye

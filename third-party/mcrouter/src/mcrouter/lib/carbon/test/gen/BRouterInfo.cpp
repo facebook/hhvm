@@ -203,6 +203,11 @@ BRouterInfo::buildRouteMapWithProxy() {
 BRouterInfo::buildRouteMapForWrapper() {
   return RouteHandleFactoryMapForWrapper();
 }
+
+/* static */ bool BRouterInfo::isSRLinked() {
+    return false;
+}
+    
 } // namespace B
 } // namespace test
 } // namespace carbon

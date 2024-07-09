@@ -117,6 +117,7 @@ struct CarbonThriftTestRouterInfo {
   static RouteHandleFactoryMap buildRouteMap();
   static RouteHandleFactoryMapWithProxy buildRouteMapWithProxy();
   static RouteHandleFactoryMapForWrapper buildRouteMapForWrapper();
+  static bool isSRLinked();
 
   static std::unique_ptr<facebook::memcache::mcrouter::
                              ExtraRouteHandleProviderIf<CarbonThriftTestRouterInfo>>

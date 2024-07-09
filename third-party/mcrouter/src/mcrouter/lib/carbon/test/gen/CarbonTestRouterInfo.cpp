@@ -202,5 +202,10 @@ CarbonTestRouterInfo::buildRouteMapWithProxy() {
 CarbonTestRouterInfo::buildRouteMapForWrapper() {
   return RouteHandleFactoryMapForWrapper();
 }
+
+/* static */ bool CarbonTestRouterInfo::isSRLinked() {
+    return false;
+}
+    
 } // namespace test
 } // namespace carbon

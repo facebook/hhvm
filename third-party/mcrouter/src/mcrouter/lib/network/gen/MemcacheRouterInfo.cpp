@@ -202,5 +202,14 @@ MemcacheRouterInfo::buildRouteMapWithProxy() {
 MemcacheRouterInfo::buildRouteMapForWrapper() {
   return RouteHandleFactoryMapForWrapper();
 }
+
+/* static */ bool MemcacheRouterInfo::isSRLinked() {
+  MemcacheRouterInfo::RouteHandlePtr (*fn)(
+      RouteHandleFactory<MemcacheRouterInfo::RouteHandleIf>&,
+      const folly::dynamic& json,
+      ProxyBase& proxy) = makeSRRoute;
+  return fn != nullptr;
+}
+    
 } // namespace memcache
 } // namespace facebook

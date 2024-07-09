@@ -202,5 +202,10 @@ CarbonThriftTestRouterInfo::buildRouteMapWithProxy() {
 CarbonThriftTestRouterInfo::buildRouteMapForWrapper() {
   return RouteHandleFactoryMapForWrapper();
 }
+
+/* static */ bool CarbonThriftTestRouterInfo::isSRLinked() {
+    return false;
+}
+    
 } // namespace test
 } // namespace carbon

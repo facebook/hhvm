@@ -16,6 +16,4 @@
 
 #pragma once
 
-#include <cstdint>
-#include <string_view>
-#include <folly/CPortability.h>
+#include <thrift/lib/cpp2/runtime/SchemaRegistry.h>

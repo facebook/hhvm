@@ -88,6 +88,9 @@ class schematizer {
   std::string identify_definition(const t_named& node);
   int64_t identify_program(const t_program& node);
 
+  // Get the name of the program's schema const.
+  static std::string name_schema(source_manager& sm, const t_program& node);
+
  private:
   const t_scope& scope_;
   source_manager& sm_;

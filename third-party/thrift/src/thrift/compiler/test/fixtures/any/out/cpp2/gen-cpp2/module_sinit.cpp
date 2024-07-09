@@ -5,24 +5,31 @@
  *  @generated @nocommit
  */
 
+
+
 namespace facebook::thrift::compiler::test::fixtures::any {
 // Call all static init functions.
 //
 // If this file is always linked (e.g. link_whole), it will force
 // static linking to include the intialization logic.
+
 void __fbthrift_static_init_MyStruct();
 void __fbthrift_static_init_MyUnion();
 void __fbthrift_static_init_MyException();
+
+
 namespace {
+
 struct StaticInit {
   StaticInit() {
     __fbthrift_static_init_MyStruct();
     __fbthrift_static_init_MyUnion();
     __fbthrift_static_init_MyException();
+
   }
 };
 
 StaticInit staticInit;
-}
 
+}
 } // namespace facebook::thrift::compiler::test::fixtures::any

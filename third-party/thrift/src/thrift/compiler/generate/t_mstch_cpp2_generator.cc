@@ -34,6 +34,7 @@
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/lib/cpp2/util.h>
+#include <thrift/compiler/lib/schematizer.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/ast_validator.h>
 #include <thrift/compiler/sema/diagnostic_context.h>
@@ -210,6 +211,16 @@ bool has_runtime_annotation(const t_named& named) {
       [](const t_const& cnst) { return is_runtime_annotation(*cnst.type()); });
 }
 
+bool has_schema(source_manager& sm, const t_program& program) {
+  return program.scope()->find(
+      program.scope_name(schematizer::name_schema(sm, program)));
+}
+
+bool needs_sinit(
+    source_manager& sm, const t_program& program, bool has_option_any) {
+  return has_option_any || has_schema(sm, program);
+}
+
 class cpp2_generator_context {
  public:
   static cpp2_generator_context create() { return cpp2_generator_context(); }
@@ -297,11 +308,13 @@ class cpp_mstch_program : public mstch_program {
       const t_program* program,
       mstch_context& ctx,
       mstch_element_position pos,
+      source_manager& sm,
       std::optional<int32_t> split_id = std::nullopt,
       std::optional<std::vector<t_structured*>> split_structs = std::nullopt)
       : mstch_program(program, ctx, pos),
         split_id_(split_id),
-        split_structs_(split_structs) {
+        split_structs_(split_structs),
+        sm_(sm) {
     register_cached_methods(
         this,
         {{"program:cpp_includes", &cpp_mstch_program::cpp_includes},
@@ -321,6 +334,9 @@ class cpp_mstch_program : public mstch_program {
          {"program:fatal_data_member", &cpp_mstch_program::fatal_data_member},
          {"program:split_structs", &cpp_mstch_program::split_structs},
          {"program:split_enums", &cpp_mstch_program::split_enums},
+         {"program:has_schema?", &cpp_mstch_program::has_schema},
+         {"program:schema_name", &cpp_mstch_program::schema_name},
+         {"program:needs_sinit?", &cpp_mstch_program::needs_sinit},
          {"program:structs_and_typedefs",
           &cpp_mstch_program::structs_and_typedefs}});
     register_has_option("program:tablebased?", "tablebased");
@@ -647,10 +663,21 @@ class cpp_mstch_program : public mstch_program {
         id);
   }
 
+  mstch::node has_schema() {
+    return ::apache::thrift::compiler::has_schema(sm_, *program_);
+  }
+
+  mstch::node schema_name() { return schematizer::name_schema(sm_, *program_); }
+
+  mstch::node needs_sinit() {
+    return compiler::needs_sinit(sm_, *program_, has_option("any"));
+  }
+
  private:
   const std::optional<int32_t> split_id_;
   const std::optional<std::vector<t_structured*>> split_structs_;
   std::optional<std::vector<t_enum*>> split_enums_;
+  source_manager& sm_;
 };
 
 class cpp_mstch_service : public mstch_service {
@@ -2205,6 +2232,7 @@ class cpp_mstch_const : public mstch_const {
             {"constant:extra_arg", &cpp_mstch_const::extra_arg},
             {"constant:extra_arg_type", &cpp_mstch_const::extra_arg_type},
             {"constant:outline_init?", &cpp_mstch_const::outline_init},
+            {"constant:generated?", &cpp_mstch_const::generated},
         });
   }
   mstch::node enum_value() {
@@ -2254,6 +2282,7 @@ class cpp_mstch_const : public mstch_const {
         cpp_context_->resolver().find_structured_adapter_annotation(*const_) ||
         cpp_context_->resolver().find_first_adapter(*const_->type());
   }
+  mstch::node generated() { return const_->generated(); }
 
  private:
   std::shared_ptr<cpp2_generator_context> cpp_context_;
@@ -2321,7 +2350,7 @@ void t_mstch_cpp2_generator::generate_program() {
   const auto* program = get_program();
   set_mstch_factories();
 
-  if (has_option("any")) {
+  if (compiler::needs_sinit(source_mgr_, *program, has_option("any"))) {
     generate_sinit(program);
   }
   if (has_option("reflection")) {
@@ -2339,7 +2368,7 @@ void t_mstch_cpp2_generator::generate_program() {
 }
 
 void t_mstch_cpp2_generator::set_mstch_factories() {
-  mstch_context_.add<cpp_mstch_program>();
+  mstch_context_.add<cpp_mstch_program>(std::ref(source_mgr_));
   mstch_context_.add<cpp_mstch_service>();
   mstch_context_.add<cpp_mstch_interaction>();
   mstch_context_.add<cpp_mstch_function>(cpp_context_);
@@ -2433,6 +2462,7 @@ void t_mstch_cpp2_generator::generate_structs(const t_program* program) {
           program,
           mstch_context_,
           mstch_element_position(),
+          source_mgr_,
           split_id,
           shards.at(split_id));
       render_to_file(

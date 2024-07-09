@@ -790,6 +790,13 @@ int64_t schematizer::identify_program(const t_program& node) {
   return ret;
 }
 
+std::string schematizer::name_schema(
+    source_manager& sm, const t_program& node) {
+  schematizer s(*node.scope(), sm, {});
+  return fmt::format(
+      "_fbthrift_schema_{:x}", static_cast<uint64_t>(s.identify_program(node)));
+}
+
 } // namespace compiler
 } // namespace thrift
 } // namespace apache

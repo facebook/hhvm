@@ -423,7 +423,7 @@ void inject_schema_const(
   auto cnst = std::make_unique<t_const>(
       &prog,
       t_primitive_type::t_binary(),
-      "_fbthrift_schema",
+      schematizer::name_schema(ctx.source_mgr(), prog),
       std::make_unique<t_const_value>(std::move(serialized)));
   cnst->set_uri("");
   cnst->set_src_range(prog.src_range());

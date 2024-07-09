@@ -18,39 +18,50 @@
 #include <string>
 #include <vector>
 #include <folly/portability/GTest.h>
-#include <thrift/annotation/gen-cpp2/thrift_constants.h>
-#include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/lib/thrift/gen-cpp2/schema_types.h>
-#include <thrift/test/gen-cpp2/schema_constants.h>
+#include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
+
+// These deps pull in the corresponding schemas when enabled.
+#include <thrift/annotation/gen-cpp2/thrift_types.h>
+#include <thrift/test/gen-cpp2/schema_types.h>
 
 using namespace apache::thrift;
-using namespace facebook::thrift::test::schema;
 
 TEST(SchemaTest, not_linked) {
-  using namespace facebook::thrift::annotation::thrift_constants;
-  // This file compiles and doesn't contain the schema const, which we can't
-  // verify here.
+  for (const auto& [id, schema] : SchemaRegistry::iter()) {
+    EXPECT_NE(schema.programs()[0].path(), "thrift/annotation/thrift.thrift");
+  }
+
+  // Use the types target
+  (void)facebook::thrift::annotation::Uri{};
 }
 
 TEST(SchemaTest, linked) {
-  EXPECT_FALSE(schema_constants::_fbthrift_schema().empty());
-  auto schema = apache::thrift::CompactSerializer::deserialize<type::Schema>(
-      schema_constants::_fbthrift_schema());
+  bool found = false;
+  for (const auto& [id, schema] : SchemaRegistry::iter()) {
+    if (schema.programs()[0].path() == "thrift/test/schema.thrift") {
+      found = true;
+    } else {
+      continue;
+    }
 
-  EXPECT_EQ(schema.programs()[0].path(), "thrift/test/schema.thrift");
+    // Includes definitions from root program
+    EXPECT_EQ(
+        schema.definitionsMap()
+            ->at(schema.programs()[0].definitionKeys()[0])
+            .structDef_ref()
+            ->name(),
+        "Empty");
 
-  // Includes definitions from root program
-  EXPECT_EQ(
-      schema.definitionsMap()[schema.programs()[0].definitionKeys()[0]]
-          .structDef_ref()
-          ->name(),
-      "Empty");
+    // Only includes definitions from root program
+    EXPECT_EQ(
+        schema.definitionsMap()->size(),
+        schema.programs()[0].definitionKeys()->size());
 
-  // Only includes definitions from root program
-  EXPECT_EQ(
-      schema.definitionsMap()->size(),
-      schema.programs()[0].definitionKeys()->size());
+    // Transitive includes are listed
+    EXPECT_GT(schema.programs()->size(), 4);
+  }
+  EXPECT_TRUE(found);
 
-  // Transitive includes are listed
-  EXPECT_GT(schema.programs()->size(), 4);
+  // Use the types target
+  (void)facebook::thrift::test::schema::Empty{};
 }

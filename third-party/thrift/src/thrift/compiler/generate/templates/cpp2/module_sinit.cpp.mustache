@@ -16,31 +16,54 @@
 
 }}{{ > Autogen}}
 
+{{#program:needs_sinit?}}
+
+{{#program:has_schema?}}{{! avoids circular dependency }}
+#include <thrift/lib/cpp2/gen/module_sinit_cpp.h>
+{{/program:has_schema?}}
+
 {{ > common/namespace_cpp2_begin}}
 
-{{#program:any?}}
 // Call all static init functions.
 //
 // If this file is always linked (e.g. link_whole), it will force
 // static linking to include the intialization logic.
+
+{{#program:any?}}
 {{#program:structs}}
 {{#struct:any?}}
 void __fbthrift_static_init_{{struct:cpp_underlying_name}}();
 {{/struct:any?}}
 {{/program:structs}}
+{{/program:any?}}
+
+{{#program:has_schema?}}
+namespace {{program:name}}_constants {
+extern std::string_view {{program:schema_name}}();
+}
+{{/program:has_schema?}}
+
 namespace {
+
 struct StaticInit {
   StaticInit() {
+    {{#program:any?}}
     {{#program:structs}}
     {{#struct:any?}}
     __fbthrift_static_init_{{struct:cpp_underlying_name}}();
     {{/struct:any?}}
     {{/program:structs}}
+    {{/program:any?}}
+
+    {{#program:has_schema?}}
+    ::apache::thrift::SchemaRegistry::registerSchema({{program:name}}_constants::{{program:schema_name}}());
+    {{/program:has_schema?}}
   }
 };
 
 StaticInit staticInit;
-}
-{{/program:any?}}
 
+}
 {{ > common/namespace_cpp2_end}}
+
+{{/program:needs_sinit?}}

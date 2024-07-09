@@ -463,18 +463,8 @@
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
-        "scope.Const" : {  },
-        "scope.Enum" : {  },
-        "scope.EnumValue" : {  },
-        "scope.Exception" : {  },
-        "scope.Field" : {  },
-        "scope.Function" : {  },
-        "scope.Interaction" : {  },
         "scope.Program" : {  },
-        "scope.Service" : {  },
-        "scope.Struct" : {  },
-        "scope.Typedef" : {  },
-        "scope.Union" : {  }
+        "scope.Definition" : {  }
       },
       "fields" : {
 
@@ -485,7 +475,7 @@
           "column" : 1
         },
         "end" : {
-          "line" : 272,
+          "line" : 262,
           "column" : 38
         }
       }

@@ -257,16 +257,6 @@ struct DeprecatedUnvalidatedAnnotations {
 * the usage with `@thrift.AllowReservedIdentifierName`,
 * and may result in undefined behavior.
 */
-@scope.Const
-@scope.Enum
-@scope.EnumValue
-@scope.Exception
-@scope.Field
-@scope.Function
-@scope.Interaction
 @scope.Program
-@scope.Service
-@scope.Struct
-@scope.Typedef
-@scope.Union
+@scope.Definition
 struct AllowReservedIdentifierName {}

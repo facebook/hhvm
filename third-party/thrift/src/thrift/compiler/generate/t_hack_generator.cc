@@ -5809,24 +5809,25 @@ void t_hack_generator::generate_process_function(
   }
   f_service_ << ");\n";
 
-  if (tfunction->qualifier() != t_function_qualifier::oneway) {
-    indent(f_service_) << "$this->eventHandler_->postExec($handler_ctx, '"
-                       << fn_name << "', $result);\n";
-  }
   if (is_stream) {
     if (!is_void) {
       f_service_ << indent()
-                 << "$result->success = $response_and_stream->response;"
-                 << indent() << "$this->writeHelper($result, '" << fn_name
-                 << "', $seqid, $handler_ctx, $output, $reply_type);\n";
+                 << "$result->success = $response_and_stream->response;\n";
     }
 
     std::string stream_response_type = generate_function_helper_name(
         tservice, tfunction, PhpFunctionNameSuffix::STREAM_RESPONSE);
-    f_service_ << indent()
+    f_service_ << indent() << "$this->eventHandler_->postExec($handler_ctx, '"
+               << fn_name << "', $result);\n"
+               << indent() << "$this->writeHelper($result, '" << fn_name
+               << "', $seqid, $handler_ctx, $output, $reply_type);\n"
+               << indent()
                << "await $this->genExecuteStream($response_and_stream->stream, "
                << stream_response_type << "::class, $output);\n"
                << indent() << "return;\n";
+  } else if (tfunction->qualifier() != t_function_qualifier::oneway) {
+    indent(f_service_) << "$this->eventHandler_->postExec($handler_ctx, '"
+                       << fn_name << "', $result);\n";
   }
   indent_down();
   int exc_num = 0;

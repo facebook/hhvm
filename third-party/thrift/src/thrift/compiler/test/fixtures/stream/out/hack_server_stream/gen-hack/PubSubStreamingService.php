@@ -571,6 +571,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'returnstream', $args);
       $response_and_stream = await $this->handler->returnstream($args->i32_from, $args->i32_to);
       $this->eventHandler_->postExec($handler_ctx, 'returnstream', $result);
+      $this->writeHelper($result, 'returnstream', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_returnstream_StreamResponse::class, $output);
       return;
     } catch (\Exception $ex) {
@@ -589,6 +590,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'streamthrows', $args);
       $response_and_stream = await $this->handler->streamthrows($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'streamthrows', $result);
+      $this->writeHelper($result, 'streamthrows', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_streamthrows_StreamResponse::class, $output);
       return;
     } catch (\Exception $ex) {
@@ -607,6 +609,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'servicethrows', $args);
       $response_and_stream = await $this->handler->servicethrows($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'servicethrows', $result);
+      $this->writeHelper($result, 'servicethrows', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_servicethrows_StreamResponse::class, $output);
       return;
     } catch (FooEx $exc0) {
@@ -628,6 +631,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'servicethrows2', $args);
       $response_and_stream = await $this->handler->servicethrows2($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'servicethrows2', $result);
+      $this->writeHelper($result, 'servicethrows2', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_servicethrows2_StreamResponse::class, $output);
       return;
     } catch (FooEx $exc0) {
@@ -652,6 +656,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'boththrows', $args);
       $response_and_stream = await $this->handler->boththrows($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'boththrows', $result);
+      $this->writeHelper($result, 'boththrows', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_boththrows_StreamResponse::class, $output);
       return;
     } catch (FooEx $exc0) {
@@ -672,8 +677,9 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     try {
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'responseandstreamstreamthrows', $args);
       $response_and_stream = await $this->handler->responseandstreamstreamthrows($args->foo);
+      $result->success = $response_and_stream->response;
       $this->eventHandler_->postExec($handler_ctx, 'responseandstreamstreamthrows', $result);
-      $result->success = $response_and_stream->response;      $this->writeHelper($result, 'responseandstreamstreamthrows', $seqid, $handler_ctx, $output, $reply_type);
+      $this->writeHelper($result, 'responseandstreamstreamthrows', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_responseandstreamstreamthrows_StreamResponse::class, $output);
       return;
     } catch (\Exception $ex) {
@@ -691,8 +697,9 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     try {
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'responseandstreamservicethrows', $args);
       $response_and_stream = await $this->handler->responseandstreamservicethrows($args->foo);
+      $result->success = $response_and_stream->response;
       $this->eventHandler_->postExec($handler_ctx, 'responseandstreamservicethrows', $result);
-      $result->success = $response_and_stream->response;      $this->writeHelper($result, 'responseandstreamservicethrows', $seqid, $handler_ctx, $output, $reply_type);
+      $this->writeHelper($result, 'responseandstreamservicethrows', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_responseandstreamservicethrows_StreamResponse::class, $output);
       return;
     } catch (FooEx $exc0) {
@@ -713,8 +720,9 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     try {
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'responseandstreamboththrows', $args);
       $response_and_stream = await $this->handler->responseandstreamboththrows($args->foo);
+      $result->success = $response_and_stream->response;
       $this->eventHandler_->postExec($handler_ctx, 'responseandstreamboththrows', $result);
-      $result->success = $response_and_stream->response;      $this->writeHelper($result, 'responseandstreamboththrows', $seqid, $handler_ctx, $output, $reply_type);
+      $this->writeHelper($result, 'responseandstreamboththrows', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_responseandstreamboththrows_StreamResponse::class, $output);
       return;
     } catch (FooEx $exc0) {
@@ -736,6 +744,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'returnstreamFast', $args);
       $response_and_stream = await $this->handler->returnstreamFast($args->i32_from, $args->i32_to);
       $this->eventHandler_->postExec($handler_ctx, 'returnstreamFast', $result);
+      $this->writeHelper($result, 'returnstreamFast', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_returnstreamFast_StreamResponse::class, $output);
       return;
     } catch (\Exception $ex) {

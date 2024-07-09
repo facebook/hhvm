@@ -17,7 +17,10 @@
 namespace cpp thrift.test.debug
 namespace py thrift.test.UnionTest
 
-typedef binary (cpp.type = "folly::IOBuf") IOBuf
+include "thrift/annotation/cpp.thrift"
+
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
 
 struct OneOfEach {
   1: bool im_true;
@@ -56,7 +59,8 @@ union TestUnion {
   3: OneOfEach struct_field;
   4: list<RandomStuff> struct_list;
   5: i32 other_i32_field;
-  6: OneOfEach ref_field (cpp.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: OneOfEach ref_field;
 }
 
 struct StructWithAUnion {
@@ -80,6 +84,7 @@ union NoExceptMoveUnion {
 }
 
 union CppRefContainers {
-  1: list<CppRefContainers> values (cpp.ref);
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<CppRefContainers> values;
   2: string data;
 }

@@ -16,7 +16,10 @@
 
 namespace cpp thrift.test.getter_setter
 
-typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>") IOBufPtr
+include "thrift/annotation/cpp.thrift"
+
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
 
 struct GetterSetterTest {
   1: optional i32 optionalInt;

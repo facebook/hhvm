@@ -16,8 +16,12 @@
 
 namespace cpp2 thrift.test.iobufptr
 
-typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>") IOBufPtr
-typedef binary (cpp2.type = "folly::IOBuf") IOBufBinary
+include "thrift/annotation/cpp.thrift"
+
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBufBinary
 
 struct Request {
   1: IOBufPtr one;

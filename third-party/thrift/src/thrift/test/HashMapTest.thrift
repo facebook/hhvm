@@ -16,13 +16,15 @@
 
 namespace cpp2 apache.thrift.test
 
+include "thrift/annotation/cpp.thrift"
+
 struct foo {
   1: map_i32_i32_7733 bar;
   2: map_string_i32_6307 baz;
 }
 
 // The following were automatically generated and may benefit from renaming.
-typedef map<i32, i32> (cpp.template = "std::unordered_map") map_i32_i32_7733
-typedef map<string, i32> (
-  cpp.template = "std::unordered_map",
-) map_string_i32_6307
+@cpp.Type{template = "std::unordered_map"}
+typedef map<i32, i32> map_i32_i32_7733
+@cpp.Type{template = "std::unordered_map"}
+typedef map<string, i32> map_string_i32_6307

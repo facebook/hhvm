@@ -229,17 +229,17 @@ func (p *rocketProtocol) open() error {
 }
 
 func (p *rocketProtocol) readPayload() (resp payload.Payload, err error) {
-	var readTimeout <-chan time.Time
+	ctx := p.ctx
 	if p.timeout > 0 {
-		readTimeout = time.After(p.timeout)
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, p.timeout)
+		defer cancel()
 	}
 	select {
 	case r := <-p.resultChan:
 		return r.val, r.err
-	case <-p.ctx.Done():
-		return nil, p.ctx.Err()
-	case <-readTimeout:
-		return nil, fmt.Errorf("rocket protocol timeout")
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	}
 }
 

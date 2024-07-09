@@ -460,7 +460,6 @@ ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
     plugin.add_program_visitor(&inject_schema_const);
   }
 
-  add_patch_mutators(mutators);
   return mutators;
 }
 

@@ -72,6 +72,7 @@ final class FusableReconnectingRpcClientMono extends Mono<RpcClient> implements 
 
   private volatile RpcClient rpcClient;
   private volatile State state;
+  private volatile String previousExceptionMessage = null;
 
   private volatile long lastConnectAttemptTs;
 
@@ -180,6 +181,8 @@ final class FusableReconnectingRpcClientMono extends Mono<RpcClient> implements 
     RpcClient oldClient;
     boolean stateChanged;
     boolean clientUpdated;
+    // Set exception message null if connection succeeded
+    previousExceptionMessage = null;
 
     do {
       oldState = this.state;
@@ -194,7 +197,14 @@ final class FusableReconnectingRpcClientMono extends Mono<RpcClient> implements 
   }
 
   private void handleConnectionError(Throwable t) {
-    LOGGER.error("error connecting to " + socketAddress, t);
+    // Log exception only if this is the first time we see this exception OR exception message is
+    // different
+    String currentExceptionMessage = t != null && t.getMessage() != null ? t.getMessage() : "";
+    if (previousExceptionMessage == null
+        || !previousExceptionMessage.equals(currentExceptionMessage)) {
+      previousExceptionMessage = currentExceptionMessage;
+      LOGGER.error("error connecting to " + socketAddress, t);
+    }
 
     STATE.set(this, State.DISCONNECTED);
 

@@ -461,7 +461,17 @@ module.exports = {
               'fb/troubleshooting/exception-handling/error-classification',
             ],
           },
-          'fb/troubleshooting/debugging-tools',
+          {
+            type: 'category',
+            label: "Debugging Tools",
+            link: {
+              type: 'doc',
+              id: 'fb/troubleshooting/debugging-tools',
+            },
+            items: [
+              'fb/troubleshooting/debuggingtools/thriftdbg-info',
+            ]
+          },
           'fb/troubleshooting/fuzzer',
           {
             type: 'category',

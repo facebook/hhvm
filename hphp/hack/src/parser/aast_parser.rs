@@ -120,7 +120,7 @@ impl<'src> AastParser {
         language: Language,
         mode: Option<Mode>,
         tree: PositionedSyntaxTree<'src, 'arena>,
-        default_unstable_features: HashSet<experimental_features::FeatureName>,
+        default_experimental_features: HashSet<experimental_features::FeatureName>,
     ) -> Result<ParserResult> {
         let ns = NamespaceEnv::empty(
             env.parser_options.auto_namespace_map.clone(),
@@ -135,7 +135,7 @@ impl<'src> AastParser {
             language,
             mode,
             tree,
-            default_unstable_features,
+            default_experimental_features,
         )
     }
 
@@ -168,7 +168,7 @@ impl<'src> AastParser {
         language: Language,
         mode: Option<Mode>,
         tree: PositionedSyntaxTree<'src, 'arena>,
-        default_unstable_features: HashSet<experimental_features::FeatureName>,
+        default_experimental_features: HashSet<experimental_features::FeatureName>,
     ) -> Result<ParserResult> {
         let lowering_t = Instant::now();
         match language {
@@ -205,7 +205,7 @@ impl<'src> AastParser {
             indexed_source_text,
             &tree,
             Some(&mut ret),
-            default_unstable_features,
+            default_experimental_features,
         );
         let error_peak = stack_limit::peak() as u64;
         let lowerer_parsing_errors = lowerer_env.parsing_errors().to_vec();
@@ -238,7 +238,7 @@ impl<'src> AastParser {
         indexed_source_text: &'src IndexedSourceText<'src>,
         tree: &PositionedSyntaxTree<'src, 'arena>,
         aast: Option<&mut Program<(), ()>>,
-        default_unstable_features: HashSet<experimental_features::FeatureName>,
+        default_experimental_features: HashSet<experimental_features::FeatureName>,
     ) -> Vec<SyntaxError> {
         let find_errors = |hhi_mode: bool| -> Vec<SyntaxError> {
             let mut errors = tree.errors().into_iter().cloned().collect::<Vec<_>>();
@@ -251,7 +251,7 @@ impl<'src> AastParser {
                 hhi_mode,
                 env.mode,
                 env.is_systemlib,
-                default_unstable_features,
+                default_experimental_features,
             );
             errors.extend(parse_errors);
             errors.sort_by(SyntaxError::compare_offset);

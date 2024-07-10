@@ -55,13 +55,13 @@ impl FeatureName {
         &self,
         po: &ParserOptions,
         mode: &Mode,
-        active_unstable_features: &hash::HashSet<FeatureName>,
+        active_experimental_features: &hash::HashSet<FeatureName>,
     ) -> bool {
         (match self {
             UnionIntersectionTypeHints => po.union_intersection_type_hints,
             ClassLevelWhere => po.enable_class_level_where_clauses,
             _ => false,
-        }) || active_unstable_features.contains(self)
+        }) || active_experimental_features.contains(self)
             || (matches!(self.get_feature_status(), OngoingRelease)
                 && matches!(mode, Mode::ForCodegen))
     }
@@ -70,7 +70,7 @@ impl FeatureName {
         &self,
         po: &ParserOptions,
         is_hhi: bool,
-        active_unstable_features: &mut hash::HashSet<FeatureName>,
+        active_experimental_features: &mut hash::HashSet<FeatureName>,
         text: &str,
         error: &mut dyn FnMut(syntax_error::Error),
     ) {
@@ -78,7 +78,7 @@ impl FeatureName {
             || is_hhi
             || !matches!(self.get_feature_status(), FeatureStatus::Unstable)
         {
-            active_unstable_features.insert(self.clone());
+            active_experimental_features.insert(self.clone());
         } else {
             error(syntax_error::cannot_enable_unstable_feature(
                 format!("{} is unstable and unstable features are disabled", text).as_str(),

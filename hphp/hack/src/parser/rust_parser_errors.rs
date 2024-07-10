@@ -173,7 +173,7 @@ struct Context<'a> {
     pub active_callable_attr_spec: Option<S<'a>>,
     pub active_const: Option<S<'a>>,
     pub active_enum_class: Option<S<'a>>,
-    pub active_unstable_features: HashSet<FeatureName>,
+    active_experimental_features: HashSet<FeatureName>,
 }
 
 struct Env<'a, State> {
@@ -1149,7 +1149,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     Ok(feature) => feature.enable(
                         &self.env.parser_options,
                         self.env.is_hhi_mode(),
-                        &mut self.env.context.active_unstable_features,
+                        &mut self.env.context.active_experimental_features,
                         text,
                         &mut |err| self.errors.push(make_error_from_node(node, err)),
                     ),
@@ -1176,7 +1176,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         if !feature.can_use(
             &self.env.parser_options,
             &self.env.mode,
-            &self.env.context.active_unstable_features,
+            &self.env.context.active_experimental_features,
         ) {
             self.errors.push(make_error_from_node(
                 node,
@@ -2913,7 +2913,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         let enabled = feature.can_use(
             &self.env.parser_options,
             &self.env.mode,
-            &self.env.context.active_unstable_features,
+            &self.env.context.active_experimental_features,
         );
         (feature, enabled)
     }
@@ -5661,7 +5661,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         hhi_mode: bool,
         mode: Mode,
         systemlib: bool,
-        default_unstable_features: HashSet<FeatureName>,
+        default_experimental_features: HashSet<FeatureName>,
     ) -> (Vec<SyntaxError>, bool) {
         let env = Env {
             parser_options,
@@ -5674,7 +5674,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 active_callable_attr_spec: None,
                 active_const: None,
                 active_enum_class: None,
-                active_unstable_features: default_unstable_features,
+                active_experimental_features: default_experimental_features,
             },
             hhvm_compat_mode,
             hhi_mode,
@@ -5692,7 +5692,7 @@ pub fn parse_errors<'a, State: Clone>(
     hhi_mode: bool,
     ns_mode: Mode,
     systemlib: bool,
-    default_unstable_features: HashSet<FeatureName>,
+    default_experimental_features: HashSet<FeatureName>,
 ) -> (Vec<SyntaxError>, bool) {
     <ParserErrors<'a, State>>::parse_errors(
         tree,
@@ -5702,7 +5702,7 @@ pub fn parse_errors<'a, State: Clone>(
         hhi_mode,
         ns_mode,
         systemlib,
-        default_unstable_features,
+        default_experimental_features,
     )
 }
 
@@ -5714,7 +5714,7 @@ pub fn parse_errors_with_text<'a, State: Clone>(
     hhi_mode: bool,
     ns_mode: Mode,
     systemlib: bool,
-    default_unstable_features: HashSet<FeatureName>,
+    default_experimental_features: HashSet<FeatureName>,
 ) -> (Vec<SyntaxError>, bool) {
     <ParserErrors<'a, State>>::parse_errors(
         tree,
@@ -5724,6 +5724,6 @@ pub fn parse_errors_with_text<'a, State: Clone>(
         hhi_mode,
         ns_mode,
         systemlib,
-        default_unstable_features,
+        default_experimental_features,
     )
 }

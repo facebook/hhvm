@@ -381,7 +381,6 @@ void CAresResolver::Query::queryCallback(
       break;
     }
 
-    // Used by DNSCrypt to get certificates
     case RecordType::kTXT: {
       auto result = detail::parseTxtRecords(abuf, alen);
       if (result.hasError()) {
@@ -427,8 +426,7 @@ void CAresResolver::Query::queryCallback(
   }
 
   for (auto& answer : answers) {
-    answer.resolverType = self->dnscryptUsed_ ? ResolverType::CARES_DNSCRYPT
-                                              : ResolverType::CARES;
+    answer.resolverType = ResolverType::CARES;
   }
 
   self->succeed(std::move(answers));
@@ -455,23 +453,6 @@ void CAresResolver::Query::timeoutExpired() noexcept {
 
   cb->eraseQuery(this);
   cb->resolutionError(ew);
-}
-
-std::array<unsigned char, kCryptoBoxHalfNonceBytes>&
-CAresResolver::Query::getNonce() {
-  return nonce_;
-}
-
-void CAresResolver::Query::setDnsCryptUsed(bool used, uint32_t serial) {
-  dnscryptUsed_ = true;
-  dnsEvent_.addMeta(TraceFieldType::DNSCryptUsed, used ? "1" : "0");
-  dnsEvent_.addMeta(TraceFieldType::DNSCryptCertSerial,
-                    folly::to<std::string>(serial));
-}
-
-std::chrono::steady_clock::time_point&
-CAresResolver::Query::getLastNonceTimeRef() {
-  return resolver_->getLastNonceTimeRef();
 }
 
 namespace proxygen {
@@ -510,7 +491,6 @@ class CAresResolver::MultiQuery
     startTime_ = getCurrentTime();
 
     for (auto q : queries) {
-      q->setDnsCryptUsed(dnsCryptUsed_, serial_);
       insertQuery(q);
       q->resolve(this, timeout);
     }
@@ -527,11 +507,6 @@ class CAresResolver::MultiQuery
     finish();
   }
 
-  void setDnsCryptUsed(bool used, uint32_t serial) {
-    dnsCryptUsed_ = used;
-    serial_ = serial;
-  }
-
  private:
   CAresResolver* resolver_;
   ResolutionCallback* callback_{nullptr};
@@ -540,8 +515,6 @@ class CAresResolver::MultiQuery
   std::string name_;
   std::vector<Answer> answers_;
   uint16_t queries_{0};
-  bool dnsCryptUsed_{false};
-  uint32_t serial_{0};
 
   void resolutionSuccess(std::vector<Answer> a) noexcept override {
     --queries_;
@@ -649,8 +622,6 @@ CAresResolver::CAresResolver()
 
 CAresResolver::~CAresResolver() {
   if (channel_) {
-    ares_set_read_callback(channel_, nullptr, nullptr, nullptr);
-    ares_set_write_callback(channel_, nullptr, nullptr, nullptr);
     ares_destroy(channel_);
   }
 
@@ -807,7 +778,6 @@ void CAresResolver::resolveAddress(DNSResolver::ResolutionCallback* cb,
                      std::move(dnsEvent),
                      &timeUtil_,
                      std::move(teContext));
-  q->setDnsCryptUsed(false, 0);
   q->resolve(cb, timeout);
 }
 
@@ -878,8 +848,6 @@ void CAresResolver::resolveHostname(DNSResolver::ResolutionCallback* cb,
     timeout = kMaxTimeout;
   }
 
-  // If we are a dnscrypt enabled resolver, we need to have a valid cert
-  // context installed before making any queries
   TraceEvent dnsEvent =
       TraceEvent(TraceEventType::DnsResolution, teContext.parentID);
   dnsEvent.addMeta(TraceFieldType::NumberResolvers, servers_.size());
@@ -895,7 +863,6 @@ void CAresResolver::resolveHostname(DNSResolver::ResolutionCallback* cb,
                        &timeUtil_,
                        std::move(teContext));
     cb->insertQuery(q);
-    q->setDnsCryptUsed(false, 0);
     q->resolve(cb, std::chrono::milliseconds(timeout));
   }
 
@@ -908,7 +875,6 @@ void CAresResolver::resolveHostname(DNSResolver::ResolutionCallback* cb,
                        &timeUtil_,
                        std::move(teContext));
     cb->insertQuery(q);
-    q->setDnsCryptUsed(false, 0);
     q->resolve(cb, std::chrono::milliseconds(timeout));
   } else if (family == AF_INET6) {
     auto q = new Query(this,
@@ -919,11 +885,9 @@ void CAresResolver::resolveHostname(DNSResolver::ResolutionCallback* cb,
                        &timeUtil_,
                        std::move(teContext));
     cb->insertQuery(q);
-    q->setDnsCryptUsed(false, 0);
     q->resolve(cb, std::chrono::milliseconds(timeout));
   } else if (family == AF_UNSPEC) {
     auto mq = new MultiQuery(this, host);
-    mq->setDnsCryptUsed(false, 0);
     cb->insertQuery(mq);
     mq->resolve(cb,
                 {new Query(this,
@@ -973,7 +937,6 @@ void CAresResolver::resolveMailExchange(DNSResolver::ResolutionCallback* cb,
                      std::move(dnsEvent),
                      &timeUtil_,
                      std::move(teContext));
-  q->setDnsCryptUsed(false, 0);
   q->resolve(cb, timeout);
 }
 
@@ -1077,10 +1040,6 @@ void CAresResolver::initGlobal() {
 
 void CAresResolver::destroyGlobal() {
   ares_library_cleanup();
-}
-
-std::chrono::steady_clock::time_point& CAresResolver::getLastNonceTimeRef() {
-  return lastNonceTimeStamp_;
 }
 
 namespace detail {

@@ -27,8 +27,6 @@ class MockCAresResolver : public CAresResolver {
       aresQuery,
       (const std::string&, CAresResolver::RecordType, ares_callback, void*),
       (const));
-  MOCK_METHOD(void, recordPlaintext, (CAresResolver::Query*), (const));
-  MOCK_METHOD(void, recordEncrypted, (CAresResolver::Query*), (const));
 
  private:
   ~MockCAresResolver() override {
@@ -122,7 +120,6 @@ TEST_F(CAresResolverTest, ScheduleFallbackOnFailureDnscr) {
                                     &tu,
                                     std::move(teContext),
                                     cb.get());
-  query->setDnsCryptUsed(true, 1);
   query->fail(static_cast<DNSResolver::ResolutionStatus>(1), "error");
 }
 
@@ -135,7 +132,6 @@ TEST_F(CAresResolverTest, ScheduleFallbackOnFailureDnscrNoCob) {
                                     std::move(te),
                                     nullptr,
                                     std::move(teContext));
-  query->setDnsCryptUsed(true, 1);
   query->fail(static_cast<DNSResolver::ResolutionStatus>(1), "error");
 }
 

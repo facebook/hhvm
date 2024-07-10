@@ -48,7 +48,7 @@ class DNSResolver : public folly::DelayedDestruction {
     UNKNOWN = 0,
     POSIX = 1,
     CARES = 2,
-    CARES_DNSCRYPT = 3,
+    /* Intentionally unused =  3 */
     DOH = 4,
   };
 

@@ -20,13 +20,8 @@
 #include <folly/SocketAddress.h>
 #include <folly/io/async/AsyncTimeout.h>
 #include <folly/io/async/EventBase.h>
-#include <sodium.h>
 
 #include "proxygen/lib/dns/DNSResolver.h"
-
-namespace {
-constexpr size_t kCryptoBoxHalfNonceBytes(crypto_box_NONCEBYTES / 2U);
-}
 
 namespace proxygen {
 /**
@@ -109,9 +104,6 @@ class CAresResolver : public DNSResolver {
 
     void resolve(ResolutionCallback* cb, std::chrono::milliseconds timeout);
     void cancelResolutionImpl() override;
-    std::array<unsigned char, kCryptoBoxHalfNonceBytes>& getNonce();
-    void setDnsCryptUsed(bool used, uint32_t serial);
-    std::chrono::steady_clock::time_point& getLastNonceTimeRef();
 
    protected:
     // Don't use fail() here, as that would delete the object and we need to
@@ -130,14 +122,11 @@ class CAresResolver : public DNSResolver {
     int cnameResolutions_ = {0};
     TimePoint startTime_;
     bool recordStats_;
-    bool dnscryptUsed_{false};
     const TimeUtil* timeUtil_;
 
     // TraceEvent for resolution
     TraceEvent dnsEvent_;
     TraceEventContext teContext_;
-
-    std::array<unsigned char, kCryptoBoxHalfNonceBytes> nonce_;
 
     void succeed(std::vector<Answer> answers);
 
@@ -215,7 +204,6 @@ class CAresResolver : public DNSResolver {
                                std::chrono::milliseconds(100)) override;
   void setStatsCollector(DNSResolver::StatsCollector* statsCollector) override;
   DNSResolver::StatsCollector* getStatsCollector() const override;
-  std::chrono::steady_clock::time_point& getLastNonceTimeRef();
 
   const TimeUtil* getTimeUtilPtr() const {
     return &timeUtil_;
@@ -237,7 +225,6 @@ class CAresResolver : public DNSResolver {
   uint16_t port_;
   StatsCollector* statsCollector_;
   TimeUtil timeUtil_;
-  std::chrono::steady_clock::time_point lastNonceTimeStamp_;
   bool resolveSRVRecord_{false};
 
   // Attempt to resolve literal IPs, invoking the callback and returning

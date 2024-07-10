@@ -90,7 +90,6 @@
 #include <thrift/lib/cpp2/server/ThreadManagerLoggingWrapper.h>
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 #include <thrift/lib/cpp2/server/TransportRoutingHandler.h>
-#include <thrift/lib/cpp2/server/metrics/MetricCollector.h>
 #include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
@@ -931,9 +930,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   folly::Synchronized<std::shared_ptr<server::TServerObserver>> observer_;
   std::atomic<server::TServerObserver*> observerPtr_{nullptr};
 
-  // MetricCollector instance used for collecting server metrics
-  MetricCollector metricCollector_{};
-
   //! The type of thread manager to create.
   ThreadManagerType threadManagerType_{ThreadManagerType::PRIORITY};
 
@@ -1037,12 +1033,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   std::shared_ptr<server::TServerObserver> getObserverShared() const {
     return observer_.copy();
-  }
-
-  MetricCollector& getMetricCollector() override { return metricCollector_; }
-
-  const MetricCollector& getMetricCollector() const override {
-    return metricCollector_;
   }
 
   AdaptiveConcurrencyController& getAdaptiveConcurrencyController() final {

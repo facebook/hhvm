@@ -40,9 +40,6 @@ class MockServerConfigs : public apache::thrift::server::ServerConfigs {
       getObserver,
       (),
       (const, override));
-  MOCK_METHOD(MetricCollector&, getMetricCollector, (), (override));
-  MOCK_METHOD(
-      const MetricCollector&, getMetricCollector, (), (const, override));
   MOCK_METHOD(
       apache::thrift::AdaptiveConcurrencyController&,
       getAdaptiveConcurrencyController,

@@ -151,8 +151,7 @@ Cpp2Connection::Cpp2Connection(
               *worker_->getServer())
               .size()),
       transport_(transport),
-      executor_(worker_->getServer()->getHandlerExecutor_deprecated().get()),
-      metricCollector_{worker_->getServer()->getMetricCollector()} {
+      executor_(worker_->getServer()->getHandlerExecutor_deprecated().get()) {
   processor_->coalesceWithServerScopedLegacyEventHandlers(
       *worker_->getServer());
   if (worker_->getServer()->resourcePoolSet().empty()) {
@@ -217,7 +216,6 @@ void Cpp2Connection::stop() {
       if (auto* observer = worker_->getServer()->getObserver()) {
         observer->taskKilled();
       }
-      metricCollector_.requestRejected({});
     }
   }
 
@@ -332,7 +330,6 @@ void Cpp2Connection::killRequest(
   if (auto* observer = server->getObserver()) {
     observer->taskKilled();
   }
-  metricCollector_.requestRejected({});
 
   // Nothing to do for Thrift oneway request.
   if (req->isOneway()) {
@@ -526,7 +523,6 @@ void Cpp2Connection::requestReceived(
   if (observer) {
     observer->receivedRequest(&methodName);
   }
-  metricCollector_.requestReceived();
 
   auto injectedFailure = server->maybeInjectFailure();
   switch (injectedFailure) {

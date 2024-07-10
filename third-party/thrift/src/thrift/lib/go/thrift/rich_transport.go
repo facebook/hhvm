@@ -47,6 +47,14 @@ func (r *richTransport) RemainingBytes() uint64 {
 	return readSizeProvider.RemainingBytes()
 }
 
+func remainingBytes(r io.Reader) uint64 {
+	readSizeProvider, ok := r.(ReadSizeProvider)
+	if !ok {
+		return UnknownRemaining
+	}
+	return readSizeProvider.RemainingBytes()
+}
+
 func (r *richTransport) Flush() error {
 	flusher, ok := r.ReadWriteCloser.(Flusher)
 	if !ok {

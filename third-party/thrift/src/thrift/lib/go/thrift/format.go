@@ -58,6 +58,38 @@ const (
 
 // Format is the interface that must be implemented by all serialization formats.
 type Format interface {
+	Encoder
+	Decoder
+}
+
+// Decoder is the interface that must be implemented by all serialization formats.
+type Decoder interface {
+	ReadMessageBegin() (name string, typeID MessageType, seqid int32, err error)
+	ReadMessageEnd() error
+	ReadStructBegin() (name string, err error)
+	ReadStructEnd() error
+	ReadFieldBegin() (name string, typeID Type, id int16, err error)
+	ReadFieldEnd() error
+	ReadMapBegin() (keyType Type, valueType Type, size int, err error)
+	ReadMapEnd() error
+	ReadListBegin() (elemType Type, size int, err error)
+	ReadListEnd() error
+	ReadSetBegin() (elemType Type, size int, err error)
+	ReadSetEnd() error
+	ReadBool() (value bool, err error)
+	ReadByte() (value byte, err error)
+	ReadI16() (value int16, err error)
+	ReadI32() (value int32, err error)
+	ReadI64() (value int64, err error)
+	ReadDouble() (value float64, err error)
+	ReadFloat() (value float32, err error)
+	ReadString() (value string, err error)
+	ReadBinary() (value []byte, err error)
+	Skip(fieldType Type) (err error)
+}
+
+// Encoder is the interface that must be implemented by all serialization formats.
+type Encoder interface {
 	WriteMessageBegin(name string, typeID MessageType, seqid int32) error
 	WriteMessageEnd() error
 	WriteStructBegin(name string) error
@@ -80,30 +112,6 @@ type Format interface {
 	WriteFloat(value float32) error
 	WriteString(value string) error
 	WriteBinary(value []byte) error
-
-	ReadMessageBegin() (name string, typeID MessageType, seqid int32, err error)
-	ReadMessageEnd() error
-	ReadStructBegin() (name string, err error)
-	ReadStructEnd() error
-	ReadFieldBegin() (name string, typeID Type, id int16, err error)
-	ReadFieldEnd() error
-	ReadMapBegin() (keyType Type, valueType Type, size int, err error)
-	ReadMapEnd() error
-	ReadListBegin() (elemType Type, size int, err error)
-	ReadListEnd() error
-	ReadSetBegin() (elemType Type, size int, err error)
-	ReadSetEnd() error
-	ReadBool() (value bool, err error)
-	ReadByte() (value byte, err error)
-	ReadI16() (value int16, err error)
-	ReadI32() (value int32, err error)
-	ReadI64() (value int64, err error)
-	ReadDouble() (value float64, err error)
-	ReadFloat() (value float32, err error)
-	ReadString() (value string, err error)
-	ReadBinary() (value []byte, err error)
-
-	Skip(fieldType Type) (err error)
 	Flush() (err error)
 }
 
@@ -118,12 +126,12 @@ var _ Format = (*debugProtocol)(nil)
 const DEFAULT_RECURSION_DEPTH = 64
 
 // SkipDefaultDepth skips over the next data element from the provided Protocol object.
-func SkipDefaultDepth(prot Format, typeID Type) (err error) {
+func SkipDefaultDepth(prot Decoder, typeID Type) (err error) {
 	return Skip(prot, typeID, DEFAULT_RECURSION_DEPTH)
 }
 
 // Skip skips over the next data element from the provided Protocol object.
-func Skip(self Format, fieldType Type, maxDepth int) (err error) {
+func Skip(self Decoder, fieldType Type, maxDepth int) (err error) {
 	if maxDepth <= 0 {
 		return NewProtocolExceptionWithType(DEPTH_LIMIT, errors.New("Depth limit exceeded"))
 	}

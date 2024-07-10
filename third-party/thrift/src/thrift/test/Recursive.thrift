@@ -16,6 +16,7 @@
 
 include "thrift/annotation/thrift.thrift"
 include "thrift/test/Recursive2.thrift"
+include "thrift/annotation/cpp.thrift"
 
 namespace cpp2 apache.thrift.test
 
@@ -27,12 +28,14 @@ struct RecTree {
 }
 
 struct RecList {
-  1: optional RecList next (cpp.ref = "true", cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional RecList next;
   3: i16 item;
 }
 
 struct CoRec {
-  1: optional CoRec2 other (cpp.ref = "true", cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional CoRec2 other;
 }
 
 struct CoRec2 {
@@ -48,14 +51,13 @@ struct MyField {
 }
 
 struct MyStruct {
-  1: optional MyField field (cpp.ref = "true", cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional MyField field;
 }
 
 struct StructUsingOtherNamespace {
-  1: optional Recursive2.OtherStruct other (
-    cpp.ref = "true",
-    cpp2.ref = "true",
-  );
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional Recursive2.OtherStruct other;
 }
 
 struct StructUsingAnnotation {

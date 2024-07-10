@@ -22,9 +22,12 @@ cpp_include "thrift/test/AdapterTest.h"
 namespace cpp2 cpp2
 
 struct RecursiveStruct {
-  1: RecursiveStruct def_field (cpp2.ref = "true");
-  2: optional RecursiveStruct opt_field (cpp2.ref = "true");
-  3: required RecursiveStruct req_field (cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: RecursiveStruct def_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional RecursiveStruct opt_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: required RecursiveStruct req_field;
 }
 
 struct PlainStruct {
@@ -38,110 +41,172 @@ struct EmptiableStruct {
 }
 
 struct ReferringStruct {
-  1: PlainStruct def_field (cpp2.ref = "true");
-  2: optional PlainStruct opt_field (cpp2.ref = "true");
-  3: required PlainStruct req_field (cpp2.ref = "true");
-  4: PlainStruct def_unique_field (cpp2.ref_type = "unique");
-  5: optional PlainStruct opt_unique_field (cpp2.ref_type = "unique");
-  6: required PlainStruct req_unique_field (cpp2.ref_type = "unique");
-  7: PlainStruct def_shared_field (cpp2.ref_type = "shared");
-  8: optional PlainStruct opt_shared_field (cpp2.ref_type = "shared");
-  9: required PlainStruct req_shared_field (cpp2.ref_type = "shared");
-  10: PlainStruct def_shared_const_field (cpp2.ref_type = "shared_const");
-  11: optional PlainStruct opt_shared_const_field (
-    cpp2.ref_type = "shared_const",
-  );
-  12: required PlainStruct req_shared_const_field (
-    cpp2.ref_type = "shared_const",
-  );
-  13: optional PlainStruct opt_box_field (thrift.box);
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: PlainStruct def_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional PlainStruct opt_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: required PlainStruct req_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: PlainStruct def_unique_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  5: optional PlainStruct opt_unique_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: required PlainStruct req_unique_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  7: PlainStruct def_shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  8: optional PlainStruct opt_shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  9: required PlainStruct req_shared_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  10: PlainStruct def_shared_const_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  11: optional PlainStruct opt_shared_const_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  12: required PlainStruct req_shared_const_field;
+  @thrift.Box
+  13: optional PlainStruct opt_box_field;
 }
 
 struct ReferringStructWithBaseTypeFields {
-  1: i64 def_field (cpp2.ref = "true");
-  2: optional i64 opt_field (cpp2.ref = "true");
-  3: required i64 req_field (cpp2.ref = "true");
-  4: i64 def_unique_field (cpp2.ref_type = "unique");
-  5: optional i64 opt_unique_field (cpp2.ref_type = "unique");
-  6: required i64 req_unique_field (cpp2.ref_type = "unique");
-  7: i64 def_shared_field (cpp2.ref_type = "shared");
-  8: optional i64 opt_shared_field (cpp2.ref_type = "shared");
-  9: required i64 req_shared_field (cpp2.ref_type = "shared");
-  10: i64 def_shared_const_field (cpp2.ref_type = "shared_const");
-  11: optional i64 opt_shared_const_field (cpp2.ref_type = "shared_const");
-  12: required i64 req_shared_const_field (cpp2.ref_type = "shared_const");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: i64 def_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional i64 opt_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: required i64 req_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: i64 def_unique_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  5: optional i64 opt_unique_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: required i64 req_unique_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  7: i64 def_shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  8: optional i64 opt_shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  9: required i64 req_shared_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  10: i64 def_shared_const_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  11: optional i64 opt_shared_const_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  12: required i64 req_shared_const_field;
   13: optional i64 opt_box_field (cpp.box);
 }
 
 struct ReferringStructWithStringFields {
-  1: string def_field (cpp2.ref = "true");
-  2: optional string opt_field (cpp2.ref = "true");
-  3: required string req_field (cpp2.ref = "true");
-  4: string def_unique_field (cpp2.ref_type = "unique");
-  5: optional string opt_unique_field (cpp2.ref_type = "unique");
-  6: required string req_unique_field (cpp2.ref_type = "unique");
-  7: string def_shared_field (cpp2.ref_type = "shared");
-  8: optional string opt_shared_field (cpp2.ref_type = "shared");
-  9: required string req_shared_field (cpp2.ref_type = "shared");
-  10: string def_shared_const_field (cpp2.ref_type = "shared_const");
-  11: optional string opt_shared_const_field (cpp2.ref_type = "shared_const");
-  12: required string req_shared_const_field (cpp2.ref_type = "shared_const");
-  13: optional string opt_box_field (thrift.box);
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: string def_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional string opt_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: required string req_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: string def_unique_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  5: optional string opt_unique_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: required string req_unique_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  7: string def_shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  8: optional string opt_shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  9: required string req_shared_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  10: string def_shared_const_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  11: optional string opt_shared_const_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  12: required string req_shared_const_field;
+  @thrift.Box
+  13: optional string opt_box_field;
 }
 
 struct ReferringStructWithListFields {
-  1: list<i32> def_field (cpp2.ref = "true");
-  2: optional list<i32> opt_field (cpp2.ref = "true");
-  3: required list<i32> req_field (cpp2.ref = "true");
-  4: list<i32> def_unique_field (cpp2.ref_type = "unique");
-  5: optional list<i32> opt_unique_field (cpp2.ref_type = "unique");
-  6: required list<i32> req_unique_field (cpp2.ref_type = "unique");
-  7: list<i32> def_shared_field (cpp2.ref_type = "shared");
-  8: optional list<i32> opt_shared_field (cpp2.ref_type = "shared");
-  9: required list<i32> req_shared_field (cpp2.ref_type = "shared");
-  10: list<i32> def_shared_const_field (cpp2.ref_type = "shared_const");
-  11: optional list<i32> opt_shared_const_field (
-    cpp2.ref_type = "shared_const",
-  );
-  12: required list<i32> req_shared_const_field (
-    cpp2.ref_type = "shared_const",
-  );
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<i32> def_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional list<i32> opt_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: required list<i32> req_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: list<i32> def_unique_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  5: optional list<i32> opt_unique_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: required list<i32> req_unique_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  7: list<i32> def_shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  8: optional list<i32> opt_shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  9: required list<i32> req_shared_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  10: list<i32> def_shared_const_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  11: optional list<i32> opt_shared_const_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  12: required list<i32> req_shared_const_field;
   13: optional list<i32> opt_box_field (cpp.box);
 }
 
 struct ReferringStructWithSetFields {
-  1: set<i32> def_field (cpp2.ref = "true");
-  2: optional set<i32> opt_field (cpp2.ref = "true");
-  3: required set<i32> req_field (cpp2.ref = "true");
-  4: set<i32> def_unique_field (cpp2.ref_type = "unique");
-  5: optional set<i32> opt_unique_field (cpp2.ref_type = "unique");
-  6: required set<i32> req_unique_field (cpp2.ref_type = "unique");
-  7: set<i32> def_shared_field (cpp2.ref_type = "shared");
-  8: optional set<i32> opt_shared_field (cpp2.ref_type = "shared");
-  9: required set<i32> req_shared_field (cpp2.ref_type = "shared");
-  10: set<i32> def_shared_const_field (cpp2.ref_type = "shared_const");
-  11: optional set<i32> opt_shared_const_field (cpp2.ref_type = "shared_const");
-  12: required set<i32> req_shared_const_field (cpp2.ref_type = "shared_const");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: set<i32> def_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional set<i32> opt_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: required set<i32> req_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: set<i32> def_unique_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  5: optional set<i32> opt_unique_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: required set<i32> req_unique_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  7: set<i32> def_shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  8: optional set<i32> opt_shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  9: required set<i32> req_shared_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  10: set<i32> def_shared_const_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  11: optional set<i32> opt_shared_const_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  12: required set<i32> req_shared_const_field;
   13: optional set<i32> opt_box_field (cpp.box);
 }
 
 struct ReferringStructWithMapFields {
-  1: map<i32, i32> def_field (cpp2.ref = "true");
-  2: optional map<i32, i32> opt_field (cpp2.ref = "true");
-  3: required map<i32, i32> req_field (cpp2.ref = "true");
-  4: map<i32, i32> def_unique_field (cpp2.ref_type = "unique");
-  5: optional map<i32, i32> opt_unique_field (cpp2.ref_type = "unique");
-  6: required map<i32, i32> req_unique_field (cpp2.ref_type = "unique");
-  7: map<i32, i32> def_shared_field (cpp2.ref_type = "shared");
-  8: optional map<i32, i32> opt_shared_field (cpp2.ref_type = "shared");
-  9: required map<i32, i32> req_shared_field (cpp2.ref_type = "shared");
-  10: map<i32, i32> def_shared_const_field (cpp2.ref_type = "shared_const");
-  11: optional map<i32, i32> opt_shared_const_field (
-    cpp2.ref_type = "shared_const",
-  );
-  12: required map<i32, i32> req_shared_const_field (
-    cpp2.ref_type = "shared_const",
-  );
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i32, i32> def_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional map<i32, i32> opt_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: required map<i32, i32> req_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: map<i32, i32> def_unique_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  5: optional map<i32, i32> opt_unique_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: required map<i32, i32> req_unique_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  7: map<i32, i32> def_shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  8: optional map<i32, i32> opt_shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  9: required map<i32, i32> req_shared_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  10: map<i32, i32> def_shared_const_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  11: optional map<i32, i32> opt_shared_const_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  12: required map<i32, i32> req_shared_const_field;
   13: optional map<i32, i32> opt_box_field (cpp.box);
 }
 
@@ -257,15 +322,21 @@ struct TerseInternBox {
 }
 
 struct StructWithString {
-  1: string def_unique_string_ref = "..." (cpp.ref_type = "unique");
-  2: string def_shared_string_ref = "..." (cpp.ref_type = "shared");
-  3: string def_shared_string_const_ref = "..." (cpp.ref_type = "shared_const");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: string def_unique_string_ref = "...";
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: string def_shared_string_ref = "...";
+  @cpp.Ref{type = cpp.RefType.Shared}
+  3: string def_shared_string_const_ref = "...";
 }
 
 union ReferringUnionWithCppRef {
-  1: string box_string (cpp.ref);
-  2: PlainStruct box_plain (cpp.ref);
-  3: ReferringUnionWithCppRef box_self (cpp.ref);
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: string box_string;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: PlainStruct box_plain;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: ReferringUnionWithCppRef box_self;
 }
 
 union ReferringUnion {

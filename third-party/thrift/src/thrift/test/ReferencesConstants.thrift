@@ -16,12 +16,17 @@
 
 namespace cpp2 apache.thrift.test
 
+include "thrift/annotation/cpp.thrift"
+
 struct Empty {}
 
 struct StructWithRef {
-  1: Empty def_field (cpp.ref);
-  2: optional Empty opt_field (cpp.ref);
-  3: required Empty req_field (cpp.ref);
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: Empty def_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional Empty opt_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: required Empty req_field;
 }
 
 const StructWithRef kStructWithRef = {
@@ -31,9 +36,12 @@ const StructWithRef kStructWithRef = {
 };
 
 struct StructWithRefTypeUnique {
-  1: Empty def_field (cpp.ref_type = "unique");
-  2: optional Empty opt_field (cpp.ref_type = "unique");
-  3: required Empty req_field (cpp.ref_type = "unique");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: Empty def_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional Empty opt_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: required Empty req_field;
 }
 
 const StructWithRefTypeUnique kStructWithRefTypeUnique = {
@@ -43,9 +51,12 @@ const StructWithRefTypeUnique kStructWithRefTypeUnique = {
 };
 
 struct StructWithRefTypeShared {
-  1: Empty def_field (cpp.ref_type = "shared");
-  2: optional Empty opt_field (cpp.ref_type = "shared");
-  3: required Empty req_field (cpp.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: Empty def_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: optional Empty opt_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  3: required Empty req_field;
 }
 
 const StructWithRefTypeShared kStructWithRefTypeShared = {
@@ -55,9 +66,12 @@ const StructWithRefTypeShared kStructWithRefTypeShared = {
 };
 
 struct StructWithRefTypeSharedConst {
-  1: Empty def_field (cpp.ref_type = "shared_const");
-  2: optional Empty opt_field (cpp.ref_type = "shared_const");
-  3: required Empty req_field (cpp.ref_type = "shared_const");
+  @cpp.Ref{type = cpp.RefType.Shared}
+  1: Empty def_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  2: optional Empty opt_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  3: required Empty req_field;
 }
 
 const StructWithRefTypeSharedConst kStructWithRefTypeSharedConst = {

@@ -18,6 +18,7 @@ namespace fizz::openssl {
 template <typename T>
 struct HasherType {
   static constexpr size_t HashLen = T::HashLen;
+  static constexpr size_t BlockSize = T::BlockSize;
   static constexpr folly::StringPiece BlankHash = T::BlankHash;
   static constexpr auto HashEngine = Properties<T>::HashEngine;
 };

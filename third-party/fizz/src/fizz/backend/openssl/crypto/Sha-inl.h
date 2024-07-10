@@ -22,13 +22,23 @@ void Sha<T>::hash_update(folly::ByteRange data) {
 }
 
 template <typename T>
-void Sha<T>::hash_update(const folly::IOBuf& data) {
-  digest_.hash_update(data);
+void Sha<T>::hash_final(folly::MutableByteRange out) {
+  digest_.hash_final(out);
 }
 
 template <typename T>
-void Sha<T>::hash_final(folly::MutableByteRange out) {
-  digest_.hash_final(out);
+std::unique_ptr<fizz::Hasher> Sha<T>::clone() const {
+  return std::make_unique<Sha<T>>(*this);
+}
+
+template <typename T>
+size_t Sha<T>::getHashLen() const {
+  return T::HashLen;
+}
+
+template <typename T>
+size_t Sha<T>::getBlockSize() const {
+  return T::BlockSize;
 }
 
 template <typename T>

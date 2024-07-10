@@ -531,10 +531,14 @@ class mstch_service : public mstch_base {
     }
 
     // Collect performed interactions and cache them.
+    std::set<const t_interaction*> seen;
     for (const auto* function : get_functions()) {
       if (const auto& interaction = function->interaction()) {
-        interactions_.insert(
-            dynamic_cast<const t_interaction*>(interaction.get_type()));
+        auto* ptr = dynamic_cast<const t_interaction*>(interaction.get_type());
+        if (!seen.insert(ptr).second) {
+          continue; // Already seen this interaction.
+        }
+        interactions_.push_back(ptr);
       }
     }
   }
@@ -588,7 +592,7 @@ class mstch_service : public mstch_base {
 
  protected:
   const t_service* service_;
-  std::set<const t_interaction*> interactions_;
+  std::vector<const t_interaction*> interactions_;
 
   // If `service_` is really an interaction, `containing_service_` is the
   // service it belongs to.

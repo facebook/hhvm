@@ -6,10 +6,9 @@
  *
  *)
 
-(* The logic to determine whether a feature is enabled is implemented in
-   check_can_use_feature and the logic to determine whether the file-level
-   attribute is allowed is in enable_experimental_feature, both in
-   rust_parser_errors.rs *)
+(* The logic to determine whether a feature is enabled is implemented in can_use
+   and the logic to determine whether the file-level attribute is allowed is in
+   enable, both in experimental_features_impl.rs *)
 
 type feature_status =
   | Unstable

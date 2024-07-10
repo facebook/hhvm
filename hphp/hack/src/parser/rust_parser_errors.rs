@@ -14,7 +14,6 @@ use hh_autoimport_rust as hh_autoimport;
 use itertools::Itertools;
 use naming_special_names_rust as sn;
 use oxidized::experimental_features::FeatureName;
-use oxidized::experimental_features::FeatureStatus;
 use oxidized::namespace_env::Mode;
 use oxidized::parser_options::ParserOptions;
 use parser_core_types::indexed_source_text::IndexedSourceText;
@@ -64,45 +63,6 @@ enum BinopAllowsAwaitInPositions {
     BinopAllowAwaitLeft,
     BinopAllowAwaitRight,
     BinopAllowAwaitNone,
-}
-
-// Preview features are allowed to run in prod. This function decides
-// whether the feature is considered Unstable or Preview.
-fn get_feature_status(name: &FeatureName) -> FeatureStatus {
-    use FeatureStatus::*;
-    match name {
-        FeatureName::UnionIntersectionTypeHints => Unstable,
-        FeatureName::ClassLevelWhere => Unstable,
-        FeatureName::ExpressionTrees => Unstable,
-        FeatureName::Readonly => Preview,
-        FeatureName::ModuleReferences => Unstable,
-        FeatureName::ContextAliasDeclaration => Unstable,
-        FeatureName::ContextAliasDeclarationShort => Preview,
-        FeatureName::TypeConstMultipleBounds => Preview,
-        FeatureName::TypeConstSuperBound => Unstable,
-        FeatureName::ClassConstDefault => Migration,
-        FeatureName::TypeRefinements => OngoingRelease,
-        FeatureName::MethodTraitDiamond => OngoingRelease,
-        FeatureName::UpcastExpression => Unstable,
-        FeatureName::RequireClass => OngoingRelease,
-        FeatureName::NewtypeSuperBounds => Unstable,
-        FeatureName::ExpressionTreeBlocks => OngoingRelease,
-        FeatureName::Package => OngoingRelease,
-        FeatureName::CaseTypes => Preview,
-        FeatureName::ModuleLevelTraits => OngoingRelease,
-        FeatureName::ModuleLevelTraitsExtensions => OngoingRelease,
-        FeatureName::TypedLocalVariables => Preview,
-        FeatureName::PipeAwait => Preview,
-        FeatureName::MatchStatements => Unstable,
-        FeatureName::StrictSwitch => Unstable,
-        FeatureName::ClassType => Unstable,
-        FeatureName::FunctionReferences => Unstable,
-        FeatureName::FunctionTypeOptionalParams => OngoingRelease,
-        FeatureName::ExpressionTreeMap => OngoingRelease,
-        FeatureName::ExpressionTreeNest => Preview,
-        FeatureName::SealedMethods => Unstable,
-        FeatureName::AwaitInSplice => Preview,
-    }
 }
 
 use BinopAllowsAwaitInPositions::*;
@@ -1186,25 +1146,13 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             LiteralExpression(x) => {
                 let text = self.text(&x.expression);
                 match FeatureName::from_str(escaper::unquote_str(text)) {
-                    Ok(feature) => {
-                        if !self.env.parser_options.allow_unstable_features
-                            && !self.env.is_hhi_mode()
-                            && get_feature_status(&feature) == FeatureStatus::Unstable
-                        {
-                            self.errors.push(make_error_from_node(
-                                node,
-                                errors::cannot_enable_unstable_feature(
-                                    format!(
-                                        "{} is unstable and unstable features are disabled",
-                                        text
-                                    )
-                                    .as_str(),
-                                ),
-                            ))
-                        } else {
-                            self.env.context.active_unstable_features.insert(feature);
-                        }
-                    }
+                    Ok(feature) => feature.enable(
+                        &self.env.parser_options,
+                        self.env.is_hhi_mode(),
+                        &mut self.env.context.active_unstable_features,
+                        text,
+                        &mut |err| self.errors.push(make_error_from_node(node, err)),
+                    ),
                     Err(_) => error_invalid_argument(
                         self,
                         format!(
@@ -1225,21 +1173,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn check_can_use_feature(&mut self, node: S<'a>, feature: &FeatureName) {
-        let parser_options = &self.env.parser_options;
-        let enabled = match feature {
-            FeatureName::UnionIntersectionTypeHints => {
-                parser_options.union_intersection_type_hints
-            }
-            FeatureName::ClassLevelWhere => parser_options.enable_class_level_where_clauses,
-
-            _ => false,
-        } || self.env.context.active_unstable_features.contains(feature)
-          // Preview features with an ongoing release should be allowed by the
-          // runtime, but not the typechecker
-          || (get_feature_status(feature) == FeatureStatus::OngoingRelease
-            && matches!(self.env.mode, Mode::ForCodegen));
-
-        if !enabled {
+        if !feature.can_use(
+            &self.env.parser_options,
+            &self.env.mode,
+            &self.env.context.active_unstable_features,
+        ) {
             self.errors.push(make_error_from_node(
                 node,
                 errors::cannot_use_feature(feature.into()),
@@ -2972,11 +2910,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
     fn is_pipe_await_enabled(&self) -> (FeatureName, bool) {
         let feature = FeatureName::PipeAwait;
-        // Preview features with an ongoing release should be allowed by the
-        // runtime, but not the typechecker
-        let enabled = self.env.context.active_unstable_features.contains(&feature)
-            || (get_feature_status(&feature) == FeatureStatus::OngoingRelease
-                && matches!(self.env.mode, Mode::ForCodegen));
+        let enabled = feature.can_use(
+            &self.env.parser_options,
+            &self.env.mode,
+            &self.env.context.active_unstable_features,
+        );
         (feature, enabled)
     }
 

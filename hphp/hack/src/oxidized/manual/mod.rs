@@ -12,6 +12,7 @@ pub mod custom_error_config_impl;
 pub mod direct_decl_parser;
 pub mod error_hash_set;
 pub mod errors_impl;
+pub mod experimental_features_impl;
 pub mod global_options_impl;
 pub mod i_map;
 pub mod i_set;

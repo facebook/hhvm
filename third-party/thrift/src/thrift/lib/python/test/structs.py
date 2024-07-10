@@ -83,6 +83,17 @@ class StructTests(unittest.TestCase):
         dif_int = copy.copy(x.an_int)
         self.assertEqual(x.an_int, dif_int)
 
+    def test_no_dict(self) -> None:
+        # Struct
+        with self.assertRaises(AttributeError):
+            easy().__dict__
+
+        # TODO: disable union dict
+        self.assertEqual(Integers().__dict__, {})
+        self.assertEqual(Integers(small=300).__dict__, {})
+        # with self.assertRaises(AttributeError):
+        # Integers().__dict__
+
     def test_hashability(self) -> None:
         hash(easy())
         hash(EmptyStruct())

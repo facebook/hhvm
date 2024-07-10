@@ -83,6 +83,10 @@ class MapTests(unittest.TestCase):
         self.assertEqual(list(x.keys()), list(tx.keys()))
         self.assertEqual(list(x.items()), list(tx.items()))
 
+    def test_no_dict(self) -> None:
+        with self.assertRaises(AttributeError):
+            StrIntMap().__dict__
+
     def test_empty(self) -> None:
         StrIntMap()
         StrIntMap({})

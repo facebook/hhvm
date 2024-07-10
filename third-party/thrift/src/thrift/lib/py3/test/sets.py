@@ -132,6 +132,10 @@ class SetTests(unittest.TestCase):
             #  got `Set[typing.Set[None]]`.
             SetSetI32Lists({{None}})
 
+    def test_no_dict(self) -> None:
+        with self.assertRaises(AttributeError):
+            SetI32().__dict__
+
     def test_empty(self) -> None:
         SetI32Lists(set())
         SetI32Lists({()})

@@ -59,6 +59,10 @@ class ListTests(unittest.TestCase):
             #  `List[typing.Union[typing.List[None], typing.List[str]]]`.
             StrList2D([a, [None]])
 
+    def test_no_dict(self) -> None:
+        with self.assertRaises(AttributeError):
+            I32List().__dict__
+
     @brokenInAutoMigrate()
     def test_list_add(self) -> None:
         other_list = [99, 88, 77, 66, 55]

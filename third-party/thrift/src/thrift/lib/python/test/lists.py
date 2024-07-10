@@ -37,7 +37,6 @@ from python_test.lists.thrift_types import (
     easy,
     EasyList,
     I32List,
-    int_list,
     StringList,
     StrList2D,
 )
@@ -116,6 +115,10 @@ class ListTests(unittest.TestCase):
         if not self.lists_types.__name__.endswith("thrift_mutable_types"):
             hash(self.easy().val_list)
             hash(self.I32List(range(10)))
+
+    def test_no_dict(self) -> None:
+        with self.assertRaises(AttributeError):
+            I32List().__dict__
 
     def test_index(self) -> None:
         x = self.I32List([1, 2, 3, 4, 1, 2, 3, 4])

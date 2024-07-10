@@ -41,7 +41,6 @@ from python_test.containers.thrift_types import (
 from python_test.maps.thrift_types import (
     easy as easyType,
     F14MapFollyString as F14MapFollyStringType,
-    LocationMap,
     StrEasyMap as StrEasyMapType,
     StrI32ListMap as StrI32ListMapType,
     StrIntMap as StrIntMapType,
@@ -102,6 +101,10 @@ class MapTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             # pyre-ignore[6]: purposely use a wrong type to raise a TypeError
             self.StrStrIntListMapMap({"bar": {"foo": None}})
+
+    def test_no_dict(self) -> None:
+        with self.assertRaises(AttributeError):
+            StrIntMapType().__dict__
 
     def test_getitem(self) -> None:
         x = self.StrStrMap({"test": "value"})

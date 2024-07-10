@@ -134,6 +134,16 @@ class StructTests(unittest.TestCase):
             repr(x),
         )
 
+    @brokenInAutoMigrate()
+    def test_no_dict(self) -> None:
+        # Struct
+        with self.assertRaises(AttributeError):
+            easy().__dict__
+
+        # Union
+        with self.assertRaises(AttributeError):
+            Integers().__dict__
+
     def test_optional_struct_creation(self) -> None:
         with self.assertRaises(TypeError):
             # pyre-fixme[19]: Expected 0 positional arguments.

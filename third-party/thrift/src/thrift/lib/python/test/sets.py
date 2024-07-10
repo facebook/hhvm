@@ -172,6 +172,10 @@ class SetTests(unittest.TestCase):
             # pyre-ignore[6]: purposely use a wrong type to raise a TypeError
             self.SetSetI32Lists({{None}})
 
+    def test_no_dict(self) -> None:
+        with self.assertRaises(AttributeError):
+            SetI32().__dict__
+
     def test_struct_with_set_fields(self) -> None:
         # pyre-ignore[16]: has no attribute `lists_types`
         is_immutable = self.sets_types.__name__.endswith("immutable_types")

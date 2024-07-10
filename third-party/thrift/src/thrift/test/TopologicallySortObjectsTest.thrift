@@ -64,12 +64,9 @@ struct DependentAdaptedListDep {
 }
 
 // The following were automatically generated and may benefit from renaming.
-typedef list<CompleteListDep> (
-  cpp2.template = "folly::small_vector",
-) list_CompleteListDep_2043
-typedef list<IncompleteListDep> (
-  cpp.template = "::std::list",
-) list_IncompleteListDep_5764
-typedef map<i32, CompleteMapDep> (
-  cpp2.template = "std::unordered_map",
-) map_i32_CompleteMapDep_4031
+@cpp.Type{template = "folly::small_vector"}
+typedef list<CompleteListDep> list_CompleteListDep_2043
+@cpp.Type{template = "::std::list"}
+typedef list<IncompleteListDep> list_IncompleteListDep_5764
+@cpp.Type{template = "std::unordered_map"}
+typedef map<i32, CompleteMapDep> map_i32_CompleteMapDep_4031

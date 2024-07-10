@@ -1174,7 +1174,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             .expect("<text_extraction_failure>")
     }
 
-    fn enable_unstable_feature(&mut self, node: S<'a>, arg: S<'a>) {
+    fn enable_experimental_feature(&mut self, node: S<'a>, arg: S<'a>) {
         let error_invalid_argument = |self_: &mut Self, message| {
             self_.errors.push(make_error_from_node(
                 arg,
@@ -5523,7 +5523,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                             ),
                         ))
                         } else {
-                            args.for_each(|arg| self.enable_unstable_feature(node, arg))
+                            args.for_each(|arg| self.enable_experimental_feature(node, arg))
                         }
                     }
                 }

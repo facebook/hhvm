@@ -437,9 +437,6 @@ class mstch_program : public mstch_base {
     register_has_option("program:frozen?", "frozen");
     register_has_option("program:json?", "json");
     register_has_option("program:any?", "any");
-    register_has_option(
-        "program:unstructured_annotations_in_metadata?",
-        "deprecated_unstructured_annotations_in_metadata");
   }
 
   virtual std::string get_program_namespace(const t_program*) { return {}; }

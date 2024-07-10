@@ -39,13 +39,6 @@ using apache::thrift::metadata::ThriftPrimitiveType;
 using apache::thrift::metadata::ThriftServiceMetadataResponse;
 using apache::thrift::metadata::ThriftType;
 
-void check_unstructured_metadata(
-    const std::map<std::string, std::string>& meta, const std::string& prefix) {
-  EXPECT_EQ(meta.size(), 2);
-  EXPECT_EQ(meta.at(prefix + "_foo"), "1");
-  EXPECT_EQ(meta.at(prefix + "_bar"), prefix + "_baz");
-}
-
 auto cons(std::string data, std::optional<ThriftConstValue> next = {}) {
   ThriftConstStruct s;
   s.type_ref()->name_ref() = "simple_structs_test.Nat";
@@ -296,8 +289,6 @@ TEST_F(ServiceMetadataTest, NestedStructsTest) {
   EXPECT_EQ(
       s1.fields_ref()[0].type_ref()->get_t_primitive(),
       ThriftPrimitiveType::THRIFT_STRING_TYPE);
-  check_unstructured_metadata(
-      *s1.fields_ref()[0].unstructured_annotations(), "field");
   EXPECT_EQ(*s1.fields_ref()[1].id_ref(), 2);
   EXPECT_EQ(*s1.fields_ref()[1].name_ref(), "continent");
   EXPECT_EQ(s1.fields_ref()[1].type_ref()->getType(), ThriftType::Type::t_enum);

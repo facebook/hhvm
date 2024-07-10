@@ -39,9 +39,6 @@ void EnumMetadata<::cpp2::YourEnum>::gen(ThriftMetadata& metadata) {
   enum_metadata.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourEnum") } }).cv_struct_ref());
 }
 
-void StructMetadata<::cpp2::MyStructNestedAnnotation>::unstructured_annotations([[maybe_unused]] ::apache::thrift::metadata::ThriftStruct& thriftStruct){
-  thriftStruct.fields()[0].unstructured_annotations() = std::map<std::string, std::string>{  };
-}
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyStructNestedAnnotation>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.MyStructNestedAnnotation", ::apache::thrift::metadata::ThriftStruct{});
@@ -63,10 +60,7 @@ StructMetadata<::cpp2::MyStructNestedAnnotation>::gen(ThriftMetadata& metadata) 
     field.structured_annotations() = f.structured_annotations;
     module_MyStructNestedAnnotation.fields()->push_back(std::move(field));
   }
-  StructMetadata::unstructured_annotations(module_MyStructNestedAnnotation);
   return res.first->second;
-}
-void StructMetadata<::cpp2::detail::YourUnion>::unstructured_annotations([[maybe_unused]] ::apache::thrift::metadata::ThriftStruct& thriftStruct){
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::detail::YourUnion>::gen(ThriftMetadata& metadata) {
@@ -81,8 +75,6 @@ StructMetadata<::cpp2::detail::YourUnion>::gen(ThriftMetadata& metadata) {
   module_MyUnion.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourUnion") } }).cv_struct_ref());
   return res.first->second;
 }
-void StructMetadata<::cpp2::detail::YourException>::unstructured_annotations([[maybe_unused]] ::apache::thrift::metadata::ThriftStruct& thriftStruct){
-}
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::detail::YourException>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.MyException", ::apache::thrift::metadata::ThriftStruct{});
@@ -95,17 +87,6 @@ StructMetadata<::cpp2::detail::YourException>::gen(ThriftMetadata& metadata) {
   module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourException") } }).cv_struct_ref());
   module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::StaticCast") } }).cv_struct_ref());
   return res.first->second;
-}
-void StructMetadata<::cpp2::detail::YourStruct>::unstructured_annotations([[maybe_unused]] ::apache::thrift::metadata::ThriftStruct& thriftStruct){
-  thriftStruct.fields()[0].unstructured_annotations() = std::map<std::string, std::string>{  };
-  thriftStruct.fields()[1].unstructured_annotations() = std::map<std::string, std::string>{ {R"THRIFT_CODEGEN(java.swift.name)THRIFT_CODEGEN", R"THRIFT_CODEGEN(_abstract)THRIFT_CODEGEN"}, };
-  thriftStruct.fields()[2].unstructured_annotations() = std::map<std::string, std::string>{  };
-  thriftStruct.fields()[3].unstructured_annotations() = std::map<std::string, std::string>{ {R"THRIFT_CODEGEN(java.swift.name)THRIFT_CODEGEN", R"THRIFT_CODEGEN(class_)THRIFT_CODEGEN"}, };
-  thriftStruct.fields()[4].unstructured_annotations() = std::map<std::string, std::string>{ {R"THRIFT_CODEGEN(custom)THRIFT_CODEGEN", R"THRIFT_CODEGEN(test)THRIFT_CODEGEN"}, };
-  thriftStruct.fields()[5].unstructured_annotations() = std::map<std::string, std::string>{  };
-  thriftStruct.fields()[6].unstructured_annotations() = std::map<std::string, std::string>{  };
-  thriftStruct.fields()[7].unstructured_annotations() = std::map<std::string, std::string>{  };
-  thriftStruct.fields()[8].unstructured_annotations() = std::map<std::string, std::string>{  };
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
@@ -128,15 +109,10 @@ StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_MyStruct.fields()->push_back(std::move(field));
   }
-  StructMetadata::unstructured_annotations(module_MyStruct);
   module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourStruct") } }).cv_struct_ref());
   module_MyStruct.structured_annotations()->push_back(*cvStruct("hack.Attributes", { {"attributes", cvList({ cvString("\\SomeClass(\\AnotherClass::class)") }) } }).cv_struct_ref());
   module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::StaticCast") } }).cv_struct_ref());
   return res.first->second;
-}
-void StructMetadata<::cpp2::SecretStruct>::unstructured_annotations([[maybe_unused]] ::apache::thrift::metadata::ThriftStruct& thriftStruct){
-  thriftStruct.fields()[0].unstructured_annotations() = std::map<std::string, std::string>{  };
-  thriftStruct.fields()[1].unstructured_annotations() = std::map<std::string, std::string>{ {R"THRIFT_CODEGEN(java.sensitive)THRIFT_CODEGEN", R"THRIFT_CODEGEN(1)THRIFT_CODEGEN"}, };
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::SecretStruct>::gen(ThriftMetadata& metadata) {
@@ -159,7 +135,6 @@ StructMetadata<::cpp2::SecretStruct>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_SecretStruct.fields()->push_back(std::move(field));
   }
-  StructMetadata::unstructured_annotations(module_SecretStruct);
   return res.first->second;
 }
 

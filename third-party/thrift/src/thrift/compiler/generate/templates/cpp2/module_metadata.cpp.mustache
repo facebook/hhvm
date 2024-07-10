@@ -57,13 +57,6 @@ void EnumMetadata<{{ > common/namespace_cpp2}}{{enum:cpp_name}}>::gen(ThriftMeta
 {{/program:enums}}
 
 {{#program:structs}}
-{{#program:unstructured_annotations_in_metadata?}}
-void StructMetadata<{{struct:cpp_fullname}}>::unstructured_annotations([[maybe_unused]] ::apache::thrift::metadata::ThriftStruct& thriftStruct){
-  {{#struct:fields}}
-  thriftStruct.fields()[{{field:index}}].unstructured_annotations() = {{ > metadata/unstructured_field_gen}};
-  {{/struct:fields}}
-}
-{{/program:unstructured_annotations_in_metadata?}}
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("{{program:name}}.{{struct:name}}", ::apache::thrift::metadata::ThriftStruct{});
@@ -89,9 +82,6 @@ StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     {{struct:metadata_name}}.fields()->push_back(std::move(field));
   }
-  {{#program:unstructured_annotations_in_metadata?}}
-  StructMetadata::unstructured_annotations({{struct:metadata_name}});
-  {{/program:unstructured_annotations_in_metadata?}}
 {{/struct:fields?}}
 {{#struct:structured_annotations}}
 {{#structured_annotation:const_struct?}}

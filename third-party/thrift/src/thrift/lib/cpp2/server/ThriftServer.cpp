@@ -291,7 +291,7 @@ void ThriftServer::initializeDefaults() {
 
   // status and monitoring methods should bypass request limit by default
 
-  folly::sorted_vector_set<std::string> internalMethods;
+  folly::sorted_vector_set<std::string> methodsBypassMaxRequestsLimit;
   if (extraInterfaces.monitoring) {
     auto monitoringInterfaceMethods =
         extraInterfaces.monitoring->createMethodMetadata();
@@ -301,7 +301,7 @@ void ThriftServer::initializeDefaults() {
     CHECK(monitoringMethodsMetadataMap != nullptr)
         << "WildcardMethodMetadataMap is not allowed for the monitoring interface";
     for (const auto& [method, _] : *monitoringMethodsMetadataMap) {
-      internalMethods.insert(method);
+      methodsBypassMaxRequestsLimit.insert(method);
     }
   }
   if (extraInterfaces.status) {
@@ -313,10 +313,15 @@ void ThriftServer::initializeDefaults() {
     CHECK(statusMethodsMetadataMethods != nullptr)
         << "WildcardMethodMetadataMap is not allowed for the status interface";
     for (const auto& [method, _] : *statusMethodsMetadataMethods) {
-      internalMethods.insert(method);
+      methodsBypassMaxRequestsLimit.insert(method);
     }
   }
-  setInternalMethods(std::move(internalMethods));
+  setInternalMethods(std::unordered_set<std::string>(
+      methodsBypassMaxRequestsLimit.begin(),
+      methodsBypassMaxRequestsLimit.end()));
+  thriftConfig_.methodsBypassMaxRequestsLimit_.setDefault(
+      std::move(methodsBypassMaxRequestsLimit));
+
   setMonitoringInterface(std::move(extraInterfaces.monitoring));
   setStatusInterface(std::move(extraInterfaces.status));
   setControlInterface(std::move(extraInterfaces.control));
@@ -1904,31 +1909,12 @@ void ThriftServer::scheduleInMemoryTicketSeeds() {
   setTicketSeeds(std::move(seeds));
 }
 
-bool ThriftServer::methodShouldBypassPreprocess(
-    const std::string& method) const {
-  return getMethodsBypassMaxRequestsLimit().contains(method) ||
-      getInternalMethods().contains(method);
-}
-
-bool ThriftServer::methodShouldBypassCheckOverload(
-    const std::string& method) const {
-  return getMethodsBypassMaxRequestsLimit().contains(method) ||
-      getInternalMethods().contains(method);
-}
-
-bool ThriftServer::methodShouldBypassCheckOverload(
-    const std::string* method) const {
-  if (method == nullptr) {
-    return false;
-  }
-  return methodShouldBypassCheckOverload(*method);
-}
-
 PreprocessResult ThriftServer::preprocess(
     const PreprocessParams& params) const {
-  if (methodShouldBypassPreprocess(params.method)) {
+  if (getMethodsBypassMaxRequestsLimit().contains(params.method)) {
     return {};
   }
+
   return preprocessFunctions_.run(params);
 }
 
@@ -1936,7 +1922,9 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
     const transport::THeader::StringToStringMap* readHeaders,
     const std::string* method) {
   if (UNLIKELY(
-          isOverloaded_ && !methodShouldBypassCheckOverload(method) &&
+          isOverloaded_ &&
+          (method == nullptr ||
+           !getMethodsBypassMaxRequestsLimit().contains(*method)) &&
           isOverloaded_(readHeaders, method))) {
     return OverloadResult{
         kAppOverloadedErrorCode,
@@ -1953,7 +1941,8 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
       THRIFT_FLAG(enforce_queue_concurrency_resource_pools);
   if (!isActiveRequestsTrackingDisabled() && !useQueueConcurrency) {
     if (auto maxRequests = getMaxRequests(); maxRequests > 0 &&
-        !methodShouldBypassCheckOverload(method) &&
+        (method == nullptr ||
+         !getMethodsBypassMaxRequestsLimit().contains(*method)) &&
         static_cast<uint32_t>(getActiveRequests()) >= maxRequests) {
       LoadShedder loadShedder = LoadShedder::MAX_REQUESTS;
       if (getCPUConcurrencyController().requestShed(
@@ -1971,7 +1960,8 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
 
   if (auto maxQps = getMaxQps(); maxQps > 0 &&
       FLAGS_thrift_server_enforces_qps_limit &&
-      !methodShouldBypassCheckOverload(method) &&
+      (method == nullptr ||
+       !getMethodsBypassMaxRequestsLimit().contains(*method)) &&
       !qpsTokenBucket_.consume(1.0, maxQps, maxQps)) {
     LoadShedder loadShedder = LoadShedder::MAX_QPS;
     if (getCPUConcurrencyController().requestShed(

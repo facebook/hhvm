@@ -149,7 +149,6 @@ struct ServerAttributeObservable {
   explicit ServerAttributeObservable(T defaultValue)
       : ServerAttributeObservable(
             folly::observer::makeStaticObserver<T>(std::move(defaultValue))) {}
-
   explicit ServerAttributeObservable(folly::observer::Observer<T> defaultValue)
       : default_(std::move(defaultValue)) {}
   void setDefault(folly::observer::Observer<T> defaultValue) {
@@ -267,7 +266,7 @@ struct ServerAttributeStatic {
   const T& get() const { return merged_.get(); }
   const std::optional<T> getBaseline() const { return rawValues_.baseline_; }
 
- private:
+ protected:
   void updateMergedValue() {
     auto& merged = apache::thrift::detail::mergeServerAttributeRawValues(
         rawValues_.override_internal_,

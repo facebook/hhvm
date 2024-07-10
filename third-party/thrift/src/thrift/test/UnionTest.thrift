@@ -18,6 +18,8 @@ namespace cpp thrift.test.debug
 namespace py thrift.test.UnionTest
 namespace java thrift.test.union
 
+include "thrift/annotation/cpp.thrift"
+
 struct OneOfEach {
   // make at least one field of a struct contained in a union required
   // to test exception handling in union code
@@ -60,7 +62,8 @@ union TestUnion {
 
 struct StructWithAUnion {
   1: TestUnion test_union;
-  2: TestUnion test_union_ref (cpp.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: TestUnion test_union_ref;
 }
 
 struct StructWithUnionAndOther {

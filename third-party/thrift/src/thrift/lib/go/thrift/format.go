@@ -108,11 +108,11 @@ type Format interface {
 }
 
 // Compile time check that all serialization formats implement the interface.
-var _ Format = (*CompactProtocol)(nil)
-var _ Format = (*BinaryProtocol)(nil)
-var _ Format = (*JSONProtocol)(nil)
-var _ Format = (*SimpleJSONProtocol)(nil)
-var _ Format = (*DebugProtocol)(nil)
+var _ Format = (*compactProtocol)(nil)
+var _ Format = (*binaryProtocol)(nil)
+var _ Format = (*jsonProtocol)(nil)
+var _ Format = (*simpleJSONProtocol)(nil)
+var _ Format = (*debugProtocol)(nil)
 
 // The maximum recursive depth the skip() function will traverse
 const DEFAULT_RECURSION_DEPTH = 64

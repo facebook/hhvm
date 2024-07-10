@@ -789,7 +789,7 @@ func TestWriteSimpleJSONProtocolMap(t *testing.T) {
 
 func TestWriteSimpleJSONProtocolSafePeek(t *testing.T) {
 	trans := NewMemoryBuffer()
-	p := NewSimpleJSONProtocol(trans)
+	p := newSimpleJSONProtocol(trans)
 	trans.Write([]byte{'a', 'b'})
 	trans.Flush()
 

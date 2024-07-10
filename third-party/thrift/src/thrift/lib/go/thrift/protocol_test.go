@@ -302,7 +302,7 @@ func ReadBool(t testing.TB, p Format, trans io.Reader) {
 	if err != nil {
 		t.Fatalf("%s: %T %T %q Error reading list: %v", "ReadBool", p, trans, err, boolValues)
 	}
-	_, ok := p.(*SimpleJSONProtocol)
+	_, ok := p.(*simpleJSONProtocol)
 	if !ok {
 		if thetype != thetype2 {
 			t.Fatalf("%s: %T %T type %s != type %s", "ReadBool", p, trans, thetype, thetype2)
@@ -384,7 +384,7 @@ func ReadByte(t testing.TB, p Format, trans io.Reader) {
 	if err != nil {
 		t.Fatalf("%s: %T %T %q Error reading list: %q", "ReadByte", p, trans, err, byteValues)
 	}
-	_, ok := p.(*SimpleJSONProtocol)
+	_, ok := p.(*simpleJSONProtocol)
 	if !ok {
 		if thetype != thetype2 {
 			t.Fatalf("%s: %T %T type %s != type %s", "ReadByte", p, trans, thetype, thetype2)
@@ -431,7 +431,7 @@ func ReadI16(t testing.TB, p Format, trans io.Reader) {
 	if err != nil {
 		t.Fatalf("%s: %T %T %q Error reading list: %q", "ReadI16", p, trans, err, int16Values)
 	}
-	_, ok := p.(*SimpleJSONProtocol)
+	_, ok := p.(*simpleJSONProtocol)
 	if !ok {
 		if thetype != thetype2 {
 			t.Fatalf("%s: %T %T type %s != type %s", "ReadI16", p, trans, thetype, thetype2)
@@ -478,7 +478,7 @@ func ReadI32(t testing.TB, p Format, trans io.Reader) {
 	if err != nil {
 		t.Fatalf("%s: %T %T %q Error reading list: %q", "ReadI32", p, trans, err, int32Values)
 	}
-	_, ok := p.(*SimpleJSONProtocol)
+	_, ok := p.(*simpleJSONProtocol)
 	if !ok {
 		if thetype != thetype2 {
 			t.Fatalf("%s: %T %T type %s != type %s", "ReadI32", p, trans, thetype, thetype2)
@@ -524,7 +524,7 @@ func ReadI64(t testing.TB, p Format, trans io.Reader) {
 	if err != nil {
 		t.Fatalf("%s: %T %T %q Error reading list: %q", "ReadI64", p, trans, err, int64Values)
 	}
-	_, ok := p.(*SimpleJSONProtocol)
+	_, ok := p.(*simpleJSONProtocol)
 	if !ok {
 		if thetype != thetype2 {
 			t.Fatalf("%s: %T %T type %s != type %s", "ReadI64", p, trans, thetype, thetype2)
@@ -677,7 +677,7 @@ func ReadString(t testing.TB, p Format, trans io.Reader) {
 	if err != nil {
 		t.Fatalf("%s: %T %T %q Error reading list: %q", "ReadString", p, trans, err, stringValues)
 	}
-	_, ok := p.(*SimpleJSONProtocol)
+	_, ok := p.(*simpleJSONProtocol)
 	if !ok {
 		if thetype != thetype2 {
 			t.Fatalf("%s: %T %T type %s != type %s", "ReadString", p, trans, thetype, thetype2)

@@ -133,7 +133,7 @@ function flip<Tk, Tv as arraykey>(
  * Returns a new dict where each value is the result of calling the given
  * function on the corresponding key.
  *
- * - To use an async function, see `Dict\from_key_async()`.
+ * - To use an async function, see `Dict\from_keys_async()`.
  * - To create a dict from values, see `Dict\from_values()`.
  * - To create a dict from key/value tuples, see `Dict\from_entries()`.
  *

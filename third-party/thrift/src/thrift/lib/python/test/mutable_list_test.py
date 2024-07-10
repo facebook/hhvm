@@ -13,7 +13,6 @@
 # limitations under the License.
 
 # pyre-strict
-
 import unittest
 
 from collections.abc import MutableSequence
@@ -269,3 +268,30 @@ class MutableListTest(unittest.TestCase):
 
         self.assertEqual(0, mutable_list.count("Not an Integer"))
         self.assertEqual(0, mutable_list.count(2**31))
+
+    def test_index(self) -> None:
+        mutable_list = MutableList(typeinfo_i32, [1, 2, 1, 1, 3, 2])
+
+        self.assertEqual(0, mutable_list.index(1))
+        self.assertEqual(2, mutable_list.index(1, 1))
+        self.assertEqual(3, mutable_list.index(1, 3))
+        self.assertEqual(3, mutable_list.index(1, 3, 999))
+
+        with self.assertRaisesRegex(ValueError, "not in list"):
+            _ = mutable_list.index(1, 4)
+
+        self.assertEqual(1, mutable_list.index(2))
+        self.assertEqual(4, mutable_list.index(3))
+
+        with self.assertRaisesRegex(ValueError, "not in list"):
+            _ = mutable_list.index(5)
+
+    def test_index_wrong_type(self) -> None:
+        mutable_list = MutableList(typeinfo_i32, [1, 2, 1, 1, 3, 2])
+
+        with self.assertRaises(ValueError):
+            _ = mutable_list.index("Not an Integer")
+
+        with self.assertRaises(ValueError):
+            # It suppresses `OverflowError` and raises `ValueError`
+            _ = mutable_list.index(2**31)

@@ -135,6 +135,17 @@ cdef class MutableList:
 
         return self._list_data.count(internal_value)
 
+    def index(self, value, start=0, stop=None):
+        try:
+            internal_value = self._val_typeinfo.to_internal_data(value)
+        except (TypeError, OverflowError):
+            raise ValueError
+
+        if stop is None:
+            return self._list_data.index(value, start)
+        else:
+            return self._list_data.index(value, start, stop)
+
 
 MutableSequence.register(MutableList)
 

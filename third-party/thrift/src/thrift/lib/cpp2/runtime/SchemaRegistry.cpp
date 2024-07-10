@@ -19,29 +19,53 @@
 #include <folly/Indestructible.h>
 
 namespace apache::thrift {
-#ifdef FBTHRIFT_HAS_SCHEMA
-void SchemaRegistry::registerSchema(std::string_view data) {
-  auto schema = CompactSerializer::deserialize<type::Schema>(data);
-  auto id = *schema.programs()[0].id();
-  if (auto it = getSchemas().find(id); it != getSchemas().end()) {
-    if (it->second.programs()[0].path() != schema.programs()[0].path()) {
+
+void SchemaRegistry::registerSchema(
+    std::string_view name, std::string_view data, std::string_view path) {
+  if (accessed()) {
+    throw std::runtime_error("Schemas accessed before registration complete.");
+  }
+  if (auto it = getRawSchemas().find(name); it != getRawSchemas().end()) {
+    if (it->second.path != path) { // Needed to support dynamic linking
       throw std::runtime_error(fmt::format(
-          "Duplicate schema id for {} vs {}",
-          *schema.programs()[0].path(),
-          *it->second.programs()[0].path()));
+          "Checksum collision between {} and {}. Make any change to either file's content (e.g.. whitespace/comment) to fix it.",
+          it->second.path,
+          path));
     }
     return;
   }
-  getSchemas()[id] = std::move(schema);
+  getRawSchemas()[name] = {data, path};
 }
 
+#ifdef FBTHRIFT_HAS_SCHEMA
 folly::F14FastMap<type::ProgramId, type::Schema>& SchemaRegistry::getSchemas() {
   static folly::Indestructible<folly::F14FastMap<type::ProgramId, type::Schema>>
+      schemas = [&] {
+        folly::F14FastMap<type::ProgramId, type::Schema> schemaMap;
+        accessed() = true;
+        for (auto& [name, data] : getRawSchemas()) {
+          auto schema = CompactSerializer::deserialize<type::Schema>(data.data);
+          auto id = *schema.programs()[0].id();
+          schemaMap[id] = std::move(schema);
+        }
+        return schemaMap;
+      }();
+
+  return *schemas;
+}
+#endif
+
+folly::F14FastMap<std::string_view, SchemaRegistry::RawSchema>&
+SchemaRegistry::getRawSchemas() {
+  static folly::Indestructible<
+      folly::F14FastMap<std::string_view, SchemaRegistry::RawSchema>>
       schemas;
   return *schemas;
 }
 
-#else
-void SchemaRegistry::registerSchema(std::string_view) {}
-#endif
+bool& SchemaRegistry::accessed() {
+  static folly::Indestructible<bool> accessed = false;
+  return *accessed;
+}
+
 } // namespace apache::thrift

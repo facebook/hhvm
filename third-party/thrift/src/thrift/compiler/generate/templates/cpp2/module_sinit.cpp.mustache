@@ -56,7 +56,7 @@ struct StaticInit {
     {{/program:any?}}
 
     {{#program:has_schema?}}
-    ::apache::thrift::SchemaRegistry::registerSchema({{program:name}}_constants::{{program:schema_name}}());
+    ::apache::thrift::SchemaRegistry::registerSchema("{{program:schema_name}}", {{program:name}}_constants::{{program:schema_name}}(), "{{program:autogen_path}}");
     {{/program:has_schema?}}
   }
 };

@@ -29,9 +29,19 @@ namespace apache::thrift {
 
 class SchemaRegistry {
  public:
-  static void registerSchema(std::string_view data);
+  static void registerSchema(
+      std::string_view name, std::string_view data, std::string_view path);
+
+ private:
+  struct RawSchema {
+    std::string_view data;
+    std::string_view path;
+  };
+  static folly::F14FastMap<std::string_view, RawSchema>& getRawSchemas();
+  static bool& accessed();
 
 #ifdef FBTHRIFT_HAS_SCHEMA
+ public:
   struct Iter {
     auto begin() const { return SchemaRegistry::getSchemas().begin(); }
     auto end() const { return SchemaRegistry::getSchemas().end(); }

@@ -23,6 +23,8 @@ const-cstr = "0.3.0"
 fbthrift = { version = "0.0.1+unstable", path = "../../../.." }
 futures = { version = "0.3.30", features = ["async-await", "compat"] }
 test_if__types = { package = "fbthrift_test_if", version = "0.0.1+unstable", path = ".." }
+thrift = { version = "0.0.1+unstable", path = "../../../../annotation/thrift" }
+thrift_services = { version = "0.0.1+unstable", path = "../../../../annotation/thrift/services" }
 tracing = { version = "0.1.40", features = ["attributes", "valuable"] }
 
 [build-dependencies]

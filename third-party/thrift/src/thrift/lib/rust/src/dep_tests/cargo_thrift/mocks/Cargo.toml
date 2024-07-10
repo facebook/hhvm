@@ -24,6 +24,9 @@ fbthrift = { version = "0.0.1+unstable", path = "../../../.." }
 futures = { version = "0.3.30", features = ["async-await", "compat"] }
 test_if__clients = { package = "fbthrift_test_if_clients", version = "0.0.1+unstable", path = "../clients" }
 test_if__types = { package = "fbthrift_test_if", version = "0.0.1+unstable", path = ".." }
+thrift = { version = "0.0.1+unstable", path = "../../../../annotation/thrift" }
+thrift_clients = { version = "0.0.1+unstable", path = "../../../../annotation/thrift/clients" }
+thrift_mocks = { version = "0.0.1+unstable", path = "../../../../annotation/thrift/mocks" }
 tracing = { version = "0.1.40", features = ["attributes", "valuable"] }
 
 [build-dependencies]

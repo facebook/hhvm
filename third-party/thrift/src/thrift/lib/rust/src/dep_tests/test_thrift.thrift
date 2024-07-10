@@ -17,6 +17,8 @@
 namespace cpp2 facebook
 namespace rust fbthrift_test_if
 
+include "thrift/annotation/thrift.thrift"
+
 struct Small {
   1: i32 num;
   2: i64 two;
@@ -92,12 +94,14 @@ service TestService {
 }
 
 safe stateful server exception TestExceptionMsgOverride {
+  @thrift.ExceptionMessage
   1: string message;
-} (message = 'message')
+}
 
 safe stateful server exception TestExceptionMsgOverrideOptional {
+  @thrift.ExceptionMessage
   1: optional string message;
-} (message = 'message')
+}
 
 const SubStruct DEFAULT_SUBSTRUCT = {};
 

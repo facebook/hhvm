@@ -295,30 +295,34 @@ type::Schema t_ast_generator::gen_schema(
     // visits the children after this lambda returns.
   });
 
-#define THRIFT_ADD_VISITOR(kind)                                     \
-  visitor.add_##kind##_visitor([&](const t_##kind& node) {           \
-    if (node.generated() && !schema_opts.include_generated_) {       \
-      return;                                                        \
-    }                                                                \
-    auto key = schema_source.identify_definition(node);              \
-    definition_key_index[&node] = key;                               \
-    if (!is_root_program && schema_opts.only_root_program_) {        \
-      return;                                                        \
-    }                                                                \
-    auto& definitions = *ast.definitions();                          \
-    auto pos = definitions.size();                                   \
-    definition_index[&node] =                                        \
-        positionToId<apache::thrift::type::DefinitionId>(pos);       \
-    auto& def = definitions.emplace_back().kind##Def_ref().ensure(); \
-    hydrate_const(def, *schema_source.gen_schema(node));             \
-    set_source_range(node, *def.attrs());                            \
-    set_child_source_ranges(node, def);                              \
-    if (ast.definitionsMap()->count(key)) {                          \
-      throw std::runtime_error(fmt::format(                          \
-          "Duplicate definition key: {}",                            \
-          node.uri().empty() ? node.name() : node.uri()));           \
-    }                                                                \
-    ast.definitionsMap()[std::move(key)] = definitions.back();       \
+  auto add_definition = [&](const auto& node, auto kind_ref_fn) {
+    if (node.generated() && !schema_opts.include_generated_) {
+      return;
+    }
+    auto key = schema_source.identify_definition(node);
+    definition_key_index[&node] = key;
+    if (!is_root_program && schema_opts.only_root_program_) {
+      return;
+    }
+    auto& definitions = *ast.definitions();
+    auto pos = definitions.size();
+    definition_index[&node] =
+        positionToId<apache::thrift::type::DefinitionId>(pos);
+    auto& def = kind_ref_fn(definitions.emplace_back()).ensure();
+    hydrate_const(def, *schema_source.gen_schema(node));
+    set_source_range(node, *def.attrs());
+    set_child_source_ranges(node, def);
+    if (ast.definitionsMap()->count(key)) {
+      throw std::runtime_error(fmt::format(
+          "Duplicate definition key: {}",
+          node.uri().empty() ? node.name() : node.uri()));
+    }
+    ast.definitionsMap()[std::move(key)] = definitions.back();
+  };
+
+#define THRIFT_ADD_VISITOR(kind)                                         \
+  visitor.add_##kind##_visitor([&](const t_##kind& node) {               \
+    add_definition(node, [](auto& def) { return def.kind##Def_ref(); }); \
   })
   THRIFT_ADD_VISITOR(service);
   THRIFT_ADD_VISITOR(interaction);

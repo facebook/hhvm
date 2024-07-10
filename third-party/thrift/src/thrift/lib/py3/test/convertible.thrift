@@ -33,7 +33,8 @@ struct Simple {
   4: set<string> strSet;
   5: map<string, i64> strToIntMap;
   6: Color color;
-  7: string name (py3.name = "name_");
+  @python.Name{name = "name_"}
+  7: string name;
   8: Empty empty;
 }
 
@@ -50,7 +51,8 @@ union Union {
   3: list<i32> intList;
   @python.Name{name = "simple_"}
   4: Simple simpleField;
-  5: string name (py3.name = "name_");
+  @python.Name{name = "name_"}
+  5: string name;
 }
 
 struct OptionalDefaultsStruct {

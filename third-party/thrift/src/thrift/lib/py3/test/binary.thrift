@@ -22,8 +22,10 @@ cpp_include "thrift/lib/py3/test/BinaryTypes.h"
 typedef binary IOBuf
 @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
 typedef binary IOBufPtr
-typedef binary (cpp2.type = "folly::fbstring") fbstring_type
-typedef binary (cpp2.type = "test::Buffer") Buffer
+@cpp.Type{name = "folly::fbstring"}
+typedef binary fbstring_type
+@cpp.Type{name = "test::Buffer"}
+typedef binary Buffer
 
 union BinaryUnion {
   1: IOBuf iobuf_val;

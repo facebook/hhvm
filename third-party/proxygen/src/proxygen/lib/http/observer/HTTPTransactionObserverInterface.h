@@ -33,10 +33,12 @@ class HTTPTransactionObserverInterface {
       FIRST_BODY_BYTE_ACK,
       LAST_BODY_BYTE_WRITE,
       LAST_BODY_BYTE_ACK,
+      BODY_BYTES_GENERATED,
     };
 
     const proxygen::TimePoint timestamp;
     const Type type;
+    const folly::Optional<size_t> maybeNumBytes;
 
     TxnBytesEvent(TxnBytesEvent&&) = delete;
     TxnBytesEvent& operator=(const TxnBytesEvent&) = delete;
@@ -47,12 +49,14 @@ class HTTPTransactionObserverInterface {
       folly::Optional<std::reference_wrapper<const proxygen::TimePoint>>
           maybeTimestampRef;
       Type type;
+      size_t numBytes;
       explicit BuilderFields() = default;
     };
 
     struct Builder : public BuilderFields {
       Builder&& setTimestamp(const proxygen::TimePoint& timestampIn);
       Builder&& setType(Type typeIn);
+      Builder&& setNumBytes(const size_t numBytes);
       TxnBytesEvent build() &&;
       explicit Builder() = default;
     };

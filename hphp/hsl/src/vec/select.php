@@ -179,6 +179,9 @@ function intersect<Tv as arraykey>(
   Traversable<Tv> $second,
   Container<Tv> ...$rest
 )[]: vec<Tv> {
+  if (!$first is Container<_>) {
+    $first = vec($first);
+  }
   $intersection = Keyset\intersect($first, $second, ...$rest);
   if (!$intersection) {
     return vec[];

@@ -304,6 +304,12 @@ final class VecSelectTest extends HackTest {
         vec[],
         vec[3, 4, 4],
       ),
+      tuple(
+        HackLibTestTraversables::getGenerator(Vec\range(0, 4)),
+        vec[3],
+        vec[],
+        vec[3],
+      ),
     ];
   }
 

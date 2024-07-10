@@ -970,7 +970,18 @@
             "key" : 1,
             "lineno" : 162,
             "type" : "string"
-                  }
+            ,
+            "structured_annotations": {
+              "thrift.ExceptionMessage" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "ExceptionMessage",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          }
         },
         "is_exception" : true,
         "is_union" : false,

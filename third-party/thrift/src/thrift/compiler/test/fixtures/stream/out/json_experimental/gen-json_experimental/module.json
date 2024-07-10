@@ -1,6 +1,9 @@
 {
   "__fbthrift": "@generated",
   "thrift_module" : "module",
+  "includes": {
+    "cpp": "thrift/annotation/cpp.thrift"
+  },
   "namespaces": {
     "java.swift": "test.fixtures.stream"
   },
@@ -11,26 +14,26 @@
         "name" : "FooStreamEx",
         "is_exception" : true,
         "is_union" : false,
-        "lineno" : 19
+        "lineno" : 21
       },
       "FooEx" : {
         "name" : "FooEx",
         "is_exception" : true,
         "is_union" : false,
-        "lineno" : 20
+        "lineno" : 22
       },
       "FooEx2" : {
         "name" : "FooEx2",
         "is_exception" : true,
         "is_union" : false,
-        "lineno" : 21
+        "lineno" : 23
       }
       },
   "services" :
   {
       "PubSubStreamingService" : { 
         "name" : "PubSubStreamingService",
-        "lineno" : 23,
+        "lineno" : 25,
         "functions" : {
           "returnstream" : {
             "name" : "returnstream",
@@ -39,66 +42,24 @@
                 "name" : "i32_from",
                 "type" : "i32",
                 "key" : 1,
-                "lineno" : 24,
+                "lineno" : 26,
                 "required" : "opt-in-req-out"
                           },
               "i32_to": {
                 "name" : "i32_to",
                 "type" : "i32",
                 "key" : 2,
-                "lineno" : 24,
-                "required" : "opt-in-req-out"
-                          }
-            },
-            "returnType" : {
-  "type" : "streamresponse",
-  "inner_type" : "i32"},
-            "lineno" : 24
-          },
-          "streamthrows" : {
-            "name" : "streamthrows",
-            "args" : {
-              "foo": {
-                "name" : "foo",
-                "type" : "i32",
-                "key" : 1,
-                "lineno" : 25,
-                "required" : "opt-in-req-out"
-                          }
-            },
-            "returnType" : {
-  "type" : "streamresponse",
-  "inner_type" : "i32"},
-            "lineno" : 25
-          },
-          "servicethrows" : {
-            "name" : "servicethrows",
-            "args" : {
-              "foo": {
-                "name" : "foo",
-                "type" : "i32",
-                "key" : 1,
                 "lineno" : 26,
                 "required" : "opt-in-req-out"
                           }
-            },
-            "exceptions" : {
-              "e" : {
-                "name": "e",
-                "type" : {
-  "type" : "struct",
-  "name" : "FooEx"
-},
-                "id" : 1
-              }
             },
             "returnType" : {
   "type" : "streamresponse",
   "inner_type" : "i32"},
             "lineno" : 26
           },
-          "servicethrows2" : {
-            "name" : "servicethrows2",
+          "streamthrows" : {
+            "name" : "streamthrows",
             "args" : {
               "foo": {
                 "name" : "foo",
@@ -108,31 +69,13 @@
                 "required" : "opt-in-req-out"
                           }
             },
-            "exceptions" : {
-              "e1" : {
-                "name": "e1",
-                "type" : {
-  "type" : "struct",
-  "name" : "FooEx"
-},
-                "id" : 1
-              },
-              "e2" : {
-                "name": "e2",
-                "type" : {
-  "type" : "struct",
-  "name" : "FooEx2"
-},
-                "id" : 2
-              }
-            },
             "returnType" : {
   "type" : "streamresponse",
   "inner_type" : "i32"},
             "lineno" : 27
           },
-          "boththrows" : {
-            "name" : "boththrows",
+          "servicethrows" : {
+            "name" : "servicethrows",
             "args" : {
               "foo": {
                 "name" : "foo",
@@ -157,26 +100,68 @@
   "inner_type" : "i32"},
             "lineno" : 28
           },
-          "responseandstreamstreamthrows" : {
-            "name" : "responseandstreamstreamthrows",
+          "servicethrows2" : {
+            "name" : "servicethrows2",
             "args" : {
               "foo": {
                 "name" : "foo",
                 "type" : "i32",
                 "key" : 1,
-                "lineno" : 32,
+                "lineno" : 29,
                 "required" : "opt-in-req-out"
                           }
             },
+            "exceptions" : {
+              "e1" : {
+                "name": "e1",
+                "type" : {
+  "type" : "struct",
+  "name" : "FooEx"
+},
+                "id" : 1
+              },
+              "e2" : {
+                "name": "e2",
+                "type" : {
+  "type" : "struct",
+  "name" : "FooEx2"
+},
+                "id" : 2
+              }
+            },
             "returnType" : {
   "type" : "streamresponse",
-  "inner_type" : "i32",
-  "first_response_type" : "i32"
-},
-            "lineno" : 31
+  "inner_type" : "i32"},
+            "lineno" : 29
           },
-          "responseandstreamservicethrows" : {
-            "name" : "responseandstreamservicethrows",
+          "boththrows" : {
+            "name" : "boththrows",
+            "args" : {
+              "foo": {
+                "name" : "foo",
+                "type" : "i32",
+                "key" : 1,
+                "lineno" : 30,
+                "required" : "opt-in-req-out"
+                          }
+            },
+            "exceptions" : {
+              "e" : {
+                "name": "e",
+                "type" : {
+  "type" : "struct",
+  "name" : "FooEx"
+},
+                "id" : 1
+              }
+            },
+            "returnType" : {
+  "type" : "streamresponse",
+  "inner_type" : "i32"},
+            "lineno" : 30
+          },
+          "responseandstreamstreamthrows" : {
+            "name" : "responseandstreamstreamthrows",
             "args" : {
               "foo": {
                 "name" : "foo",
@@ -186,6 +171,24 @@
                 "required" : "opt-in-req-out"
                           }
             },
+            "returnType" : {
+  "type" : "streamresponse",
+  "inner_type" : "i32",
+  "first_response_type" : "i32"
+},
+            "lineno" : 33
+          },
+          "responseandstreamservicethrows" : {
+            "name" : "responseandstreamservicethrows",
+            "args" : {
+              "foo": {
+                "name" : "foo",
+                "type" : "i32",
+                "key" : 1,
+                "lineno" : 36,
+                "required" : "opt-in-req-out"
+                          }
+            },
             "exceptions" : {
               "e" : {
                 "name": "e",
@@ -201,7 +204,7 @@
   "inner_type" : "i32",
   "first_response_type" : "i32"
 },
-            "lineno" : 34
+            "lineno" : 36
           },
           "responseandstreamboththrows" : {
             "name" : "responseandstreamboththrows",
@@ -210,7 +213,7 @@
                 "name" : "foo",
                 "type" : "i32",
                 "key" : 1,
-                "lineno" : 38,
+                "lineno" : 40,
                 "required" : "opt-in-req-out"
                           }
             },
@@ -229,7 +232,7 @@
   "inner_type" : "i32",
   "first_response_type" : "i32"
 },
-            "lineno" : 37
+            "lineno" : 39
           },
           "returnstreamFast" : {
             "name" : "returnstreamFast",
@@ -238,21 +241,31 @@
                 "name" : "i32_from",
                 "type" : "i32",
                 "key" : 1,
-                "lineno" : 40,
+                "lineno" : 43,
                 "required" : "opt-in-req-out"
                           },
               "i32_to": {
                 "name" : "i32_to",
                 "type" : "i32",
                 "key" : 2,
-                "lineno" : 40,
+                "lineno" : 43,
                 "required" : "opt-in-req-out"
                           }
             },
             "returnType" : {
   "type" : "streamresponse",
   "inner_type" : "i32"},
-            "lineno" : 40
+            "lineno" : 42,
+            "structured_annotations": {
+              "cpp.ProcessInEbThreadUnsafe" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "ProcessInEbThreadUnsafe",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+            "value" : {}
+          }
+                }
           }
         }
           }

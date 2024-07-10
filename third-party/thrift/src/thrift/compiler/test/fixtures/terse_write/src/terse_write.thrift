@@ -159,5 +159,6 @@ struct WrappedFields {
 
 @thrift.TerseWrite
 exception TerseException {
+  @thrift.ExceptionMessage
   1: string msg;
-} (message = 'msg')
+}

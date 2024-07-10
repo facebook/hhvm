@@ -150,6 +150,7 @@ def _fbthrift_gen_metadata_service_PubSubStreamingService(metadata_struct: _fbth
             ]),
         ], exceptions = [
         ], is_oneway=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.ProcessInEbThreadUnsafe"), fields= {  }),
         ]),
     ]
     

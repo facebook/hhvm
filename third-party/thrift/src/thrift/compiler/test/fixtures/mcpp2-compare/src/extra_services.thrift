@@ -15,6 +15,8 @@
  */
 
 include "module.thrift"
+include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 namespace cpp2 extra.svc
 
@@ -36,14 +38,16 @@ struct containerStruct2 {
 
 service ExtraService extends module.ParamService {
   bool simple_function();
+  @cpp.ProcessInEbThreadUnsafe
   void throws_function() throws (
     1: module.AnException ex,
     2: module.AnotherException aex,
-  ) (thread = "eb");
+  );
+  @thrift.Priority{level = thrift.RpcPriority.HIGH}
   bool throws_function2(1: bool param1) throws (
     1: module.AnException ex,
     2: module.AnotherException aex,
-  ) (priority = "HIGH");
+  );
   map<i32, string> throws_function3(1: bool param1, 3: string param2) throws (
     2: module.AnException ex,
     5: module.AnotherException aex,
@@ -56,10 +60,11 @@ service ExtraService extends module.ParamService {
     4: i32 param4,
     5: i32 param5,
   );
+  @cpp.ProcessInEbThreadUnsafe
   oneway void oneway_void_ret_map_setlist_param(
     1: map<string, i64> param1,
     3: set<list<string>> param2,
-  ) (thread = "eb");
+  );
   oneway void oneway_void_ret_struct_param(1: module.MyStruct param1);
   oneway void oneway_void_ret_listunion_param(
     1: list<module.ComplexUnion> param1,

@@ -2803,6 +2803,12 @@ class SinkServiceStaticMetadata implements \IThriftServiceStaticMetadata {
     return shape(
       'service' => dict[],
       'functions' => dict[
+        'methodFast' => dict[
+          '\facebook\thrift\annotation\cpp\ProcessInEbThreadUnsafe' => \facebook\thrift\annotation\cpp\ProcessInEbThreadUnsafe::fromShape(
+            shape(
+            )
+          ),
+        ],
       ],
     );
   }

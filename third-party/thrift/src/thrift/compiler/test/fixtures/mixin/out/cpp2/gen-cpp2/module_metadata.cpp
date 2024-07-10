@@ -106,7 +106,7 @@ StructMetadata<::cpp2::Foo>::gen(ThriftMetadata& metadata) {
   module_Foo.is_union() = false;
   static const auto* const
   module_Foo_fields = new std::array<EncodedThriftField, 3>{ {
-    { 1, "field4", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "m2", false, std::make_unique<Struct<::cpp2::Mixin2>>("module.Mixin2"), std::vector<ThriftConstStruct>{ }},    { 3, "m3", false, std::make_unique<Typedef>("module.Mixin3", std::make_unique<Struct<::cpp2::Mixin3Base>>("module.Mixin3Base"), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},  }};
+    { 1, "field4", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "m2", false, std::make_unique<Struct<::cpp2::Mixin2>>("module.Mixin2"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Mixin", {  }).cv_struct_ref(), }},    { 3, "m3", false, std::make_unique<Typedef>("module.Mixin3", std::make_unique<Struct<::cpp2::Mixin3Base>>("module.Mixin3Base"), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Mixin", {  }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_Foo_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;

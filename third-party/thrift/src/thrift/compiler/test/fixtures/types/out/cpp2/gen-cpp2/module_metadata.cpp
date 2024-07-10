@@ -375,7 +375,7 @@ StructMetadata<::apache::thrift::fixtures::types::Renamed>::gen(ThriftMetadata& 
   module_Renaming.is_union() = false;
   static const auto* const
   module_Renaming_fields = new std::array<EncodedThriftField, 1>{ {
-    { 1, "foo", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};
+    { 1, "foo", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Name", { {"value", cvString("bar") } }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_Renaming_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -385,6 +385,7 @@ StructMetadata<::apache::thrift::fixtures::types::Renamed>::gen(ThriftMetadata& 
     field.structured_annotations() = f.structured_annotations;
     module_Renaming.fields()->push_back(std::move(field));
   }
+  module_Renaming.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("Renamed") } }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

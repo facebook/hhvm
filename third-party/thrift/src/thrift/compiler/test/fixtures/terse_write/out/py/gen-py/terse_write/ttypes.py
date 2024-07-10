@@ -3255,7 +3255,6 @@ TerseException.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 TerseException.thrift_struct_annotations = {
-  "message": "msg",
 }
 TerseException.thrift_field_annotations = {
 }

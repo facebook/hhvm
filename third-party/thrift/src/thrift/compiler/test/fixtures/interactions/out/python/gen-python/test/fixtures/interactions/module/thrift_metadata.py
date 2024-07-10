@@ -182,6 +182,7 @@ def _fbthrift_gen_metadata_service_MyService_MyInteractionFast(metadata_struct: 
     
     service_dict = dict(metadata_struct.services)
     service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
+        _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.ProcessInEbThreadUnsafe"), fields= {  }),
     ])
     new_struct = metadata_struct(services=service_dict)
     
@@ -227,6 +228,7 @@ def _fbthrift_gen_metadata_service_MyService_SerialInteraction(metadata_struct: 
     
     service_dict = dict(metadata_struct.services)
     service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
+        _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.Serial"), fields= {  }),
     ])
     new_struct = metadata_struct(services=service_dict)
     
@@ -392,6 +394,7 @@ def _fbthrift_gen_metadata_service_Factories_MyInteractionFast(metadata_struct: 
     
     service_dict = dict(metadata_struct.services)
     service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
+        _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.ProcessInEbThreadUnsafe"), fields= {  }),
     ])
     new_struct = metadata_struct(services=service_dict)
     
@@ -437,6 +440,7 @@ def _fbthrift_gen_metadata_service_Factories_SerialInteraction(metadata_struct: 
     
     service_dict = dict(metadata_struct.services)
     service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
+        _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.Serial"), fields= {  }),
     ])
     new_struct = metadata_struct(services=service_dict)
     
@@ -571,6 +575,7 @@ def _fbthrift_gen_metadata_service_Perform_MyInteractionFast(metadata_struct: _f
     
     service_dict = dict(metadata_struct.services)
     service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
+        _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.ProcessInEbThreadUnsafe"), fields= {  }),
     ])
     new_struct = metadata_struct(services=service_dict)
     
@@ -616,6 +621,7 @@ def _fbthrift_gen_metadata_service_Perform_SerialInteraction(metadata_struct: _f
     
     service_dict = dict(metadata_struct.services)
     service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
+        _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.Serial"), fields= {  }),
     ])
     new_struct = metadata_struct(services=service_dict)
     

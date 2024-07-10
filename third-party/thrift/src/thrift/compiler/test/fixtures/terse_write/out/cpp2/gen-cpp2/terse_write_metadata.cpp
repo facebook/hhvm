@@ -225,7 +225,7 @@ StructMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(Thrif
   terse_write_TerseException.is_union() = false;
   static const auto* const
   terse_write_TerseException_fields = new std::array<EncodedThriftField, 1>{ {
-    { 1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
+    { 1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct_ref(), }},  }};
   for (const auto& f : *terse_write_TerseException_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -248,7 +248,7 @@ void ExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>::g
   terse_write_TerseException.name() = "terse_write.TerseException";
   static const auto* const
   terse_write_TerseException_fields = new std::array<EncodedThriftField, 1>{ {
-    { 1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
+    { 1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct_ref(), }},  }};
   for (const auto& f : *terse_write_TerseException_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;

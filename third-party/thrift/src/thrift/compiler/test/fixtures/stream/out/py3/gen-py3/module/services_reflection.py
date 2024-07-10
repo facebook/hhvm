@@ -242,7 +242,7 @@ def get_reflection__PubSubStreamingService(for_clients: bool):
             exceptions=(
             ),
             annotations={
-                """thread""": """eb""",            },
+            },
         )
     )
     return spec

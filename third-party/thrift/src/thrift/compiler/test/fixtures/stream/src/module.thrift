@@ -16,6 +16,8 @@
 
 namespace java.swift test.fixtures.stream
 
+include "thrift/annotation/cpp.thrift"
+
 safe server exception FooStreamEx {}
 safe server exception FooEx {}
 safe server exception FooEx2 {}
@@ -37,5 +39,6 @@ service PubSubStreamingService {
   i32, stream<i32 throws (1: FooStreamEx e)> responseandstreamboththrows(
     1: i32 foo,
   ) throws (1: FooEx e);
-  stream<i32> returnstreamFast(1: i32 i32_from, 2: i32 i32_to) (thread = 'eb');
+  @cpp.ProcessInEbThreadUnsafe
+  stream<i32> returnstreamFast(1: i32 i32_from, 2: i32 i32_to);
 }

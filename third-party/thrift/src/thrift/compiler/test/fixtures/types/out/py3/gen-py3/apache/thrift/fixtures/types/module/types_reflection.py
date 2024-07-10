@@ -600,7 +600,7 @@ def get_reflection__Renaming() -> __StructSpec:
         name="Renaming",
         kind=__StructType.STRUCT,
         annotations={
-            """cpp.name""": """Renamed""",        },
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -612,7 +612,7 @@ def get_reflection__Renaming() -> __StructSpec:
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.name""": """bar""",            },
+            },
         ),
     )
     return spec

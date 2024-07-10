@@ -1,6 +1,9 @@
 {
   "__fbthrift": "@generated",
   "thrift_module" : "module",
+  "includes": {
+    "cpp": "thrift/annotation/cpp.thrift"
+  },
   "namespaces": {
     "java.swift": "test.fixtures.sink"
   },
@@ -13,14 +16,14 @@
           "content" : {
             "name" : "content",
             "key" : 1,
-            "lineno" : 20,
+            "lineno" : 22,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 19
+        "lineno" : 21
       },
       "FinalResponse" : {
         "name" : "FinalResponse",
@@ -28,14 +31,14 @@
           "content" : {
             "name" : "content",
             "key" : 1,
-            "lineno" : 24,
+            "lineno" : 26,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 23
+        "lineno" : 25
       },
       "SinkPayload" : {
         "name" : "SinkPayload",
@@ -43,14 +46,14 @@
           "content" : {
             "name" : "content",
             "key" : 1,
-            "lineno" : 28,
+            "lineno" : 30,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 27
+        "lineno" : 29
       },
       "CompatibleWithKeywordSink" : {
         "name" : "CompatibleWithKeywordSink",
@@ -58,14 +61,14 @@
           "sink" : {
             "name" : "sink",
             "key" : 1,
-            "lineno" : 33,
+            "lineno" : 35,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 31
+        "lineno" : 33
       },
       "InitialException" : {
         "name" : "InitialException",
@@ -73,14 +76,14 @@
           "reason" : {
             "name" : "reason",
             "key" : 1,
-            "lineno" : 37,
+            "lineno" : 39,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : true,
         "is_union" : false,
-        "lineno" : 36
+        "lineno" : 38
       },
       "SinkException1" : {
         "name" : "SinkException1",
@@ -88,14 +91,14 @@
           "reason" : {
             "name" : "reason",
             "key" : 1,
-            "lineno" : 41,
+            "lineno" : 43,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : true,
         "is_union" : false,
-        "lineno" : 40
+        "lineno" : 42
       },
       "SinkException2" : {
         "name" : "SinkException2",
@@ -103,21 +106,21 @@
           "reason" : {
             "name" : "reason",
             "key" : 1,
-            "lineno" : 45,
+            "lineno" : 47,
             "required" : "opt-in-req-out",
             "type" : "i64"
                   }
         },
         "is_exception" : true,
         "is_union" : false,
-        "lineno" : 44
+        "lineno" : 46
       }
       },
   "services" :
   {
       "SinkService" : { 
         "name" : "SinkService",
-        "lineno" : 48,
+        "lineno" : 50,
         "functions" : {
           "method" : {
             "name" : "method",
@@ -132,7 +135,7 @@
   "name" : "FinalResponse"
 }
 },
-            "lineno" : 49
+            "lineno" : 51
           },
           "methodAndReponse" : {
             "name" : "methodAndReponse",
@@ -151,7 +154,7 @@
   "name" : "FinalResponse"
 }
 },
-            "lineno" : 50
+            "lineno" : 52
           },
           "methodThrow" : {
             "name" : "methodThrow",
@@ -176,7 +179,7 @@
   "name" : "FinalResponse"
 }
 },
-            "lineno" : 51
+            "lineno" : 53
           },
           "methodSinkThrow" : {
             "name" : "methodSinkThrow",
@@ -191,7 +194,7 @@
   "name" : "FinalResponse"
 }
 },
-            "lineno" : 54
+            "lineno" : 56
           },
           "methodFinalThrow" : {
             "name" : "methodFinalThrow",
@@ -206,7 +209,7 @@
   "name" : "FinalResponse"
 }
 },
-            "lineno" : 58
+            "lineno" : 60
           },
           "methodBothThrow" : {
             "name" : "methodBothThrow",
@@ -221,7 +224,7 @@
   "name" : "FinalResponse"
 }
 },
-            "lineno" : 62
+            "lineno" : 64
           },
           "methodFast" : {
             "name" : "methodFast",
@@ -236,7 +239,17 @@
   "name" : "FinalResponse"
 }
 },
-            "lineno" : 66
+            "lineno" : 68,
+            "structured_annotations": {
+              "cpp.ProcessInEbThreadUnsafe" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "ProcessInEbThreadUnsafe",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+            "value" : {}
+          }
+                }
           }
         }
           }

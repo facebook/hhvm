@@ -3399,6 +3399,12 @@ class PubSubStreamingServiceStaticMetadata implements \IThriftServiceStaticMetad
     return shape(
       'service' => dict[],
       'functions' => dict[
+        'returnstreamFast' => dict[
+          '\facebook\thrift\annotation\cpp\ProcessInEbThreadUnsafe' => \facebook\thrift\annotation\cpp\ProcessInEbThreadUnsafe::fromShape(
+            shape(
+            )
+          ),
+        ],
       ],
     );
   }

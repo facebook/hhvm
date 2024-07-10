@@ -47,7 +47,7 @@ def get_reflection__ReturnService(for_clients: bool):
             exceptions=(
             ),
             annotations={
-                """thread""": """eb""",            },
+            },
         )
     )
     spec.add_method(
@@ -145,7 +145,7 @@ def get_reflection__ReturnService(for_clients: bool):
             exceptions=(
             ),
             annotations={
-                """thread""": """eb""",            },
+            },
         )
     )
     spec.add_method(
@@ -229,7 +229,7 @@ def get_reflection__ReturnService(for_clients: bool):
             exceptions=(
             ),
             annotations={
-                """thread""": """eb""",            },
+            },
         )
     )
     spec.add_method(
@@ -243,7 +243,7 @@ def get_reflection__ReturnService(for_clients: bool):
             exceptions=(
             ),
             annotations={
-                """thread""": """eb""",            },
+            },
         )
     )
     spec.add_method(
@@ -285,7 +285,7 @@ def get_reflection__ReturnService(for_clients: bool):
             exceptions=(
             ),
             annotations={
-                """thread""": """eb""",            },
+            },
         )
     )
     spec.add_method(
@@ -321,7 +321,7 @@ def get_reflection__ReturnService(for_clients: bool):
             exceptions=(
             ),
             annotations={
-                """thread""": """eb""",            },
+            },
         )
     )
     spec.add_method(
@@ -375,7 +375,7 @@ def get_reflection__ParamService(for_clients: bool):
             exceptions=(
             ),
             annotations={
-                """thread""": """eb""",            },
+            },
         )
     )
     spec.add_method(
@@ -733,7 +733,7 @@ def get_reflection__ParamService(for_clients: bool):
             exceptions=(
             ),
             annotations={
-                """thread""": """eb""",            },
+            },
         )
     )
     spec.add_method(
@@ -917,7 +917,7 @@ def get_reflection__ParamService(for_clients: bool):
             exceptions=(
             ),
             annotations={
-                """thread""": """eb""",            },
+            },
         )
     )
     spec.add_method(
@@ -1013,7 +1013,7 @@ def get_reflection__ParamService(for_clients: bool):
             exceptions=(
             ),
             annotations={
-                """thread""": """eb""",            },
+            },
         )
     )
     spec.add_method(

@@ -4411,12 +4411,8 @@ Renaming.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 Renaming.thrift_struct_annotations = {
-  "cpp.name": "Renamed",
 }
 Renaming.thrift_field_annotations = {
-  1: {
-    "cpp.name": "bar",
-  },
 }
 
 def Renaming__init__(self, foo=None,):

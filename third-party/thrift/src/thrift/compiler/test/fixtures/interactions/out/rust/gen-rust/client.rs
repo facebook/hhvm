@@ -942,7 +942,6 @@ pub struct make_MyInteractionFast;
 /// # };
 /// ```
 impl dyn MyInteractionFast {
-    pub const process_in_event_base: &'static ::std::primitive::str = "1";
     pub fn new<P, T>(
         protocol: P,
         transport: T,
@@ -1228,7 +1227,6 @@ pub struct make_SerialInteraction;
 /// # };
 /// ```
 impl dyn SerialInteraction {
-    pub const serial: &'static ::std::primitive::str = "1";
     pub fn new<P, T>(
         protocol: P,
         transport: T,
@@ -2951,7 +2949,6 @@ pub struct make_MyInteractionFast;
 /// # };
 /// ```
 impl dyn MyInteractionFast {
-    pub const process_in_event_base: &'static ::std::primitive::str = "1";
     pub fn new<P, T>(
         protocol: P,
         transport: T,
@@ -3237,7 +3234,6 @@ pub struct make_SerialInteraction;
 /// # };
 /// ```
 impl dyn SerialInteraction {
-    pub const serial: &'static ::std::primitive::str = "1";
     pub fn new<P, T>(
         protocol: P,
         transport: T,
@@ -4885,7 +4881,6 @@ pub struct make_MyInteractionFast;
 /// # };
 /// ```
 impl dyn MyInteractionFast {
-    pub const process_in_event_base: &'static ::std::primitive::str = "1";
     pub fn new<P, T>(
         protocol: P,
         transport: T,
@@ -5171,7 +5166,6 @@ pub struct make_SerialInteraction;
 /// # };
 /// ```
 impl dyn SerialInteraction {
-    pub const serial: &'static ::std::primitive::str = "1";
     pub fn new<P, T>(
         protocol: P,
         transport: T,

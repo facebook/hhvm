@@ -314,7 +314,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
-    """process_in_event_base""": """1""",    }
+        }
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -418,7 +418,7 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
-    """serial""": """1""",    }
+        }
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -758,7 +758,7 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
-    """process_in_event_base""": """1""",    }
+        }
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -862,7 +862,7 @@ class Factories_SerialInteraction(_fbthrift_python_Client["Factories_SerialInter
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
-    """serial""": """1""",    }
+        }
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -1127,7 +1127,7 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
-    """process_in_event_base""": """1""",    }
+        }
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -1231,7 +1231,7 @@ class Perform_SerialInteraction(_fbthrift_python_Client["Perform_SerialInteracti
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
-    """serial""": """1""",    }
+        }
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

@@ -80,6 +80,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   func.exceptions()->push_back(std::move(extra_services_ExtraService_throws_function_aex_2));
   ExceptionMetadata<::some::valid::ns::AnotherException>::gen(metadata);
   func.is_oneway() = false;
+  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct_ref());
   service.functions()->push_back(std::move(func));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_throws_function2([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
@@ -111,6 +112,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   func.exceptions()->push_back(std::move(extra_services_ExtraService_throws_function2_aex_2));
   ExceptionMetadata<::some::valid::ns::AnotherException>::gen(metadata);
   func.is_oneway() = false;
+  func.structured_annotations()->push_back(*cvStruct("thrift.Priority", { {"level", cvInteger(1) } }).cv_struct_ref());
   service.functions()->push_back(std::move(func));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_throws_function3([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
@@ -222,6 +224,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   extra_services_ExtraService_oneway_void_ret_map_setlist_param_param2_3_type->writeAndGenType(*extra_services_ExtraService_oneway_void_ret_map_setlist_param_param2_3.type(), metadata);
   func.arguments()->push_back(std::move(extra_services_ExtraService_oneway_void_ret_map_setlist_param_param2_3));
   func.is_oneway() = true;
+  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct_ref());
   service.functions()->push_back(std::move(func));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret_struct_param([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {

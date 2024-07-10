@@ -130,7 +130,7 @@ def get_reflection__Foo() -> __StructSpec:
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.mixin""": """1""",            },
+            },
         ),
     )
     spec.add_field(
@@ -143,7 +143,7 @@ def get_reflection__Foo() -> __StructSpec:
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.mixin""": """1""",            },
+            },
         ),
     )
     return spec

@@ -638,7 +638,7 @@ def get_reflection__AnException() -> __StructSpec:
         name="AnException",
         kind=__StructType.EXCEPTION,
         annotations={
-            """message""": """message2""",        },
+        },
     )
     defaults = _module_types.AnException()
     spec.add_field(

@@ -131,9 +131,11 @@ struct MyStruct {
 
 struct MyDataItem {} (cpp.noncomparable)
 
+@cpp.Name{value = "Renamed"}
 struct Renaming {
-  1: i64 foo (cpp.name = 'bar');
-} (cpp.name = "Renamed")
+  @cpp.Name{value = "bar"}
+  1: i64 foo;
+}
 
 struct AnnotatedTypes {
   1: TBinary_8623 binary_field;

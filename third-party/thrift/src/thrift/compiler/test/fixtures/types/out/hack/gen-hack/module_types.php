@@ -2592,8 +2592,24 @@ class Renaming implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+          shape(
+            "value" => "Renamed",
+          )
+        ),
+      ],
       'fields' => dict[
+        'foo' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+              shape(
+                "value" => "bar",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }

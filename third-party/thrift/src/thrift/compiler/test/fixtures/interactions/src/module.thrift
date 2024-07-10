@@ -19,6 +19,10 @@ namespace java.swift test.fixtures.interactions
 namespace py test.fixtures.interactions
 namespace py3 test.fixtures.interactions
 
+include "thrift/annotation/cpp.thrift"
+
+include "thrift/annotation/thrift.thrift"
+
 exception CustomException {
   1: string message;
 }
@@ -30,16 +34,18 @@ interaction MyInteraction {
   set<i32>, sink<string, binary> encode();
 }
 
+@cpp.ProcessInEbThreadUnsafe
 interaction MyInteractionFast {
   i32 frobnicate();
   oneway void ping();
   stream<bool> truthify();
   set<i32>, sink<string, binary> encode();
-} (process_in_event_base)
+}
 
+@thrift.Serial
 interaction SerialInteraction {
   void frobnicate();
-} (serial)
+}
 
 service MyService {
   performs MyInteraction;

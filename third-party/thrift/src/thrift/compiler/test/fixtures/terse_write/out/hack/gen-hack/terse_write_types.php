@@ -4511,6 +4511,15 @@ class TerseException extends \TException implements \IThriftSyncStruct, \IThrift
         ),
       ],
       'fields' => dict[
+        'msg' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }

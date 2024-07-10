@@ -79,7 +79,8 @@ void ThriftQuicServer::startAdditionalServers() {
             alpn,
             wangle::SecureTransportType::TLS,
             wangle::TransportInfo());
-      });
+      },
+      getQuicTransportSettings());
   auto keepalives = ioThreadPool_->getAllEventBases();
   std::vector<folly::EventBase*> evbs(keepalives.size());
   std::transform(
@@ -107,7 +108,6 @@ void ThriftQuicServer::startAdditionalServers() {
   fizzContext->setCertManager(fizzCertManager);
 
   quicServer_->setFizzContext(std::move(fizzContext));
-  quicServer_->setTransportSettings(getQuicTransportSettings());
   quicServer_->start(server_addr, evbs);
 }
 

@@ -250,13 +250,13 @@ HQServer::HQServer(
     HQServerParams params,
     HTTPTransactionHandlerProvider httpTransactionHandlerProvider,
     std::function<void(proxygen::HQSession*)> onTransportReadyFn)
-    : params_(std::move(params)),
-      server_(quic::QuicServer::createQuicServer()) {
+    : params_(std::move(params)) {
+  params_.transportSettings.datagramConfig.enabled = true;
+  server_ = quic::QuicServer::createQuicServer(params_.transportSettings);
+
   server_->setBindV6Only(false);
   server_->setCongestionControllerFactory(
       std::make_shared<ServerCongestionControllerFactory>());
-  params_.transportSettings.datagramConfig.enabled = true;
-  server_->setTransportSettings(params_.transportSettings);
 
   server_->setQuicServerTransportFactory(
       std::make_unique<HQServerTransportFactory>(

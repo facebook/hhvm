@@ -23,6 +23,7 @@ from cpython.unicode cimport PyUnicode_AsUTF8String
 
 import enum
 
+from thrift.python.mutable_exceptions cimport MutableGeneratedError
 from thrift.python.mutable_serializer cimport cserialize, cdeserialize
 from thrift.python.mutable_typeinfos cimport (
     MutableListTypeInfo,
@@ -88,10 +89,17 @@ class _MutableStructField:
         self._field_index = field_id
 
     def __get__(self, obj, objtype):
-        return (<MutableStruct>obj)._fbthrift_get_field_value(self._field_index)
+        if isinstance(obj, MutableStruct):
+            return (<MutableStruct>obj)._fbthrift_get_field_value(self._field_index)
+        else:
+            return (<MutableGeneratedError>obj)._fbthrift_get_field_value(self._field_index)
 
     def __set__(self, obj, value):
-        (<MutableStruct>obj)._fbthrift_set_field_value(self._field_index, value)
+        if isinstance(obj, MutableStruct):
+            (<MutableStruct>obj)._fbthrift_set_field_value(self._field_index, value)
+        else:
+            (<MutableGeneratedError>obj)._fbthrift_set_field_value(self._field_index, value)
+
 
 
 cdef is_cacheable_non_primitive(ThriftIdlType idl_type):
@@ -105,10 +113,17 @@ class _MutableStructCachedField:
         self._field_index = field_id
 
     def __get__(self, obj, objtype):
-        return (<MutableStruct>obj)._fbthrift_get_cached_field_value(self._field_index)
+        if isinstance(obj, MutableStruct):
+            return (<MutableStruct>obj)._fbthrift_get_cached_field_value(self._field_index)
+        else:
+            return (<MutableGeneratedError>obj)._fbthrift_get_cached_field_value(self._field_index)
 
     def __set__(self, obj, value):
-        (<MutableStruct>obj)._fbthrift_set_field_value(self._field_index, value)
+        if isinstance(obj, MutableStruct):
+            (<MutableStruct>obj)._fbthrift_set_field_value(self._field_index, value)
+        else:
+            (<MutableGeneratedError>obj)._fbthrift_set_field_value(self._field_index, value)
+
         obj._fbthrift_field_cache[self._field_index] = None
 
 

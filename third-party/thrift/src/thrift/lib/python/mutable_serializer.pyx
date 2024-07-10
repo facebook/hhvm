@@ -14,16 +14,17 @@
 
 from cython.view cimport memoryview
 from folly.iobuf cimport IOBuf
-from thrift.python.exceptions cimport Error, GeneratedError
+from thrift.python.exceptions cimport Error
+from thrift.python.mutable_exceptions cimport MutableGeneratedError
 from thrift.python.mutable_types cimport MutableStruct, MutableStructOrUnion
 from thrift.python.protocol import Protocol
 
 
 def serialize_iobuf(strct, cProtocol protocol=cProtocol.COMPACT):
-    if isinstance(strct, GeneratedError):
-        return (<GeneratedError>strct)._fbthrift_serialize(protocol)
     if isinstance(strct, MutableStructOrUnion):
         return (<MutableStructOrUnion>strct)._fbthrift_serialize(protocol)
+    if isinstance(strct, MutableGeneratedError):
+        return (<MutableGeneratedError>strct)._fbthrift_serialize(protocol)
 
     raise TypeError("thrift-python serialization only supports thrift-python types")
 
@@ -31,7 +32,7 @@ def serialize(struct, cProtocol protocol=cProtocol.COMPACT):
     return b''.join(serialize_iobuf(struct, protocol))
 
 def deserialize_with_length(klass, buf, cProtocol protocol=cProtocol.COMPACT):
-    if not issubclass(klass, (MutableStructOrUnion, GeneratedError)):
+    if not issubclass(klass, (MutableStructOrUnion, MutableGeneratedError)):
         raise TypeError("thrift-python deserialization only supports thrift-python types")
     if not isinstance(buf, (IOBuf, bytes, bytearray, memoryview)):
         raise TypeError("buf must be IOBuf, bytes, bytearray, or memoryview")
@@ -42,7 +43,7 @@ def deserialize_with_length(klass, buf, cProtocol protocol=cProtocol.COMPACT):
         if issubclass(klass, MutableStruct):
             length = (<MutableStruct>inst)._fbthrift_deserialize(iobuf, protocol)
         else:
-            length = (<GeneratedError>inst)._fbthrift_deserialize(iobuf, protocol)
+            length = (<MutableGeneratedError>inst)._fbthrift_deserialize(iobuf, protocol)
     except Exception as e:
         raise Error.__new__(Error, *e.args) from None
     return inst, length

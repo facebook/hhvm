@@ -27,13 +27,13 @@ from thrift.python.mutable_containers cimport (
     MutableSet,
     MutableMap,
 )
+from thrift.python.mutable_exceptions cimport MutableGeneratedError
 from thrift.python.mutable_types cimport (
     MutableStruct,
     MutableStructInfo,
     MutableUnion,
     MutableUnionInfo,
 )
-from thrift.python.exceptions cimport GeneratedError
 from thrift.python.types cimport getCTypeInfo
 
 
@@ -79,8 +79,8 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
             return (<MutableStruct>value)._fbthrift_data
         if isinstance(value, MutableUnion):
             return (<MutableUnion>value)._fbthrift_data
-        if isinstance(value, GeneratedError):
-            return (<GeneratedError>value)._fbthrift_data
+        if isinstance(value, MutableGeneratedError):
+            return (<MutableGeneratedError>value)._fbthrift_data
 
         raise TypeError(f"MutableStructInfo cannot convert {self._mutable_struct_class} to internal data")
 

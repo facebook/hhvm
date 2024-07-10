@@ -15,6 +15,7 @@ import dataclasses
 
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
+import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 import thrift.python.types as _fbthrift_python_types
 
@@ -281,6 +282,144 @@ class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         import importlib
         immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
         return immutable_types.MyUnion(**dataclasses.asdict(self))
+
+
+class MyException(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "MyIntField",  # name
+            "MyIntField", # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_i64,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            True, # field type is primitive
+            5, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "MyStringField",  # name
+            "MyStringField", # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "myStruct",  # name
+            "myStruct", # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            4,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "myUnion",  # name
+            "myUnion", # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyUnion),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyException"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic/MyException"
+
+    @staticmethod
+    def __get_metadata__():
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
+    def _to_immutable(self):
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
+        return immutable_types.MyException(**dataclasses.asdict(self))
+
+
+class MyExceptionWithMessage(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "MyIntField",  # name
+            "MyIntField", # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_i64,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            True, # field type is primitive
+            5, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "MyStringField",  # name
+            "MyStringField", # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "myStruct",  # name
+            "myStruct", # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            4,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "myUnion",  # name
+            "myUnion", # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyUnion),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyExceptionWithMessage"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic/MyExceptionWithMessage"
+
+    @staticmethod
+    def __get_metadata__():
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
+    def __str__(self):
+        field = self.MyStringField
+        if field is None:
+            return str(field)
+        return field
+
+    def _to_immutable(self):
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
+        return immutable_types.MyExceptionWithMessage(**dataclasses.asdict(self))
 
 
 class ReservedKeyword(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):

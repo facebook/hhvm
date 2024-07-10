@@ -25,19 +25,24 @@ import dataclasses
 
 import folly.iobuf as _fbthrift_iobuf
 import {{program:base_library_package}}.mutable_types as _fbthrift_python_mutable_types
+import {{program:base_library_package}}.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import {{program:base_library_package}}.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 import {{program:base_library_package}}.types as _fbthrift_python_types
 {{#program:adapter_modules}}
 import {{module_path}}
 {{/program:adapter_modules}}
 {{!
-Iterate over structs and unions (but not exceptions).
-}}{{#program:structs}}{{^struct:exception?}}
+Iterate over structs, unions and exceptions.
+}}{{#program:structs}}
 
 
 class {{> structs/unadapted_name}}(metaclass={{!
         }}{{#struct:union?}}_fbthrift_python_mutable_types.MutableUnionMeta{{/struct:union?}}{{!
-        }}{{^struct:union?}}_fbthrift_python_mutable_types.MutableStructMeta{{/struct:union?}}):
+        }}{{^struct:union?}}{{!
+        }}{{#struct:exception?}}_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta{{/struct:exception?}}{{!
+        }}{{^struct:exception?}}_fbthrift_python_mutable_types.MutableStructMeta{{/struct:exception?}}{{!
+        }}{{/struct:union?}}{{!
+        }}):
     _fbthrift_SPEC = (
         {{#struct:fields_ordered_by_id}}
         _fbthrift_python_types.FieldInfo(
@@ -68,6 +73,17 @@ class {{> structs/unadapted_name}}(metaclass={{!
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
+    {{#struct:exception?}}
+    {{#struct:exception_message?}}
+    def __str__(self):
+        field = self.{{struct:exception_message}}
+        if field is None:
+            {{! optional field, stringify }}
+            return str(field)
+        return field
+
+    {{/struct:exception_message?}}
+    {{/struct:exception?}}
     def _to_immutable(self):
         import importlib
         immutable_types = importlib.import_module("{{program:module_path}}.thrift_types")
@@ -77,7 +93,7 @@ class {{> structs/unadapted_name}}(metaclass={{!
 
 raise NotImplementedError("Adapted struct not yet supported in thrift-python: {{> structs/unadapted_name}}")
 {{/struct:has_adapter?}}{{!
-}}{{/struct:exception?}}{{/program:structs}}
+}}{{/program:structs}}
 {{> enums/thrift_enums }}
 
 {{> common/constants }}

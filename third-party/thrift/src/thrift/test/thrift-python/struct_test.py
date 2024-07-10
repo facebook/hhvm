@@ -24,8 +24,10 @@ import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
 
 from parameterized import parameterized
+from thrift.python.exceptions import Error
 from thrift.python.mutable_containers import MutableList, MutableMap, MutableSet
 
+from thrift.python.mutable_exceptions import MutableGeneratedError
 from thrift.python.mutable_types import (
     MutableStruct,
     MutableStructMeta,
@@ -49,6 +51,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
     map_constant,
     set_constant,
     string_constant,
+    TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesMutable,
     TestStruct as TestStructMutable,
     TestStructAdaptedTypes as MutableTestStructAdaptedTypes,
     TestStructAllThriftContainerTypes as MutableTestStructAllThriftContainerTypes,
@@ -60,6 +63,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
     TestStructNested_1 as TestStructNested_1_Mutable,
     TestStructNested_2 as TestStructNested_2_Mutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
+    TestStructWithExceptionField as TestStructWithExceptionFieldMutable,
     TestStructWithTypedefField as TestStructWithTypedefFieldMutable,
     TestStructWithUnionField as TestStructWithUnionFieldMutable,
 )
@@ -1263,3 +1267,39 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
     def test_create_for_struct_with_union_field(self) -> None:
         _ = TestStructWithUnionFieldMutable()
+
+    def test_exception(self) -> None:
+        s = TestStructAllThriftPrimitiveTypesMutable()
+        self.assertIsInstance(s, MutableStruct)
+        self.assertNotIsInstance(s, MutableGeneratedError)
+
+        # `Error` <- `MutableGeneratedError`
+        # is an independent type hierarchy than
+        # `MutableStructOrUnion` <- `MutableStruct`
+        e = TestExceptionAllThriftPrimitiveTypesMutable()
+        self.assertNotIsInstance(e, MutableStructOrUnion)
+        self.assertNotIsInstance(e, MutableStruct)
+        self.assertIsInstance(e, Error)
+        self.assertIsInstance(e, MutableGeneratedError)
+
+    def test_create_for_struct_with_exception_field(self) -> None:
+        _ = TestStructWithExceptionFieldMutable()
+
+    @parameterized.expand(
+        [
+            (TestExceptionAllThriftPrimitiveTypesMutable(),),
+            (TestExceptionAllThriftPrimitiveTypesMutable(unqualified_i32=2),),
+            (TestStructWithExceptionFieldMutable(),),
+            (TestStructWithExceptionFieldMutable(i32_field=3),),
+            (
+                TestStructWithExceptionFieldMutable(
+                    i32_field=5,
+                    exception_field=TestExceptionAllThriftPrimitiveTypesMutable(
+                        unqualified_string="Hello World!"
+                    ),
+                ),
+            ),
+        ]
+    )
+    def test_exception_serialization_round_trip(self, struct_or_exception) -> None:
+        _thrift_serialization_round_trip(self, mutable_serializer, struct_or_exception)

@@ -161,3 +161,34 @@ struct TestStructWithUnionField {
   1: i32 i32_field;
   2: TestUnion union_field;
 }
+
+exception TestExceptionAllThriftPrimitiveTypes {
+  1: bool unqualified_bool;
+  2: optional bool optional_bool;
+
+  3: byte unqualified_byte;
+  4: optional byte optional_byte;
+
+  5: i16 unqualified_i16;
+  6: optional i16 optional_i16;
+
+  7: i32 unqualified_i32;
+  8: optional i32 optional_i32;
+
+  9: i64 unqualified_i64;
+  10: optional i64 optional_i64;
+
+  11: float unqualified_float;
+  12: optional float optional_float;
+
+  13: double unqualified_double;
+  14: optional double optional_double;
+
+  15: string unqualified_string;
+  16: optional string optional_string;
+}
+
+struct TestStructWithExceptionField {
+  1: i32 i32_field;
+  2: TestExceptionAllThriftPrimitiveTypes exception_field;
+}

@@ -24,10 +24,7 @@ import (
 
 type contextKey int
 
-const (
-	connInfoKey contextKey = iota
-	protocolKey
-)
+const connInfoKey contextKey = 0
 
 // ConnInfo contains connection information from clients of the SimpleServer.
 type ConnInfo struct {
@@ -76,14 +73,4 @@ func WithConnInfo(ctx context.Context, conn net.Conn) context.Context {
 func ConnInfoFromContext(ctx context.Context) (ConnInfo, bool) {
 	v, ok := ctx.Value(connInfoKey).(ConnInfo)
 	return v, ok
-}
-
-// Deprecated: Use thrift.GetHeaders
-func HeadersFromContext(ctx context.Context) map[string]string {
-	t, ok := ctx.Value(protocolKey).(Protocol)
-	if !ok {
-		// A nil map behaves like an empty map for reading.
-		return nil
-	}
-	return t.GetResponseHeaders()
 }

@@ -43,28 +43,19 @@ func AddHeader(ctx context.Context, key string, value string) (context.Context, 
 	return ctx, nil
 }
 
-// WithHeaders attaches thrift headers to a ctx
+// WithHeaders attaches thrift headers to a ctx.
 func WithHeaders(ctx context.Context, headers map[string]string) context.Context {
 	return context.WithValue(ctx, headersKey, headers)
 }
 
 // GetHeaders gets thrift headers from ctx.
-// WithHeaders will set this, and if nothing is set it
-// will defer to thrift.HeadersFromContext
-// can return nil if there is no headers.
 func GetHeaders(ctx context.Context) map[string]string {
 	// check for headersKey
 	v, ok := ctx.Value(headersKey).(map[string]string)
 	if ok {
 		return v
 	}
-	// deprecated
-	t, ok := ctx.Value(protocolKey).(Protocol)
-	if !ok {
-		// A nil map behaves like an empty map for reading.
-		return nil
-	}
-	return t.GetResponseHeaders()
+	return nil
 }
 
 // Deprecated: RequestHeaders will eventually be private.

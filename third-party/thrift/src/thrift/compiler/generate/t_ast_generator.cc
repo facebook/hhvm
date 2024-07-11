@@ -253,7 +253,9 @@ type::Schema t_ast_generator::gen_schema(
     program_pos_index[program_id] = pos;
     hydrate_const(programs.emplace_back(), *schema_source.gen_schema(program));
     programs.back().id() = program_id;
-    if (program.has_doc()) {
+    if (program.has_doc() &&
+        schema_opts.include.test(schematizer::included_data::Docs) &&
+        schema_opts.include.test(schematizer::included_data::SourceRanges)) {
       programs.back().attrs()->docs()->sourceRange() =
           src_range(program.doc_range(), program);
     }
@@ -310,8 +312,10 @@ type::Schema t_ast_generator::gen_schema(
         positionToId<apache::thrift::type::DefinitionId>(pos);
     auto& def = kind_ref_fn(definitions.emplace_back()).ensure();
     hydrate_const(def, *schema_source.gen_schema(node));
-    set_source_range(node, *def.attrs());
-    set_child_source_ranges(node, def);
+    if (schema_opts.include.test(schematizer::included_data::SourceRanges)) {
+      set_source_range(node, *def.attrs());
+      set_child_source_ranges(node, def);
+    }
     if (ast.definitionsMap()->count(key)) {
       throw std::runtime_error(fmt::format(
           "Duplicate definition key: {}",

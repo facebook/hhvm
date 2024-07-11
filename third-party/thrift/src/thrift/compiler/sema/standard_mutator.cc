@@ -407,6 +407,8 @@ void inject_schema_const(
   opts.only_root_program_ = true;
   opts.use_hash = true;
   opts.include.reset(schematizer::included_data::DoubleWrites);
+  opts.include.reset(schematizer::included_data::Docs);
+  opts.include.reset(schematizer::included_data::SourceRanges);
   std::string serialized;
   try {
     serialized = detail::pluggable_functions().call<GetSchemaTag>(

@@ -40,6 +40,7 @@ class schematizer {
     DoubleWrites = 1, // Legacy copies of data for backcompat
     Annotations = 2,
     Docs = 4,
+    SourceRanges = 8,
   };
 
   struct included_data_set {

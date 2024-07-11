@@ -78,17 +78,12 @@ func ConnInfoFromContext(ctx context.Context) (ConnInfo, bool) {
 	return v, ok
 }
 
-// WithProtocol attaches thrift protocol to a context
+// Deprecated: use thrift.WithHeaders(ctx, proto.GetResponseHeaders())
 func WithProtocol(ctx context.Context, proto Protocol) context.Context {
 	return context.WithValue(ctx, protocolKey, proto)
 }
 
-// HeadersFromContext extracts headers for this message, both per-message
-// and persistent headers. When both a per-message header and a persistent
-// header exist with the same name, the persistent header is returned. This is
-// also the behaviour of the C++ implementation.
-// This function returns nil when the underlying transport/protocol do not
-// support headers.
+// Deprecated: Use thrift.GetHeaders
 func HeadersFromContext(ctx context.Context) map[string]string {
 	t, ok := ctx.Value(protocolKey).(Protocol)
 	if !ok {

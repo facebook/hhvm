@@ -23,9 +23,6 @@ pub struct Context<'a> {
     pub defs: HashMap<String, &'a Item>,
     /// modules contain the `defs`.
     pub mods: HashSet<String>,
-    /// root is a type from `defs`, a visit function will be generated
-    /// if a type is in `defs` and transitively depended by `root`.
-    pub root: &'a str,
     /// a set of types transitively depended by `root`.
     types: Vec<String>,
     /// a list of type parameters in the root type
@@ -61,7 +58,6 @@ impl<'a> Context<'a> {
         Ok(Self {
             mods,
             defs,
-            root,
             root_ty_params,
             types,
             context: "Context".into(),

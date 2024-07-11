@@ -124,10 +124,6 @@ func (p *SimpleServer) processRequests(ctx context.Context, client net.Conn) err
 		return err
 	}
 
-	// Store the protocol on the context so handlers can query headers.
-	// See HeadersFromContext.
-	ctx = WithProtocol(ctx, protocol)
-
 	defer func() {
 		if err := recover(); err != nil {
 			p.log.Printf("panic in processor: %v: %s", err, debug.Stack())

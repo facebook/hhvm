@@ -78,11 +78,6 @@ func ConnInfoFromContext(ctx context.Context) (ConnInfo, bool) {
 	return v, ok
 }
 
-// Deprecated: use thrift.WithHeaders(ctx, proto.GetResponseHeaders())
-func WithProtocol(ctx context.Context, proto Protocol) context.Context {
-	return context.WithValue(ctx, protocolKey, proto)
-}
-
 // Deprecated: Use thrift.GetHeaders
 func HeadersFromContext(ctx context.Context) map[string]string {
 	t, ok := ctx.Value(protocolKey).(Protocol)

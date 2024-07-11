@@ -71,6 +71,7 @@ func processContext(ctx context.Context, processor ProcessorContext, prot Protoc
 		}
 		return false, rerr
 	}
+	ctx = WithHeaders(ctx, prot.GetResponseHeaders())
 	var err ApplicationException
 	var pfunc ProcessorFunctionContext
 	if messageType != CALL && messageType != ONEWAY {

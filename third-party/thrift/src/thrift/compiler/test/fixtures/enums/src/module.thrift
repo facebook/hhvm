@@ -74,11 +74,12 @@ struct MyStruct {
   6: MyEnum1 me1_t2 = MyEnum1.ME1_1;
 }
 
+@thrift.BitmaskEnum
 enum MyBitmaskEnum1 {
   ONE = 1,
   TWO = 2,
   FOUR = 4,
-} (bitmask = 1)
+}
 
 @thrift.BitmaskEnum
 enum MyBitmaskEnum2 {

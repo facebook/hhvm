@@ -78,6 +78,15 @@ class Fiery extends \TException implements \IThriftSyncStruct, \IThriftException
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'message' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -166,6 +175,15 @@ class Serious extends \TException implements \IThriftSyncStruct, \IThriftExcepti
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'sonnet' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -277,6 +295,15 @@ class ComplexFieldNames extends \TException implements \IThriftSyncStruct, \IThr
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'internal_error_message' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -388,6 +415,15 @@ class CustomFieldNames extends \TException implements \IThriftSyncStruct, \IThri
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'internal_error_message' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -494,6 +530,15 @@ class ExceptionWithPrimitiveField extends \TException implements \IThriftSyncStr
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'message' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }

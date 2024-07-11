@@ -118,13 +118,13 @@
           "column" : 1
         },
         "end" : {
-          "line" : 81,
-          "column" : 16
+          "line" : 82,
+          "column" : 2
         }
       }
     },
     "MyBitmaskEnum2" : {
-      "lineno" : 83,
+      "lineno" : 84,
       "constants" : {
         "ONE" : 1,
         "TWO" : 2,
@@ -132,11 +132,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 83,
+          "line" : 84,
           "column" : 1
         },
         "end" : {
-          "line" : 88,
+          "line" : 89,
           "column" : 2
         }
       }

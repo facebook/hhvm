@@ -96,6 +96,7 @@ void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>::gen(ThriftMetadata& 
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
     enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
+  enum_metadata.structured_annotations()->push_back(*cvStruct("thrift.BitmaskEnum", {  }).cv_struct_ref());
 }
 void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>::gen(ThriftMetadata& metadata) {
   auto res = metadata.enums()->emplace("module.MyBitmaskEnum2", ::apache::thrift::metadata::ThriftEnum{});

@@ -303,6 +303,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for Fiery {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
+                    let mut tmp = Some(thrift__types::ExceptionMessage {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -408,6 +417,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for Serious {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
+                    let mut tmp = Some(thrift__types::ExceptionMessage {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -522,6 +540,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for ComplexFieldNames {
             1 => {
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
+                    let mut tmp = Some(thrift__types::ExceptionMessage {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -636,6 +663,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for CustomFieldNames {
             1 => {
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
+                    let mut tmp = Some(thrift__types::ExceptionMessage {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -748,6 +784,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithPrimitiveField {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
+                    let mut tmp = Some(thrift__types::ExceptionMessage {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
             },

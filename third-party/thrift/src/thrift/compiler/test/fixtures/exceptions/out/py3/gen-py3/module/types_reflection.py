@@ -29,7 +29,7 @@ def get_reflection__Fiery() -> __StructSpec:
         name="Fiery",
         kind=__StructType.EXCEPTION,
         annotations={
-            """message""": """message""",        },
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -50,7 +50,7 @@ def get_reflection__Serious() -> __StructSpec:
         name="Serious",
         kind=__StructType.EXCEPTION,
         annotations={
-            """message""": """sonnet""",        },
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -71,7 +71,7 @@ def get_reflection__ComplexFieldNames() -> __StructSpec:
         name="ComplexFieldNames",
         kind=__StructType.EXCEPTION,
         annotations={
-            """message""": """internal_error_message""",        },
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -105,7 +105,7 @@ def get_reflection__CustomFieldNames() -> __StructSpec:
         name="CustomFieldNames",
         kind=__StructType.EXCEPTION,
         annotations={
-            """message""": """internal_error_message""",        },
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -139,7 +139,7 @@ def get_reflection__ExceptionWithPrimitiveField() -> __StructSpec:
         name="ExceptionWithPrimitiveField",
         kind=__StructType.EXCEPTION,
         annotations={
-            """message""": """message""",        },
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(

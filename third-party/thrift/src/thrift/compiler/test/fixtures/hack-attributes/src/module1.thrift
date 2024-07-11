@@ -62,6 +62,7 @@ service FooService {
   i32 ping(1: string str_arg);
 }
 
+@hack.Attributes{attributes = ["Oncalls('thrift')"]}
 service FooService1 {
   i32 ping(1: string str_arg);
-} (hack.attributes = "Oncalls('thrift')")
+}

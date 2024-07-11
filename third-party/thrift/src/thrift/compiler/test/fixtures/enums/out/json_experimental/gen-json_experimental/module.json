@@ -168,17 +168,17 @@
         "constants" : {
           "ONE" : {
             "name" : "ONE",
-            "lineno" : 78,
+            "lineno" : 79,
             "value" : 1
           },
           "TWO" : {
             "name" : "TWO",
-            "lineno" : 79,
+            "lineno" : 80,
             "value" : 2
           },
           "FOUR" : {
             "name" : "FOUR",
-            "lineno" : 80,
+            "lineno" : 81,
             "value" : 4
           }
         },
@@ -189,21 +189,21 @@
         "constants" : {
           "ONE" : {
             "name" : "ONE",
-            "lineno" : 85,
+            "lineno" : 86,
             "value" : 1
           },
           "TWO" : {
             "name" : "TWO",
-            "lineno" : 86,
+            "lineno" : 87,
             "value" : 2
           },
           "FOUR" : {
             "name" : "FOUR",
-            "lineno" : 87,
+            "lineno" : 88,
             "value" : 4
           }
         },
-        "lineno" : 83
+        "lineno" : 84
       }
       },
   "structs" :

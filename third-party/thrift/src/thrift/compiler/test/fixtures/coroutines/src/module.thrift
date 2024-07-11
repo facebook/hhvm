@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
 service MyService {
-  void ping() (cpp.coroutine);
+  void ping();
   string getRandomData();
-  bool hasDataById(1: i64 id) (cpp.coroutine);
-  string getDataById(1: i64 id) (cpp.coroutine, thread = 'eb');
+  bool hasDataById(1: i64 id);
+  @cpp.ProcessInEbThreadUnsafe
+  string getDataById(1: i64 id);
   void putDataById(1: i64 id, 2: string data);
 }

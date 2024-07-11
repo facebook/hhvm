@@ -63,6 +63,7 @@ trait FooService1ClientBase {
 
 }
 
+<<Oncalls('thrift')>>
 class FooService1AsyncClient extends \ThriftClientBase implements FooService1AsyncClientIf {
   use FooService1ClientBase;
 
@@ -87,6 +88,7 @@ class FooService1AsyncClient extends \ThriftClientBase implements FooService1Asy
 
 }
 
+<<Oncalls('thrift')>>
 class FooService1Client extends \ThriftClientBase implements FooService1ClientIf {
   use FooService1ClientBase;
 
@@ -338,7 +340,15 @@ class FooService1StaticMetadata implements \IThriftServiceStaticMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TServiceAnnotations {
     return shape(
-      'service' => dict[],
+      'service' => dict[
+        '\facebook\thrift\annotation\hack\Attributes' => \facebook\thrift\annotation\hack\Attributes::fromShape(
+          shape(
+            "attributes" => vec[
+              "Oncalls('thrift')",
+            ],
+          )
+        ),
+      ],
       'functions' => dict[
       ],
     );

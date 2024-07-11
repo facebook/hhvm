@@ -800,7 +800,6 @@ Fiery.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 Fiery.thrift_struct_annotations = {
-  "message": "message",
 }
 Fiery.thrift_field_annotations = {
 }
@@ -823,7 +822,6 @@ Serious.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 Serious.thrift_struct_annotations = {
-  "message": "sonnet",
 }
 Serious.thrift_field_annotations = {
 }
@@ -847,7 +845,6 @@ ComplexFieldNames.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 ComplexFieldNames.thrift_struct_annotations = {
-  "message": "internal_error_message",
 }
 ComplexFieldNames.thrift_field_annotations = {
 }
@@ -873,7 +870,6 @@ CustomFieldNames.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 CustomFieldNames.thrift_struct_annotations = {
-  "message": "internal_error_message",
 }
 CustomFieldNames.thrift_field_annotations = {
   2: {
@@ -902,7 +898,6 @@ ExceptionWithPrimitiveField.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 ExceptionWithPrimitiveField.thrift_struct_annotations = {
-  "message": "message",
 }
 ExceptionWithPrimitiveField.thrift_field_annotations = {
 }

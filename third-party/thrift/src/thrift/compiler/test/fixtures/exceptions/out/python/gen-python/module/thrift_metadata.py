@@ -19,6 +19,7 @@ def _fbthrift_gen_metadata_exception_Fiery(metadata_struct: _fbthrift_metadata.T
         return metadata_struct
     fields = [
         _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="message", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.ExceptionMessage"), fields= {  }),
         ]),
     ]
     struct_dict = dict(metadata_struct.exceptions)
@@ -42,6 +43,7 @@ def _fbthrift_gen_metadata_exception_Serious(metadata_struct: _fbthrift_metadata
         return metadata_struct
     fields = [
         _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="sonnet", is_optional=True, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.ExceptionMessage"), fields= {  }),
         ]),
     ]
     struct_dict = dict(metadata_struct.exceptions)
@@ -67,6 +69,7 @@ def _fbthrift_gen_metadata_exception_ComplexFieldNames(metadata_struct: _fbthrif
         _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="error_message", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="internal_error_message", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.ExceptionMessage"), fields= {  }),
         ]),
     ]
     struct_dict = dict(metadata_struct.exceptions)
@@ -93,6 +96,7 @@ def _fbthrift_gen_metadata_exception_CustomFieldNames(metadata_struct: _fbthrift
         _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="error_message", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="internal_error_message", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.ExceptionMessage"), fields= {  }),
         ]),
     ]
     struct_dict = dict(metadata_struct.exceptions)
@@ -117,6 +121,7 @@ def _fbthrift_gen_metadata_exception_ExceptionWithPrimitiveField(metadata_struct
         return metadata_struct
     fields = [
         _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="message", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.ExceptionMessage"), fields= {  }),
         ]),
         _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), name="error_code", is_optional=False, structured_annotations=[
         ]),

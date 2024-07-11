@@ -6,9 +6,9 @@
  *
  *)
 
-(* The logic to determine whether a feature is enabled is implemented in can_use
-   and the logic to determine whether the file-level attribute is allowed is in
-   enable, both in experimental_features_impl.rs *)
+(* The logic to determine whether a feature is enabled is implemented in
+   `can_use` and the logic to determine whether the file-level attribute is
+   allowed is in `enable`, both in experimental_features_impl.rs *)
 
 type feature_status =
   | Unstable
@@ -23,7 +23,7 @@ type feature_status =
 [@@deriving eq, ord, show]
 
 (** Experimental features are enabled with a file attribute
-    <file:__EnableUnstableFeatures('feature_name')>> where the feature name is
+    <<file:__EnableUnstableFeatures('feature_name')>> where the feature name is
     one of these construcors written in snake_case. *)
 type feature_name =
   | UnionIntersectionTypeHints
@@ -31,12 +31,12 @@ type feature_name =
   | ExpressionTrees
   | Readonly
   | ModuleReferences
-  | ClassConstDefault
-  | TypeConstMultipleBounds
-  | TypeConstSuperBound
-  | TypeRefinements
   | ContextAliasDeclaration
   | ContextAliasDeclarationShort
+  | TypeConstMultipleBounds
+  | TypeConstSuperBound
+  | ClassConstDefault
+  | TypeRefinements
   | MethodTraitDiamond
   | UpcastExpression
   | RequireClass
@@ -62,3 +62,7 @@ type feature_name =
 val feature_status_from_string : string -> feature_status option
 
 val feature_name_from_string : string -> feature_name option
+
+(** Convert string/json pair to feature name/status. Fail if the name/status aren't valid. *)
+val parse_experimental_feature :
+  string * Hh_json.json -> feature_name * feature_status

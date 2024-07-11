@@ -39,6 +39,11 @@ type t = {
   parser_errors_only: bool;
   disable_hh_ignore_error: int;
   allowed_decl_fixme_codes: ISet.t;
+  use_legacy_experimental_feature_config: bool;
+  experimental_features:
+    (Experimental_features.feature_name * Experimental_features.feature_status)
+    list;
+  consider_unspecified_experimental_features_released: bool;
 }
 [@@deriving show, eq]
 
@@ -76,6 +81,9 @@ let default =
     parser_errors_only = false;
     disable_hh_ignore_error = 0;
     allowed_decl_fixme_codes = ISet.empty;
+    use_legacy_experimental_feature_config = true;
+    experimental_features = [];
+    consider_unspecified_experimental_features_released = true;
   }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
@@ -99,6 +107,10 @@ type ffi_t =
   * bool
   * bool
   * bool
+  * bool
+  * (Experimental_features.feature_name * Experimental_features.feature_status)
+    list
+  * bool
 
 let to_rust_ffi_t po =
   ( po.hhvm_compat_mode,
@@ -119,4 +131,7 @@ let to_rust_ffi_t po =
     po.interpret_soft_types_as_like_types,
     po.is_systemlib,
     po.disallow_static_constants_in_default_func_args,
-    po.disallow_direct_superglobals_refs )
+    po.disallow_direct_superglobals_refs,
+    po.use_legacy_experimental_feature_config,
+    po.experimental_features,
+    po.consider_unspecified_experimental_features_released )

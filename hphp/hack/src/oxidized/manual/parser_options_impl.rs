@@ -41,6 +41,9 @@ impl Default for ParserOptions {
             parser_errors_only: false,
             allowed_decl_fixme_codes: i_set::ISet::new(),
             disable_hh_ignore_error: 0,
+            use_legacy_experimental_feature_config: true,
+            experimental_features: vec![],
+            consider_unspecified_experimental_features_released: true,
         }
     }
 }

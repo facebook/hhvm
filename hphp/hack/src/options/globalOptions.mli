@@ -59,7 +59,10 @@ type t = {
   po: ParserOptions.t;
   tco_saved_state: saved_state;
   tco_experimental_features: SSet.t;
-      (** Set of experimental features, in lowercase. *)
+      (** Set of typechecker-only experimental features, in lowercase.
+          NB, *not* the experimental features that are controlled by the
+          file level <<__EnableUnstableFeatures('feature_name')>> attribute.
+          Those are in ParserOptions. *)
   tco_migration_flags: SSet.t;
       (** Set of opt-in migration behavior flags, in lowercase. *)
   tco_num_local_workers: int option;

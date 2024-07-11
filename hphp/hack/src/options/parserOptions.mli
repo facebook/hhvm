@@ -64,6 +64,18 @@ type t = {
       (** Disable HH_IGNORE_ERROR comments, either raising an error if 1 or treating them as normal comments if 2. *)
   allowed_decl_fixme_codes: ISet.t;
       (** Set of error codes disallowed in decl positions *)
+  use_legacy_experimental_feature_config: bool;
+      (** Ignore the experimental_features and consider_unspecified_experimental_features_released config
+          options and use a hard coded function instead *)
+  experimental_features:
+    (Experimental_features.feature_name * Experimental_features.feature_status)
+    list;
+      (** A mapping of names of experimental features to their status: Unstable/Preview/OngoingRelease *)
+  consider_unspecified_experimental_features_released: bool;
+      (** Any experimental features not specified in the experimental_features configuration field should
+          default to OngoingRelease if this is true. Otherwise they will default to Unstable. This should be true for
+          testing and tools that don't read .hhconfig (e.g., like hh_single_type_check and hh_parse). It should
+          be false for hh_server. *)
 }
 [@@deriving show, eq]
 
@@ -89,6 +101,10 @@ type ffi_t =
   * bool
   * bool
   * bool
+  * bool
+  * bool
+  * (Experimental_features.feature_name * Experimental_features.feature_status)
+    list
   * bool
 
 val to_rust_ffi_t : t -> ffi_t

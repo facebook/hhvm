@@ -78,8 +78,8 @@
 (library
  (name parser_options)
  (wrapped false)
- (modules parserOptions)
- (libraries collections)
+ (modules parserOptions experimental_features)
+ (libraries collections utils_core)
  (preprocess
   (pps ppx_deriving.std)))
 

@@ -18,6 +18,7 @@ use config_file::ConfigFile;
 pub use local_config::LocalConfig;
 use oxidized::custom_error_config::CustomErrorConfig;
 use oxidized::decl_parser_options::DeclParserOptions;
+use oxidized::experimental_features;
 use oxidized::global_options::ExtendedReasonsConfig;
 use oxidized::global_options::GlobalOptions;
 use oxidized::parser_options::ParserOptions;
@@ -289,6 +290,14 @@ impl HhConfig {
                 default.disallow_direct_superglobals_refs,
             )?,
             stack_size: default.stack_size,
+            use_legacy_experimental_feature_config: false,
+            experimental_features: hhconfig
+                .get_str("enable_experimental_stx_features")
+                .map_or(
+                    Ok::<_, anyhow::Error>(default.experimental_features),
+                    parse_experimental_features,
+                )?,
+            consider_unspecified_experimental_features_released: false,
         };
         let default = GlobalOptions::default();
         let opts = GlobalOptions {
@@ -502,6 +511,23 @@ impl HhConfig {
 
 fn parse_json<'de, T: serde::de::Deserialize<'de>>(value: &'de str) -> Result<T> {
     Ok(serde_json::from_slice(value.as_bytes())?)
+}
+
+fn parse_experimental_features(
+    s: &str,
+) -> Result<
+    Vec<(
+        experimental_features::FeatureName,
+        experimental_features::FeatureStatus,
+    )>,
+> {
+    let features: Vec<_> = parse_json::<BTreeMap<String, String>>(s)?
+        .into_iter()
+        .collect();
+    features
+        .iter()
+        .map(experimental_features::FeatureName::parse_experimental_feature)
+        .collect()
 }
 
 fn parse_svec(value: &str) -> Vec<String> {

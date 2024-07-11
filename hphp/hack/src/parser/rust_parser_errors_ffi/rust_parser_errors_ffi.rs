@@ -14,6 +14,7 @@ use bumpalo::Bump;
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromOcamlRep;
 use ocamlrep_ocamlpool::ocaml_ffi;
+use oxidized::experimental_features;
 use oxidized::namespace_env::Mode;
 use oxidized::parser_options::ParserOptions;
 use parser_core_types::source_text::SourceText;
@@ -51,6 +52,14 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     let po_disallow_static_constants_in_default_func_args =
         bool::from_ocaml(*ocaml_opts.add(17)).unwrap();
     let po_disallow_direct_superglobals_refs = bool::from_ocaml(*ocaml_opts.add(18)).unwrap();
+    let use_legacy_experimental_feature_config = bool::from_ocaml(*ocaml_opts.add(19)).unwrap();
+    let po_experimental_features = Vec::<(
+        experimental_features::FeatureName,
+        experimental_features::FeatureStatus,
+    )>::from_ocaml(*ocaml_opts.add(20))
+    .unwrap();
+    let consider_unspecified_experimental_features_released =
+        bool::from_ocaml(*ocaml_opts.add(21)).unwrap();
 
     parser_options.disable_lval_as_an_expression = po_disable_lval_as_an_expression;
     parser_options.disable_legacy_soft_typehints = po_disable_legacy_soft_typehints;
@@ -69,6 +78,10 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     parser_options.disallow_static_constants_in_default_func_args =
         po_disallow_static_constants_in_default_func_args;
     parser_options.disallow_direct_superglobals_refs = po_disallow_direct_superglobals_refs;
+    parser_options.use_legacy_experimental_feature_config = use_legacy_experimental_feature_config;
+    parser_options.experimental_features = po_experimental_features;
+    parser_options.consider_unspecified_experimental_features_released =
+        consider_unspecified_experimental_features_released;
     (
         parser_options,
         (hhvm_compat_mode, hhi_mode, codegen, tco_is_systemlib),

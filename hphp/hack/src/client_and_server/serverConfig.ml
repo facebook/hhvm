@@ -123,6 +123,14 @@ let config_experimental_tc_features config =
       let sl = Str.split config_list_regexp list_str in
       process_experimental sl)
 
+let config_experimental_stx_features config =
+  Option.map
+    (Config_file.Getters.string_opt "enable_experimental_stx_features" config)
+    ~f:(fun str ->
+      let json = Hh_json.json_of_string ~strict:true str in
+      let pairs = Hh_json.get_object_exn json in
+      List.map ~f:Experimental_features.parse_experimental_feature pairs)
+
 let process_migration_flags sl =
   match sl with
   | ["false"] -> SSet.empty
@@ -346,6 +354,11 @@ let load_config config options =
         disable_hh_ignore_error =
           int_opt "disable_hh_ignore_error" config
           >?? po_opt.disable_hh_ignore_error;
+        use_legacy_experimental_feature_config = false;
+        experimental_features =
+          config_experimental_stx_features config
+          >?? po_opt.experimental_features;
+        consider_unspecified_experimental_features_released = false;
       }
   in
   GlobalOptions.set
@@ -547,6 +560,8 @@ let load ~silent options : t * ServerLocalConfig.t =
               ParserOptions.allow_unstable_features =
                 local_config.ServerLocalConfig.allow_unstable_features;
               parser_errors_only = Option.is_some (ServerArgs.ai_mode options);
+              ParserOptions.consider_unspecified_experimental_features_released =
+                false;
             }
         ?so_naming_sqlite_path:local_config.naming_sqlite_path
         ?tco_log_large_fanouts_threshold:

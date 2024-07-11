@@ -18,12 +18,14 @@
 import itertools
 import unittest
 
+from python_test.testing_utils import Untruthy
 from testing.types import (
     Color,
     ColorGroups,
     easy,
     I32List,
     int_list,
+    ListTypes,
     StringList,
     StrList2D,
     Uint32List,
@@ -85,6 +87,13 @@ class ListTests(unittest.TestCase):
             # pyre-fixme[6]: Expected `Optional[typing.Sequence[int]]` for 1st param
             #  but got `List[typing.Union[int, str]]`.
             I32List([1, "b", "c", "four"])
+
+    def test_create_untruthy_list(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Do not dare question my truth"):
+            bool(Untruthy(5))
+
+        self.assertEqual(I32List(Untruthy(5)), list(range(5)))
+        self.assertEqual(ListTypes(second=Untruthy(5)).second, list(range(5)))
 
     def test_hashability(self) -> None:
         hash(easy().val_list)

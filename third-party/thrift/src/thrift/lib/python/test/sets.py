@@ -31,7 +31,6 @@ import python_test.sets.thrift_types as mutable_sets_types
 from folly.iobuf import IOBuf
 
 from parameterized import parameterized_class
-
 from python_test.containers.thrift_types import Color, Foo, Sets
 from python_test.sets.thrift_types import (
     easy,
@@ -40,6 +39,7 @@ from python_test.sets.thrift_types import (
     SetI32Lists,
     SetSetI32Lists,
 )
+from python_test.testing_utils import Untruthy
 
 
 @parameterized_class(
@@ -175,6 +175,13 @@ class SetTests(unittest.TestCase):
     def test_no_dict(self) -> None:
         with self.assertRaises(AttributeError):
             SetI32().__dict__
+
+    def test_create_untruthy_set(self) -> None:
+        with self.assertRaises(ValueError):
+            bool(Untruthy(5))
+
+        self.assertEqual(SetI32(Untruthy(5)), set(range(5)))
+        self.assertEqual(Sets(i32Set=Untruthy(5)).i32Set, set(range(5)))
 
     def test_struct_with_set_fields(self) -> None:
         # pyre-ignore[16]: has no attribute `lists_types`

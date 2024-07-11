@@ -358,6 +358,11 @@ struct ListTypes {
   5: list<map<i32, i32>> fifth;
 }
 
+struct SetTypes {
+  1: set<string> first;
+  2: set<i32> second;
+}
+
 struct StructuredAnnotation {
   2: map<double, i64> first;
   3: i64 second;

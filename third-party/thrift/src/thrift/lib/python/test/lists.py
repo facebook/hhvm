@@ -40,6 +40,7 @@ from python_test.lists.thrift_types import (
     StringList,
     StrList2D,
 )
+from python_test.testing_utils import Untruthy
 
 
 # ct = containers type, lt = lists type
@@ -108,6 +109,13 @@ class ListTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             # pyre-ignore[6]: purposely use a wrong type to raise a TypeError
             self.I32List([1, "b", "c", "four"])
+
+    def test_create_untruthy_list(self) -> None:
+        with self.assertRaises(ValueError):
+            bool(Untruthy(5))
+
+        self.assertEqual(I32List(Untruthy(5)), list(range(5)))
+        self.assertEqual(Lists(i32List=Untruthy(5)).i32List, list(range(5)))
 
     def test_hashability(self) -> None:
         # Mutable types do not support hashing

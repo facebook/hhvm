@@ -19,7 +19,8 @@ import copy
 import unittest
 from typing import AbstractSet, Sequence, Tuple
 
-from testing.types import SetI32, SetI32Lists, SetSetI32Lists
+from python_test.testing_utils import Untruthy
+from testing.types import SetI32, SetI32Lists, SetSetI32Lists, SetTypes
 from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.types import Container
 
@@ -157,6 +158,13 @@ class SetTests(unittest.TestCase):
         pz.add(5)
         with self.assertRaises(TypeError):
             SetSetI32Lists(pz)
+
+    def test_create_untruthy_set(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Do not dare question my truth"):
+            bool(Untruthy(5))
+
+        self.assertEqual(SetI32(Untruthy(5)), set(range(5)))
+        self.assertEqual(SetTypes(second=Untruthy(5)).second, set(range(5)))
 
     def test_hashability(self) -> None:
         hash(SetI32Lists())

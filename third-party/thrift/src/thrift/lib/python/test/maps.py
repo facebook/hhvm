@@ -26,8 +26,8 @@ from typing import Dict, Type
 import python_test.containers.thrift_mutable_types as mutable_containers_types
 import python_test.containers.thrift_types as immutable_containers_types
 
-import python_test.maps.thrift_mutable_types as immutable_maps_types
-import python_test.maps.thrift_types as mutable_maps_types
+import python_test.maps.thrift_mutable_types as mutable_maps_types
+import python_test.maps.thrift_types as immutable_maps_types
 
 from folly.iobuf import IOBuf
 
@@ -51,6 +51,15 @@ from python_test.maps.thrift_types import (
 
 class MyStringEnum(str, Enum):
     test = "test"
+
+
+class ImmutableMapTests(unittest.TestCase):
+    def test_hashability(self) -> None:
+        hash(immutable_maps_types.StrI32ListMap())
+        x = immutable_maps_types.StrStrIntListMapMap(
+            {"foo": immutable_maps_types.StrI32ListMap()}
+        )
+        hash(x["foo"])
 
 
 @parameterized_class(
@@ -84,6 +93,9 @@ class MapTests(unittest.TestCase):
         self.Foo: Type[FooType] = self.containers_types.Foo
         self.Maps: Type[MapsType] = self.containers_types.Maps
         self.Color: Type[ColorType] = self.containers_types.Color
+        self.is_mutable_run: bool = self.containers_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
 
     def test_recursive_const_map(self) -> None:
         self.assertEqual(self.LocationMap[1][1], 1)
@@ -163,14 +175,6 @@ class MapTests(unittest.TestCase):
             self.StrStrIntListMapMap(px)
         self.assertNotIn("bar", cx)
 
-    def test_hashability(self) -> None:
-        # Mutable types do not support hashing
-        # pyre-ignore[16]: has no attribute `lists_types`
-        if self.maps_types.__name__.endswith("immutable_types"):
-            hash(self.StrI32ListMap())
-            x = self.StrStrIntListMapMap({"foo": self.StrI32ListMap()})
-            hash(x["foo"])
-
     def test_equality(self) -> None:
         x = self.StrIntMap({"foo": 5, "bar": 4})
         y = self.StrIntMap({"foo": 4, "bar": 5})
@@ -198,9 +202,6 @@ class MapTests(unittest.TestCase):
         self.assertNotEqual(a, c)
 
     def test_struct_with_map_fields(self) -> None:
-        # pyre-ignore[16]: has no attribute `lists_types`
-        is_immutable = self.maps_types.__name__.endswith("immutable_types")
-
         s = self.Maps(
             boolMap={True: True, False: False},
             byteMap={1: 1, 2: 2, 3: 3},
@@ -212,12 +213,12 @@ class MapTests(unittest.TestCase):
             binaryMap={b"foo": b"foo", b"bar": b"bar"},
             iobufMap={IOBuf(b"foo"): IOBuf(b"foo"), IOBuf(b"bar"): IOBuf(b"bar")},
             structMap=(
-                {
+                {}
+                if self.is_mutable_run
+                else {
                     self.Foo(value=1): self.Foo(value=1),
                     self.Foo(value=2): self.Foo(value=2),
                 }
-                if is_immutable
-                else {}
             ),
         )
         self.assertEqual(s.boolMap, {True: True, False: False})
@@ -231,7 +232,7 @@ class MapTests(unittest.TestCase):
         self.assertEqual(
             s.iobufMap, {IOBuf(b"foo"): IOBuf(b"foo"), IOBuf(b"bar"): IOBuf(b"bar")}
         )
-        if is_immutable:
+        if not self.is_mutable_run:
             self.assertEqual(
                 s.structMap,
                 {

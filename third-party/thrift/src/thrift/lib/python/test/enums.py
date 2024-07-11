@@ -67,6 +67,9 @@ class EnumTests(unittest.TestCase):
         self.OptionalColorGroups: Type[OptionalColorGroups] = (
             self.test_types.OptionalColorGroups
         )
+        self.is_mutable_run: bool = self.test_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
 
@@ -115,8 +118,7 @@ class EnumTests(unittest.TestCase):
             self.serializer.Protocol.JSON,
         )
         # Mutable types do not support hashing
-        # pyre-ignore[16]: has no attribute `test_types`
-        if self.test_types.__name__.endswith("immutable_types"):
+        if not self.is_mutable_run:
             self.assertEqual(hash(x), hash(y))
         self.assertEqual(hash(x.type), hash(y.type))
         self.assertFalse(x.type is y.type)

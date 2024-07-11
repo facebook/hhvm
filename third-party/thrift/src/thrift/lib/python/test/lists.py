@@ -25,8 +25,8 @@ from typing import List, Type
 import python_test.containers.thrift_mutable_types as mutable_containers_types
 import python_test.containers.thrift_types as immutable_containers_types
 
-import python_test.lists.thrift_mutable_types as immutable_lists_types
-import python_test.lists.thrift_types as mutable_lists_types
+import python_test.lists.thrift_mutable_types as mutable_lists_types
+import python_test.lists.thrift_types as immutable_lists_types
 
 from folly.iobuf import IOBuf
 
@@ -41,6 +41,12 @@ from python_test.lists.thrift_types import (
     StrList2D,
 )
 from python_test.testing_utils import Untruthy
+
+
+class ImmutableListTests(unittest.TestCase):
+    def test_hashability(self) -> None:
+        hash(easy().val_list)
+        hash(I32List(range(10)))
 
 
 # ct = containers type, lt = lists type
@@ -64,6 +70,9 @@ class ListTests(unittest.TestCase):
         self.Foo: Type[Foo] = self.containers_types.Foo
         self.Lists: Type[Lists] = self.containers_types.Lists
         self.Color: Type[Color] = self.containers_types.Color
+        self.is_mutable_run: bool = self.containers_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
 
     def test_negative_indexes(self) -> None:
         length = len(self.int_list)
@@ -116,13 +125,6 @@ class ListTests(unittest.TestCase):
 
         self.assertEqual(I32List(Untruthy(5)), list(range(5)))
         self.assertEqual(Lists(i32List=Untruthy(5)).i32List, list(range(5)))
-
-    def test_hashability(self) -> None:
-        # Mutable types do not support hashing
-        # pyre-ignore[16]: has no attribute `lists_types`
-        if not self.lists_types.__name__.endswith("thrift_mutable_types"):
-            hash(self.easy().val_list)
-            hash(self.I32List(range(10)))
 
     def test_no_dict(self) -> None:
         with self.assertRaises(AttributeError):
@@ -252,8 +254,7 @@ class ListTests(unittest.TestCase):
         # test reaccess the list element not recreating the struct
         # DO_BEFORE(alperyoney,20240701): Figure out whether mutable containers
         # should cache the instance.
-        # pyre-ignore[16]: has no attribute `containers_types`
-        if not self.containers_types.__name__.endswith("thrift_mutable_types"):
+        if not self.is_mutable_run:
             self.assertIs(s.structList[0], s.structList[0])
             self.assertIs(s.structList[1], s.structList[1])
 
@@ -262,8 +263,7 @@ class ListTests(unittest.TestCase):
         self.assertEqual(clist.colorList.count(self.Color.red), 2)
         self.assertEqual(clist.colorList.count(self.Color.blue), 1)
         self.assertEqual(clist.colorList.count(self.Color.green), 0)
-        # pyre-ignore[16]: has no attribute `containers_types`
-        if self.containers_types.__name__.endswith("thrift_mutable_types"):
+        if self.is_mutable_run:
             self.assertEqual(clist.colorList.count(0), 0)
             self.assertEqual(clist.colorList.count(1), 0)
             self.assertEqual(clist.colorList.count(2), 0)

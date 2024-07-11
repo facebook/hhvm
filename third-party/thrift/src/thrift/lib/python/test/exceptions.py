@@ -146,6 +146,9 @@ class ExceptionTests(unittest.TestCase):
         self.SimpleError: Type[SimpleErrorType] = self.test_types.SimpleError
         self.Color: Type[ColorType] = self.test_types.Color
         self.ValueOrError: Type[ValueOrErrorType] = self.test_types.ValueOrError
+        self.is_mutable_run: bool = self.test_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
 
@@ -269,8 +272,7 @@ class ExceptionTests(unittest.TestCase):
         self.assertEqual(repr(z), "UnfriendlyError(errortext='WAT!', code=22)")
 
     def test_serialize_deserialize(self) -> None:
-        # pyre-ignore[16]: has no attribute `test_types`
-        if not self.test_types.__name__.endswith("immutable_types"):
+        if self.is_mutable_run:
             # `ValueOrError` is an union, MutableUnion implementation is not complete yet
             return
 

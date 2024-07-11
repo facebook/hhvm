@@ -25,8 +25,8 @@ from typing import AbstractSet, Sequence, Tuple, Type
 import python_test.containers.thrift_mutable_types as mutable_containers_types
 import python_test.containers.thrift_types as immutable_containers_types
 
-import python_test.sets.thrift_mutable_types as immutable_sets_types
-import python_test.sets.thrift_types as mutable_sets_types
+import python_test.sets.thrift_mutable_types as mutable_sets_types
+import python_test.sets.thrift_types as immutable_sets_types
 
 from folly.iobuf import IOBuf
 
@@ -61,6 +61,9 @@ class SetTests(unittest.TestCase):
         self.Foo: Type[Foo] = self.containers_types.Foo
         self.Sets: Type[Sets] = self.containers_types.Sets
         self.Color: Type[Color] = self.containers_types.Color
+        self.is_mutable_run: bool = self.containers_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
 
     def test_and(self) -> None:
         x = self.SetI32({1, 3, 4, 5})
@@ -184,9 +187,6 @@ class SetTests(unittest.TestCase):
         self.assertEqual(Sets(i32Set=Untruthy(5)).i32Set, set(range(5)))
 
     def test_struct_with_set_fields(self) -> None:
-        # pyre-ignore[16]: has no attribute `lists_types`
-        is_immutable = self.sets_types.__name__.endswith("immutable_types")
-
         s = self.Sets(
             boolSet={True, False},
             byteSet={1, 2, 3},
@@ -198,7 +198,7 @@ class SetTests(unittest.TestCase):
             binarySet={b"foo", b"bar"},
             iobufSet={IOBuf(b"foo"), IOBuf(b"bar")},
             structSet=(
-                {self.Foo(value=1), self.Foo(value=2)} if is_immutable else set()
+                set() if self.is_mutable_run else {self.Foo(value=1), self.Foo(value=2)}
             ),
         )
         self.assertEqual(s.boolSet, {True, False})
@@ -210,7 +210,7 @@ class SetTests(unittest.TestCase):
         self.assertEqual(s.stringSet, {"foo", "bar"})
         self.assertEqual(s.binarySet, {b"foo", b"bar"})
         self.assertEqual(s.iobufSet, {IOBuf(b"foo"), IOBuf(b"bar")})
-        if is_immutable:
+        if not self.is_mutable_run:
             self.assertEqual(s.structSet, {Foo(value=1), Foo(value=2)})
             # test reaccess the set element won't have to recreating the struct
             structs1 = list(s.structSet)

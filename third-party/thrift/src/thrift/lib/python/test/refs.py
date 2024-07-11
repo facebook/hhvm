@@ -43,6 +43,9 @@ class RefTest(unittest.TestCase):
         """
         # pyre-ignore[16]: has no attribute `sets_types`
         self.ComplexRef: Type[ComplexRefType] = self.test_types.ComplexRef
+        self.is_mutable_run: bool = self.test_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
 
     def test_create_default(self) -> None:
         x = self.ComplexRef()
@@ -71,17 +74,16 @@ class RefTest(unittest.TestCase):
         self.assertEqual(x.list_recursive_ref, (bar, baz))
 
     def test_set(self) -> None:
-        # pyre-ignore[16]: has no attribute `test_types`
-        is_immutable = self.test_types.__name__.endswith("immutable_types")
-
         bar, baz = self.ComplexRef(name="bar"), self.ComplexRef(name="baz")
         x = self.ComplexRef(
             name="foo",
             set_basetype_ref={1, 2, 3},
-            set_recursive_ref={bar, baz} if is_immutable else set(),
+            set_recursive_ref=set() if self.is_mutable_run else {bar, baz},
         )
         self.assertEqual(x.set_basetype_ref, {1, 2, 3})
-        self.assertEqual(x.set_recursive_ref, {bar, baz} if is_immutable else set())
+        self.assertEqual(
+            x.set_recursive_ref, set() if self.is_mutable_run else {bar, baz}
+        )
 
     def test_map(self) -> None:
         bar, baz = self.ComplexRef(name="bar"), self.ComplexRef(name="baz")
@@ -99,14 +101,14 @@ class RefTest(unittest.TestCase):
         self.assertEqual(x.list_shared_ref, (bar, baz))
 
     def test_const_shared_ref(self) -> None:
-        # pyre-ignore[16]: has no attribute `test_types`
-        is_immutable = self.test_types.__name__.endswith("immutable_types")
-
         bar, baz = self.ComplexRef(name="bar"), self.ComplexRef(name="baz")
         x = self.ComplexRef(
-            name="foo", set_const_shared_ref={bar, baz} if is_immutable else set()
+            name="foo",
+            set_const_shared_ref=set() if self.is_mutable_run else {bar, baz},
         )
-        self.assertEqual(x.set_const_shared_ref, {bar, baz} if is_immutable else set())
+        self.assertEqual(
+            x.set_const_shared_ref, set() if self.is_mutable_run else {bar, baz}
+        )
 
     def test_recursive(self) -> None:
         bar = self.ComplexRef(name="bar")

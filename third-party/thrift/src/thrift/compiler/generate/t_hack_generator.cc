@@ -1044,10 +1044,8 @@ class t_hack_generator : public t_concat_generator {
     std::vector<const t_function*> funcs;
     for (auto func : tservice->get_functions()) {
       if (!is_client_only_function(func) &&
-          !func->is_interaction_constructor()) {
-        if (async || !func->sink_or_stream()) {
-          funcs.push_back(func);
-        }
+          is_function_supported(func, async)) {
+        funcs.push_back(func);
       }
     }
     return funcs;
@@ -1057,14 +1055,21 @@ class t_hack_generator : public t_concat_generator {
       const t_service* tservice) {
     auto funcs = get_supported_server_functions(tservice, true);
     for (auto func : tservice->get_functions()) {
-      if (is_client_only_function(func)) {
+      if (is_client_only_function(func) && is_function_supported(func)) {
         funcs.push_back(func);
       }
     }
     return funcs;
   }
 
+  bool is_function_supported(const t_function* func, bool async = true) {
+    return !func->interaction() && (async || !func->sink_or_stream());
+  }
+
   bool is_client_only_function(const t_function* func) {
+    if (func->is_interaction_constructor()) {
+      return true;
+    }
     if (server_stream_) {
       return func->sink();
     }

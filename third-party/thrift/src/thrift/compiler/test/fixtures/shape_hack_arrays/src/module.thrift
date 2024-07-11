@@ -46,4 +46,5 @@ struct C {
   8: optional list<string> list_of_string;
   9: optional list<map<string, A>> list_of_map_of_string_to_A;
   12: optional list<map<string, list<A>>> list_of_map_of_string_to_list_of_A;
+  13: set<string> set_of_string = [];
 }

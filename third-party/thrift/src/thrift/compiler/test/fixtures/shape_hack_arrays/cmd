@@ -1,1 +1,2 @@
 hack: hack:shapes=1,shapes_allow_unknown_fields=1,arrays=1,shapes_use_pipe_structure=1 src/module.thrift
+hack_array_sets: hack:shapes=1,shapes_allow_unknown_fields=1,arrays=1,shapes_use_pipe_structure=1,arraysets=1 src/module.thrift

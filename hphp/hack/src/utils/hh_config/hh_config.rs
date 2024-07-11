@@ -396,7 +396,6 @@ impl HhConfig {
             tco_allowed_files_for_ignore_readonly: hhconfig.get_str("allowed_files_for_ignore_readonly").map_or(default.tco_allowed_files_for_ignore_readonly, parse_svec),
             tco_record_fine_grained_dependencies: default.tco_record_fine_grained_dependencies,
             tco_loop_iteration_upper_bound: default.tco_loop_iteration_upper_bound,
-            tco_use_type_alias_heap: default.tco_use_type_alias_heap,
             tco_populate_dead_unsafe_cast_heap: default.tco_populate_dead_unsafe_cast_heap,
             tco_rust_elab: local_config.rust_elab,
             dump_tast_hashes: hh_conf.get_bool_or("dump_tast_hashes", default.dump_tast_hashes)?,

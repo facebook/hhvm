@@ -41,22 +41,6 @@ let get_cnstr_errs env tcstr reverse t_pos ty =
     (env, Option.merge ~f:Typing_error.both ty_err_opt1 ty_err_opt2)
   | _ -> (env, None)
 
-let create_err_from_cycles cycles pos name =
-  let relevant_cycles =
-    List.filter
-      ~f:(fun Decl_typedef_expand.{ td_name; _ } -> String.equal name td_name)
-      cycles
-  in
-  let cycle_to_error Decl_typedef_expand.{ decl_pos; _ } =
-    Typing_error.(primary @@ Primary.Cyclic_typedef { pos; decl_pos })
-  in
-  let err =
-    match List.map relevant_cycles ~f:cycle_to_error with
-    | [] -> None
-    | head :: tail -> Some (List.fold_left tail ~init:head ~f:Typing_error.both)
-  in
-  err
-
 let casetype_def env typedef =
   let {
     t_annotation = ();
@@ -159,56 +143,22 @@ let typedef_def ctx typedef =
   in
 
   let env =
-    if TypecheckerOptions.use_type_alias_heap (Env.get_tcopt env) then
-      match Decl_provider.get_typedef ctx t_name with
-      | Decl_entry.Found _ ->
-        let (ty, ty_err_opt2) =
-          let ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
-          let ctx = Env.get_ctx env in
-          let r = Typing_defs_core.get_reason ty in
-          let (ty, cycles) =
-            Decl_typedef_expand.expand_typedef_with_error
-              ~force_expand:true
-              ctx
-              r
-              t_name
-          in
-          let err = create_err_from_cycles cycles t_pos t_name in
-          (ty, err)
-        in
-        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
-        let ety_env = Typing_defs.empty_expand_env in
-        let ((env, ty_err_opt3), ty) = Phase.localize ~ety_env env ty in
-        let env = casetype_def env typedef in
-        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt3;
-
-        let (env, ty_err_opt3) = get_cnstr_errs env tascstr false t_pos ty in
-        let (env, ty_err_opt4) = get_cnstr_errs env tsupercstr true t_pos ty in
-        Option.iter
-          ~f:(Typing_error_utils.add_typing_error ~env)
-          (Option.merge ~f:Typing_error.both ty_err_opt3 ty_err_opt4);
+    let ((env, ty_err_opt2), ty) =
+      Phase.localize_hint_no_subst
         env
-      | Decl_entry.DoesNotExist
-      | Decl_entry.NotYetAvailable ->
-        (* We get here if there's a "Name already bound" error. *)
-        env
-    else
-      let ((env, ty_err_opt2), ty) =
-        Phase.localize_hint_no_subst
-          env
-          ~ignore_errors:false
-          ~report_cycle:(t_pos, t_name)
-          hint
-      in
-      let env = casetype_def env typedef in
-      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
+        ~ignore_errors:false
+        ~report_cycle:(t_pos, t_name)
+        hint
+    in
+    let env = casetype_def env typedef in
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
 
-      let (env, ty_err_opt3) = get_cnstr_errs env tascstr false t_pos ty in
-      let (env, ty_err_opt4) = get_cnstr_errs env tsupercstr true t_pos ty in
-      Option.iter
-        ~f:(Typing_error_utils.add_typing_error ~env)
-        (Option.merge ~f:Typing_error.both ty_err_opt3 ty_err_opt4);
-      env
+    let (env, ty_err_opt3) = get_cnstr_errs env tascstr false t_pos ty in
+    let (env, ty_err_opt4) = get_cnstr_errs env tsupercstr true t_pos ty in
+    Option.iter
+      ~f:(Typing_error_utils.add_typing_error ~env)
+      (Option.merge ~f:Typing_error.both ty_err_opt3 ty_err_opt4);
+    env
   in
 
   let env =

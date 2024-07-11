@@ -51,7 +51,6 @@ type rollout_flags = {
   remote_old_decls_no_limit: bool;
   use_manifold_cython_client: bool;
   disable_naming_table_fallback_loading: bool;
-  use_type_alias_heap: bool;
   load_state_natively_v4: bool;
   rust_provider_backend: bool;
   use_distc: bool;

@@ -23,15 +23,15 @@ let is_typedef ctx name =
   | _ -> false
 
 (** [expand_and_instantiate visited ctx name ty_argl] returns the full expansion of the type alias named [name] and
-    performs type parameter substitution on the result using [ty_argl].
-    E.g. if `type A<T> = Vec<B<T>>; type B<T> = Map<int, T>`, [expand_and_instantiate ctx "A" [string]] returns `Vec<Map<int, string>>`.
+  performs type parameter substitution on the result using [ty_argl].
+  E.g. if `type A<T> = Vec<B<T>>; type B<T> = Map<int, T>`, [expand_and_instantiate ctx "A" [string]] returns `Vec<Map<int, string>>`.
 
-    Parameters:
-    - force_expand: expand regardless of typedef visibility (default: false)
-    - visited: set of type alias names. Used to detect cycles.
-    - r: reason to use as part of the returned decl_ty
-    - name: name of type alias to expand
-    - ty_argl: list of type arguments used to substitute the expanded typedef's type parameters *)
+  Parameters:
+  - force_expand: expand regardless of typedef visibility (default: false)
+  - visited: set of type alias names. Used to detect cycles.
+  - r: reason to use as part of the returned decl_ty
+  - name: name of type alias to expand
+  - ty_argl: list of type arguments used to substitute the expanded typedef's type parameters *)
 let rec expand_and_instantiate
     ?(force_expand = false) visited ctx r name ty_argl :
     decl_ty * cyclic_td_usage list =
@@ -42,19 +42,19 @@ let rec expand_and_instantiate
   (Decl_instantiate.instantiate subst (mk (r, expanded_type)), cycles)
 
 (** [expand_typedef_ visited ctx name ty_argl] returns the full expansion of the type alias named [name].
-    E.g. if `type A<T> = Vec<B<T>>; type B<T> = Map<int, T>`, [expand_typedef] on "A" returns `(["T"], Vec<Map<int, T>>)`.
+  E.g. if `type A<T> = Vec<B<T>>; type B<T> = Map<int, T>`, [expand_typedef] on "A" returns `(["T"], Vec<Map<int, T>>)`.
 
-    Parameters:
-    - force_expand: expand regardless of typedef visibility (default: false)
-    - name: name of type alias to expand
-    - visited: set of type alias names. Used to detect cycles.
+  Parameters:
+  - force_expand: expand regardless of typedef visibility (default: false)
+  - name: name of type alias to expand
+  - visited: set of type alias names. Used to detect cycles.
 
-    Returned values:
-    - the list of type parameters for the expanded type alias. Useful to perform substitution.
-    - the full type alias expansion
+  Returned values:
+  - the list of type parameters for the expanded type alias. Useful to perform substitution.
+  - the full type alias expansion
 
-    Opaque typedefs are not expanded, regardless of the current file.
-    Detects cycles, but does not raise an error - it just stops expanding instead. *)
+  Opaque typedefs are not expanded, regardless of the current file.
+  Detects cycles, but does not raise an error - it just stops expanding instead. *)
 and expand_typedef_ ?(force_expand = false) visited ctx (name : string) :
     decl_tparam list * decl_ty_ * cyclic_td_usage list =
   let td =
@@ -235,10 +235,3 @@ let expand_typedef ?(force_expand = false) ctx r name ty_argl =
     expand_and_instantiate ~force_expand visited ctx r name ty_argl
   in
   ty
-
-let expand_typedef_with_error ?(force_expand = false) ctx r name =
-  let visited = SSet.empty in
-  let (_, expanded_type, cycles) =
-    expand_typedef_ ~force_expand visited ctx name
-  in
-  (mk (r, expanded_type), cycles)

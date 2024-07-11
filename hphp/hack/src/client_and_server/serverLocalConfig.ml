@@ -231,7 +231,6 @@ type t = {
       (** Configure whether fetch and cache remote decls *)
   disable_naming_table_fallback_loading: bool;
       (** Stop loading from OCaml marshalled naming table if sqlite table is missing. *)
-  use_type_alias_heap: bool;  (** optimize type alias expansions *)
   use_distc: bool;
       (** use remote type-checking (hh_distc) rather than only local type-checking*)
   hh_distc_fanout_threshold: int;
@@ -332,7 +331,6 @@ let default =
     remote_old_decls_no_limit = false;
     cache_remote_decls = false;
     disable_naming_table_fallback_loading = false;
-    use_type_alias_heap = false;
     use_distc = true;
     use_compressed_dep_graph = true;
     use_old_decls_from_cas = false;
@@ -973,13 +971,6 @@ let load_
       ~current_version
       config
   in
-  let use_type_alias_heap =
-    bool_if_min_version
-      "use_type_alias_heap"
-      ~default:default.use_type_alias_heap
-      ~current_version
-      config
-  in
   let use_distc =
     bool_if_min_version
       "use_distc"
@@ -1146,7 +1137,6 @@ let load_
     remote_old_decls_no_limit;
     cache_remote_decls;
     disable_naming_table_fallback_loading;
-    use_type_alias_heap;
     use_distc;
     use_compressed_dep_graph;
     use_old_decls_from_cas;
@@ -1190,7 +1180,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         GlobalOptions.(options.saved_state.loading.use_manifold_cython_client);
       disable_naming_table_fallback_loading =
         options.disable_naming_table_fallback_loading;
-      use_type_alias_heap = options.use_type_alias_heap;
       load_state_natively_v4 = options.load_state_natively;
       rust_provider_backend = options.rust_provider_backend;
       use_distc = options.use_distc;

@@ -385,7 +385,6 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
               ~ety_env
               env
               r_inst
-              (get_reason dty)
               id
               targs
               (Env.get_typedef env id |> Decl_entry.to_option)
@@ -489,7 +488,6 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
               ~ety_env
               env
               r
-              (get_reason dty)
               cid
               argl
               (Some typedef_info)
@@ -893,31 +891,23 @@ and localize_class_instantiation
         ((env, err), mk (new_r, Tnewtype (name, tyl, cstr)))
 
 and localize_typedef_instantiation
-    ~ety_env env r decl_r type_name tyargs (typedef_info : _ option) =
+    ~ety_env env (r : Reason.t) type_name tyargs (typedef_info : _ option) =
   match typedef_info with
   | Some typedef_info ->
-    if TypecheckerOptions.use_type_alias_heap (Env.get_tcopt env) then
-      Decl_typedef_expand.expand_typedef
-        (Env.get_ctx env)
-        decl_r
-        type_name
+    let tparams = typedef_info.Typing_defs.td_tparams in
+    let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparams in
+    let ((env, e1), tyargs) =
+      localize_targs_by_kind
+        ~ety_env:{ ety_env with expand_visible_newtype = true }
+        env
         tyargs
-      |> localize ~ety_env env
-    else
-      let tparams = typedef_info.Typing_defs.td_tparams in
-      let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparams in
-      let ((env, e1), tyargs) =
-        localize_targs_by_kind
-          ~ety_env:{ ety_env with expand_visible_newtype = true }
-          env
-          tyargs
-          nkinds
-      in
-      let ((env, e2), lty) =
-        TUtils.expand_typedef ety_env env r type_name tyargs
-      in
-      let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-      ((env, ty_err_opt), lty)
+        nkinds
+    in
+    let ((env, e2), lty) =
+      TUtils.expand_typedef ety_env env r type_name tyargs
+    in
+    let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
+    ((env, ty_err_opt), lty)
   | None ->
     (* This must be unreachable. We only call localize_typedef_instantiation if we *know* that
        we have a typedef with typedef info at hand. *)

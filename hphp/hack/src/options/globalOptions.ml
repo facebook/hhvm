@@ -165,7 +165,6 @@ type t = {
   tco_allowed_files_for_module_declarations: string list;
   tco_record_fine_grained_dependencies: bool;
   tco_loop_iteration_upper_bound: int option;
-  tco_use_type_alias_heap: bool;
   tco_populate_dead_unsafe_cast_heap: bool;
   tco_rust_elab: bool;
   dump_tast_hashes: bool;
@@ -274,7 +273,6 @@ let default =
     tco_allowed_files_for_module_declarations = [];
     tco_record_fine_grained_dependencies = false;
     tco_loop_iteration_upper_bound = None;
-    tco_use_type_alias_heap = false;
     tco_populate_dead_unsafe_cast_heap = false;
     tco_rust_elab = false;
     dump_tast_hashes = false;
@@ -381,7 +379,6 @@ let set
     ?tco_allowed_files_for_module_declarations
     ?tco_record_fine_grained_dependencies
     ?tco_loop_iteration_upper_bound
-    ?tco_use_type_alias_heap
     ?tco_populate_dead_unsafe_cast_heap
     ?tco_rust_elab
     ?dump_tast_hashes
@@ -633,8 +630,6 @@ let set
       setting
         tco_loop_iteration_upper_bound
         options.tco_loop_iteration_upper_bound;
-    tco_use_type_alias_heap =
-      setting tco_use_type_alias_heap options.tco_use_type_alias_heap;
     tco_populate_dead_unsafe_cast_heap =
       setting
         tco_populate_dead_unsafe_cast_heap

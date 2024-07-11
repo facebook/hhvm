@@ -284,8 +284,6 @@ let log_fanout t ~fanout_cardinal =
   | None -> false
   | Some threshold -> Int.(fanout_cardinal >= threshold)
 
-let use_type_alias_heap t = t.GlobalOptions.tco_use_type_alias_heap
-
 let populate_dead_unsafe_cast_heap t =
   t.GlobalOptions.tco_populate_dead_unsafe_cast_heap
 

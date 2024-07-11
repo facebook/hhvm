@@ -122,7 +122,6 @@ impl Default for GlobalOptions {
             tco_allowed_files_for_module_declarations: vec![],
             tco_record_fine_grained_dependencies: false,
             tco_loop_iteration_upper_bound: None,
-            tco_use_type_alias_heap: false,
             tco_populate_dead_unsafe_cast_heap: false,
             tco_rust_elab: false,
             dump_tast_hashes: false,

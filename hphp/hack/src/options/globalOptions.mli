@@ -229,7 +229,6 @@ type t = {
          for example between individual methods. *)
   tco_loop_iteration_upper_bound: int option;
       (** When set, uses the given number of iterations while typechecking loops *)
-  tco_use_type_alias_heap: bool;
   tco_populate_dead_unsafe_cast_heap: bool;
       (** Dead UNSAFE_CAST codemod stashes patches through a TAST visitor in shared
          heap. This is only needed in dead UNSAFE_CAST removal mode. This option
@@ -357,7 +356,6 @@ val set :
   ?tco_allowed_files_for_module_declarations:string list ->
   ?tco_record_fine_grained_dependencies:bool ->
   ?tco_loop_iteration_upper_bound:int option ->
-  ?tco_use_type_alias_heap:bool ->
   ?tco_populate_dead_unsafe_cast_heap:bool ->
   ?tco_rust_elab:bool ->
   ?dump_tast_hashes:bool ->

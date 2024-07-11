@@ -134,7 +134,6 @@ class StructTests(unittest.TestCase):
             repr(x),
         )
 
-    @brokenInAutoMigrate()
     def test_no_dict(self) -> None:
         # Struct
         with self.assertRaises(AttributeError):

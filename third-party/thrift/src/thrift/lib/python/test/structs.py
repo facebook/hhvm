@@ -87,12 +87,20 @@ class StructTests(unittest.TestCase):
         # Struct
         with self.assertRaises(AttributeError):
             easy().__dict__
+        # TODO: make it a tuple instead of a list
+        # self.assertIsInstance(easy().__class__.__slots__, tuple)
+        # pyre-ignore[16]
+        self.assertIs(easy().__class__.__slots__, easy().__slots__)
+        self.assertIs(easy(val=5).__slots__, easy(name="yo").__slots__)
 
-        # TODO: disable union dict
-        self.assertEqual(Integers().__dict__, {})
-        self.assertEqual(Integers(small=300).__dict__, {})
-        # with self.assertRaises(AttributeError):
-        # Integers().__dict__
+        # Union
+        with self.assertRaises(AttributeError):
+            Integers().__dict__
+        # TODO: make it a tuple instead of a list
+        # self.assertIsInstance(Integer().__class__.__slots__, tuple)
+        # pyre-ignore[16]
+        self.assertIs(Integers().__class__.__slots__, Integers().__slots__)
+        self.assertIs(Integers(small=5).__slots__, Integers(large=500).__slots__)
 
     def test_hashability(self) -> None:
         hash(easy())

@@ -1495,12 +1495,12 @@ class StructMeta(type):
         dct["_fbthrift_struct_info"] = StructInfo(cls_name, fields)
 
         # List[Tuple[int (index in fields), str (field name), type_info]]
-        primitive_types = []
+        cdef list primitive_types = []
 
         # List[Tuple[int (index in fields), str (field name)]]
-        non_primitive_types = []
+        cdef list non_primitive_types = []
 
-        slots = []
+        cdef list slots = []
         for i, field_info in enumerate(fields):
             slots.append(field_info.py_name)
 
@@ -1617,11 +1617,18 @@ class UnionMeta(type):
         union_class_namespace["Type"] = enum.Enum(
             union_name, _gen_union_field_enum_members(field_infos)
         )
+        cdef list slots = []
         for field_info in field_infos:
-            union_class_namespace[field_info.py_name] = _make_fget_union(
-                field_info.id, field_info.adapter_info
+            slots.append(field_info.py_name)
+        union_class_namespace["__slots__"] = slots
+        klass = super().__new__(cls, union_name, (Union,), union_class_namespace)
+        for field_info in field_infos:
+            type.__setattr__(
+                klass,
+                field_info.py_name,
+                _make_fget_union(field_info.id, field_info.adapter_info),
             )
-        return super().__new__(cls, union_name, (Union,), union_class_namespace)
+        return klass
 
     def __dir__(cls):
         return tuple((<UnionInfo>cls._fbthrift_struct_info).name_to_index.keys()) + (

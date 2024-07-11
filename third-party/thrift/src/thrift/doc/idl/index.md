@@ -324,7 +324,9 @@ In both cases the Python namespaces don't include the file name component.
 
 The default namespace can be overriden for individual target languages with the [namespace directive](#namespace-directives).
 
-Annotations on a package declaration apply to the whole file. For example:
+Annotations on a package declaration apply to the file broadly, with the exact behaviour defined by the specific annotation.
+
+For example, the following annotation would apply to all [unqualified fields](#field-qualifiers) in a given file:
 
 ```thrift
 @cpp.TerseWrite

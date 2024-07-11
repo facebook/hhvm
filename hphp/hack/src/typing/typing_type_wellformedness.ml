@@ -477,7 +477,7 @@ let class_ tenv c =
       enum_opt env c_enum;
     ]
 
-let typedef tenv t =
+let typedef tenv (t : (_, _) typedef) =
   let {
     t_tparams;
     t_annotation = _;
@@ -502,9 +502,9 @@ let typedef tenv t =
   in
   (* We don't allow constraints on typdef parameters, but we still
      need to record their kinds in the generic var environment *)
-  let where_constraints = [] in
   let tenv_with_typedef_tparams =
     let (env, ty_err_opt) =
+      let where_constraints = [] in
       Phase.localize_and_add_ast_generic_parameters_and_where_constraints
         tenv
         ~ignore_errors:true

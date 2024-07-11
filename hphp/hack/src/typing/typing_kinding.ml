@@ -298,6 +298,8 @@ module Simple = struct
     in
     is_subk sub sup
 
+  (** Check for arity mismatch between type params and type arguments
+  then check that each type argument is well-kinded. *)
   let rec check_targs_well_kinded
       ~allow_missing_targs
       ~in_signature
@@ -337,6 +339,9 @@ module Simple = struct
            ~in_tp_constraint
            env)
 
+  (** Checks that a type argument is well-kinded against its corresponding
+  type parameter. Also checks that the wildcard type argument is not used
+  if the type parameter is higher kinded (i.e. it expected type arguments itself) *)
   and check_targ_well_kinded
       ~in_signature
       ~in_typeconst
@@ -375,6 +380,11 @@ module Simple = struct
         tyarg
         nkind
 
+  (** Traverse a type and for each encountered type argument of a type X,
+  check that it complies with the corresponding type parameter of X (arity and kinds, but not constraints),
+  fetched from the decl of X.
+
+  This code also does package visibility checks, which should probably sit elsewhere? *)
   and check_well_kinded_type
       ~allow_missing_targs
       ~in_signature
@@ -386,7 +396,7 @@ module Simple = struct
       (ty : decl_ty) =
     let (r, ty_) = deref ty in
     let use_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos in
-    let check =
+    let check ty =
       check_well_kinded_type
         ~allow_missing_targs:false
         ~in_signature
@@ -395,10 +405,10 @@ module Simple = struct
         ~in_targ
         ~in_tp_constraint
         env
+        ty
     in
     let check_against_tparams def_pos tyargs tparams =
       let kinds = Simple.named_kinds_of_decl_tparams tparams in
-
       check_targs_well_kinded
         ~allow_missing_targs
         ~in_typeconst
@@ -411,6 +421,7 @@ module Simple = struct
         kinds
     in
     match ty_ with
+    (* Boring recursive cases first---------------------- *)
     | Tany _
     | Tnonnull
     | Tprim _
@@ -446,15 +457,15 @@ module Simple = struct
       Class_refinement.iter check rs
     | Tshape { s_fields = map; _ } ->
       TShapeMap.iter (fun _ sft -> check sft.sft_ty) map
-    | Tfun ft ->
-      check ft.ft_ret;
-      List.iter ft.ft_params ~f:(fun p -> check p.fp_type)
-    (* FIXME shall we inspect tparams and where_constraints *)
-    (* List.iter ft.ft_where_constraints (fun (ty1, _, ty2) -> check ty1; check ty2 ); *)
+    | Tfun ({ ft_params; ft_ret; _ } : _ fun_type) ->
+      (* FIXME shall we inspect tparams and where_constraints? *)
+      check ft_ret;
+      List.iter ft_params ~f:(fun p -> check p.fp_type)
+    (* Interesting cases--------------------------------- *)
     | Tgeneric (name, targs) -> begin
       match Env.get_pos_and_kind_of_generic env name with
-      | Some (def_pos, gen_kind) ->
-        let param_nkinds =
+      | Some (def_pos, (gen_kind : kind)) ->
+        let (tparams_named_kinds : Simple.named_kind list) =
           Simple.from_full_kind gen_kind |> Simple.get_named_parameter_kinds
         in
         check_targs_well_kinded
@@ -467,39 +478,37 @@ module Simple = struct
           ~use_pos
           env
           targs
-          param_nkinds
+          tparams_named_kinds
       | None -> ()
     end
     | Tapply ((_p, cid), argl) -> begin
       match Env.get_class_or_typedef env cid with
       | Decl_entry.Found (Env.ClassResult class_info) ->
-        Option.iter
-          ~f:(Typing_error_utils.add_typing_error ~env)
-          (Typing_visibility.check_top_level_access
-             ~ignore_package_errors:
-               (in_typeconst || in_typehint || in_targ || in_tp_constraint)
-             ~in_signature
-             ~use_pos
-             ~def_pos:(Cls.pos class_info)
-             env
-             (Cls.internal class_info)
-             (Cls.get_module class_info)
-             (Cls.get_package_override class_info));
+        Typing_visibility.check_top_level_access
+          ~ignore_package_errors:
+            (in_typeconst || in_typehint || in_targ || in_tp_constraint)
+          ~in_signature
+          ~use_pos
+          ~def_pos:(Cls.pos class_info)
+          env
+          (Cls.internal class_info)
+          (Cls.get_module class_info)
+          (Cls.get_package_override class_info)
+        |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env);
         let tparams = Cls.tparams class_info in
         check_against_tparams ~in_signature (Cls.pos class_info) argl tparams
       | Decl_entry.Found (Env.TypedefResult typedef) ->
-        Option.iter
-          ~f:(Typing_error_utils.add_typing_error ~env)
-          (Typing_visibility.check_top_level_access
-             ~ignore_package_errors:
-               (in_typeconst || in_typehint || in_targ || in_tp_constraint)
-             ~in_signature
-             ~use_pos
-             ~def_pos:typedef.td_pos
-             env
-             typedef.td_internal
-             (Option.map typedef.td_module ~f:snd)
-             typedef.td_package_override);
+        Typing_visibility.check_top_level_access
+          ~ignore_package_errors:
+            (in_typeconst || in_typehint || in_targ || in_tp_constraint)
+          ~in_signature
+          ~use_pos
+          ~def_pos:typedef.td_pos
+          env
+          typedef.td_internal
+          (Option.map typedef.td_module ~f:snd)
+          typedef.td_package_override
+        |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env);
         check_against_tparams
           ~in_signature
           typedef.td_pos
@@ -532,6 +541,13 @@ module Simple = struct
       | Decl_entry.NotYetAvailable ->
         ())
 
+  (** Check that the given type is a well-kinded type whose kind matches the provided one.
+  Otherwise, reports errors.
+
+  Also check that classes mentioned in types are accessible from the current
+  module, and accessible also from outside if in_signature=true.
+  We use the optional arguments `in_typeconst`, `in_typehint`, `in_targ`
+  and in_tp_constraint` to determine whether we should bypass package visibility check. *)
   and check_well_kinded
       ~in_signature
       ?(in_typeconst = false)
@@ -541,7 +557,7 @@ module Simple = struct
       env
       (ty : decl_ty)
       (expected_nkind : Simple.named_kind) =
-    let (expected_name, expected_kind) = expected_nkind in
+    let (expected_name, (expected_kind : Simple.kind)) = expected_nkind in
     let r = get_reason ty in
     let use_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos in
     let kind_error actual_kind env =

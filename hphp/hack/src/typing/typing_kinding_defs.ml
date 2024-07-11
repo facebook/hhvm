@@ -146,6 +146,7 @@ module Simple = struct
     ( { st with parameters = named_internal_kinds_of_decl_tparams tparams },
       NonLocalized [] )
 
+  (** Returns the type parameters of the kind, more or less. *)
   let get_named_parameter_kinds (kind, _) : named_kind list =
     List.map kind.parameters ~f:(fun (n, fk) -> (n, (fk, NonLocalized [])))
 

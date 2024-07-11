@@ -43,7 +43,7 @@ val wfold_left2 : ('a -> 'b -> 'c -> 'a) -> 'a -> 'b list -> 'c list -> 'a
 
 val sl : string list -> string
 
-val maybe : ('a -> 'b -> unit) -> 'a -> 'b option -> unit
+val maybe : ('env -> 'a -> unit) -> 'env -> 'a option -> unit
 
 val unsafe_opt_note : string -> 'a option -> 'a
 

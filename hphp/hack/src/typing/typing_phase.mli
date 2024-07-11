@@ -61,12 +61,11 @@ val localize_no_subst :
   decl_ty ->
   (env * Typing_error.t option) * locl_ty
 
-(**
- Transform a type hint into a localized type, with no substitution for generic
- parameters and [this].
+(** Transform a type hint into a localized type, with no substitution for generic
+  parameters and [this].
 
- [ignore_errors] silences errors because those errors have already fired
- and/or are not appropriate at the time we call localize. *)
+  [ignore_errors] silences errors because those errors have already fired
+  and/or are not appropriate at the time we call localize. *)
 val localize_hint_no_subst :
   env ->
   ignore_errors:bool ->
@@ -89,11 +88,11 @@ val localize_ft :
   (env * Typing_error.t option) * locl_fun_type
 
 (** Declare and localize the type arguments to a constructor or function, given
-    information about the declared type parameters in `decl_tparam list`. If no
-    explicit type arguments are given, generate fresh type variables in their
-    place; do the same for any wildcard explicit type arguments.
-    Report arity errors using `def_pos` (for the declared parameters), `use_pos`
-    (for the use-site) and `use_name` (the name of the constructor or function). *)
+  information about the declared type parameters in `decl_tparam list`. If no
+  explicit type arguments are given, generate fresh type variables in their
+  place; do the same for any wildcard explicit type arguments.
+  Report arity errors using `def_pos` (for the declared parameters), `use_pos`
+  (for the use-site) and `use_name` (the name of the constructor or function). *)
 val localize_targs :
   check_well_kinded:bool ->
   is_method:bool ->
@@ -121,7 +120,7 @@ val localize_targs_with_kinds :
   (env * Typing_error.t option) * Tast.targ list
 
 (** Same as [localize_targs] but also check constraints on type parameters
-    (though not `where` constraints) *)
+  (though not `where` constraints) *)
 val localize_targs_and_check_constraints :
   exact:exact ->
   check_well_kinded:bool ->
@@ -159,7 +158,7 @@ val is_sub_type_decl :
   bool
 
 (** Add some [as] or [super] constraint to the environment.
-    Raise an error if any inconsistency is detected. *)
+  Raise an error if any inconsistency is detected. *)
 val check_tparams_constraints :
   use_pos:Pos.t ->
   ety_env:expand_env ->
@@ -168,7 +167,7 @@ val check_tparams_constraints :
   env * Typing_error.t option
 
 (** Add some [where] constraints to the environment.
-    Raise an error if any inconsistency is detected. *)
+  Raise an error if any inconsistency is detected. *)
 val check_where_constraints :
   in_class:bool ->
   use_pos:Pos.t ->
@@ -183,7 +182,7 @@ val decl : decl_ty -> phase_ty
 val locl : locl_ty -> phase_ty
 
 (** Add generic parameters to the environment, with localized bounds,
-    and also add any consequences of `where` constraints *)
+  and also add any consequences of `where` constraints *)
 val localize_and_add_generic_parameters_and_where_constraints :
   ety_env:expand_env ->
   env ->
@@ -191,11 +190,12 @@ val localize_and_add_generic_parameters_and_where_constraints :
   decl_where_constraint list ->
   env * Typing_error.t option
 
-(** Add generic parameters to the environment, with localized bounds,
-    and also add any consequences of `where` constraints.
+(** [localize_and_add_ast_generic_parameters_and_where_constraints env ~ignore_errors tparams where_constraints]
+  adds the type parameters [tparams] to the environment, with localized bounds,
+  and also adds any consequences of `where` constraints.
 
-    {!ignore_errors} silences errors because those errors may have already fired
-    during another localization and/or are not appropriate at the time we call localize. *)
+  {!ignore_errors} silences errors because those errors may have already fired
+  during another localization and/or are not appropriate at the time we call localize. *)
 val localize_and_add_ast_generic_parameters_and_where_constraints :
   env ->
   ignore_errors:bool ->

@@ -115,8 +115,8 @@ let typedef_def ctx typedef =
       []
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
-  List.iter ~f:(Typing_error_utils.add_typing_error ~env)
-  @@ Typing_type_wellformedness.typedef env typedef;
+  Typing_type_wellformedness.typedef env typedef
+  |> List.iter ~f:(Typing_error_utils.add_typing_error ~env);
   Env.make_depend_on_current_module env;
   Typing_variance.typedef env typedef;
   let {

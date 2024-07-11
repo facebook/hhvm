@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<95ef87950883a72e163afe614f87ff8a>>
+// @generated SignedSource<<c6e2e711b03844d6b9bf57d04733297d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2151,6 +2151,7 @@ pub struct Typedef<Ex, En> {
     pub tparams: Vec<Tparam<Ex, En>>,
     pub as_constraint: Option<Hint>,
     pub super_constraint: Option<Hint>,
+    /// The RHS of `=` in the type definition.
     #[rust_to_ocaml(attr = "transform.explicit")]
     pub kind: Hint,
     pub user_attributes: UserAttributes<Ex, En>,

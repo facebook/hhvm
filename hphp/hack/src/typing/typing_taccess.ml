@@ -24,10 +24,10 @@ module MakeType = Typing_make_type
    below where this behavior is encoded. *)
 
 (** When the access code is going to return a `Tgeneric "Foo::Bar"`,
-    we use the following type to tell the difference between legit
-    accesses from known concrete types (`this`, or expression-
-    dependent types), and unsound accesses from arbitrary generic
-    variables. *)
+  we use the following type to tell the difference between legit
+  accesses from known concrete types (`this`, or expression-
+  dependent types), and unsound accesses from arbitrary generic
+  variables. *)
 type root_kind =
   | ConcreteClass
   | GenericType
@@ -40,27 +40,27 @@ type context = {
       (** A set of visited types used to avoid infinite loops during expansion. *)
   allow_abstract: bool;
       (** Whether or not an abstract type constant is allowed as the result. In the
-      future, this boolean should disappear and abstract type constants should
-      appear only in the class where they are defined. *)
+        future, this boolean should disappear and abstract type constants should
+        appear only in the class where they are defined. *)
   abstract_as_tyvar_at_pos: Pos.t option;
       (** If set, abstract type constants will be expanded as type variables. This
-      is a hack which should naturally go away when the semantics of abstract
-      type constants is cleaned up. *)
+        is a hack which should naturally go away when the semantics of abstract
+        type constants is cleaned up. *)
   base: locl_ty option;
       (** The origin of the extension. For example if TC is a generic parameter
-      subject to the constraint TC as C and we would like to expand TC::T we
-      will expand C::T with base set to `Some (Tgeneric "TC")` (and root set
-      to C). If it is None the base is exactly the current root. *)
+        subject to the constraint TC as C and we would like to expand TC::T we
+        will expand C::T with base set to `Some (Tgeneric "TC")` (and root set
+        to C). If it is None the base is exactly the current root. *)
   root_kind: root_kind;  (** See documentation for the [root_kind] type. *)
 }
 
 (** The result of an expansion
-    - Missing err means that the type constant is not present, with error function
-      to be called if we need to report this
-    - Exact ty means that the expansion results precisely in 'ty'
-    - Abstract (n0, [n1, n2, n3], lower_bound, upper_bound) means that the result is a
-      generic with name n0::T such that:
-      n0::T as n1::T as n2::T as n3::T as upper_bound super lower_bound *)
+  - Missing err means that the type constant is not present, with error function
+    to be called if we need to report this
+  - Exact ty means that the expansion results precisely in 'ty'
+  - Abstract (n0, [n1, n2, n3], lower_bound, upper_bound) means that the result is a
+    generic with name n0::T such that:
+    n0::T as n1::T as n2::T as n3::T as upper_bound super lower_bound *)
 type result =
   | Missing of Typing_error.t option
   | Exact of locl_ty
@@ -82,7 +82,7 @@ let make_reason env id root r =
 let tp_name class_name id = class_name ^ "::" ^ snd id
 
 (** A smart constructor for Abstract that also checks if the type we are
-    creating is known to be equal to some other type *)
+  creating is known to be equal to some other type *)
 let abstract_or_exact env id ({ name; _ } as abstr) =
   let tp_name = tp_name name id in
   if not (TySet.is_empty (Env.get_equal_bounds env tp_name [])) then
@@ -103,9 +103,9 @@ let abstract_or_exact env id ({ name; _ } as abstr) =
     Abstract abstr
 
 (** Lookup a type constant in a class and return a result. A type constant has
-    both a constraint type and assigned type. Which one we choose depends if
-    the current root is the base (origin) of the expansion, or if it is an
-    upper bound of the base. *)
+  both a constraint type and assigned type. Which one we choose depends if
+  the current root is the base (origin) of the expansion, or if it is an
+  upper bound of the base. *)
 let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
     =
   let { id = (id_pos, id_name) as id; _ } = ctx in

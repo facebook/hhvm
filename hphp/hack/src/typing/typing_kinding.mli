@@ -8,11 +8,12 @@ end
 (** Simple well-kindedness checks do not take constraints into account. *)
 module Simple : sig
   (** Check that the given type is a well-kinded type whose kind matches the provided one.
-    Otherwise, reports errors.
-    Check that classes mentioned in types are accessible from the current
-    module, and accessible also from outside if in_signature=true.
-    We use the optional arguments `in_typeconst`, `in_typehint`, `in_targ`
-    and in_tp_constraint` to determine whether we should bypass package visibility check. *)
+  Otherwise, reports errors.
+
+  Also check that classes mentioned in types are accessible from the current
+  module, and accessible also from outside if in_signature=true.
+  We use the optional arguments `in_typeconst`, `in_typehint`, `in_targ`
+  and in_tp_constraint` to determine whether we should bypass package visibility check. *)
   val check_well_kinded :
     in_signature:bool ->
     ?in_typeconst:bool ->
@@ -24,12 +25,14 @@ module Simple : sig
     KindDefs.Simple.named_kind ->
     unit
 
-  (** Runs check_well_kinded_type after translating hint to decl type
-      Check that classes mentioned in hints are accessible from the current
-      module, and accessible also from outside if in_signature=true.
-      We use the optional arguments `in_typeconst`, `in_typehint`, `in_targ`,
-      and `in_tp_constraint` to determine whether we should bypass package
-      visibility check.*)
+  (** Traverse a type and for each encountered type argument of a type X,
+  check that it complies with the corresponding type parameter of X (arity and kind, but not constraints),
+  fetched from the decl of X.
+
+  Also check that classes mentioned in hints are accessible from the current
+  module, and accessible also from outside if `in_signature` is true.
+  We bypass package visibility checks if any of `in_typeconst`, `in_typehint`, `in_targ`,
+  of `in_tp_constraint` is true. *)
   val check_well_kinded_hint :
     in_signature:bool ->
     ?in_typeconst:bool ->
@@ -40,6 +43,13 @@ module Simple : sig
     Aast.hint ->
     unit
 
+  (** Traverse a type and for each encountered type argument of a type X,
+  check that it complies with the corresponding type parameter of X (arity, kind, etc.),
+  fetched from the decl of X.
+
+  Also check that classes mentioned in hints are accessible from the current
+  module, and accessible also from outside if `in_signature` is true.
+  Package visibility checks are ignored. *)
   val check_well_kinded_context_hint :
     in_signature:bool -> Typing_env_types.env -> Aast.hint -> unit
 

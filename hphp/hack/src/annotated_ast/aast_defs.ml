@@ -1087,6 +1087,7 @@ and ('ex, 'en) typedef = {
   t_as_constraint: hint option;
   t_super_constraint: hint option;
   t_kind: hint; [@transform.explicit]
+      (** The RHS of `=` in the type definition. *)
   t_user_attributes: ('ex, 'en) user_attributes;
   t_file_attributes: ('ex, 'en) file_attribute list;
   t_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]

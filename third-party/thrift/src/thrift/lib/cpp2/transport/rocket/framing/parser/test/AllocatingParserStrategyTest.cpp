@@ -16,26 +16,11 @@
 
 #include <gtest/gtest.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/parser/test/TestUtil.h>
 
 namespace apache {
 namespace thrift {
 namespace rocket {
-
-class FakeOwner {
- public:
-  void handleFrame(std::unique_ptr<folly::IOBuf> buf) {
-    frames_.push_back(std::move(buf));
-  }
-  bool incMemoryUsage(uint32_t n) {
-    memoryCounter_ += n;
-    return true;
-  }
-  void decMemoryUsage(uint32_t n) { memoryCounter_ -= n; }
-
-  std::vector<std::unique_ptr<folly::IOBuf>> frames_{};
-
-  uint32_t memoryCounter_ = 0;
-};
 
 ParserAllocatorType alloc = ParserAllocatorType();
 

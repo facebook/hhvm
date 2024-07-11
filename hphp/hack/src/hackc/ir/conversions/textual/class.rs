@@ -238,7 +238,11 @@ impl ClassState<'_, '_> {
             }
         }
 
-        let ty = convert_ty(&ir::EnforceableType::from_type_info(type_info));
+        let ty = if ir::EnforceableType::from_type_info(type_info).is_generic_typevar() {
+            textual::Ty::mixed_ptr()
+        } else {
+            convert_ty(&ir::EnforceableType::from_type_info(type_info))
+        };
 
         fields.push(textual::Field {
             name,

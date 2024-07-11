@@ -149,6 +149,10 @@ impl EnforceableType {
     pub fn is_reference_type(&self) -> bool {
         matches!(self.ty, BaseType::Class(_) | BaseType::This)
     }
+
+    pub fn is_generic_typevar(&self) -> bool {
+        self.modifiers.contains(TypeConstraintFlags::TypeVar)
+    }
 }
 
 impl Default for EnforceableType {

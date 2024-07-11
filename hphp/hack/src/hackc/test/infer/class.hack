@@ -478,7 +478,7 @@ class TestFieldNamesWithKeywordsAndConflicts {
 
 // TEST-CHECK-BAL: type TestClassWithGenerics
 // CHECK: type TestClassWithGenerics = .kind="class" {
-// CHECK:   t: .public *T;
+// CHECK:   t: .public *HackMixed;
 // CHECK:   b: .public *Box
 // CHECK: }
 // TEST-CHECK-BAL: define TestClassWithGenerics.__construct

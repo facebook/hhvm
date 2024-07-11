@@ -38,20 +38,44 @@ void SchemaRegistry::registerSchema(
 }
 
 #ifdef FBTHRIFT_HAS_SCHEMA
-folly::F14FastMap<type::ProgramId, type::Schema>& SchemaRegistry::getSchemas() {
-  static folly::Indestructible<folly::F14FastMap<type::ProgramId, type::Schema>>
-      schemas = [&] {
-        folly::F14FastMap<type::ProgramId, type::Schema> schemaMap;
-        accessed() = true;
-        for (auto& [name, data] : getRawSchemas()) {
-          auto schema = CompactSerializer::deserialize<type::Schema>(data.data);
-          auto id = *schema.programs()[0].id();
-          schemaMap[id] = std::move(schema);
-        }
-        return schemaMap;
-      }();
+const type::Schema& SchemaRegistry::getMergedSchema() {
+  static const folly::Indestructible<type::Schema> merged = [&] {
+    accessed() = true;
+    type::Schema mergedSchema;
+    std::unordered_set<type::ProgramId> includedPrograms;
 
-  return *schemas;
+    for (auto& [name, data] : getRawSchemas()) {
+      auto schema = CompactSerializer::deserialize<type::Schema>(data.data);
+
+      for (auto& program : *schema.programs()) {
+        auto id = *program.id();
+        if (!includedPrograms.insert(id).second) {
+          // We checked during registration that the program ids are unique,
+          // so this file was already included by another program bundle.
+          continue;
+        }
+        mergedSchema.programs()->push_back(std::move(program));
+      }
+
+      mergedSchema.valuesMap()->insert(
+          std::make_move_iterator(schema.valuesMap()->begin()),
+          std::make_move_iterator(schema.valuesMap()->end()));
+      // This deduplicates common values.
+
+      auto ndefs = mergedSchema.definitionsMap()->size();
+      mergedSchema.definitionsMap()->insert(
+          std::make_move_iterator(schema.definitionsMap()->begin()),
+          std::make_move_iterator(schema.definitionsMap()->end()));
+      if (mergedSchema.definitionsMap()->size() !=
+          ndefs + schema.definitionsMap()->size()) {
+        throw std::runtime_error("DefinitionKey collision");
+      }
+    }
+
+    return mergedSchema;
+  }();
+
+  return *merged;
 }
 #endif
 

@@ -22,13 +22,31 @@
 
 // These deps pull in the corresponding schemas when enabled.
 #include <thrift/annotation/gen-cpp2/thrift_types.h>
+#include <thrift/test/gen-cpp2/TopologicallySortObjectsTest_types.h>
 #include <thrift/test/gen-cpp2/schema_types.h>
 
 using namespace apache::thrift;
 
 TEST(SchemaTest, not_linked) {
-  for (const auto& [id, schema] : SchemaRegistry::iter()) {
-    EXPECT_NE(schema.programs()[0].path(), "thrift/annotation/thrift.thrift");
+  const auto& schema = SchemaRegistry::getMergedSchema();
+  for (const auto& program : *schema.programs()) {
+    EXPECT_NE(
+        program.path(), "thrift/test/TopologicallySortObjectsTest.thrift");
+  }
+
+  // Use the types target
+  (void)apache::thrift::test::IncompleteMap{};
+}
+
+TEST(SchemaTest, not_linked_but_included) {
+  const auto& schema = SchemaRegistry::getMergedSchema();
+  for (const auto& program : *schema.programs()) {
+    if (program.path() != "thrift/annotation/thrift.thrift") {
+      continue;
+    }
+    for (const auto& def : *program.definitionKeys()) {
+      EXPECT_FALSE(schema.definitionsMap()->contains(def));
+    }
   }
 
   // Use the types target
@@ -37,8 +55,9 @@ TEST(SchemaTest, not_linked) {
 
 TEST(SchemaTest, linked) {
   bool found = false;
-  for (const auto& [id, schema] : SchemaRegistry::iter()) {
-    if (schema.programs()[0].path() == "thrift/test/schema.thrift") {
+  const auto& schema = SchemaRegistry::getMergedSchema();
+  for (const auto& program : *schema.programs()) {
+    if (program.path() == "thrift/test/schema.thrift") {
       found = true;
     } else {
       continue;
@@ -47,15 +66,14 @@ TEST(SchemaTest, linked) {
     // Includes definitions from root program
     EXPECT_EQ(
         schema.definitionsMap()
-            ->at(schema.programs()[0].definitionKeys()[0])
+            ->at(program.definitionKeys()[0])
             .structDef_ref()
             ->name(),
         "Empty");
 
     // Only includes definitions from root program
     EXPECT_EQ(
-        schema.definitionsMap()->size(),
-        schema.programs()[0].definitionKeys()->size());
+        schema.definitionsMap()->size(), program.definitionKeys()->size());
 
     // Transitive includes are listed
     EXPECT_GT(schema.programs()->size(), 4);

@@ -42,14 +42,7 @@ class SchemaRegistry {
 
 #ifdef FBTHRIFT_HAS_SCHEMA
  public:
-  struct Iter {
-    auto begin() const { return SchemaRegistry::getSchemas().begin(); }
-    auto end() const { return SchemaRegistry::getSchemas().end(); }
-  };
-  static Iter iter() { return {}; }
-
- private:
-  static folly::F14FastMap<type::ProgramId, type::Schema>& getSchemas();
+  static const type::Schema& getMergedSchema();
 #endif
 };
 

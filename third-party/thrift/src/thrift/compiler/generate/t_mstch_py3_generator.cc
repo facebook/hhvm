@@ -1402,6 +1402,9 @@ void t_mstch_py3_generator::generate_types() {
       "metadata.cpp",
   };
 
+  if (has_option("enable_container_pickling_DO_NOT_USE")) {
+    generate_file("__init__.py", TypesFile::IsTypesFile, generateRootPath_);
+  }
   for (const auto& file : converterFiles) {
     generate_file(file, TypesFile::IsTypesFile, generateRootPath_);
   }

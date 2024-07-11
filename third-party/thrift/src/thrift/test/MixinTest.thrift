@@ -39,7 +39,10 @@ typedef Mixin3Base Mixin3
 
 struct Foo {
   1: string field4;
-  2: Mixin2 m2 (cpp.mixin);
-  3: Mixin3 m3 (cpp.mixin);
-  4: Union u (cpp.mixin);
+  @thrift.Mixin
+  2: Mixin2 m2;
+  @thrift.Mixin
+  3: Mixin3 m3;
+  @thrift.Mixin
+  4: Union u;
 }

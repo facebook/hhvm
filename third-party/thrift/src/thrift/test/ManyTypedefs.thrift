@@ -17,8 +17,11 @@
 package "thrift.org/test"
 namespace go thrift.test.ManyTypedefs
 
+include "thrift/annotation/cpp.thrift"
+
 typedef list<int32> biglist
-typedef map<int32, int32> (cpp.template = 'std::unordered_map') bigmap
+@cpp.Type{template = "std::unordered_map"}
+typedef map<int32, int32> bigmap
 typedef i32 int32
 
 struct struct1 {

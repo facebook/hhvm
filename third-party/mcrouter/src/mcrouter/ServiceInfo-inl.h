@@ -51,19 +51,21 @@ class RouteHandlesCommandDispatcher {
  public:
   bool dispatch(
       size_t typeId,
+      const std::shared_ptr<ProxyRequestContextWithInfo<RouterInfo>>& ctx,
       folly::StringPiece key,
       const ProxyRoute<RouterInfo>& proxyRoute,
       std::string& outStr) {
-    return dispatcher_.dispatch(typeId, *this, key, proxyRoute, outStr);
+    return dispatcher_.dispatch(typeId, *this, ctx, key, proxyRoute, outStr);
   }
 
   template <class Request>
   static void processMsg(
       RouteHandlesCommandDispatcher<RouterInfo>& me,
+      const std::shared_ptr<ProxyRequestContextWithInfo<RouterInfo>>& ctx,
       folly::StringPiece key,
       const ProxyRoute<RouterInfo>& proxyRoute,
       std::string& outStr) {
-    outStr = me.processMsgInternal<Request>(key, proxyRoute);
+    outStr = me.processMsgInternal<Request>(ctx, key, proxyRoute);
   }
 
  private:
@@ -73,6 +75,7 @@ class RouteHandlesCommandDispatcher {
       // Dispatcher class
       detail::RouteHandlesCommandDispatcher<RouterInfo>,
       // List of types of args to Dispatcher::processMsg()
+      const std::shared_ptr<ProxyRequestContextWithInfo<RouterInfo>>&,
       folly::StringPiece,
       const ProxyRoute<RouterInfo>&,
       std::string&>
@@ -80,6 +83,7 @@ class RouteHandlesCommandDispatcher {
 
   template <class Request>
   std::string processMsgInternal(
+      const std::shared_ptr<ProxyRequestContextWithInfo<RouterInfo>>& ctx,
       folly::StringPiece key,
       const ProxyRoute<RouterInfo>& proxyRoute) {
     std::string tree;
@@ -111,6 +115,7 @@ class RouteHandlesCommandDispatcher {
     } else {
       request.key_ref() = key;
     }
+    fiber_local<RouterInfo>::setSharedCtx(ctx);
     proxyRoute.traverse(request, t);
     return tree;
   }
@@ -411,8 +416,10 @@ ServiceInfo<RouterInfo>::ServiceInfoImpl::ServiceInfoImpl(
             requestName, typename RouterInfo::RoutableRequests());
 
         std::string res;
+        auto ctx = ProxyRequestContextWithInfo<RouterInfo>::createRecording(
+            proxy_, nullptr);
         if (!routeHandlesCommandDispatcher_.dispatch(
-                typeId, key, proxyRoute_, res)) {
+                typeId, ctx, key, proxyRoute_, res)) {
           throw std::runtime_error(
               folly::sformat("route: unknown request {}", requestName));
         }

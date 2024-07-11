@@ -97,7 +97,9 @@ class BucketHashSelector : public HashSelectorBase<HashFunc> {
     auto key = folly::to<std::string>(*bucketId);
     if (this->clientFanout_) {
       auto& ctx = mcrouter::fiber_local<RouterInfo>::getSharedCtx();
-      key += ctx->userIpAddress();
+      if (ctx) {
+        key += ctx->userIpAddress();
+      }
     }
     return folly::fibers::runInMainContext(
         [this, size, key]() { return this->selectInternal(key, size); });

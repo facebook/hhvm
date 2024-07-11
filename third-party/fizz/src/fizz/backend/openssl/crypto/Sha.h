@@ -38,19 +38,13 @@ class Sha : public fizz::Hasher {
 
   size_t getHashLen() const override;
 
-  size_t getBlockSize() const override;
+  inline size_t getBlockSize() const override;
 
-  /**
-   * Puts HMAC(key, in) into out. Out must be at least of size HashLen.
-   */
   static void hmac(
       folly::ByteRange key,
       const folly::IOBuf& in,
       folly::MutableByteRange out);
 
-  /**
-   * Puts Hash(in) into out. Out must be at least of size HashLen.
-   */
   static void hash(const folly::IOBuf& in, folly::MutableByteRange out);
 
  private:

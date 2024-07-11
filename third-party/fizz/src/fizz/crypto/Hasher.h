@@ -45,7 +45,18 @@ class Hasher {
 
   virtual size_t getHashLen() const = 0;
 
-  virtual size_t getBlockSize() const = 0;
+  virtual inline size_t getBlockSize() const = 0;
 };
+
+using HasherFactory = std::unique_ptr<Hasher> (*)();
+
+/**
+ * Puts `Hash(in)` into `out`.
+ * `out` must be at least of size HashLen.
+ */
+void hash(
+    HasherFactory makeHasher,
+    const folly::IOBuf& in,
+    folly::MutableByteRange out);
 
 } // namespace fizz

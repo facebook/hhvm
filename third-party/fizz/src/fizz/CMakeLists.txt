@@ -183,6 +183,8 @@ set(FIZZ_SOURCES
   crypto/aead/IOBufUtil.cpp
   crypto/aead/AEGISCipher.cpp
   backend/openssl/crypto/signature/Signature.cpp
+  crypto/Hasher.cpp
+  crypto/Hmac.cpp
   crypto/Hkdf.cpp
   crypto/KeyDerivation.cpp
   crypto/Crypto.cpp

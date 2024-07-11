@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <fizz/crypto/Hmac.h>
+
 namespace fizz {
 namespace openssl {
 
@@ -37,7 +39,7 @@ size_t Sha<T>::getHashLen() const {
 }
 
 template <typename T>
-size_t Sha<T>::getBlockSize() const {
+inline size_t Sha<T>::getBlockSize() const {
   return T::BlockSize;
 }
 
@@ -46,14 +48,23 @@ void Sha<T>::hmac(
     folly::ByteRange key,
     const folly::IOBuf& in,
     folly::MutableByteRange out) {
-  CHECK_GE(out.size(), T::HashLen);
-  folly::ssl::OpenSSLHash::hmac(out, T::HashEngine(), key, in);
+  fizz::hmac(
+      []() -> std::unique_ptr<fizz::Hasher> {
+        return std::make_unique<Sha<T>>();
+      },
+      key,
+      in,
+      out);
 }
 
 template <typename T>
 void Sha<T>::hash(const folly::IOBuf& in, folly::MutableByteRange out) {
-  CHECK_GE(out.size(), T::HashLen);
-  folly::ssl::OpenSSLHash::hash(out, T::HashEngine(), in);
+  fizz::hash(
+      []() -> std::unique_ptr<fizz::Hasher> {
+        return std::make_unique<Sha<T>>();
+      },
+      in,
+      out);
 }
 } // namespace openssl
 } // namespace fizz

@@ -475,3 +475,32 @@ class TestFieldNamesWithKeywordsAndConflicts {
   }
 
 }
+
+// TEST-CHECK-BAL: type TestClassWithGenerics
+// CHECK: type TestClassWithGenerics = .kind="class" {
+// CHECK:   t: .public *T;
+// CHECK:   b: .public *Box
+// CHECK: }
+// TEST-CHECK-BAL: define TestClassWithGenerics.__construct
+// CHECK: define TestClassWithGenerics.__construct($this: .notnull *TestClassWithGenerics, $t: .typevar="T" *HackMixed, $b: *Box) : *HackMixed {
+// CHECK: #b0:
+// CHECK:   n0: *HackMixed = load &$this
+// CHECK:   n1 = $builtins.hhbc_check_this(n0)
+// CHECK:   n2: *HackMixed = load &$b
+// CHECK:   n3: *HackMixed = load &$this
+// CHECK:   store n3.?.b <- n2: *HackMixed
+// CHECK:   n4: *HackMixed = load &$this
+// CHECK:   n5 = $builtins.hhbc_check_this(n4)
+// CHECK:   n6: *HackMixed = load &$t
+// CHECK:   n7: *HackMixed = load &$this
+// CHECK:   store n7.?.t <- n6: *HackMixed
+// CHECK:   ret null
+// CHECK: }
+class Box<T> {}
+
+class TestClassWithGenerics<T> {
+
+  public function __construct(public T $t, public Box<T> $b) {
+  }
+
+}

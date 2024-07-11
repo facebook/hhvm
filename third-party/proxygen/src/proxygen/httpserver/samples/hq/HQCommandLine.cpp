@@ -278,7 +278,6 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
                                                 kDefaultQuicTransportKnobId,
                                                 FLAGS_transport_knobs});
   }
-  hqParams.transportSettings.shouldRecvBatch = true;
   hqParams.transportSettings.maxRecvBatchSize = 32;
   hqParams.transportSettings.shouldUseRecvmmsgForBatchRecv = true;
   hqParams.transportSettings.advertisedInitialMaxStreamsBidi = 100;
@@ -304,10 +303,7 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
     hqParams.transportSettings.ccaConfig.leaveHeadroomForCwndLimited = true;
   }
 
-  if (FLAGS_read_ecn) {
-    hqParams.transportSettings.readEcnOnIngress = FLAGS_read_ecn;
-    hqParams.transportSettings.shouldRecvBatch = false;
-  }
+  hqParams.transportSettings.readEcnOnIngress = FLAGS_read_ecn;
 
   hqParams.transportSettings.dscpValue = FLAGS_dscp;
 } // initializeTransportSettings

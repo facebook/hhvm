@@ -154,7 +154,6 @@ folly::AsyncTransport::UniquePtr createQuicSocket(
       .initCwndInMss = 100,
       .maxCwndInMss = quic::kLargeMaxCwndInMss,
       .maxRecvBatchSize = 64,
-      .shouldRecvBatch = true,
       .shouldUseRecvmmsgForBatchRecv = true,
   };
   auto qEvb = std::make_shared<quic::FollyQuicEventBase>(evb);

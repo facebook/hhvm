@@ -212,7 +212,7 @@ static quic::TransportSettings createTransportSettings() {
   transportSettings.batchingMode =
       quic::getQuicBatchingMode(FLAGS_quic_batching_mode);
   transportSettings.maxBatchSize = FLAGS_quic_batch_size;
-  transportSettings.shouldRecvBatch = true;
+  transportSettings.shouldUseRecvmmsgForBatchRecv = true;
   transportSettings.maxRecvBatchSize = FLAGS_quic_recv_batch_size;
   transportSettings.connectUDP = FLAGS_udp_connect;
   transportSettings.shouldDrain = false;

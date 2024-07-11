@@ -34,7 +34,6 @@ const quic::TransportSettings& getQuicTransportSettings() {
     ts_.initCwndInMss = 100;
     ts_.maxCwndInMss = quic::kLargeMaxCwndInMss;
     ts_.maxRecvBatchSize = 64;
-    ts_.shouldRecvBatch = true;
     ts_.shouldUseRecvmmsgForBatchRecv = true;
     return ts_;
   })();

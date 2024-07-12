@@ -21,11 +21,75 @@ from schema_evolution_test.thrift_types import (
     MyStruct_V2,
     MyUnion_V1,
     MyUnion_V2,
+    New,
+    Old,
 )
 from thrift.python.protocol import Protocol
 
 from thrift.python.serializer import deserialize, serialize
-from thrift.python.types import StructOrUnion
+from thrift.python.types import isset, StructOrUnion
+
+
+@parameterized_class(
+    ("protocol"),
+    [(Protocol.BINARY,), (Protocol.COMPACT,), (Protocol.JSON,)],
+)
+class TestEvolution(unittest.TestCase):
+    def test_evolution(self) -> None:
+        params = {field_name: field_name for field_name, _ in Old}
+        old_struct = Old(**params)
+        serialized = serialize(old_struct, protocol=self.protocol)
+        new_struct = deserialize(New, serialized, protocol=self.protocol)
+
+        self.assertEqual(
+            old_struct.unqualified_to_unqualified, new_struct.unqualified_to_unqualified
+        )
+        self.assertEqual(
+            old_struct.unqualified_to_optional, new_struct.unqualified_to_optional
+        )
+        self.assertEqual(
+            old_struct.unqualified_to_required, new_struct.unqualified_to_required
+        )
+
+        self.assertEqual(
+            old_struct.optional_to_unqualified, new_struct.optional_to_unqualified
+        )
+        self.assertEqual(
+            old_struct.optional_to_optional, new_struct.optional_to_optional
+        )
+        self.assertEqual(
+            old_struct.optional_to_required, new_struct.optional_to_required
+        )
+
+        self.assertEqual(
+            old_struct.required_to_unqualified, new_struct.required_to_unqualified
+        )
+        self.assertEqual(
+            old_struct.required_to_optional, new_struct.required_to_optional
+        )
+        self.assertEqual(
+            old_struct.required_to_required, new_struct.required_to_required
+        )
+
+        # Protocol.JSON is SimpleJSON
+        if self.protocol is Protocol.JSON:
+            self.assertEqual(new_struct.unqualified_new, "")
+            self.assertEqual(new_struct.required_new, "")
+
+            self.assertFalse(isset(new_struct)["unqualified_new"])
+            self.assertIsNone(new_struct.optional_new)
+            self.assertIsNotNone(new_struct.required_new)
+        else:
+            self.assertEqual(new_struct.unqualified_new, old_struct.unqualified_old)
+            self.assertEqual(new_struct.optional_new, old_struct.optional_old)
+            self.assertEqual(new_struct.required_new, old_struct.required_old)
+
+        self.assertEqual(new_struct.unqualified_added, "")
+        self.assertEqual(new_struct.required_added, "")
+
+        self.assertFalse(isset(new_struct)["unqualified_added"])
+        self.assertIsNone(new_struct.optional_added)
+        self.assertIsNotNone(new_struct.required_added)
 
 
 @parameterized_class(

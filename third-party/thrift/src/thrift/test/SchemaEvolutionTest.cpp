@@ -57,6 +57,8 @@ TYPED_TEST(EvolutionTest, evolution) {
   EXPECT_EQ(newObj.required_to_optional(), *oldObj.required_to_optional());
   EXPECT_EQ(newObj.required_to_required(), *oldObj.required_to_required());
 
+  // SimpleJSON: This protocol doesn't output verbose field types and uses field
+  // names instead of IDs (which affects schema evolution).
   if (std::is_same_v<Serializer, SimpleJSONSerializer>) {
     EXPECT_EQ(newObj.unqualified_new(), "");
     EXPECT_EQ(newObj.required_new(), "");

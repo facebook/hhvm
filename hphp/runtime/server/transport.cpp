@@ -677,6 +677,16 @@ void Transport::prepareHeaders(bool precompressed, bool chunked,
     // so lower level transports can ignore incoming "Connection: keep-alive"
     removeRequestHeaderImpl("Connection");
   }
+
+  if (Cfg::Server::ExposeLoadhint) {
+    static auto const counter = ServiceData::createCounter("loadhint.new");
+    auto const loadhint = counter->getValue();
+    if (loadhint >= 0) {
+      char buf[16];
+      std::snprintf(buf, sizeof(buf), "%d", static_cast<int>(loadhint));
+      addHeaderImpl("X-FB-Server-Load", buf);
+    }
+  }
 }
 
 namespace {

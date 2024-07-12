@@ -727,6 +727,7 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 - bool Server.ExposeHPHP = true, UNKNOWN
 - bool Server.ExposeXFBServer = false, UNKNOWN
 - bool Server.ExposeXFBDebug = false, UNKNOWN
+- bool Server.ExposeLoadhint = false, UNKNOWN
 - std::string Server.XFBDebugSSLKey = "", UNKNOWN
 - int Server.ConnectionTimeoutSeconds = -1, UNKNOWN
 - bool Server.EnableOutputBuffering = false, UNKNOWN

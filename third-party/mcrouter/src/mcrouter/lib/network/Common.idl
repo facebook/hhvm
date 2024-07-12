@@ -27,6 +27,10 @@ exception CarbonResultTryAgain {
   1: std::string message;
 };
 
+exception CarbonResultInvalidRequest {
+  1: std::string message;
+};
+
 request McVersionRequest {
   id: 13;
   name: "version";

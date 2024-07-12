@@ -16,6 +16,8 @@
 #include <contextprop/if/gen-cpp2/ContextpropConstants_constants.h>
 #endif
 
+#include "mcrouter/lib/network/Utils.h"
+
 namespace facebook {
 namespace memcache {
 
@@ -108,6 +110,18 @@ FOLLY_NOINLINE auto ThriftTransportBase::makeError(
                setReplyResultAndMessage(
                    reply, carbon::Result::SHUTDOWN, e.what());
              })) {
+  } else if (ew.with_exception(
+                 [&](const thrift::CarbonResultInvalidRequest& e) {
+                   if (e.get_message().find(kBadKeyMessage) !=
+                       std::string::npos) {
+                     setReplyResultAndMessage(
+                         reply, carbon::Result::BAD_KEY, e.what());
+                   } else {
+                     // By default set BAD_COMMAND result
+                     setReplyResultAndMessage(
+                         reply, carbon::Result::BAD_COMMAND, e.what());
+                   }
+                 })) {
   } else if (ew.with_exception([&](const std::exception& e) {
                setReplyResultAndMessage(
                    reply, carbon::Result::LOCAL_ERROR, e.what());

@@ -41,6 +41,10 @@ exception CarbonResultTryAgain {
   1: string message
 }
 
+exception CarbonResultInvalidRequest {
+  1: string message
+}
+
 struct McVersionRequest {
   1: carbon.IOBufKey key
 }(cpp.methods = "

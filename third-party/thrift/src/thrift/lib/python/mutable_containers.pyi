@@ -38,6 +38,7 @@ class MutableList:
         start: typing.Optional[typing.Union[int, typing.SupportsIndex]] = 0,
         stop: typing.Optional[typing.Union[int, typing.SupportsIndex]] = None,
     ) -> int: ...
+    def __contains__(self, value: object) -> bool: ...
 
 class MutableSet:
     def __init__(

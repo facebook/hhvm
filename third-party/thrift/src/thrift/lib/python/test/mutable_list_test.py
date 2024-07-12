@@ -247,6 +247,14 @@ class MutableListTest(unittest.TestCase):
 
         self.assertFalse(10 in mutable_list)
 
+    def test_contains_wrong_type(self) -> None:
+        mutable_list = MutableList(typeinfo_i32, [1, 2, 3])
+
+        self.assertIn(3, mutable_list)
+        self.assertNotIn(4, mutable_list)
+        self.assertNotIn("Not an Integer", mutable_list)
+        self.assertNotIn(2**31, mutable_list)
+
     def test_add(self) -> None:
         mutable_list = MutableList(typeinfo_i32, [])
         mutable_list.extend(range(100))

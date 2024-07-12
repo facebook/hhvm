@@ -205,10 +205,38 @@ class ListTests(unittest.TestCase):
         self.assertIn(self.Color.red, clist.colorList)
         self.assertIn(self.Color.blue, clist.colorList)
         self.assertNotIn(self.Color.green, clist.colorList)
+        self.assertNotIn("str", clist.colorList)
+        if self.is_mutable_run:
+            self.assertNotIn(0, clist.colorList)
+        else:
+            self.assertIn(0, clist.colorList)
 
-        # TODO(T194526180): mutable thrift-python should not raise
-        # this is also a behavior divergence from thrift-py3, which
-        # self.assertIn(0, clist.colorList)
+        # This behavior is more permissive than thrift-py3
+        # which implicitly converts int to enum
+        if self.is_mutable_run:
+            self.assertNotIn(0, clist.colorList)
+            self.assertNotIn(1, clist.colorList)
+
+            # Python converts between integers and enums, but mutable containers
+            # don't do it right now. This could be addressed in `EnumTypeInfo`
+            # that will change the behavior in other places.
+            self.assertEqual(0, self.Color.red)
+            self.assertEqual(clist.colorList.index(self.Color.red), 0)
+            with self.assertRaises(ValueError):
+                clist.colorList.index(0)
+        else:
+            self.assertIn(0, clist.colorList)
+            self.assertIn(1, clist.colorList)
+            self.assertEqual(clist.colorList.index(0), 0)
+            self.assertEqual(clist.colorList.index(1), 2)
+
+        with self.assertRaises(ValueError):
+            clist.colorList.index(2)
+
+        if not self.is_mutable_run:
+            # gross
+            self.assertEqual(clist.colorList[clist.colorList.index(0)], self.Color.red)
+            self.assertEqual(clist.colorList[clist.colorList.index(1)], self.Color.blue)
 
     def test_struct_list(self) -> None:
         a = self.EasyList([self.easy()])
@@ -272,49 +300,3 @@ class ListTests(unittest.TestCase):
             self.assertEqual(clist.colorList.count(0), 2)
             self.assertEqual(clist.colorList.count(1), 1)
             self.assertEqual(clist.colorList.count(2), 0)
-
-
-# TODO: Collapse these two test cases into parameterized test above
-class ListImmutablePythonTests(unittest.TestCase):
-    Color = immutable_containers_types.Color
-    Lists = immutable_containers_types.Lists
-
-    def test_contains_enum(self) -> None:
-        clist = self.Lists(colorList=[self.Color.red, self.Color.red, self.Color.blue])
-        self.assertNotIn("str", clist.colorList)
-
-        # This behavior is more permissive than thrift-py3
-        # which implicitly converts int to enum
-        self.assertIn(0, clist.colorList)
-        self.assertIn(1, clist.colorList)
-        self.assertEqual(clist.colorList.index(0), 0)
-        self.assertEqual(clist.colorList.index(1), 2)
-        with self.assertRaises(ValueError):
-            clist.colorList.index(2)
-        # gross
-        self.assertEqual(clist.colorList[clist.colorList.index(0)], self.Color.red)
-        self.assertEqual(clist.colorList[clist.colorList.index(1)], self.Color.blue)
-
-
-# TODO: Collapse these two test cases into parameterized test above
-class ListMutablePythonTests(unittest.TestCase):
-    # pyre-ignore
-    Color = mutable_containers_types.Color
-    # pyre-ignore
-    Lists = mutable_containers_types.Lists
-
-    # this test case documents behavior divergences from thrift-python
-    @unittest.expectedFailure
-    def test_contains_enum(self) -> None:
-        clist = self.Lists(colorList=[self.Color.red, self.Color.red, self.Color.blue])
-        # TODO(T194526180): mutable thrift-python should not raise
-        self.assertNotIn("str", clist.colorList)
-        # TODO(T194526180): mutable thrift-python should not raise
-        self.assertIn(0, clist.colorList)
-
-        # TODO(T194919234): index not implemented for mutable python
-        self.assertEqual(clist.colorList.index(0), 0)
-        self.assertEqual(clist.colorList.index(1), 2)
-
-        with self.assertRaises(ValueError):
-            clist.colorList.index(2)

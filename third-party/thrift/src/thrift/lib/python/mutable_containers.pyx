@@ -115,12 +115,16 @@ cdef class MutableList:
             return 'i[]'
         return f'i[{", ".join(map(repr, self))}]'
 
-    def __contains__(self, item):
-        if item is None:
+    def __contains__(self, value):
+        if value is None:
             return False
 
-        internal_item = self._val_typeinfo.to_internal_data(item)
-        return internal_item in self._list_data
+        try:
+            internal_value = self._val_typeinfo.to_internal_data(value)
+        except (TypeError, OverflowError):
+            return False
+
+        return internal_value in self._list_data
 
     def __add__(self, other):
         lst = MutableList(self._val_typeinfo, self._list_data[:])

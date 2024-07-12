@@ -131,6 +131,35 @@ struct ClassData : IRExtraData {
   const Class* cls;
 };
 
+struct ClassIdData : IRExtraData {
+  explicit ClassIdData(const Class* cls)
+    : cls(cls)
+  {
+    assertx(cls != nullptr);
+  }
+
+  std::string show() const {
+    return folly::sformat("{},{}",
+      cls->name()->data(),
+      cls->classId().id()
+    );
+  }
+
+  bool equals(const ClassIdData& o) const {
+    return cls == o.cls;
+  }
+
+  size_t hash() const {
+    return pointer_hash<Class>()(cls);
+  }
+
+  size_t stableHash() const {
+    return cls->stableHash();
+  }
+
+  const Class* cls;
+};
+
 struct ModulePropAccessData : IRExtraData {
   ModulePropAccessData(const Func* callerFunc, const Class* propCls,
                        const StringData* propName, bool is_static)
@@ -517,23 +546,6 @@ struct IndexData : IRExtraData {
   }
 
   uint32_t index;
-};
-
-/*
- * ClassId.
- */
-struct ClassIdData : IRExtraData {
-  explicit ClassIdData(ClassId id) : id(id) {}
-
-  std::string show() const { return fmt::format("{}", id.id()); }
-  size_t hash() const { return std::hash<ClassId::Id>()(id.id()); }
-  size_t stableHash() const { return std::hash<ClassId::Id>()(id.id()); }
-
-  bool equals(const ClassIdData& o) const {
-    return id == o.id;
-  }
-
-  ClassId id;
 };
 
 /*

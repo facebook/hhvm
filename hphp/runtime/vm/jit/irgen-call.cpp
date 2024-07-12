@@ -1741,17 +1741,18 @@ void emitFCallClsMethodD(IRGS& env,
     case Class::ClassLookupResult::Maybe: {
       auto const cls = lookup.cls;
       assertx(!RO::RepoAuthoritative);
+      assertx(!lookup.cls->isPersistent());
+      assertx(!lookup.cls->classId().isInvalid());
       auto const callCtx =
         MemberLookupContext(callContext(env, fca, cls), curFunc(env));
       auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
       if (!func) return slow();
 
-      auto const loadedCls = gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
-      auto const classId = lookup.cls->classId();
+      gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
       return ifThenElse(
         env,
         [&] (Block* taken) {
-          gen(env, EqClassId, ClassIdData(classId), taken, loadedCls);
+          gen(env, EqClassId, ClassIdData(lookup.cls), taken);
         },
         [&] {
           updateStackOffset(env);

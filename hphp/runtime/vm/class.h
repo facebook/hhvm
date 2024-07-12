@@ -1257,8 +1257,11 @@ public:
    * We can burn these into the TC even when classes are not persistent, since
    * only a single name-to-class mapping will exist per request.
    */
-  rds::Handle classHandle() const;
   void setClassHandle(rds::Link<LowPtr<Class>, rds::Mode::NonLocal> link) const;
+  rds::Handle classHandle() const;
+  rds::Handle classIdHandle() const;
+  rds::Link<ClassId, rds::Mode::Normal> classIdLink() const;
+  
 
   /*
    * Get and set the RDS-cached class with this class's name.
@@ -1384,10 +1387,6 @@ public:
       sizeof(m_extra) == sizeof(ExtraData*),
       "The JIT loads m_extra as a bare pointer");
     return offsetof(Class, m_extra);
-  }
-
-  static constexpr size_t classIdOffset() {
-    return offsetof(Class, m_classId);
   }
 
   /*

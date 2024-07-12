@@ -41,6 +41,7 @@ inline bool Class::validate() const {
 }
 
 inline const ClassId Class::classId() const {
+  assertx(!m_classId.isInvalid());
   return m_classId;
 }
 
@@ -657,10 +658,20 @@ inline rds::Handle Class::classHandle() const {
   return m_cachedClass.handle();
 }
 
+inline rds::Link<ClassId, rds::Mode::Normal> Class::classIdLink() const {
+  auto const sym = rds::LinkName{"ClassId", name()};
+  return rds::bind<ClassId, rds::Mode::Normal>(sym);
+}
+
+inline rds::Handle Class::classIdHandle() const {
+  return classIdLink().handle();
+}
+
 inline void Class::setClassHandle(rds::Link<LowPtr<Class>,
-                                            rds::Mode::NonLocal> link) const {
+                                  rds::Mode::NonLocal> link) const {
   assertx(!m_cachedClass.bound());
   m_cachedClass = link;
+
 }
 
 inline Class* Class::getCached() const {
@@ -669,6 +680,8 @@ inline Class* Class::getCached() const {
 
 inline void Class::setCached() {
   m_cachedClass.initWith(this);
+  if (isPersistent()) return;
+  classIdLink().initWith(classId());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -820,7 +833,8 @@ inline Class::ClassLookup Class::lookupKnownMaybe(const Class* cls,
     if (UNLIKELY(cls == nullptr)) return Class::ClassLookupResult::None;
     if (cls->attrs() & AttrPersistent) return Class::ClassLookupResult::Exact;
     if (ctx && ctx->classof(cls)) return Class::ClassLookupResult::Exact;
-    return ClassLookupResult::Maybe;
+    if (RO::SandboxSpeculate) return ClassLookupResult::Maybe;
+    return Class::ClassLookupResult::None;
   }();
   return Class::ClassLookup { tag, cls };
 }

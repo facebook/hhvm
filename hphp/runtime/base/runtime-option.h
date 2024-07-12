@@ -975,6 +975,7 @@ public:
 
   // Sandbox options
   static bool SandboxMode;
+  static bool SandboxSpeculate;
   static std::string SandboxPattern;
   static std::string SandboxHome;
   static std::string SandboxFallback;

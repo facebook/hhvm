@@ -885,6 +885,7 @@ bool RuntimeOption::HHProfAccum = false;
 bool RuntimeOption::HHProfRequest = false;
 
 bool RuntimeOption::SandboxMode = false;
+bool RuntimeOption::SandboxSpeculate = false;
 std::string RuntimeOption::SandboxPattern;
 std::string RuntimeOption::SandboxHome;
 std::string RuntimeOption::SandboxFallback;
@@ -1943,6 +1944,7 @@ void RuntimeOption::Load(
   {
     // Sandbox
     Config::Bind(SandboxMode, ini, config, "Sandbox.SandboxMode");
+    Config::Bind(SandboxSpeculate, ini, config, "Sandbox.SandboxSpeculate");
     Config::Bind(SandboxPattern, ini, config, "Sandbox.Pattern");
     SandboxPattern = format_pattern(SandboxPattern, true);
     Config::Bind(SandboxHome, ini, config, "Sandbox.Home");

@@ -19,6 +19,8 @@
 #include <thrift/lib/cpp2/server/ServiceInterceptorBase.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 
+#if FOLLY_HAS_COROUTINES
+
 namespace apache::thrift {
 
 template <class RequestState, class ConnectionState = folly::Unit>
@@ -81,3 +83,5 @@ class ServiceInterceptor : public ServiceInterceptorBase {
 };
 
 } // namespace apache::thrift
+
+#endif // FOLLY_HAS_COROUTINES

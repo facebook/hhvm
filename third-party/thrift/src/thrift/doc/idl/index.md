@@ -329,7 +329,7 @@ Annotations on a package declaration apply to the file broadly, with the exact b
 For example, the following annotation would apply to all [unqualified fields](#field-qualifiers) in a given file:
 
 ```thrift
-@cpp.TerseWrite
+@thrift.TerseWrite
 package "facebook.com/peoplesearch"
 
 struct PeopleSearchRequest {
@@ -338,7 +338,7 @@ struct PeopleSearchRequest {
 }
 ```
 
-This enables terse writes for `query` and `numResults` fields even though they are not annotated with `@cpp.TerseWrite` themselves.
+This enables terse writes for `query` and `numResults` fields even though they are not annotated with `@thrift.TerseWrite` themselves.
 
 The package name is also used as a prefix for universal names. For example:
 

@@ -96,6 +96,15 @@ interface CClientIf extends \IThriftSyncIf {
   public function f(): Awaitable<void>;
 
   /**
+   * Streaming function
+   * 
+   * Original thrift definition:-
+   * void, stream<number>
+   *   numbers();
+   */
+  public function numbers(): Awaitable<\ResponseAndStream<null, int>>;
+
+  /**
    * 
    * Original thrift definition:-
    * string
@@ -105,15 +114,6 @@ interface CClientIf extends \IThriftSyncIf {
    *   throws (1: Bang bang);
    */
   public function thing(int $a, string $b, Set<int> $c): Awaitable<string>;
-
-  /**
-   * Streaming function
-   * 
-   * Original thrift definition:-
-   * void, stream<number>
-   *   numbers();
-   */
-  public function numbers(): Awaitable<\ResponseAndStream<null, int>>;
 }
 
 /**
@@ -150,6 +150,25 @@ class CAsyncClient extends \ThriftClientBase implements CAsyncClientIf {
   }
 
   /**
+   * Streaming function
+   * 
+   * Original thrift definition:-
+   * void, stream<number>
+   *   numbers();
+   */
+  public async function numbers(): Awaitable<\ResponseAndStream<null, int>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = C_numbers_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("C", "numbers", $args);
+    $currentseqid = $this->sendImplHelper($args, "numbers", false);
+    return await $this->genAwaitStreamResponse(C_numbers_FirstResponse::class, C_numbers_StreamResponse::class, "numbers", true, $currentseqid, $rpc_options);
+  }
+
+  /**
    * 
    * Original thrift definition:-
    * string
@@ -172,25 +191,6 @@ class CAsyncClient extends \ThriftClientBase implements CAsyncClientIf {
     await $this->asyncHandler_->genBefore("C", "thing", $args);
     $currentseqid = $this->sendImplHelper($args, "thing", false);
     return await $this->genAwaitResponse(C_thing_result::class, "thing", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Streaming function
-   * 
-   * Original thrift definition:-
-   * void, stream<number>
-   *   numbers();
-   */
-  public async function numbers(): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = C_numbers_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("C", "numbers", $args);
-    $currentseqid = $this->sendImplHelper($args, "numbers", false);
-    return await $this->genAwaitStreamResponse(C_numbers_FirstResponse::class, C_numbers_StreamResponse::class, "numbers", true, $currentseqid, $rpc_options);
   }
 
 }
@@ -218,6 +218,25 @@ class CClient extends \ThriftClientBase implements CClientIf {
   }
 
   /**
+   * Streaming function
+   * 
+   * Original thrift definition:-
+   * void, stream<number>
+   *   numbers();
+   */
+  public async function numbers(): Awaitable<\ResponseAndStream<null, int>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = C_numbers_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("C", "numbers", $args);
+    $currentseqid = $this->sendImplHelper($args, "numbers", false);
+    return await $this->genAwaitStreamResponse(C_numbers_FirstResponse::class, C_numbers_StreamResponse::class, "numbers", true, $currentseqid, $rpc_options);
+  }
+
+  /**
    * 
    * Original thrift definition:-
    * string
@@ -240,25 +259,6 @@ class CClient extends \ThriftClientBase implements CClientIf {
     await $this->asyncHandler_->genBefore("C", "thing", $args);
     $currentseqid = $this->sendImplHelper($args, "thing", false);
     return await $this->genAwaitResponse(C_thing_result::class, "thing", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Streaming function
-   * 
-   * Original thrift definition:-
-   * void, stream<number>
-   *   numbers();
-   */
-  public async function numbers(): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = C_numbers_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("C", "numbers", $args);
-    $currentseqid = $this->sendImplHelper($args, "numbers", false);
-    return await $this->genAwaitStreamResponse(C_numbers_FirstResponse::class, C_numbers_StreamResponse::class, "numbers", true, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
@@ -369,6 +369,195 @@ class C_f_result extends \ThriftSyncStructWithoutResult implements \IThriftStruc
     return tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.C_f_result",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+class C_numbers_args implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'C_numbers_args';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.numbers_args",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+class C_numbers_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const type TResult = int;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    0 => shape(
+      'var' => 'success',
+      'type' => \TType::I32,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'success' => 0,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'success' => ?this::TResult,
+  );
+
+  const int STRUCTURAL_ID = 1815418233987567820;
+  public ?this::TResult $success;
+
+  public function __construct(?this::TResult $success = null)[] {
+    $this->success = $success;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'success'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'C_numbers_StreamResponse';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.C_numbers_StreamResponse",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 0,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.number",
+                      "underlyingType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "success",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+class C_numbers_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'C_numbers_FirstResponse';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.C_numbers_FirstResponse",
         "is_union" => false,
       )
     );
@@ -630,195 +819,6 @@ class C_thing_result extends \ThriftSyncStructWithResult implements \IThriftStru
   }
 }
 
-class C_numbers_args implements \IThriftSyncStruct, \IThriftStructMetadata {
-  use \ThriftSerializationTrait;
-
-  const \ThriftStructTypes::TSpec SPEC = dict[
-  ];
-  const dict<string, int> FIELDMAP = dict[
-  ];
-
-  const type TConstructorShape = shape(
-  );
-
-  const int STRUCTURAL_ID = 957977401221134810;
-
-  public function __construct()[] {
-  }
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public static function fromShape(self::TConstructorShape $shape)[]: this {
-    return new static(
-    );
-  }
-
-  public function getName()[]: string {
-    return 'C_numbers_args';
-  }
-
-  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
-      shape(
-        "name" => "module.numbers_args",
-        "is_union" => false,
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
-    return shape(
-      'struct' => dict[],
-      'fields' => dict[
-      ],
-    );
-  }
-
-  public function getInstanceKey()[write_props]: string {
-    return \TCompactSerializer::serialize($this);
-  }
-
-}
-
-class C_numbers_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
-  use \ThriftSerializationTrait;
-
-  const type TResult = int;
-
-  const \ThriftStructTypes::TSpec SPEC = dict[
-    0 => shape(
-      'var' => 'success',
-      'type' => \TType::I32,
-    ),
-  ];
-  const dict<string, int> FIELDMAP = dict[
-    'success' => 0,
-  ];
-
-  const type TConstructorShape = shape(
-    ?'success' => ?this::TResult,
-  );
-
-  const int STRUCTURAL_ID = 1815418233987567820;
-  public ?this::TResult $success;
-
-  public function __construct(?this::TResult $success = null)[] {
-    $this->success = $success;
-  }
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public static function fromShape(self::TConstructorShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'success'),
-    );
-  }
-
-  public function getName()[]: string {
-    return 'C_numbers_StreamResponse';
-  }
-
-  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
-      shape(
-        "name" => "module.C_numbers_StreamResponse",
-        "fields" => vec[
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 0,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
-                    shape(
-                      "name" => "module.number",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                        )
-                      ),
-                    )
-                  ),
-                )
-              ),
-              "name" => "success",
-            )
-          ),
-        ],
-        "is_union" => false,
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
-    return shape(
-      'struct' => dict[],
-      'fields' => dict[
-      ],
-    );
-  }
-
-  public function getInstanceKey()[write_props]: string {
-    return \TCompactSerializer::serialize($this);
-  }
-
-}
-
-class C_numbers_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
-  use \ThriftSerializationTrait;
-
-  const \ThriftStructTypes::TSpec SPEC = dict[
-  ];
-  const dict<string, int> FIELDMAP = dict[
-  ];
-
-  const type TConstructorShape = shape(
-  );
-
-  const int STRUCTURAL_ID = 957977401221134810;
-
-  public function __construct()[] {
-  }
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public static function fromShape(self::TConstructorShape $shape)[]: this {
-    return new static(
-    );
-  }
-
-  public function getName()[]: string {
-    return 'C_numbers_FirstResponse';
-  }
-
-  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
-      shape(
-        "name" => "module.C_numbers_FirstResponse",
-        "is_union" => false,
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
-    return shape(
-      'struct' => dict[],
-      'fields' => dict[
-      ],
-    );
-  }
-
-  public function getInstanceKey()[write_props]: string {
-    return \TCompactSerializer::serialize($this);
-  }
-
-}
-
 class CStaticMetadata implements \IThriftServiceStaticMetadata {
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
@@ -831,6 +831,38 @@ class CStaticMetadata implements \IThriftServiceStaticMetadata {
               "return_type" => tmeta_ThriftType::fromShape(
                 shape(
                   "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_VOID_TYPE,
+                )
+              ),
+            )
+          ),
+          tmeta_ThriftFunction::fromShape(
+            shape(
+              "name" => "numbers",
+              "return_type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_stream" => tmeta_ThriftStreamType::fromShape(
+                    shape(
+                      "elemType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "module.number",
+                              "underlyingType" => tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                )
+                              ),
+                            )
+                          ),
+                        )
+                      ),
+                      "initialResponseType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_VOID_TYPE,
+                        )
+                      ),
+                    )
+                  ),
                 )
               ),
             )
@@ -903,38 +935,6 @@ class CStaticMetadata implements \IThriftServiceStaticMetadata {
                   )
                 ),
               ],
-            )
-          ),
-          tmeta_ThriftFunction::fromShape(
-            shape(
-              "name" => "numbers",
-              "return_type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_stream" => tmeta_ThriftStreamType::fromShape(
-                    shape(
-                      "elemType" => tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
-                            shape(
-                              "name" => "module.number",
-                              "underlyingType" => tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                                )
-                              ),
-                            )
-                          ),
-                        )
-                      ),
-                      "initialResponseType" => tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_VOID_TYPE,
-                        )
-                      ),
-                    )
-                  ),
-                )
-              ),
             )
           ),
         ],

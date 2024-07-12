@@ -1043,8 +1043,7 @@ class t_hack_generator : public t_concat_generator {
       const t_service* tservice, bool async) {
     std::vector<const t_function*> funcs;
     for (auto func : tservice->get_functions()) {
-      if (!is_client_only_function(func) &&
-          is_function_supported(func, async)) {
+      if (is_function_supported(func, false, async)) {
         funcs.push_back(func);
       }
     }
@@ -1053,27 +1052,30 @@ class t_hack_generator : public t_concat_generator {
 
   std::vector<const t_function*> get_supported_client_functions(
       const t_service* tservice) {
-    auto funcs = get_supported_server_functions(tservice, true);
+    std::vector<const t_function*> funcs;
     for (auto func : tservice->get_functions()) {
-      if (is_client_only_function(func) && is_function_supported(func)) {
+      if (is_function_supported(func, true)) {
         funcs.push_back(func);
       }
     }
     return funcs;
   }
 
-  bool is_function_supported(const t_function* func, bool async = true) {
-    return !func->interaction() && (async || !func->sink_or_stream());
-  }
-
-  bool is_client_only_function(const t_function* func) {
-    if (func->is_interaction_constructor()) {
+  bool is_function_supported(
+      const t_function* func, bool client, bool async = true) {
+    if (func->interaction()) {
+      return false;
+    }
+    if (client) {
       return true;
     }
-    if (server_stream_) {
-      return func->sink();
+    if (func->is_interaction_constructor() || func->sink()) {
+      return false;
     }
-    return func->sink_or_stream();
+    if (func->stream()) {
+      return server_stream_ && async;
+    }
+    return true;
   }
 
   std::vector<const t_service*> get_interactions(
@@ -6802,7 +6804,7 @@ void t_hack_generator::generate_service_interface(
 
   for (const t_function* function : functions) {
     if (skip_codegen(function) ||
-        (async && client && !is_client_only_function(function))) {
+        (async && client && is_function_supported(function, false, true))) {
       continue;
     }
     // Add a blank line before the start of a new function definition

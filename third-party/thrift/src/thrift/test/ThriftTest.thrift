@@ -21,6 +21,8 @@ namespace perl ThriftTest
 namespace csharp Thrift.Test
 namespace json thrift.test
 
+include "thrift/annotation/cpp.thrift"
+
 enum Numberz {
   ONE = 1,
   TWO = 2,
@@ -215,6 +217,5 @@ struct WithAnnotations {
 )
 
 // The following were automatically generated and may benefit from renaming.
-typedef map<string, string> (
-  cpp.template = "std::unordered_map",
-) map_string_string_917
+@cpp.Type{template = "std::unordered_map"}
+typedef map<string, string> map_string_string_917

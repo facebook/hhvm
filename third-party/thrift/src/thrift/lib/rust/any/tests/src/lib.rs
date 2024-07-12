@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#[cfg(test)]
 mod bridge;
-#[cfg(test)]
 mod compare_with_cpp;
-#[cfg(test)]
 mod simple_tests;

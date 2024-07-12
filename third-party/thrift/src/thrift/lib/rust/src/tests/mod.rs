@@ -46,9 +46,9 @@ const FLOAT_VALUES: [f32; 14] = [
     1.673e25,
     6.0221417e23,
     -6.0221417e23,
-    ::std::f32::INFINITY,
-    ::std::f32::NEG_INFINITY,
-    ::std::f32::NAN,
+    ::std::primitive::f32::INFINITY,
+    ::std::primitive::f32::NEG_INFINITY,
+    ::std::primitive::f32::NAN,
 ];
 const DOUBLE_VALUES: [f64; 14] = [
     459.3f64,
@@ -62,9 +62,9 @@ const DOUBLE_VALUES: [f64; 14] = [
     1.673e25,
     6.02214179e23,
     -6.02214179e23,
-    ::std::f64::INFINITY,
-    ::std::f64::NEG_INFINITY,
-    ::std::f64::NAN,
+    ::std::primitive::f64::INFINITY,
+    ::std::primitive::f64::NEG_INFINITY,
+    ::std::primitive::f64::NAN,
 ];
 
 mod binary;

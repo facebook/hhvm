@@ -141,12 +141,7 @@ pub fn unzigzag(v: u64) -> i64 {
 
 #[cfg(test)]
 mod test {
-    use std::i16;
-    use std::i32;
-    use std::i64;
-    use std::i8;
     use std::io::Cursor;
-    use std::u64;
 
     use bufsize::SizeCounter;
     use bytes::BytesMut;

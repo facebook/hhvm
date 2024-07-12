@@ -138,7 +138,7 @@ fn write_f64_list() {
         p.write_list_begin(thetype, thelen - 2);
 
         for v in &DOUBLE_VALUES {
-            if v >= &::std::f64::INFINITY || v <= &::std::f64::NEG_INFINITY || v.is_nan() {
+            if v >= &f64::INFINITY || v <= &f64::NEG_INFINITY || v.is_nan() {
                 continue;
             }
             p.write_list_value_begin();

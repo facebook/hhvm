@@ -15,7 +15,6 @@
  */
 
 use std::io::Cursor;
-use std::u8;
 
 use bytes::Buf;
 use bytes::Bytes;

@@ -66,6 +66,8 @@ void MyServicePrioParentAsyncProcessor::executeRequest_ping(apache::thrift::Serv
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "ping"
     , return_ping<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_ping<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -170,6 +172,8 @@ void MyServicePrioParentAsyncProcessor::executeRequest_pong(apache::thrift::Serv
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "pong"
     , return_pong<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_pong<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

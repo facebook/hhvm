@@ -64,6 +64,8 @@ void AAsyncProcessor::executeRequest_foo(apache::thrift::ServerRequest&& serverR
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Foo>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "foo"
     , return_foo<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_foo<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -175,6 +177,8 @@ void AAsyncProcessor::executeRequest_I_interact(apache::thrift::ServerRequest&& 
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "I.interact"
     , return_I_interact<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_I_interact<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -298,6 +302,8 @@ void BAsyncProcessor::executeRequest_bar(apache::thrift::ServerRequest&& serverR
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "bar"
     , return_bar<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_bar<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -402,6 +408,8 @@ void BAsyncProcessor::executeRequest_stream_stuff(apache::thrift::ServerRequest&
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "stream_stuff"
     , return_stream_stuff<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_stream_stuff<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -511,6 +519,8 @@ void BAsyncProcessor::executeRequest_sink_stuff(apache::thrift::ServerRequest&& 
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "sink_stuff"
     , return_sink_stuff<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_sink_stuff<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -638,6 +648,8 @@ void CAsyncProcessor::executeRequest_I_interact(apache::thrift::ServerRequest&& 
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "I.interact"
     , return_I_interact<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_I_interact<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

@@ -737,6 +737,57 @@ CO_TEST_P(ServiceInterceptorTestP, RequestArguments) {
   EXPECT_EQ(interceptor->arg3, requestArgs);
 }
 
+CO_TEST_P(ServiceInterceptorTestP, ServiceAndMethodNames) {
+  struct ServiceInterceptorCheckingServiceAndMethodNames
+      : public NamedServiceInterceptor<folly::Unit> {
+   public:
+    using ConnectionState = folly::Unit;
+    using RequestState = folly::Unit;
+
+    ServiceInterceptorCheckingServiceAndMethodNames()
+        : NamedServiceInterceptor("SomeName") {}
+
+    folly::coro::Task<std::optional<RequestState>> onRequest(
+        ConnectionState*, RequestInfo requestInfo) override {
+      names.emplace_back(
+          requestInfo.serviceName ? std::string(requestInfo.serviceName) : "",
+          requestInfo.methodName ? std::string(requestInfo.methodName) : "");
+      co_return std::nullopt;
+    }
+
+    using Entry = std::pair<std::string, std::string>;
+    std::vector<Entry> names;
+  };
+  auto interceptor =
+      std::make_shared<ServiceInterceptorCheckingServiceAndMethodNames>();
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(interceptor));
+      });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  co_await client->co_echo("");
+  co_await client->co_noop();
+
+  std::vector<ServiceInterceptorCheckingServiceAndMethodNames::Entry>
+      expectedNames = {
+          {"ServiceInterceptorTest", "echo"},
+          {"ServiceInterceptorTest", "noop"},
+      };
+
+  if (transportType() == TransportType::ROCKET) {
+    // only rocket supports interactions
+    auto interaction = co_await client->co_createInteraction();
+    co_await interaction.co_echo("");
+    expectedNames.emplace_back("ServiceInterceptorTest", "createInteraction");
+    expectedNames.emplace_back(
+        "ServiceInterceptorTest", "SampleInteraction.echo");
+  }
+
+  EXPECT_THAT(interceptor->names, ElementsAreArray(expectedNames));
+}
+
 INSTANTIATE_TEST_SUITE_P(
     ServiceInterceptorTestP,
     ServiceInterceptorTestP,

@@ -64,6 +64,8 @@ void MyNodeAsyncProcessor::executeRequest_do_mid(apache::thrift::ServerRequest&&
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "do_mid"
     , return_do_mid<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_do_mid<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

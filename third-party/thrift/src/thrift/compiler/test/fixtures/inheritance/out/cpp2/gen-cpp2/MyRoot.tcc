@@ -64,6 +64,8 @@ void MyRootAsyncProcessor::executeRequest_do_root(apache::thrift::ServerRequest&
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "do_root"
     , return_do_root<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_do_root<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

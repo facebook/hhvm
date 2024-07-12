@@ -104,6 +104,8 @@ void SinkServiceAsyncProcessor::executeRequest_method(apache::thrift::ServerRequ
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "method"
     , return_method<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_method<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -222,6 +224,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodAndReponse(apache::thrift::
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "methodAndReponse"
     , return_methodAndReponse<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodAndReponse<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -342,6 +346,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodThrow(apache::thrift::Serve
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "methodThrow"
     , return_methodThrow<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodThrow<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -477,6 +483,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodSinkThrow(apache::thrift::S
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "methodSinkThrow"
     , return_methodSinkThrow<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodSinkThrow<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -595,6 +603,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodFinalThrow(apache::thrift::
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "methodFinalThrow"
     , return_methodFinalThrow<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodFinalThrow<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -723,6 +733,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodBothThrow(apache::thrift::S
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "methodBothThrow"
     , return_methodBothThrow<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodBothThrow<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -854,6 +866,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodFast(apache::thrift::Server
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "methodFast"
     , return_methodFast<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodFast<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

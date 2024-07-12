@@ -72,6 +72,8 @@ void MyServiceAsyncProcessor::executeRequest_query(apache::thrift::ServerRequest
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "query"
     , return_query<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_query<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -182,6 +184,8 @@ void MyServiceAsyncProcessor::executeRequest_has_arg_docs(apache::thrift::Server
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "has_arg_docs"
     , return_has_arg_docs<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_has_arg_docs<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

@@ -64,6 +64,8 @@ void MyServicePrioChildAsyncProcessor::executeRequest_pang(apache::thrift::Serve
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "pang"
     , return_pang<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_pang<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

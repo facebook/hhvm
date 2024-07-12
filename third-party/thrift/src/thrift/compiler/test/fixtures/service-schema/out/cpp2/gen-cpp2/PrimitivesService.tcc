@@ -74,6 +74,8 @@ void PrimitivesServiceAsyncProcessor::executeRequest_init(apache::thrift::Server
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "init"
     , return_init<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_init<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -180,6 +182,8 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(apache::
   auto callback = apache::thrift::HandlerCallbackPtr<::cpp2::Result>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "method_that_throws"
     , return_method_that_throws<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_method_that_throws<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -306,6 +310,8 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(apache::
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "return_void_method"
     , return_return_void_method<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_return_void_method<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

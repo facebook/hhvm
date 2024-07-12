@@ -1002,6 +1002,8 @@ void HandlerCallbackBase::breakTilePromise() {
 HandlerCallback<void>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
+    const char* serviceName,
+    const char* methodName,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,
@@ -1012,6 +1014,8 @@ HandlerCallback<void>::HandlerCallback(
     : HandlerCallbackBase(
           std::move(req),
           std::move(ctx),
+          serviceName,
+          methodName,
           ewp,
           eb,
           tm,
@@ -1024,6 +1028,8 @@ HandlerCallback<void>::HandlerCallback(
 HandlerCallback<void>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
+    const char* serviceName,
+    const char* methodName,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,
@@ -1037,6 +1043,8 @@ HandlerCallback<void>::HandlerCallback(
     : HandlerCallbackBase(
           std::move(req),
           std::move(ctx),
+          serviceName,
+          methodName,
           ewp,
           eb,
           std::move(executor),
@@ -1114,7 +1122,9 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
     auto requestInfo = ServiceInterceptorBase::RequestInfo{
         reqCtx_,
         reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i),
-        arguments};
+        arguments,
+        serviceName_,
+        methodName_};
     try {
       co_await serviceInterceptorsInfo[i].interceptor->internal_onRequest(
           std::move(connectionInfo), std::move(requestInfo));

@@ -75,6 +75,8 @@ void MyServiceFastAsyncProcessor::executeRequest_hasDataById(apache::thrift::Ser
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "hasDataById"
     , return_hasDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_hasDataById<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -187,6 +189,8 @@ void MyServiceFastAsyncProcessor::executeRequest_getDataById(apache::thrift::Ser
   auto callback = apache::thrift::HandlerCallbackPtr<::std::string>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "getDataById"
     , return_getDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_getDataById<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -302,6 +306,8 @@ void MyServiceFastAsyncProcessor::executeRequest_putDataById(apache::thrift::Ser
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "putDataById"
     , return_putDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_putDataById<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -405,8 +411,10 @@ void MyServiceFastAsyncProcessor::executeRequest_lobDataById(apache::thrift::Ser
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
   auto callback = std::make_unique<apache::thrift::HandlerCallbackBase>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , nullptr
-    , nullptr
+    , nullptr /* contextStack */
+    , this->getServiceName()
+    , "lobDataById"
+    , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()

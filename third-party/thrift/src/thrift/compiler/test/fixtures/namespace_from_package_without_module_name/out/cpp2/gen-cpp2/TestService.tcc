@@ -67,6 +67,8 @@ void TestServiceAsyncProcessor::executeRequest_init(apache::thrift::ServerReques
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "init"
     , return_init<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_init<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

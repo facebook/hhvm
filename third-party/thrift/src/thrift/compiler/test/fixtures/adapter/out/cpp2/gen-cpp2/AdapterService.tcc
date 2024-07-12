@@ -66,6 +66,8 @@ void AdapterServiceAsyncProcessor::executeRequest_count(apache::thrift::ServerRe
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::CountingStruct>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "count"
     , return_count<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_count<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -175,6 +177,8 @@ void AdapterServiceAsyncProcessor::executeRequest_adaptedTypes(apache::thrift::S
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "adaptedTypes"
     , return_adaptedTypes<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_adaptedTypes<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

@@ -69,6 +69,8 @@ void SomeServiceAsyncProcessor::executeRequest_bounce_map(apache::thrift::Server
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::apache::thrift::fixtures::types::SomeMap>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "bounce_map"
     , return_bounce_map<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_bounce_map<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -178,6 +180,8 @@ void SomeServiceAsyncProcessor::executeRequest_binary_keyed_map(apache::thrift::
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "binary_keyed_map"
     , return_binary_keyed_map<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_binary_keyed_map<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

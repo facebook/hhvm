@@ -75,6 +75,8 @@ void NestedContainersAsyncProcessor::executeRequest_mapList(apache::thrift::Serv
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "mapList"
     , return_mapList<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_mapList<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -182,6 +184,8 @@ void NestedContainersAsyncProcessor::executeRequest_mapSet(apache::thrift::Serve
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "mapSet"
     , return_mapSet<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_mapSet<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -289,6 +293,8 @@ void NestedContainersAsyncProcessor::executeRequest_listMap(apache::thrift::Serv
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "listMap"
     , return_listMap<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_listMap<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -396,6 +402,8 @@ void NestedContainersAsyncProcessor::executeRequest_listSet(apache::thrift::Serv
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "listSet"
     , return_listSet<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_listSet<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -503,6 +511,8 @@ void NestedContainersAsyncProcessor::executeRequest_turtles(apache::thrift::Serv
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "turtles"
     , return_turtles<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_turtles<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

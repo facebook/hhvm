@@ -67,6 +67,8 @@ void FB303ServiceAsyncProcessor::executeRequest_simple_rpc(apache::thrift::Serve
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "simple_rpc"
     , return_simple_rpc<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_simple_rpc<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

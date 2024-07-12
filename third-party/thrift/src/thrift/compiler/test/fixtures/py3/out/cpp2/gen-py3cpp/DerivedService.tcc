@@ -64,6 +64,8 @@ void DerivedServiceAsyncProcessor::executeRequest_get_six(apache::thrift::Server
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "get_six"
     , return_get_six<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get_six<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

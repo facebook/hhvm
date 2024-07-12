@@ -1280,6 +1280,8 @@ class HandlerCallbackBase {
   HandlerCallbackBase(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
+      const char* serviceName,
+      const char* methodName,
       exnw_ptr ewp,
       folly::EventBase* eb,
       concurrency::ThreadManager* tm,
@@ -1288,6 +1290,8 @@ class HandlerCallbackBase {
       : req_(std::move(req)),
         ctx_(std::move(ctx)),
         interaction_(std::move(interaction)),
+        serviceName_(serviceName),
+        methodName_(methodName),
         ewp_(ewp),
         eb_(eb),
         executor_(
@@ -1302,6 +1306,8 @@ class HandlerCallbackBase {
   HandlerCallbackBase(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
+      const char* serviceName,
+      const char* methodName,
       exnw_ptr ewp,
       folly::EventBase* eb,
       folly::Executor::KeepAlive<> executor,
@@ -1313,6 +1319,8 @@ class HandlerCallbackBase {
       : req_(std::move(req)),
         ctx_(std::move(ctx)),
         interaction_(std::move(interaction)),
+        serviceName_(serviceName),
+        methodName_(methodName),
         ewp_(ewp),
         eb_(eb),
         executor_(std::move(executor)),
@@ -1486,6 +1494,8 @@ class HandlerCallbackBase {
   ResponseChannelRequest::UniquePtr req_;
   ContextStack::UniquePtr ctx_;
   TilePtr interaction_;
+  const char* const serviceName_ = "";
+  const char* const methodName_ = "";
 
   // May be null in a oneway call
   exnw_ptr ewp_;
@@ -1532,6 +1542,8 @@ class HandlerCallback : public HandlerCallbackBase {
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
+      const char* serviceName,
+      const char* methodName,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1543,6 +1555,8 @@ class HandlerCallback : public HandlerCallbackBase {
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
+      const char* serviceName,
+      const char* methodName,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1615,6 +1629,8 @@ class HandlerCallback<void> : public HandlerCallbackBase {
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
+      const char* serviceName,
+      const char* methodName,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1626,6 +1642,8 @@ class HandlerCallback<void> : public HandlerCallbackBase {
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
+      const char* serviceName,
+      const char* methodName,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1970,6 +1988,8 @@ template <typename T>
 HandlerCallback<T>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
+    const char* serviceName,
+    const char* methodName,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,
@@ -1980,6 +2000,8 @@ HandlerCallback<T>::HandlerCallback(
     : HandlerCallbackBase(
           std::move(req),
           std::move(ctx),
+          serviceName,
+          methodName,
           ewp,
           eb,
           tm,
@@ -1993,6 +2015,8 @@ template <typename T>
 HandlerCallback<T>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
+    const char* serviceName,
+    const char* methodName,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,
@@ -2006,6 +2030,8 @@ HandlerCallback<T>::HandlerCallback(
     : HandlerCallbackBase(
           std::move(req),
           std::move(ctx),
+          serviceName,
+          methodName,
           ewp,
           eb,
           std::move(executor),

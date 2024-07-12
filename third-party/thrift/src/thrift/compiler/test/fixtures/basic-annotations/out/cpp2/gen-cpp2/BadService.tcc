@@ -64,6 +64,8 @@ void GoodServiceAsyncProcessor::executeRequest_bar(apache::thrift::ServerRequest
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "bar"
     , return_bar<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_bar<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -175,6 +177,8 @@ void GoodServiceAsyncProcessor::executeRequest_BadInteraction_foo(apache::thrift
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "BadInteraction.foo"
     , return_BadInteraction_foo<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_BadInteraction_foo<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

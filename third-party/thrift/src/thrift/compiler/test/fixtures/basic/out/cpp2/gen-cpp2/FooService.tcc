@@ -64,6 +64,8 @@ void FooServiceAsyncProcessor::executeRequest_simple_rpc(apache::thrift::ServerR
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "simple_rpc"
     , return_simple_rpc<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_simple_rpc<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

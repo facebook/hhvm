@@ -70,6 +70,8 @@ void RaiserAsyncProcessor::executeRequest_doBland(apache::thrift::ServerRequest&
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "doBland"
     , return_doBland<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_doBland<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -174,6 +176,8 @@ void RaiserAsyncProcessor::executeRequest_doRaise(apache::thrift::ServerRequest&
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "doRaise"
     , return_doRaise<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_doRaise<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -315,6 +319,8 @@ void RaiserAsyncProcessor::executeRequest_get200(apache::thrift::ServerRequest&&
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "get200"
     , return_get200<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get200<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -421,6 +427,8 @@ void RaiserAsyncProcessor::executeRequest_get500(apache::thrift::ServerRequest&&
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "get500"
     , return_get500<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get500<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

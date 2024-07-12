@@ -69,6 +69,8 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey0(apache::t
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "getDataByKey0"
     , return_getDataByKey0<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_getDataByKey0<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -178,6 +180,8 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey1(apache::t
   auto callback = apache::thrift::HandlerCallbackPtr<::std::string>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "getDataByKey1"
     , return_getDataByKey1<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_getDataByKey1<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

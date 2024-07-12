@@ -64,6 +64,8 @@ void PerformAsyncProcessor::executeRequest_foo(apache::thrift::ServerRequest&& s
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "foo"
     , return_foo<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_foo<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -185,6 +187,8 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_frobnicate(apache::thri
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "MyInteraction.frobnicate"
     , return_MyInteraction_frobnicate<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteraction_frobnicate<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -304,8 +308,10 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_ping(apache::thrift::Se
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
   auto callback = std::make_unique<apache::thrift::HandlerCallbackBase>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , nullptr
-    , nullptr
+    , nullptr /* contextStack */
+    , this->getServiceName()
+    , "MyInteraction.ping"
+    , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
@@ -390,6 +396,8 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_truthify(apache::thrift
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "MyInteraction.truthify"
     , return_MyInteraction_truthify<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteraction_truthify<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -501,6 +509,8 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_encode(apache::thrift::
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "MyInteraction.encode"
     , return_MyInteraction_encode<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteraction_encode<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -635,6 +645,8 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(apache::
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "MyInteractionFast.frobnicate"
     , return_MyInteractionFast_frobnicate<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteractionFast_frobnicate<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -735,8 +747,10 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_ping(apache::thrift
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
   auto callback = std::make_unique<apache::thrift::HandlerCallbackBase>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , nullptr
-    , nullptr
+    , nullptr /* contextStack */
+    , this->getServiceName()
+    , "MyInteractionFast.ping"
+    , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
@@ -819,6 +833,8 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_truthify(apache::th
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "MyInteractionFast.truthify"
     , return_MyInteractionFast_truthify<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteractionFast_truthify<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -928,6 +944,8 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_encode(apache::thri
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "MyInteractionFast.encode"
     , return_MyInteractionFast_encode<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteractionFast_encode<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1052,6 +1070,8 @@ void PerformAsyncProcessor::executeRequest_SerialInteraction_frobnicate(apache::
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "SerialInteraction.frobnicate"
     , return_SerialInteraction_frobnicate<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_SerialInteraction_frobnicate<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

@@ -66,6 +66,8 @@ void MyServiceAsyncProcessor::executeRequest_first(apache::thrift::ServerRequest
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "first"
     , return_first<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_first<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -175,6 +177,8 @@ void MyServiceAsyncProcessor::executeRequest_second(apache::thrift::ServerReques
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "second"
     , return_second<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_second<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

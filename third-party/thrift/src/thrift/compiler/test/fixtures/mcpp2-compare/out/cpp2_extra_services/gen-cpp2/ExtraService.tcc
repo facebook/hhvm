@@ -75,6 +75,8 @@ void ExtraServiceAsyncProcessor::executeRequest_simple_function(apache::thrift::
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "simple_function"
     , return_simple_function<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_simple_function<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -184,6 +186,8 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function(apache::thrift::
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "throws_function"
     , return_throws_function<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_throws_function<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -318,6 +322,8 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function2(apache::thrift:
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "throws_function2"
     , return_throws_function2<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_throws_function2<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -457,6 +463,8 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function3(apache::thrift:
   auto callback = apache::thrift::HandlerCallbackPtr<::std::map<::std::int32_t, ::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "throws_function3"
     , return_throws_function3<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_throws_function3<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -584,8 +592,10 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret(apache::thrift::
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
   auto callback = std::make_unique<apache::thrift::HandlerCallbackBase>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , nullptr
-    , nullptr
+    , nullptr /* contextStack */
+    , this->getServiceName()
+    , "oneway_void_ret"
+    , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
@@ -677,8 +687,10 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_i32_i32_i32_i32_
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
   auto callback = std::make_unique<apache::thrift::HandlerCallbackBase>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , nullptr
-    , nullptr
+    , nullptr /* contextStack */
+    , this->getServiceName()
+    , "oneway_void_ret_i32_i32_i32_i32_i32_param"
+    , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
@@ -760,8 +772,10 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_map_setlist_para
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
   auto callback = std::make_unique<apache::thrift::HandlerCallbackBase>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , nullptr
-    , nullptr
+    , nullptr /* contextStack */
+    , this->getServiceName()
+    , "oneway_void_ret_map_setlist_param"
+    , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
@@ -841,8 +855,10 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_struct_param(apa
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
   auto callback = std::make_unique<apache::thrift::HandlerCallbackBase>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , nullptr
-    , nullptr
+    , nullptr /* contextStack */
+    , this->getServiceName()
+    , "oneway_void_ret_struct_param"
+    , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
@@ -922,8 +938,10 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_listunion_param(
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
   auto callback = std::make_unique<apache::thrift::HandlerCallbackBase>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , nullptr
-    , nullptr
+    , nullptr /* contextStack */
+    , this->getServiceName()
+    , "oneway_void_ret_listunion_param"
+    , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()

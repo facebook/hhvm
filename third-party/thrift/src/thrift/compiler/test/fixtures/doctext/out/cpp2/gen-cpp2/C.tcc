@@ -71,6 +71,8 @@ void CAsyncProcessor::executeRequest_f(apache::thrift::ServerRequest&& serverReq
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "f"
     , return_f<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_f<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -175,6 +177,8 @@ void CAsyncProcessor::executeRequest_numbers(apache::thrift::ServerRequest&& ser
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::number>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "numbers"
     , return_numbers<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_numbers<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -293,6 +297,8 @@ void CAsyncProcessor::executeRequest_thing(apache::thrift::ServerRequest&& serve
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "thing"
     , return_thing<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_thing<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

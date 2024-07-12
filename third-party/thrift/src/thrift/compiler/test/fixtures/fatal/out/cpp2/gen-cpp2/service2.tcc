@@ -74,6 +74,8 @@ void service2AsyncProcessor::executeRequest_methodA(apache::thrift::ServerReques
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "methodA"
     , return_methodA<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodA<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -187,6 +189,8 @@ void service2AsyncProcessor::executeRequest_methodB(apache::thrift::ServerReques
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "methodB"
     , return_methodB<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodB<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -291,6 +295,8 @@ void service2AsyncProcessor::executeRequest_methodC(apache::thrift::ServerReques
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "methodC"
     , return_methodC<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodC<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -406,6 +412,8 @@ void service2AsyncProcessor::executeRequest_methodD(apache::thrift::ServerReques
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "methodD"
     , return_methodD<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodD<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -512,6 +520,8 @@ void service2AsyncProcessor::executeRequest_methodE(apache::thrift::ServerReques
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test_cpp2::cpp_reflection::struct2>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "methodE"
     , return_methodE<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodE<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -627,6 +637,8 @@ void service2AsyncProcessor::executeRequest_methodF(apache::thrift::ServerReques
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test_cpp2::cpp_reflection::struct2>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "methodF"
     , return_methodF<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodF<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

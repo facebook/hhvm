@@ -113,6 +113,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstream(apache::t
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "returnstream"
     , return_returnstream<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_returnstream<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -225,6 +227,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_streamthrows(apache::t
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "streamthrows"
     , return_streamthrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_streamthrows<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -347,6 +351,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows(apache::
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "servicethrows"
     , return_servicethrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_servicethrows<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -476,6 +482,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows2(apache:
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "servicethrows2"
     , return_servicethrows2<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_servicethrows2<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -615,6 +623,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_boththrows(apache::thr
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "boththrows"
     , return_boththrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_boththrows<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -754,6 +764,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamstrea
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "responseandstreamstreamthrows"
     , return_responseandstreamstreamthrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_responseandstreamstreamthrows<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -878,6 +890,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamservi
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "responseandstreamservicethrows"
     , return_responseandstreamservicethrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_responseandstreamservicethrows<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1009,6 +1023,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreambotht
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "responseandstreamboththrows"
     , return_responseandstreamboththrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_responseandstreamboththrows<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1156,6 +1172,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstreamFast(apach
   auto callback = apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::std::int32_t>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "returnstreamFast"
     , return_returnstreamFast<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_returnstreamFast<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

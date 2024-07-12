@@ -107,6 +107,8 @@ void ReturnServiceAsyncProcessor::executeRequest_noReturn(apache::thrift::Server
   auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "noReturn"
     , return_noReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_noReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -211,6 +213,8 @@ void ReturnServiceAsyncProcessor::executeRequest_boolReturn(apache::thrift::Serv
   auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "boolReturn"
     , return_boolReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_boolReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -317,6 +321,8 @@ void ReturnServiceAsyncProcessor::executeRequest_i16Return(apache::thrift::Serve
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int16_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "i16Return"
     , return_i16Return<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_i16Return<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -423,6 +429,8 @@ void ReturnServiceAsyncProcessor::executeRequest_i32Return(apache::thrift::Serve
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "i32Return"
     , return_i32Return<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_i32Return<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -529,6 +537,8 @@ void ReturnServiceAsyncProcessor::executeRequest_i64Return(apache::thrift::Serve
   auto callback = apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "i64Return"
     , return_i64Return<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_i64Return<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -635,6 +645,8 @@ void ReturnServiceAsyncProcessor::executeRequest_floatReturn(apache::thrift::Ser
   auto callback = apache::thrift::HandlerCallbackPtr<float>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "floatReturn"
     , return_floatReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_floatReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -741,6 +753,8 @@ void ReturnServiceAsyncProcessor::executeRequest_doubleReturn(apache::thrift::Se
   auto callback = apache::thrift::HandlerCallbackPtr<double>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "doubleReturn"
     , return_doubleReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_doubleReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -850,6 +864,8 @@ void ReturnServiceAsyncProcessor::executeRequest_stringReturn(apache::thrift::Se
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "stringReturn"
     , return_stringReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_stringReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -956,6 +972,8 @@ void ReturnServiceAsyncProcessor::executeRequest_binaryReturn(apache::thrift::Se
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "binaryReturn"
     , return_binaryReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_binaryReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1062,6 +1080,8 @@ void ReturnServiceAsyncProcessor::executeRequest_mapReturn(apache::thrift::Serve
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "mapReturn"
     , return_mapReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_mapReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1168,6 +1188,8 @@ void ReturnServiceAsyncProcessor::executeRequest_simpleTypedefReturn(apache::thr
   auto callback = apache::thrift::HandlerCallbackPtr<::some::valid::ns::simpleTypeDef>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "simpleTypedefReturn"
     , return_simpleTypedefReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_simpleTypedefReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1274,6 +1296,8 @@ void ReturnServiceAsyncProcessor::executeRequest_complexTypedefReturn(apache::th
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::complexStructTypeDef>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "complexTypedefReturn"
     , return_complexTypedefReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_complexTypedefReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1380,6 +1404,8 @@ void ReturnServiceAsyncProcessor::executeRequest_list_mostComplexTypedefReturn(a
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::mostComplexTypeDef>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "list_mostComplexTypedefReturn"
     , return_list_mostComplexTypedefReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_list_mostComplexTypedefReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1489,6 +1515,8 @@ void ReturnServiceAsyncProcessor::executeRequest_enumReturn(apache::thrift::Serv
   auto callback = apache::thrift::HandlerCallbackPtr<::some::valid::ns::MyEnumA>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "enumReturn"
     , return_enumReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_enumReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1598,6 +1626,8 @@ void ReturnServiceAsyncProcessor::executeRequest_list_EnumReturn(apache::thrift:
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "list_EnumReturn"
     , return_list_EnumReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_list_EnumReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1704,6 +1734,8 @@ void ReturnServiceAsyncProcessor::executeRequest_structReturn(apache::thrift::Se
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::MyStruct>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "structReturn"
     , return_structReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_structReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1810,6 +1842,8 @@ void ReturnServiceAsyncProcessor::executeRequest_set_StructReturn(apache::thrift
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "set_StructReturn"
     , return_set_StructReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_set_StructReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -1919,6 +1953,8 @@ void ReturnServiceAsyncProcessor::executeRequest_unionReturn(apache::thrift::Ser
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::ComplexUnion>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "unionReturn"
     , return_unionReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_unionReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -2025,6 +2061,8 @@ void ReturnServiceAsyncProcessor::executeRequest_list_UnionReturn(apache::thrift
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "list_UnionReturn"
     , return_list_UnionReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_list_UnionReturn<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -2137,6 +2175,8 @@ void ReturnServiceAsyncProcessor::executeRequest_readDataEb(apache::thrift::Serv
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::IOBuf>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "readDataEb"
     , return_readDataEb<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_readDataEb<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
@@ -2246,6 +2286,8 @@ void ReturnServiceAsyncProcessor::executeRequest_readData(apache::thrift::Server
   auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::IOBufPtr>>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
+    , this->getServiceName()
+    , "readData"
     , return_readData<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_readData<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()

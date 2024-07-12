@@ -36,7 +36,7 @@ bool TestExtServer::RunTests(const std::string &which) {
   std::string root = std::string(HHVM_FN(getcwd)().toString().c_str()) +
                      "/test/ext/";
 
-  Cfg::Server::SourceRoot = root;
+  HPHP::Cfg::Server::SourceRoot = root;
   Cfg::PageletServer::ThreadCount = 10;
   PageletServer::Restart();
 

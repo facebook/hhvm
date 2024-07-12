@@ -61,14 +61,14 @@ bool TestCppBase::TestIpBlockMap() {
   struct in6_addr addr;
   int bits;
 
-  VERIFY(IpBlockMap::ReadIPv6Address("204.15.21.0/22", &addr, bits));
+  VERIFY(HPHP::IpBlockMap::ReadIPv6Address("204.15.21.0/22", &addr, bits));
   VS(bits, 118);
   VS(in6addrWord(addr, 0), 0x00000000L);
   VS(in6addrWord(addr, 1), 0x00000000L);
   VS(in6addrWord(addr, 2), 0x0000FFFFL);
   VS(in6addrWord(addr, 3), 0xCC0F1500L);
 
-  VERIFY(IpBlockMap::ReadIPv6Address("127.0.0.1", &addr, bits));
+  VERIFY(HPHP::IpBlockMap::ReadIPv6Address("127.0.0.1", &addr, bits));
   VS(bits, 128);
   VS(in6addrWord(addr, 0), 0x00000000L);
   VS(in6addrWord(addr, 1), 0x00000000L);

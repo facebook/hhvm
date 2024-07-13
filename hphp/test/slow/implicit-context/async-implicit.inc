@@ -15,6 +15,7 @@ class D extends Base {}
 abstract final class IntContext extends HH\ImplicitContext {
   const type T = int;
   const bool IS_MEMO_SENSITIVE = true;
+  const ctx CRun = [zoned];
   public static async function genStart(int $context, (function (): int) $f)[zoned] {
     return await parent::runWithAsync($context, $f);
   }
@@ -26,6 +27,7 @@ abstract final class IntContext extends HH\ImplicitContext {
 abstract final class ClassContext extends HH\ImplicitContext {
   const type T = Base;
   const bool IS_MEMO_SENSITIVE = true;
+  const ctx CRun = [zoned];
   public static async function genStart(Base $context, (function (): int) $f)[zoned] {
     return await parent::runWithAsync($context, $f);
   }

@@ -3,6 +3,7 @@
 abstract final class IntContext extends HH\ImplicitContext {
   const type T = int;
   const bool IS_MEMO_SENSITIVE = true;
+  const ctx CRun = [zoned];
   public static function set(int $context, (function (): int) $f)[zoned] :mixed{
     echo 'Setting context to ' . $context . "\n";
     return parent::runWith($context, $f);

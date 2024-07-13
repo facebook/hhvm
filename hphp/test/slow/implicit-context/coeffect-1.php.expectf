@@ -1,4 +1,4 @@
-Warning: Call to IntContext::set() requires [zoned_with] coeffects but main() provided [defaults] in %s on line 22
+Warning: Call to IntContext::set() requires [zoned_with] coeffects but main() provided [defaults] in %s on line %d
 Setting context to 5
 int(10)
 Setting context to 5

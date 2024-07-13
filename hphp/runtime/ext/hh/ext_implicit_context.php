@@ -134,11 +134,12 @@ function get_implicit_context_debug_info()[]: vec<string>;
 abstract class ImplicitContext {
   abstract const type T as nonnull;
   abstract const bool IS_MEMO_SENSITIVE;
+  abstract const ctx CRun;
 
   protected static async function runWithAsync<Tout>(
     this::T $context,
     (function ()[_]: Awaitable<Tout>) $f,
-  )[zoned, ctx $f]: Awaitable<Tout> {
+  )[this::CRun, ctx $f]: Awaitable<Tout> {
     $prev = ImplicitContext\_Private\set_implicit_context_by_value(
       ImplicitContext\_Private\create_implicit_context(
         nameof static,
@@ -159,7 +160,7 @@ abstract class ImplicitContext {
   protected static function runWith<Tout>(
     this::T $context,
     (function ()[_]: Tout) $f,
-  )[zoned, ctx $f]: Tout {
+  )[this::CRun, ctx $f]: Tout {
     $prev = ImplicitContext\_Private\set_implicit_context_by_value(
       ImplicitContext\_Private\create_implicit_context(
         nameof static,
@@ -174,11 +175,11 @@ abstract class ImplicitContext {
     }
   }
 
-  protected static function exists()[zoned]: bool {
+  protected static function exists()[this::CRun]: bool {
     return ImplicitContext\_Private\has_key(nameof static);
   }
 
-  protected static function get()[zoned]: ?this::T {
+  protected static function get()[this::CRun]: ?this::T {
     return ImplicitContext\_Private\get_implicit_context(nameof static);
   }
 }

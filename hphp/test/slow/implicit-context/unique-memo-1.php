@@ -15,6 +15,7 @@ function f()[zoned] :mixed{
 trait T {
   const type T = int;
   const bool IS_MEMO_SENSITIVE = true;
+  const ctx CRun = [zoned];
   public static function set($value, $fun) :mixed{ parent::runWith($value, $fun); }
 }
 

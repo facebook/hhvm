@@ -53,11 +53,9 @@ union TestUnionAmbiguousFromValueFloatInt {
 # thrift-python union class implementation to expose an enumeration with all
 # possible fields. See union_test.py for the resulting behavior.
 #
-# NOTE: Disabling __dict__ with __slots__ has made this functionally impossible
-# (import failure)
-// union TestUnionAmbiguousTypeFieldName {
-//   1: i32 Type;
-// }
+union TestUnionAmbiguousTypeFieldName {
+  1: i32 Type;
+}
 
 # This union intentionaly uses field names that are used internally by the
 # (immutable) thrift-python union class implementation. See union_test.py for

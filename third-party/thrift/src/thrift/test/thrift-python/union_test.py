@@ -27,6 +27,7 @@ from thrift.test.thrift_python.union_test.thrift_types import (
     TestUnionAmbiguousFromValueBoolInt as TestUnionAmbiguousFromValueBoolIntImmutable,
     TestUnionAmbiguousFromValueFloatInt as TestUnionAmbiguousFromValueFloatIntImmutable,
     TestUnionAmbiguousFromValueIntBool as TestUnionAmbiguousFromValueIntBoolImmutable,
+    TestUnionAmbiguousTypeFieldName as TestUnionAmbiguousTypeFieldNameImmutable,
     TestUnionAmbiguousValueFieldName as TestUnionAmbiguousValueFieldNameImmutable,
 )
 
@@ -180,15 +181,24 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         self.assertEqual(union_float_int_2.float_field, 1)
 
     def test_field_name_conflict(self) -> None:
-        # BAD: All statements below should actually pass, but are failing due
-        # to the (undocumented) reserved attributes colliding with IDL field names.
-        # Old behavior below: now it's impossible to create such a Union.
-        # with self.assertRaises(TypeError):
-        #     TestUnionAmbiguousTypeFieldNameImmutable()
+        # By setting class type `Type` attr after field attrs, we get the desired behavior
+        self.assertEqual(
+            TestUnionAmbiguousTypeFieldNameImmutable().type,
+            TestUnionAmbiguousTypeFieldNameImmutable().Type.EMPTY,
+        )
 
-        # self.assertNotIsInstance(
-        #     TestUnionAmbiguousTypeFieldNameImmutable.Type, enum.EnumMeta
-        # )
+        self.assertEqual(
+            TestUnionAmbiguousTypeFieldNameImmutable(Type=3).type,
+            TestUnionAmbiguousTypeFieldNameImmutable.Type.Type,
+        )
+        self.assertIsInstance(
+            TestUnionAmbiguousTypeFieldNameImmutable.Type, enum.EnumMeta
+        )
+        type_union = TestUnionAmbiguousTypeFieldNameImmutable()
+        with self.assertRaisesRegex(
+            AttributeError, "object attribute 'Type' is read-only"
+        ):
+            type_union.Type = 1
 
         u = TestUnionAmbiguousValueFieldNameImmutable(value=42)
         self.assertEqual(u.value, 42)

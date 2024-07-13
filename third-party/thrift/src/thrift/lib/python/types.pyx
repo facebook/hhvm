@@ -1614,9 +1614,6 @@ class UnionMeta(type):
         union_class_namespace["_fbthrift_struct_info"] = UnionInfo(
             union_name, field_infos
         )
-        union_class_namespace["Type"] = enum.Enum(
-            union_name, _gen_union_field_enum_members(field_infos)
-        )
         cdef list slots = []
         for field_info in field_infos:
             slots.append(field_info.py_name)
@@ -1628,6 +1625,11 @@ class UnionMeta(type):
                 field_info.py_name,
                 _make_fget_union(field_info.id, field_info.adapter_info),
             )
+        type.__setattr__(
+            klass,
+            "Type",
+            enum.Enum(union_name, _gen_union_field_enum_members(field_infos)),
+        )
         return klass
 
     def __dir__(cls):

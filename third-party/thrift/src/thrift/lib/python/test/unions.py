@@ -71,6 +71,29 @@ class UnionTests(unittest.TestCase):
         for itype in iter(Integers.Type):
             self.assertTrue(itype.name in contents)
 
+    def test_no_dict(self) -> None:
+        with self.assertRaises(AttributeError):
+            Integers().__dict__
+        # TODO: make it a tuple instead of a list
+        # self.assertIsInstance(Integer().__class__.__slots__, tuple)
+        # pyre-ignore[16]
+        self.assertIs(Integers().__class__.__slots__, Integers().__slots__)
+        self.assertIs(Integers(small=5).__slots__, Integers(large=500).__slots__)
+
+    def test_union_no_dynamic(self) -> None:
+        i = Integers(small=42)
+        with self.assertRaisesRegex(
+            AttributeError, "object attribute 'Type' is read-only"
+        ):
+            # pyre-ignore[8,41]
+            i.Type = Integers.Type.large
+
+        with self.assertRaisesRegex(
+            AttributeError, "object attribute 'Type' is read-only"
+        ):
+            # pyre-ignore[8,41]
+            i.Type = Integers.Type.small
+
     def test_union_enum_members(self) -> None:
         members = Integers.Type.__members__
         # Alias can't happen in this enum so these should always equal

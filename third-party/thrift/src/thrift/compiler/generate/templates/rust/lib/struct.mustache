@@ -22,6 +22,7 @@
     }}{{#struct:ord?}}, Eq, PartialOrd, Ord, Hash{{/struct:ord?}}{{!
     }}{{#struct:union?}}, Debug{{/struct:union?}}{{!
     }}{{#struct:serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/struct:serde?}}{{!
+    }}{{#program:valuable?}}, ::valuable::Valuable{{/program:valuable?}}{{!
     }}{{#struct:exception?}}{{#struct:union?}}, ::thiserror::Error{{/struct:union?}}{{/struct:exception?}}{{!
     }}{{#struct:derive}}, {{.}}{{/struct:derive}}{{!
 }})]

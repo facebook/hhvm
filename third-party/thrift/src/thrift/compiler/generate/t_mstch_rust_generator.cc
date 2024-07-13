@@ -62,6 +62,10 @@ struct rust_codegen_options {
   // Enabled by `--gen rust:serde`.
   bool serde = false;
 
+  // Whether to emit derive(Valuable).
+  // Enabled by `--gen rust:valuable`
+  bool valuable = false;
+
   // Whether fields w/optional values of None should
   // be skipped during serialization. Enabled w/ `--gen
   // rust:skip_none_serialization` Note: `rust:serde` must also be set for this
@@ -650,6 +654,7 @@ class rust_mstch_program : public mstch_program {
             {"program:nonexhaustiveStructs?",
              &rust_mstch_program::rust_nonexhaustive_structs},
             {"program:serde?", &rust_mstch_program::rust_serde},
+            {"program:valuable?", &rust_mstch_program::rust_valuable},
             {"program:skip_none_serialization?",
              &rust_mstch_program::rust_skip_none_serialization},
             {"program:multifile?", &rust_mstch_program::rust_multifile},
@@ -749,6 +754,7 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_skip_none_serialization() {
     return options_.skip_none_serialization;
   }
+  mstch::node rust_valuable() { return options_.valuable; }
   mstch::node rust_multifile() { return options_.multifile_mode; }
   mstch::node rust_crate() {
     if (options_.multifile_mode) {
@@ -2347,6 +2353,8 @@ void t_mstch_rust_generator::generate_program() {
     assert(options_.serde);
   }
 
+  options_.valuable = has_option("valuable");
+
   options_.any_registry_initialization_enabled = has_option("any");
 
   parse_include_srcs(
@@ -2560,6 +2568,7 @@ THRIFT_REGISTER_GENERATOR(
     mstch_rust,
     "Rust",
     "    serde:           Derive serde Serialize/Deserialize traits for types\n"
+    "    valuable:        Derive valuable Valuable trait for types\n"
     "    any:             Generate \"any registry\" initialization functions\n"
     "    deprecated_default_enum_min_i32:\n"
     "                     Default enum value is i32::MIN. Deprecated, to be removed in future versions\n"

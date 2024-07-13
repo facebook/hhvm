@@ -37,6 +37,13 @@ extern crate serde;
 
 {{/program:serde?}}{{!
 
+}}
+{{#program:valuable?}}
+{{! Work around https://github.com/rust-lang/rust/issues/46991 }}
+extern crate valuable;
+
+{{/program:valuable?}}{{!
+
 }}{{#program:types_include_srcs}}
 include!("{{.}}");
 {{/program:types_include_srcs}}{{!
@@ -87,7 +94,7 @@ pub(crate) use {{program:crate}} as types;
 
 mod dot_dot {{>lib/block}}{{!
     NOTE: intentionally no Default impl}}
-    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash{{#program:valuable?}}, ::valuable::Valuable{{/program:valuable?}})]
     pub struct OtherFields(pub(crate) ());
 
     #[allow(dead_code)] // if serde isn't being used

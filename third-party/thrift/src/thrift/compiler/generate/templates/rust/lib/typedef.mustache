@@ -49,6 +49,7 @@ pub type {{typedef:rust_name}} = {{>lib/type}};
     }}Clone, Debug, PartialEq{{!
     }}{{#typedef:ord?}}, Eq, PartialOrd, Ord, Hash{{/typedef:ord?}}{{!
     }}{{#typedef:serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/typedef:serde?}}{{!
+    }}{{#program:valuable?}}, ::valuable::Valuable{{/program:valuable?}}{{!
 }})]
 pub struct {{typedef:rust_name}}(pub {{!
   }}{{#typedef:has_adapter?}}{{!

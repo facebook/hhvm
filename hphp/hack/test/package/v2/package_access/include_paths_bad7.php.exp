@@ -1,0 +1,94 @@
+error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg2 [1]
+-> This is from package_access/include_paths_bad7.php--foo.php, which belongs to package pkg1 [2]
+-> But package_access/include_paths_bad7.php--bar.php is in package pkg2, and package pkg2 does not include package pkg1 [3]
+
+include_paths_bad7.php--bar.php:9:7
+7 | function test(): void {
+8 |   // All error
+[1] 9 |   bar<TFoo>();
+10 |   bar<Foo>();
+11 |   $_ = new Bar<TFoo>();
+
+include_paths_bad7.php--foo.php:3:6
+1 | <?hh
+2 | // package pkg1
+[2] 3 | type TFoo = int;
+4 | class Foo {}
+
+../PACKAGES.toml:6:11
+4 | include_paths=["./package_access/*"]
+5 |
+[3] 6 | [packages.pkg2]
+7 | include_paths=[
+8 |     "package_access/include_paths_bad1.php--foo.php",
+
+error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg2 [1]
+-> This is from package_access/include_paths_bad7.php--foo.php, which belongs to package pkg1 [2]
+-> But package_access/include_paths_bad7.php--bar.php is in package pkg2, and package pkg2 does not include package pkg1 [3]
+
+include_paths_bad7.php--bar.php:10:7
+8 |   // All error
+9 |   bar<TFoo>();
+[1] 10 |   bar<Foo>();
+11 |   $_ = new Bar<TFoo>();
+12 |   $_ = new Bar<Foo>();
+
+include_paths_bad7.php--foo.php:4:7
+2 | // package pkg1
+3 | type TFoo = int;
+[2]  4 | class Foo {}
+
+../PACKAGES.toml:6:11
+4 | include_paths=["./package_access/*"]
+5 |
+[3]  6 | [packages.pkg2]
+7 | include_paths=[
+8 |     "package_access/include_paths_bad1.php--foo.php",
+
+error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg2 [1]
+-> This is from package_access/include_paths_bad7.php--foo.php, which belongs to package pkg1 [2]
+-> But package_access/include_paths_bad7.php--bar.php is in package pkg2, and package pkg2 does not include package pkg1 [3]
+
+include_paths_bad7.php--bar.php:11:16
+9 |   bar<TFoo>();
+10 |   bar<Foo>();
+[1] 11 |   $_ = new Bar<TFoo>();
+12 |   $_ = new Bar<Foo>();
+13 | }
+
+include_paths_bad7.php--foo.php:3:6
+1 | <?hh
+2 | // package pkg1
+[2]  3 | type TFoo = int;
+4 | class Foo {}
+
+../PACKAGES.toml:6:11
+4 | include_paths=["./package_access/*"]
+5 |
+[3]  6 | [packages.pkg2]
+7 | include_paths=[
+8 |     "package_access/include_paths_bad1.php--foo.php",
+
+error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg2 [1]
+-> This is from package_access/include_paths_bad7.php--foo.php, which belongs to package pkg1 [2]
+-> But package_access/include_paths_bad7.php--bar.php is in package pkg2, and package pkg2 does not include package pkg1 [3]
+
+include_paths_bad7.php--bar.php:12:16
+10 |   bar<Foo>();
+11 |   $_ = new Bar<TFoo>();
+[1] 12 |   $_ = new Bar<Foo>();
+13 | }
+
+include_paths_bad7.php--foo.php:4:7
+2 | // package pkg1
+3 | type TFoo = int;
+[2]  4 | class Foo {}
+
+../PACKAGES.toml:6:11
+4 | include_paths=["./package_access/*"]
+5 |
+[3]  6 | [packages.pkg2]
+7 | include_paths=[
+8 |     "package_access/include_paths_bad1.php--foo.php",
+
+4 errors found.

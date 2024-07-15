@@ -173,7 +173,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
     // inflight writes of its own.
     return !writeLoopCallback_.isLoopCallbackScheduled() && !requests_ &&
         streams_.empty() && (!socket_ || socket_->isDetachable()) &&
-        parser_.getReadBufLength() == 0 && !interactions_;
+        !interactions_;
   }
 
   void attachEventBase(folly::EventBase& evb);

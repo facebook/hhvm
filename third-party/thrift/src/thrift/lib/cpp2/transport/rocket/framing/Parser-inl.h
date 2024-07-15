@@ -42,96 +42,28 @@ namespace apache {
 namespace thrift {
 namespace rocket {
 template <class T>
-void Parser<T>::getReadBufferOld(void** bufout, size_t* lenout) {
-  DCHECK(!readBuffer_.isChained());
-
-  readBuffer_.unshareOne();
-  if (readBuffer_.length() == 0) {
-    DCHECK(readBuffer_.capacity() > 0);
-    // If we read everything, reset pointers to 0 and reuse the buffer
-    readBuffer_.clear();
-  } else if (readBuffer_.headroom() > 0) {
-    // Move partially read data to the beginning
-    readBuffer_.retreat(readBuffer_.headroom());
-  }
-
-  *bufout = readBuffer_.writableTail();
-  *lenout = readBuffer_.tailroom();
-}
-
-template <class T>
-void Parser<T>::readDataAvailableOld(size_t nbytes) {
-  readBuffer_.append(nbytes);
-
-  while (!readBuffer_.empty()) {
-    if (readBuffer_.length() < Serializer::kMinimumFrameHeaderLength) {
-      return;
-    }
-
-    folly::io::Cursor cursor(&readBuffer_);
-    const size_t totalFrameSize = Serializer::kBytesForFrameOrMetadataLength +
-        readFrameOrMetadataSize(cursor);
-
-    if (!currentFrameLength_) {
-      if (!owner_.incMemoryUsage(totalFrameSize)) {
-        return;
-      }
-      currentFrameLength_ = totalFrameSize;
-    }
-
-    if (readBuffer_.length() < totalFrameSize) {
-      if (readBuffer_.length() + readBuffer_.tailroom() < totalFrameSize) {
-        DCHECK(!readBuffer_.isChained());
-        readBuffer_.unshareOne();
-        bufferSize_ = std::max<size_t>(bufferSize_, totalFrameSize);
-        readBuffer_.reserve(
-            0 /* minHeadroom */,
-            bufferSize_ - readBuffer_.length() /* minTailroom */);
-      }
-      return;
-    }
-
-    // Otherwise, we have a full frame to handle.
-    const size_t bytesToClone =
-        totalFrameSize - Serializer::kBytesForFrameOrMetadataLength;
-    cursor.reset(&readBuffer_);
-    readFrameOrMetadataSize(cursor);
-    std::unique_ptr<folly::IOBuf> frame;
-    cursor.clone(frame, bytesToClone);
-    owner_.decMemoryUsage(currentFrameLength_);
-    currentFrameLength_ = 0;
-    readBuffer_.trimStart(totalFrameSize);
-    owner_.handleFrame(std::move(frame));
-  }
-
-  if (!isScheduled() && bufferSize_ > kMaxBufferSize) {
-    owner_.scheduleTimeout(this, kDefaultBufferResizeInterval);
-  }
-}
-
-template <class T>
 void Parser<T>::getReadBuffer(void** bufout, size_t* lenout) {
-  blockResize_ = true;
-  if (mode_ == ParserMode::STRATEGY) {
-    frameLengthParser_->getReadBuffer(bufout, lenout);
-  } else if (mode_ == ParserMode::ALLOCATING) {
-    allocatingParser_->getReadBuffer(bufout, lenout);
-  } else {
-    getReadBufferOld(bufout, lenout);
+  switch (mode_) {
+    case (ParserMode::STRATEGY):
+      frameLengthParser_->getReadBuffer(bufout, lenout);
+      break;
+    case (ParserMode::ALLOCATING):
+      allocatingParser_->getReadBuffer(bufout, lenout);
+      break;
   }
 }
 
 template <class T>
 void Parser<T>::readDataAvailable(size_t nbytes) noexcept {
   folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
-  blockResize_ = false;
   try {
-    if (mode_ == ParserMode::STRATEGY) {
-      frameLengthParser_->readDataAvailable(nbytes);
-    } else if (mode_ == ParserMode::ALLOCATING) {
-      allocatingParser_->readDataAvailable(nbytes);
-    } else {
-      readDataAvailableOld(nbytes);
+    switch (mode_) {
+      case (ParserMode::STRATEGY):
+        frameLengthParser_->readDataAvailable(nbytes);
+        break;
+      case (ParserMode::ALLOCATING):
+        allocatingParser_->readDataAvailable(nbytes);
+        break;
     }
   } catch (...) {
     auto exceptionStr =
@@ -145,7 +77,6 @@ template <class T>
 void Parser<T>::readEOF() noexcept {
   folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
 
-  blockResize_ = false;
   owner_.close(transport::TTransportException(
       transport::TTransportException::TTransportExceptionType::END_OF_FILE,
       "Channel got EOF. Check for server hitting connection limit, "
@@ -155,15 +86,7 @@ void Parser<T>::readEOF() noexcept {
 template <class T>
 void Parser<T>::readErr(const folly::AsyncSocketException& ex) noexcept {
   folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
-  blockResize_ = false;
   owner_.close(transport::TTransportException(ex));
-}
-
-template <class T>
-void Parser<T>::timeoutExpired() noexcept {
-  if (LIKELY(!blockResize_)) {
-    resizeBuffer();
-  }
 }
 
 template <class T>
@@ -171,40 +94,14 @@ void Parser<T>::readBufferAvailable(
     std::unique_ptr<folly::IOBuf> buf) noexcept {
   folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
   try {
-    if (mode_ == ParserMode::STRATEGY) {
-      frameLengthParser_->readBufferAvailable(std::move(buf));
-    } else if (mode_ == ParserMode::ALLOCATING) {
-      // Will throw not implemented runtime exception
-      allocatingParser_->readBufferAvailable(std::move(buf));
-    } else {
-      readBufQueue_.append(std::move(buf));
-      while (!readBufQueue_.empty()) {
-        if (readBufQueue_.chainLength() <
-            Serializer::kBytesForFrameOrMetadataLength) {
-          return;
-        }
-        folly::io::Cursor cursor(readBufQueue_.front());
-
-        if (!currentFrameLength_) {
-          currentFrameLength_ = Serializer::kBytesForFrameOrMetadataLength +
-              readFrameOrMetadataSize(cursor);
-          if (!owner_.incMemoryUsage(currentFrameLength_)) {
-            currentFrameLength_ = 0;
-            return;
-          }
-        }
-
-        if (readBufQueue_.chainLength() < currentFrameLength_) {
-          return;
-        }
-
-        readBufQueue_.trimStart(Serializer::kBytesForFrameOrMetadataLength);
-        auto frame = readBufQueue_.split(
-            currentFrameLength_ - Serializer::kBytesForFrameOrMetadataLength);
-        owner_.handleFrame(std::move(frame));
-        owner_.decMemoryUsage(currentFrameLength_);
-        currentFrameLength_ = 0;
-      }
+    switch (mode_) {
+      case (ParserMode::STRATEGY):
+        frameLengthParser_->readBufferAvailable(std::move(buf));
+        break;
+      case (ParserMode::ALLOCATING):
+        // Will throw not implemented runtime exception
+        allocatingParser_->readBufferAvailable(std::move(buf));
+        break;
     }
   } catch (...) {
     auto exceptionStr =
@@ -212,21 +109,6 @@ void Parser<T>::readBufferAvailable(
     LOG(ERROR) << "Bad frame received, closing connection: " << exceptionStr;
     owner_.close(transport::TTransportException(exceptionStr));
   }
-}
-
-template <class T>
-void Parser<T>::resizeBuffer() {
-  if (bufferSize_ <= kMaxBufferSize || readBuffer_.length() >= kMaxBufferSize) {
-    return;
-  }
-  // resize readBuffer_ to kMaxBufferSize
-  readBuffer_ = folly::IOBuf(
-      folly::IOBuf::CopyBufferOp(),
-      readBuffer_.data(),
-      readBuffer_.length(),
-      /* headroom */ 0,
-      /* tailroom */ kMaxBufferSize - readBuffer_.length());
-  bufferSize_ = kMaxBufferSize;
 }
 
 } // namespace rocket

@@ -1448,13 +1448,6 @@ void RocketClient::detachEventBase() {
   evb_->dcheckIsInEventBaseThread();
   DCHECK(!writeLoopCallback_.isLoopCallbackScheduled());
 
-  if (parser_.isReadCallbackBased()) {
-    // trigger the buffer resize timeout ensure rocket client not holding extra
-    // buffer when detaching
-    parser_.cancelTimeout();
-    parser_.timeoutExpired();
-  }
-
   eventBaseDestructionCallback_.cancel();
   detachableLoopCallback_.cancelLoopCallback();
   if (keepAliveWatcher_) {

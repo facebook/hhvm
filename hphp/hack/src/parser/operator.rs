@@ -13,7 +13,7 @@ use parser_core_types::token_kind::TokenKind;
 
 pub use crate::operator_generated::*;
 
-#[derive(PartialEq, FromOcamlRep, ToOcamlRep)]
+#[derive(PartialEq, FromOcamlRep, ToOcamlRep, Debug)]
 pub enum Assoc {
     LeftAssociative,
     RightAssociative,

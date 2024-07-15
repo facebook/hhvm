@@ -2176,14 +2176,10 @@ where
                 kind,
                 left_precedence,
             ) {
-                BinaryExpressionPrefixKind::PrefixLessThan(_) => {
-                    let old_precedence = self.precedence;
-                    let right_term = {
-                        self.with_precedence(left_precedence);
-                        self.parse_remaining_expression(right_term)
-                    };
-                    self.with_precedence(old_precedence);
-                    self.parse_remaining_binary_expression_helper(right_term, left_precedence)
+                BinaryExpressionPrefixKind::PrefixLessThan((type_args, parser1)) => {
+                    self.continue_from(parser1);
+                    let result = self.do_parse_specified_function_call(right_term, type_args);
+                    self.parse_remaining_binary_expression_helper(result, left_precedence)
                 }
                 BinaryExpressionPrefixKind::PrefixAssignment => {
                     let old_precedence = self.precedence;

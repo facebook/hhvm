@@ -59,8 +59,6 @@ namespace apache {
 namespace thrift {
 namespace rocket {
 
-constexpr std::chrono::seconds RocketServerConnection::SocketDrainer::kTimeout;
-
 RocketServerConnection::RocketServerConnection(
     folly::AsyncTransport::UniquePtr socket,
     std::unique_ptr<RocketServerHandler> frameHandler,

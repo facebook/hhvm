@@ -663,6 +663,8 @@ TEST(CoroutineExceptionTest, completesHandlerCallback) {
       apache::thrift::HandlerCallback<std::unique_ptr<SumResponse>>>(
       nullptr,
       nullptr,
+      "" /* serviceName */,
+      "" /* methodName */,
       nullptr,
       nullptr,
       0,
@@ -674,6 +676,8 @@ TEST(CoroutineExceptionTest, completesHandlerCallback) {
   auto cb2 = std::make_unique<apache::thrift::HandlerCallback<int32_t>>(
       nullptr,
       nullptr,
+      "" /* serviceName */,
+      "" /* methodName */,
       nullptr,
       nullptr,
       0,
@@ -683,7 +687,14 @@ TEST(CoroutineExceptionTest, completesHandlerCallback) {
   handler.async_tm_computeSumThrowsPrimitive(std::move(cb2), 0, 0);
 
   auto cb3 = std::make_unique<apache::thrift::HandlerCallbackBase>(
-      nullptr, nullptr, nullptr, ebt.getEventBase(), tm.get(), &cpp2reqCtx);
+      nullptr,
+      nullptr,
+      "" /* serviceName */,
+      "" /* methodName */,
+      nullptr,
+      ebt.getEventBase(),
+      tm.get(),
+      &cpp2reqCtx);
   handler.async_tm_onewayRequest(std::move(cb3), 0);
 }
 

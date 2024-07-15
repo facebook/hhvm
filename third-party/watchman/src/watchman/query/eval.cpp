@@ -253,7 +253,8 @@ static void execute_common(
     // Log if override set, or if we have hit the sample rate
     if (sample->will_log || eventCount == samplingRate) {
       addRootMetadataToEvent(root_metadata, *queryExecute);
-      queryExecute->event_count = eventCount != samplingRate ? 0 : eventCount;
+      queryExecute->meta.base.event_count =
+          eventCount != samplingRate ? 0 : eventCount;
       queryExecute->fresh_instance = res->isFreshInstance;
       queryExecute->deduped = ctx->num_deduped;
       queryExecute->results = ctx->resultsArray.size();

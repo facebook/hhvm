@@ -20,6 +20,7 @@ folly::SemiFuture<folly::Unit> Root::waitForSettle(
 
 CookieSync::SyncResult Root::syncToNow(std::chrono::milliseconds timeout) {
   PerfSample sample("sync_to_now");
+  SyncToNow syncToNow;
   auto root = shared_from_this();
   try {
     auto result = view()->syncToNow(root, timeout);
@@ -39,22 +40,13 @@ CookieSync::SyncResult Root::syncToNow(std::chrono::milliseconds timeout) {
         getLogEventCounters(LogEventType::SyncToNowType);
     // Log if override set, or if we have hit the sample rate
     if (sample.will_log || eventCount == samplingRate) {
-      auto syncToNow = SyncToNow{
-          // MetadataEvent
-          {
-              // BaseEvent
-              {
-                  root_metadata.root_path.string(), // root
-                  std::string(), // error
-                  eventCount != samplingRate ? 0 : eventCount // event_count
-              },
-              root_metadata.recrawl_count, // recrawl
-              root_metadata.case_sensitive, // case_sensitive
-              root_metadata.watcher.string() // watcher
-          },
-          true, // success
-          timeout.count() // timeoutms
-      };
+      syncToNow.meta.base.root = root_metadata.root_path.string();
+      syncToNow.meta.base.event_count =
+          eventCount != samplingRate ? 0 : eventCount;
+      syncToNow.meta.recrawl = root_metadata.recrawl_count;
+      syncToNow.meta.case_sensitive = root_metadata.case_sensitive;
+      syncToNow.meta.watcher = root_metadata.watcher.string();
+      syncToNow.timeoutms = timeout.count();
       getLogger()->logEvent(syncToNow);
     }
     return result;
@@ -73,22 +65,15 @@ CookieSync::SyncResult Root::syncToNow(std::chrono::milliseconds timeout) {
 
     const auto& [samplingRate, eventCount] =
         getLogEventCounters(LogEventType::SyncToNowType);
-    auto syncToNow = SyncToNow{
-        // MetadataEvent
-        {
-            // BaseEvent
-            {
-                root_metadata.root_path.string(), // root
-                exc.what(), // error
-                eventCount != samplingRate ? 0 : eventCount // event_count
-            },
-            root_metadata.recrawl_count, // recrawl
-            root_metadata.case_sensitive, // case_sensitive
-            root_metadata.watcher.string() // watcher
-        },
-        false, // success
-        timeout.count() // timeoutms
-    };
+    syncToNow.meta.base.root = root_metadata.root_path.string();
+    syncToNow.meta.base.error = exc.what();
+    syncToNow.meta.base.event_count =
+        eventCount != samplingRate ? 0 : eventCount;
+    syncToNow.meta.recrawl = root_metadata.recrawl_count;
+    syncToNow.meta.case_sensitive = root_metadata.case_sensitive;
+    syncToNow.meta.watcher = root_metadata.watcher.string();
+    syncToNow.success = false;
+    syncToNow.timeoutms = timeout.count();
     getLogger()->logEvent(syncToNow);
 
     throw;

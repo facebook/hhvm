@@ -8,7 +8,10 @@
 #pragma once
 
 #include <folly/portability/SysTypes.h>
+#include <folly/stop_watch.h>
+
 #include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -33,12 +36,23 @@ enum LogEventType : uint8_t {
 // Returns samplingRate and eventCount
 std::pair<int64_t, int64_t> getLogEventCounters(const LogEventType& type);
 
-struct BaseEvent {
+struct BaseEventData {
+  // TODO: add system and user time for Unix systems
+  std::chrono::time_point<std::chrono::system_clock> start_time =
+      std::chrono::system_clock::now();
   std::string root;
   std::string error;
   int64_t event_count = 1;
 
   void populate(DynamicEvent& event) const {
+    std::chrono::duration<int64_t, std::nano> elapsed_time =
+        start_time - std::chrono::system_clock::now();
+    event.addInt(
+        "start_time", std::chrono::system_clock::to_time_t(start_time));
+    event.addInt(
+        "elapsed_time",
+        std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_time)
+            .count());
     if (!root.empty()) {
       event.addString("root", root);
     }
@@ -49,14 +63,14 @@ struct BaseEvent {
   }
 };
 
-struct MetadataEvent : public BaseEvent {
+struct MetadataEventData {
+  BaseEventData base;
   int64_t recrawl = 0;
   bool case_sensitive = false;
   std::string watcher;
 
   void populate(DynamicEvent& event) const {
-    BaseEvent::populate(event);
-
+    base.populate(event);
     event.addInt("recrawl", recrawl);
     event.addBool("case_sensitive", case_sensitive);
     if (!watcher.empty()) {
@@ -65,18 +79,16 @@ struct MetadataEvent : public BaseEvent {
   }
 };
 
-struct DispatchCommand : public MetadataEvent {
+struct DispatchCommand {
   static constexpr const char* type = "dispatch_command";
 
-  double duration = 0.0;
+  MetadataEventData meta;
   std::string command;
   std::string args;
   pid_t client_pid = 0;
 
   void populate(DynamicEvent& event) const {
-    MetadataEvent::populate(event);
-
-    event.addDouble("duration", duration);
+    meta.populate(event);
     event.addString("command", command);
     if (!args.empty()) {
       event.addString("args", args);
@@ -87,50 +99,53 @@ struct DispatchCommand : public MetadataEvent {
   }
 };
 
-struct ClockTest : public BaseEvent {
+struct ClockTest {
   static constexpr const char* type = "clock_test";
 
+  BaseEventData base;
+
   void populate(DynamicEvent& event) const {
-    BaseEvent::populate(event);
+    base.populate(event);
   }
 };
 
-struct AgeOut : public MetadataEvent {
+struct AgeOut {
   static constexpr const char* type = "age_out";
 
+  MetadataEventData meta;
   int64_t walked = 0;
   int64_t files = 0;
   int64_t dirs = 0;
 
   void populate(DynamicEvent& event) const {
-    MetadataEvent::populate(event);
-
+    meta.populate(event);
     event.addInt("walked", walked);
     event.addInt("files", files);
     event.addInt("dirs", dirs);
   }
 };
 
-struct SyncToNow : public MetadataEvent {
+struct SyncToNow {
   static constexpr const char* type = "sync_to_now";
 
-  bool success = false;
+  MetadataEventData meta;
+  bool success = true;
   int64_t timeoutms = 0;
 
   void populate(DynamicEvent& event) const {
-    MetadataEvent::populate(event);
-
+    meta.populate(event);
     event.addBool("success", success);
     event.addInt("timeoutms", timeoutms);
   }
 };
 
-struct SavedState : public MetadataEvent {
+struct SavedState {
   enum Target { Manifold = 1, Xdb = 2 };
   enum Action { GetProperties = 1, Connect = 2, Query = 3 };
 
   static constexpr const char* type = "saved_state";
 
+  MetadataEventData meta;
   Target target = Manifold;
   Action action = GetProperties;
   std::string project;
@@ -141,8 +156,7 @@ struct SavedState : public MetadataEvent {
   bool success = false;
 
   void populate(DynamicEvent& event) const {
-    MetadataEvent::populate(event);
-
+    meta.populate(event);
     event.addInt("target", target);
     event.addInt("action", action);
     event.addString("project", project);
@@ -160,9 +174,10 @@ struct SavedState : public MetadataEvent {
   }
 };
 
-struct QueryExecute : public MetadataEvent {
+struct QueryExecute {
   static constexpr const char* type = "query_execute";
 
+  MetadataEventData meta;
   std::string request_id;
   int64_t num_special_files = 0;
   std::string special_files;
@@ -173,8 +188,7 @@ struct QueryExecute : public MetadataEvent {
   std::string query;
 
   void populate(DynamicEvent& event) const {
-    MetadataEvent::populate(event);
-
+    meta.populate(event);
     if (!request_id.empty()) {
       event.addString("request_id", request_id);
     }
@@ -192,18 +206,24 @@ struct QueryExecute : public MetadataEvent {
   }
 };
 
-struct FullCrawl : public MetadataEvent {
+struct FullCrawl {
   static constexpr const char* type = "full_crawl";
+
+  MetadataEventData meta;
+
+  void populate(DynamicEvent& event) const {
+    meta.populate(event);
+  }
 };
 
-struct Dropped : public MetadataEvent {
+struct Dropped {
   static constexpr const char* type = "dropped";
 
+  MetadataEventData meta;
   bool isKernel = false;
 
   void populate(DynamicEvent& event) const {
-    MetadataEvent::populate(event);
-
+    meta.populate(event);
     event.addBool("isKernel", isKernel);
   }
 };

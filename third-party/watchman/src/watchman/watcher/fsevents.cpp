@@ -138,21 +138,12 @@ std::shared_ptr<FSEventsWatcher> watcherFromRoot(
 /** Generate a perf event for the drop */
 static void log_drop_event(const std::shared_ptr<Root>& root, bool isKernel) {
   auto root_metadata = root->getRootMetadata();
-  auto dropped = Dropped{
-      // MetdataEvent
-      {
-          // BaseEvent
-          {
-              root_metadata.root_path.string(), // root
-              std::string() // error
-              // event_count = 1, default
-          },
-          root_metadata.recrawl_count, // recrawl
-          root_metadata.case_sensitive, // case_sensitive
-          root_metadata.watcher.string() // watcher
-      },
-      isKernel // isKernel
-  };
+  Dropped dropped;
+  dropped.meta.base.root = root_metadata.root_path.string();
+  dropped.meta.recrawl = root_metadata.recrawl_count;
+  dropped.meta.case_sensitive = root_metadata.case_sensitive;
+  dropped.meta.watcher = root_metadata.watcher.string();
+  dropped.isKernel = isKernel;
   getLogger()->logEvent(dropped);
 
   PerfSample sample(isKernel ? "KernelDropped" : "UserDropped");

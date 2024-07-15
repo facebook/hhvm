@@ -89,20 +89,11 @@ void InMemoryView::fullCrawl(
   sample.force_log();
   sample.log();
 
-  auto fullCrawl = FullCrawl{
-      // MetadataEvent
-      {
-          // BaseEvent
-          {
-              root_metadata.root_path.string(), // root
-              std::string() // error
-              // event_count = 1, default
-          },
-          root_metadata.recrawl_count, // recrawl
-          root_metadata.case_sensitive, // case_sensitive
-          root_metadata.watcher.string() // watcher
-      },
-  };
+  FullCrawl fullCrawl;
+  fullCrawl.meta.base.root = root_metadata.root_path.string();
+  fullCrawl.meta.recrawl = root_metadata.recrawl_count;
+  fullCrawl.meta.case_sensitive = root_metadata.case_sensitive;
+  fullCrawl.meta.watcher = root_metadata.watcher.string();
   getLogger()->logEvent(fullCrawl);
 
   logf(ERR, "{}crawl complete\n", recrawlCount ? "re" : "");

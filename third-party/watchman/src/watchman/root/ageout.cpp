@@ -69,23 +69,15 @@ void Root::performAgeOut(std::chrono::seconds min_age) {
       getLogEventCounters(LogEventType::AgeOutType);
   // Log if override set, or if we have hit the sample rate
   if (sample.will_log || eventCount == samplingRate) {
-    auto ageOut = AgeOut{
-        // MetadataEvent
-        {
-            // BaseEvent
-            {
-                root_metadata.root_path.string(), // root
-                std::string(), // error
-                eventCount != samplingRate ? 0 : eventCount // event_count
-            },
-            root_metadata.recrawl_count, // recrawl
-            root_metadata.case_sensitive, // case_sensitive
-            root_metadata.watcher.string() // watcher
-        },
-        walked, // walked
-        files, // files
-        dirs // dirs
-    };
+    AgeOut ageOut;
+    ageOut.meta.base.root = root_metadata.root_path.string();
+    ageOut.meta.base.event_count = eventCount != samplingRate ? 0 : eventCount;
+    ageOut.meta.recrawl = root_metadata.recrawl_count;
+    ageOut.meta.case_sensitive = root_metadata.case_sensitive;
+    ageOut.meta.watcher = root_metadata.watcher.string();
+    ageOut.walked = walked;
+    ageOut.files = files;
+    ageOut.dirs = dirs;
     getLogger()->logEvent(ageOut);
   }
 }

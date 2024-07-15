@@ -80,7 +80,7 @@ void Client::sendErrorResponse(std::string_view formatted) {
   resp.set("error", typed_string_to_json(formatted));
 
   if (dispatch_command) {
-    dispatch_command->error = formatted;
+    dispatch_command->meta.base.error = formatted;
   }
 
   if (perf_sample) {
@@ -136,7 +136,6 @@ bool Client::dispatchCommand(const Command& command, CommandFlags mode) {
     // Scope for the perf sample
     {
       logf(DBG, "dispatch_command: {}\n", def->name);
-      folly::stop_watch<> dispatchCommandStart;
       DispatchCommand dispatchCommand;
       dispatchCommand.command = command.name();
       dispatch_command = &dispatchCommand;
@@ -163,7 +162,7 @@ bool Client::dispatchCommand(const Command& command, CommandFlags mode) {
         enqueueResponse(def->handler(this, rendered));
       } catch (const ErrorResponse& e) {
         sendErrorResponse(e.what());
-        dispatchCommand.error = e.what();
+        dispatchCommand.meta.base.error = e.what();
       } catch (const ResponseWasHandledManually&) {
       }
 
@@ -179,12 +178,10 @@ bool Client::dispatchCommand(const Command& command, CommandFlags mode) {
           getLogEventCounters(LogEventType::DispatchCommandType);
       // Log if override set, or if we have hit the sample rate
       if (sample.will_log || eventCount == samplingRate) {
-        dispatchCommand.event_count =
+        dispatchCommand.meta.base.event_count =
             eventCount != samplingRate ? 0 : eventCount;
-        dispatchCommand.duration =
-            std::chrono::duration<double>{dispatchCommandStart.elapsed()}
-                .count();
         dispatchCommand.args = renderedString;
+        dispatchCommand.client_pid = stm->getPeerProcessID();
         getLogger()->logEvent(dispatchCommand);
       }
 

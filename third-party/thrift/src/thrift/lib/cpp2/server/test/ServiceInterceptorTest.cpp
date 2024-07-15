@@ -337,6 +337,71 @@ CO_TEST_P(ServiceInterceptorTestP, BasicVoidReturn) {
   }
 }
 
+CO_TEST_P(ServiceInterceptorTestP, NonTrivialRequestState) {
+  struct Counts {
+    int construct = 0;
+    int destruct = 0;
+  } counts;
+
+  struct RequestState {
+    explicit RequestState(Counts& counts) : counts_(&counts) {
+      counts_->construct++;
+    }
+    RequestState(RequestState&& other) noexcept
+        : counts_(std::exchange(other.counts_, nullptr)) {}
+    RequestState& operator=(RequestState&& other) noexcept {
+      counts_ = std::exchange(other.counts_, nullptr);
+      return *this;
+    }
+    ~RequestState() {
+      if (counts_) {
+        counts_->destruct++;
+      }
+    }
+
+   private:
+    Counts* counts_;
+  };
+
+  struct ServiceInterceptorNonTrivialRequestState
+      : public NamedServiceInterceptor<RequestState> {
+   public:
+    ServiceInterceptorNonTrivialRequestState(std::string name, Counts& counts)
+        : NamedServiceInterceptor(std::move(name)), counts_(counts) {}
+
+    folly::coro::Task<std::optional<RequestState>> onRequest(
+        folly::Unit*, RequestInfo) override {
+      co_return RequestState(counts_);
+    }
+
+    folly::coro::Task<void> onResponse(
+        RequestState*, folly::Unit*, ResponseInfo) override {
+      co_return;
+    }
+
+   private:
+    Counts& counts_;
+  };
+  auto interceptor1 =
+      std::make_shared<ServiceInterceptorNonTrivialRequestState>(
+          "Interceptor1", counts);
+  auto interceptor2 =
+      std::make_shared<ServiceInterceptorNonTrivialRequestState>(
+          "Interceptor2", counts);
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(
+            InterceptorList{interceptor1, interceptor2}));
+      });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  co_await client->co_noop();
+
+  EXPECT_EQ(counts.construct, 2);
+  EXPECT_EQ(counts.destruct, 2);
+}
+
 TEST_P(ServiceInterceptorTestP, OnStartServing) {
   struct ServiceInterceptorCountOnStartServing
       : public NamedServiceInterceptor<folly::Unit> {

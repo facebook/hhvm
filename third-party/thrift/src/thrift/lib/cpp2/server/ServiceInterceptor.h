@@ -30,7 +30,7 @@ class ServiceInterceptor : public ServiceInterceptorBase {
   static T* getValueAsType(
       apache::thrift::util::TypeErasedValue<Size, Align>& storage) {
     return storage.has_value()
-        ? std::addressof(storage.template value_unchecked<ConnectionState>())
+        ? std::addressof(storage.template value_unchecked<T>())
         : nullptr;
   }
 

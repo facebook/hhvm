@@ -72,7 +72,7 @@ struct AnyData {
   const T& get() const { return data; }
 
   constexpr bool empty() const noexcept { return op::isEmpty<Tag>(data); }
-  constexpr void clear() noexcept {
+  constexpr void clear() {
     // For const types, we cannot clear the value. So do nothing and keep
     // method to satisfy interface requirements.
     if constexpr (!std::is_const_v<std::remove_reference_t<T>>) {

@@ -25,6 +25,9 @@ namespace compiler {
 // Standard mutators for Thrift.
 ast_mutators standard_mutators(bool use_legacy_type_ref_resolution);
 
+// Extra mutator for schema support.
+ast_mutator schema_mutator();
+
 } // namespace compiler
 } // namespace thrift
 } // namespace apache

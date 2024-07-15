@@ -15,8 +15,6 @@
  */
 
 include "thrift/annotation/thrift.thrift"
-// @lint-ignore THRIFTCHECKS used by GenerateRuntimeSchema
-include "thrift/lib/thrift/schema.thrift"
 include "thrift/annotation/cpp.thrift"
 
 package "facebook.com/thrift/test/schema"
@@ -53,7 +51,6 @@ enum Enum {
   test = 22,
 }
 
-// @lint-ignore THRIFTCHECKS
 @thrift.GenerateRuntimeSchema
 exception SimpleException {}
 
@@ -66,7 +63,6 @@ const i32 IntConst = 11;
 @thrift.GenerateRuntimeSchema
 const list<i32> ListConst = [2, 3, 5, 7, IntConst];
 
-// @lint-ignore THRIFTCHECKS
 exception NonSchematizedException {}
 
 struct NonSchematizedStruct {

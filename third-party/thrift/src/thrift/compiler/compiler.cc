@@ -67,6 +67,8 @@ struct gen_params {
   // This is useful, for example, to parse and validate source Thrift IDL
   // without a particular target language in mind.
   bool skip_gen = false;
+
+  bool inject_schema_const = false;
 };
 
 /**
@@ -130,6 +132,9 @@ void usage() {
       stderr,
       "  --record-genfiles FILE\n"
       "              Save the list of generated files to FILE,\n");
+  fprintf(
+      stderr,
+      "  --inject-schema-const  Inject generated schema constant (must use thrift2ast)\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "Available generators (and options):\n");
 
@@ -367,6 +372,8 @@ std::string parse_args(
 
       gparams.out_path = std::move(out_path);
       gparams.add_gen_dir = (flag == "o");
+    } else if (flag == "inject-schema-const") {
+      gparams.inject_schema_const = true;
     } else {
       fprintf(
           stderr, "!!! Unrecognized option: %s\n\n", arguments[arg_i].c_str());
@@ -741,6 +748,11 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
         source_location{},
         "Could not load Thrift standard libraries: {}",
         std::get<1>(found_or_error));
+  }
+  if (gparams.inject_schema_const) {
+    mutator_context mctx;
+    mctx.bundle = program_bundle.get();
+    schema_mutator()(ctx, mctx, *program_bundle->root_program());
   }
 
   program_bundle->root_program()->set_include_prefix(

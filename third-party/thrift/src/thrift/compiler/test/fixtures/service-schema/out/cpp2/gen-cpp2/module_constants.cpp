@@ -9,7 +9,6 @@
 
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
-#include "thrift/lib/thrift/gen-cpp2/schema_constants.h"
 
 namespace cpp2 {
 namespace module_constants {

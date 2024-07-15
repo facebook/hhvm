@@ -409,17 +409,12 @@ void inject_schema_const(
   opts.include.reset(schematizer::included_data::DoubleWrites);
   opts.include.reset(schematizer::included_data::Docs);
   opts.include.reset(schematizer::included_data::SourceRanges);
-  std::string serialized;
-  try {
-    serialized = detail::pluggable_functions().call<GetSchemaTag>(
-        opts, ctx.source_mgr(), prog);
-  } catch (const std::runtime_error&) {
-    // Standard library isn't loaded yet so can't generate schemas.
-    return;
-  }
 
+  std::string serialized = detail::pluggable_functions().call<GetSchemaTag>(
+      opts, ctx.source_mgr(), prog);
   if (serialized.empty()) {
-    return;
+    throw std::runtime_error(
+        "Enabling --inject-schema-const requires using thrift2ast");
   }
 
   auto cnst = std::make_unique<t_const>(
@@ -456,12 +451,13 @@ ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
     main.add_definition_visitor(&match_annotation_types_with_const_values);
   }
 
-  {
-    auto& plugin = mutators[standard_mutator_stage::plugin];
-    plugin.add_program_visitor(&inject_schema_const);
-  }
-
   return mutators;
+}
+
+ast_mutator schema_mutator() {
+  ast_mutator mutator;
+  mutator.add_program_visitor(&inject_schema_const);
+  return mutator;
 }
 
 } // namespace compiler

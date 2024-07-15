@@ -232,9 +232,10 @@ def _parse_fixture_cmd(
 
         if generator_spec.startswith("thrift2ast-"):
             if thrift2ast_bin_path is None:
-                raise RuntimeError(f"No path to `thrift2ast` binary provided.")
+                raise RuntimeError("No path to `thrift2ast` binary provided.")
             generator_spec = generator_spec.removeprefix("thrift2ast-")
             base_args[0] = thrift2ast_bin_path
+            base_args[-1:-1] = ["--inject-schema-const"]
 
         return FixtureCmd(
             unique_name=cmd_name,

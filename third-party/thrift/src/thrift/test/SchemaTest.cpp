@@ -76,7 +76,7 @@ TEST(SchemaTest, linked) {
         schema.definitionsMap()->size(), program.definitionKeys()->size());
 
     // Transitive includes are listed
-    EXPECT_GT(schema.programs()->size(), 4);
+    EXPECT_GT(schema.programs()->size(), 3);
   }
   EXPECT_TRUE(found);
 

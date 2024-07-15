@@ -15,8 +15,9 @@
  */
 
 #include <folly/portability/GTest.h>
+#include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/test/gen-cpp2/schema_evolution_test_for_each_field.h>
+#include <thrift/test/gen-cpp2/schema_evolution_test_types.h>
 
 using namespace apache::thrift;
 
@@ -33,7 +34,9 @@ TYPED_TEST_CASE(EvolutionTest, Serializers);
 TYPED_TEST(EvolutionTest, evolution) {
   using Serializer = typename TestFixture::Serializer;
   cpp2::Old oldObj;
-  for_each_field(oldObj, [](auto& meta, auto ref) { ref = *meta.name_ref(); });
+  op::for_each_field_id<cpp2::Old>([&oldObj]<typename Id>(Id) {
+    op::get<Id>(oldObj) = op::get_name_v<cpp2::Old, Id>;
+  });
 
   cpp2::New newObj;
   Serializer::deserialize(

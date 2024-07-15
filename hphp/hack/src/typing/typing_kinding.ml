@@ -303,9 +303,6 @@ module Simple = struct
   let rec check_targs_well_kinded
       ~allow_missing_targs
       ~in_signature
-      ~in_typeconst
-      ~in_typehint
-      ~in_tp_constraint
       ~def_pos
       ~use_pos
       env
@@ -328,28 +325,13 @@ module Simple = struct
                });
     let length = min exp_len act_len in
     let (tyargs, nkinds) = (List.take tyargs length, List.take nkinds length) in
-    List.iter2_exn
-      tyargs
-      nkinds
-      ~f:
-        (check_targ_well_kinded
-           ~in_signature
-           ~in_typeconst
-           ~in_typehint
-           ~in_tp_constraint
-           env)
+    List.iter2_exn tyargs nkinds ~f:(check_targ_well_kinded ~in_signature env)
 
   (** Checks that a type argument is well-kinded against its corresponding
   type parameter. Also checks that the wildcard type argument is not used
   if the type parameter is higher kinded (i.e. it expected type arguments itself) *)
-  and check_targ_well_kinded
-      ~in_signature
-      ~in_typeconst
-      ~in_typehint
-      ~in_tp_constraint
-      env
-      tyarg
-      (nkind : Simple.named_kind) =
+  and check_targ_well_kinded ~in_signature env tyarg (nkind : Simple.named_kind)
+      =
     let kind = snd nkind in
     match get_node tyarg with
     | Twildcard ->
@@ -361,10 +343,7 @@ module Simple = struct
         Errors.add_error Naming_error.(to_user_error @@ HKT_wildcard pos);
         check_well_kinded
           ~in_signature
-          ~in_typeconst
-          ~in_typehint
-          ~in_tp_constraint
-          ~in_targ:true
+          ~ignore_package_errors:true (* ignore package errors for targs *)
           env
           tyarg
           nkind
@@ -372,10 +351,7 @@ module Simple = struct
     | _ ->
       check_well_kinded
         ~in_signature
-        ~in_typeconst
-        ~in_typehint
-        ~in_tp_constraint
-        ~in_targ:true
+        ~ignore_package_errors:true (* ignore package errors for targs *)
         env
         tyarg
         nkind
@@ -388,10 +364,7 @@ module Simple = struct
   and check_well_kinded_type
       ~allow_missing_targs
       ~in_signature
-      ~in_typeconst
-      ~in_typehint
-      ?(in_targ = false)
-      ?(in_tp_constraint = false)
+      ~ignore_package_errors
       env
       (ty : decl_ty) =
     let (r, ty_) = deref ty in
@@ -400,10 +373,7 @@ module Simple = struct
       check_well_kinded_type
         ~allow_missing_targs:false
         ~in_signature
-        ~in_typeconst
-        ~in_typehint
-        ~in_targ
-        ~in_tp_constraint
+        ~ignore_package_errors
         env
         ty
     in
@@ -411,9 +381,6 @@ module Simple = struct
       let kinds = Simple.named_kinds_of_decl_tparams tparams in
       check_targs_well_kinded
         ~allow_missing_targs
-        ~in_typeconst
-        ~in_typehint
-        ~in_tp_constraint
         ~def_pos
         ~use_pos
         env
@@ -446,10 +413,7 @@ module Simple = struct
       check_well_kinded_type
         ~allow_missing_targs:true
         ~in_signature
-        ~in_typeconst
-        ~in_typehint
-        ~in_tp_constraint
-        ~in_targ
+        ~ignore_package_errors
         env
         ty
     | Trefinement (ty, rs) ->
@@ -471,9 +435,6 @@ module Simple = struct
         check_targs_well_kinded
           ~allow_missing_targs:false
           ~in_signature
-          ~in_typeconst
-          ~in_typehint
-          ~in_tp_constraint
           ~def_pos
           ~use_pos
           env
@@ -485,8 +446,7 @@ module Simple = struct
       match Env.get_class_or_typedef env cid with
       | Decl_entry.Found (Env.ClassResult class_info) ->
         Typing_visibility.check_top_level_access
-          ~ignore_package_errors:
-            (in_typeconst || in_typehint || in_targ || in_tp_constraint)
+          ~ignore_package_errors
           ~in_signature
           ~use_pos
           ~def_pos:(Cls.pos class_info)
@@ -499,8 +459,7 @@ module Simple = struct
         check_against_tparams ~in_signature (Cls.pos class_info) argl tparams
       | Decl_entry.Found (Env.TypedefResult typedef) ->
         Typing_visibility.check_top_level_access
-          ~ignore_package_errors:
-            (in_typeconst || in_typehint || in_targ || in_tp_constraint)
+          ~ignore_package_errors
           ~in_signature
           ~use_pos
           ~def_pos:typedef.td_pos
@@ -550,10 +509,7 @@ module Simple = struct
   and in_tp_constraint` to determine whether we should bypass package visibility check. *)
   and check_well_kinded
       ~in_signature
-      ?(in_typeconst = false)
-      ?(in_typehint = false)
-      ?(in_targ = false)
-      ?(in_tp_constraint = false)
+      ~ignore_package_errors
       env
       (ty : decl_ty)
       (expected_nkind : Simple.named_kind) =
@@ -580,10 +536,7 @@ module Simple = struct
       check_well_kinded_type
         ~allow_missing_targs:false
         ~in_signature
-        ~in_typeconst
-        ~in_typehint
-        ~in_tp_constraint
-        ~in_targ
+        ~ignore_package_errors
         env
         ty
     else
@@ -623,22 +576,12 @@ module Simple = struct
       | Tany _ -> ()
       | _ -> kind_error (Simple.fully_applied_type ()) env
 
-  let check_well_kinded_hint
-      ~in_signature
-      ?(in_typeconst = false)
-      ?(in_typehint = false)
-      ?(in_targ = false)
-      ?(in_tp_constraint = false)
-      env
-      hint =
+  let check_well_kinded_hint ~in_signature ~ignore_package_errors env hint =
     let decl_ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
     check_well_kinded_type
       ~allow_missing_targs:false
       ~in_signature
-      ~in_typeconst
-      ~in_typehint
-      ~in_targ
-      ~in_tp_constraint
+      ~ignore_package_errors
       env
       decl_ty
 
@@ -647,8 +590,7 @@ module Simple = struct
     check_well_kinded_type
       ~in_signature
       ~allow_missing_targs:false
-      ~in_typeconst:false
-      ~in_typehint:false
+      ~ignore_package_errors:false
       env
       decl_ty
 end

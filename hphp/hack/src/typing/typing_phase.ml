@@ -1360,7 +1360,7 @@ let localize_targ_with_kind
     if check_well_kinded then
       Kinding.Simple.check_well_kinded
         ~in_signature:false
-        ~in_targ:true
+        ~ignore_package_errors:true (* ignore package errors for targs *)
         env
         ty
         nkind;

@@ -251,34 +251,26 @@ and contexts env (_, hl) = List.concat_map ~f:(context_hint env) hl
 
 and contexts_opt env = Option.value_map ~default:[] ~f:(contexts env)
 
-let hint
-    ?(in_signature = true)
-    ?(in_typeconst = false)
-    ?(in_typehint = false)
-    ?(in_targ = false)
-    ?(in_tp_constraint = false)
-    env
-    (p, h) =
+let hint ?(in_signature = true) ?(ignore_package_errors = false) env (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
   Typing_kinding.Simple.check_well_kinded_hint
     ~in_signature
-    ~in_typeconst
-    ~in_typehint
-    ~in_targ
-    ~in_tp_constraint
+    ~ignore_package_errors
     env.tenv
     (p, h);
   hint_ ~in_signature env p h
 
-let hint_opt ?in_signature ?in_typeconst env =
-  Option.value_map ~default:[] ~f:(hint ?in_signature ?in_typeconst env)
+let hint_opt ?in_signature ?ignore_package_errors env =
+  Option.value_map
+    ~default:[]
+    ~f:(hint ?in_signature ?ignore_package_errors env)
 
 let hints ?in_signature env = List.concat_map ~f:(hint ?in_signature env)
 
 let type_hint env th =
   Option.value_map
     ~default:[]
-    ~f:(hint ~in_typehint:true env)
+    ~f:(hint ~ignore_package_errors:true env)
     (hint_of_type_hint th)
 
 let fun_param env param = type_hint env param.param_type_hint
@@ -287,7 +279,8 @@ let fun_params env = List.concat_map ~f:(fun_param env)
 
 let tparam env t =
   List.concat_map t.Aast.tp_constraints ~f:(fun (_, h) ->
-      hint ~in_tp_constraint:true env h)
+      (* ignore package checks on tparam constraints *)
+      hint ~ignore_package_errors:true env h)
 
 let tparams env = List.concat_map ~f:(tparam env)
 
@@ -331,14 +324,14 @@ let consts env cs = List.concat_map ~f:(const env) cs
 
 let typeconsts env tcs =
   let f tconst =
-    let in_typeconst = true in
+    let ignore_package_errors = true in
     match tconst.c_tconst_kind with
     | TCAbstract { c_atc_as_constraint; c_atc_super_constraint; c_atc_default }
       ->
-      hint_opt ~in_typeconst env c_atc_as_constraint
-      @ hint_opt ~in_typeconst env c_atc_super_constraint
-      @ hint_opt ~in_typeconst env c_atc_default
-    | TCConcrete { c_tc_type } -> hint ~in_typeconst env c_tc_type
+      hint_opt ~ignore_package_errors env c_atc_as_constraint
+      @ hint_opt ~ignore_package_errors env c_atc_super_constraint
+      @ hint_opt ~ignore_package_errors env c_atc_default
+    | TCConcrete { c_tc_type } -> hint ~ignore_package_errors env c_tc_type
   in
   List.concat_map ~f tcs
 
@@ -526,15 +519,20 @@ let typedef tenv (t : (_, _) typedef) =
      parameters of typedefs by Tany, which makes the kind check moot *)
   maybe
     (* We always check the constraints for internal types, so treat in_signature:true *)
-    (Typing_kinding.Simple.check_well_kinded_hint ~in_signature:true)
+    (Typing_kinding.Simple.check_well_kinded_hint
+       ~in_signature:true
+       ~ignore_package_errors:false)
     tenv_with_typedef_tparams
     t_as_constraint;
   maybe
-    (Typing_kinding.Simple.check_well_kinded_hint ~in_signature:true)
+    (Typing_kinding.Simple.check_well_kinded_hint
+       ~in_signature:true
+       ~ignore_package_errors:false)
     tenv_with_typedef_tparams
     t_super_constraint;
   Typing_kinding.Simple.check_well_kinded_hint
     ~in_signature:should_check_internal_signature
+    ~ignore_package_errors:false
     tenv_with_typedef_tparams
     t_kind;
   let env =
@@ -579,9 +577,9 @@ let global_constant tenv gconst =
   in
   hint_opt env cst_type
 
-let hint ?(in_targ = false) tenv h =
+let hint ?(ignore_package_errors = false) tenv h =
   let env = { typedef_tparams = []; tenv } in
-  hint ~in_signature:false ~in_targ env h
+  hint ~in_signature:false ~ignore_package_errors env h
 
 (** Check well-formedness of type hints. See .mli file for more. *)
 let expr tenv ((), _p, e) =
@@ -594,7 +592,9 @@ let expr tenv ((), _p, e) =
     hint tenv h
   | New (_, hl, _, _, _)
   | Call { targs = hl; _ } ->
-    List.concat_map hl ~f:(fun (_, h) -> hint ~in_targ:true tenv h)
+    List.concat_map hl ~f:(fun (_, h) ->
+        (* ignore package checks on targs *)
+        hint ~ignore_package_errors:true tenv h)
   | Lfun (f, _)
   | Efun { ef_fun = f; _ } ->
     fun_ tenv f

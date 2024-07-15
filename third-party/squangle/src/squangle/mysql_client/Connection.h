@@ -198,7 +198,7 @@ class Connection {
       Args&&... args);
 
   template <typename... Args>
-  DbMultiQueryResult multiQueryWithGenerators(
+  DbMultiQueryResult multiQueryWithGenerator(
       std::unique_ptr<QueryGenerator>&& query_generator,
       Args&&... args);
 

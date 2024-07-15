@@ -539,7 +539,7 @@ DbMultiQueryResult Connection::multiQueryWithGenerators(
 }
 
 template <>
-DbMultiQueryResult Connection::multiQueryWithGenerators(
+DbMultiQueryResult Connection::multiQueryWithGenerator(
     std::unique_ptr<QueryGenerator>&& query_generator) {
   std::vector<std::unique_ptr<QueryGenerator>> query_generators;
   query_generators.push_back(std::move(query_generator));

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c0c97ae2c11312a6c97c4003ac951787>>
+// @generated SignedSource<<336a6b458a3f837784009075f2f577e8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -36,31 +36,31 @@ use crate::*;
 #[rust_to_ocaml(attr = "deriving (show, eq)")]
 #[repr(C)]
 pub struct ParserOptions {
-    pub hhvm_compat_mode: bool,
-    pub hhi_mode: bool,
-    pub codegen: bool,
     pub disable_lval_as_an_expression: bool,
-    pub disable_legacy_soft_typehints: bool,
     pub const_static_props: bool,
-    pub disable_legacy_attribute_syntax: bool,
     pub const_default_func_args: bool,
     pub abstract_static_props: bool,
     pub disallow_func_ptrs_in_constants: bool,
     pub enable_xhp_class_modifier: bool,
     pub disable_xhp_element_mangling: bool,
+    pub disallow_direct_superglobals_refs: bool,
+    pub enable_class_level_where_clauses: bool,
+    pub allow_unstable_features: bool,
+    pub hhvm_compat_mode: bool,
+    pub hhi_mode: bool,
+    pub codegen: bool,
+    pub disable_legacy_soft_typehints: bool,
+    pub disable_legacy_attribute_syntax: bool,
     pub disable_xhp_children_declarations: bool,
     pub const_default_lambda_args: bool,
-    pub allow_unstable_features: bool,
     pub interpret_soft_types_as_like_types: bool,
     pub is_systemlib: bool,
     pub disallow_static_constants_in_default_func_args: bool,
-    pub disallow_direct_superglobals_refs: bool,
     pub auto_namespace_map: Vec<(String, String)>,
     pub everything_sdt: bool,
     pub keep_user_attributes: bool,
     pub stack_size: isize,
     pub deregister_php_stdlib: bool,
-    pub enable_class_level_where_clauses: bool,
     pub union_intersection_type_hints: bool,
     pub unwrap_concurrent: bool,
     pub disallow_silence: bool,

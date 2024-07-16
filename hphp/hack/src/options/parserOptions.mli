@@ -6,16 +6,10 @@
  *
  *)
 type t = {
-  hhvm_compat_mode: bool;
-  hhi_mode: bool;
-  codegen: bool;  (** Are we emitting bytecode? *)
+  (* These options are set in both hhvm and hh config *)
   disable_lval_as_an_expression: bool;
       (** Flag to disable using lvals as expressions. *)
-  disable_legacy_soft_typehints: bool;
-      (** Disable legacy soft typehint syntax (@int) and only allow the __Soft attribute. *)
   const_static_props: bool;  (** Enable const static properties *)
-  disable_legacy_attribute_syntax: bool;
-      (** Disable <<...>> attribute syntax *)
   const_default_func_args: bool;
       (** Statically check default function arguments *)
   abstract_static_props: bool;  (** Static properties can be abstract *)
@@ -29,17 +23,27 @@ type t = {
       (** Flag to disable the old stype xhp element mangling. `<something/>` would otherwise be resolved as `xhp_something`
          The new style `xhp class something {}` does not do this style of mangling, thus we need a way to disable it on the
          'lookup side'. *)
+  disallow_direct_superglobals_refs: bool;
+      (** block accessing superglobals via their variable names *)
+  enable_class_level_where_clauses: bool;
+      (** Enable class-level where clauses, i.e. class base<T> where T = int {} *)
+  allow_unstable_features: bool;
+      (** Allows enabling unstable features via the __EnableUnstableFeatures attribute *)
+  (* These options are set in hh config, but use the defaults in (from parser_options_impl.rs) hhvm *)
+  hhvm_compat_mode: bool;
+  hhi_mode: bool;
+  codegen: bool;  (** Are we emitting bytecode? *)
+  disable_legacy_soft_typehints: bool;
+      (** Disable legacy soft typehint syntax (@int) and only allow the __Soft attribute. *)
+  disable_legacy_attribute_syntax: bool;
+      (** Disable <<...>> attribute syntax *)
   disable_xhp_children_declarations: bool;
       (** Disable `children (foo|bar+|pcdata)` declarations as they can be implemented without special syntax *)
   const_default_lambda_args: bool;
       (** Statically check default lambda arguments. Subset of default_func_args *)
-  allow_unstable_features: bool;
-      (** Allows enabling unstable features via the __EnableUnstableFeatures attribute *)
   interpret_soft_types_as_like_types: bool;  (** <<__Soft>> T -> ~T *)
   is_systemlib: bool;  (** Enable features used to typecheck systemlib *)
   disallow_static_constants_in_default_func_args: bool;
-  disallow_direct_superglobals_refs: bool;
-      (** block accessing superglobals via their variable names *)
   auto_namespace_map: (string * string) list;  (** Namespace aliasing map *)
   everything_sdt: bool;
       (** All classes are implcitly marked <<__SupportDynamicType>> *)
@@ -49,8 +53,6 @@ type t = {
       (** Stack size to use for parallel workers inside the parser. *)
   deregister_php_stdlib: bool;
       (** Flag for disabling functions in HHI files with the __PHPStdLib attribute *)
-  enable_class_level_where_clauses: bool;
-      (** Enable class-level where clauses, i.e. class base<T> where T = int {} *)
   union_intersection_type_hints: bool;
       (** Enables union and intersection type hints *)
   unwrap_concurrent: bool;

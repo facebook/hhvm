@@ -7,31 +7,33 @@
  *
  *)
 type t = {
-  hhvm_compat_mode: bool;
-  hhi_mode: bool;
-  codegen: bool;
+  (* These options are set in both hhvm and hh config *)
   disable_lval_as_an_expression: bool;
-  disable_legacy_soft_typehints: bool;
   const_static_props: bool;
-  disable_legacy_attribute_syntax: bool;
   const_default_func_args: bool;
   abstract_static_props: bool;
   disallow_func_ptrs_in_constants: bool;
   enable_xhp_class_modifier: bool;
   disable_xhp_element_mangling: bool;
+  disallow_direct_superglobals_refs: bool;
+  enable_class_level_where_clauses: bool;
+  allow_unstable_features: bool;
+  (* These options are set in hack config, but use the defaults in (from parser_options_impl.rs) hhvm*)
+  hhvm_compat_mode: bool;
+  hhi_mode: bool;
+  codegen: bool;
+  disable_legacy_soft_typehints: bool;
+  disable_legacy_attribute_syntax: bool;
   disable_xhp_children_declarations: bool;
   const_default_lambda_args: bool;
-  allow_unstable_features: bool;
   interpret_soft_types_as_like_types: bool;
   is_systemlib: bool;
   disallow_static_constants_in_default_func_args: bool;
-  disallow_direct_superglobals_refs: bool;
   auto_namespace_map: (string * string) list;
   everything_sdt: bool;
   keep_user_attributes: bool;
   stack_size: int;
   deregister_php_stdlib: bool;
-  enable_class_level_where_clauses: bool;
   union_intersection_type_hints: bool;
   unwrap_concurrent: bool;
   disallow_silence: bool;
@@ -49,31 +51,31 @@ type t = {
 
 let default =
   {
-    hhvm_compat_mode = false;
-    hhi_mode = false;
-    codegen = false;
-    disable_lval_as_an_expression = true;
-    disable_legacy_soft_typehints = true;
+    disable_lval_as_an_expression = true (* false in rust *);
     const_static_props = false;
-    disable_legacy_attribute_syntax = false;
     const_default_func_args = false;
     abstract_static_props = false;
     disallow_func_ptrs_in_constants = false;
-    enable_xhp_class_modifier = true;
-    disable_xhp_element_mangling = true;
-    disable_xhp_children_declarations = true;
-    const_default_lambda_args = false;
+    enable_xhp_class_modifier = true (* false in rust *);
+    disable_xhp_element_mangling = true (* false in rust *);
+    disallow_direct_superglobals_refs = false;
+    enable_class_level_where_clauses = false;
     allow_unstable_features = false;
+    hhvm_compat_mode = false;
+    hhi_mode = false;
+    codegen = false;
+    disable_legacy_soft_typehints = true;
+    disable_legacy_attribute_syntax = false;
+    disable_xhp_children_declarations = true (* false in rust *);
+    const_default_lambda_args = false;
     interpret_soft_types_as_like_types = false;
     is_systemlib = false;
     disallow_static_constants_in_default_func_args = false;
-    disallow_direct_superglobals_refs = false;
     auto_namespace_map = [];
     everything_sdt = false;
-    keep_user_attributes = false;
-    stack_size = 32 * 1024 * 1024;
     deregister_php_stdlib = false;
-    enable_class_level_where_clauses = false;
+    stack_size = 32 * 1024 * 1024;
+    keep_user_attributes = false;
     union_intersection_type_hints = false;
     unwrap_concurrent = false;
     disallow_silence = false;

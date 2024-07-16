@@ -739,6 +739,15 @@ Array HHVM_FUNCTION(facts_path_to_modules, const String& path) {
   return Facts::getFactsOrThrow().getFileModules(path);
 }
 
+Variant HHVM_FUNCTION(facts_path_to_module_membership, const String& path) {
+  auto result = Facts::getFactsOrThrow().getFileModuleMembership(path);
+  if (!result) {
+    return Variant{Variant::NullInit{}};
+  } else {
+    return Variant{result.value()};
+  }
+}
+
 Array HHVM_FUNCTION(facts_path_to_type_aliases, const String& path) {
   return Facts::getFactsOrThrow().getFileTypeAliases(path);
 }
@@ -923,6 +932,9 @@ void FactsExtension::moduleRegisterNative() {
   HHVM_NAMED_FE(
       HH\\Facts\\path_to_type_aliases, HHVM_FN(facts_path_to_type_aliases));
   HHVM_NAMED_FE(HH\\Facts\\path_to_modules, HHVM_FN(facts_path_to_modules));
+  HHVM_NAMED_FE(
+      HH\\Facts\\path_to_module_membership,
+      HHVM_FN(facts_path_to_module_membership));
   HHVM_NAMED_FE(HH\\Facts\\type_name, HHVM_FN(facts_type_name));
   HHVM_NAMED_FE(HH\\Facts\\kind, HHVM_FN(facts_kind));
   HHVM_NAMED_FE(HH\\Facts\\is_abstract, HHVM_FN(facts_is_abstract));

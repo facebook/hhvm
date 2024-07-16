@@ -111,6 +111,14 @@ pub fn get_file_modules(parsed_file: &ParsedFile<'_>, name: &str) -> Vec<ExtDecl
         .collect()
 }
 
+pub fn get_file_module_membership(parsed_file: &ParsedFile<'_>) -> String {
+    if let Some(module_membership) = parsed_file.module_membership {
+        module_membership.to_string()
+    } else {
+        "".to_string()
+    }
+}
+
 pub fn get_file_typedefs(parsed_file: &ParsedFile<'_>, name: &str) -> Vec<ExtDeclTypeDef> {
     parsed_file
         .decls

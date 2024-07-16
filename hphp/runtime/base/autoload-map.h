@@ -332,6 +332,11 @@ struct FactsStore : public AutoloadMap {
    * If the given file does not have the given attribute, return an empty vec.
    */
   virtual Array getFileAttrArgs(const String& file, const String& attr) = 0;
+
+  /**
+   * Returns the module the given file is a member of, if any.
+   */
+  virtual Optional<String> getFileModuleMembership(const String& path) = 0;
 };
 
 } // namespace HPHP

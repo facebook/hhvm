@@ -76,6 +76,9 @@ function main(): void {
   var_dump($instance->getFileModule('missing'));
   var_dump($instance->getFileModule(''));
 
+  echo "=== File Module Membership\n";
+  var_dump($instance->getFileModuleMembership());
+
   echo "=== File Typedef\n";
   var_dump($instance->getFileTypedefs());
   var_dump($instance->getFileTypedef('myGlobalType1'));

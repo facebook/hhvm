@@ -207,6 +207,21 @@ function print_attr_value_files(
   $files_json = \json_encode($files);
   print "Files decorated with $attr and value $value: $files_json\n";
 }
+function print_path_modules(
+  string $path,
+): void {
+  $modules = HH\Facts\path_to_modules($path);
+  foreach ($modules as $mod) {
+    print "$path has $mod module definition\n";
+  }
+
+  $module_membership = HH\Facts\path_to_module_membership($path);
+  if ($module_membership is null) {
+    print "$path has no module membership\n";
+  } else {
+    print "$path has $module_membership module membership\n";
+  }
+}
 
 function print_num_symbols(
   string $path,
@@ -214,6 +229,13 @@ function print_num_symbols(
   $modules = HH\Facts\path_to_modules($path);
   $num_modules = \count($modules);
   print "$path has $num_modules modules\n";
+
+  $module_membership = HH\Facts\path_to_module_membership($path);
+  if ($module_membership is null) {
+    print "$path has no module membership\n";
+  } else {
+    print "$path has $module_membership module membership\n";
+  }
 
   $types = HH\Facts\path_to_types($path);
   $num_types = \count($types);
@@ -565,6 +587,9 @@ function facts(): void {
   print_attr_files_and_args(NoArgFileAttr::class);
   print_attr_files_and_args(TwoArgFileAttr::class);
   print_file_attrs('attribute-classes.inc');
+  print "\nGetting modules from paths\n";
+  print_path_modules('types-with-kinds.inc');
+  print_path_modules('module-membership.inc');
   print "\nChecking nonexistent paths\n";
   print_num_symbols('this/path/does/not/exist.php');
   print_num_symbols('/this/path/does/not/exist.php');

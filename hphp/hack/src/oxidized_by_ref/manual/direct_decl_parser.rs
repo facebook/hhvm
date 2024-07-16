@@ -43,6 +43,10 @@ pub struct ParsedFile<'a> {
     /// are detected in a second pass over the CST, and this field does not
     /// indicate whether errors would be detected in that second pass.
     pub has_first_pass_parse_errors: bool,
+
+    /// The module this file is a part of, if any.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub module_membership: Option<&'a str>,
 }
 
 arena_deserializer::impl_deserialize_in_arena!(ParsedFile<'arena>);

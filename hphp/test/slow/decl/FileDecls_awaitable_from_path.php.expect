@@ -328,6 +328,8 @@ dict(1) {
 }
 NULL
 NULL
+=== File Module Membership
+string(8) "myModule"
 === File Typedef
 vec(2) {
   dict(4) {

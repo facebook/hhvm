@@ -382,6 +382,12 @@ struct Recorder::FactsStore final : public HPHP::FactsStore {
     return wrapper(path);
   }
 
+  Optional<String> getFileModuleMembership(const String& path) override {
+    static constexpr auto m{&HPHP::FactsStore::getFileModuleMembership};
+    static const auto wrapper{wrap(m, "getFileModuleMembership")};
+    return wrapper(path);
+  }
+
   Array getFilesWithAttribute(const String& attr) override {
     static constexpr auto m{&HPHP::FactsStore::getFilesWithAttribute};
     static const auto wrapper{wrap(m, "getFilesWithAttribute")};

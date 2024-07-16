@@ -96,13 +96,21 @@ Files and attr args with NoArgFileAttr: [["attribute-classes.inc",null]]
 Files and attr args with TwoArgFileAttr: [["attribute-classes.inc","Hello"],["attribute-classes.inc","There"]]
 Attributes of attribute-classes.inc: {"NoArgFileAttr":[],"OneArgFileAttr":["7"],"TwoArgFileAttr":["Hello","There"]}
 
+Getting modules from paths
+types-with-kinds.inc has a module definition
+types-with-kinds.inc has b module definition
+types-with-kinds.inc has no module membership
+module-membership.inc has someModule module membership
+
 Checking nonexistent paths
 this/path/does/not/exist.php has 0 modules
+this/path/does/not/exist.php has no module membership
 this/path/does/not/exist.php has 0 types
 this/path/does/not/exist.php has 0 functions
 this/path/does/not/exist.php has 0 constants
 this/path/does/not/exist.php has 0 type aliases
 /this/path/does/not/exist.php has 0 modules
+/this/path/does/not/exist.php has no module membership
 /this/path/does/not/exist.php has 0 types
 /this/path/does/not/exist.php has 0 functions
 /this/path/does/not/exist.php has 0 constants
@@ -218,13 +226,21 @@ Files and attr args with NoArgFileAttr: [["attribute-classes.inc",null]]
 Files and attr args with TwoArgFileAttr: [["attribute-classes.inc","Hello"],["attribute-classes.inc","There"]]
 Attributes of attribute-classes.inc: {"NoArgFileAttr":[],"OneArgFileAttr":["7"],"TwoArgFileAttr":["Hello","There"]}
 
+Getting modules from paths
+types-with-kinds.inc has a module definition
+types-with-kinds.inc has b module definition
+types-with-kinds.inc has no module membership
+module-membership.inc has someModule module membership
+
 Checking nonexistent paths
 this/path/does/not/exist.php has 0 modules
+this/path/does/not/exist.php has no module membership
 this/path/does/not/exist.php has 0 types
 this/path/does/not/exist.php has 0 functions
 this/path/does/not/exist.php has 0 constants
 this/path/does/not/exist.php has 0 type aliases
 /this/path/does/not/exist.php has 0 modules
+/this/path/does/not/exist.php has no module membership
 /this/path/does/not/exist.php has 0 types
 /this/path/does/not/exist.php has 0 functions
 /this/path/does/not/exist.php has 0 constants

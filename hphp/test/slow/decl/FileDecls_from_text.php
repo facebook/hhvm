@@ -74,4 +74,6 @@ function main(): void {
   ");
   echo "FileDecls Error (should be null):".($instance->getError()??'null')."\n";
   echo "Has typedef InlineSeeMoreToFBECheckerInput (should be yes):".($instance->hasType('InlineSeeMoreToFBECheckerInput') ? "Yes\n" : "No\n");
+
+  echo "File Module Membership (should be null): ".($instance->getFileModuleMembership()??'null')."\n";
 }

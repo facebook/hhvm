@@ -237,7 +237,7 @@ struct AutoloadDB {
   virtual std::vector<std::string> getPathConstants(
       const std::filesystem::path& path) = 0;
 
-  // Modules
+  // Module Definitions
   virtual void insertModule(
       std::string_view module,
       const std::filesystem::path& path) = 0;
@@ -245,6 +245,15 @@ struct AutoloadDB {
       std::string_view module) = 0;
   virtual std::vector<std::string> getPathModules(
       const std::filesystem::path& path) = 0;
+
+  // Module Membership
+  virtual void insertModuleMembership(
+      const std::filesystem::path& path,
+      std::string_view module) = 0;
+  virtual std::optional<std::string> getPathModuleMembership(
+      const std::filesystem::path& path) = 0;
+  virtual std::vector<std::filesystem::path> getModuleMembers(
+      std::string_view module) = 0;
 
   /**
    * Validates the current facts DB is not corrupted

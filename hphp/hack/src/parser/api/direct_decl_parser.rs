@@ -142,5 +142,6 @@ fn parse_script_with_text_allocator<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>>(
         decls: sc_state.decls,
         disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
         has_first_pass_parse_errors: !errors.is_empty(),
+        module_membership: sc_state.module.map(|id| id.1),
     }
 }

@@ -96,7 +96,7 @@ namespace Facts {
 // implementation.  We use this when we make a change that invalidates
 // the cache, such as adding a new table which would otherwise be
 // unpopulated without a cache rebuild.
-constexpr size_t kSchemaVersion = 1916337637;
+constexpr size_t kSchemaVersion = 8306754210;
 }
 
 /*
@@ -466,6 +466,8 @@ struct RuntimeOption {
   F(bool, EnableFuncCoverage,          false)                           \
   /* The number of worker threads to spawn for facts extraction. */     \
   F(uint64_t, FactsWorkers,            Process::GetCPUCount())          \
+  /* Whether to force the old Facts SQLite DB format. */                \
+  F(bool, FactsExcludeModuleMembership,            false)               \
   /* Whether the HackC compiler should inherit the compiler config of the
      HHVM process that launches it. */                                  \
   F(bool, HackCompilerInheritConfig,   true)                            \

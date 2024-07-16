@@ -97,11 +97,12 @@ void IRUnit::expandJmp(IRInstruction* jmp, SSATmp* value) {
 Block* IRUnit::defBlock(uint64_t profCount /* =1 */,
                         Block::Hint hint   /* =Neither */ ) {
   FTRACE(2, "IRUnit defining B{}\n", m_nextBlockId);
-  auto const block = new (m_arena) Block(m_nextBlockId++, profCount);
   if (hint == Block::Hint::Neither) {
     hint = m_defHint;
   }
-  block->setHint(hint);
+  auto const block = new (m_arena) Block(m_nextBlockId++, profCount, hint);
+  assertx(!block->isEntry() || block->hint() >= Block::Hint::Neither);
+
   return block;
 }
 

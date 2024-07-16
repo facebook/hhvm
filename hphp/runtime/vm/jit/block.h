@@ -72,10 +72,10 @@ struct Block {
 
   enum class Hint { Unused, Unlikely, Neither, Likely };
 
-  explicit Block(unsigned id, uint64_t profCount)
+  explicit Block(unsigned id, uint64_t profCount, Hint hint)
     : m_profCount(checkedProfCount(profCount))
     , m_id(id)
-    , m_hint(Hint::Neither)
+    , m_hint(hint)
   {}
 
   Block(const Block&) = delete;

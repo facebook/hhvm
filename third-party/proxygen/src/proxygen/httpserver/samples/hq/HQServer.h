@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 
+#include <folly/io/async/EventBaseLocal.h>
 #include <proxygen/httpserver/samples/hq/HQParams.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <quic/server/QuicServer.h>
@@ -79,6 +80,32 @@ class ScopedHQServer {
 
  private:
   HQServer server_;
+};
+
+class HQServerTransportFactory : public quic::QuicServerTransportFactory {
+ public:
+  explicit HQServerTransportFactory(
+      const HQServerParams& params,
+      HTTPTransactionHandlerProvider httpTransactionHandlerProvider,
+      std::function<void(proxygen::HQSession*)> onTransportReadyFn_);
+  ~HQServerTransportFactory() override = default;
+
+  // Creates new quic server transport
+  quic::QuicServerTransport::Ptr make(
+      folly::EventBase* evb,
+      std::unique_ptr<quic::FollyAsyncUDPSocketAlias> socket,
+      const folly::SocketAddress& /* peerAddr */,
+      quic::QuicVersion quicVersion,
+      std::shared_ptr<const fizz::server::FizzServerContext> ctx) noexcept
+      override;
+
+ private:
+  // Configuration params
+  const HQServerParams& params_;
+  // Provider of HTTPTransactionHandler
+  HTTPTransactionHandlerProvider httpTransactionHandlerProvider_;
+  std::function<void(proxygen::HQSession*)> onTransportReadyFn_;
+  folly::EventBaseLocal<wangle::ConnectionManager::UniquePtr> connMgr_;
 };
 
 } // namespace quic::samples

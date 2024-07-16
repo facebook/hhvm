@@ -46,7 +46,7 @@ HTTPTransactionHandler* Dispatcher::getRequestHandler(HTTPMessage* msg) {
   }
   if (path == "/status_fail") {
     shouldPassHealthChecks = false;
-    return new HealthCheckHandler(true, params_);
+    return new HealthCheckHandler(false, params_);
   }
   if (path == "/wait" || path == "/release") {
     return new WaitReleaseHandler(

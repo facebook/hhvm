@@ -29,32 +29,6 @@ namespace {
 using namespace quic::samples;
 using namespace proxygen;
 
-class HQServerTransportFactory : public quic::QuicServerTransportFactory {
- public:
-  explicit HQServerTransportFactory(
-      const HQServerParams& params,
-      HTTPTransactionHandlerProvider httpTransactionHandlerProvider,
-      std::function<void(HQSession*)> onTransportReadyFn_);
-  ~HQServerTransportFactory() override = default;
-
-  // Creates new quic server transport
-  quic::QuicServerTransport::Ptr make(
-      folly::EventBase* evb,
-      std::unique_ptr<quic::FollyAsyncUDPSocketAlias> socket,
-      const folly::SocketAddress& /* peerAddr */,
-      quic::QuicVersion quicVersion,
-      std::shared_ptr<const fizz::server::FizzServerContext> ctx) noexcept
-      override;
-
- private:
-  // Configuration params
-  const HQServerParams& params_;
-  // Provider of HTTPTransactionHandler
-  HTTPTransactionHandlerProvider httpTransactionHandlerProvider_;
-  std::function<void(HQSession*)> onTransportReadyFn_;
-  folly::EventBaseLocal<wangle::ConnectionManager::UniquePtr> connMgr_;
-};
-
 /**
  * HQSessionController creates new HQSession objects
  *
@@ -203,6 +177,10 @@ void HQSessionController::detachSession(const HTTPSessionBase* /*session*/) {
   }
 }
 
+} // namespace
+
+namespace quic::samples {
+
 HQServerTransportFactory::HQServerTransportFactory(
     const HQServerParams& params,
     HTTPTransactionHandlerProvider httpTransactionHandlerProvider,
@@ -241,10 +219,6 @@ QuicServerTransport::Ptr HQServerTransportFactory::make(
   connCb->quicSocket = transport;
   return transport;
 }
-
-} // namespace
-
-namespace quic::samples {
 
 HQServer::HQServer(
     HQServerParams params,

@@ -1135,7 +1135,7 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     $this->list_of_string = $list_of_string;
     $this->list_of_map_of_string_to_A = $list_of_map_of_string_to_A;
     $this->list_of_map_of_string_to_list_of_A = $list_of_map_of_string_to_list_of_A;
-    $this->set_of_string = $set_of_string ?? keyset[
+    $this->set_of_string = $set_of_string ?? dict[
     ];
   }
 

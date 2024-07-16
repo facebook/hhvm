@@ -104,6 +104,8 @@ type element = {
   elt_visibility: ce_visibility;
   elt_deprecated: string option;
   elt_sort_text: string option;
+  (* Derived from <<__Overlapping(_)>> attribute *)
+  elt_overlapping_tparams: SSet.t option;
 }
 [@@deriving show]
 

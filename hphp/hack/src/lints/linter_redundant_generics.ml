@@ -13,7 +13,7 @@ open Typing_defs
 module Cls = Folded_class
 module SN = Naming_special_names
 
-let ft_redundant_tparams env tparams ty =
+let ft_redundant_tparams env overlapping tparams ty =
   let tracked =
     List.fold_left
       tparams
@@ -31,15 +31,20 @@ let ft_redundant_tparams env tparams ty =
   List.iter tparams ~f:(fun t ->
       let (pos, name) = t.tp_name in
       let pos = Naming_provider.resolve_position (Tast_env.get_ctx env) pos in
-      (* It's only redundant if it's erased and inferred *)
+      (* It's only redundant if it's erased and inferred, and not covered by a non-disjointness check *)
       if
         equal_reify_kind t.tp_reified Erased
         && (not
               (Attributes.mem
                  SN.UserAttributes.uaNonDisjoint
                  t.tp_user_attributes))
+        && (not
+              (Attributes.mem SN.UserAttributes.uaExplicit t.tp_user_attributes))
+        (* Don't track generics that are mentioned in an <<__Overlapping>> attribute *)
         && not
-             (Attributes.mem SN.UserAttributes.uaExplicit t.tp_user_attributes)
+             (match overlapping with
+             | Some s -> SSet.mem name s
+             | None -> false)
       then
         let super_bounds =
           List.filter
@@ -129,12 +134,13 @@ let check_redundant_generics_class_method env (_method_name, method_) =
   match method_.ce_type with
   | (lazy (ty as ft)) -> begin
     match get_node ty with
-    | Tfun { ft_tparams; _ } -> ft_redundant_tparams env ft_tparams ft
+    | Tfun { ft_tparams; _ } ->
+      ft_redundant_tparams env method_.ce_overlapping_tparams ft_tparams ft
     | _ -> assert false
   end
 
 let check_redundant_generics_fun env ft =
-  ft_redundant_tparams env ft.ft_tparams (mk (Reason.none, Tfun ft))
+  ft_redundant_tparams env None ft.ft_tparams (mk (Reason.none, Tfun ft))
 
 let check_redundant_generics_class env class_name class_type =
   Cls.methods class_type

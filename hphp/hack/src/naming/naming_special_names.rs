@@ -255,6 +255,8 @@ pub mod user_attributes {
 
     pub const NON_DISJOINT: &str = "__NonDisjoint";
 
+    pub const OVERLAPPING: &str = "__Overlapping";
+
     pub const SOFT: &str = "__Soft";
 
     pub const SOFT_INTERNAL: &str = "__SoftInternal";
@@ -729,10 +731,7 @@ pub mod typehints {
                 "" => false,
                 _ => true,
             });
-            let last_split = match as_list.pop() {
-                None => "",
-                Some(x) => x,
-            };
+            let last_split = as_list.pop().unwrap_or_default();
 
             (as_list, last_split)
         }

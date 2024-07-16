@@ -53,10 +53,11 @@ let check_non_disjoint ~is_dynamic_call ~as_lint env p name ty1 ty2 =
   else
     let ty1 = Tast_env.strip_dynamic env ty1 in
     let ty2 = Tast_env.strip_dynamic env ty2 in
+    (* We don't flag ~null because typically this is a false positive *)
     if
       Typing_utils.(
-        (not (is_nothing tenv ty1))
-        && (not (is_nothing tenv ty2))
+        (not (is_nothing tenv ty1 || is_null tenv ty1))
+        && (not (is_nothing tenv ty2 || is_null tenv ty2))
         && is_type_disjoint tenv ty1 ty2)
     then
       add_warning env p name ty1 ty2 ~dynamic:true ~as_lint
@@ -73,15 +74,37 @@ let rec check_non_disjoint_tyl ~is_dynamic_call ~as_lint env p name tyl =
 let has_non_disjoint_attr tp =
   Attributes.mem SN.UserAttributes.uaNonDisjoint tp.tp_user_attributes
 
+let is_in_overlapping tp overlapping =
+  match overlapping with
+  | None -> false
+  | Some s -> SSet.mem (snd tp.tp_name) s
+
 let check_function_type_args_non_disjoint
-    ~is_dynamic_call ~as_lint env p name tal fun_ty =
+    ~is_dynamic_call
+    ~as_lint
+    env
+    p
+    class_typarams
+    name
+    overlapping
+    (class_tyargs : Tast.ty list)
+    (method_tyargs : Tast.ty list)
+    fun_ty =
   match get_node fun_ty with
-  | Tfun { ft_tparams = tpl; _ } ->
-    if List.exists tpl ~f:has_non_disjoint_attr then
-      let (pairs, _) = List.zip_with_remainder tpl tal in
+  | Tfun { ft_tparams = method_typarams; _ } ->
+    if
+      List.exists method_typarams ~f:has_non_disjoint_attr
+      || Option.is_some overlapping
+    then
+      let (method_pairs, _) =
+        List.zip_with_remainder method_typarams method_tyargs
+      in
+      let (class_pairs, _) =
+        List.zip_with_remainder class_typarams class_tyargs
+      in
       let tyl =
-        List.filter_map pairs ~f:(fun (tp, (ty, _)) ->
-            if has_non_disjoint_attr tp then
+        List.filter_map (class_pairs @ method_pairs) ~f:(fun (tp, ty) ->
+            if has_non_disjoint_attr tp || is_in_overlapping tp overlapping then
               Some ty
             else
               None)
@@ -89,45 +112,101 @@ let check_function_type_args_non_disjoint
       check_non_disjoint_tyl ~is_dynamic_call ~as_lint env p name tyl
   | _ -> ()
 
-let member_hook ~is_dynamic_call ~as_lint env p class_type method_name tal =
-  match Cls.get_method class_type method_name with
+let get_origin_info env class_id class_type class_tyargs origin =
+  if String.equal origin class_id then
+    Some (Cls.tparams class_type, class_tyargs)
+  else
+    match
+      Decl_provider.get_class (Tast_env.get_ctx env) origin
+      |> Decl_entry.to_option
+    with
+    | None -> None
+    | Some origin_class_type ->
+      (match Cls.get_ancestor class_type origin with
+      | Some ty -> begin
+        match get_node ty with
+        | Tapply (_, tyargs) ->
+          let ety_env =
+            {
+              empty_expand_env with
+              substs =
+                Typing_utils.make_locl_subst_for_class_tparams
+                  origin_class_type
+                  class_tyargs;
+            }
+          in
+          let origin_class_tyargs =
+            List.map tyargs ~f:(fun ty ->
+                snd (Tast_env.localize env ety_env ty))
+          in
+          Some (Cls.tparams origin_class_type, origin_class_tyargs)
+        | _ -> None
+      end
+      | None -> None)
+
+let member_hook
+    ~is_dynamic_call ~as_lint env p class_id class_tyargs method_name tal =
+  match
+    Decl_provider.get_class (Tast_env.get_ctx env) class_id
+    |> Decl_entry.to_option
+  with
   | None -> ()
-  | Some { ce_type = (lazy fun_ty); _ } ->
-    check_function_type_args_non_disjoint
-      ~is_dynamic_call
-      ~as_lint
-      env
-      p
-      method_name
-      tal
-      fun_ty
+  | Some class_type ->
+    (match Cls.get_method class_type method_name with
+    | None -> ()
+    | Some { ce_type = (lazy fun_ty); ce_overlapping_tparams; ce_origin; _ } ->
+      (match get_origin_info env class_id class_type class_tyargs ce_origin with
+      | None -> ()
+      | Some (origin_class_typarams, origin_class_tyargs) ->
+        check_function_type_args_non_disjoint
+          ~is_dynamic_call
+          ~as_lint
+          env
+          p
+          origin_class_typarams
+          method_name
+          ce_overlapping_tparams
+          origin_class_tyargs
+          (List.map tal ~f:fst)
+          fun_ty))
 
 let check_instance_method_call
     env p ~as_lint function_type receiver_type method_name tal =
-  let ctx = Tast_env.get_ctx env in
   let tenv = Env.tast_env_as_typing_env env in
   let is_dynamic_call =
     Option.is_some (Typing_utils.try_strip_dynamic tenv function_type)
   in
-  Tast_env.get_class_ids env receiver_type
-  |> List.filter_map ~f:(fun c ->
-         Decl_provider.get_class ctx c |> Decl_entry.to_option)
-  |> List.iter ~f:(fun class_type ->
-         member_hook ~is_dynamic_call ~as_lint env p class_type method_name tal)
+  Tast_env.get_receiver_ids env receiver_type
+  |> List.iter ~f:(fun ri ->
+         match ri with
+         | Tast_env.RIclass (cid, tyargs) ->
+           member_hook
+             ~is_dynamic_call
+             ~as_lint
+             env
+             p
+             cid
+             tyargs
+             method_name
+             tal
+         | _ -> ())
 
 let check_static_method_call env p ~as_lint class_result method_name tal =
   match class_result with
   | Decl_entry.Found cd -> begin
     match Cls.get_smethod cd method_name with
     | None -> ()
-    | Some { ce_type = (lazy fun_ty); _ } ->
+    | Some { ce_type = (lazy fun_ty); ce_overlapping_tparams; _ } ->
       check_function_type_args_non_disjoint
         ~is_dynamic_call:false
         ~as_lint
         env
         p
+        []
         method_name
-        tal
+        ce_overlapping_tparams
+        []
+        (List.map tal ~f:fst)
         fun_ty
   end
   | _ -> ()
@@ -148,8 +227,11 @@ let handler ~as_lint =
             ~as_lint
             env
             p
+            []
             name
-            tal
+            None
+            []
+            (List.map tal ~f:fst)
             fe_type
         | _ -> ()
       end

@@ -29,6 +29,13 @@ SORT TEXT: none
   Cache the return values from this function/method. Calls with the same arguments will return the cached value.
   
   Caching is per-request and shared between subclasses (see also `__MemoizeLSB`).
+__Overlapping
+  INSERT __Overlapping
+  built-in attribute
+SORT TEXT: none
+  Requires these type parameters to have some overlap with each other.
+  
+  This prevents Hack inferring completely unrelated types. For example, this allows the typechecker to warn on `C\contains(vec[1], "foo")`.
 __ReturnDisposable
   INSERT __ReturnDisposable
   built-in attribute

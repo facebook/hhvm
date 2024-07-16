@@ -12,6 +12,7 @@ FoldedClass {
             sort_text: Some(
                 "2getFoo",
             ),
+            overlapping_tparams: None,
         },
         "getBar": FoldedElement {
             flags: ClassEltFlags(
@@ -23,6 +24,7 @@ FoldedClass {
             sort_text: Some(
                 "1getBar",
             ),
+            overlapping_tparams: None,
         },
     },
     consts: {
@@ -48,6 +50,7 @@ FoldedClass {
             visibility: Public,
             deprecated: None,
             sort_text: None,
+            overlapping_tparams: None,
         },
         "getBar": FoldedElement {
             flags: ClassEltFlags(
@@ -57,6 +60,7 @@ FoldedClass {
             visibility: Public,
             deprecated: None,
             sort_text: None,
+            overlapping_tparams: None,
         },
     },
     consts: {
@@ -106,6 +110,7 @@ FoldedClass {
             sort_text: Some(
                 "2getFoo",
             ),
+            overlapping_tparams: None,
         },
         "getBar": FoldedElement {
             flags: ClassEltFlags(
@@ -117,6 +122,7 @@ FoldedClass {
             sort_text: Some(
                 "1getBar",
             ),
+            overlapping_tparams: None,
         },
     },
     consts: {
@@ -164,6 +170,7 @@ FoldedClass {
             visibility: Public,
             deprecated: None,
             sort_text: None,
+            overlapping_tparams: None,
         },
     },
     static_methods: {
@@ -177,6 +184,7 @@ FoldedClass {
             sort_text: Some(
                 "2getFoo",
             ),
+            overlapping_tparams: None,
         },
         "getBar": FoldedElement {
             flags: ClassEltFlags(
@@ -188,6 +196,7 @@ FoldedClass {
             sort_text: Some(
                 "1getBar",
             ),
+            overlapping_tparams: None,
         },
     },
     consts: {

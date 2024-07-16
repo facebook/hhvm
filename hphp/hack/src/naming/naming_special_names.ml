@@ -294,6 +294,8 @@ module UserAttributes = struct
 
   let uaNonDisjoint = "__NonDisjoint"
 
+  let uaOverlapping = "__Overlapping"
+
   let uaSoft = "__Soft"
 
   let uaWarn = "__Warn"
@@ -673,6 +675,15 @@ module UserAttributes = struct
               autocomplete = true;
               doc =
                 "Requires this type parameter to have some overlap with the other `<<__NonDisjoint>>` type parameters."
+                ^ "\n\nThis prevents Hack inferring completely unrelated types."
+                ^ " For example, this allows the typechecker to warn on `C\\contains(vec[1], \"foo\")`.";
+            } );
+          ( uaOverlapping,
+            {
+              contexts = [fn; mthd];
+              autocomplete = true;
+              doc =
+                "Requires these type parameters to have some overlap with each other."
                 ^ "\n\nThis prevents Hack inferring completely unrelated types."
                 ^ " For example, this allows the typechecker to warn on `C\\contains(vec[1], \"foo\")`.";
             } );

@@ -267,6 +267,7 @@ pub mod user_attributes {
     pub static uaReturnDisposable: Lazy<TypeName> = lazy!(sn::user_attributes::RETURN_DISPOSABLE);
     pub static uaLSB: Lazy<TypeName> = lazy!(sn::user_attributes::LSB);
     pub static uaSealed: Lazy<TypeName> = lazy!(sn::user_attributes::SEALED);
+    pub static uaOverlapping: Lazy<TypeName> = lazy!(sn::user_attributes::OVERLAPPING);
     pub static uaLateInit: Lazy<TypeName> = lazy!(sn::user_attributes::LATE_INIT);
     pub static uaNewable: Lazy<TypeName> = lazy!(sn::user_attributes::NEWABLE);
     pub static uaEnforceable: Lazy<TypeName> = lazy!(sn::user_attributes::ENFORCEABLE);
@@ -334,6 +335,7 @@ pub mod user_attributes {
             *uaEnforceable,
             *uaExplicit,
             *uaNonDisjoint,
+            *uaOverlapping,
             *uaSoft,
             *uaWarn,
             *uaMockClass,

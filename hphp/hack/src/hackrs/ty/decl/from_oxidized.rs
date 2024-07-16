@@ -570,6 +570,9 @@ impl From<&obr::decl_defs::Element<'_>> for folded::FoldedElement {
             visibility: x.visibility.into(),
             deprecated: x.deprecated.map(Into::into),
             sort_text: x.sort_text.map(Into::into),
+            overlapping_tparams: x
+                .overlapping_tparams
+                .map(|l| l.iter().copied().map(Into::into).collect()),
         }
     }
 }

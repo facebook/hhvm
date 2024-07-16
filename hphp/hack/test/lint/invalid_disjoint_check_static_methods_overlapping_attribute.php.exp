@@ -1,0 +1,26 @@
+File "invalid_disjoint_check_static_methods_overlapping_attribute.php", line 17, characters 13-59:
+This call to 'contains' will always return the same value, because type Map<string, mixed> is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods_overlapping_attribute.php", line 27, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods_overlapping_attribute.php", line 31, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods_overlapping_attribute.php", line 34, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods_overlapping_attribute.php", line 37, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods_overlapping_attribute.php", line 40, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods_overlapping_attribute.php", line 43, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods_overlapping_attribute.php", line 46, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods_overlapping_attribute.php", line 49, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods_overlapping_attribute.php", line 52, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type Baz. (Lint[5638])
+File "invalid_disjoint_check_static_methods_overlapping_attribute.php", line 55, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type <expr#3> as Bar. (Lint[5638])
+File "invalid_disjoint_check_static_methods_overlapping_attribute.php", line 58, characters 10-28:
+This call to 'contains' will always return the same value, because type Bar is disjoint from type Foo. (Lint[5638])
+File "invalid_disjoint_check_static_methods_overlapping_attribute.php", line 106, characters 10-28:
+This call to 'contains' will always return the same value, because type string is disjoint from type EnumInt. (Lint[5638])

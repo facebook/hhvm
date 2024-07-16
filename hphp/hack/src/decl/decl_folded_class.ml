@@ -292,6 +292,20 @@ let get_sealed_whitelist (c : Shallow_decl_defs.shallow_class) : SSet.t option =
     in
     Some (SSet.of_list cn_params)
 
+let get_overlapping_tparams (m : Shallow_decl_defs.shallow_method) :
+    SSet.t option =
+  match Attributes.find SN.UserAttributes.uaOverlapping m.sm_attributes with
+  | None -> None
+  | Some { ua_params; _ } ->
+    let params =
+      List.filter_map
+        ~f:(function
+          | String s -> Some s
+          | _ -> None)
+        ua_params
+    in
+    Some (SSet.of_list params)
+
 let get_instantiated_ancestors_and_self
     (env : Decl_env.env) parent_cache (ht : Typing_defs.decl_ty) :
     Typing_defs.decl_ty SMap.t =
@@ -367,6 +381,7 @@ let build_constructor
       elt_origin = class_name;
       elt_deprecated = method_.sm_deprecated;
       elt_sort_text = method_.sm_sort_text;
+      elt_overlapping_tparams = get_overlapping_tparams method_;
     }
   in
   let fe = build_constructor_fun_elt ~ctx ~elt_origin:class_name ~method_ in
@@ -490,6 +505,7 @@ let prop_decl_eager
       elt_origin;
       elt_deprecated = None;
       elt_sort_text = None;
+      elt_overlapping_tparams = None;
     }
   in
   let acc = SMap.add (snd sp.sp_name) (elt, Some ty) acc in
@@ -527,6 +543,7 @@ let static_prop_decl_eager
       elt_origin = snd c.sc_name;
       elt_deprecated = None;
       elt_sort_text = None;
+      elt_overlapping_tparams = None;
     }
   in
   let acc = SMap.add (snd sp.sp_name) (elt, Some ty) acc in
@@ -699,6 +716,7 @@ let method_decl_eager
       elt_origin = snd c.sc_name;
       elt_deprecated = m.sm_deprecated;
       elt_sort_text = sort_text;
+      elt_overlapping_tparams = get_overlapping_tparams m;
     }
   in
   let fe =

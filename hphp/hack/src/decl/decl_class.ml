@@ -90,6 +90,7 @@ let element_to_class_elt
        elt_visibility = ce_visibility;
        elt_deprecated = ce_deprecated;
        elt_sort_text = ce_sort_text;
+       elt_overlapping_tparams = ce_overlapping_tparams;
      } :
       Decl_defs.element) : Typing_defs.class_elt =
   let (ce_pos, ce_type) =
@@ -103,6 +104,7 @@ let element_to_class_elt
     ce_pos;
     ce_flags;
     ce_sort_text;
+    ce_overlapping_tparams;
   }
 
 let fun_elt_to_ty fe = (fe.fe_pos, fe.fe_type)

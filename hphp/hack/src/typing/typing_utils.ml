@@ -263,6 +263,10 @@ let is_nothing_i env ty =
 
 let is_nothing env ty = is_nothing_i env (LoclType ty)
 
+let is_null env ty =
+  let null = MakeType.null Reason.none in
+  is_sub_type_for_union env ty null
+
 let is_dynamic env ty =
   let dynamic = MakeType.dynamic Reason.none in
   (is_sub_type_for_union env dynamic ty && not (is_mixed env ty))

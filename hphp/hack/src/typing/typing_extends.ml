@@ -128,6 +128,7 @@ module ParentClassElt = struct
       ce_pos = _;
       ce_flags = _;
       ce_sort_text = _;
+      ce_overlapping_tparams = _;
     } =
       elt1
     in
@@ -139,6 +140,7 @@ module ParentClassElt = struct
       ce_pos = _;
       ce_flags = _;
       ce_sort_text = _;
+      ce_overlapping_tparams = _;
     } =
       elt2
     in
@@ -1724,6 +1726,7 @@ let default_constructor_ce class_ =
     ce_deprecated = None;
     ce_sort_text = None;
     ce_pos = lazy pos;
+    ce_overlapping_tparams = None;
     ce_flags =
       make_ce_flags
         ~xhp_attr:None

@@ -112,7 +112,7 @@ val strip_dynamic : env -> Tast.ty -> Tast.ty
 (** Types that can have methods called on them. Usually a class but
     also includes dynamic types *)
 type receiver_identifier =
-  | RIclass of string
+  | RIclass of string * Tast.ty list
   | RIdynamic
   | RIerr
   | RIany

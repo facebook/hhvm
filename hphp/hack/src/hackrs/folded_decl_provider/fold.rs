@@ -14,6 +14,7 @@ use pos::MethodName;
 use pos::ModuleName;
 use pos::Positioned;
 use pos::PropName;
+use pos::Symbol;
 use pos::TypeConstName;
 use pos::TypeName;
 use special_names as sn;
@@ -293,6 +294,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             deprecated: None,
             flags: ClassEltFlags::new(flag_args),
             sort_text: None,
+            overlapping_tparams: None,
         };
         props.insert(prop, elt);
     }
@@ -331,6 +333,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             deprecated: None,
             flags: ClassEltFlags::new(flag_args),
             sort_text: None,
+            overlapping_tparams: None,
         };
         static_props.insert(prop, elt);
     }
@@ -387,6 +390,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             deprecated: sm.deprecated,
             flags: ClassEltFlags::new(flag_args),
             sort_text,
+            overlapping_tparams: self.get_overlapping_tparams(sm),
         };
 
         methods.insert(meth, elt);
@@ -433,6 +437,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 deprecated: sm.deprecated,
                 flags: ClassEltFlags::new(flag_args),
                 sort_text: sm.sort_text.to_owned(),
+                overlapping_tparams: None,
             }
         });
 
@@ -772,6 +777,14 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         (self.child.user_attributes.iter())
             .find(|ua| ua.name.id() == *sn::user_attributes::uaSealed)
             .map(|ua| ua.classname_params().iter().copied().collect())
+    }
+
+    fn get_overlapping_tparams(&self, method: &ShallowMethod<R>) -> Option<IndexSet<Symbol>> {
+        method
+            .attributes
+            .iter()
+            .find(|ua| ua.name.id() == *sn::user_attributes::uaOverlapping)
+            .map(|ua| ua.string_params().iter().copied().collect())
     }
 
     fn get_deferred_init_members_helper(&self) -> IndexSet<PropName> {

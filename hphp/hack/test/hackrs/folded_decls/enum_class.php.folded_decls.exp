@@ -29,6 +29,7 @@ FoldedClass {
             visibility: Public,
             deprecated: None,
             sort_text: None,
+            overlapping_tparams: None,
         },
     },
     consts: {
@@ -116,6 +117,7 @@ FoldedClass {
             visibility: Public,
             deprecated: None,
             sort_text: None,
+            overlapping_tparams: None,
         },
         "getValues": FoldedElement {
             flags: ClassEltFlags(
@@ -125,6 +127,7 @@ FoldedClass {
             visibility: Public,
             deprecated: None,
             sort_text: None,
+            overlapping_tparams: None,
         },
         "valueOf": FoldedElement {
             flags: ClassEltFlags(
@@ -134,6 +137,7 @@ FoldedClass {
             visibility: Public,
             deprecated: None,
             sort_text: None,
+            overlapping_tparams: None,
         },
     },
     consts: {

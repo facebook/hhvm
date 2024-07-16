@@ -55,6 +55,7 @@ type class_elt = {
   ce_pos: Pos_or_decl.t Hh_prelude.Lazy.t;
   ce_flags: Typing_defs_flags.ClassElt.t;
   ce_sort_text: string option;
+  ce_overlapping_tparams: SSet.t option;
 }
 [@@deriving show]
 

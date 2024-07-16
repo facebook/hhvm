@@ -371,6 +371,15 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             .elaborate_raw_id(ElaborateKind::Class, id)
     }
 
+    //// Should we preserve this user attribute in the decls?
+    fn keep_user_attribute(&self, attr: &UserAttributeNode<'a>) -> bool {
+        let name = attr.name.1;
+        self.opts.keep_user_attributes
+            || name == "__NoAutoDynamic"
+            || name == "__NoAutoLikes"
+            || name == "__Overlapping"
+    }
+
     fn fold_string_concat(&self, expr: &nast::Expr<'a>, acc: &mut bump::Vec<'a, u8>) -> bool {
         match *expr {
             aast::Expr(
@@ -520,10 +529,6 @@ fn concat<'a>(arena: &'a Bump, str1: &str, str2: &str) -> &'a str {
 
 fn strip_dollar_prefix<'a>(name: &'a str) -> &'a str {
     name.trim_start_matches('$')
-}
-
-fn is_no_auto_attribute(name: &str) -> bool {
-    name == "__NoAutoDynamic" || name == "__NoAutoLikes"
 }
 
 const TANY_: Ty_<'_> = Ty_::Tany(oxidized_by_ref::tany_sentinel::TanySentinel);
@@ -3353,7 +3358,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic/__NoAutoLikes is
         let user_attributes = self.slice(attributes.iter().rev().filter_map(|attribute| {
             if let Node::Attribute(attr) = attribute {
-                if self.opts.keep_user_attributes || is_no_auto_attribute(attr.name.1) {
+                if self.keep_user_attribute(attr) {
                     Some(self.user_attribute_to_decl(attr))
                 } else {
                     None
@@ -3539,7 +3544,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic/__NoAutoLikes is
         let user_attributes = self.slice(attribute_spec.iter().rev().filter_map(|attribute| {
             if let Node::Attribute(attr) = attribute {
-                if self.opts.keep_user_attributes || is_no_auto_attribute(attr.name.1) {
+                if self.keep_user_attribute(attr) {
                     Some(self.user_attribute_to_decl(attr))
                 } else {
                     None
@@ -4831,7 +4836,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic/__NoAutoLikes is
         let user_attributes = self.slice(attrs.iter().rev().filter_map(|attribute| {
             if let Node::Attribute(attr) = attribute {
-                if self.opts.keep_user_attributes || is_no_auto_attribute(attr.name.1) {
+                if self.keep_user_attribute(attr) {
                     Some(self.user_attribute_to_decl(attr))
                 } else {
                     None

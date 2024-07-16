@@ -12,6 +12,7 @@ FoldedClass {
             visibility: Public,
             deprecated: None,
             sort_text: None,
+            overlapping_tparams: None,
         },
     },
     consts: {
@@ -54,6 +55,7 @@ FoldedClass {
             visibility: Public,
             deprecated: None,
             sort_text: None,
+            overlapping_tparams: None,
         },
     },
     consts: {

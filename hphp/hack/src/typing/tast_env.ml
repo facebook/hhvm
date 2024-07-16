@@ -126,7 +126,7 @@ let fully_expand = Typing_expand.fully_expand
 (*****************************************************************************)
 
 type receiver_identifier =
-  | RIclass of string
+  | RIclass of string * Tast.ty list
   | RIdynamic
   | RIerr
   | RIany
@@ -135,7 +135,7 @@ let get_receiver_ids env ty =
   let open Typing_defs in
   let rec aux seen acc ty =
     match get_node ty with
-    | Tclass ((_, cid), _, _) -> RIclass cid :: acc
+    | Tclass ((_, cid), _, tyl) -> RIclass (cid, tyl) :: acc
     | Toption ty
     | Tdependent (_, ty)
     | Tnewtype (_, _, ty) ->
@@ -157,7 +157,7 @@ let get_receiver_ids env ty =
 let get_class_ids env ty =
   get_receiver_ids env ty
   |> List.filter_map ~f:(function
-         | RIclass cid -> Some cid
+         | RIclass (cid, _) -> Some cid
          | _ -> None)
 
 let get_label_receiver_ty env ty =

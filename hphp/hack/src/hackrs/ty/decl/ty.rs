@@ -156,6 +156,14 @@ impl<P> UserAttribute<P> {
             })
             .collect()
     }
+    pub fn string_params(&self) -> Vec<Symbol> {
+        (self.params.iter())
+            .filter_map(|p| match p {
+                UserAttributeParam::String(s) => Some(Symbol::new(s.to_string())),
+                _ => None,
+            })
+            .collect()
+    }
 }
 
 walkable!(impl<R: Reason> for UserAttribute<R::Pos> => [name, params]);

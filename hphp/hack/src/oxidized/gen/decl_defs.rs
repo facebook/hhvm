@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dc4b9f5fbd1b2d686187478049fba053>>
+// @generated SignedSource<<f5a1333601ea435398482bdc545f2eaf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -170,6 +170,7 @@ pub struct Element {
     pub visibility: CeVisibility,
     pub deprecated: Option<String>,
     pub sort_text: Option<String>,
+    pub overlapping_tparams: Option<s_set::SSet>,
 }
 
 #[derive(

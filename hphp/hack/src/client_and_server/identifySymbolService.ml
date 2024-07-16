@@ -264,7 +264,7 @@ let process_class class_ =
 let typed_member_id env receiver_ty mid ~kind =
   Tast_env.get_receiver_ids env receiver_ty
   |> List.map ~f:(function
-         | Tast_env.RIclass cid -> ClassName cid
+         | Tast_env.RIclass (cid, _) -> ClassName cid
          | Tast_env.RIdynamic
          | Tast_env.RIerr
          | Tast_env.RIany ->

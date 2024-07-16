@@ -31,6 +31,13 @@ SORT TEXT: none
   Cache the return values from this method. Calls with the same arguments will return the cached value.
   
   Caching is per-request and has Late Static Binding, so subclasses do not share the cache.
+__Overlapping
+  INSERT __Overlapping
+  built-in attribute
+SORT TEXT: none
+  Requires these type parameters to have some overlap with each other.
+  
+  This prevents Hack inferring completely unrelated types. For example, this allows the typechecker to warn on `C\contains(vec[1], "foo")`.
 __Override
   INSERT __Override
   built-in attribute

@@ -149,6 +149,8 @@ val is_nothing_i : Typing_env_types.env -> Typing_defs.internal_type -> bool
 
 val is_nothing : Typing_env_types.env -> Typing_defs.locl_ty -> bool
 
+val is_null : Typing_env_types.env -> Typing_defs.locl_ty -> bool
+
 val run_on_intersection :
   'env ->
   f:('env -> Typing_defs.locl_ty -> 'env * 'a) ->

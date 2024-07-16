@@ -17,6 +17,7 @@ FoldedClass {
             visibility: Public,
             deprecated: None,
             sort_text: None,
+            overlapping_tparams: None,
         },
     },
     consts: {
@@ -49,6 +50,7 @@ FoldedClass {
             visibility: Public,
             deprecated: None,
             sort_text: None,
+            overlapping_tparams: None,
         },
     },
     consts: {
@@ -81,6 +83,7 @@ FoldedClass {
             sort_text: Some(
                 "zzz",
             ),
+            overlapping_tparams: None,
         },
     },
     consts: {
@@ -111,6 +114,7 @@ FoldedClass {
             visibility: Public,
             deprecated: None,
             sort_text: None,
+            overlapping_tparams: None,
         },
     },
     consts: {

@@ -102,8 +102,8 @@ uint32_t JSONProtocolWriterCommon::writeJSONDoubleInternal(float flt) {
   folly::toAppend(
       flt,
       &appender,
-      double_conversion::DoubleToStringConverter::SHORTEST_SINGLE,
-      0);
+      folly::DtoaMode::SHORTEST_SINGLE,
+      0 /* numDigits is unused in shortest */);
   if (isMapKey()) {
     folly::toAppend('"', &appender);
   }

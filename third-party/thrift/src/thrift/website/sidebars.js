@@ -323,7 +323,10 @@ module.exports = {
               type: 'doc',
               id: 'fb/server/interface/index',
             },
-            items: ['fb/server/interface/rocket'],
+            items: [
+              'fb/server/interface/rocket',
+              'fb/server/interface/server-transport-exception-contract',
+            ],
           },
           'fb/server/channels',
           'fb/server/threading-models',
@@ -463,14 +466,12 @@ module.exports = {
           },
           {
             type: 'category',
-            label: "Debugging Tools",
+            label: 'Debugging Tools',
             link: {
               type: 'doc',
               id: 'fb/troubleshooting/debugging-tools',
             },
-            items: [
-              'fb/troubleshooting/debuggingtools/thriftdbg-info',
-            ]
+            items: ['fb/troubleshooting/debuggingtools/thriftdbg-info'],
           },
           'fb/troubleshooting/fuzzer',
           {

@@ -29,6 +29,7 @@
 #include <thrift/compiler/lib/const_util.h>
 #include <thrift/compiler/lib/schematizer.h>
 
+#include <folly/compression/Compression.h>
 #include <thrift/lib/cpp2/op/Sha256Hasher.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
@@ -532,7 +533,12 @@ std::string gen_schema(
     const t_program& root_program) {
   auto schema =
       t_ast_generator::gen_schema(schema_opts, source_mgr, root_program);
-  return serialize<CompactProtocolWriter>(schema);
+  auto serialized = serialize<CompactProtocolWriter>(schema);
+  auto compressed = folly::compression::getCodec(
+                        folly::io::CodecType::ZSTD,
+                        folly::compression::COMPRESSION_LEVEL_BEST)
+                        ->compress(serialized);
+  return compressed;
 }
 
 static bool register_schema_generation = []() {

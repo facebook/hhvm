@@ -17,6 +17,7 @@
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 
 #include <folly/Indestructible.h>
+#include <folly/compression/Compression.h>
 
 namespace apache::thrift {
 
@@ -45,7 +46,10 @@ const type::Schema& SchemaRegistry::getMergedSchema() {
     std::unordered_set<type::ProgramId> includedPrograms;
 
     for (auto& [name, data] : getRawSchemas()) {
-      auto schema = CompactSerializer::deserialize<type::Schema>(data.data);
+      auto decompressed =
+          folly::io::getCodec(folly::compression::CodecType::ZSTD)
+              ->uncompress(data.data);
+      auto schema = CompactSerializer::deserialize<type::Schema>(decompressed);
 
       for (auto& program : *schema.programs()) {
         auto id = *program.id();

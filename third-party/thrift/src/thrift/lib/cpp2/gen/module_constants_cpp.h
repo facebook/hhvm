@@ -20,3 +20,5 @@
 
 #include <folly/Indestructible.h>
 #include <folly/lang/Exception.h>
+
+FOLLY_CLANG_DISABLE_WARNING("-Woverlength-strings")

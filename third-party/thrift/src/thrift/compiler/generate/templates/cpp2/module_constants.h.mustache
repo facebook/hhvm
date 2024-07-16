@@ -30,16 +30,21 @@ namespace {{program:name}}_constants {
 
 {{#program:constants}}{{#constant:type}}{{#constant:value}}
 {{^constant:outline_init?}}
+{{! The generated constants check is intended to cover the schema constant, where the _sinit.cpp target has to use external linkage to break a dependency cycle. }}
+{{^constant:generated?}}
 {{^type:binary?}}
   constexpr {{ > types/const_value_type}} const {{constant:name}}_ = {{ > common/const_value}};
 {{/type:binary?}}
 {{#type:binary?}}
   constexpr std::string_view {{constant:name}}_{"{{value:string_value}}", {{value:string_length}}};
 {{/type:binary?}}
-{{! The generated constants check is intended to cover the schema constant, where the _sinit.cpp target has to use external linkage to break a dependency cycle. }}
-  {{#constant:generated?}}FOLLY_EXPORT{{/constant:generated?}}{{^constant:generated?}}constexpr{{/constant:generated?}} {{ > types/const_value_type}} {{constant:name}}() {
+  constexpr {{ > types/const_value_type}} {{constant:name}}() {
     return {{constant:name}}_;
   }
+{{/constant:generated?}}
+{{#constant:generated?}}
+  FOLLY_EXPORT {{ > types/const_value_type}} {{constant:name}}();
+{{/constant:generated?}}
 {{/constant:outline_init?}}
 {{#constant:outline_init?}}
   {{constant:cpp_type}} const& {{constant:name}}();

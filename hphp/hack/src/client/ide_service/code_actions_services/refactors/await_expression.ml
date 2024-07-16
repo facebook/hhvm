@@ -288,9 +288,7 @@ end = struct
         method! on_expr env expr = On_expr (super#on_expr env expr)
       end
     in
-    nast
-    |> List.map ~f:(visitor#on_def ())
-    |> List.fold ~init:visitor#zero ~f:visitor#plus
+    visitor#on_program () nast
 
   let nast_of_program_source_code popt s =
     let source_text = Full_fidelity_source_text.make Relative_path.default s in

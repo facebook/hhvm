@@ -28,3 +28,9 @@ val to_option : 'a t -> 'a option
 val bind : 'a t -> ('a -> 'b t) -> 'b t
 
 val map : 'a t -> f:('a -> 'b) -> 'b t
+
+val map_or : 'a t -> f:('a -> 'b) -> default:'b -> 'b
+
+val iter : 'a t -> f:('a -> unit) -> unit
+
+val fold : 'a t -> f:('b -> 'a -> 'b) -> init:'b -> 'b

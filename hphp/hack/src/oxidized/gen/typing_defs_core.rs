@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2a3963204ad120390349ed94d4c97ac0>>
+// @generated SignedSource<<1eac7889055433be4ade57fe2d10ecee>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -800,6 +800,9 @@ pub enum Exact {
     Nonexact(ClassRefinement),
 }
 
+/// Class refinements are for type annotations like
+///
+/// Box with {type T = string}
 #[derive(
     Clone,
     Debug,
@@ -862,7 +865,9 @@ pub struct RefinedConst {
 #[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum RefinedConstBound {
+    /// for `=` constraints
     TRexact(Ty),
+    /// for `as` or `super` constraints
     TRloose(RefinedConstBounds),
 }
 

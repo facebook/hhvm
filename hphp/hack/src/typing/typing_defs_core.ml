@@ -423,6 +423,10 @@ and exact =
   | Exact
   | Nonexact of locl_phase class_refinement
 
+(** Class refinements are for type annotations like
+
+      Box with {type T = string}
+  *)
 and 'phase class_refinement = { cr_consts: 'phase refined_const SMap.t }
 
 and 'phase refined_const = {
@@ -432,7 +436,9 @@ and 'phase refined_const = {
 
 and 'phase refined_const_bound =
   | TRexact : 'phase ty -> 'phase refined_const_bound
+      (** for `=` constraints *)
   | TRloose : 'phase refined_const_bounds -> 'phase refined_const_bound
+      (** for `as` or `super` constraints *)
 
 and 'phase refined_const_bounds = {
   tr_lower: 'phase ty list;

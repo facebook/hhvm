@@ -144,6 +144,7 @@ let typedef_def ctx typedef =
 
   let env =
     let ((env, ty_err_opt2), ty) =
+      (* This also detects cyclic definitions *)
       Phase.localize_hint_no_subst
         env
         ~ignore_errors:false

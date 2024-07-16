@@ -653,7 +653,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
               Typing_error.(
                 primary
                 @@ Primary.Cyclic_typedef
-                     { pos = initial_taccess_pos; decl_pos }))
+                     { def_pos = initial_taccess_pos; use_pos = decl_pos }))
         in
         let (env, ty) =
           Env.fresh_type_error env (Pos_or_decl.unsafe_to_raw_pos decl_pos)

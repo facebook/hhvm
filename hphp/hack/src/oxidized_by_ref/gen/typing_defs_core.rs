@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4157a6b3942cf9d00f2fdd03895a46bf>>
+// @generated SignedSource<<5999ccf99b03183586cfe0976da54c01>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -791,6 +791,9 @@ pub enum Exact<'a> {
 impl<'a> TrivialDrop for Exact<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Exact<'arena>);
 
+/// Class refinements are for type annotations like
+///
+/// Box with {type T = string}
 #[derive(
     Clone,
     Copy,
@@ -862,8 +865,10 @@ arena_deserializer::impl_deserialize_in_arena!(RefinedConst<'arena>);
 #[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum RefinedConstBound<'a> {
+    /// for `=` constraints
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TRexact(&'a Ty<'a>),
+    /// for `as` or `super` constraints
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TRloose(&'a RefinedConstBounds<'a>),
 }

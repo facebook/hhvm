@@ -230,6 +230,7 @@ type expand_typeconst =
 
 val expand_typeconst_ref : expand_typeconst ref
 
+(** Expands a type constant access like A::T to its definition. *)
 val expand_typeconst :
   Typing_defs.expand_env ->
   Typing_env_types.env ->

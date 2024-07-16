@@ -32,3 +32,24 @@ let map x ~f =
   | DoesNotExist -> DoesNotExist
   | NotYetAvailable -> NotYetAvailable
   | Found x -> Found (f x)
+
+let map_or x ~f ~default =
+  match x with
+  | DoesNotExist
+  | NotYetAvailable ->
+    default
+  | Found x -> f x
+
+let iter x ~f =
+  match x with
+  | DoesNotExist
+  | NotYetAvailable ->
+    ()
+  | Found x -> f x
+
+let fold x ~f ~init =
+  match x with
+  | DoesNotExist
+  | NotYetAvailable ->
+    init
+  | Found x -> f init x

@@ -18,11 +18,14 @@ module TUtils = Typing_utils
 module Phase = Typing_phase
 module MakeType = Typing_make_type
 
-(*****************************************************************************)
-(* Expanding type definition *)
-(*****************************************************************************)
+(** [expand_typedef_ ~force_expand ety_env env r name ty_args] looks up the type
+  alias [name] in the decls and returns the value of the type alias as a locl_ty, with
+  type parameters substituted with [ty_args].
 
-let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
+  It will not expand opaque type aliases (`newtype`) unless they're visible (in the current file)
+  or [force_expand] is true.
+  *)
+let expand_typedef_ ~force_expand ety_env env r (x : string) argl =
   let pos = Reason.to_pos r in
   let td = unsafe_opt @@ Decl_entry.to_option (Env.get_typedef env x) in
   let {
@@ -52,7 +55,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
           Typing_error.(
             primary
             @@ Primary.Cyclic_typedef
-                 { pos = initial_taccess_pos; decl_pos = pos }))
+                 { def_pos = initial_taccess_pos; use_pos = pos }))
     in
     let (env, ty) =
       Env.fresh_type_error env (Pos_or_decl.unsafe_to_raw_pos pos)
@@ -103,11 +106,16 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
     (env, (ety_env, with_reason expanded_ty r))
 
 let expand_typedef ety_env env r type_name argl =
-  let (env, (_ety_env, ty)) = expand_typedef_ ety_env env r type_name argl in
+  let (env, (_ety_env, ty)) =
+    expand_typedef_ ~force_expand:false ety_env env r type_name argl
+  in
   (env, ty)
 
-(* Expand a typedef, smashing abstraction and collecting a trail
- * of where the typedefs come from. *)
+(** Expand a typedef, smashing abstraction and collecting a trail
+  of where the typedefs come from.
+
+  /!\ This only does something if passed a Tnewtype. Not sure if that's a bug.
+  *)
 let force_expand_typedef ~ety_env env (t : locl_ty) =
   let rec aux e1 ety_env env t =
     let default () =

@@ -37,7 +37,8 @@ type context = {
   ety_env: expand_env;
       (** The expand environment as passed in by Phase.localize *)
   generics_seen: TySet.t;
-      (** A set of visited types used to avoid infinite loops during expansion. *)
+      (** The set of visited generics used to avoid infinite loops during expansion.
+        These are all some `Tgeneric (name, tyargs)`. *)
   allow_abstract: bool;
       (** Whether or not an abstract type constant is allowed as the result. In the
         future, this boolean should disappear and abstract type constants should
@@ -102,12 +103,16 @@ let abstract_or_exact env id ({ name; _ } as abstr) =
   else
     Abstract abstr
 
-(** Lookup a type constant in a class and return a result. A type constant has
-  both a constraint type and assigned type. Which one we choose depends if
-  the current root is the base (origin) of the expansion, or if it is an
-  upper bound of the base. *)
+(** [create_root_from_type_constant ctx env root class_name class_]
+  looks up a type constant in a class and returns a `result`. More precisely, it looks up
+  [ctx.id] in [class_]. [class_name] is the class name for [class_] and [root]
+  is a `Tclass (class_name, ...)`.
+
+  A type constant has both a constraint type and assigned type. Which one we choose depends if
+  the current root is the base (origin) of the expansion (in which case [ctx.base] is `None`),
+  or if it is an upper bound of the base (in which case [ctx.base] is `Some`). *)
 let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
-    =
+    : _ * result =
   let { id = (id_pos, id_name) as id; _ } = ctx in
   match Env.get_typeconst env class_ id_name with
   | None ->
@@ -150,14 +155,14 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
       (* This is a cycle through a type constant that we are using *)
       ((env, ty_err_opt), Missing None)
     | None ->
-      let drop_exact ty =
-        (* Legacy behavior is to preserve exactness only on `this` and not
-           through `this::T` *)
-        map_ty ty ~f:(function
-            | Tclass (cid, _, tyl) -> Tclass (cid, nonexact, tyl)
-            | ty -> ty)
-      in
       let ety_env =
+        let drop_exact ty =
+          (* Legacy behavior is to preserve exactness only on `this` and not
+             through `this::T` *)
+          map_ty ty ~f:(function
+              | Tclass (cid, _, tyl) -> Tclass (cid, nonexact, tyl)
+              | ty -> ty)
+        in
         {
           ctx.ety_env with
           this_ty = drop_exact (Option.value ctx.base ~default:root);
@@ -166,7 +171,6 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
       let abstract_or_exact env ~lower_bounds ~upper_bounds =
         let ty_err_opt =
           if not ctx.allow_abstract then
-            let tc_pos = fst typeconst.ttc_name in
             Option.map
               ctx.ety_env.on_error
               ~f:
@@ -176,7 +180,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
                     @@ Secondary.Abstract_tconst_not_allowed
                          {
                            pos = id_pos;
-                           decl_pos = tc_pos;
+                           decl_pos = fst typeconst.ttc_name;
                            tconst_name = id_name;
                          })
           else
@@ -188,12 +192,6 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
             id
             { name = class_name; names = []; lower_bounds; upper_bounds },
           ty_err_opt )
-      in
-      let to_tys env = function
-        | Some ty ->
-          let (env, ty) = Phase.localize ~ety_env env ty in
-          (env, TySet.singleton ty)
-        | None -> ((env, None), TySet.empty)
       in
       (* Don't report errors in expanded definition or constraint.
        * These will have been reported at the definition site already. *)
@@ -207,6 +205,12 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
       (* Abstract type constants *)
       | TCAbstract
           { atc_as_constraint = upper; atc_super_constraint = lower; _ } ->
+        let to_tys env : decl_ty option -> _ * TySet.t = function
+          | Some ty ->
+            let (env, ty) = Phase.localize ~ety_env env ty in
+            (env, TySet.singleton ty)
+          | None -> ((env, None), TySet.empty)
+        in
         let ((env, e1), lower_bounds) = to_tys env lower in
         let ((env, e2), upper_bounds) = to_tys env upper in
         let (res, e3) = abstract_or_exact env ~lower_bounds ~upper_bounds in
@@ -370,7 +374,7 @@ let is_opaque_internal ty =
 
 let rec expand ctx env root =
   let (env, root) = Env.expand_type env root in
-  let err =
+  let err_opt =
     let (pos, tconst) = ctx.id in
     let ty_name = lazy (Typing_print.error env root) in
     let reason =
@@ -392,12 +396,15 @@ let rec expand ctx env root =
   else
     match get_node root with
     | Tany _ -> ((env, None), Exact root)
-    (* Deal with projection from a newtype that was generated from an internal access e.g.
-     *   internal class Base { const type TC = int; public static function foo(self::TC $_):void { } }
-     *   class Derived extends Base { }
-     *   function bar():void { Derived::foo("A"); }
-     * Generate another fake newtype by mangling the name using the projection syntax.
-     *)
+    (* We allow inheritance of members from internal classes and traits into public ones,
+       even if their signatures include internal types, but when localizing such internal
+       types we pretend that a Tclass is a Tnewtype i.e. is opaque.
+       Here we deal with projection from a newtype that was generated in such cases e.g.
+           internal class Base { const type TC = int; public static function foo(self::TC $_):void { } }
+           class Derived extends Base { }
+           function bar():void { Derived::foo("A"); }
+        Generate another fake newtype by mangling the name using the projection syntax.
+    *)
     | Tnewtype (name, _tyl, bound) when is_opaque_internal root ->
       ( (env, None),
         Exact
@@ -450,43 +457,35 @@ let rec expand ctx env root =
       | None -> (* unreachable *) ((env, None), Missing None)
     end
     | Tclass (cls, _, _) -> begin
-      match Env.get_class env (snd cls) with
-      | Decl_entry.DoesNotExist
-      | Decl_entry.NotYetAvailable ->
-        ((env, None), Missing None)
-      | Decl_entry.Found ci ->
-        (* Hack: `self` in a trait is mistakenly replaced by the trait instead
-           of the class using the trait, so if a trait is the root, it is
-           likely because originally there was `self::T` written.
-           TODO(T54081153): fix `self` in traits and clean this up *)
-        let allow_abstract =
-          Ast_defs.is_c_trait (Cls.kind ci) || ctx.allow_abstract
-        in
-
-        let ctx = { ctx with allow_abstract } in
-        create_root_from_type_constant ctx env root cls ci
+      Env.get_class env (snd cls)
+      |> Decl_entry.map_or
+           ~default:((env, None), Missing None)
+           ~f:(fun ci ->
+             (* Hack: `self` in a trait is mistakenly replaced by the trait instead
+                of the class using the trait, so if a trait is the root, it is
+                likely because originally there was `self::T` written.
+                TODO(T54081153): fix `self` in traits and clean this up *)
+             let allow_abstract =
+               Ast_defs.is_c_trait (Cls.kind ci) || ctx.allow_abstract
+             in
+             let ctx = { ctx with allow_abstract } in
+             create_root_from_type_constant ctx env root cls ci)
     end
     | Tgeneric (s, tyargs) ->
       let ctx =
-        let root_kind =
-          let this_name = Naming_special_names.SpecialIdents.this in
-          (* The `this` type stands for a concrete class. *)
-          if String.equal s this_name then
-            ConcreteClass
-          else
-            ctx.root_kind
-        in
-        let generics_seen = TySet.add root ctx.generics_seen in
-        let base = Some (Option.value ctx.base ~default:root) in
-        let allow_abstract = true in
-        let abstract_as_tyvar_at_pos = None in
         {
           ctx with
-          generics_seen;
-          base;
-          allow_abstract;
-          abstract_as_tyvar_at_pos;
-          root_kind;
+          generics_seen = TySet.add root ctx.generics_seen;
+          base = Some (Option.value ctx.base ~default:root);
+          allow_abstract = true;
+          abstract_as_tyvar_at_pos = None;
+          root_kind =
+            (let this_name = Naming_special_names.SpecialIdents.this in
+             (* The `this` type stands for a concrete class. *)
+             if String.equal s this_name then
+               ConcreteClass
+             else
+               ctx.root_kind);
         }
       in
       let is_supportdyn_mixed t =
@@ -513,7 +512,7 @@ let rec expand ctx env root =
           ~f:(expand ctx)
           ~combine_ty_errs:Typing_error.multiple_opt
       in
-      let res = intersect_results err resl in
+      let res = intersect_results err_opt resl in
       ((env, ty_err_opt), update_class_name env ctx.id s res)
     | Tdependent (dep_ty, ty) ->
       let ctx =
@@ -544,7 +543,7 @@ let rec expand ctx env root =
           ~f:(expand ctx)
           ~combine_ty_errs:Typing_error.multiple_opt
       in
-      let result = intersect_results err resl in
+      let result = intersect_results err_opt resl in
       (match result with
       | Missing _ ->
         (* TODO: should we be taking the intersection of the errors? *)
@@ -559,7 +558,7 @@ let rec expand ctx env root =
         let ty_err_opt =
           Option.merge e1 e2 ~f:(fun e1 e2 -> Typing_error.multiple [e1; e2])
         in
-        ((env, ty_err_opt), intersect_results err resl)
+        ((env, ty_err_opt), intersect_results err_opt resl)
       | _ -> ((env, e1), result))
     | Tunion tyl ->
       let ((env, ty_err_opt), resl) =
@@ -569,7 +568,7 @@ let rec expand ctx env root =
           ~f:(expand ctx)
           ~combine_ty_errs:Typing_error.union_opt
       in
-      let result = union_results err resl in
+      let result = union_results err_opt resl in
       ((env, ty_err_opt), result)
     | Tvar n ->
       let (env, ty) =
@@ -593,7 +592,7 @@ let rec expand ctx env root =
     | Toption _
     | Tlabel _
     | Tneg _ ->
-      ((env, None), Missing err)
+      ((env, None), Missing err_opt)
 
 (** Expands a type constant access like A::T to its definition. *)
 let expand_with_env

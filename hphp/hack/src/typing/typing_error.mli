@@ -1164,8 +1164,8 @@ module Primary : sig
       }
     | Object_string_deprecated of Pos.t
     | Cyclic_typedef of {
-        pos: Pos.t;
-        decl_pos: Pos_or_decl.t;
+        def_pos: Pos.t;
+        use_pos: Pos_or_decl.t;
       }
     | Require_args_reify of {
         pos: Pos.t;

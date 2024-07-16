@@ -279,12 +279,13 @@ module DataType = struct
 
   let cycle_handler ~f ~default ~env ~trail =
     let report_cycle_error reason = function
-      | Some pos ->
+      | Some def_pos ->
         Typing_error_utils.add_typing_error
           ~env
           Typing_error.(
             primary
-            @@ Primary.Cyclic_typedef { pos; decl_pos = Reason.to_pos reason })
+            @@ Primary.Cyclic_typedef
+                 { def_pos; use_pos = Reason.to_pos reason })
       | None -> ()
     in
     match trail with

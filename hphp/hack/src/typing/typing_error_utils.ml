@@ -5421,7 +5421,7 @@ end = struct
     | Generic_static { pos; typaram_name } -> generic_static pos typaram_name
     | Ellipsis_strict_mode { pos; require } -> ellipsis_strict_mode pos require
     | Object_string { pos; decl_pos } -> object_string pos decl_pos
-    | Cyclic_typedef { pos; decl_pos } -> cyclic_typedef pos decl_pos
+    | Cyclic_typedef { def_pos; use_pos } -> cyclic_typedef def_pos use_pos
     | Require_args_reify { pos; decl_pos } -> require_args_reify pos decl_pos
     | Require_generic_explicit { pos; param_name; decl_pos } ->
       require_generic_explicit pos decl_pos param_name

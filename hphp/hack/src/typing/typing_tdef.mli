@@ -6,8 +6,19 @@
  *
  *)
 
+val expand_typedef :
+  Typing_defs.expand_env ->
+  Typing_env_types.env ->
+  Typing_reason.t ->
+  string ->
+  Typing_defs.locl_ty list ->
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
+
 (** Expand a typedef, smashing abstraction and collecting a trail
-    of where the typedefs come from. *)
+  of where the typedefs come from.
+
+  /!\ This only does something if passed a Tnewtype. Not sure if that's a bug.
+  *)
 val force_expand_typedef :
   ety_env:Typing_defs.expand_env ->
   Typing_env_types.env ->

@@ -2912,6 +2912,10 @@ end = struct
           (LoclType ty_super)
       | _ ->
         let ty_null = MakeType.null r in
+        let t =
+          Typing_env.update_reason env t ~f:(fun r_sub_prj ->
+              Typing_reason.prj_nullable_sub ~r_sub:r ~r_sub_prj)
+        in
         simplify
           ~subtype_env
           ~this_ty
@@ -3262,6 +3266,10 @@ end = struct
             fun env ->
           if_unsat (invalid ~fail) @@ prop env
         in
+        let ty =
+          Typing_env.update_reason env ty ~f:(fun r_sub_prj ->
+              Typing_reason.prj_nullable_sub ~r_sub:r ~r_sub_prj)
+        in
         prop_null env
         &&& simplify
               ~subtype_env
@@ -3404,6 +3412,10 @@ end = struct
       let (env, ty_sub') =
         Inter.intersect env ~r:r_super tyarg1 (MakeType.nonnull r_super)
       in
+      let lty_inner =
+        Typing_env.update_reason env lty_inner ~f:(fun r_super_prj ->
+            Typing_reason.prj_nullable_super ~r_super ~r_super_prj)
+      in
       simplify
         ~subtype_env
         ~this_ty:None
@@ -3418,7 +3430,11 @@ end = struct
      * by covariance and idempotence of ?, we have ?ty_sub' <: ??ty_sub' <: ?ty_super'.
      * Therefore, this step preserves the set of solutions.
      *)
-    | ((_, Toption ty_sub'), (r_super, Toption lty_inner)) ->
+    | ((r_sub, Toption ty_sub'), (r_super, Toption lty_inner)) ->
+      let ty_sub' =
+        Typing_env.update_reason env ty_sub' ~f:(fun r_sub_prj ->
+            Typing_reason.prj_nullable_sub ~r_sub ~r_sub_prj)
+      in
       simplify
         ~subtype_env
         ~this_ty
@@ -3443,6 +3459,10 @@ end = struct
       let (env, ty_sub) =
         Inter.intersect env ~r:r_super ty_sub (MakeType.nonnull r_super)
       in
+      let ty_inner_super =
+        Typing_env.update_reason env ty_inner_super ~f:(fun r_super_prj ->
+            Typing_reason.prj_nullable_super ~r_super ~r_super_prj)
+      in
       let lhs = { lhs with ty_sub }
       and rhs =
         { rhs with super_supportdyn = false; ty_super = ty_inner_super }
@@ -3450,8 +3470,12 @@ end = struct
       simplify ~subtype_env ~this_ty ~lhs ~rhs env
     (* If the type on the left is disjoint from null, then the Toption on the right is not
        doing anything helpful. *)
-    | ((_, (Tintersection _ | Tunion _)), (_, Toption lty_inner))
+    | ((_, (Tintersection _ | Tunion _)), (r_super, Toption lty_inner))
       when TUtils.is_type_disjoint env ty_sub (MakeType.null Reason.none) ->
+      let lty_inner =
+        Typing_env.update_reason env lty_inner ~f:(fun r_super_prj ->
+            Typing_reason.prj_nullable_super ~r_super ~r_super_prj)
+      in
       simplify
         ~subtype_env
         ~this_ty
@@ -3498,6 +3522,10 @@ end = struct
      *)
     | ( (_, (Tnewtype _ | Tdependent _ | Tgeneric _ | Tprim Nast.Tvoid)),
         (r_super, Toption lty_inner) ) ->
+      let lty_inner =
+        Typing_env.update_reason env lty_inner ~f:(fun r_super_prj ->
+            Typing_reason.prj_nullable_super ~r_super ~r_super_prj)
+      in
       (* TODO(T69551141) handle type arguments? *)
       if null_not_subtype ty_sub then
         simplify
@@ -3535,7 +3563,11 @@ end = struct
     | ( ( _,
           ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
           | Tclass _ | Tvec_or_dict _ | Tany _ | Taccess _ | Tlabel _ ) ),
-        (_, Toption lty_inner) ) ->
+        (r_super, Toption lty_inner) ) ->
+      let lty_inner =
+        Typing_env.update_reason env lty_inner ~f:(fun r_super_prj ->
+            Typing_reason.prj_nullable_super ~r_super ~r_super_prj)
+      in
       simplify
         ~subtype_env
         ~this_ty
@@ -3546,7 +3578,11 @@ end = struct
        t <: t1 | t2 to (t <: t1) || (t <: t2) reduction
        TODO(T120921930): Don't do this if require_completeness is set.
     *)
-    | ((_, Tneg _), (_, Toption lty_inner)) ->
+    | ((_, Tneg _), (r_super, Toption lty_inner)) ->
+      let lty_inner =
+        Typing_env.update_reason env lty_inner ~f:(fun r_super_prj ->
+            Typing_reason.prj_nullable_super ~r_super ~r_super_prj)
+      in
       simplify
         ~subtype_env
         ~this_ty
@@ -3845,11 +3881,15 @@ end = struct
         | (_, Tnewtype (name_sub, _, _))
           when String.equal name_sub SN.Classes.cEnumClassLabel ->
           valid env
-        | (_, Toption ty) ->
+        | (r_sub, Toption ty) ->
           (match deref ty with
           (* Special case mixed <: dynamic for better error message *)
           | (_, Tnonnull) -> invalid env ~fail
           | _ ->
+            let ty =
+              Typing_env.update_reason env ty ~f:(fun r_sub_prj ->
+                  Typing_reason.prj_nullable_sub ~r_sub ~r_sub_prj)
+            in
             simplify
               ~subtype_env
               ~this_ty:None
@@ -4166,7 +4206,11 @@ end = struct
       when Aast.equal_tprim prim_sub prim_sup ->
       valid env
     | ((_, Tprim _), (_, Tprim _)) -> invalid env ~fail
-    | ((_, Toption arg_ty_sub), (_, Tprim Nast.Tnull)) ->
+    | ((r_sub, Toption arg_ty_sub), (_, Tprim Nast.Tnull)) ->
+      let arg_ty_sub =
+        Typing_env.update_reason env arg_ty_sub ~f:(fun r_sub_prj ->
+            Typing_reason.prj_nullable_sub ~r_sub ~r_sub_prj)
+      in
       simplify
         ~subtype_env
         ~this_ty
@@ -4515,6 +4559,10 @@ end = struct
           else
             fun env ->
           if_unsat (invalid ~fail) @@ prop env
+        in
+        let ty_sub =
+          Typing_env.update_reason env ty_sub ~f:(fun r_sub_prj ->
+              Typing_reason.prj_nullable_sub ~r_sub:r ~r_sub_prj)
         in
         prop_null env
         &&& simplify
@@ -6904,6 +6952,10 @@ end = struct
     match deref ty_sub with
     | (r, Toption ty) ->
       let ty_null = MakeType.null r in
+      let ty =
+        Typing_env.update_reason env ty ~f:(fun r_sub_prj ->
+            Typing_reason.prj_nullable_sub ~r_sub:r ~r_sub_prj)
+      in
       let prop env =
         simplify_disj_r
           ~subtype_env

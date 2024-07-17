@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<198988479ba759e42386a847ba55137e>>
+// @generated SignedSource<<6a5b729bdfb41dd6d871ff5efbf1346e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -258,6 +258,8 @@ arena_deserializer::impl_deserialize_in_arena!(CtorKind);
 pub enum PrjSymm {
     #[rust_to_ocaml(name = "Prj_symm_neg")]
     PrjSymmNeg,
+    #[rust_to_ocaml(name = "Prj_symm_nullable")]
+    PrjSymmNullable,
     #[rust_to_ocaml(name = "Prj_symm_ctor")]
     PrjSymmCtor(CtorKind, String, isize, CstrVariance),
     #[rust_to_ocaml(name = "Prj_symm_tuple")]
@@ -300,6 +302,8 @@ pub enum PrjAsymm {
     PrjAsymmInter,
     #[rust_to_ocaml(name = "Prj_asymm_neg")]
     PrjAsymmNeg,
+    #[rust_to_ocaml(name = "Prj_asymm_nullable")]
+    PrjAsymmNullable,
 }
 impl TrivialDrop for PrjAsymm {}
 arena_deserializer::impl_deserialize_in_arena!(PrjAsymm);

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7e6a32499ce6c5cf8540f46805b3e1e6>>
+// @generated SignedSource<<2249a719a8614c9fd8a4b07405bfb7cf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -144,6 +144,8 @@ pub use oxidized::typing_reason::FieldKind;
 pub enum PrjSymm<'a> {
     #[rust_to_ocaml(name = "Prj_symm_neg")]
     PrjSymmNeg,
+    #[rust_to_ocaml(name = "Prj_symm_nullable")]
+    PrjSymmNullable,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Prj_symm_ctor")]
     #[rust_to_ocaml(inline_tuple)]

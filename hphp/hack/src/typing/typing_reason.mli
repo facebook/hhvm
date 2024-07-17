@@ -395,6 +395,11 @@ val prj_ctor_contra :
 val prj_neg :
   sub:locl_phase t_ * locl_phase t_ -> super:locl_phase t_ -> locl_phase t_
 
+(** Record the decomposition of a subtype contraint between two nullable types
+    into a constraint between the two inner non-null types *)
+val prj_nullable :
+  sub:locl_phase t_ * locl_phase t_ -> super:locl_phase t_ -> locl_phase t_
+
 (** Record the decomposition of a subtype contraint between two tuple types
     into a constraint between the two types at index [idx] *)
 val prj_tuple :
@@ -485,6 +490,18 @@ val prj_neg_sub :
     supertype position and some other type into another contraint between some
     member of the union and the other type *)
 val prj_neg_super :
+  r_super:locl_phase t_ -> r_super_prj:locl_phase t_ -> locl_phase t_
+
+(** Record the decomposition of a subtype constraint between a nullable type in
+    subtype position and some other type into another contraint between the
+    non-null part of the nullable type and the other type *)
+val prj_nullable_sub :
+  r_sub:locl_phase t_ -> r_sub_prj:locl_phase t_ -> locl_phase t_
+
+(** Record the decomposition of a subtype constraint between a nullable type in
+    supertype position and some other type into another contraint between the
+    non-null part of the nullable type and the other type *)
+val prj_nullable_super :
   r_super:locl_phase t_ -> r_super_prj:locl_phase t_ -> locl_phase t_
 
 val missing_field : t

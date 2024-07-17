@@ -202,6 +202,7 @@ let explain_ctor_kind = function
     to both sub- and supertype during inference *)
 type prj_symm =
   | Prj_symm_neg
+  | Prj_symm_nullable
   | Prj_symm_ctor of ctor_kind * string * int * cstr_variance
   | Prj_symm_tuple of int
   | Prj_symm_shape of string * field_kind * field_kind
@@ -218,12 +219,14 @@ let prj_symm_is_contra = function
   | Prj_symm_fn_param_inout (_, _, Co)
   | Prj_symm_fn_ret
   | Prj_symm_neg
+  | Prj_symm_nullable
   | Prj_symm_tuple _
   | Prj_symm_shape _ ->
     false
 
 let prj_symm_to_json = function
   | Prj_symm_neg -> Hh_json.JSON_String "Prj_symm_neg"
+  | Prj_symm_nullable -> Hh_json.JSON_String "Prj_symm_nullable"
   | Prj_symm_ctor (ctor_kind, nm, idx, variance) ->
     Hh_json.(
       JSON_Object
@@ -289,7 +292,8 @@ let int_to_ordinal =
 
 let explain_symm_prj prj ~side =
   match prj with
-  | Prj_symm_neg -> "via the negation type"
+  | Prj_symm_neg -> "as the inner type of a negation"
+  | Prj_symm_nullable -> "as the non-null part of a nullable type"
   | Prj_symm_ctor (ctor_kind, nm, idx, Inv dir) ->
     Format.sprintf
       "as the invariant, %s type parameter of the %s `%s`, when typing as %s"
@@ -345,18 +349,21 @@ type prj_asymm =
   | Prj_asymm_union
   | Prj_asymm_inter
   | Prj_asymm_neg
+  | Prj_asymm_nullable
 [@@deriving hash]
 
 let prj_asymm_to_json = function
   | Prj_asymm_union -> Hh_json.JSON_String "Prj_asymm_union"
   | Prj_asymm_inter -> Hh_json.JSON_String "Prj_asymm_inter"
   | Prj_asymm_neg -> Hh_json.JSON_String "Prj_asymm_neg"
+  | Prj_asymm_nullable -> Hh_json.JSON_String "Prj_asymm_nullable"
 
 let explain_asymm_prj prj =
   match prj with
   | Prj_asymm_union -> "as an element of the union type"
   | Prj_asymm_inter -> "as an element of the intersection type"
   | Prj_asymm_neg -> "as the inner type of a negation"
+  | Prj_asymm_nullable -> "as the non-null part of a nullable type"
 
 (** For asymmetric projections we need to track which of the sub- or supertype
     was decomposed  *)
@@ -2321,6 +2328,12 @@ let prj_neg ~sub:(r_sub, r_sub_prj) ~super =
   let into = prj_symm parent_flow ~prj in
   flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
+let prj_nullable ~sub:(r_sub, r_sub_prj) ~super =
+  let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
+  let prj = Prj_symm_nullable in
+  let into = prj_symm parent_flow ~prj in
+  flow ~from:r_sub_prj ~into ~kind:Flow_prj
+
 let prj_tuple ~sub:(r_sub, r_sub_prj) ~super idx =
   let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
   let prj = Prj_symm_tuple idx in
@@ -2384,6 +2397,12 @@ let prj_neg_sub ~r_sub ~r_sub_prj =
 
 let prj_neg_super ~r_super ~r_super_prj =
   prj_asymm_super ~r_super ~r_super_prj Prj_asymm_neg
+
+let prj_nullable_sub ~r_sub ~r_sub_prj =
+  prj_asymm_sub ~r_sub ~r_sub_prj Prj_asymm_nullable
+
+let prj_nullable_super ~r_super ~r_super_prj =
+  prj_asymm_super ~r_super ~r_super_prj Prj_asymm_nullable
 
 let missing_field = Rmissing_field
 
@@ -2691,17 +2710,32 @@ let to_path t =
           (dir, false)
       in
       let cur_depth = cur_depth + 1 in
-      (match aux t ~dir ~cur_depth with
-      | (None, elem, None, stats, max_depth) ->
-        let (prj_l_opt, prj_r_opt) = bracket prj in
-        let stats =
-          if flipped then
-            { stats with reversals = stats.reversals + 1 }
-          else
-            stats
-        in
-        (prj_l_opt, elem, prj_r_opt, stats, max_depth)
-      | _ -> failwith "ill formed path")
+      let (prj_l_inner, elem, prj_r_inner, stats, max_depth) =
+        aux t ~dir ~cur_depth
+      in
+      let (prj_l_opt, prj_r_opt) = bracket prj in
+      let stats =
+        if flipped then
+          { stats with reversals = stats.reversals + 1 }
+        else
+          stats
+      in
+      let prj_l_opt =
+        match (prj_l_inner, prj_l_opt) with
+        | (Some l, None)
+        | (None, Some l) ->
+          Some l
+        | (None, None) -> None
+        | _ -> failwith "ill-formed path"
+      and prj_r_opt =
+        match (prj_r_inner, prj_r_opt) with
+        | (Some r, None)
+        | (None, Some r) ->
+          Some r
+        | (None, None) -> None
+        | _ -> failwith "ill-formed path"
+      in
+      (prj_l_opt, elem, prj_r_opt, stats, max_depth)
     | witness -> (None, [Node witness], None, empty_stats, cur_depth)
   in
   match aux t ~dir:Fwd ~cur_depth:0 with

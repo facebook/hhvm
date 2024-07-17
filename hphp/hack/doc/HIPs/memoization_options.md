@@ -63,7 +63,7 @@ We propose allowing setting an IC when executing functions requiring `[defaults]
   )[ctx $f, zoned]: Tout { ... }
 ```
 
->In the above, we have also renamed `ImpicitContext::set` to `ImplicitContet::runWith` in order to avoid an incorrect assumption that the IC is set to the given value *after* the completion of this method call. We use the new “runWith” name for the remainder of this document.
+>In the above, we have also renamed `ImplicitContext::set` to `ImplicitContet::runWith` in order to avoid an incorrect assumption that the IC is set to the given value *after* the completion of this method call. We use the new “runWith” name for the remainder of this document.
 
 
 We will avoid poisoning memoization caches by dynamically requiring that memoized functions executing under an IC fall into one of two safe categories:
@@ -72,46 +72,21 @@ We will avoid poisoning memoization caches by dynamically requiring that memoize
 * The functions is marked as never using the IC. This can be achieved either by:
     * Using the new attribute `__Memoize(#MakeICInaccessible)` instead of regular `__Memoize`. This attribute will act like `__Memoize` except: attempting to fetch the IC or calling an uncategorized memoized function from a function with this attribute will throw. This behavior applies to immediate and recursive callees until an IC value is set again (if ever).
     * Using regular `__Memoize` and requiring a context that does not have the `ImplicitPolicy` capability. Because fetching the IC requires `[zoned]`, we know that recursive callees cannot access the IC. (Given the current set of contexts, this is the set of contexts as capable as or less capable than `[leak_safe, globals]`.)
+* If a function is marked with `__Memoize` without an categorization argument or coeffect, it will be treated as `__Memoize(#MakeICInaccessible)`.
 
 >In the above, we are adding an optional enum class label argument to the `__Memoize` attribute. See the “Syntax” section.
-
-
-If a memoized function is executed under a non-null IC and does not fall into one of the above two categories, the runtime will throw an exception. The primary example of such a function would be a function that requires `[defaults]` and has the regular `__Memoize` attribute.
-
-We also propose adding the following features to allow for migration to the above while minimizing the risk of surprise exceptions:
-
-* `soft_run_with($callable, $blame_string)` - This function will execute the callable and log in the same circumstances when calling `runWith` instead would throw: namely when calling a function that is `__Memoize` + `[defaults]`. The blame string distinguishes distinct uses of this API. Developers can use this function before using `runWith` in order to identify functions to fix.
-    * Note that this function does not belong to an `ImplicitContext` class because it does not effect propagation of a user-provided value.
-* `__Memoize(#SoftMakeICInaccessible)` - This attribute is analogous to `__Memoize(#MakeICInaccessible)` and will cause logs in cases when using `__Memoize(#MakeICInaccessible)` instead would throw: namely when calling a function that is `__Memoize` + `[defaults]` or when attempting to fetch the IC. Developers can use this before using `__Memoize(#MakeICInaccessible)` in order to identify functions to fix.
-    * Note that since a function with `[defaults]` and this attribute behaves exactly like a function with `[defaults]` and `__Memoize` except for the logging, a function with this attribute will also be considered "uncategorized."
-    * When using `#SoftMakeICInaccessible`, the attribute will also take an integer as an optional second argument. This integer will be used as a sample rate. That is, if you pass N, then when this function is called there is a 1/N chance that we will enter the “soft inaccessible” state and produce logs; otherwise, this function will act as if no arguments we passed.
-* `run_with_soft_inaccessible_state($callable, $blame_string)` - This function will execute the callable and log in the same circumstances when calling this from a `#MakeICInaccessible` function would throw. The purpose of this function is to allow removing calls to backdoors in code that is already running under an “inaccessible” state.
-    * This currently will only be allowed from the “null” state which is the state you are in in a backdoor.
-
-The goal of logging is to allow developers to get signal if making changes would result in exceptions due to disallowed access to the IC or calls to uncategorized memoized functions. Developers who use these "soft" variations should get at least one log for problematic dependencies if any exist, even if other callers of the same dependencies exist (assuming 1:1 sampling). Note that while getting logs for every problematic dependency that could be detected at runtime is ideal, logs for a single dependency should be sufficient to block the developer from upgrading to throwing variants.
-
-These various memoization options are mutually exclusive and cannot be used together on the same function.
 
 Note: In this document, we describe semantics in terms of `__Memoize` and `__Memoize()`. The same statements apply to `__MemoizeLSB` and new `__MemoizeLSB()`.
 
 ## Description of states
 
-Under this proposal, the IC can be in one of five states:
+Under this proposal, the IC can be in one of three states:
 
 ```
 null : The IC has not been set
 value(T) : The IC has been set to some value
 inaccessible : Fetching the IC or calling uncategorized memoized functions will result in an exception
-soft_set(vector<soft inaccessible blame>, vector<soft run blame>) : The IC has not been set, but you will get logs for uncategorized memoization
-soft_inaccessibl(vector<soft inaccessible blame>, vector<soft run blame>) : The IC has not been set, but you will get logs for uncategorized memoization and for fetching the IC
 ```
-
-Both soft states maintain two vectors of information on caller frames: one for strings associated with the reason for entering a “soft inaccessible” state (usually the names of functions with `__Memoize(#SoftMakeICInaccessible)`), the other for the list of user-provided strings passed to calls to `soft_run_with`. They are used as in two places:
-
-* Functions with `__Memoize(#KeyedByIC)` will account for both vectors in the memoization cache key.
-* Warnings that are raised for calling uncategorized memoized functions (from either soft state) or fetching the Implicit Context (from `soft_inaccessible`) will not include the blame information in the error string. However, this blame information will be passed as an additional argument to the error handler — a 2-tuple of the two vectors of strings.
-
-The "blame" values help indicate what function calls or functions' attributes are responsible for the logs. This is necessary in order to address logs during migrations, especially when migrating multiple code-sites at once.
 
 ## Description of state transitions
 
@@ -119,17 +94,11 @@ The following actions will have the following behavior:
 
 ### Calling a function with regular `__Memoize` that has the `ImplicitPolicy` capability (e.g. `[defaults]`)
 
-This does not affect the state of the IC.
+This is treated the same as `__Memoize(#MakeICInaccessible)`
 
 ```
-null: Run, do not use IC for cache key
-value: throw
-inaccessible: throw
-soft_set: log, run, do not use IC for cache key
-soft_inaccessible: log, run, do not use IC for cache key
+* : Run, do not key cache with IC, transition to inaccessible state with this function as blame
 ```
-
-Note that although `[zoned]` has the `ImplicitPolicy` capability, it is an error for a function with the `[zoned]` context to use regular `__Memoize` and so is not subject to this
 
 ### Calling a function with `__Memoize(#KeyedByIC)`
 
@@ -139,28 +108,12 @@ This does not affect the state of the IC.
 null: Run and use null as the IC key
 value: Run and use the IC value as the IC key
 inaccessible: Run and use the inaccessible state (singleton value) as the IC key
-soft_set: Run and use the the state plus blame vectors as the IC key
-soft_inaccessible: Run and use the the state plus blame vectors as the IC key
 ```
-
-For the soft states, it is necessary to key by blame information. Otherwise, if there are multiple callers that enable logging and a callee that would produce a log, if all the callers share the same cache key, that logging callee will not produce logs for every caller and non-first callers will lose signal that the callee may eventually throw.
 
 ### Calling a function with `__Memoize(#MakeICInaccessible)`
 
 ```
 * : Run, do not key cache with IC, transition to inaccessible state with this function as blame
-```
-
-### Calling a function with `__Memoize(#SoftMakeICInaccessible) `
-
-Recall that functions with this attribute are still considered uncategorized and so have similar behavior to a `__Memoize` + `[defaults]` function.
-
-```
-null: Run, do not key with IC, transition to soft_inaccessible state with this function as blame
-value: throw
-inaccessible: throw
-soft_set: log, run, do not key with IC, transition to soft_inaccessible state, inherit both blame vectors and append this function name to the inaccessible blame vector
-soft_inaccessible: log, run, do not key with IC, stay in soft_inaccessible state and add this function to existing inaccesible blame vector
 ```
 
 ### Calling a function with `__Memoize` that does not have the `ImplicitPolicy` capability
@@ -179,8 +132,16 @@ This does not affect the state of the IC.
 null: return null
 value: return value
 inaccessible: throw
-soft_set: return null
-soft_inaccessible: log, return null
+```
+
+### Calling `ImplicitContext::isInaccessible`
+
+This does not affect the state of the IC.
+
+```
+null: return false
+value: return false
+inaccessible: true
 ```
 
 ### Calling `ImplicitContext::runWith`
@@ -188,30 +149,6 @@ soft_inaccessible: log, return null
 ```
 * : set the IC to a value, transition to the value state with this function call as blame
 ```
-
-### Calling `soft_run_with`
-
-```
-null: transition to soft_set state with the given string as blame
-value: no op (relevant callees will already throw)
-inaccessible: no op (relevant callees will already throw)
-soft_set: stay in soft_set state and add the given blame string to the existing soft run blame vector
-soft_inaccessible: stay in soft_inaccessible state and add the given blame string to the existing soft run blame vector
-```
-
-Note: From the `soft_inaccessible` state, we stay in `soft_inaccessible` instead of transitioning to `soft_set` because we still want to produce warnings for downstream calls to `ImplicitContext::get` in order to associate them with the previous `__Memoize(#SoftMakeICInaccessible)` and `soft_inaccessible` has this behavior in addition to the warning behaviors of `soft_set`.
-
-### Calling `run_with_soft_inaccessible_state`
-
-```
-null: transition to soft_inaccessible state with the given string in the soft inaccessible function blame vector
-value: throw
-inaccessible: throw
-soft_set: throw
-soft_inaccessible: throw
-```
-
-We may consider supporting this call from other states if we determine there are other uses for it.
 
 ### Calling `HH\Coeffects\backdoor` or aliases
 
@@ -239,43 +176,26 @@ This section describes rules for what functions with what coeffects can use thes
 * `__Memoize(#KeyedByIC)` will only be permitted on functions that are known to have the `ImplicitPolicy` capability at compile time.
     * This means that the functions’ context list must be implicitly `[defaults]` or contain one of the following contexts explicitly: `defaults`, `zoned`, `zoned_shallow`, `zoned_local`.
     * Reason: A developer should be able to expect that a function without the `ImplicitPolicy` capability is not affected by the Implicit Context. However, this would not be the case if we allowed `#KeyedByIC` — e.g. imagine a memoized, leak-safe function that returns a random number.
-* `__Memoize(#MakeICInaccessible)` and `__Memoize(#SoftMakeICInaccessible)` will only be allowed on functions with any of the following contexts: `defaults`, `leak_safe_shallow`, `leak_safe_local`
+* `__Memoize(#MakeICInaccessible)` will only be allowed on functions with any of the following contexts: `defaults`, `leak_safe_shallow`, `leak_safe_local`
     * Reason: For functions without the `ImplicitPolicy` capability, the IC is already inaccessible and the function can use regular `__Memoize`. For functions with `zoned`, using this attribute seems contradictory.
     * This will be similarly enforced at compile time.
 * (As before) A memoized function with the `zoned` context must use `#KeyedByIC`.
 * (As before) A function with dependent contexts may not be memoized.
 
-## Expected use
+## Expected migration path
 
-A developer that wants to execute code under an IC would:
+A developer that wants to enable adopt DEIC in a codebase:
 
-1. Start by executing the code using `soft_run_with`
-2. Address logs for uncategorized memoized functions by either (a) switch to `__Memoize(#KeyedByIC)` or (b) use `__Memoize(#SoftMakeICInaccessible)`.
-    1. The latter may produce additional logs for uncategorized memoized functions and additional logs for `ImplicitContext::get`.
-3. Continue to categorize detected uncategorized memoized functions AND address logs for `ImplicitContext::get`. Options for addressing `ImplicitContext::get`:
-    1.  Use `__Memoize(#KeyedByIC)` instead of `__Memoize(#SoftMakeICInaccessible)`
-    2.  Introduce a new IC between the `__Memoize(#SoftMakeICInaccessible)` and the `ImplicitContext::get` using another `soft_run_with` and eventually `runWith` (or by removing the IC via a backdoor function)
-4. New uses of `__Memoize(#SoftMakeICInaccessible)` may produce additional logs as in step (2) and/or additional logs for `ImplicitContext::get`; Continue to categorize uncategorized memoized functions detected by logging and address
-5. Harden `__Memoize(#SoftMakeICInaccessible)` to `__Memoize(#MakeICInaccessible)` when logging indicates it is safe.
-6. Harden calls to `soft_run_with` to `runWith` when logging indicates it is safe.
-
-Note that developers may also choose to use static analysis or existing runtime profiling to identify uncategorized, memoized dependencies ahead of using `soft_run_with` or `__Memoize(#SoftMakeICInaccessible)`.
-
-Framework developers that want to make their frameworks compatible with being executed under an IC would use similar steps except likely by starting with making their regular `__Memoize` calls either `__Memoize(#KeyedByIC)` or `__Memoize(#SoftMakeICInaccessible)` depending on intended semantics.
+1. At the start of request, begin executing the code using `ImplicitContext::runWith`
+2. Add calls to `ImplicitContext::isInaccessible` where you expect to fetch the implicit context via `ImplicitContext::get` and log all violations.
+3. Address these logs and remediate them as fit (ie. Change `__Memoize` functions to be `#KeyedByIC`).
+4. Once violations are sufficiently addressed, start using `ImplicitContext::get` to influence runtime.
 
 ## Path to contexts and capabilities
 
 Allowing use of a dynamically-enforced Implicit Context is compatible with a statically-enforced Implicit Context using Contexts and Capabilities. In fact, the work to specify IC-handling for memoized functions is a subset of the work required to make functions callable from `[zoned]` contexts.
 
 In abstract, you can think of functions using `__Memoize(#KeyedByIC)` as being functions where the intention is to eventually require `[zoned]` (if it does not already) and think of functions using `__Memoize(#MakeICInaccessible)` as being functions where the intention is to eventually require `[leak_safe]` or some more restrictive context.
-
-## Explicit Uncategorization
-
-We also propose another memoization option `#Uncategorized`. Passing this argument will have the same behavior described above for not passing any arguments (with the exception of functions without the `ImplicitPolicy` capability).
-
-The purpose of this is that you can then require that the memoize attribute takes an argument. This encourages developers to consider how their function should behave w.r.t. the IC when writing new functions.
-
-Even under such a requirement though, memoized functions without the `ImplicitPolicy` capability will continue to require that no arguments are passed to the memoize attribute as the context list already explicitly designates the behavior.
 
 ## Syntax
 
@@ -285,8 +205,6 @@ The current proposal introduces an optional, enum class label argument to the ex
 enum class MemoizeOption: string {
   string KeyedByIC = 'KeyedByIC';
   string MakeICInaccessible = 'MakeICInaccessible';
-  string SoftMakeICInaccessible = 'SoftMakeICInaccessible';
-  string Uncategorized = 'Uncategorized';
 }
 ```
 
@@ -321,8 +239,6 @@ Alternatives we considered:
 
 "MakeICInaccessible" describes how the IC cannot be accessed. A previously proposed name used the verbiage "clear IC," however this created a distinction between a state where the IC was "cleared" vs one where the IC was never set. Primary concerns with this name are aesthetic: "inaccessible" is long and may be awkward to say and spell. A name like <imperative verb> + "IC" may be preferable, but verbs like "prohibit" or "ban" may incorrectly imply immediate exceptional behavior of the function with the attribute instead of restrictions on the function's dependencies.
 
-"Soft" has analogous meaning in the `__Soft` attribute for typehints where behavior that would normally throw exceptions results in logs instead which can be used to eventually move code to the "hard" throwing behavior.
-
 “IC” as an abbreviation for “Implicit Context” was chosen for brevity and lack of more attractive options. We concluded that brevity was valuable given expected prevalent usage of these attributes and that the disadvantage of possible ambiguity of “IC” would be offset by the fact that the full symbols names would be sufficiently unique. Other alternatives that were considered:
 
 * “IArg” as in “Implicit Argument” — This primary issue with this option is that “implicit arguments” is a feature in other languages with a different meaning. Using this term would both set incorrect expectations for readers with experience in those languages as well as be problematic should we want Hack to adopt a similar feature.
@@ -338,7 +254,7 @@ The current implementation of Implicit Contexts allows for multiple IC “flavor
 We have identified a few options:
 
 1. **Only allow a single flavor and require any further division of the value to be done in userland.** This has the benefit of simplifying the semantics. This also inherently requires coupling among all flavors, but unless you parameterize `KeyedByIC` and `MakeICInaccessible` features by flavor, the flavors are already tightly coupled since they will need to agree on when these attributes ought to be used. Coupling is also introduced by sharing related coeffects and the backdoor functions.
-2. **Track an IC state per flavor and allow individual setting.** Each flavor’s state could be set individual by `runWith` and `soft_run_with` calls, but `MakeICInaccesible` would set all flavors’ state to `inaccessible`. This would likely require more checks at runtime resulting in worsened performance.
+2. **Track an IC state per flavor and allow individual setting.** Each flavor’s state could be set individual by `runWith` calls, but `MakeICInaccesible` would set all flavors’ state to `inaccessible`. This would likely require more checks at runtime resulting in worsened performance.
 3. **Only track flavors in the value state.** Setting one flavor from the `inaccessible` state would resulting in implicitly setting all other flavors’ value to the initial null state.
 
 Our recommendation is that we take Option 3 which is closest to the current implementation of Implicit Contexts but require in userland that there is at most a single child of `HH\ImplicitContext`. This effectively means choosing Option 1 from the perspective of the user. This compromise allows us to make fewer changes to the runtime in the near term. We can choose to simplify the runtime to not support multiple flavors at a later date.

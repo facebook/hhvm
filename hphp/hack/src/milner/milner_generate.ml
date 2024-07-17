@@ -13,7 +13,7 @@ let name_ctr = ref 0
 let fresh prefix =
   let n = !name_ctr in
   name_ctr := !name_ctr + 1;
-  prefix ^ string_of_int n
+  prefix ^ "_" ^ string_of_int n
 
 let select l = List.length l - 1 |> Random.int_incl 0 |> List.nth_exn l
 
@@ -182,7 +182,7 @@ module Type = struct
       let name = fresh "N" in
       let (aliased, defs) = mk () in
       let def_newtype = "newtype " ^ name ^ " = " ^ show aliased ^ ";" in
-      let producer = fresh "mkNewtype" in
+      let producer = fresh ("mk" ^ name) in
       let (aliased_expr, expr_defs) = expr_of aliased in
       let def_maker =
         "function "

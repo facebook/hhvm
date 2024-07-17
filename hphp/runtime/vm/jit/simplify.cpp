@@ -1026,6 +1026,11 @@ SSATmp* simplifyDivInt(State& env, const IRInstruction* inst) {
   if (divisorVal == 0) {
     // The branch emitted during irgen will deal with this
     return nullptr;
+  } 
+
+  // X / 1 -> X
+  if (divisorVal == 1) {
+    return dividend;
   }
 
   if (!dividend->hasConstVal()) return nullptr;

@@ -144,7 +144,7 @@ let check_happly unchecked_tparams env h =
   env
 
 let rec context_hint ?(in_signature = true) env (p, h) =
-  Typing_kinding.Simple.check_well_kinded_context_hint
+  Typing_type_integrity.Simple.check_well_kinded_context_hint
     ~in_signature
     env.tenv
     (p, h);
@@ -253,7 +253,7 @@ and contexts_opt env = Option.value_map ~default:[] ~f:(contexts env)
 
 let hint ?(in_signature = true) ?(ignore_package_errors = false) env (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
-  Typing_kinding.Simple.check_well_kinded_hint
+  Typing_type_integrity.Simple.check_well_kinded_hint
     ~in_signature
     ~ignore_package_errors
     env.tenv
@@ -519,18 +519,18 @@ let typedef tenv (t : (_, _) typedef) =
      parameters of typedefs by Tany, which makes the kind check moot *)
   maybe
     (* We always check the constraints for internal types, so treat in_signature:true *)
-    (Typing_kinding.Simple.check_well_kinded_hint
+    (Typing_type_integrity.Simple.check_well_kinded_hint
        ~in_signature:true
        ~ignore_package_errors:false)
     tenv_with_typedef_tparams
     t_as_constraint;
   maybe
-    (Typing_kinding.Simple.check_well_kinded_hint
+    (Typing_type_integrity.Simple.check_well_kinded_hint
        ~in_signature:true
        ~ignore_package_errors:false)
     tenv_with_typedef_tparams
     t_super_constraint;
-  Typing_kinding.Simple.check_well_kinded_hint
+  Typing_type_integrity.Simple.check_well_kinded_hint
     ~in_signature:should_check_internal_signature
     ~ignore_package_errors:false
     tenv_with_typedef_tparams

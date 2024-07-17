@@ -331,7 +331,7 @@
   typing_intersection
   typing_generic_constraint
   typing_helpers
-  typing_kinding
+  typing_type_integrity
   typing_logic_helpers
   typing_object_get
   typing_ops

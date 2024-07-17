@@ -128,7 +128,7 @@ let type_capability env ctxs unsafe_ctxs default_pos =
       List.iter
         hl
         ~f:
-          (Typing_kinding.Simple.check_well_kinded_context_hint
+          (Typing_type_integrity.Simple.check_well_kinded_context_hint
              ~in_signature:false
              env));
 

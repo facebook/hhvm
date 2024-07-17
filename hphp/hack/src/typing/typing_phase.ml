@@ -18,7 +18,7 @@ module Subst = Decl_subst
 module MakeType = Typing_make_type
 module Cls = Folded_class
 module KindDefs = Typing_kinding_defs
-module Kinding = Typing_kinding
+module TIntegrity = Typing_type_integrity
 module SN = Naming_special_names
 
 (* Here is the general problem the delayed application of the phase solves.
@@ -461,7 +461,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     (* All should have been dealt with already:
      * (1) Wildcard_fresh_generic and Wildcard_fresh_generic_type_argument, in localize_targ_by_kind.
      * (2) Wildcard_illegal, in the naming phase.
-     * (3) Wildcard_higher_kinded_placeholder, in Typing_kinding.ml
+     * (3) Wildcard_higher_kinded_placeholder, in Typing_type_integrity.ml
      *)
     | Wildcard_fresh_generic
     | Wildcard_illegal
@@ -740,7 +740,7 @@ and localize_targ_by_kind (env, ety_env) ty (nkind : KindDefs.Simple.named_kind)
       let subst_and_add_localized_constraints env ck cstr_tys =
         Typing_set.fold
           (fun cstr_ty env ->
-            let cstr_ty = Kinding.Locl_Inst.instantiate substs cstr_ty in
+            let cstr_ty = TIntegrity.Locl_Inst.instantiate substs cstr_ty in
             TUtils.add_constraint env ck ty_fresh cstr_ty ety_env.on_error)
           cstr_tys
           env
@@ -939,7 +939,8 @@ and localize_with_kind
         let classish_kind =
           KindDefs.Simple.type_with_params_to_simple_kind tparams
         in
-        if Kinding.Simple.is_subkind env ~sub:classish_kind ~sup:expected_kind
+        if
+          TIntegrity.Simple.is_subkind env ~sub:classish_kind ~sup:expected_kind
         then
           ((env, None), mk (r, Tclass (id, nonexact, [])))
         else
@@ -963,7 +964,7 @@ and localize_with_kind
       match Env.get_pos_and_kind_of_generic env name with
       | Some (_, gen_kind) ->
         if
-          Kinding.Simple.is_subkind
+          TIntegrity.Simple.is_subkind
             env
             ~sub:(KindDefs.Simple.from_full_kind gen_kind)
             ~sup:expected_kind
@@ -1364,7 +1365,7 @@ let localize_targ_with_kind
       Aast.is_erased full_kind.Typing_kinding_defs.reified
     in
     if check_well_kinded then
-      Kinding.Simple.check_well_kinded
+      TIntegrity.Simple.check_well_kinded
         ~in_signature:false
         ~ignore_package_errors:in_non_reified_targ
         env

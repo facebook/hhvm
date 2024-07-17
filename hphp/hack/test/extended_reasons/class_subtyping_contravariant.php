@@ -6,7 +6,7 @@ class MyB<-T1, T2> extends MyA<Sub, T1, T2> {}
 
 class Super {}
 
-class Sub {}
+class Sub extends Super {}
 
 function takes_my_a(MyA<Sub, Super, Super> $_): void {}
 

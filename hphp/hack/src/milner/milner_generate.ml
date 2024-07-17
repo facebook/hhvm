@@ -20,6 +20,7 @@ type primitive =
 [@@deriving enum, ord]
 
 type kind =
+  | KMixed
   | KPrimitive
   | KClass
   | KAlias
@@ -28,6 +29,7 @@ type kind =
 [@@deriving enum]
 
 type ty =
+  | TMixed
   | TPrimitive of primitive
   | TClass of { name: string }
   | TAlias of {
@@ -54,6 +56,7 @@ let pick l = List.length l - 1 |> Random.int_incl 0 |> List.nth_exn l
 
 let show_ty ty =
   match ty with
+  | TMixed -> "mixed"
   | TPrimitive prim -> begin
     match prim with
     | PInt -> "int"
@@ -67,25 +70,6 @@ let show_ty ty =
   | TAlias info -> info.name
   | TNewtype info -> info.name
   | TCase info -> info.name
-
-let rec expr_for = function
-  | TPrimitive prim -> begin
-    match prim with
-    | PInt -> "42"
-    | PString -> "'apple'"
-    | PFloat -> "42.0"
-    | PBool -> "true"
-    | PArraykey ->
-      let prim = pick [PInt; PString] in
-      expr_for (TPrimitive prim)
-    | PNum ->
-      let prim = pick [PInt; PFloat] in
-      expr_for (TPrimitive prim)
-  end
-  | TClass info -> "new " ^ info.name ^ "()"
-  | TAlias info -> expr_for info.aliased
-  | TNewtype info -> info.producer ^ "()"
-  | TCase info -> expr_for (pick info.disjuncts)
 
 let are_disjoint_prims prim prim' =
   let expand_prim = function
@@ -102,6 +86,9 @@ let are_disjoint_prims prim prim' =
 
 let rec are_disjoint_tys ty ty' =
   match (ty, ty') with
+  | (TMixed, _)
+  | (_, TMixed) ->
+    false
   | (TNewtype _, _)
   | (_, TNewtype _) ->
     (* Opaque newtypes (which is all we represent at the moment) cannot be
@@ -120,11 +107,32 @@ let rec are_disjoint_tys ty ty' =
        class definition each time we generate a new type. *)
     true
 
-let rec ty () =
+let rec expr_for = function
+  | TMixed -> expr_for @@ ty ()
+  | TPrimitive prim -> begin
+    match prim with
+    | PInt -> "42"
+    | PString -> "'apple'"
+    | PFloat -> "42.0"
+    | PBool -> "true"
+    | PArraykey ->
+      let prim = pick [PInt; PString] in
+      expr_for (TPrimitive prim)
+    | PNum ->
+      let prim = pick [PInt; PFloat] in
+      expr_for (TPrimitive prim)
+  end
+  | TClass info -> "new " ^ info.name ^ "()"
+  | TAlias info -> expr_for info.aliased
+  | TNewtype info -> info.producer ^ "()"
+  | TCase info -> expr_for (pick info.disjuncts)
+
+and ty () =
   let kind =
     Random.int_incl min_kind max_kind |> kind_of_enum |> Option.value_exn
   in
   match kind with
+  | KMixed -> TMixed
   | KPrimitive ->
     let prim =
       Random.int_incl min_primitive max_primitive

@@ -20,6 +20,9 @@ use crate::lexable_token::LexableToken;
 use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
 
+#[allow(clippy::assign_op_pattern)]
+#[allow(clippy::let_and_return)]
+
 impl<T, V, C> SyntaxType<C> for Syntax<T, V>
 where
     T: LexableToken,
@@ -2027,6 +2030,9 @@ where
     }
 
  }
+
+#[allow(clippy::assign_op_pattern)]
+#[allow(clippy::let_and_return)]
 
 impl<T, V> Syntax<T, V>
 where
@@ -7179,6 +7185,9 @@ pub enum SyntaxVariant<T, V> {
     ModuleMembershipDeclaration(Box<ModuleMembershipDeclarationChildren<T, V>>),
     PackageExpression(Box<PackageExpressionChildren<T, V>>),
 }
+
+#[allow(clippy::assign_op_pattern)]
+#[allow(clippy::let_and_return)]
 
 impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
     pub fn next_impl(&mut self, direction : bool) -> Option<&'a Syntax<T, V>> {

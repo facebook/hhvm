@@ -1668,7 +1668,7 @@ pub struct PackageExpressionChildren<'a, T, V> {
 impl<'a, T, V> SyntaxVariant<'a, T, V> {
     pub fn iter_children(&'a self) -> SyntaxChildrenIterator<'a, T, V> {
         SyntaxChildrenIterator {
-            syntax: &self,
+            syntax: self,
             index: 0,
             index_back: 0,
         }

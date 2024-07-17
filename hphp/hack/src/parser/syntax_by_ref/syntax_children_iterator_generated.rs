@@ -22,6 +22,9 @@ use super::{
     syntax::*
 };
 
+#[allow(clippy::assign_op_pattern)]
+#[allow(clippy::let_and_return)]
+
 impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
     pub fn next_impl(&mut self, direction : bool) -> Option<&'a Syntax<'a, T, V>> {
         use SyntaxVariant::*;

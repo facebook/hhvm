@@ -17,12 +17,6 @@ let fresh prefix =
 
 let select l = List.length l - 1 |> Random.int_incl 0 |> List.nth_exn l
 
-module Definition = struct
-  type t = string
-
-  let show def = def
-end
-
 module Primitive = struct
   type t =
     | Null
@@ -62,7 +56,54 @@ module Kind = struct
   let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
 end
 
-module Type = struct
+module rec Definition : sig
+  type t
+
+  val show : t -> string
+
+  val function_ : name:string -> ret:Type.t -> ret_expr:string -> t
+
+  val class_ : name:string -> t
+
+  val alias : name:string -> Type.t -> t
+
+  val newtype : name:string -> Type.t -> t
+
+  val case_type : name:string -> Type.t list -> t
+end = struct
+  type t = string
+
+  let show def = def
+
+  let function_ ~name ~ret ~ret_expr =
+    Format.sprintf
+      "function %s(): %s { return %s; }"
+      name
+      (Type.show ret)
+      ret_expr
+
+  let class_ ~name = Format.sprintf "class %s {}" name
+
+  let alias ~name aliased =
+    Format.sprintf "type %s = %s;" name (Type.show aliased)
+
+  let newtype ~name aliased =
+    Format.sprintf "newtype %s = %s;" name (Type.show aliased)
+
+  let case_type ~name disjuncts =
+    let rhs = String.concat ~sep:" | " (List.map ~f:Type.show disjuncts) in
+    Format.sprintf "case type %s = %s;" name rhs
+end
+
+and Type : sig
+  type t
+
+  val show : t -> string
+
+  val expr_of : t -> string * Definition.t list
+
+  val mk : unit -> t * Definition.t list
+end = struct
   type t =
     | Mixed
     | Primitive of Primitive.t
@@ -171,30 +212,22 @@ module Type = struct
       (Option ty, defs)
     | Kind.Class ->
       let name = fresh "C" in
-      let def_class = "class " ^ name ^ " {}" in
-      (Class { name }, [def_class])
+      (Class { name }, [Definition.class_ ~name])
     | Kind.Alias ->
       let name = fresh "A" in
       let (aliased, defs) = mk () in
-      let def_alias = "type " ^ name ^ " = " ^ show aliased ^ ";" in
-      (Alias { name; aliased }, def_alias :: defs)
+      (Alias { name; aliased }, Definition.alias ~name aliased :: defs)
     | Kind.Newtype ->
       let name = fresh "N" in
       let (aliased, defs) = mk () in
-      let def_newtype = "newtype " ^ name ^ " = " ^ show aliased ^ ";" in
       let producer = fresh ("mk" ^ name) in
+      let newtype_def = Definition.newtype ~name aliased in
       let (aliased_expr, expr_defs) = expr_of aliased in
-      let def_maker =
-        "function "
-        ^ producer
-        ^ "(): "
-        ^ name
-        ^ " { return "
-        ^ aliased_expr
-        ^ "; }"
+      let ty = Newtype { name; producer } in
+      let newtype_producer_def =
+        Definition.function_ ~name:producer ~ret:ty ~ret_expr:aliased_expr
       in
-      ( Newtype { name; producer },
-        def_newtype :: def_maker :: (expr_defs @ defs) )
+      (ty, newtype_def :: newtype_producer_def :: (expr_defs @ defs))
     | Kind.Case ->
       let name = fresh "CT" in
       let rec add_disjuncts (disjuncts, defs) =
@@ -209,12 +242,6 @@ module Type = struct
       in
       let (ty, defs) = mk () in
       let (disjuncts, defs) = add_disjuncts ([ty], defs) in
-      let def_case_type =
-        "case type "
-        ^ name
-        ^ " = "
-        ^ String.concat ~sep:" | " (List.map ~f:show disjuncts)
-        ^ ";"
-      in
-      (Case { name; disjuncts }, def_case_type :: defs)
+      let case_type_def = Definition.case_type ~name disjuncts in
+      (Case { name; disjuncts }, case_type_def :: defs)
 end

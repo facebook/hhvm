@@ -1010,6 +1010,10 @@ SSATmp* simplifyDivDbl(State& env, const IRInstruction* inst) {
     // The branch emitted during irgen will deal with this
     return nullptr;
   }
+  // X / 1.0 -> X
+  if (src2Val == 1.0) {
+    return src1;
+  }
 
   // statically compute X / Y
   return src1->hasConstVal() ? cns(env, src1->dblVal() / src2Val) : nullptr;

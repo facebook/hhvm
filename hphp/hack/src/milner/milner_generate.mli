@@ -8,10 +8,12 @@
 
 type ty
 
-val defs : string list ref
+type def
 
-val expr_for : ty -> string
+val show_def : def -> string
+
+val expr_for : ty -> string * def list
 
 val show_ty : ty -> string
 
-val ty : unit -> ty
+val ty : unit -> ty * def list

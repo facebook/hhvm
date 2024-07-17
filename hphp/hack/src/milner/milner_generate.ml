@@ -8,7 +8,9 @@
 
 open Hh_prelude
 
-let defs = ref []
+type def = string
+
+let show_def def = def
 
 type primitive =
   | PNull
@@ -116,14 +118,17 @@ let rec are_disjoint_tys ty ty' =
     true
 
 let rec expr_for = function
-  | TMixed -> expr_for @@ ty ()
+  | TMixed ->
+    let (ty, defs) = ty () in
+    let (str, defs') = expr_for ty in
+    (str, defs @ defs')
   | TPrimitive prim -> begin
     match prim with
-    | PNull -> "null"
-    | PInt -> "42"
-    | PString -> "'apple'"
-    | PFloat -> "42.0"
-    | PBool -> "true"
+    | PNull -> ("null", [])
+    | PInt -> ("42", [])
+    | PString -> ("'apple'", [])
+    | PFloat -> ("42.0", [])
+    | PBool -> ("true", [])
     | PArraykey ->
       let prim = pick [PInt; PString] in
       expr_for (TPrimitive prim)
@@ -132,9 +137,9 @@ let rec expr_for = function
       expr_for (TPrimitive prim)
   end
   | TOption ty -> expr_for @@ pick [TPrimitive PNull; ty]
-  | TClass info -> "new " ^ info.name ^ "()"
+  | TClass info -> ("new " ^ info.name ^ "()", [])
   | TAlias info -> expr_for info.aliased
-  | TNewtype info -> info.producer ^ "()"
+  | TNewtype info -> (info.producer ^ "()", [])
   | TCase info -> expr_for (pick info.disjuncts)
 
 and ty () =
@@ -142,72 +147,70 @@ and ty () =
     Random.int_incl min_kind max_kind |> kind_of_enum |> Option.value_exn
   in
   match kind with
-  | KMixed -> TMixed
+  | KMixed -> (TMixed, [])
   | KPrimitive ->
     let prim =
       Random.int_incl min_primitive max_primitive
       |> primitive_of_enum
       |> Option.value_exn
     in
-    TPrimitive prim
+    (TPrimitive prim, [])
   | KOption ->
     let rec candidate () =
       match ty () with
-      | TMixed
-      | TOption _ ->
+      | (TMixed, _)
+      | (TOption _, _) ->
         (* Due to some misguided checks the parser and the typechecker has. We
            need to eliminate these cases. *)
         candidate ()
-      | ty -> ty
+      | res -> res
     in
-    TOption (candidate ())
+    let (ty, defs) = candidate () in
+    (TOption ty, defs)
   | KClass ->
     let name = fresh "C" in
-    let def = "class " ^ name ^ " {}" in
-    defs := def :: !defs;
-    TClass { name }
+    let def_class = "class " ^ name ^ " {}" in
+    (TClass { name }, [def_class])
   | KAlias ->
     let name = fresh "A" in
-    let aliased = ty () in
-    let def = "type " ^ name ^ " = " ^ show_ty aliased ^ ";" in
-    defs := def :: !defs;
-    TAlias { name; aliased }
+    let (aliased, defs) = ty () in
+    let def_alias = "type " ^ name ^ " = " ^ show_ty aliased ^ ";" in
+    (TAlias { name; aliased }, def_alias :: defs)
   | KNewtype ->
     let name = fresh "N" in
-    let aliased = ty () in
-    let def = "newtype " ^ name ^ " = " ^ show_ty aliased ^ ";" in
-    defs := def :: !defs;
+    let (aliased, defs) = ty () in
+    let def_newtype = "newtype " ^ name ^ " = " ^ show_ty aliased ^ ";" in
     let producer = fresh "mkNewtype" in
-    let def =
+    let (aliased_expr, expr_defs) = expr_for aliased in
+    let def_maker =
       "function "
       ^ producer
       ^ "(): "
       ^ name
       ^ " { return "
-      ^ expr_for aliased
+      ^ aliased_expr
       ^ "; }"
     in
-    defs := def :: !defs;
-    TNewtype { name; producer }
+    (TNewtype { name; producer }, def_newtype :: def_maker :: (expr_defs @ defs))
   | KCase ->
     let name = fresh "CT" in
-    let rec add_disjuncts disjuncts =
+    let rec add_disjuncts (disjuncts, defs) =
       if Random.bool () then
-        let disjunct = ty () in
+        let (disjunct, defs') = ty () in
         if List.for_all disjuncts ~f:(are_disjoint_tys disjunct) then
-          add_disjuncts @@ (disjunct :: disjuncts)
+          add_disjuncts @@ (disjunct :: disjuncts, defs' @ defs)
         else
-          add_disjuncts disjuncts
+          add_disjuncts (disjuncts, defs)
       else
-        disjuncts
+        (disjuncts, defs)
     in
-    let disjuncts = add_disjuncts [ty ()] in
-    let def =
+    let (ty, defs) = ty () in
+    let (disjuncts, defs) = add_disjuncts ([ty], defs) in
+    let def_case_type =
       "case type "
       ^ name
       ^ " = "
       ^ String.concat ~sep:" | " (List.map ~f:show_ty disjuncts)
       ^ ";"
     in
-    defs := def :: !defs;
-    TCase { name; disjuncts }
+    (TCase { name; disjuncts }, def_case_type :: defs)

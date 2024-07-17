@@ -43,13 +43,23 @@ let generate_tables template =
      a random type and use that to generate an expression. *)
   let expr_table = init_table template expr_regexp in
   let gen_expr_from_ty_table ~key ~data:_ =
-    Hashtbl.find ty_table key
-    |> Option.value_or_thunk ~default:Gen.ty
-    |> Gen.expr_for
+    let (ty, _) =
+      Hashtbl.find ty_table key |> Option.value_or_thunk ~default:Gen.ty
+    in
+    Gen.expr_for ty
   in
   let expr_table = Hashtbl.mapi expr_table ~f:gen_expr_from_ty_table in
 
-  (ty_table, expr_table)
+  let defs =
+    let get_defs (_, (_, defs)) = defs in
+    let ty_defs = Hashtbl.to_alist ty_table |> List.map ~f:get_defs in
+    let expr_defs = Hashtbl.to_alist expr_table |> List.map ~f:get_defs in
+    ty_defs @ expr_defs |> List.concat
+  in
+  let ty_table = Hashtbl.map ty_table ~f:(fun (ty, _) -> ty) in
+  let expr_table = Hashtbl.map expr_table ~f:(fun (expr, _) -> expr) in
+
+  (ty_table, expr_table, defs)
 
 (* Add generated types and expressions back in the template *)
 let fill_in_template ty_table expr_table template =
@@ -65,11 +75,11 @@ let fill_in_template ty_table expr_table template =
   |> fill_table ty_str_table ~prefix:type_prefix
   |> fill_table expr_table ~prefix:expr_prefix
 
-let add_missing_definitions output =
+let add_missing_definitions defs output =
   output
   ^ "\n"
   ^ "// Auxiliary definitions\n"
-  ^ String.concat ~sep:"\n" !Gen.defs
+  ^ String.concat ~sep:"\n" (List.map ~f:Gen.show_def defs)
   ^ "\n"
 
 let milner verbose seed template_path destination_path =
@@ -83,9 +93,10 @@ let milner verbose seed template_path destination_path =
   end;
   let () = Random.init seed in
   let template = In_channel.read_all template_path in
-  let (ty_table, expr_table) = generate_tables template in
+  let (ty_table, expr_table, defs) = generate_tables template in
   let output =
-    fill_in_template ty_table expr_table template |> add_missing_definitions
+    fill_in_template ty_table expr_table template
+    |> add_missing_definitions defs
   in
   match destination_path with
   | Some path -> Out_channel.write_all path ~data:output

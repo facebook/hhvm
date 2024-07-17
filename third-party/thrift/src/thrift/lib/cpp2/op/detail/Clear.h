@@ -42,7 +42,7 @@ namespace detail {
 //
 // C++'s default for the underlying native type, is the default for all
 // unstructured types.
-template <typename Tag, typename = void>
+template <typename Tag>
 struct GetDefault {
   static_assert(!type::is_a_v<Tag, type::structured_c>, "");
   constexpr auto operator()() const { return type::native_type<Tag>{}; }
@@ -51,7 +51,7 @@ struct GetDefault {
 // Gets a (potentally const&) value representing the **intrinsic** default.
 //
 // This is the same as the default for all non-structured types.
-template <typename Tag, typename = void>
+template <typename Tag>
 struct GetIntrinsicDefault : GetDefault<Tag> {
   static_assert(!type::is_a_v<Tag, type::structured_c>, "");
 };

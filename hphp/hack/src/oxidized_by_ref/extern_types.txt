@@ -105,6 +105,7 @@ oxidized::typing_defs_core::ShapeKind
 oxidized::typing_defs_core::ValKind
 oxidized::typing_reason::ArgPosition
 oxidized::typing_reason::BlameSource
+oxidized::typing_reason::CtorKind
 oxidized::typing_reason::Direction
 oxidized::typing_reason::FieldKind
 oxidized::typing_reason::FlowKind

@@ -110,6 +110,7 @@ typing_defs_core::ShapeKind
 typing_defs_core::ValKind
 typing_reason::ArgPosition
 typing_reason::BlameSource
+typing_reason::CtorKind
 typing_reason::CstrVariance
 typing_reason::Direction
 typing_reason::FieldKind

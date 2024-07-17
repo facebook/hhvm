@@ -88,10 +88,10 @@ which itself flows up into this expression as the 1st function parameter
  11 | function passes_missing_a_alias(
  12 |   missing_a $s,
  13 | ): void {
- 14 |   »expects_required_a_at_int_alias«($s);
+ 14 |   »expects_required_a_at_int_alias($s)«;
  15 | }
 
-File "shape_subtyping_7.php", line 14, character 3 - line 14, character 33:
+File "shape_subtyping_7.php", line 14, character 3 - line 14, character 37:
 
 which itself flows from this function or method  because they are required to be subtypes
 
@@ -212,10 +212,10 @@ which itself flows up into this expression as the 1st function parameter
  11 | function passes_missing_a_alias(
  12 |   missing_a $s,
  13 | ): void {
- 14 |   »expects_required_a_at_int_alias«($s);
+ 14 |   »expects_required_a_at_int_alias($s)«;
  15 | }
 
-File "shape_subtyping_7.php", line 14, character 3 - line 14, character 33:
+File "shape_subtyping_7.php", line 14, character 3 - line 14, character 37:
 
 which itself flows from this function or method  because they are required to be subtypes
 

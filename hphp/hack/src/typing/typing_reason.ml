@@ -185,12 +185,24 @@ let explain_field_kind = function
   | Optional -> "optional"
   | Absent -> "non-existent"
 
+type ctor_kind =
+  | Ctor_class
+  | Ctor_newtype
+[@@deriving hash]
+
+let ctor_kind_to_json = function
+  | Ctor_class -> Hh_json.string_ "Ctor_class"
+  | Ctor_newtype -> Hh_json.string_ "Ctor_newtype"
+
+let explain_ctor_kind = function
+  | Ctor_class -> "this class"
+  | Ctor_newtype -> "this newtype"
+
 (** Symmetric projections are those in which the same decomposition is applied
     to both sub- and supertype during inference *)
 type prj_symm =
   | Prj_symm_neg
-  | Prj_symm_class of string * int * cstr_variance
-  | Prj_symm_newtype of string * int * cstr_variance
+  | Prj_symm_ctor of ctor_kind * string * int * cstr_variance
   | Prj_symm_tuple of int
   | Prj_symm_shape of string * field_kind * field_kind
   | Prj_symm_fn_param of int * int
@@ -199,9 +211,7 @@ type prj_symm =
 [@@deriving hash]
 
 let prj_symm_is_contra = function
-  | Prj_symm_class (_, _, var)
-  | Prj_symm_newtype (_, _, var) ->
-    cstr_variance_is_contra var
+  | Prj_symm_ctor (_, _, _, var) -> cstr_variance_is_contra var
   | Prj_symm_fn_param _
   | Prj_symm_fn_param_inout (_, _, Contra) ->
     true
@@ -214,27 +224,16 @@ let prj_symm_is_contra = function
 
 let prj_symm_to_json = function
   | Prj_symm_neg -> Hh_json.JSON_String "Prj_symm_neg"
-  | Prj_symm_class (nm, idx, variance) ->
+  | Prj_symm_ctor (ctor_kind, nm, idx, variance) ->
     Hh_json.(
       JSON_Object
         [
-          ( "Prj_symm_class",
+          ( "Prj_symm_ctor",
             JSON_Array
               [
+                ctor_kind_to_json ctor_kind;
                 JSON_String nm;
-                JSON_Number (string_of_int idx);
-                cstr_variance_to_json variance;
-              ] );
-        ])
-  | Prj_symm_newtype (nm, idx, variance) ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Prj_symm_newtype",
-            JSON_Array
-              [
-                JSON_String nm;
-                JSON_Number (string_of_int idx);
+                int_ idx;
                 cstr_variance_to_json variance;
               ] );
         ])
@@ -291,29 +290,19 @@ let int_to_ordinal =
 let explain_symm_prj prj ~side =
   match prj with
   | Prj_symm_neg -> "via the negation type"
-  | Prj_symm_class (nm, idx, Inv dir) ->
+  | Prj_symm_ctor (ctor_kind, nm, idx, Inv dir) ->
     Format.sprintf
-      "as the invariant, %s type parameter of the class `%s`, when typing as %s"
+      "as the invariant, %s type parameter of the %s `%s`, when typing as %s"
       (int_to_ordinal (idx + 1))
+      (explain_ctor_kind ctor_kind)
       nm
       (explain_variance_dir dir)
-  | Prj_symm_class (nm, idx, Dir dir) ->
+  | Prj_symm_ctor (ctor_kind, nm, idx, Dir dir) ->
     Format.sprintf
-      "as the %s, %s type parameter of the class `%s`"
+      "as the %s, %s type parameter of the %s `%s`"
       (explain_variance_dir dir)
       (int_to_ordinal (idx + 1))
-      nm
-  | Prj_symm_newtype (nm, idx, Inv dir) ->
-    Format.sprintf
-      "as the invariant, %s type parameter of the type definition `%s`, when typing as %s"
-      (int_to_ordinal (idx + 1))
-      nm
-      (explain_variance_dir dir)
-  | Prj_symm_newtype (nm, idx, Dir dir) ->
-    Format.sprintf
-      "as the %s, %s type parameter of the type definition `%s`"
-      (explain_variance_dir dir)
-      (int_to_ordinal (idx + 1))
+      (explain_ctor_kind ctor_kind)
       nm
   | Prj_symm_tuple idx ->
     Format.sprintf "as the %s element of the tuple" (int_to_ordinal idx)
@@ -2295,62 +2284,106 @@ let flow ~from ~into ~kind = Rflow (from, kind, into)
 
 let reverse r = Rrev r
 
+(* -- Symmetric projections -- *)
 let prj_symm t ~prj = Rprj (Symm prj, t)
 
-let prj_class t ~nm ~idx ~var = prj_symm t ~prj:(Prj_symm_class (nm, idx, var))
+let prj_ctor_co
+    ~sub:(r_sub, r_sub_prj) ~super:r_super ctor_kind nm idx is_invariant =
+  let parent_flow = flow ~from:r_sub ~into:r_super ~kind:Flow_subtype in
+  let var =
+    if is_invariant then
+      Inv Co
+    else
+      Dir Co
+  in
+  let prj = Prj_symm_ctor (ctor_kind, nm, idx, var) in
+  let into = prj_symm parent_flow ~prj in
+  flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
-let prj_class_co t ~nm ~idx = prj_class t ~nm ~idx ~var:(Dir Co)
+let prj_ctor_contra
+    ~sub:r_sub ~super:(r_super, r_super_prj) ctor_kind nm idx is_invariant =
+  let parent_flow =
+    flow ~from:r_super ~into:(reverse r_sub) ~kind:Flow_subtype
+  in
+  let var =
+    if is_invariant then
+      Inv Co
+    else
+      Dir Co
+  in
+  let prj = Prj_symm_ctor (ctor_kind, nm, idx, var) in
+  let into = prj_symm parent_flow ~prj in
+  flow ~from:r_super_prj ~into ~kind:Flow_prj
 
-let prj_class_contra t ~nm ~idx = prj_class t ~nm ~idx ~var:(Dir Contra)
+let prj_neg ~sub:(r_sub, r_sub_prj) ~super =
+  let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
+  let prj = Prj_symm_neg in
+  let into = prj_symm parent_flow ~prj in
+  flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
-let prj_class_inv_co t ~nm ~idx = prj_class t ~nm ~idx ~var:(Inv Co)
+let prj_tuple ~sub:(r_sub, r_sub_prj) ~super idx =
+  let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
+  let prj = Prj_symm_tuple idx in
+  let into = prj_symm parent_flow ~prj in
+  flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
-let prj_class_inv_contra t ~nm ~idx = prj_class t ~nm ~idx ~var:(Inv Contra)
+let prj_shape ~sub:(r_sub, r_sub_prj) ~super lbl ~kind_sub ~kind_super =
+  let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
+  let prj = Prj_symm_shape (lbl, kind_sub, kind_super) in
+  let into = prj_symm parent_flow ~prj in
+  flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
-let prj_newtype t ~nm ~idx ~var =
-  prj_symm t ~prj:(Prj_symm_newtype (nm, idx, var))
+let prj_fn_param ~super:(r_super, r_super_prj) ~sub ~idx_sub ~idx_super =
+  let parent_flow = flow ~from:r_super ~into:(reverse sub) ~kind:Flow_subtype in
+  let prj = Prj_symm_fn_param (idx_super, idx_sub) in
+  let into = prj_symm parent_flow ~prj in
+  flow ~from:r_super_prj ~into ~kind:Flow_prj
 
-let prj_newtype_co t ~nm ~idx = prj_newtype t ~nm ~idx ~var:(Dir Co)
+let prj_fn_param_inout_co ~sub:(r_sub, r_sub_prj) ~super ~idx_sub ~idx_super =
+  let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
+  let prj = Prj_symm_fn_param_inout (idx_sub, idx_super, Co) in
+  let into = prj_symm parent_flow ~prj in
+  flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
-let prj_newtype_contra t ~nm ~idx = prj_newtype t ~nm ~idx ~var:(Dir Contra)
+let prj_fn_param_inout_contra
+    ~super:(r_super, r_super_prj) ~sub ~idx_sub ~idx_super =
+  let parent_flow = flow ~from:r_super ~into:(reverse sub) ~kind:Flow_subtype in
+  let prj = Prj_symm_fn_param_inout (idx_super, idx_sub, Contra) in
+  let into = prj_symm parent_flow ~prj in
+  flow ~from:r_super_prj ~into ~kind:Flow_prj
 
-let prj_newtype_inv_co t ~nm ~idx = prj_newtype t ~nm ~idx ~var:(Inv Co)
+let prj_fn_ret ~sub:(r_sub, r_sub_prj) ~super =
+  let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
+  let prj = Prj_symm_fn_ret in
+  let into = prj_symm parent_flow ~prj in
+  flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
-let prj_newtype_inv_contra t ~nm ~idx = prj_newtype t ~nm ~idx ~var:(Inv Contra)
+(* -- Asymmetric projections -- *)
+let prj_asymm_sub ~r_sub ~r_sub_prj prj =
+  let into = Rprj (Asymm (Sub, prj), r_sub) in
+  flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
-let prj_neg t = prj_symm t ~prj:Prj_symm_neg
+let prj_asymm_super ~r_super ~r_super_prj prj =
+  let from = Rprj (Asymm (Super, prj), r_super) in
+  flow ~from ~into:r_super_prj ~kind:Flow_prj
 
-let prj_tuple t ~idx = prj_symm t ~prj:(Prj_symm_tuple idx)
+let prj_union_sub ~r_sub ~r_sub_prj =
+  prj_asymm_sub ~r_sub ~r_sub_prj Prj_asymm_union
 
-let prj_shape t ~lbl ~kind_sub ~kind_super =
-  prj_symm t ~prj:(Prj_symm_shape (lbl, kind_sub, kind_super))
+let prj_union_super ~r_super ~r_super_prj =
+  prj_asymm_super ~r_super ~r_super_prj Prj_asymm_union
 
-let prj_fn_param t ~idx_sub ~idx_super =
-  prj_symm t ~prj:(Prj_symm_fn_param (idx_sub, idx_super))
+let prj_inter_sub ~r_sub ~r_sub_prj =
+  prj_asymm_sub ~r_sub ~r_sub_prj Prj_asymm_inter
 
-let prj_fn_param_inout_co t ~idx_sub ~idx_super =
-  prj_symm t ~prj:(Prj_symm_fn_param_inout (idx_sub, idx_super, Co))
+let prj_inter_super ~r_super ~r_super_prj =
+  prj_asymm_super ~r_super ~r_super_prj Prj_asymm_inter
 
-let prj_fn_param_inout_contra t ~idx_sub ~idx_super =
-  prj_symm t ~prj:(Prj_symm_fn_param_inout (idx_sub, idx_super, Contra))
+let prj_neg_sub ~r_sub ~r_sub_prj =
+  prj_asymm_sub ~r_sub ~r_sub_prj Prj_asymm_neg
 
-let prj_fn_ret t = prj_symm t ~prj:Prj_symm_fn_ret
-
-let prj_asymm_sub t ~prj = Rprj (Asymm (Sub, prj), t)
-
-let prj_asymm_super t ~prj = Rprj (Asymm (Super, prj), t)
-
-let prj_union_sub t = prj_asymm_sub t ~prj:Prj_asymm_union
-
-let prj_union_super t = prj_asymm_super t ~prj:Prj_asymm_union
-
-let prj_inter_sub t = prj_asymm_sub t ~prj:Prj_asymm_inter
-
-let prj_inter_super t = prj_asymm_super t ~prj:Prj_asymm_inter
-
-let prj_neg_sub t = prj_asymm_sub t ~prj:Prj_asymm_neg
-
-let prj_neg_super t = prj_asymm_super t ~prj:Prj_asymm_neg
+let prj_neg_super ~r_super ~r_super_prj =
+  prj_asymm_super ~r_super ~r_super_prj Prj_asymm_neg
 
 let missing_field = Rmissing_field
 

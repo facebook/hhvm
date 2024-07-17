@@ -95,10 +95,10 @@ which itself flows up into this expression as the 1st function parameter
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
-10 |   »rcvr_upper_bound«($x);
+10 |   »rcvr_upper_bound($x)«;
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, character 18:
+File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, character 22:
 
 which itself flows from this function or method  because they are required to be subtypes
 
@@ -176,7 +176,7 @@ Path:
           "filename":"generic_subtyping_upper_bound.php",
           "line":10,
           "char_start":3,
-          "char_end":18
+          "char_end":22
         }
       ]
     },
@@ -312,10 +312,10 @@ which itself flows up into this expression as the 1st function parameter
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
-10 |   »rcvr_upper_bound«($x);
+10 |   »rcvr_upper_bound($x)«;
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, character 18:
+File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, character 22:
 
 which itself flows from this function or method  because they are required to be subtypes
 
@@ -382,7 +382,7 @@ Path:
           "filename":"generic_subtyping_upper_bound.php",
           "line":10,
           "char_start":3,
-          "char_end":18
+          "char_end":22
         }
       ]
     },

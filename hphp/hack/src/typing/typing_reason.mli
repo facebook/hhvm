@@ -50,20 +50,6 @@ type locl_phase = private LoclPhase [@@deriving eq, hash, show]
  * Reasons used for decl types should be 'phase t_ so that they can be localized
  * to be used in the localized version of the type. *)
 
-type variance_dir =
-  | Co
-  | Contra
-[@@deriving hash]
-
-(** When recording the decomposition of a type during inference we want to keep
-    track of variance so we can give intuition about the direction of 'flow'.
-    In the case of invariant type paramters, we record both the fact that it was
-    invariant and the direction in which the error occurred *)
-type cstr_variance =
-  | Dir of variance_dir
-  | Inv of variance_dir
-[@@deriving hash]
-
 type field_kind =
   | Absent
   | Optional
@@ -86,6 +72,10 @@ type flow_kind =
   | Flow_upper_bound
   | Flow_lower_bound
 [@@deriving hash, show]
+
+type ctor_kind =
+  | Ctor_class
+  | Ctor_newtype
 
 (** The reason why something is expected to have a certain type *)
 type _ t_ [@@deriving hash, show]
@@ -378,65 +368,49 @@ val flow :
 (** Paths are reversed with contravariance; we use this constructor to perform reversals lazily *)
 val reverse : locl_phase t_ -> locl_phase t_
 
-(** Record the decomposition of a type parameter when simplifying a subtype
-    constraint between two classes *)
-val prj_class :
-  locl_phase t_ -> nm:string -> idx:int -> var:cstr_variance -> locl_phase t_
-
 (** Record the decomposition of a covariant type parameter when simplifying a
-    subtype constraint between two classes *)
-val prj_class_co : locl_phase t_ -> nm:string -> idx:int -> locl_phase t_
+    subtype constraint between two type constructors *)
+val prj_ctor_co :
+  sub:locl_phase t_ * locl_phase t_ ->
+  super:locl_phase t_ ->
+  ctor_kind ->
+  string ->
+  int ->
+  bool ->
+  locl_phase t_
 
 (** Record the decomposition of a contravariant type parameter when simplifying a
    subtype constraint between two classes *)
-val prj_class_contra : locl_phase t_ -> nm:string -> idx:int -> locl_phase t_
-
-(** Record the decomposition of an invariant type parameter treated as covariant
-    when simplifying a subtype constraint between two classes *)
-val prj_class_inv_co : locl_phase t_ -> nm:string -> idx:int -> locl_phase t_
-
-(** Record the decomposition of an invariant type parameter treated as
-    contravariant when simplifying a subtype constraint between two classes *)
-val prj_class_inv_contra :
-  locl_phase t_ -> nm:string -> idx:int -> locl_phase t_
-
-(** Record the decomposition of a type parameter when simplifying a
-    subtype constraint between two newtypes *)
-val prj_newtype :
-  locl_phase t_ -> nm:string -> idx:int -> var:cstr_variance -> locl_phase t_
-
-(** Record the decomposition of a covariant type parameter when simplifying a
-    subtype constraint between two newtypes *)
-val prj_newtype_co : locl_phase t_ -> nm:string -> idx:int -> locl_phase t_
-
-(** Record the decomposition of a contravariant type parameter when simplifying
-    a subtype constraint between two newtypes *)
-val prj_newtype_contra : locl_phase t_ -> nm:string -> idx:int -> locl_phase t_
-
-(** Record the decomposition of an invariant type parameter treated as covariant
-    when simplifying a subtype constraint between two newtypes *)
-val prj_newtype_inv_co : locl_phase t_ -> nm:string -> idx:int -> locl_phase t_
-
-(** Record the decomposition of an invariant type parameter treated as
-    contravariant when simplifying a subtype constraint between two newtypes *)
-val prj_newtype_inv_contra :
-  locl_phase t_ -> nm:string -> idx:int -> locl_phase t_
+val prj_ctor_contra :
+  sub:locl_phase t_ ->
+  super:locl_phase t_ * locl_phase t_ ->
+  ctor_kind ->
+  string ->
+  int ->
+  bool ->
+  locl_phase t_
 
 (** Record the decomposition of a subtype contraint between two negated types
     into a constraint between the two inner types *)
-val prj_neg : locl_phase t_ -> locl_phase t_
+val prj_neg :
+  sub:locl_phase t_ * locl_phase t_ -> super:locl_phase t_ -> locl_phase t_
 
 (** Record the decomposition of a subtype contraint between two tuple types
     into a constraint between the two types at index [idx] *)
-val prj_tuple : locl_phase t_ -> idx:int -> locl_phase t_
+val prj_tuple :
+  sub:locl_phase t_ * locl_phase t_ ->
+  super:locl_phase t_ ->
+  int ->
+  locl_phase t_
 
 (** Record the decomposition of a subtype contraint between two shape types
     into a constraint between the two types for a given field [lbl]; since
     the subtype relationship may depend on the field 'kind' in the sub- and
     supertype, we also record this information *)
 val prj_shape :
-  locl_phase t_ ->
-  lbl:string ->
+  sub:locl_phase t_ * locl_phase t_ ->
+  super:locl_phase t_ ->
+  string ->
   kind_sub:field_kind ->
   kind_super:field_kind ->
   locl_phase t_
@@ -446,53 +420,72 @@ val prj_shape :
     has variadic arguments the indices may differ so we explicitly record the
     index in both sub- and supertype *)
 val prj_fn_param :
-  locl_phase t_ -> idx_sub:int -> idx_super:int -> locl_phase t_
+  super:locl_phase t_ * locl_phase t_ ->
+  sub:locl_phase t_ ->
+  idx_sub:int ->
+  idx_super:int ->
+  locl_phase t_
 
 (** Record the decomposition of a subtype contraint between two function types
     into a constraint between the types of a given inout parameter treated
     as covariant *)
 val prj_fn_param_inout_co :
-  locl_phase t_ -> idx_sub:int -> idx_super:int -> locl_phase t_
+  sub:locl_phase t_ * locl_phase t_ ->
+  super:locl_phase t_ ->
+  idx_sub:int ->
+  idx_super:int ->
+  locl_phase t_
 
 (** Record the decomposition of a subtype contraint between two function types
     into a constraint between the types of a given inout parameter treated
     as contravariant *)
 val prj_fn_param_inout_contra :
-  locl_phase t_ -> idx_sub:int -> idx_super:int -> locl_phase t_
+  super:locl_phase t_ * locl_phase t_ ->
+  sub:locl_phase t_ ->
+  idx_sub:int ->
+  idx_super:int ->
+  locl_phase t_
 
 (** Record the decomposition of a subtype contraint between two function types
     into a constraint between the return types *)
-val prj_fn_ret : locl_phase t_ -> locl_phase t_
+val prj_fn_ret :
+  sub:locl_phase t_ * locl_phase t_ -> super:locl_phase t_ -> locl_phase t_
 
 (** Record the decomposition of a subtype constraint between a union type in
     subtype position and some other type into another contraint between some
     member of the union and the other type *)
-val prj_union_sub : locl_phase t_ -> locl_phase t_
+val prj_union_sub :
+  r_sub:locl_phase t_ -> r_sub_prj:locl_phase t_ -> locl_phase t_
 
 (** Record the decomposition of a subtype constraint between a union type in
     supertype position and some other type into another contraint between some
     member of the union and the other type *)
-val prj_union_super : locl_phase t_ -> locl_phase t_
+val prj_union_super :
+  r_super:locl_phase t_ -> r_super_prj:locl_phase t_ -> locl_phase t_
 
 (** Record the decomposition of a subtype constraint between a intersection type
     in subtype position and some other type into another contraint between some
     member of the union and the other type *)
-val prj_inter_sub : locl_phase t_ -> locl_phase t_
+val prj_inter_sub :
+  r_sub:locl_phase t_ -> r_sub_prj:locl_phase t_ -> locl_phase t_
 
 (** Record the decomposition of a subtype constraint between a intersection type
     in supertype position and some other type into another contraint between
     some member of the union and the other type *)
-val prj_inter_super : locl_phase t_ -> locl_phase t_
+val prj_inter_super :
+  r_super:locl_phase t_ -> r_super_prj:locl_phase t_ -> locl_phase t_
 
 (** Record the decomposition of a subtype constraint between a negated type in
     subtype position and some other type into another contraint between some
     member of the union and the other type *)
-val prj_neg_sub : locl_phase t_ -> locl_phase t_
+val prj_neg_sub :
+  r_sub:locl_phase t_ -> r_sub_prj:locl_phase t_ -> locl_phase t_
 
 (** Record the decomposition of a subtype constraint between a negated type in
     supertype position and some other type into another contraint between some
     member of the union and the other type *)
-val prj_neg_super : locl_phase t_ -> locl_phase t_
+val prj_neg_super :
+  r_super:locl_phase t_ -> r_super_prj:locl_phase t_ -> locl_phase t_
 
 val missing_field : t
 

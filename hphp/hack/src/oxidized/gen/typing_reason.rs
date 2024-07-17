@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<433deac0e8d6f3dd6934b2717823a0a6>>
+// @generated SignedSource<<198988479ba759e42386a847ba55137e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -208,6 +208,34 @@ pub enum FieldKind {
 impl TrivialDrop for FieldKind {}
 arena_deserializer::impl_deserialize_in_arena!(FieldKind);
 
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[repr(u8)]
+pub enum CtorKind {
+    #[rust_to_ocaml(name = "Ctor_class")]
+    CtorClass,
+    #[rust_to_ocaml(name = "Ctor_newtype")]
+    CtorNewtype,
+}
+impl TrivialDrop for CtorKind {}
+arena_deserializer::impl_deserialize_in_arena!(CtorKind);
+
 /// Symmetric projections are those in which the same decomposition is applied
 /// to both sub- and supertype during inference
 #[derive(
@@ -230,10 +258,8 @@ arena_deserializer::impl_deserialize_in_arena!(FieldKind);
 pub enum PrjSymm {
     #[rust_to_ocaml(name = "Prj_symm_neg")]
     PrjSymmNeg,
-    #[rust_to_ocaml(name = "Prj_symm_class")]
-    PrjSymmClass(String, isize, CstrVariance),
-    #[rust_to_ocaml(name = "Prj_symm_newtype")]
-    PrjSymmNewtype(String, isize, CstrVariance),
+    #[rust_to_ocaml(name = "Prj_symm_ctor")]
+    PrjSymmCtor(CtorKind, String, isize, CstrVariance),
     #[rust_to_ocaml(name = "Prj_symm_tuple")]
     PrjSymmTuple(isize),
     #[rust_to_ocaml(name = "Prj_symm_shape")]

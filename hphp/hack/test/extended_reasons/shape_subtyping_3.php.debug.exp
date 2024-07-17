@@ -83,10 +83,10 @@ which itself flows up into this expression as the 1st function parameter
   8 | function passes_optional_a_at_bool(
   9 |   shape(?'a' => bool) $s,
  10 | ): void {
- 11 |   »expects_required_a_at_int«($s);
+ 11 |   »expects_required_a_at_int($s)«;
  12 | }
 
-File "shape_subtyping_3.php", line 11, character 3 - line 11, character 27:
+File "shape_subtyping_3.php", line 11, character 3 - line 11, character 31:
 
 which itself flows from this function or method  because they are required to be subtypes
 
@@ -144,7 +144,7 @@ Path:
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
     {
-      "Rwitness":[{"filename":"shape_subtyping_3.php","line":11,"char_start":3,"char_end":27}]
+      "Rwitness":[{"filename":"shape_subtyping_3.php","line":11,"char_start":3,"char_end":31}]
     },
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {

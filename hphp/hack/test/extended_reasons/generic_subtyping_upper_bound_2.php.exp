@@ -95,10 +95,10 @@ which itself flows up into this expression as the 1st function parameter
   9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
  10 | 
  11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
- 12 |   »rcvr_both_bounds«($x);
+ 12 |   »rcvr_both_bounds($x)«;
  13 | }
 
-File "generic_subtyping_upper_bound_2.php", line 12, character 3 - line 12, character 18:
+File "generic_subtyping_upper_bound_2.php", line 12, character 3 - line 12, character 22:
 
 which itself flows from this function or method  because they are required to be subtypes
 
@@ -207,10 +207,10 @@ which itself flows up into this expression as the 1st function parameter
   9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
  10 | 
  11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
- 12 |   »rcvr_both_bounds«($x);
+ 12 |   »rcvr_both_bounds($x)«;
  13 | }
 
-File "generic_subtyping_upper_bound_2.php", line 12, character 3 - line 12, character 18:
+File "generic_subtyping_upper_bound_2.php", line 12, character 3 - line 12, character 22:
 
 which itself flows from this function or method  because they are required to be subtypes
 

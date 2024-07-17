@@ -40,7 +40,7 @@ Here's why: this hint
 
 File "class_subtyping_covariant.php", line 13, character 36 - line 13, character 40:
 
-flows up into this hint as the covariant, 1st type parameter of the class `\MyA`
+flows up into this hint as the covariant, 1st type parameter of the this class `\MyA`
 
  5 | class MyC<+T1, T2> extends »MyA<T1, Super, T2>« {}
  6 | 
@@ -83,10 +83,10 @@ which itself flows up into this expression as the 1st function parameter
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
  13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
- 14 |   »takes_my_a«($x);
+ 14 |   »takes_my_a($x)«;
  15 | }
 
-File "class_subtyping_covariant.php", line 14, character 3 - line 14, character 12:
+File "class_subtyping_covariant.php", line 14, character 3 - line 14, character 16:
 
 which itself flows from this function or method  because they are required to be subtypes
 
@@ -108,7 +108,7 @@ which itself flows down into this hint as the 1st function parameter
 
 File "class_subtyping_covariant.php", line 11, character 21 - line 11, character 42:
 
-which itself flows down into this hint as the covariant, 1st type parameter of the class `\MyA`
+which itself flows down into this hint as the covariant, 1st type parameter of the this class `\MyA`
 
  11 | function takes_my_a(MyA<»Sub«, Super, Super> $_): void {}
  12 | 
@@ -136,7 +136,7 @@ Path:
       "Edge":{
         "dir":"Fwd",
         "kind":"Flow_prj",
-        "in_to":{"Symm":[{"Prj_symm_class":["\\MyA",0,{"Dir":[{"Co":[]}]}]}]}
+        "in_to":{"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",0,{"Dir":[{"Co":[]}]}]}]}
       }
     },
     {
@@ -191,7 +191,7 @@ Path:
           "filename":"class_subtyping_covariant.php",
           "line":14,
           "char_start":3,
-          "char_end":12
+          "char_end":16
         }
       ]
     },
@@ -227,7 +227,7 @@ Path:
       "Edge":{
         "dir":"Fwd",
         "kind":"Flow_subtype_toplevel",
-        "out_of":{"Symm":[{"Prj_symm_class":["\\MyA",0,{"Dir":[{"Co":[]}]}]}]}
+        "out_of":{"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",0,{"Dir":[{"Co":[]}]}]}]}
       }
     },
     {

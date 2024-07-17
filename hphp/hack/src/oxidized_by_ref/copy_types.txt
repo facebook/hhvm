@@ -250,6 +250,7 @@ typing_mutability_env::MutType
 typing_reason::ArgPosition
 typing_reason::Blame
 typing_reason::BlameSource
+typing_reason::CtorKind
 typing_reason::CstrVariance
 typing_reason::DeclPhase
 typing_reason::ExprDepTypeReason

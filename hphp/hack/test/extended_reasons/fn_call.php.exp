@@ -65,10 +65,10 @@ which itself flows up into this expression as the 1st function parameter
  3 | function foo(string $_): void {}
  4 | 
  5 | function bar(int $y ): void{
- 6 |   »foo«($y);
+ 6 |   »foo($y)«;
  7 | }
 
-File "fn_call.php", line 6, character 3 - line 6, character 5:
+File "fn_call.php", line 6, character 3 - line 6, character 9:
 
 which itself flows from this function or method  because they are required to be subtypes
 

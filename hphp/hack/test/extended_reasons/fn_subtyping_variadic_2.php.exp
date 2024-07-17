@@ -76,10 +76,10 @@ which itself flows into this expression because they are required to be subtypes
 
  6 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
  7 | function bar_variadic_2((function(Sub...):void) $x): void {
- 8 |   »foo_variadic_2«($x);
+ 8 |   »foo_variadic_2($x)«;
  9 | }
 
-File "fn_subtyping_variadic_2.php", line 8, character 3 - line 8, character 16:
+File "fn_subtyping_variadic_2.php", line 8, character 3 - line 8, character 20:
 
 which itself flows down from this expression as the 1st function parameter
 

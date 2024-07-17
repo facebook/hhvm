@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<260d1974d8994dd2ebda8ab1d74d91b8>>
+// @generated SignedSource<<7e6a32499ce6c5cf8540f46805b3e1e6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -118,6 +118,7 @@ pub enum CstrVariance<'a> {
 impl<'a> TrivialDrop for CstrVariance<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(CstrVariance<'arena>);
 
+pub use oxidized::typing_reason::CtorKind;
 pub use oxidized::typing_reason::FieldKind;
 
 /// Symmetric projections are those in which the same decomposition is applied
@@ -144,13 +145,16 @@ pub enum PrjSymm<'a> {
     #[rust_to_ocaml(name = "Prj_symm_neg")]
     PrjSymmNeg,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Prj_symm_class")]
+    #[rust_to_ocaml(name = "Prj_symm_ctor")]
     #[rust_to_ocaml(inline_tuple)]
-    PrjSymmClass(&'a (&'a str, isize, CstrVariance<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Prj_symm_newtype")]
-    #[rust_to_ocaml(inline_tuple)]
-    PrjSymmNewtype(&'a (&'a str, isize, CstrVariance<'a>)),
+    PrjSymmCtor(
+        &'a (
+            &'a oxidized::typing_reason::CtorKind,
+            &'a str,
+            isize,
+            CstrVariance<'a>,
+        ),
+    ),
     #[rust_to_ocaml(name = "Prj_symm_tuple")]
     PrjSymmTuple(isize),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

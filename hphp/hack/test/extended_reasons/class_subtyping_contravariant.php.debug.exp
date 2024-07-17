@@ -28,7 +28,7 @@ But got `Super`
 
 File "class_subtyping_contravariant.php", line 11, character 30 - line 11, character 34:
 
-This error has 8 steps, a maximum depth of 2 and contains 2 reversals.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -40,7 +40,7 @@ Here's why: this hint
 
 File "class_subtyping_contravariant.php", line 11, character 30 - line 11, character 34:
 
-flows up into this hint as the contravariant, 2nd type parameter of the class `\MyA`
+flows up into this hint as the covariant, 2nd type parameter of the this class `\MyA`
 
  11 | function takes_my_a(»MyA<Sub, Super, Super>« $_): void {}
  12 | 
@@ -50,7 +50,7 @@ flows up into this hint as the contravariant, 2nd type parameter of the class `\
 
 File "class_subtyping_contravariant.php", line 11, character 21 - line 11, character 42:
 
-which itself flows up from this function or method  as the 1st function parameter
+which itself flows up into this function or method  as the 1st function parameter
 
  11 | function »takes_my_a«(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -60,17 +60,17 @@ which itself flows up from this function or method  as the 1st function paramete
 
 File "class_subtyping_contravariant.php", line 11, character 10 - line 11, character 19:
 
-which itself flows into this expression because they are required to be subtypes
+which itself flows from this expression because they are required to be subtypes
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
  13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
- 14 |   »takes_my_a«($x);
+ 14 |   »takes_my_a($x)«;
  15 | }
 
-File "class_subtyping_contravariant.php", line 14, character 3 - line 14, character 12:
+File "class_subtyping_contravariant.php", line 14, character 3 - line 14, character 16:
 
-which itself flows down from this expression as the 1st function parameter
+which itself flows down into this expression as the 1st function parameter
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -80,7 +80,7 @@ which itself flows down from this expression as the 1st function parameter
 
 File "class_subtyping_contravariant.php", line 14, character 14 - line 14, character 15:
 
-which itself flows from this expression because the local variable has this type
+which itself flows into this expression because the local variable has this type
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -90,7 +90,7 @@ which itself flows from this expression because the local variable has this type
 
 File "class_subtyping_contravariant.php", line 13, character 52 - line 13, character 53:
 
-which itself flows from this hint because it is a parameter hint
+which itself flows into this hint because it is a parameter hint
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -100,7 +100,7 @@ which itself flows from this hint because it is a parameter hint
 
 File "class_subtyping_contravariant.php", line 13, character 36 - line 13, character 50:
 
-which itself flows from this hint because they are subclass and superclass
+which itself flows into this hint because they are subclass and superclass
 
  5 | class MyB<-T1, T2> extends »MyA<Sub, T1, T2>« {}
  6 | 
@@ -108,7 +108,7 @@ which itself flows from this hint because they are subclass and superclass
 
 File "class_subtyping_contravariant.php", line 5, character 28 - line 5, character 43:
 
-which itself flows down into this hint as the contravariant, 2nd type parameter of the class `\MyA`
+which itself flows down into this hint as the covariant, 2nd type parameter of the this class `\MyA`
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -120,7 +120,7 @@ File "class_subtyping_contravariant.php", line 13, character 40 - line 13, chara
 
 Path:
 {
-  "stats":{"max_depth":2,"length":8,"reversals":2},
+  "stats":{"max_depth":2,"length":8,"reversals":1},
   "path_elems":[
     {
       "Rhint":[
@@ -136,7 +136,7 @@ Path:
       "Edge":{
         "dir":"Fwd",
         "kind":"Flow_prj",
-        "in_to":{"Symm":[{"Prj_symm_class":["\\MyA",1,{"Dir":[{"Contr":[]}]}]}]}
+        "in_to":{"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",1,{"Dir":[{"Co":[]}]}]}]}
       }
     },
     {
@@ -151,7 +151,7 @@ Path:
     },
     {
       "Edge":{
-        "dir":"Bwd",
+        "dir":"Fwd",
         "kind":"Flow_subtype",
         "in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
       }
@@ -166,19 +166,19 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Fwd","kind":"Flow_subtype"}},
+    {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
       "Rwitness":[
         {
           "filename":"class_subtyping_contravariant.php",
           "line":14,
           "char_start":3,
-          "char_end":12
+          "char_end":16
         }
       ]
     },
     {
-      "Edge":{"dir":"Bwd","kind":"Flow_prj","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
+      "Edge":{"dir":"Fwd","kind":"Flow_prj","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
     {
       "Rwitness":[
@@ -190,7 +190,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd","kind":"Flow_local"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
       "Rwitness":[
         {
@@ -201,7 +201,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd","kind":"Flow_param_hint"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
       "Rhint":[
         {
@@ -212,7 +212,7 @@ Path:
         }
       ]
     },
-    {"Edge":{"dir":"Bwd","kind":"Flow_extends"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_extends"}},
     {
       "Rhint":[
         {
@@ -227,7 +227,7 @@ Path:
       "Edge":{
         "dir":"Fwd",
         "kind":"Flow_subtype_toplevel",
-        "out_of":{"Symm":[{"Prj_symm_class":["\\MyA",1,{"Dir":[{"Contr":[]}]}]}]}
+        "out_of":{"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",1,{"Dir":[{"Co":[]}]}]}]}
       }
     },
     {

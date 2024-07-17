@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<785131864514477c59f8533c1eca9c5c>>
+// @generated SignedSource<<273a2341cc9214b9490bb94cbdee1a08>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1082,8 +1082,7 @@ impl<'a> Node<'a> for PrjSymm<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             PrjSymm::PrjSymmNeg => {}
-            PrjSymm::PrjSymmClass(ref __binding_0) => __binding_0.accept(v),
-            PrjSymm::PrjSymmNewtype(ref __binding_0) => __binding_0.accept(v),
+            PrjSymm::PrjSymmCtor(ref __binding_0) => __binding_0.accept(v),
             PrjSymm::PrjSymmTuple(ref __binding_0) => __binding_0.accept(v),
             PrjSymm::PrjSymmShape(ref __binding_0) => __binding_0.accept(v),
             PrjSymm::PrjSymmFnParam(ref __binding_0) => __binding_0.accept(v),
@@ -1410,6 +1409,17 @@ impl<'a> Node<'a> for FieldKind {
             FieldKind::Absent => {}
             FieldKind::Optional => {}
             FieldKind::Required => {}
+        }
+    }
+}
+impl<'a> Node<'a> for CtorKind {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_ctor_kind(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            CtorKind::CtorClass => {}
+            CtorKind::CtorNewtype => {}
         }
     }
 }

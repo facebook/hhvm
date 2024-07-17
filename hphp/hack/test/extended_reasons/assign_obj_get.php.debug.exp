@@ -66,10 +66,10 @@ which itself flows up into this expression as the 1st function parameter
 
  14 | function bar(SuperBox $f): void {
  15 |   $g = $f->get();
- 16 |   »foo«($g);
+ 16 |   »foo($g)«;
  17 | }
 
-File "assign_obj_get.php", line 16, character 3 - line 16, character 5:
+File "assign_obj_get.php", line 16, character 3 - line 16, character 9:
 
 which itself flows from this function or method  because they are required to be subtypes
 
@@ -110,7 +110,7 @@ Path:
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
     {
-      "Rwitness":[{"filename":"assign_obj_get.php","line":16,"char_start":3,"char_end":5}]
+      "Rwitness":[{"filename":"assign_obj_get.php","line":16,"char_start":3,"char_end":9}]
     },
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {

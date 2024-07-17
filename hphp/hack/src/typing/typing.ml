@@ -1320,19 +1320,6 @@ let fun_type_of_id env x tal el =
           (Reason.localize (get_reason fd.fe_type))
           ft
       in
-      (* If we used constraint solving for function typing, the
-         inferred type of the function call would be the supertype and the
-         declared function type, instantiated at the calls type arguents, would
-         be the subtype. We would then project on the individual type parameters
-         and create the contravariant constraints with this path reversed so we
-         construct that reversed path here. *)
-      let fty =
-        Typing_env.(
-          update_reason env fty ~f:(fun r_sub ->
-              let r_super = Reason.witness (fst x) in
-              Typing_reason.(
-                flow ~from:r_super ~into:(reverse r_sub) ~kind:Flow_subtype)))
-      in
       Option.iter
         ~f:(Typing_error_utils.add_typing_error ~env)
         (TVis.check_deprecated ~use_pos ~def_pos env fd.fe_deprecated);
@@ -5950,20 +5937,6 @@ end = struct
               (Reason.localize (get_reason m))
               ft
           in
-          (* If we used constraint solving for function typing, the
-             inferred type of the function call would be the supertype and the
-             declared function type, instantiated at the calls type arguents, would
-             be the subtype. We would then project on the individual type parameters
-             and create the contravariant constraints with this path reversed so we
-             construct that reversed path here. *)
-          let fty =
-            Typing_env.update_reason env fty ~f:(fun r_sub ->
-                Typing_reason.(
-                  flow
-                    ~from:(witness p)
-                    ~into:(reverse r_sub)
-                    ~kind:Flow_subtype))
-          in
           (env, fty)
         | _ ->
           Errors.internal_error p "Expected function type for constructor";
@@ -6402,15 +6375,15 @@ end = struct
               (* If we were using our function subtyping code to handle calls
                  we would have a contravariant function arg projection so
                  replicate that here *)
-              let update_reason from =
-                Typing_reason.(
-                  flow
-                    ~from
-                    ~into:
-                      (prj_fn_param ~idx_sub:arg_idx ~idx_super:param_idx
-                      @@ get_reason fty)
-                    ~kind:Flow_prj)
+              let r_sup = Typing_reason.witness expr_pos in
+              let update_reason r_sup_prj =
+                Typing_reason.prj_fn_param
+                  ~super:(r_sup, r_sup_prj)
+                  ~sub:(get_reason fty)
+                  ~idx_sub:param_idx
+                  ~idx_super:arg_idx
               in
+
               let ty = Typing_env.update_reason env ty ~f:update_reason in
 
               (* We have to update the type on the expression too rather
@@ -6441,15 +6414,15 @@ end = struct
               (* If we were using our function subtyping code to handle calls
                  we would have a contravariant function arg projection so
                  replicate that here *)
-              let update_reason from =
-                Typing_reason.(
-                  flow
-                    ~from
-                    ~into:
-                      (prj_fn_param ~idx_sub:arg_idx ~idx_super:param_idx
-                      @@ get_reason fty)
-                    ~kind:Flow_prj)
+              let r_sup = Typing_reason.witness expr_pos in
+              let update_reason r_sup_prj =
+                Typing_reason.prj_fn_param
+                  ~super:(r_sup, r_sup_prj)
+                  ~sub:(get_reason fty)
+                  ~idx_sub:param_idx
+                  ~idx_super:arg_idx
               in
+
               let ty = Typing_env.update_reason env ty ~f:update_reason in
 
               (* We have to update the type on the expression too rather

@@ -65,10 +65,10 @@ which itself flows up into this expression as the 1st function parameter
  3 | function foo(string $_): void {}
  4 | 
  5 | function bar(int $y ): void{
- 6 |   »foo«($y);
+ 6 |   »foo($y)«;
  7 | }
 
-File "fn_call.php", line 6, character 3 - line 6, character 5:
+File "fn_call.php", line 6, character 3 - line 6, character 9:
 
 which itself flows from this function or method  because they are required to be subtypes
 
@@ -104,7 +104,7 @@ Path:
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
-    {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":5}]},
+    {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":9}]},
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
       "Rsupport_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]

@@ -1020,6 +1020,13 @@ SSATmp* simplifyDivDbl(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyDivInt(State& env, const IRInstruction* inst) {
+  auto isPowTwo = [](int64_t a) {
+    return a > 0 && folly::isPowTwo<uint64_t>(a);
+  };
+  auto log2 = [](int64_t a) {
+    assertx(a > 0);
+    return folly::findLastSet<uint64_t>(a) - 1;
+  };  
   auto const dividend = inst->src(0);
   auto const divisor  = inst->src(1);
 
@@ -1037,15 +1044,16 @@ SSATmp* simplifyDivInt(State& env, const IRInstruction* inst) {
     return dividend;
   }
 
-  if (!dividend->hasConstVal()) return nullptr;
-
-  auto const dividendVal = dividend->intVal();
-
-  if (dividendVal == LLONG_MIN || dividendVal % divisorVal) {
-    // This should be unreachable
+  if (!dividend->hasConstVal()) {
+    // X / 2^n -> X >> n
+    if (isPowTwo(divisorVal)) {
+      return gen(env, Shr, dividend, cns(env, log2(divisorVal)));
+    }
     return nullptr;
   }
+  auto const dividendVal = dividend->intVal();
 
+  assertx(dividendVal != LLONG_MIN && dividendVal % divisorVal == 0);
   return cns(env, dividendVal / divisorVal);
 }
 

@@ -193,7 +193,8 @@ namespace {
      *
      * @guide /hack/generics/constraints
      */
-    public readonly function containsKey(mixed $k)[]: bool;
+    <<__Overlapping('Tv', 'Tv2')>>
+    public readonly function containsKey<Tv2>(Tv2 $k)[]: bool;
   }
 
   /**
@@ -556,7 +557,8 @@ namespace {
      *
      * @guide /hack/generics/constraints
      */
-    public readonly function linearSearch(mixed $search_value)[]: int;
+    <<__Overlapping('Tv', 'Tv2')>>
+    public readonly function linearSearch<Tv2>(Tv2 $search_value)[]: int;
     public function toVArray()[]: varray<Tv>;
     public function toDArray()[]: darray<int, Tv>;
   }
@@ -825,7 +827,8 @@ namespace {
      *
      * @guide /hack/generics/constraints
      */
-    public readonly function linearSearch(mixed $search_value)[]: int;
+    <<__Overlapping('Tv', 'Tv2')>>
+    public readonly function linearSearch<Tv2>(Tv2 $search_value)[]: int;
     public function toVArray()[]: varray<Tv>;
     public function toDArray()[]: darray<int, Tv>;
   }

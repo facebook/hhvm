@@ -521,7 +521,8 @@ namespace HH {
      *
      * @guide /hack/generics/constraints
      */
-    public readonly function containsKey(mixed $k)[]: bool;
+    <<__Overlapping('Tv', 'Tv2')>>
+    public readonly function containsKey<Tv2>(Tv2 $k)[]: bool;
 
     /**
      * Appends a value to the end of the current `Vector`, assigning it the next
@@ -692,7 +693,8 @@ namespace HH {
      *
      * @guide /hack/generics/constraints
      */
-    public readonly function linearSearch(mixed $search_value)[]: int;
+    <<__Overlapping('Tv', 'Tv2')>>
+    public readonly function linearSearch<Tv2>(Tv2 $search_value)[]: int;
 
     /**
      * Shuffles the values of the current `Vector` randomly in place.

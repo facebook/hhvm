@@ -12,7 +12,7 @@ ERROR: File "collection_error.php", line 11, characters 14-23:
 Unbound name: `symbolType` (an object type) (Naming[2049])
 ERROR: File "collection_error.php", line 8, characters 14-16:
 No static method `__makeType` in `Map` (Typing[4090])
-  File "collections/Map.hhi", line 633, characters 28-36:
+  File "collections/Map.hhi", line 635, characters 28-36:
   Did you mean `fromArray` instead?
   File "collections/Map.hhi", line 57, characters 15-17:
   Declaration of `Map` is here
@@ -22,7 +22,7 @@ No static method `__makeType` in `dict` (Typing[4090])
   Declaration of `dict` is here
 ERROR: File "collection_error.php", line 10, characters 14-19:
 No static method `__makeType` in `Vector` (Typing[4090])
-  File "collections/Vector.hhi", line 712, characters 28-36:
+  File "collections/Vector.hhi", line 714, characters 28-36:
   Did you mean `fromArray` instead?
   File "collections/Vector.hhi", line 48, characters 15-20:
   Declaration of `Vector` is here

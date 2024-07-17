@@ -438,7 +438,8 @@ namespace HH {
      *
      * @guide /hack/generics/constraints
      */
-    public readonly function contains(mixed $k)[]: bool;
+    <<__Overlapping('Tk', 'Tk2')>>
+    public readonly function contains<Tk2>(Tk2 $k)[]: bool;
 
     /**
      * Determines if the specified key is in the current `ImmMap`.
@@ -452,7 +453,8 @@ namespace HH {
      *
      * @guide /hack/generics/constraints
      */
-    public readonly function containsKey(mixed $k)[]: bool;
+    <<__Overlapping('Tk', 'Tk2')>>
+    public readonly function containsKey<Tk2>(Tk2 $k)[]: bool;
 
     /**
      * Returns a new `ImmMap` with the keys that are in the current `ImmMap`, but

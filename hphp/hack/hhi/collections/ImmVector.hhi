@@ -110,7 +110,8 @@ namespace HH {
      *
      * @guide /hack/generics/constraints
      */
-    public readonly function containsKey(mixed $k)[]: bool;
+    <<__Overlapping('Tv', 'Tv2')>>
+    public readonly function containsKey<Tv2>(Tv2 $k)[]: bool;
 
     /**
      * Returns an `array` containing the values from the current `ImmVector`.
@@ -148,7 +149,8 @@ namespace HH {
      *
      * @guide /hack/generics/constraints
      */
-    public readonly function linearSearch(mixed $search_value)[]: int;
+    <<__Overlapping('Tv', 'Tv2')>>
+    public readonly function linearSearch<Tv2>(Tv2 $search_value)[]: int;
 
     /**
      * Creates an `ImmVector` from the given `Traversable`, or an empty

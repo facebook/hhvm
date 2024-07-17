@@ -158,7 +158,7 @@ def get_reflection__MyServiceFast(for_clients: bool):
             exceptions=(
             ),
             annotations={
-                """thread""": """eb""",            },
+            },
         )
     )
     spec.add_method(
@@ -180,7 +180,7 @@ def get_reflection__MyServiceFast(for_clients: bool):
             exceptions=(
             ),
             annotations={
-                """thread""": """eb""",            },
+            },
         )
     )
     spec.add_method(
@@ -210,7 +210,7 @@ def get_reflection__MyServiceFast(for_clients: bool):
             exceptions=(
             ),
             annotations={
-                """thread""": """eb""",            },
+            },
         )
     )
     spec.add_method(
@@ -240,7 +240,7 @@ def get_reflection__MyServiceFast(for_clients: bool):
             exceptions=(
             ),
             annotations={
-                """thread""": """eb""",            },
+            },
         )
     )
     return spec

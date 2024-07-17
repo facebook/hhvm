@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
 enum MyEnum {
   MyValue1 = 0,
   MyValue2 = 1,
@@ -32,10 +34,14 @@ service MyService {
 }
 
 service MyServiceFast {
-  bool hasDataById(1: i64 id) (thread = 'eb');
-  string getDataById(1: i64 id) (thread = 'eb');
-  void putDataById(1: i64 id, 2: string data) (thread = 'eb');
-  oneway void lobDataById(1: i64 id, 2: string data) (thread = 'eb');
+  @cpp.ProcessInEbThreadUnsafe
+  bool hasDataById(1: i64 id);
+  @cpp.ProcessInEbThreadUnsafe
+  string getDataById(1: i64 id);
+  @cpp.ProcessInEbThreadUnsafe
+  void putDataById(1: i64 id, 2: string data);
+  @cpp.ProcessInEbThreadUnsafe
+  oneway void lobDataById(1: i64 id, 2: string data);
 }
 
 service DbMixedStackArguments {

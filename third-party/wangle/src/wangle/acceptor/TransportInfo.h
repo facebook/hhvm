@@ -283,7 +283,7 @@ struct TransportInfo {
   /*
    * time used to get a usable connection.
    */
-  int32_t connectLatency{-1};
+  size_t connectLatency{0};
 
   /*
    * true if the tcpinfo was successfully read from the kernel

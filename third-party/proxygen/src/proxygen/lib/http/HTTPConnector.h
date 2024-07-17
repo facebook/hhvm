@@ -137,7 +137,7 @@ class HTTPConnector : protected folly::AsyncSocket::ConnectCallback {
    * @returns the number of milliseconds since connecting began, or
    * zero if connecting hasn't started yet.
    */
-  std::chrono::milliseconds timeElapsed();
+  std::chrono::microseconds timeElapsed();
 
   /**
    * @returns true iff this connector is busy setting up a connection. If

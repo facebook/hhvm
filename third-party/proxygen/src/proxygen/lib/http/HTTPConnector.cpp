@@ -96,11 +96,11 @@ void HTTPConnector::connectSSL(EventBase* eventBase,
       this, connectAddr, timeoutMs.count(), socketOptions, bindAddr);
 }
 
-std::chrono::milliseconds HTTPConnector::timeElapsed() {
+std::chrono::microseconds HTTPConnector::timeElapsed() {
   if (timePointInitialized(connectStart_)) {
-    return millisecondsSince(connectStart_);
+    return microsecondsSince(connectStart_);
   }
-  return std::chrono::milliseconds(0);
+  return std::chrono::microseconds(0);
 }
 
 // Callback interface

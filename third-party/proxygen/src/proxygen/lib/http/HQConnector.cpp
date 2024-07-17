@@ -22,11 +22,11 @@ using namespace fizz::client;
 
 namespace proxygen {
 
-std::chrono::milliseconds HQConnector::timeElapsed() {
+std::chrono::microseconds HQConnector::timeElapsed() {
   if (timePointInitialized(connectStart_)) {
-    return millisecondsSince(connectStart_);
+    return microsecondsSince(connectStart_);
   }
-  return std::chrono::milliseconds(0);
+  return std::chrono::microseconds(0);
 }
 
 void HQConnector::reset() {

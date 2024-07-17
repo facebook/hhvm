@@ -109,6 +109,12 @@ inline std::chrono::milliseconds millisecondsSince(
 }
 
 template <typename ClockType = SteadyClock>
+inline std::chrono::microseconds microsecondsSince(
+    std::chrono::time_point<ClockType> t) {
+  return microsecondsBetween(getCurrentTime<ClockType>(), t);
+}
+
+template <typename ClockType = SteadyClock>
 inline std::chrono::seconds secondsSince(std::chrono::time_point<ClockType> t) {
   return secondsBetween(getCurrentTime<ClockType>(), t);
 }

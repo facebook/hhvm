@@ -77,7 +77,7 @@ class HQConnector : public HQSession::ConnectCallback {
       std::shared_ptr<quic::QuicTransportStatsCallback>
           quicTransportStatsCallback = nullptr);
 
-  std::chrono::milliseconds timeElapsed();
+  std::chrono::microseconds timeElapsed();
 
   bool isBusy() const {
     return (session_ != nullptr);

@@ -55,10 +55,10 @@ namespace detail {
 
 template <typename C, typename T>
 decltype(auto) forward_elem(T& elem) {
-  if constexpr (std::is_rvalue_reference_v<C>) {
-    return static_cast<T&&>(elem);
-  } else {
+  if constexpr (std::is_lvalue_reference_v<C>) {
     return elem;
+  } else {
+    return static_cast<T&&>(elem);
   }
 }
 
@@ -112,7 +112,7 @@ struct ValueHelper<type::list<V>> {
   static void set(Value& result, C&& value) {
     auto& result_list = result.ensure_list();
     for (auto& elem : value) {
-      ValueHelper<V>::set(result_list.emplace_back(), forward_elem<C&&>(elem));
+      ValueHelper<V>::set(result_list.emplace_back(), forward_elem<C>(elem));
     }
   }
 };
@@ -124,7 +124,7 @@ struct ValueHelper<type::set<V>> {
     auto& result_set = result.ensure_set();
     for (auto& elem : value) {
       Value elem_val;
-      ValueHelper<V>::set(elem_val, forward_elem<C&&>(elem));
+      ValueHelper<V>::set(elem_val, forward_elem<C>(elem));
       result_set.emplace(std::move(elem_val));
     }
   }
@@ -138,7 +138,7 @@ struct ValueHelper<type::map<K, V>> {
     for (auto& entry : value) {
       Value key;
       ValueHelper<K>::set(key, entry.first);
-      ValueHelper<V>::set(result_map[key], forward_elem<C&&>(entry.second));
+      ValueHelper<V>::set(result_map[key], forward_elem<C>(entry.second));
     }
   }
 };

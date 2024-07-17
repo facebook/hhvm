@@ -10,11 +10,10 @@
 
 namespace facebook::memcache::mcrouter::detail {
 
-bool srHostWithShardFuncRouteHandlesCommandDispatcher(
-    const HostWithShard& hostWithShard,
+bool srHostInfoPtrFuncRouteHandlesCommandDispatcher(
+    const HostInfoPtr& host,
     std::string& tree,
     const int level) {
-  const auto& host = hostWithShard.first;
   bool haveHost = (host != nullptr);
   tree.append(
       std::string(level, ' ') +

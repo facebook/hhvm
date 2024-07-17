@@ -176,14 +176,6 @@ class ProxyRequestContext {
     reqContextScopeGuard_.reset();
   }
 
-  void setRoutingHint(uint64_t hint) {
-    routingHint_ = hint;
-  }
-
-  uint64_t getRoutingHint() const {
-    return routingHint_;
-  }
-
  protected:
   // Keep on first cacheline. Used by ProxyRequestContextTyped
   const void* ptr_{nullptr};
@@ -231,11 +223,6 @@ class ProxyRequestContext {
       we want to notify we're done on destruction. */
   bool processing_{false};
   bool recording_{false};
-
-  /** A host hint to be passed to the routing layer, if thread affinity is
-      enabled. This avoids having to perform host selection twice in the routing
-      layer. */
-  uint64_t routingHint_{0};
 
   /**
    * Functions to be executed before actual processing code.

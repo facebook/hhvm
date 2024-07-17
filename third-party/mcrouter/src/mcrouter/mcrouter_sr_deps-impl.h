@@ -14,7 +14,6 @@ namespace memcache {
 
 class HostInfo;
 using HostInfoPtr = std::shared_ptr<HostInfo>;
-using HostWithShard = std::pair<HostInfoPtr, int64_t>;
 
 class HostInfoLocation {
  public:
@@ -44,13 +43,6 @@ class HostInfo {
 
  private:
   const HostInfoLocation location_;
-};
-
-class RoutingHintEncoder {
- public:
-  static uint64_t encodeRoutingHint(const HostWithShard&) {
-    return 0;
-  }
 };
 
 struct SRHost {

@@ -15,7 +15,6 @@ namespace memcache {
 
 class HostInfo;
 using HostInfoPtr = std::shared_ptr<HostInfo>;
-using HostWithShard = std::pair<HostInfoPtr, int64_t>;
 
 } // namespace memcache
 } // namespace facebook

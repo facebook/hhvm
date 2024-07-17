@@ -41,8 +41,8 @@ namespace memcache {
 namespace mcrouter {
 namespace detail {
 
-bool srHostWithShardFuncRouteHandlesCommandDispatcher(
-    const HostWithShard& hostWithShard,
+bool srHostInfoPtrFuncRouteHandlesCommandDispatcher(
+    const HostInfoPtr& host,
     std::string& tree,
     const int level);
 
@@ -97,10 +97,9 @@ class RouteHandlesCommandDispatcher {
         [&level]() { --level; },
         nullptr,
         [&tree, &level](
-            const HostWithShard& hostWithShard,
-            const RequestClass& /* unused */) {
-          return srHostWithShardFuncRouteHandlesCommandDispatcher(
-              hostWithShard, tree, level);
+            const HostInfoPtr& host, const RequestClass& /* unused */) {
+          return srHostInfoPtrFuncRouteHandlesCommandDispatcher(
+              host, tree, level);
         },
         [&tree, &level](
             const AccessPoint& srHost, const RequestClass& /* unused */) {

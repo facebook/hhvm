@@ -10,16 +10,13 @@
 
 namespace facebook::memcache::mcrouter::detail {
 
-bool srHostWithShardFuncCarbonRouterClient(
-    const HostWithShard& hostWithShard,
+bool srHostInfoPtrFuncCarbonRouterClient(
+    const HostInfoPtr& host,
     const RequestClass& requestClass,
-    uint64_t& hash,
-    uint64_t& hint) {
-  auto& host = hostWithShard.first;
+    uint64_t& hash) {
   if (!requestClass.is(RequestClass::kShadow) && host &&
       host->location().getTWTaskID()) {
     hash = *host->location().getTWTaskID();
-    hint = RoutingHintEncoder::encodeRoutingHint(hostWithShard);
     return true;
   }
   return false;

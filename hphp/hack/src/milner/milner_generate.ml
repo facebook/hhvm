@@ -11,6 +11,7 @@ open Hh_prelude
 let defs = ref []
 
 type primitive =
+  | PNull
   | PInt
   | PString
   | PFloat
@@ -59,6 +60,7 @@ let show_ty ty =
   | TMixed -> "mixed"
   | TPrimitive prim -> begin
     match prim with
+    | PNull -> "null"
     | PInt -> "int"
     | PString -> "string"
     | PFloat -> "float"
@@ -111,6 +113,7 @@ let rec expr_for = function
   | TMixed -> expr_for @@ ty ()
   | TPrimitive prim -> begin
     match prim with
+    | PNull -> "null"
     | PInt -> "42"
     | PString -> "'apple'"
     | PFloat -> "42.0"

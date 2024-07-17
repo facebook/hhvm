@@ -964,7 +964,10 @@ Integer Modulo/Remainder Operator: a % b = a - a / b * b
 SSATmp* simplifyMod(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
-
+  if (src1 == src2) {
+    // X % X -> 0
+    return cns(env, 0);
+  }
   if (!src2->hasConstVal()) return nullptr;
 
   auto const src2Val = src2->intVal();
@@ -1001,15 +1004,16 @@ SSATmp* simplifyMod(State& env, const IRInstruction* inst) {
 SSATmp* simplifyDivDbl(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
-
+  // X / X -> 1.0
+  if (src1 == src2) {
+    return cns(env, 1.0);
+  }
   if (!src2->hasConstVal()) return nullptr;
 
   auto const src2Val = src2->dblVal();
 
-  if (src2Val == 0.0) {
-    // The branch emitted during irgen will deal with this
-    return nullptr;
-  }
+  // The branch emitted during irgen will deal with this
+  assertx(src2Val != 0.0);
   // X / 1.0 -> X
   if (src2Val == 1.0) {
     return src1;
@@ -1029,15 +1033,17 @@ SSATmp* simplifyDivInt(State& env, const IRInstruction* inst) {
   };  
   auto const dividend = inst->src(0);
   auto const divisor  = inst->src(1);
+  // X / X -> 1
+  if (dividend == divisor) {
+    return cns(env, 1);
+  }
 
   if (!divisor->hasConstVal()) return nullptr;
 
   auto const divisorVal = divisor->intVal();
 
-  if (divisorVal == 0) {
-    // The branch emitted during irgen will deal with this
-    return nullptr;
-  } 
+  // The branch emitted during irgen will deal with this
+  assertx(divisorVal != 0);
 
   // X / 1 -> X
   if (divisorVal == 1) {

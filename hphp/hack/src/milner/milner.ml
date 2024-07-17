@@ -46,18 +46,16 @@ let generate_tables template =
     let (ty, _) =
       Hashtbl.find ty_table key |> Option.value_or_thunk ~default:Gen.Type.mk
     in
-    Gen.Type.expr_of ty
+    Gen.Type.inhabitant_of ty
   in
   let expr_table = Hashtbl.mapi expr_table ~f:gen_expr_from_ty_table in
 
   let defs =
     let get_defs (_, (_, defs)) = defs in
     let ty_defs = Hashtbl.to_alist ty_table |> List.map ~f:get_defs in
-    let expr_defs = Hashtbl.to_alist expr_table |> List.map ~f:get_defs in
-    ty_defs @ expr_defs |> List.concat
+    List.concat ty_defs
   in
   let ty_table = Hashtbl.map ty_table ~f:(fun (ty, _) -> ty) in
-  let expr_table = Hashtbl.map expr_table ~f:(fun (expr, _) -> expr) in
 
   (ty_table, expr_table, defs)
 

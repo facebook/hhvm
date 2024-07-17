@@ -15,7 +15,7 @@ end
 module Type : sig
   type t
 
-  val expr_of : t -> string * Definition.t list
+  val inhabitant_of : t -> string
 
   val show : t -> string
 

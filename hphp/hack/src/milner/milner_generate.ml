@@ -28,6 +28,8 @@ module Primitive = struct
     | Num
   [@@deriving enum, eq, ord]
 
+  let all = List.init max ~f:(fun i -> of_enum i |> Option.value_exn)
+
   let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
 end
 
@@ -95,7 +97,7 @@ and Type : sig
 
   val show : t -> string
 
-  val expr_of : t -> string * Definition.t list
+  val inhabitant_of : t -> string
 
   val mk : unit -> t * Definition.t list
 end = struct
@@ -127,7 +129,7 @@ end = struct
     ty
     ::
     (match ty with
-    | Mixed -> []
+    | Mixed -> List.map ~f:(fun prim -> Primitive prim) Primitive.all
     | Primitive prim -> begin
       let open Primitive in
       match prim with
@@ -206,34 +208,39 @@ end = struct
        || List.mem subtypes' Mixed ~equal
        || have_overlapping_types (subtypes, subtypes'))
 
-  let rec expr_of = function
-    | Mixed ->
-      let (ty, defs) = mk () in
-      let (str, defs') = expr_of ty in
-      (str, defs @ defs')
+  let expr_of = function
     | Primitive prim -> begin
       let open Primitive in
       match prim with
-      | Null -> ("null", [])
-      | Int -> ("42", [])
-      | String -> ("'apple'", [])
-      | Float -> ("42.0", [])
-      | Bool -> ("true", [])
-      | Arraykey ->
-        let prim = select [Int; String] in
-        expr_of (Primitive prim)
-      | Num ->
-        let prim = select [Int; Float] in
-        expr_of (Primitive prim)
+      | Null -> Some "null"
+      | Int -> Some "42"
+      | String -> Some "'apple'"
+      | Float -> Some "42.0"
+      | Bool -> Some "true"
+      | Arraykey -> None
+      | Num -> None
     end
-    | Option ty -> expr_of @@ select [Primitive Primitive.Null; ty]
-    | Class info -> ("new " ^ info.name ^ "()", [])
-    | Alias info -> expr_of info.aliased
-    | Newtype info -> (info.producer ^ "()", [])
-    | Case info -> expr_of (select info.disjuncts)
-    | Enum info -> (info.name ^ "::A", [])
+    | Class info -> Some ("new " ^ info.name ^ "()")
+    | Newtype info -> Some (info.producer ^ "()")
+    | Enum info -> Some (info.name ^ "::A")
+    | Mixed
+    | Option _
+    | Alias _
+    | Case _ ->
+      None
 
-  and mk () =
+  let inhabitant_of ty =
+    let subtypes = subtypes_of ty in
+    let inhabitants = List.filter_map subtypes ~f:expr_of in
+    try select inhabitants with
+    | Failure _ ->
+      raise
+      @@ Failure
+           ("Tried to find an inhabitant for a type: "
+           ^ show ty
+           ^ " but it is uninhabitaed. This indicates bug in `milner`.")
+
+  let rec mk () =
     match Kind.pick () with
     | Kind.Mixed -> (Mixed, [])
     | Kind.Primitive -> (Primitive (Primitive.pick ()), [])
@@ -261,12 +268,12 @@ end = struct
       let (aliased, defs) = mk () in
       let producer = fresh ("mk" ^ name) in
       let newtype_def = Definition.newtype ~name aliased in
-      let (aliased_expr, expr_defs) = expr_of aliased in
+      let aliased_expr = inhabitant_of aliased in
       let ty = Newtype { name; producer } in
       let newtype_producer_def =
         Definition.function_ ~name:producer ~ret:ty ~ret_expr:aliased_expr
       in
-      (ty, newtype_def :: newtype_producer_def :: (expr_defs @ defs))
+      (ty, newtype_def :: newtype_producer_def :: defs)
     | Kind.Case ->
       let name = fresh "CT" in
       let rec add_disjuncts (disjuncts, defs) =
@@ -288,7 +295,7 @@ end = struct
       let underlying_ty =
         select Primitive.[Primitive Arraykey; Primitive String; Primitive Int]
       in
-      let (value, defs) = expr_of underlying_ty in
+      let value = inhabitant_of underlying_ty in
       let enum_def = Definition.enum ~name underlying_ty ~value in
-      (Enum { name }, enum_def :: defs)
+      (Enum { name }, [enum_def])
 end

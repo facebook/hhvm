@@ -18,6 +18,8 @@ namespace cpp2 thrift.test
 
 cpp_include "thrift/test/CustomStruct.h"
 
+include "thrift/annotation/cpp.thrift"
+
 struct MyStruct {
   1: string stringData;
   2: i32 intData;
@@ -28,8 +30,10 @@ union MyUnion {
   2: i32 intData;
 }
 
-typedef MyStruct (cpp.type = "MyCustomStruct") SpecializedStruct
-typedef MyUnion (cpp.type = "MyCustomUnion") SpecializedUnion
+@cpp.Type{name = "MyCustomStruct"}
+typedef MyStruct SpecializedStruct
+@cpp.Type{name = "MyCustomUnion"}
+typedef MyUnion SpecializedUnion
 
 struct Container {
   1: SpecializedStruct myStruct;

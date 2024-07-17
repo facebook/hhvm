@@ -64,7 +64,8 @@ struct NoAllocatorVia {
 } (cpp.allocator = "::ScopedStatefulAlloc<>")
 
 struct YesAllocatorVia {
-  1: AAStruct_7495 foo (cpp.name = "bar");
+  @cpp.Name{value = "bar"}
+  1: AAStruct_7495 foo;
 } (cpp.allocator = "::ScopedStatefulAlloc<>", cpp.allocator_via = "bar")
 
 struct AAStructPmr {
@@ -76,7 +77,8 @@ struct NoAllocatorViaPmr {
 } (cpp.allocator = "PmrByteAlloc")
 
 struct YesAllocatorViaPmr {
-  1: AAStructPmr_1852 foo (cpp.name = "bar");
+  @cpp.Name{value = "bar"}
+  1: AAStructPmr_1852 foo;
 } (cpp.allocator = "PmrByteAlloc", cpp.allocator_via = "bar")
 
 struct HasContainerFields {
@@ -91,25 +93,17 @@ struct HasContainerFieldsPmr {
   3: map_i32_i32_7355 aa_map;
 } (cpp.allocator = "PmrByteAlloc")
 
-typedef map<i32, i32> (
-  cpp.use_allocator,
-  cpp.template = "::StatefulAllocMap",
-) StatefulAllocIntMap
+@cpp.Type{template = "::StatefulAllocMap"}
+typedef map<i32, i32> (cpp.use_allocator) StatefulAllocIntMap
 
-typedef map<i32, StatefulAllocIntMap> (
-  cpp.use_allocator,
-  cpp.template = "::StatefulAllocMap",
-) StatefulAllocMapMap
+@cpp.Type{template = "::StatefulAllocMap"}
+typedef map<i32, StatefulAllocIntMap> (cpp.use_allocator) StatefulAllocMapMap
 
-typedef set<i32> (
-  cpp.use_allocator,
-  cpp.template = "::StatefulAllocSet",
-) StatefulAllocIntSet
+@cpp.Type{template = "::StatefulAllocSet"}
+typedef set<i32> (cpp.use_allocator) StatefulAllocIntSet
 
-typedef map<i32, StatefulAllocIntSet> (
-  cpp.use_allocator,
-  cpp.template = "::StatefulAllocMap",
-) StatefulAllocMapSet
+@cpp.Type{template = "::StatefulAllocMap"}
+typedef map<i32, StatefulAllocIntSet> (cpp.use_allocator) StatefulAllocMapSet
 
 struct UsesTypedef {
   1: StatefulAllocIntMap aa_map;
@@ -120,26 +114,21 @@ struct HasNestedContainerFields {
   2: StatefulAllocMapSet aa_map_of_set;
 } (cpp.allocator = "::ScopedStatefulAlloc<>")
 
-typedef map<i32, i32> (
-  cpp.use_allocator,
-  cpp.template = "std::pmr::map",
-) PmrIntMap
+@cpp.Type{template = "std::pmr::map"}
+typedef map<i32, i32> (cpp.use_allocator) PmrIntMap
 
 struct UsesTypedefPmr {
   1: PmrIntMap aa_map;
 } (cpp.allocator = "PmrByteAlloc", cpp.allocator_via = "aa_map")
 
-typedef map<i32, PmrIntMap> (
-  cpp.use_allocator,
-  cpp.template = "std::pmr::map",
-) PmrMapMap
+@cpp.Type{template = "std::pmr::map"}
+typedef map<i32, PmrIntMap> (cpp.use_allocator) PmrMapMap
 
-typedef set<i32> (cpp.use_allocator, cpp.template = "std::pmr::set") PmrIntSet
+@cpp.Type{template = "std::pmr::set"}
+typedef set<i32> (cpp.use_allocator) PmrIntSet
 
-typedef map<i32, PmrIntSet> (
-  cpp.use_allocator,
-  cpp.template = "std::pmr::map",
-) PmrMapSet
+@cpp.Type{template = "std::pmr::map"}
+typedef map<i32, PmrIntSet> (cpp.use_allocator) PmrMapSet
 
 struct HasNestedContainerFieldsPmr {
   1: PmrMapMap aa_map_of_map;
@@ -247,79 +236,41 @@ typedef AlwaysThrowCppRefChild (
 ) AlwaysThrowCppRefChild_9703
 typedef ChildPmr (cpp.use_allocator = "1") ChildPmr_7470
 typedef CountingCppRefChild (cpp.use_allocator = "1") CountingCppRefChild_4892
-typedef list<ChildPmr> (
-  cpp.template = "std::pmr::vector",
-  cpp.use_allocator = "1",
-) list_ChildPmr_9632
-typedef list<CountingChild> (
-  cpp.template = "::CountingVector",
-  cpp.use_allocator = "1",
-) list_CountingChild_2391
-typedef list<i32> (
-  cpp.template = "::AlwaysThrowVector",
-  cpp.use_allocator = "1",
-) list_i32_1528
-typedef list<i32> (
-  cpp.template = "::StatefulAllocVector",
-  cpp.use_allocator = "1",
-) list_i32_4073
-typedef list<i32> (
-  cpp.template = "::CountingVector",
-  cpp.use_allocator = "1",
-) list_i32_8474
-typedef list<i32> (
-  cpp.template = "std::pmr::vector",
-  cpp.use_allocator = "1",
-) list_i32_8699
-typedef map<i32, i32> (
-  cpp.template = "::CountingMap",
-  cpp.use_allocator = "1",
-) map_i32_i32_1496
-typedef map<i32, i32> (
-  cpp.template = "::StatefulAllocMap",
-  cpp.use_allocator = "1",
-) map_i32_i32_3938
-typedef map<i32, i32> (
-  cpp.template = "::StatefulAllocSortedVectorMap",
-  cpp.use_allocator = "1",
-) map_i32_i32_4068
-typedef map<i32, i32> (
-  cpp.template = "::AlwaysThrowMap",
-  cpp.use_allocator = "1",
-) map_i32_i32_4816
-typedef map<i32, i32> (
-  cpp.template = "std::pmr::map",
-  cpp.use_allocator = "1",
-) map_i32_i32_7355
-typedef set<i32> (
-  cpp.template = "::AlwaysThrowSet",
-  cpp.use_allocator = "1",
-) set_i32_2716
-typedef set<i32> (
-  cpp.template = "std::pmr::set",
-  cpp.use_allocator = "1",
-) set_i32_4098
-typedef set<i32> (
-  cpp.template = "::StatefulAllocSet",
-  cpp.use_allocator = "1",
-) set_i32_8876
-typedef set<i32> (
-  cpp.template = "::CountingSet",
-  cpp.use_allocator = "1",
-) set_i32_9206
-typedef set<i32> (
-  cpp.template = "::StatefulAllocSortedVectorSet",
-  cpp.use_allocator = "1",
-) set_i32_992
-typedef string (
-  cpp.type = "::CountingString",
-  cpp.use_allocator = "1",
-) string_186
-typedef string (
-  cpp.type = "::AlwaysThrowString",
-  cpp.use_allocator = "1",
-) string_4597
-typedef string (
-  cpp.type = "std::pmr::string",
-  cpp.use_allocator = "1",
-) string_8090
+@cpp.Type{template = "std::pmr::vector"}
+typedef list<ChildPmr> (cpp.use_allocator = "1") list_ChildPmr_9632
+@cpp.Type{template = "::CountingVector"}
+typedef list<CountingChild> (cpp.use_allocator = "1") list_CountingChild_2391
+@cpp.Type{template = "::AlwaysThrowVector"}
+typedef list<i32> (cpp.use_allocator = "1") list_i32_1528
+@cpp.Type{template = "::StatefulAllocVector"}
+typedef list<i32> (cpp.use_allocator = "1") list_i32_4073
+@cpp.Type{template = "::CountingVector"}
+typedef list<i32> (cpp.use_allocator = "1") list_i32_8474
+@cpp.Type{template = "std::pmr::vector"}
+typedef list<i32> (cpp.use_allocator = "1") list_i32_8699
+@cpp.Type{template = "::CountingMap"}
+typedef map<i32, i32> (cpp.use_allocator = "1") map_i32_i32_1496
+@cpp.Type{template = "::StatefulAllocMap"}
+typedef map<i32, i32> (cpp.use_allocator = "1") map_i32_i32_3938
+@cpp.Type{template = "::StatefulAllocSortedVectorMap"}
+typedef map<i32, i32> (cpp.use_allocator = "1") map_i32_i32_4068
+@cpp.Type{template = "::AlwaysThrowMap"}
+typedef map<i32, i32> (cpp.use_allocator = "1") map_i32_i32_4816
+@cpp.Type{template = "std::pmr::map"}
+typedef map<i32, i32> (cpp.use_allocator = "1") map_i32_i32_7355
+@cpp.Type{template = "::AlwaysThrowSet"}
+typedef set<i32> (cpp.use_allocator = "1") set_i32_2716
+@cpp.Type{template = "std::pmr::set"}
+typedef set<i32> (cpp.use_allocator = "1") set_i32_4098
+@cpp.Type{template = "::StatefulAllocSet"}
+typedef set<i32> (cpp.use_allocator = "1") set_i32_8876
+@cpp.Type{template = "::CountingSet"}
+typedef set<i32> (cpp.use_allocator = "1") set_i32_9206
+@cpp.Type{template = "::StatefulAllocSortedVectorSet"}
+typedef set<i32> (cpp.use_allocator = "1") set_i32_992
+@cpp.Type{name = "::CountingString"}
+typedef string (cpp.use_allocator = "1") string_186
+@cpp.Type{name = "::AlwaysThrowString"}
+typedef string (cpp.use_allocator = "1") string_4597
+@cpp.Type{name = "std::pmr::string"}
+typedef string (cpp.use_allocator = "1") string_8090

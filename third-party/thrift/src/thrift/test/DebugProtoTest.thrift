@@ -17,6 +17,8 @@
 namespace cpp2 apache.thrift.test
 namespace java thrift.test.proto
 
+include "thrift/annotation/cpp.thrift"
+
 struct Reserved {
   1: string from;
 }
@@ -231,8 +233,10 @@ struct CompactProtoTestStruct {
   59: map<i16, float> i16_float_map;
 }
 
-typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>") IOBufPtr
-typedef binary (cpp2.type = "folly::IOBuf") IOBuf
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
 struct BufferStruct {
   1: binary bin_field;
   2: IOBufPtr iobuf_ptr_field;
@@ -404,31 +408,39 @@ struct NotNested {
 }
 
 // The following were automatically generated and may benefit from renaming.
-typedef map<binary, byte> (
-  cpp.template = "std::unordered_map",
-) map_binary_byte_3546
-typedef map<bool, byte> (cpp.template = "std::unordered_map") map_bool_byte_2237
-typedef map<byte, byte> (cpp.template = "std::unordered_map") map_byte_byte_7773
-typedef map<double, byte> (
-  cpp.template = "std::unordered_map",
-) map_double_byte_8301
-typedef map<i16, byte> (cpp.template = "std::unordered_map") map_i16_byte_1780
-typedef map<i32, byte> (cpp.template = "std::unordered_map") map_i32_byte_4822
-typedef map<i64, byte> (cpp.template = "std::unordered_map") map_i64_byte_8738
-typedef map<string, byte> (
-  cpp.template = "std::unordered_map",
-) map_string_byte_2102
-typedef map<string, list<Bonk>> (
-  cpp.template = "std::unordered_map",
-) map_string_list_Bonk_852
-typedef map<string, string> (
-  cpp.template = "std::unordered_map",
-) map_string_string_2491
-typedef set<binary> (cpp.template = "std::unordered_set") set_binary_9394
-typedef set<bool> (cpp.template = "std::unordered_set") set_bool_8062
-typedef set<byte> (cpp.template = "std::unordered_set") set_byte_5505
-typedef set<double> (cpp.template = "std::unordered_set") set_double_7024
-typedef set<i16> (cpp.template = "std::unordered_set") set_i16_4545
-typedef set<i32> (cpp.template = "std::unordered_set") set_i32_8261
-typedef set<i64> (cpp.template = "std::unordered_set") set_i64_5224
-typedef set<string> (cpp.template = "std::unordered_set") set_string_5791
+@cpp.Type{template = "std::unordered_map"}
+typedef map<binary, byte> map_binary_byte_3546
+@cpp.Type{template = "std::unordered_map"}
+typedef map<bool, byte> map_bool_byte_2237
+@cpp.Type{template = "std::unordered_map"}
+typedef map<byte, byte> map_byte_byte_7773
+@cpp.Type{template = "std::unordered_map"}
+typedef map<double, byte> map_double_byte_8301
+@cpp.Type{template = "std::unordered_map"}
+typedef map<i16, byte> map_i16_byte_1780
+@cpp.Type{template = "std::unordered_map"}
+typedef map<i32, byte> map_i32_byte_4822
+@cpp.Type{template = "std::unordered_map"}
+typedef map<i64, byte> map_i64_byte_8738
+@cpp.Type{template = "std::unordered_map"}
+typedef map<string, byte> map_string_byte_2102
+@cpp.Type{template = "std::unordered_map"}
+typedef map<string, list<Bonk>> map_string_list_Bonk_852
+@cpp.Type{template = "std::unordered_map"}
+typedef map<string, string> map_string_string_2491
+@cpp.Type{template = "std::unordered_set"}
+typedef set<binary> set_binary_9394
+@cpp.Type{template = "std::unordered_set"}
+typedef set<bool> set_bool_8062
+@cpp.Type{template = "std::unordered_set"}
+typedef set<byte> set_byte_5505
+@cpp.Type{template = "std::unordered_set"}
+typedef set<double> set_double_7024
+@cpp.Type{template = "std::unordered_set"}
+typedef set<i16> set_i16_4545
+@cpp.Type{template = "std::unordered_set"}
+typedef set<i32> set_i32_8261
+@cpp.Type{template = "std::unordered_set"}
+typedef set<i64> set_i64_5224
+@cpp.Type{template = "std::unordered_set"}
+typedef set<string> set_string_5791

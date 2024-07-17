@@ -112,102 +112,114 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 -
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rdef":[
+              "Def":[
                 {
-                  "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+                  "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
                   "line":6,
                   "char_start":11,
                   "char_end":20
                 },
                 {
-                  "Rhint":[
-                    {
-                      "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                      "line":9,
-                      "char_start":50,
-                      "char_end":50
-                    }
-                  ]
+                  "From_witness_decl":{
+                    "Hint":[
+                      {
+                        "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                        "line":9,
+                        "char_start":50,
+                        "char_end":50
+                      }
+                    ]
+                  }
                 }
               ]
             },
             "Flow_upper_bound",
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rflow":[
+                      "Flow":[
                         {
-                          "Rhint":[
-                            {
-                              "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                              "line":9,
-                              "char_start":53,
-                              "char_end":53
-                            }
-                          ]
+                          "From_witness_decl":{
+                            "Hint":[
+                              {
+                                "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                                "line":9,
+                                "char_start":53,
+                                "char_end":53
+                              }
+                            ]
+                          }
                         },
                         "Flow_param_hint",
                         {
-                          "Rwitness":[
-                            {
-                              "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                              "line":9,
-                              "char_start":55,
-                              "char_end":56
-                            }
-                          ]
+                          "From_witness_locl":{
+                            "Witness":[
+                              {
+                                "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                                "line":9,
+                                "char_start":55,
+                                "char_end":56
+                              }
+                            ]
+                          }
                         }
                       ]
                     },
                     "Flow_local",
                     {
-                      "Rwitness":[
-                        {
-                          "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                          "line":10,
-                          "char_start":17,
-                          "char_end":18
-                        }
-                      ]
+                      "From_witness_locl":{
+                        "Witness":[
+                          {
+                            "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                            "line":10,
+                            "char_start":17,
+                            "char_end":18
+                          }
+                        ]
+                      }
                     }
                   ]
                 },
                 "Flow_prj",
                 {
-                  "Rprj":[
+                  "Prj":[
                     {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
                     {
-                      "Rflow":[
+                      "Flow":[
                         {
-                          "Rwitness":[
-                            {
-                              "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                              "line":10,
-                              "char_start":3,
-                              "char_end":19
-                            }
-                          ]
+                          "From_witness_locl":{
+                            "Witness":[
+                              {
+                                "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                                "line":10,
+                                "char_start":3,
+                                "char_end":19
+                              }
+                            ]
+                          }
                         },
                         "Flow_subtype",
                         {
-                          "Rrev":[
+                          "Rev":[
                             {
-                              "Rsupport_dynamic_type":[
-                                {
-                                  "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                                  "line":7,
-                                  "char_start":10,
-                                  "char_end":22
-                                }
-                              ]
+                              "From_witness_decl":{
+                                "Support_dynamic_type":[
+                                  {
+                                    "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                                    "line":7,
+                                    "char_start":10,
+                                    "char_end":22
+                                  }
+                                ]
+                              }
                             }
                           ]
                         }
@@ -221,22 +233,24 @@ Raw:
         },
         "Flow_upper_bound",
         {
-          "Rdef":[
+          "Def":[
             {
-              "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+              "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
               "line":6,
               "char_start":11,
               "char_end":20
             },
             {
-              "Rhint":[
-                {
-                  "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                  "line":9,
-                  "char_start":50,
-                  "char_end":50
-                }
-              ]
+              "From_witness_decl":{
+                "Hint":[
+                  {
+                    "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                    "line":9,
+                    "char_start":50,
+                    "char_end":50
+                  }
+                ]
+              }
             }
           ]
         }
@@ -244,7 +258,7 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rdef":[
+      "Def":[
         {
           "filename":"generic_subtyping_caller_implicit_upper_bound.php",
           "line":5,
@@ -252,14 +266,16 @@ Raw:
           "char_end":7
         },
         {
-          "Rhint":[
-            {
-              "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-              "line":7,
-              "char_start":24,
-              "char_end":24
-            }
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {
+                "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                "line":7,
+                "char_start":24,
+                "char_end":24
+              }
+            ]
+          }
         }
       ]
     }
@@ -271,100 +287,112 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rdef":[
+              "Def":[
                 {
-                  "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+                  "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
                   "line":6,
                   "char_start":11,
                   "char_end":20
                 },
                 {
-                  "Rhint":[
-                    {
-                      "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                      "line":9,
-                      "char_start":50,
-                      "char_end":50
-                    }
-                  ]
+                  "From_witness_decl":{
+                    "Hint":[
+                      {
+                        "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                        "line":9,
+                        "char_start":50,
+                        "char_end":50
+                      }
+                    ]
+                  }
                 }
               ]
             },
             "Flow_upper_bound",
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rflow":[
+                      "Flow":[
                         {
-                          "Rhint":[
-                            {
-                              "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                              "line":9,
-                              "char_start":53,
-                              "char_end":53
-                            }
-                          ]
+                          "From_witness_decl":{
+                            "Hint":[
+                              {
+                                "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                                "line":9,
+                                "char_start":53,
+                                "char_end":53
+                              }
+                            ]
+                          }
                         },
                         "Flow_param_hint",
                         {
-                          "Rwitness":[
-                            {
-                              "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                              "line":9,
-                              "char_start":55,
-                              "char_end":56
-                            }
-                          ]
+                          "From_witness_locl":{
+                            "Witness":[
+                              {
+                                "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                                "line":9,
+                                "char_start":55,
+                                "char_end":56
+                              }
+                            ]
+                          }
                         }
                       ]
                     },
                     "Flow_local",
                     {
-                      "Rwitness":[
-                        {
-                          "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                          "line":10,
-                          "char_start":17,
-                          "char_end":18
-                        }
-                      ]
+                      "From_witness_locl":{
+                        "Witness":[
+                          {
+                            "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                            "line":10,
+                            "char_start":17,
+                            "char_end":18
+                          }
+                        ]
+                      }
                     }
                   ]
                 },
                 "Flow_prj",
                 {
-                  "Rprj":[
+                  "Prj":[
                     {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
                     {
-                      "Rflow":[
+                      "Flow":[
                         {
-                          "Rwitness":[
-                            {
-                              "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                              "line":10,
-                              "char_start":3,
-                              "char_end":19
-                            }
-                          ]
+                          "From_witness_locl":{
+                            "Witness":[
+                              {
+                                "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                                "line":10,
+                                "char_start":3,
+                                "char_end":19
+                              }
+                            ]
+                          }
                         },
                         "Flow_subtype",
                         {
-                          "Rsupport_dynamic_type":[
-                            {
-                              "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                              "line":7,
-                              "char_start":10,
-                              "char_end":22
-                            }
-                          ]
+                          "From_witness_decl":{
+                            "Support_dynamic_type":[
+                              {
+                                "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                                "line":7,
+                                "char_start":10,
+                                "char_end":22
+                              }
+                            ]
+                          }
                         }
                       ]
                     }
@@ -376,22 +404,24 @@ Normalised:
         },
         "Flow_upper_bound",
         {
-          "Rdef":[
+          "Def":[
             {
-              "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+              "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
               "line":6,
               "char_start":11,
               "char_end":20
             },
             {
-              "Rhint":[
-                {
-                  "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                  "line":9,
-                  "char_start":50,
-                  "char_end":50
-                }
-              ]
+              "From_witness_decl":{
+                "Hint":[
+                  {
+                    "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                    "line":9,
+                    "char_start":50,
+                    "char_end":50
+                  }
+                ]
+              }
             }
           ]
         }
@@ -399,7 +429,7 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rdef":[
+      "Def":[
         {
           "filename":"generic_subtyping_caller_implicit_upper_bound.php",
           "line":5,
@@ -407,14 +437,16 @@ Normalised:
           "char_end":7
         },
         {
-          "Rhint":[
-            {
-              "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-              "line":7,
-              "char_start":24,
-              "char_end":24
-            }
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {
+                "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                "line":7,
+                "char_start":24,
+                "char_end":24
+              }
+            ]
+          }
         }
       ]
     }
@@ -429,81 +461,93 @@ Path:
   "stats":{"max_depth":1,"length":7,"reversals":1},
   "path_elems":[
     {
-      "Rdef":[
+      "Def":[
         {
-          "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+          "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
           "line":6,
           "char_start":11,
           "char_end":20
         },
         {
-          "Rhint":[
-            {
-              "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-              "line":9,
-              "char_start":50,
-              "char_end":50
-            }
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {
+                "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                "line":9,
+                "char_start":50,
+                "char_end":50
+              }
+            ]
+          }
         }
       ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_upper_bound"}},
     {
-      "Rhint":[
-        {
-          "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-          "line":9,
-          "char_start":53,
-          "char_end":53
-        }
-      ]
+      "From_witness_decl":{
+        "Hint":[
+          {
+            "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+            "line":9,
+            "char_start":53,
+            "char_end":53
+          }
+        ]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
-      "Rwitness":[
-        {
-          "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-          "line":9,
-          "char_start":55,
-          "char_end":56
-        }
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {
+            "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+            "line":9,
+            "char_start":55,
+            "char_end":56
+          }
+        ]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
-      "Rwitness":[
-        {
-          "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-          "line":10,
-          "char_start":17,
-          "char_end":18
-        }
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {
+            "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+            "line":10,
+            "char_start":17,
+            "char_end":18
+          }
+        ]
+      }
     },
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
     {
-      "Rwitness":[
-        {
-          "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-          "line":10,
-          "char_start":3,
-          "char_end":19
-        }
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {
+            "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+            "line":10,
+            "char_start":3,
+            "char_end":19
+          }
+        ]
+      }
     },
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
-      "Rsupport_dynamic_type":[
-        {
-          "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-          "line":7,
-          "char_start":10,
-          "char_end":22
-        }
-      ]
+      "From_witness_decl":{
+        "Support_dynamic_type":[
+          {
+            "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+            "line":7,
+            "char_start":10,
+            "char_end":22
+          }
+        ]
+      }
     },
     {
       "Edge":{
@@ -513,28 +557,30 @@ Path:
       }
     },
     {
-      "Rdef":[
+      "Def":[
         {
-          "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+          "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
           "line":6,
           "char_start":11,
           "char_end":20
         },
         {
-          "Rhint":[
-            {
-              "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-              "line":9,
-              "char_start":50,
-              "char_end":50
-            }
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {
+                "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                "line":9,
+                "char_start":50,
+                "char_end":50
+              }
+            ]
+          }
         }
       ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
-      "Rdef":[
+      "Def":[
         {
           "filename":"generic_subtyping_caller_implicit_upper_bound.php",
           "line":5,
@@ -542,14 +588,16 @@ Path:
           "char_end":7
         },
         {
-          "Rhint":[
-            {
-              "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-              "line":7,
-              "char_start":24,
-              "char_end":24
-            }
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {
+                "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                "line":7,
+                "char_start":24,
+                "char_end":24
+              }
+            ]
+          }
         }
       ]
     }
@@ -653,77 +701,87 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 -
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rhint":[
-                    {
-                      "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                      "line":9,
-                      "char_start":53,
-                      "char_end":53
-                    }
-                  ]
+                  "From_witness_decl":{
+                    "Hint":[
+                      {
+                        "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                        "line":9,
+                        "char_start":53,
+                        "char_end":53
+                      }
+                    ]
+                  }
                 },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[
-                    {
-                      "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                      "line":9,
-                      "char_start":55,
-                      "char_end":56
-                    }
-                  ]
+                  "From_witness_locl":{
+                    "Witness":[
+                      {
+                        "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                        "line":9,
+                        "char_start":55,
+                        "char_end":56
+                      }
+                    ]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[
-                {
-                  "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                  "line":10,
-                  "char_start":17,
-                  "char_end":18
-                }
-              ]
+              "From_witness_locl":{
+                "Witness":[
+                  {
+                    "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                    "line":10,
+                    "char_start":17,
+                    "char_end":18
+                  }
+                ]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rwitness":[
-                    {
-                      "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                      "line":10,
-                      "char_start":3,
-                      "char_end":19
-                    }
-                  ]
+                  "From_witness_locl":{
+                    "Witness":[
+                      {
+                        "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                        "line":10,
+                        "char_start":3,
+                        "char_end":19
+                      }
+                    ]
+                  }
                 },
                 "Flow_subtype",
                 {
-                  "Rrev":[
+                  "Rev":[
                     {
-                      "Rsupport_dynamic_type":[
-                        {
-                          "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                          "line":7,
-                          "char_start":10,
-                          "char_end":22
-                        }
-                      ]
+                      "From_witness_decl":{
+                        "Support_dynamic_type":[
+                          {
+                            "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                            "line":7,
+                            "char_start":10,
+                            "char_end":22
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -735,7 +793,7 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rdef":[
+      "Def":[
         {
           "filename":"generic_subtyping_caller_implicit_upper_bound.php",
           "line":5,
@@ -743,14 +801,16 @@ Raw:
           "char_end":7
         },
         {
-          "Rhint":[
-            {
-              "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-              "line":7,
-              "char_start":24,
-              "char_end":24
-            }
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {
+                "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                "line":7,
+                "char_start":24,
+                "char_end":24
+              }
+            ]
+          }
         }
       ]
     }
@@ -762,75 +822,85 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rhint":[
-                    {
-                      "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                      "line":9,
-                      "char_start":53,
-                      "char_end":53
-                    }
-                  ]
+                  "From_witness_decl":{
+                    "Hint":[
+                      {
+                        "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                        "line":9,
+                        "char_start":53,
+                        "char_end":53
+                      }
+                    ]
+                  }
                 },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[
-                    {
-                      "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                      "line":9,
-                      "char_start":55,
-                      "char_end":56
-                    }
-                  ]
+                  "From_witness_locl":{
+                    "Witness":[
+                      {
+                        "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                        "line":9,
+                        "char_start":55,
+                        "char_end":56
+                      }
+                    ]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[
-                {
-                  "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                  "line":10,
-                  "char_start":17,
-                  "char_end":18
-                }
-              ]
+              "From_witness_locl":{
+                "Witness":[
+                  {
+                    "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                    "line":10,
+                    "char_start":17,
+                    "char_end":18
+                  }
+                ]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rwitness":[
-                    {
-                      "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                      "line":10,
-                      "char_start":3,
-                      "char_end":19
-                    }
-                  ]
+                  "From_witness_locl":{
+                    "Witness":[
+                      {
+                        "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                        "line":10,
+                        "char_start":3,
+                        "char_end":19
+                      }
+                    ]
+                  }
                 },
                 "Flow_subtype",
                 {
-                  "Rsupport_dynamic_type":[
-                    {
-                      "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-                      "line":7,
-                      "char_start":10,
-                      "char_end":22
-                    }
-                  ]
+                  "From_witness_decl":{
+                    "Support_dynamic_type":[
+                      {
+                        "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                        "line":7,
+                        "char_start":10,
+                        "char_end":22
+                      }
+                    ]
+                  }
                 }
               ]
             }
@@ -840,7 +910,7 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rdef":[
+      "Def":[
         {
           "filename":"generic_subtyping_caller_implicit_upper_bound.php",
           "line":5,
@@ -848,14 +918,16 @@ Normalised:
           "char_end":7
         },
         {
-          "Rhint":[
-            {
-              "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-              "line":7,
-              "char_start":24,
-              "char_end":24
-            }
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {
+                "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                "line":7,
+                "char_start":24,
+                "char_end":24
+              }
+            ]
+          }
         }
       ]
     }
@@ -870,60 +942,70 @@ Path:
   "stats":{"max_depth":1,"length":5,"reversals":1},
   "path_elems":[
     {
-      "Rhint":[
-        {
-          "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-          "line":9,
-          "char_start":53,
-          "char_end":53
-        }
-      ]
+      "From_witness_decl":{
+        "Hint":[
+          {
+            "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+            "line":9,
+            "char_start":53,
+            "char_end":53
+          }
+        ]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
-      "Rwitness":[
-        {
-          "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-          "line":9,
-          "char_start":55,
-          "char_end":56
-        }
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {
+            "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+            "line":9,
+            "char_start":55,
+            "char_end":56
+          }
+        ]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
-      "Rwitness":[
-        {
-          "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-          "line":10,
-          "char_start":17,
-          "char_end":18
-        }
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {
+            "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+            "line":10,
+            "char_start":17,
+            "char_end":18
+          }
+        ]
+      }
     },
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
     {
-      "Rwitness":[
-        {
-          "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-          "line":10,
-          "char_start":3,
-          "char_end":19
-        }
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {
+            "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+            "line":10,
+            "char_start":3,
+            "char_end":19
+          }
+        ]
+      }
     },
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
-      "Rsupport_dynamic_type":[
-        {
-          "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-          "line":7,
-          "char_start":10,
-          "char_end":22
-        }
-      ]
+      "From_witness_decl":{
+        "Support_dynamic_type":[
+          {
+            "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+            "line":7,
+            "char_start":10,
+            "char_end":22
+          }
+        ]
+      }
     },
     {
       "Edge":{
@@ -933,7 +1015,7 @@ Path:
       }
     },
     {
-      "Rdef":[
+      "Def":[
         {
           "filename":"generic_subtyping_caller_implicit_upper_bound.php",
           "line":5,
@@ -941,14 +1023,16 @@ Path:
           "char_end":7
         },
         {
-          "Rhint":[
-            {
-              "filename":"generic_subtyping_caller_implicit_upper_bound.php",
-              "line":7,
-              "char_start":24,
-              "char_end":24
-            }
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {
+                "filename":"generic_subtyping_caller_implicit_upper_bound.php",
+                "line":7,
+                "char_start":24,
+                "char_end":24
+              }
+            ]
+          }
         }
       ]
     }

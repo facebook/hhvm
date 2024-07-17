@@ -98,115 +98,133 @@ File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rhint":[
-            {"filename":"workplace_invariant.php","line":15,"char_start":25,"char_end":27}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"workplace_invariant.php","line":15,"char_start":25,"char_end":27}
+            ]
+          }
         },
         "Flow_upper_bound",
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rhint":[
-                {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
-              ]
+              "From_witness_decl":{
+                "Hint":[
+                  {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
+                ]
+              }
             },
             "Flow_prj",
             {
-              "Rprj":[
+              "Prj":[
                 {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]}]},
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rdef":[
+                      "Def":[
                         {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
                         {
-                          "Rhint":[
-                            {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
-                          ]
+                          "From_witness_decl":{
+                            "Hint":[
+                              {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
+                            ]
+                          }
                         }
                       ]
                     },
                     "Flow_subtype",
                     {
-                      "Rrev":[
+                      "Rev":[
                         {
-                          "Rflow":[
+                          "Flow":[
                             {
-                              "Rdef":[
+                              "Def":[
                                 {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
                                 {
-                                  "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                                  "From_witness_decl":{
+                                    "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                                  }
                                 }
                               ]
                             },
                             "Flow_extends",
                             {
-                              "Rflow":[
+                              "Flow":[
                                 {
-                                  "Rinstantiate":[
+                                  "Instantiate":[
                                     {
-                                      "Rwitness":[
-                                        {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
-                                      ]
+                                      "From_witness_locl":{
+                                        "Witness":[
+                                          {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
+                                        ]
+                                      }
                                     },
                                     "this",
                                     {
-                                      "Rclass_class":[
-                                        {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-                                        "\\foo"
-                                      ]
+                                      "From_witness_decl":{
+                                        "Class_class":[
+                                          {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                          "\\foo"
+                                        ]
+                                      }
                                     }
                                   ]
                                 },
                                 "Flow_prj",
                                 {
-                                  "Rprj":[
+                                  "Prj":[
                                     {
                                       "Symm":[{"Prj_symm_ctor":["Ctor_newtype","\\HH\\classname",0,{"Dir":[{"Co":[]}]}]}]
                                     },
                                     {
-                                      "Rflow":[
+                                      "Flow":[
                                         {
-                                          "Rflow":[
+                                          "Flow":[
                                             {
-                                              "Rdef":[
+                                              "Def":[
                                                 {
-                                                  "filename":"/tmp/ixboC8UjoE/classname.hhi",
+                                                  "filename":"/tmp/gu0R1uoAbh/classname.hhi",
                                                   "line":19,
                                                   "char_start":11,
                                                   "char_end":19
                                                 },
                                                 {
-                                                  "Rclass_class":[
-                                                    {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-                                                    "\\foo"
-                                                  ]
+                                                  "From_witness_decl":{
+                                                    "Class_class":[
+                                                      {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                                      "\\foo"
+                                                    ]
+                                                  }
                                                 }
                                               ]
                                             },
                                             "Flow_return_hint",
                                             {
-                                              "Rwitness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                              "From_witness_locl":{
+                                                "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                              }
                                             }
                                           ]
                                         },
                                         "Flow_subtype",
                                         {
-                                          "Rdef":[
+                                          "Def":[
                                             {
-                                              "filename":"/tmp/ixboC8UjoE/classname.hhi",
+                                              "filename":"/tmp/gu0R1uoAbh/classname.hhi",
                                               "line":19,
                                               "char_start":11,
                                               "char_end":19
                                             },
                                             {
-                                              "Rhint":[
-                                                {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
-                                              ]
+                                              "From_witness_decl":{
+                                                "Hint":[
+                                                  {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
+                                                ]
+                                              }
                                             }
                                           ]
                                         }
@@ -230,7 +248,9 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+      }
     }
   ]
 }
@@ -240,85 +260,97 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rhint":[
-            {"filename":"workplace_invariant.php","line":15,"char_start":25,"char_end":27}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"workplace_invariant.php","line":15,"char_start":25,"char_end":27}
+            ]
+          }
         },
         "Flow_upper_bound",
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rhint":[
-                {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
-              ]
+              "From_witness_decl":{
+                "Hint":[
+                  {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
+                ]
+              }
             },
             "Flow_prj",
             {
-              "Rprj":[
+              "Prj":[
                 {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]}]},
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rdef":[
+                      "Def":[
                         {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
                         {
-                          "Rhint":[
-                            {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
-                          ]
+                          "From_witness_decl":{
+                            "Hint":[
+                              {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
+                            ]
+                          }
                         }
                       ]
                     },
                     "Flow_subtype",
                     {
-                      "Rflow":[
+                      "Flow":[
                         {
-                          "Rflow":[
+                          "Flow":[
                             {
-                              "Rprj":[
+                              "Prj":[
                                 {
                                   "Symm":[{"Prj_symm_ctor":["Ctor_newtype","\\HH\\classname",0,{"Dir":[{"Co":[]}]}]}]
                                 },
                                 {
-                                  "Rflow":[
+                                  "Flow":[
                                     {
-                                      "Rdef":[
+                                      "Def":[
                                         {
-                                          "filename":"/tmp/ixboC8UjoE/classname.hhi",
+                                          "filename":"/tmp/gu0R1uoAbh/classname.hhi",
                                           "line":19,
                                           "char_start":11,
                                           "char_end":19
                                         },
                                         {
-                                          "Rhint":[
-                                            {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
-                                          ]
+                                          "From_witness_decl":{
+                                            "Hint":[
+                                              {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
+                                            ]
+                                          }
                                         }
                                       ]
                                     },
                                     "Flow_subtype",
                                     {
-                                      "Rflow":[
+                                      "Flow":[
                                         {
-                                          "Rwitness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                          "From_witness_locl":{
+                                            "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                          }
                                         },
                                         "Flow_return_hint",
                                         {
-                                          "Rdef":[
+                                          "Def":[
                                             {
-                                              "filename":"/tmp/ixboC8UjoE/classname.hhi",
+                                              "filename":"/tmp/gu0R1uoAbh/classname.hhi",
                                               "line":19,
                                               "char_start":11,
                                               "char_end":19
                                             },
                                             {
-                                              "Rclass_class":[
-                                                {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-                                                "\\foo"
-                                              ]
+                                              "From_witness_decl":{
+                                                "Class_class":[
+                                                  {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                                  "\\foo"
+                                                ]
+                                              }
                                             }
                                           ]
                                         }
@@ -330,18 +362,22 @@ Normalised:
                             },
                             "Flow_prj",
                             {
-                              "Rinstantiate":[
+                              "Instantiate":[
                                 {
-                                  "Rwitness":[
-                                    {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
-                                  ]
+                                  "From_witness_locl":{
+                                    "Witness":[
+                                      {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
+                                    ]
+                                  }
                                 },
                                 "this",
                                 {
-                                  "Rclass_class":[
-                                    {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-                                    "\\foo"
-                                  ]
+                                  "From_witness_decl":{
+                                    "Class_class":[
+                                      {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                      "\\foo"
+                                    ]
+                                  }
                                 }
                               ]
                             }
@@ -349,10 +385,12 @@ Normalised:
                         },
                         "Flow_extends",
                         {
-                          "Rdef":[
+                          "Def":[
                             {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
                             {
-                              "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                              "From_witness_decl":{
+                                "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                              }
                             }
                           ]
                         }
@@ -368,7 +406,9 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+      }
     }
   ]
 }
@@ -381,15 +421,19 @@ Path:
   "stats":{"max_depth":2,"length":8,"reversals":0},
   "path_elems":[
     {
-      "Rhint":[
-        {"filename":"workplace_invariant.php","line":15,"char_start":25,"char_end":27}
-      ]
+      "From_witness_decl":{
+        "Hint":[
+          {"filename":"workplace_invariant.php","line":15,"char_start":25,"char_end":27}
+        ]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_upper_bound"}},
     {
-      "Rhint":[
-        {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
-      ]
+      "From_witness_decl":{
+        "Hint":[
+          {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
+        ]
+      }
     },
     {
       "Edge":{
@@ -399,12 +443,14 @@ Path:
       }
     },
     {
-      "Rdef":[
+      "Def":[
         {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
         {
-          "Rhint":[
-            {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
+            ]
+          }
         }
       ]
     },
@@ -418,38 +464,44 @@ Path:
       }
     },
     {
-      "Rdef":[
+      "Def":[
         {
-          "filename":"/tmp/ixboC8UjoE/classname.hhi",
+          "filename":"/tmp/gu0R1uoAbh/classname.hhi",
           "line":19,
           "char_start":11,
           "char_end":19
         },
         {
-          "Rhint":[
-            {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
+            ]
+          }
         }
       ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype"}},
     {
-      "Rwitness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
-      "Rdef":[
+      "Def":[
         {
-          "filename":"/tmp/ixboC8UjoE/classname.hhi",
+          "filename":"/tmp/gu0R1uoAbh/classname.hhi",
           "line":19,
           "char_start":11,
           "char_end":19
         },
         {
-          "Rclass_class":[
-            {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-            "\\foo"
-          ]
+          "From_witness_decl":{
+            "Class_class":[
+              {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+              "\\foo"
+            ]
+          }
         }
       ]
     },
@@ -463,27 +515,33 @@ Path:
       }
     },
     {
-      "Rinstantiate":[
+      "Instantiate":[
         {
-          "Rwitness":[
-            {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
-          ]
+          "From_witness_locl":{
+            "Witness":[
+              {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
+            ]
+          }
         },
         "this",
         {
-          "Rclass_class":[
-            {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-            "\\foo"
-          ]
+          "From_witness_decl":{
+            "Class_class":[
+              {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+              "\\foo"
+            ]
+          }
         }
       ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_extends"}},
     {
-      "Rdef":[
+      "Def":[
         {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
         {
-          "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+          }
         }
       ]
     },
@@ -495,7 +553,9 @@ Path:
       }
     },
     {
-      "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+      }
     }
   ]
 }
@@ -595,107 +655,123 @@ File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rhint":[
-            {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
+            ]
+          }
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rdef":[
+                  "Def":[
                     {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
                     {
-                      "Rhint":[
-                        {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
-                      ]
+                      "From_witness_decl":{
+                        "Hint":[
+                          {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
+                        ]
+                      }
                     }
                   ]
                 },
                 "Flow_subtype",
                 {
-                  "Rrev":[
+                  "Rev":[
                     {
-                      "Rflow":[
+                      "Flow":[
                         {
-                          "Rdef":[
+                          "Def":[
                             {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
                             {
-                              "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                              "From_witness_decl":{
+                                "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                              }
                             }
                           ]
                         },
                         "Flow_extends",
                         {
-                          "Rflow":[
+                          "Flow":[
                             {
-                              "Rinstantiate":[
+                              "Instantiate":[
                                 {
-                                  "Rwitness":[
-                                    {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
-                                  ]
+                                  "From_witness_locl":{
+                                    "Witness":[
+                                      {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
+                                    ]
+                                  }
                                 },
                                 "this",
                                 {
-                                  "Rclass_class":[
-                                    {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-                                    "\\foo"
-                                  ]
+                                  "From_witness_decl":{
+                                    "Class_class":[
+                                      {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                      "\\foo"
+                                    ]
+                                  }
                                 }
                               ]
                             },
                             "Flow_prj",
                             {
-                              "Rprj":[
+                              "Prj":[
                                 {
                                   "Symm":[{"Prj_symm_ctor":["Ctor_newtype","\\HH\\classname",0,{"Dir":[{"Co":[]}]}]}]
                                 },
                                 {
-                                  "Rflow":[
+                                  "Flow":[
                                     {
-                                      "Rflow":[
+                                      "Flow":[
                                         {
-                                          "Rdef":[
+                                          "Def":[
                                             {
-                                              "filename":"/tmp/ixboC8UjoE/classname.hhi",
+                                              "filename":"/tmp/gu0R1uoAbh/classname.hhi",
                                               "line":19,
                                               "char_start":11,
                                               "char_end":19
                                             },
                                             {
-                                              "Rclass_class":[
-                                                {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-                                                "\\foo"
-                                              ]
+                                              "From_witness_decl":{
+                                                "Class_class":[
+                                                  {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                                  "\\foo"
+                                                ]
+                                              }
                                             }
                                           ]
                                         },
                                         "Flow_return_hint",
                                         {
-                                          "Rwitness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                          "From_witness_locl":{
+                                            "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                          }
                                         }
                                       ]
                                     },
                                     "Flow_subtype",
                                     {
-                                      "Rdef":[
+                                      "Def":[
                                         {
-                                          "filename":"/tmp/ixboC8UjoE/classname.hhi",
+                                          "filename":"/tmp/gu0R1uoAbh/classname.hhi",
                                           "line":19,
                                           "char_start":11,
                                           "char_end":19
                                         },
                                         {
-                                          "Rhint":[
-                                            {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
-                                          ]
+                                          "From_witness_decl":{
+                                            "Hint":[
+                                              {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
+                                            ]
+                                          }
                                         }
                                       ]
                                     }
@@ -717,7 +793,9 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+      }
     }
   ]
 }
@@ -727,77 +805,87 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rhint":[
-            {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
+            ]
+          }
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rdef":[
+                  "Def":[
                     {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
                     {
-                      "Rhint":[
-                        {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
-                      ]
+                      "From_witness_decl":{
+                        "Hint":[
+                          {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
+                        ]
+                      }
                     }
                   ]
                 },
                 "Flow_subtype",
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rflow":[
+                      "Flow":[
                         {
-                          "Rprj":[
+                          "Prj":[
                             {
                               "Symm":[{"Prj_symm_ctor":["Ctor_newtype","\\HH\\classname",0,{"Dir":[{"Co":[]}]}]}]
                             },
                             {
-                              "Rflow":[
+                              "Flow":[
                                 {
-                                  "Rdef":[
+                                  "Def":[
                                     {
-                                      "filename":"/tmp/ixboC8UjoE/classname.hhi",
+                                      "filename":"/tmp/gu0R1uoAbh/classname.hhi",
                                       "line":19,
                                       "char_start":11,
                                       "char_end":19
                                     },
                                     {
-                                      "Rhint":[
-                                        {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
-                                      ]
+                                      "From_witness_decl":{
+                                        "Hint":[
+                                          {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
+                                        ]
+                                      }
                                     }
                                   ]
                                 },
                                 "Flow_subtype",
                                 {
-                                  "Rflow":[
+                                  "Flow":[
                                     {
-                                      "Rwitness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                      "From_witness_locl":{
+                                        "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                      }
                                     },
                                     "Flow_return_hint",
                                     {
-                                      "Rdef":[
+                                      "Def":[
                                         {
-                                          "filename":"/tmp/ixboC8UjoE/classname.hhi",
+                                          "filename":"/tmp/gu0R1uoAbh/classname.hhi",
                                           "line":19,
                                           "char_start":11,
                                           "char_end":19
                                         },
                                         {
-                                          "Rclass_class":[
-                                            {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-                                            "\\foo"
-                                          ]
+                                          "From_witness_decl":{
+                                            "Class_class":[
+                                              {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                              "\\foo"
+                                            ]
+                                          }
                                         }
                                       ]
                                     }
@@ -809,18 +897,22 @@ Normalised:
                         },
                         "Flow_prj",
                         {
-                          "Rinstantiate":[
+                          "Instantiate":[
                             {
-                              "Rwitness":[
-                                {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
-                              ]
+                              "From_witness_locl":{
+                                "Witness":[
+                                  {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
+                                ]
+                              }
                             },
                             "this",
                             {
-                              "Rclass_class":[
-                                {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-                                "\\foo"
-                              ]
+                              "From_witness_decl":{
+                                "Class_class":[
+                                  {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                  "\\foo"
+                                ]
+                              }
                             }
                           ]
                         }
@@ -828,10 +920,12 @@ Normalised:
                     },
                     "Flow_extends",
                     {
-                      "Rdef":[
+                      "Def":[
                         {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
                         {
-                          "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                          "From_witness_decl":{
+                            "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                          }
                         }
                       ]
                     }
@@ -845,7 +939,9 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+      }
     }
   ]
 }
@@ -858,9 +954,11 @@ Path:
   "stats":{"max_depth":2,"length":7,"reversals":0},
   "path_elems":[
     {
-      "Rhint":[
-        {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
-      ]
+      "From_witness_decl":{
+        "Hint":[
+          {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
+        ]
+      }
     },
     {
       "Edge":{
@@ -870,12 +968,14 @@ Path:
       }
     },
     {
-      "Rdef":[
+      "Def":[
         {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
         {
-          "Rhint":[
-            {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
+            ]
+          }
         }
       ]
     },
@@ -889,38 +989,44 @@ Path:
       }
     },
     {
-      "Rdef":[
+      "Def":[
         {
-          "filename":"/tmp/ixboC8UjoE/classname.hhi",
+          "filename":"/tmp/gu0R1uoAbh/classname.hhi",
           "line":19,
           "char_start":11,
           "char_end":19
         },
         {
-          "Rhint":[
-            {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
+            ]
+          }
         }
       ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype"}},
     {
-      "Rwitness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
-      "Rdef":[
+      "Def":[
         {
-          "filename":"/tmp/ixboC8UjoE/classname.hhi",
+          "filename":"/tmp/gu0R1uoAbh/classname.hhi",
           "line":19,
           "char_start":11,
           "char_end":19
         },
         {
-          "Rclass_class":[
-            {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-            "\\foo"
-          ]
+          "From_witness_decl":{
+            "Class_class":[
+              {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+              "\\foo"
+            ]
+          }
         }
       ]
     },
@@ -934,27 +1040,33 @@ Path:
       }
     },
     {
-      "Rinstantiate":[
+      "Instantiate":[
         {
-          "Rwitness":[
-            {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
-          ]
+          "From_witness_locl":{
+            "Witness":[
+              {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
+            ]
+          }
         },
         "this",
         {
-          "Rclass_class":[
-            {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-            "\\foo"
-          ]
+          "From_witness_decl":{
+            "Class_class":[
+              {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+              "\\foo"
+            ]
+          }
         }
       ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_extends"}},
     {
-      "Rdef":[
+      "Def":[
         {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
         {
-          "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+          }
         }
       ]
     },
@@ -966,7 +1078,9 @@ Path:
       }
     },
     {
-      "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+      }
     }
   ]
 }
@@ -1066,92 +1180,106 @@ File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+          }
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rdef":[
+                      "Def":[
                         {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
                         {
-                          "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                          "From_witness_decl":{
+                            "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                          }
                         }
                       ]
                     },
                     "Flow_extends",
                     {
-                      "Rflow":[
+                      "Flow":[
                         {
-                          "Rinstantiate":[
+                          "Instantiate":[
                             {
-                              "Rwitness":[
-                                {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
-                              ]
+                              "From_witness_locl":{
+                                "Witness":[
+                                  {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
+                                ]
+                              }
                             },
                             "this",
                             {
-                              "Rclass_class":[
-                                {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-                                "\\foo"
-                              ]
+                              "From_witness_decl":{
+                                "Class_class":[
+                                  {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                  "\\foo"
+                                ]
+                              }
                             }
                           ]
                         },
                         "Flow_prj",
                         {
-                          "Rprj":[
+                          "Prj":[
                             {
                               "Symm":[{"Prj_symm_ctor":["Ctor_newtype","\\HH\\classname",0,{"Dir":[{"Co":[]}]}]}]
                             },
                             {
-                              "Rflow":[
+                              "Flow":[
                                 {
-                                  "Rflow":[
+                                  "Flow":[
                                     {
-                                      "Rdef":[
+                                      "Def":[
                                         {
-                                          "filename":"/tmp/ixboC8UjoE/classname.hhi",
+                                          "filename":"/tmp/gu0R1uoAbh/classname.hhi",
                                           "line":19,
                                           "char_start":11,
                                           "char_end":19
                                         },
                                         {
-                                          "Rclass_class":[
-                                            {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-                                            "\\foo"
-                                          ]
+                                          "From_witness_decl":{
+                                            "Class_class":[
+                                              {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                              "\\foo"
+                                            ]
+                                          }
                                         }
                                       ]
                                     },
                                     "Flow_return_hint",
                                     {
-                                      "Rwitness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                      "From_witness_locl":{
+                                        "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                      }
                                     }
                                   ]
                                 },
                                 "Flow_subtype",
                                 {
-                                  "Rdef":[
+                                  "Def":[
                                     {
-                                      "filename":"/tmp/ixboC8UjoE/classname.hhi",
+                                      "filename":"/tmp/gu0R1uoAbh/classname.hhi",
                                       "line":19,
                                       "char_start":11,
                                       "char_end":19
                                     },
                                     {
-                                      "Rhint":[
-                                        {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
-                                      ]
+                                      "From_witness_decl":{
+                                        "Hint":[
+                                          {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
+                                        ]
+                                      }
                                     }
                                   ]
                                 }
@@ -1165,12 +1293,14 @@ Raw:
                 },
                 "Flow_subtype",
                 {
-                  "Rdef":[
+                  "Def":[
                     {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
                     {
-                      "Rhint":[
-                        {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
-                      ]
+                      "From_witness_decl":{
+                        "Hint":[
+                          {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
+                        ]
+                      }
                     }
                   ]
                 }
@@ -1182,9 +1312,11 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[
-        {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
-      ]
+      "From_witness_decl":{
+        "Hint":[
+          {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
+        ]
+      }
     }
   ]
 }
@@ -1194,92 +1326,106 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+          }
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rdef":[
+                      "Def":[
                         {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
                         {
-                          "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                          "From_witness_decl":{
+                            "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                          }
                         }
                       ]
                     },
                     "Flow_extends",
                     {
-                      "Rflow":[
+                      "Flow":[
                         {
-                          "Rinstantiate":[
+                          "Instantiate":[
                             {
-                              "Rwitness":[
-                                {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
-                              ]
+                              "From_witness_locl":{
+                                "Witness":[
+                                  {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
+                                ]
+                              }
                             },
                             "this",
                             {
-                              "Rclass_class":[
-                                {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-                                "\\foo"
-                              ]
+                              "From_witness_decl":{
+                                "Class_class":[
+                                  {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                  "\\foo"
+                                ]
+                              }
                             }
                           ]
                         },
                         "Flow_prj",
                         {
-                          "Rprj":[
+                          "Prj":[
                             {
                               "Symm":[{"Prj_symm_ctor":["Ctor_newtype","\\HH\\classname",0,{"Dir":[{"Co":[]}]}]}]
                             },
                             {
-                              "Rflow":[
+                              "Flow":[
                                 {
-                                  "Rflow":[
+                                  "Flow":[
                                     {
-                                      "Rdef":[
+                                      "Def":[
                                         {
-                                          "filename":"/tmp/ixboC8UjoE/classname.hhi",
+                                          "filename":"/tmp/gu0R1uoAbh/classname.hhi",
                                           "line":19,
                                           "char_start":11,
                                           "char_end":19
                                         },
                                         {
-                                          "Rclass_class":[
-                                            {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-                                            "\\foo"
-                                          ]
+                                          "From_witness_decl":{
+                                            "Class_class":[
+                                              {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                              "\\foo"
+                                            ]
+                                          }
                                         }
                                       ]
                                     },
                                     "Flow_return_hint",
                                     {
-                                      "Rwitness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                      "From_witness_locl":{
+                                        "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                      }
                                     }
                                   ]
                                 },
                                 "Flow_subtype",
                                 {
-                                  "Rdef":[
+                                  "Def":[
                                     {
-                                      "filename":"/tmp/ixboC8UjoE/classname.hhi",
+                                      "filename":"/tmp/gu0R1uoAbh/classname.hhi",
                                       "line":19,
                                       "char_start":11,
                                       "char_end":19
                                     },
                                     {
-                                      "Rhint":[
-                                        {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
-                                      ]
+                                      "From_witness_decl":{
+                                        "Hint":[
+                                          {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
+                                        ]
+                                      }
                                     }
                                   ]
                                 }
@@ -1293,12 +1439,14 @@ Normalised:
                 },
                 "Flow_subtype",
                 {
-                  "Rdef":[
+                  "Def":[
                     {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
                     {
-                      "Rhint":[
-                        {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
-                      ]
+                      "From_witness_decl":{
+                        "Hint":[
+                          {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
+                        ]
+                      }
                     }
                   ]
                 }
@@ -1310,9 +1458,11 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[
-        {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
-      ]
+      "From_witness_decl":{
+        "Hint":[
+          {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
+        ]
+      }
     }
   ]
 }
@@ -1325,7 +1475,9 @@ Path:
   "stats":{"max_depth":2,"length":7,"reversals":0},
   "path_elems":[
     {
-      "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+      }
     },
     {
       "Edge":{
@@ -1335,27 +1487,33 @@ Path:
       }
     },
     {
-      "Rdef":[
+      "Def":[
         {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
         {
-          "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+          }
         }
       ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_extends"}},
     {
-      "Rinstantiate":[
+      "Instantiate":[
         {
-          "Rwitness":[
-            {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
-          ]
+          "From_witness_locl":{
+            "Witness":[
+              {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
+            ]
+          }
         },
         "this",
         {
-          "Rclass_class":[
-            {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-            "\\foo"
-          ]
+          "From_witness_decl":{
+            "Class_class":[
+              {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+              "\\foo"
+            ]
+          }
         }
       ]
     },
@@ -1369,38 +1527,44 @@ Path:
       }
     },
     {
-      "Rdef":[
+      "Def":[
         {
-          "filename":"/tmp/ixboC8UjoE/classname.hhi",
+          "filename":"/tmp/gu0R1uoAbh/classname.hhi",
           "line":19,
           "char_start":11,
           "char_end":19
         },
         {
-          "Rclass_class":[
-            {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
-            "\\foo"
-          ]
+          "From_witness_decl":{
+            "Class_class":[
+              {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+              "\\foo"
+            ]
+          }
         }
       ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
-      "Rwitness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype"}},
     {
-      "Rdef":[
+      "Def":[
         {
-          "filename":"/tmp/ixboC8UjoE/classname.hhi",
+          "filename":"/tmp/gu0R1uoAbh/classname.hhi",
           "line":19,
           "char_start":11,
           "char_end":19
         },
         {
-          "Rhint":[
-            {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
+            ]
+          }
         }
       ]
     },
@@ -1414,12 +1578,14 @@ Path:
       }
     },
     {
-      "Rdef":[
+      "Def":[
         {"filename":"workplace_invariant.php","line":3,"char_start":11,"char_end":13},
         {
-          "Rhint":[
-            {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
+            ]
+          }
         }
       ]
     },
@@ -1431,9 +1597,11 @@ Path:
       }
     },
     {
-      "Rhint":[
-        {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
-      ]
+      "From_witness_decl":{
+        "Hint":[
+          {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
+        ]
+      }
     }
   ]
 }

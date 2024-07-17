@@ -42,10 +42,14 @@ File "fn_ret.php", line 7, character 17 - line 7, character 20:
 
 Raw:
 {
-  "Rflow":[
-    {"Rhint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+  "Flow":[
+    {
+      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}
+    },
     "Flow_subtype_toplevel",
-    {"Rhint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+    {
+      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+    }
   ]
 }
 
@@ -54,10 +58,14 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
-    {"Rhint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+  "Flow":[
+    {
+      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}
+    },
     "Flow_subtype_toplevel",
-    {"Rhint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+    {
+      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+    }
   ]
 }
 
@@ -68,9 +76,13 @@ Path:
 {
   "stats":{"max_depth":0,"length":1,"reversals":0},
   "path_elems":[
-    {"Rhint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+    {
+      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}
+    },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
-    {"Rhint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+    {
+      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+    }
   ]
 }
 
@@ -137,22 +149,30 @@ File "fn_ret.php", line 7, character 17 - line 7, character 20:
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
-            {"Rhint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+          "Flow":[
+            {
+              "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}
+            },
             "Flow_subtype",
-            {"Rwitness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]}
+            {
+              "From_witness_locl":{"Witness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]}
+            }
           ]
         },
         "Flow_return_hint",
-        {"Rwitness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]}
+        {
+          "From_witness_locl":{"Witness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]}
+        }
       ]
     },
     "Flow_subtype_toplevel",
-    {"Rhint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+    {
+      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+    }
   ]
 }
 
@@ -161,22 +181,30 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
-            {"Rhint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+          "Flow":[
+            {
+              "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}
+            },
             "Flow_subtype",
-            {"Rwitness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]}
+            {
+              "From_witness_locl":{"Witness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]}
+            }
           ]
         },
         "Flow_return_hint",
-        {"Rwitness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]}
+        {
+          "From_witness_locl":{"Witness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]}
+        }
       ]
     },
     "Flow_subtype_toplevel",
-    {"Rhint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+    {
+      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+    }
   ]
 }
 
@@ -187,13 +215,21 @@ Path:
 {
   "stats":{"max_depth":0,"length":3,"reversals":0},
   "path_elems":[
-    {"Rhint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+    {
+      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}
+    },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype"}},
-    {"Rwitness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]},
+    {
+      "From_witness_locl":{"Witness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]}
+    },
     {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
-    {"Rwitness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]},
+    {
+      "From_witness_locl":{"Witness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]}
+    },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
-    {"Rhint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+    {
+      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+    }
   ]
 }
 

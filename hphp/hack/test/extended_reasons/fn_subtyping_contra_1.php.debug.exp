@@ -119,110 +119,126 @@ File "fn_subtyping_contra_1.php", line 7, character 26 - line 7, character 28:
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rdef":[
+          "Def":[
             {"filename":"fn_subtyping_contra_1.php","line":3,"char_start":7,"char_end":11},
             {
-              "Rhint":[
-                {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":26,"char_end":30}
-              ]
+              "From_witness_decl":{
+                "Hint":[
+                  {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":26,"char_end":30}
+                ]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rdef":[
+                      "Def":[
                         {
-                          "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+                          "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
                           "line":6,
                           "char_start":11,
                           "char_end":20
                         },
                         {
-                          "Rhint":[
-                            {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":16,"char_end":38}
-                          ]
+                          "From_witness_decl":{
+                            "Hint":[
+                              {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":16,"char_end":38}
+                            ]
+                          }
                         }
                       ]
                     },
                     "Flow_prj",
                     {
-                      "Rwitness_from_decl":[
-                        {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":16,"char_end":38}
-                      ]
+                      "From_witness_decl":{
+                        "Witness_from_decl":[
+                          {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":16,"char_end":38}
+                        ]
+                      }
                     }
                   ]
                 },
                 "Flow_subtype",
                 {
-                  "Rrev":[
+                  "Rev":[
                     {
-                      "Rflow":[
+                      "Flow":[
                         {
-                          "Rflow":[
+                          "Flow":[
                             {
-                              "Rflow":[
+                              "Flow":[
                                 {
-                                  "Rflow":[
+                                  "Flow":[
                                     {
-                                      "Rdef":[
+                                      "Def":[
                                         {
-                                          "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+                                          "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
                                           "line":6,
                                           "char_start":11,
                                           "char_end":20
                                         },
                                         {
-                                          "Rhint":[
-                                            {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":16,"char_end":36}
-                                          ]
+                                          "From_witness_decl":{
+                                            "Hint":[
+                                              {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":16,"char_end":36}
+                                            ]
+                                          }
                                         }
                                       ]
                                     },
                                     "Flow_param_hint",
                                     {
-                                      "Rwitness":[
-                                        {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":38,"char_end":39}
-                                      ]
+                                      "From_witness_locl":{
+                                        "Witness":[
+                                          {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":38,"char_end":39}
+                                        ]
+                                      }
                                     }
                                   ]
                                 },
                                 "Flow_local",
                                 {
-                                  "Rwitness":[
-                                    {"filename":"fn_subtyping_contra_1.php","line":8,"char_start":9,"char_end":10}
-                                  ]
+                                  "From_witness_locl":{
+                                    "Witness":[
+                                      {"filename":"fn_subtyping_contra_1.php","line":8,"char_start":9,"char_end":10}
+                                    ]
+                                  }
                                 }
                               ]
                             },
                             "Flow_prj",
                             {
-                              "Rprj":[
+                              "Prj":[
                                 {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
                                 {
-                                  "Rflow":[
+                                  "Flow":[
                                     {
-                                      "Rwitness":[
-                                        {"filename":"fn_subtyping_contra_1.php","line":8,"char_start":3,"char_end":11}
-                                      ]
+                                      "From_witness_locl":{
+                                        "Witness":[
+                                          {"filename":"fn_subtyping_contra_1.php","line":8,"char_start":3,"char_end":11}
+                                        ]
+                                      }
                                     },
                                     "Flow_subtype",
                                     {
-                                      "Rrev":[
+                                      "Rev":[
                                         {
-                                          "Rsupport_dynamic_type":[
-                                            {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":10,"char_end":14}
-                                          ]
+                                          "From_witness_decl":{
+                                            "Support_dynamic_type":[
+                                              {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":10,"char_end":14}
+                                            ]
+                                          }
                                         }
                                       ]
                                     }
@@ -234,9 +250,11 @@ Raw:
                         },
                         "Flow_prj",
                         {
-                          "Rhint":[
-                            {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":16,"char_end":36}
-                          ]
+                          "From_witness_decl":{
+                            "Hint":[
+                              {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":16,"char_end":36}
+                            ]
+                          }
                         }
                       ]
                     }
@@ -250,12 +268,14 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rdef":[
+      "Def":[
         {"filename":"fn_subtyping_contra_1.php","line":4,"char_start":7,"char_end":9},
         {
-          "Rhint":[
-            {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":26,"char_end":28}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":26,"char_end":28}
+            ]
+          }
         }
       ]
     }
@@ -267,76 +287,88 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rdef":[
+          "Def":[
             {"filename":"fn_subtyping_contra_1.php","line":3,"char_start":7,"char_end":11},
             {
-              "Rhint":[
-                {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":26,"char_end":30}
-              ]
+              "From_witness_decl":{
+                "Hint":[
+                  {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":26,"char_end":30}
+                ]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rdef":[
+                      "Def":[
                         {
-                          "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+                          "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
                           "line":6,
                           "char_start":11,
                           "char_end":20
                         },
                         {
-                          "Rhint":[
-                            {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":16,"char_end":38}
-                          ]
+                          "From_witness_decl":{
+                            "Hint":[
+                              {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":16,"char_end":38}
+                            ]
+                          }
                         }
                       ]
                     },
                     "Flow_prj",
                     {
-                      "Rwitness_from_decl":[
-                        {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":16,"char_end":38}
-                      ]
+                      "From_witness_decl":{
+                        "Witness_from_decl":[
+                          {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":16,"char_end":38}
+                        ]
+                      }
                     }
                   ]
                 },
                 "Flow_subtype",
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rhint":[
-                        {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":16,"char_end":36}
-                      ]
+                      "From_witness_decl":{
+                        "Hint":[
+                          {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":16,"char_end":36}
+                        ]
+                      }
                     },
                     "Flow_prj",
                     {
-                      "Rflow":[
+                      "Flow":[
                         {
-                          "Rprj":[
+                          "Prj":[
                             {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
                             {
-                              "Rflow":[
+                              "Flow":[
                                 {
-                                  "Rsupport_dynamic_type":[
-                                    {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":10,"char_end":14}
-                                  ]
+                                  "From_witness_decl":{
+                                    "Support_dynamic_type":[
+                                      {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":10,"char_end":14}
+                                    ]
+                                  }
                                 },
                                 "Flow_subtype",
                                 {
-                                  "Rwitness":[
-                                    {"filename":"fn_subtyping_contra_1.php","line":8,"char_start":3,"char_end":11}
-                                  ]
+                                  "From_witness_locl":{
+                                    "Witness":[
+                                      {"filename":"fn_subtyping_contra_1.php","line":8,"char_start":3,"char_end":11}
+                                    ]
+                                  }
                                 }
                               ]
                             }
@@ -344,33 +376,39 @@ Normalised:
                         },
                         "Flow_prj",
                         {
-                          "Rflow":[
+                          "Flow":[
                             {
-                              "Rwitness":[
-                                {"filename":"fn_subtyping_contra_1.php","line":8,"char_start":9,"char_end":10}
-                              ]
+                              "From_witness_locl":{
+                                "Witness":[
+                                  {"filename":"fn_subtyping_contra_1.php","line":8,"char_start":9,"char_end":10}
+                                ]
+                              }
                             },
                             "Flow_local",
                             {
-                              "Rflow":[
+                              "Flow":[
                                 {
-                                  "Rwitness":[
-                                    {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":38,"char_end":39}
-                                  ]
+                                  "From_witness_locl":{
+                                    "Witness":[
+                                      {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":38,"char_end":39}
+                                    ]
+                                  }
                                 },
                                 "Flow_param_hint",
                                 {
-                                  "Rdef":[
+                                  "Def":[
                                     {
-                                      "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+                                      "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
                                       "line":6,
                                       "char_start":11,
                                       "char_end":20
                                     },
                                     {
-                                      "Rhint":[
-                                        {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":16,"char_end":36}
-                                      ]
+                                      "From_witness_decl":{
+                                        "Hint":[
+                                          {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":16,"char_end":36}
+                                        ]
+                                      }
                                     }
                                   ]
                                 }
@@ -390,12 +428,14 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rdef":[
+      "Def":[
         {"filename":"fn_subtyping_contra_1.php","line":4,"char_start":7,"char_end":9},
         {
-          "Rhint":[
-            {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":26,"char_end":28}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":26,"char_end":28}
+            ]
+          }
         }
       ]
     }
@@ -410,12 +450,14 @@ Path:
   "stats":{"max_depth":2,"length":9,"reversals":2},
   "path_elems":[
     {
-      "Rdef":[
+      "Def":[
         {"filename":"fn_subtyping_contra_1.php","line":3,"char_start":7,"char_end":11},
         {
-          "Rhint":[
-            {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":26,"char_end":30}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":26,"char_end":30}
+            ]
+          }
         }
       ]
     },
@@ -423,73 +465,89 @@ Path:
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
     {
-      "Rdef":[
+      "Def":[
         {
-          "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+          "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
           "line":6,
           "char_start":11,
           "char_end":20
         },
         {
-          "Rhint":[
-            {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":16,"char_end":38}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":16,"char_end":38}
+            ]
+          }
         }
       ]
     },
     {"Edge":{"dir":"Bwd","kind":"Flow_prj"}},
     {
-      "Rwitness_from_decl":[
-        {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":16,"char_end":38}
-      ]
+      "From_witness_decl":{
+        "Witness_from_decl":[
+          {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":16,"char_end":38}
+        ]
+      }
     },
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
-      "Rhint":[
-        {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":16,"char_end":36}
-      ]
+      "From_witness_decl":{
+        "Hint":[
+          {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":16,"char_end":36}
+        ]
+      }
     },
     {
       "Edge":{"dir":"Bwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
     {
-      "Rsupport_dynamic_type":[
-        {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":10,"char_end":14}
-      ]
+      "From_witness_decl":{
+        "Support_dynamic_type":[
+          {"filename":"fn_subtyping_contra_1.php","line":6,"char_start":10,"char_end":14}
+        ]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype"}},
     {
-      "Rwitness":[
-        {"filename":"fn_subtyping_contra_1.php","line":8,"char_start":3,"char_end":11}
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {"filename":"fn_subtyping_contra_1.php","line":8,"char_start":3,"char_end":11}
+        ]
+      }
     },
     {
       "Edge":{"dir":"Bwd","kind":"Flow_prj","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
     {
-      "Rwitness":[
-        {"filename":"fn_subtyping_contra_1.php","line":8,"char_start":9,"char_end":10}
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {"filename":"fn_subtyping_contra_1.php","line":8,"char_start":9,"char_end":10}
+        ]
+      }
     },
     {"Edge":{"dir":"Bwd","kind":"Flow_local"}},
     {
-      "Rwitness":[
-        {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":38,"char_end":39}
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":38,"char_end":39}
+        ]
+      }
     },
     {"Edge":{"dir":"Bwd","kind":"Flow_param_hint"}},
     {
-      "Rdef":[
+      "Def":[
         {
-          "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+          "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
           "line":6,
           "char_start":11,
           "char_end":20
         },
         {
-          "Rhint":[
-            {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":16,"char_end":36}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":16,"char_end":36}
+            ]
+          }
         }
       ]
     },
@@ -501,12 +559,14 @@ Path:
       }
     },
     {
-      "Rdef":[
+      "Def":[
         {"filename":"fn_subtyping_contra_1.php","line":4,"char_start":7,"char_end":9},
         {
-          "Rhint":[
-            {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":26,"char_end":28}
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {"filename":"fn_subtyping_contra_1.php","line":7,"char_start":26,"char_end":28}
+            ]
+          }
         }
       ]
     }

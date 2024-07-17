@@ -92,42 +92,52 @@ File "fn_call_variadic.php", line 3, character 26 - line 3, character 27:
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rhint":[{"filename":"fn_call_variadic.php","line":5,"char_start":33,"char_end":36}]
+                  "From_witness_decl":{
+                    "Hint":[{"filename":"fn_call_variadic.php","line":5,"char_start":33,"char_end":36}]
+                  }
                 },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[{"filename":"fn_call_variadic.php","line":5,"char_start":38,"char_end":39}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"fn_call_variadic.php","line":5,"char_start":38,"char_end":39}]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[{"filename":"fn_call_variadic.php","line":6,"char_start":15,"char_end":16}]
+              "From_witness_locl":{
+                "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":15,"char_end":16}]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_fn_param":[2,0]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rwitness":[{"filename":"fn_call_variadic.php","line":6,"char_start":3,"char_end":17}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":3,"char_end":17}]
+                  }
                 },
                 "Flow_subtype",
                 {
-                  "Rrev":[
+                  "Rev":[
                     {
-                      "Rsupport_dynamic_type":[{"filename":"fn_call_variadic.php","line":3,"char_start":10,"char_end":12}]
+                      "From_witness_decl":{
+                        "Support_dynamic_type":[{"filename":"fn_call_variadic.php","line":3,"char_start":10,"char_end":12}]
+                      }
                     }
                   ]
                 }
@@ -139,7 +149,9 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rvar_param_from_decl":[{"filename":"fn_call_variadic.php","line":3,"char_start":26,"char_end":27}]
+      "From_witness_decl":{
+        "Var_param_from_decl":[{"filename":"fn_call_variadic.php","line":3,"char_start":26,"char_end":27}]
+      }
     }
   ]
 }
@@ -149,40 +161,50 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rhint":[{"filename":"fn_call_variadic.php","line":5,"char_start":33,"char_end":36}]
+                  "From_witness_decl":{
+                    "Hint":[{"filename":"fn_call_variadic.php","line":5,"char_start":33,"char_end":36}]
+                  }
                 },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[{"filename":"fn_call_variadic.php","line":5,"char_start":38,"char_end":39}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"fn_call_variadic.php","line":5,"char_start":38,"char_end":39}]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[{"filename":"fn_call_variadic.php","line":6,"char_start":15,"char_end":16}]
+              "From_witness_locl":{
+                "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":15,"char_end":16}]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_fn_param":[2,0]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rwitness":[{"filename":"fn_call_variadic.php","line":6,"char_start":3,"char_end":17}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":3,"char_end":17}]
+                  }
                 },
                 "Flow_subtype",
                 {
-                  "Rsupport_dynamic_type":[{"filename":"fn_call_variadic.php","line":3,"char_start":10,"char_end":12}]
+                  "From_witness_decl":{
+                    "Support_dynamic_type":[{"filename":"fn_call_variadic.php","line":3,"char_start":10,"char_end":12}]
+                  }
                 }
               ]
             }
@@ -192,7 +214,9 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rvar_param_from_decl":[{"filename":"fn_call_variadic.php","line":3,"char_start":26,"char_end":27}]
+      "From_witness_decl":{
+        "Var_param_from_decl":[{"filename":"fn_call_variadic.php","line":3,"char_start":26,"char_end":27}]
+      }
     }
   ]
 }
@@ -205,25 +229,35 @@ Path:
   "stats":{"max_depth":1,"length":5,"reversals":1},
   "path_elems":[
     {
-      "Rhint":[{"filename":"fn_call_variadic.php","line":5,"char_start":33,"char_end":36}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"fn_call_variadic.php","line":5,"char_start":33,"char_end":36}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
-      "Rwitness":[{"filename":"fn_call_variadic.php","line":5,"char_start":38,"char_end":39}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"fn_call_variadic.php","line":5,"char_start":38,"char_end":39}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
-      "Rwitness":[{"filename":"fn_call_variadic.php","line":6,"char_start":15,"char_end":16}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":15,"char_end":16}]
+      }
     },
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[2,0]}]}}
     },
     {
-      "Rwitness":[{"filename":"fn_call_variadic.php","line":6,"char_start":3,"char_end":17}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":3,"char_end":17}]
+      }
     },
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
-      "Rsupport_dynamic_type":[{"filename":"fn_call_variadic.php","line":3,"char_start":10,"char_end":12}]
+      "From_witness_decl":{
+        "Support_dynamic_type":[{"filename":"fn_call_variadic.php","line":3,"char_start":10,"char_end":12}]
+      }
     },
     {
       "Edge":{
@@ -233,7 +267,9 @@ Path:
       }
     },
     {
-      "Rvar_param_from_decl":[{"filename":"fn_call_variadic.php","line":3,"char_start":26,"char_end":27}]
+      "From_witness_decl":{
+        "Var_param_from_decl":[{"filename":"fn_call_variadic.php","line":3,"char_start":26,"char_end":27}]
+      }
     }
   ]
 }

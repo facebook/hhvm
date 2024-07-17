@@ -92,36 +92,44 @@ File "fn_call.php", line 3, character 14 - line 3, character 19:
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
-                {"Rhint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]},
+              "Flow":[
+                {
+                  "From_witness_decl":{"Hint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]}
+                },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]
+                  "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]}
                 }
               ]
             },
             "Flow_local",
-            {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]}
+            {
+              "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]}
+            }
           ]
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
             {
-              "Rflow":[
-                {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":9}]},
+              "Flow":[
+                {
+                  "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":9}]}
+                },
                 "Flow_subtype",
                 {
-                  "Rrev":[
+                  "Rev":[
                     {
-                      "Rsupport_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
+                      "From_witness_decl":{
+                        "Support_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
+                      }
                     }
                   ]
                 }
@@ -132,7 +140,9 @@ Raw:
       ]
     },
     "Flow_subtype_toplevel",
-    {"Rhint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}
+    {
+      "From_witness_decl":{"Hint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}
+    }
   ]
 }
 
@@ -141,34 +151,42 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
-                {"Rhint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]},
+              "Flow":[
+                {
+                  "From_witness_decl":{"Hint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]}
+                },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]
+                  "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]}
                 }
               ]
             },
             "Flow_local",
-            {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]}
+            {
+              "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]}
+            }
           ]
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
             {
-              "Rflow":[
-                {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":9}]},
+              "Flow":[
+                {
+                  "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":9}]}
+                },
                 "Flow_subtype",
                 {
-                  "Rsupport_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
+                  "From_witness_decl":{
+                    "Support_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
+                  }
                 }
               ]
             }
@@ -177,7 +195,9 @@ Normalised:
       ]
     },
     "Flow_subtype_toplevel",
-    {"Rhint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}
+    {
+      "From_witness_decl":{"Hint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}
+    }
   ]
 }
 
@@ -188,20 +208,28 @@ Path:
 {
   "stats":{"max_depth":1,"length":5,"reversals":1},
   "path_elems":[
-    {"Rhint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]},
+    {
+      "From_witness_decl":{"Hint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]}
+    },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
-      "Rwitness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]
+      "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]}
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]},
+    {
+      "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]}
+    },
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
-    {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":9}]},
+    {
+      "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":9}]}
+    },
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
-      "Rsupport_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
+      "From_witness_decl":{
+        "Support_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
+      }
     },
     {
       "Edge":{
@@ -210,7 +238,9 @@ Path:
         "out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
       }
     },
-    {"Rhint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}
+    {
+      "From_witness_decl":{"Hint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}
+    }
   ]
 }
 

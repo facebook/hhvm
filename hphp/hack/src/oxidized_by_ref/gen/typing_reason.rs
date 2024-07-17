@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e1ab2154d77ed2f22225adcdbfee9d15>>
+// @generated SignedSource<<e37c81958de5f9a6cb828e4438894d53>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -222,6 +222,289 @@ arena_deserializer::impl_deserialize_in_arena!(Prj<'arena>);
 
 pub use oxidized::typing_reason::FlowKind;
 
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[repr(C, u8)]
+pub enum WitnessLocl<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Witness(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Idx_vector")]
+    IdxVector(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Foreach(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Asyncforeach(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Arith(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Arith_ret")]
+    ArithRet(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Arith_ret_int")]
+    ArithRetInt(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Arith_dynamic")]
+    ArithDynamic(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Bitwise_dynamic")]
+    BitwiseDynamic(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Incdec_dynamic")]
+    IncdecDynamic(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Comp(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Concat_ret")]
+    ConcatRet(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Logic_ret")]
+    LogicRet(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Bitwise(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Bitwise_ret")]
+    BitwiseRet(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "No_return")]
+    NoReturn(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "No_return_async")]
+    NoReturnAsync(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Ret_fun_kind")]
+    #[rust_to_ocaml(inline_tuple)]
+    RetFunKind(&'a (&'a pos::Pos<'a>, oxidized::ast_defs::FunKind)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Throw(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Placeholder(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Ret_div")]
+    RetDiv(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Yield_gen")]
+    YieldGen(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Yield_asyncgen")]
+    YieldAsyncgen(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Yield_asyncnull")]
+    YieldAsyncnull(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Yield_send")]
+    YieldSend(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Unknown_class")]
+    UnknownClass(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Var_param")]
+    VarParam(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Unpack_param")]
+    #[rust_to_ocaml(inline_tuple)]
+    UnpackParam(&'a (&'a pos::Pos<'a>, &'a pos_or_decl::PosOrDecl<'a>, isize)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Nullsafe_op")]
+    NullsafeOp(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
+    Predicated(&'a (&'a pos::Pos<'a>, &'a str)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Is_refinement")]
+    IsRefinement(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "As_refinement")]
+    AsRefinement(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Equal(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Using(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Dynamic_prop")]
+    DynamicProp(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Dynamic_call")]
+    DynamicCall(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Dynamic_construct")]
+    DynamicConstruct(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Idx_dict")]
+    IdxDict(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Idx_set_element")]
+    IdxSetElement(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Unset_field")]
+    #[rust_to_ocaml(inline_tuple)]
+    UnsetField(&'a (&'a pos::Pos<'a>, &'a str)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Regex(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Type_variable")]
+    TypeVariable(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Type_variable_generics")]
+    #[rust_to_ocaml(inline_tuple)]
+    TypeVariableGenerics(&'a (&'a pos::Pos<'a>, &'a str, &'a str)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Type_variable_error")]
+    TypeVariableError(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
+    Shape(&'a (&'a pos::Pos<'a>, &'a str)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Shape_literal")]
+    ShapeLiteral(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Destructure(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Key_value_collection_key")]
+    KeyValueCollectionKey(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Splice(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Et_boolean")]
+    EtBoolean(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Concat_operand")]
+    ConcatOperand(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Interp_operand")]
+    InterpOperand(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Missing_class")]
+    MissingClass(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Captured_like")]
+    CapturedLike(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Unsafe_cast")]
+    UnsafeCast(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Pattern(&'a pos::Pos<'a>),
+}
+impl<'a> TrivialDrop for WitnessLocl<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(WitnessLocl<'arena>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[repr(C, u8)]
+pub enum WitnessDecl<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Witness_from_decl")]
+    WitnessFromDecl(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Idx_vector_from_decl")]
+    IdxVectorFromDecl(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Hint(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Class_class")]
+    #[rust_to_ocaml(inline_tuple)]
+    ClassClass(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Var_param_from_decl")]
+    VarParamFromDecl(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Vec_or_dict_key")]
+    VecOrDictKey(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Ret_fun_kind_from_decl")]
+    #[rust_to_ocaml(inline_tuple)]
+    RetFunKindFromDecl(&'a (&'a pos_or_decl::PosOrDecl<'a>, oxidized::ast_defs::FunKind)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Inout_param")]
+    InoutParam(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Tconst_no_cstr")]
+    TconstNoCstr(&'a PosId<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Varray_or_darray_key")]
+    VarrayOrDarrayKey(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Missing_optional_field")]
+    #[rust_to_ocaml(inline_tuple)]
+    MissingOptionalField(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Implicit_upper_bound")]
+    #[rust_to_ocaml(inline_tuple)]
+    ImplicitUpperBound(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Global_type_variable_generics")]
+    #[rust_to_ocaml(inline_tuple)]
+    GlobalTypeVariableGenerics(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str, &'a str)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Solve_fail")]
+    SolveFail(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Cstr_on_generics")]
+    #[rust_to_ocaml(inline_tuple)]
+    CstrOnGenerics(&'a (&'a pos_or_decl::PosOrDecl<'a>, PosId<'a>)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Enforceable(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Global_class_prop")]
+    GlobalClassProp(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Global_fun_param")]
+    GlobalFunParam(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Global_fun_ret")]
+    GlobalFunRet(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Default_capability")]
+    DefaultCapability(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Support_dynamic_type")]
+    SupportDynamicType(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Pessimised_inout")]
+    PessimisedInout(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Pessimised_return")]
+    PessimisedReturn(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Pessimised_prop")]
+    PessimisedProp(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Pessimised_this")]
+    PessimisedThis(&'a pos_or_decl::PosOrDecl<'a>),
+}
+impl<'a> TrivialDrop for WitnessDecl<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(WitnessDecl<'arena>);
+
 /// The reason why something is expected to have a certain type
 #[derive(
     Clone,
@@ -241,41 +524,42 @@ pub use oxidized::typing_reason::FlowKind;
 #[rust_to_ocaml(attr = "deriving hash")]
 #[repr(C, u8)]
 pub enum T_<'a> {
-    Rnone,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rwitness(&'a pos::Pos<'a>),
+    #[rust_to_ocaml(name = "From_witness_decl")]
+    FromWitnessDecl(&'a WitnessDecl<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rwitness_from_decl")]
-    RwitnessFromDecl(&'a pos_or_decl::PosOrDecl<'a>),
+    #[rust_to_ocaml(inline_tuple)]
+    Instantiate(&'a (T_<'a>, &'a str, T_<'a>)),
+    #[rust_to_ocaml(name = "No_reason")]
+    NoReason,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "From_witness_locl")]
+    FromWitnessLocl(&'a WitnessLocl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
+    Flow(&'a (T_<'a>, &'a oxidized::typing_reason::FlowKind, T_<'a>)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
+    Prj(&'a (Prj<'a>, T_<'a>)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Rev(&'a T_<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
+    Def(&'a (&'a pos_or_decl::PosOrDecl<'a>, T_<'a>)),
+    Invalid,
+    #[rust_to_ocaml(name = "Missing_field")]
+    MissingField,
     /// Used as an index into a vector-like
     /// array or string. Position of indexing,
     /// reason for the indexed type
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
-    Ridx(&'a (&'a pos::Pos<'a>, T_<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Ridx_vector")]
-    RidxVector(&'a pos::Pos<'a>),
-    /// Used as an index, in the Vector case
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Ridx_vector_from_decl")]
-    RidxVectorFromDecl(&'a pos_or_decl::PosOrDecl<'a>),
-    /// Because it is iterated in a foreach loop
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rforeach(&'a pos::Pos<'a>),
-    /// Because it is iterated "await as" in foreach
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rasyncforeach(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rarith(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rarith_ret")]
-    RarithRet(&'a pos::Pos<'a>),
+    Idx(&'a (&'a pos::Pos<'a>, T_<'a>)),
     /// pos, arg float typing reason, arg position
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rarith_ret_float")]
+    #[rust_to_ocaml(name = "Arith_ret_float")]
     #[rust_to_ocaml(inline_tuple)]
-    RarithRetFloat(
+    ArithRetFloat(
         &'a (
             &'a pos::Pos<'a>,
             T_<'a>,
@@ -284,9 +568,9 @@ pub enum T_<'a> {
     ),
     /// pos, arg num typing reason, arg position
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rarith_ret_num")]
+    #[rust_to_ocaml(name = "Arith_ret_num")]
     #[rust_to_ocaml(inline_tuple)]
-    RarithRetNum(
+    ArithRetNum(
         &'a (
             &'a pos::Pos<'a>,
             T_<'a>,
@@ -294,99 +578,15 @@ pub enum T_<'a> {
         ),
     ),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rarith_ret_int")]
-    RarithRetInt(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rarith_dynamic")]
-    RarithDynamic(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rbitwise_dynamic")]
-    RbitwiseDynamic(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rincdec_dynamic")]
-    RincdecDynamic(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rcomp(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rconcat_ret")]
-    RconcatRet(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rlogic_ret")]
-    RlogicRet(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rbitwise(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rbitwise_ret")]
-    RbitwiseRet(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rno_return")]
-    RnoReturn(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rno_return_async")]
-    RnoReturnAsync(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rret_fun_kind")]
+    #[rust_to_ocaml(name = "Lost_info")]
     #[rust_to_ocaml(inline_tuple)]
-    RretFunKind(&'a (&'a pos::Pos<'a>, oxidized::ast_defs::FunKind)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rret_fun_kind_from_decl")]
-    #[rust_to_ocaml(inline_tuple)]
-    RretFunKindFromDecl(&'a (&'a pos_or_decl::PosOrDecl<'a>, oxidized::ast_defs::FunKind)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rhint(&'a pos_or_decl::PosOrDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rthrow(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rplaceholder(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rret_div")]
-    RretDiv(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Ryield_gen")]
-    RyieldGen(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Ryield_asyncgen")]
-    RyieldAsyncgen(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Ryield_asyncnull")]
-    RyieldAsyncnull(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Ryield_send")]
-    RyieldSend(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rlost_info")]
-    #[rust_to_ocaml(inline_tuple)]
-    RlostInfo(&'a (&'a str, T_<'a>, Blame<'a>)),
+    LostInfo(&'a (&'a str, T_<'a>, Blame<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
-    Rformat(&'a (&'a pos::Pos<'a>, &'a str, T_<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rclass_class")]
-    #[rust_to_ocaml(inline_tuple)]
-    RclassClass(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Runknown_class")]
-    RunknownClass(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rvar_param")]
-    RvarParam(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rvar_param_from_decl")]
-    RvarParamFromDecl(&'a pos_or_decl::PosOrDecl<'a>),
-    /// splat pos, fun def pos, number of args before splat
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Runpack_param")]
-    #[rust_to_ocaml(inline_tuple)]
-    RunpackParam(&'a (&'a pos::Pos<'a>, &'a pos_or_decl::PosOrDecl<'a>, isize)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rinout_param")]
-    RinoutParam(&'a pos_or_decl::PosOrDecl<'a>),
+    Format(&'a (&'a pos::Pos<'a>, &'a str, T_<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
-    Rinstantiate(&'a (T_<'a>, &'a str, T_<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Rtypeconst(
+    Typeconst(
         &'a (
             T_<'a>,
             (&'a pos_or_decl::PosOrDecl<'a>, &'a str),
@@ -395,198 +595,46 @@ pub enum T_<'a> {
         ),
     ),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rtype_access")]
+    #[rust_to_ocaml(name = "Type_access")]
     #[rust_to_ocaml(inline_tuple)]
-    RtypeAccess(&'a (T_<'a>, &'a [(&'a T_<'a>, &'a lazy::Lazy<&'a str>)])),
+    TypeAccess(&'a (T_<'a>, &'a [(&'a T_<'a>, &'a lazy::Lazy<&'a str>)])),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rexpr_dep_type")]
+    #[rust_to_ocaml(name = "Expr_dep_type")]
     #[rust_to_ocaml(inline_tuple)]
-    RexprDepType(
+    ExprDepType(
         &'a (
             T_<'a>,
             &'a pos_or_decl::PosOrDecl<'a>,
             ExprDepTypeReason<'a>,
         ),
     ),
-    /// ?-> operator is used
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rnullsafe_op")]
-    RnullsafeOp(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rtconst_no_cstr")]
-    RtconstNoCstr(&'a PosId<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Contravariant_generic")]
     #[rust_to_ocaml(inline_tuple)]
-    Rpredicated(&'a (&'a pos::Pos<'a>, &'a str)),
+    ContravariantGeneric(&'a (T_<'a>, &'a str)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Ris_refinement")]
-    RisRefinement(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Ras_refinement")]
-    RasRefinement(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Requal(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rvarray_or_darray_key")]
-    RvarrayOrDarrayKey(&'a pos_or_decl::PosOrDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rvec_or_dict_key")]
-    RvecOrDictKey(&'a pos_or_decl::PosOrDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rusing(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rdynamic_prop")]
-    RdynamicProp(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rdynamic_call")]
-    RdynamicCall(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rdynamic_construct")]
-    RdynamicConstruct(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Ridx_dict")]
-    RidxDict(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Ridx_set_element")]
-    RidxSetElement(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rmissing_optional_field")]
+    #[rust_to_ocaml(name = "Invariant_generic")]
     #[rust_to_ocaml(inline_tuple)]
-    RmissingOptionalField(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str)),
+    InvariantGeneric(&'a (T_<'a>, &'a str)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Runset_field")]
+    #[rust_to_ocaml(name = "Lambda_param")]
     #[rust_to_ocaml(inline_tuple)]
-    RunsetField(&'a (&'a pos::Pos<'a>, &'a str)),
+    LambdaParam(&'a (&'a pos::Pos<'a>, T_<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rcontravariant_generic")]
+    #[rust_to_ocaml(name = "Dynamic_coercion")]
+    DynamicCoercion(&'a T_<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Dynamic_partial_enforcement")]
     #[rust_to_ocaml(inline_tuple)]
-    RcontravariantGeneric(&'a (T_<'a>, &'a str)),
+    DynamicPartialEnforcement(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str, T_<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rinvariant_generic")]
+    #[rust_to_ocaml(name = "Rigid_tvar_escape")]
     #[rust_to_ocaml(inline_tuple)]
-    RinvariantGeneric(&'a (T_<'a>, &'a str)),
+    RigidTvarEscape(&'a (&'a pos::Pos<'a>, &'a str, &'a str, T_<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rregex(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rimplicit_upper_bound")]
+    #[rust_to_ocaml(name = "Opaque_type_from_module")]
     #[rust_to_ocaml(inline_tuple)]
-    RimplicitUpperBound(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rtype_variable")]
-    RtypeVariable(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rtype_variable_generics")]
-    #[rust_to_ocaml(inline_tuple)]
-    RtypeVariableGenerics(&'a (&'a pos::Pos<'a>, &'a str, &'a str)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rtype_variable_error")]
-    RtypeVariableError(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rglobal_type_variable_generics")]
-    #[rust_to_ocaml(inline_tuple)]
-    RglobalTypeVariableGenerics(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str, &'a str)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rsolve_fail")]
-    RsolveFail(&'a pos_or_decl::PosOrDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rcstr_on_generics")]
-    #[rust_to_ocaml(inline_tuple)]
-    RcstrOnGenerics(&'a (&'a pos_or_decl::PosOrDecl<'a>, PosId<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rlambda_param")]
-    #[rust_to_ocaml(inline_tuple)]
-    RlambdaParam(&'a (&'a pos::Pos<'a>, T_<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Rshape(&'a (&'a pos::Pos<'a>, &'a str)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rshape_literal")]
-    RshapeLiteral(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Renforceable(&'a pos_or_decl::PosOrDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rdestructure(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rkey_value_collection_key")]
-    RkeyValueCollectionKey(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rglobal_class_prop")]
-    RglobalClassProp(&'a pos_or_decl::PosOrDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rglobal_fun_param")]
-    RglobalFunParam(&'a pos_or_decl::PosOrDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rglobal_fun_ret")]
-    RglobalFunRet(&'a pos_or_decl::PosOrDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rsplice(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Ret_boolean")]
-    RetBoolean(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rdefault_capability")]
-    RdefaultCapability(&'a pos_or_decl::PosOrDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rconcat_operand")]
-    RconcatOperand(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rinterp_operand")]
-    RinterpOperand(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rdynamic_coercion")]
-    RdynamicCoercion(&'a T_<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rsupport_dynamic_type")]
-    RsupportDynamicType(&'a pos_or_decl::PosOrDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rdynamic_partial_enforcement")]
-    #[rust_to_ocaml(inline_tuple)]
-    RdynamicPartialEnforcement(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str, T_<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rrigid_tvar_escape")]
-    #[rust_to_ocaml(inline_tuple)]
-    RrigidTvarEscape(&'a (&'a pos::Pos<'a>, &'a str, &'a str, T_<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Ropaque_type_from_module")]
-    #[rust_to_ocaml(inline_tuple)]
-    RopaqueTypeFromModule(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str, T_<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rmissing_class")]
-    RmissingClass(&'a pos::Pos<'a>),
-    Rinvalid,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rcaptured_like")]
-    RcapturedLike(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rpessimised_inout")]
-    RpessimisedInout(&'a pos_or_decl::PosOrDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rpessimised_return")]
-    RpessimisedReturn(&'a pos_or_decl::PosOrDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rpessimised_prop")]
-    RpessimisedProp(&'a pos_or_decl::PosOrDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Runsafe_cast")]
-    RunsafeCast(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rpattern(&'a pos::Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Rflow(&'a (T_<'a>, &'a oxidized::typing_reason::FlowKind, T_<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rrev(&'a T_<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Rprj(&'a (Prj<'a>, T_<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Rdef(&'a (&'a pos_or_decl::PosOrDecl<'a>, T_<'a>)),
-    #[rust_to_ocaml(name = "Rmissing_field")]
-    RmissingField,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Rpessimised_this")]
-    RpessimisedThis(&'a pos_or_decl::PosOrDecl<'a>),
+    OpaqueTypeFromModule(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str, T_<'a>)),
 }
 impl<'a> TrivialDrop for T_<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(T_<'arena>);

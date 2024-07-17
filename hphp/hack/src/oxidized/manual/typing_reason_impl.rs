@@ -6,13 +6,108 @@
 use crate::pos::Pos;
 use crate::typing_reason::*;
 
+impl WitnessLocl {
+    pub fn pos(&self) -> &Pos {
+        match self {
+            Self::Witness(pos)
+            | Self::IdxVector(pos)
+            | Self::Foreach(pos)
+            | Self::Asyncforeach(pos)
+            | Self::Arith(pos)
+            | Self::ArithRet(pos)
+            | Self::ArithRetInt(pos)
+            | Self::ArithDynamic(pos)
+            | Self::BitwiseDynamic(pos)
+            | Self::IncdecDynamic(pos)
+            | Self::Comp(pos)
+            | Self::ConcatRet(pos)
+            | Self::LogicRet(pos)
+            | Self::Bitwise(pos)
+            | Self::BitwiseRet(pos)
+            | Self::NoReturn(pos)
+            | Self::NoReturnAsync(pos)
+            | Self::RetFunKind(pos, _)
+            | Self::Throw(pos)
+            | Self::Placeholder(pos)
+            | Self::RetDiv(pos)
+            | Self::YieldGen(pos)
+            | Self::YieldAsyncgen(pos)
+            | Self::YieldAsyncnull(pos)
+            | Self::YieldSend(pos)
+            | Self::UnknownClass(pos)
+            | Self::VarParam(pos)
+            | Self::UnpackParam(pos, _, _)
+            | Self::NullsafeOp(pos)
+            | Self::Predicated(pos, _)
+            | Self::IsRefinement(pos)
+            | Self::AsRefinement(pos)
+            | Self::Equal(pos)
+            | Self::Using(pos)
+            | Self::DynamicProp(pos)
+            | Self::DynamicCall(pos)
+            | Self::DynamicConstruct(pos)
+            | Self::IdxDict(pos)
+            | Self::IdxSetElement(pos)
+            | Self::UnsetField(pos, _)
+            | Self::Regex(pos)
+            | Self::TypeVariable(pos)
+            | Self::TypeVariableGenerics(pos, _, _)
+            | Self::TypeVariableError(pos)
+            | Self::Shape(pos, _)
+            | Self::ShapeLiteral(pos)
+            | Self::Destructure(pos)
+            | Self::KeyValueCollectionKey(pos)
+            | Self::Splice(pos)
+            | Self::EtBoolean(pos)
+            | Self::ConcatOperand(pos)
+            | Self::InterpOperand(pos)
+            | Self::MissingClass(pos)
+            | Self::CapturedLike(pos)
+            | Self::UnsafeCast(pos)
+            | Self::Pattern(pos) => pos,
+        }
+    }
+}
+
+impl WitnessDecl {
+    pub fn pos(&self) -> &Pos {
+        match self {
+            Self::WitnessFromDecl(pos_or_decl)
+            | Self::IdxVectorFromDecl(pos_or_decl)
+            | Self::RetFunKindFromDecl(pos_or_decl, _)
+            | Self::Hint(pos_or_decl)
+            | Self::ClassClass(pos_or_decl, _)
+            | Self::VarParamFromDecl(pos_or_decl)
+            | Self::InoutParam(pos_or_decl)
+            | Self::TconstNoCstr((pos_or_decl, _))
+            | Self::VarrayOrDarrayKey(pos_or_decl)
+            | Self::VecOrDictKey(pos_or_decl)
+            | Self::MissingOptionalField(pos_or_decl, _)
+            | Self::ImplicitUpperBound(pos_or_decl, _)
+            | Self::GlobalTypeVariableGenerics(pos_or_decl, _, _)
+            | Self::SolveFail(pos_or_decl)
+            | Self::CstrOnGenerics(pos_or_decl, _)
+            | Self::Enforceable(pos_or_decl)
+            | Self::GlobalClassProp(pos_or_decl)
+            | Self::GlobalFunParam(pos_or_decl)
+            | Self::GlobalFunRet(pos_or_decl)
+            | Self::DefaultCapability(pos_or_decl)
+            | Self::SupportDynamicType(pos_or_decl)
+            | Self::PessimisedInout(pos_or_decl)
+            | Self::PessimisedReturn(pos_or_decl)
+            | Self::PessimisedProp(pos_or_decl)
+            | Self::PessimisedThis(pos_or_decl) => pos_or_decl,
+        }
+    }
+}
+
 impl Reason {
     pub fn rev_pos(&self) -> Option<&Pos> {
         match self {
-            T_::Rflow(r, _, _) => r.rev_pos(),
-            T_::Rprj(_, r) => r.rev_pos(),
-            T_::Rdef(_, r) => r.rev_pos(),
-            T_::Rrev(r) => r.pos(),
+            T_::Flow(r, _, _) => r.rev_pos(),
+            T_::Prj(_, r) => r.rev_pos(),
+            T_::Def(_, r) => r.rev_pos(),
+            T_::Rev(r) => r.pos(),
             _ => self.pos(),
         }
     }
@@ -20,111 +115,32 @@ impl Reason {
     pub fn pos(&self) -> Option<&Pos> {
         use T_::*;
         match self {
-            Rnone => None,
-            Rinvalid => None,
-            RmissingField => None,
-            Rwitness(p)
-            | RwitnessFromDecl(p)
-            | Ridx(p, _)
-            | RidxVector(p)
-            | RidxVectorFromDecl(p)
-            | Rforeach(p)
-            | Rasyncforeach(p)
-            | Rarith(p)
-            | RarithRet(p)
-            | RarithDynamic(p)
-            | Rcomp(p)
-            | RconcatRet(p)
-            | RlogicRet(p)
-            | Rbitwise(p)
-            | RbitwiseRet(p)
-            | RnoReturn(p)
-            | RnoReturnAsync(p)
-            | RretFunKind(p, _)
-            | RretFunKindFromDecl(p, _)
-            | Rhint(p)
-            | Rthrow(p)
-            | Rplaceholder(p)
-            | RretDiv(p)
-            | RyieldGen(p)
-            | RyieldAsyncgen(p)
-            | RyieldAsyncnull(p)
-            | RyieldSend(p)
-            | Rformat(p, _, _)
-            | RclassClass(p, _)
-            | RunknownClass(p)
-            | RvarParam(p)
-            | RvarParamFromDecl(p)
-            | RunpackParam(p, _, _)
-            | RinoutParam(p)
-            | Rtypeconst(box Rnone, (p, _), _, _)
-            | RnullsafeOp(p)
-            | RtconstNoCstr((p, _))
-            | Rpredicated(p, _)
-            | RisRefinement(p)
-            | RasRefinement(p)
-            | Requal(p)
-            | RvarrayOrDarrayKey(p)
-            | RvecOrDictKey(p)
-            | Rusing(p)
-            | RdynamicProp(p)
-            | RdynamicCall(p)
-            | RdynamicConstruct(p)
-            | RidxDict(p)
-            | RidxSetElement(p)
-            | RmissingOptionalField(p, _)
-            | RunsetField(p, _)
-            | Rregex(p)
-            | RimplicitUpperBound(p, _)
-            | RarithRetFloat(p, _, _)
-            | RarithRetNum(p, _, _)
-            | RarithRetInt(p)
-            | RbitwiseDynamic(p)
-            | RincdecDynamic(p)
-            | RtypeVariable(p)
-            | RtypeVariableGenerics(p, _, _)
-            | RtypeVariableError(p)
-            | RglobalTypeVariableGenerics(p, _, _)
-            | RsolveFail(p)
-            | RcstrOnGenerics(p, _)
-            | RlambdaParam(p, _)
-            | Rshape(p, _)
-            | RshapeLiteral(p)
-            | Renforceable(p)
-            | Rdestructure(p)
-            | RkeyValueCollectionKey(p)
-            | RglobalClassProp(p)
-            | RglobalFunParam(p)
-            | RglobalFunRet(p)
-            | Rsplice(p)
-            | RetBoolean(p)
-            | RdefaultCapability(p)
-            | RconcatOperand(p)
-            | RinterpOperand(p)
-            | RsupportDynamicType(p)
-            | RdynamicPartialEnforcement(p, _, _)
-            | RrigidTvarEscape(p, _, _, _)
-            | RmissingClass(p)
-            | RcapturedLike(p)
-            | RpessimisedInout(p)
-            | RpessimisedReturn(p)
-            | RpessimisedProp(p)
-            | RpessimisedThis(p)
-            | RunsafeCast(p)
-            | Rpattern(p) => Some(p),
-            RlostInfo(_, r, _)
-            | Rinstantiate(_, _, r)
-            | Rtypeconst(r, _, _, _)
-            | RtypeAccess(r, _)
-            | RexprDepType(r, _, _)
-            | RcontravariantGeneric(r, _)
-            | RinvariantGeneric(r, _) => r.pos(),
-            RopaqueTypeFromModule(p, _, _) => Some(p),
-            RdynamicCoercion(r) => r.pos(),
-            Rflow(r, _, _) => r.pos(),
-            Rprj(_, r) => r.pos(),
-            Rdef(_, r) => r.pos(),
-            Rrev(r) => r.rev_pos(),
+            NoReason => None,
+            Invalid => None,
+            MissingField => None,
+            FromWitnessLocl(witness) => Some(witness.pos()),
+            FromWitnessDecl(witness) => Some(witness.pos()),
+            Idx(pos, _)
+            | ArithRetFloat(pos, _, _)
+            | ArithRetNum(pos, _, _)
+            | Format(pos, _, _)
+            | LambdaParam(pos, _)
+            | Typeconst(box NoReason, (pos, _), _, _)
+            | RigidTvarEscape(pos, _, _, _) => Some(pos),
+            DynamicPartialEnforcement(pos_or_decl, _, _)
+            | OpaqueTypeFromModule(pos_or_decl, _, _) => Some(pos_or_decl),
+            Flow(t, _, _)
+            | Prj(_, t)
+            | Def(_, t)
+            | LostInfo(_, t, _)
+            | TypeAccess(t, _)
+            | InvariantGeneric(t, _)
+            | ContravariantGeneric(t, _)
+            | DynamicCoercion(t)
+            | ExprDepType(t, _, _)
+            | Typeconst(t, _, _, _)
+            | Instantiate(_, _, t) => t.pos(),
+            Rev(t) => t.rev_pos(),
         }
     }
 }

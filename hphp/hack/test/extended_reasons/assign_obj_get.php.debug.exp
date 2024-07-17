@@ -89,55 +89,67 @@ File "assign_obj_get.php", line 12, character 14 - line 12, character 16:
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rdef":[
+                      "Def":[
                         {"filename":"assign_obj_get.php","line":3,"char_start":7,"char_end":11},
                         {
-                          "Rhint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
+                          "From_witness_decl":{
+                            "Hint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
+                          }
                         }
                       ]
                     },
                     "Flow_subtype",
                     {
-                      "Rwitness":[{"filename":"assign_obj_get.php","line":15,"char_start":8,"char_end":16}]
+                      "From_witness_locl":{
+                        "Witness":[{"filename":"assign_obj_get.php","line":15,"char_start":8,"char_end":16}]
+                      }
                     }
                   ]
                 },
                 "Flow_assign",
                 {
-                  "Rwitness":[{"filename":"assign_obj_get.php","line":15,"char_start":3,"char_end":4}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"assign_obj_get.php","line":15,"char_start":3,"char_end":4}]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[{"filename":"assign_obj_get.php","line":16,"char_start":7,"char_end":8}]
+              "From_witness_locl":{
+                "Witness":[{"filename":"assign_obj_get.php","line":16,"char_start":7,"char_end":8}]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rwitness":[{"filename":"assign_obj_get.php","line":16,"char_start":3,"char_end":9}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"assign_obj_get.php","line":16,"char_start":3,"char_end":9}]
+                  }
                 },
                 "Flow_subtype",
                 {
-                  "Rrev":[
+                  "Rev":[
                     {
-                      "Rsupport_dynamic_type":[{"filename":"assign_obj_get.php","line":12,"char_start":10,"char_end":12}]
+                      "From_witness_decl":{
+                        "Support_dynamic_type":[{"filename":"assign_obj_get.php","line":12,"char_start":10,"char_end":12}]
+                      }
                     }
                   ]
                 }
@@ -149,10 +161,12 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rdef":[
+      "Def":[
         {"filename":"assign_obj_get.php","line":4,"char_start":7,"char_end":9},
         {
-          "Rhint":[{"filename":"assign_obj_get.php","line":12,"char_start":14,"char_end":16}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"assign_obj_get.php","line":12,"char_start":14,"char_end":16}]
+          }
         }
       ]
     }
@@ -164,53 +178,65 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rdef":[
+                      "Def":[
                         {"filename":"assign_obj_get.php","line":3,"char_start":7,"char_end":11},
                         {
-                          "Rhint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
+                          "From_witness_decl":{
+                            "Hint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
+                          }
                         }
                       ]
                     },
                     "Flow_subtype",
                     {
-                      "Rwitness":[{"filename":"assign_obj_get.php","line":15,"char_start":8,"char_end":16}]
+                      "From_witness_locl":{
+                        "Witness":[{"filename":"assign_obj_get.php","line":15,"char_start":8,"char_end":16}]
+                      }
                     }
                   ]
                 },
                 "Flow_assign",
                 {
-                  "Rwitness":[{"filename":"assign_obj_get.php","line":15,"char_start":3,"char_end":4}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"assign_obj_get.php","line":15,"char_start":3,"char_end":4}]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[{"filename":"assign_obj_get.php","line":16,"char_start":7,"char_end":8}]
+              "From_witness_locl":{
+                "Witness":[{"filename":"assign_obj_get.php","line":16,"char_start":7,"char_end":8}]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rwitness":[{"filename":"assign_obj_get.php","line":16,"char_start":3,"char_end":9}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"assign_obj_get.php","line":16,"char_start":3,"char_end":9}]
+                  }
                 },
                 "Flow_subtype",
                 {
-                  "Rsupport_dynamic_type":[{"filename":"assign_obj_get.php","line":12,"char_start":10,"char_end":12}]
+                  "From_witness_decl":{
+                    "Support_dynamic_type":[{"filename":"assign_obj_get.php","line":12,"char_start":10,"char_end":12}]
+                  }
                 }
               ]
             }
@@ -220,10 +246,12 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rdef":[
+      "Def":[
         {"filename":"assign_obj_get.php","line":4,"char_start":7,"char_end":9},
         {
-          "Rhint":[{"filename":"assign_obj_get.php","line":12,"char_start":14,"char_end":16}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"assign_obj_get.php","line":12,"char_start":14,"char_end":16}]
+          }
         }
       ]
     }
@@ -238,34 +266,46 @@ Path:
   "stats":{"max_depth":1,"length":6,"reversals":1},
   "path_elems":[
     {
-      "Rdef":[
+      "Def":[
         {"filename":"assign_obj_get.php","line":3,"char_start":7,"char_end":11},
         {
-          "Rhint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
+          }
         }
       ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype"}},
     {
-      "Rwitness":[{"filename":"assign_obj_get.php","line":15,"char_start":8,"char_end":16}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"assign_obj_get.php","line":15,"char_start":8,"char_end":16}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
     {
-      "Rwitness":[{"filename":"assign_obj_get.php","line":15,"char_start":3,"char_end":4}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"assign_obj_get.php","line":15,"char_start":3,"char_end":4}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
-      "Rwitness":[{"filename":"assign_obj_get.php","line":16,"char_start":7,"char_end":8}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"assign_obj_get.php","line":16,"char_start":7,"char_end":8}]
+      }
     },
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
     {
-      "Rwitness":[{"filename":"assign_obj_get.php","line":16,"char_start":3,"char_end":9}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"assign_obj_get.php","line":16,"char_start":3,"char_end":9}]
+      }
     },
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
-      "Rsupport_dynamic_type":[{"filename":"assign_obj_get.php","line":12,"char_start":10,"char_end":12}]
+      "From_witness_decl":{
+        "Support_dynamic_type":[{"filename":"assign_obj_get.php","line":12,"char_start":10,"char_end":12}]
+      }
     },
     {
       "Edge":{
@@ -275,10 +315,12 @@ Path:
       }
     },
     {
-      "Rdef":[
+      "Def":[
         {"filename":"assign_obj_get.php","line":4,"char_start":7,"char_end":9},
         {
-          "Rhint":[{"filename":"assign_obj_get.php","line":12,"char_start":14,"char_end":16}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"assign_obj_get.php","line":12,"char_start":14,"char_end":16}]
+          }
         }
       ]
     }

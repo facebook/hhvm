@@ -74,42 +74,52 @@ File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rdef":[
+                  "Def":[
                     {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
                     {
-                      "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                      "From_witness_decl":{
+                        "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                      }
                     }
                   ]
                 },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+              "From_witness_locl":{
+                "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+              }
             }
           ]
         },
         "Flow_return_hint",
         {
-          "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+          "From_witness_locl":{
+            "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+          }
         }
       ]
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+      }
     }
   ]
 }
@@ -119,42 +129,52 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rdef":[
+                  "Def":[
                     {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
                     {
-                      "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                      "From_witness_decl":{
+                        "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                      }
                     }
                   ]
                 },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+              "From_witness_locl":{
+                "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+              }
             }
           ]
         },
         "Flow_return_hint",
         {
-          "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+          "From_witness_locl":{
+            "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+          }
         }
       ]
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+      }
     }
   ]
 }
@@ -167,28 +187,38 @@ Path:
   "stats":{"max_depth":0,"length":4,"reversals":0},
   "path_elems":[
     {
-      "Rdef":[
+      "Def":[
         {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
         {
-          "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+          }
         }
       ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
-      "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
-      "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
-      "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
-      "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+      }
     }
   ]
 }
@@ -281,56 +311,68 @@ File "union_subtyping_r.php", line 6, character 26 - line 6, character 26:
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rdef":[
+                  "Def":[
                     {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
                     {
-                      "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                      "From_witness_decl":{
+                        "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                      }
                     }
                   ]
                 },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+              "From_witness_locl":{
+                "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+              }
             }
           ]
         },
         "Flow_return_hint",
         {
-          "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+          "From_witness_locl":{
+            "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+          }
         }
       ]
     },
     "Flow_subtype_toplevel",
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rprj":[
+          "Prj":[
             {"Asymm":["Super","Prj_asymm_union"]},
             {
-              "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+              "From_witness_decl":{
+                "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rdef":[
+          "Def":[
             {"filename":"union_subtyping_r.php","line":2,"char_start":7,"char_end":7},
             {
-              "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":26,"char_end":26}]
+              "From_witness_decl":{
+                "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":26,"char_end":26}]
+              }
             }
           ]
         }
@@ -344,56 +386,68 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rdef":[
+                  "Def":[
                     {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
                     {
-                      "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                      "From_witness_decl":{
+                        "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                      }
                     }
                   ]
                 },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+              "From_witness_locl":{
+                "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+              }
             }
           ]
         },
         "Flow_return_hint",
         {
-          "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+          "From_witness_locl":{
+            "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+          }
         }
       ]
     },
     "Flow_subtype_toplevel",
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rprj":[
+          "Prj":[
             {"Asymm":["Super","Prj_asymm_union"]},
             {
-              "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+              "From_witness_decl":{
+                "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rdef":[
+          "Def":[
             {"filename":"union_subtyping_r.php","line":2,"char_start":7,"char_end":7},
             {
-              "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":26,"char_end":26}]
+              "From_witness_decl":{
+                "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":26,"char_end":26}]
+              }
             }
           ]
         }
@@ -410,37 +464,49 @@ Path:
   "stats":{"max_depth":1,"length":5,"reversals":0},
   "path_elems":[
     {
-      "Rdef":[
+      "Def":[
         {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
         {
-          "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+          }
         }
       ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
-      "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
-      "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
-      "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
-      "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+      }
     },
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","out_of":{"Asymm":["Super","Prj_asymm_union"]}}
     },
     {
-      "Rdef":[
+      "Def":[
         {"filename":"union_subtyping_r.php","line":2,"char_start":7,"char_end":7},
         {
-          "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":26,"char_end":26}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":26,"char_end":26}]
+          }
         }
       ]
     }
@@ -535,56 +601,68 @@ File "union_subtyping_r.php", line 6, character 28 - line 6, character 28:
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rdef":[
+                  "Def":[
                     {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
                     {
-                      "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                      "From_witness_decl":{
+                        "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                      }
                     }
                   ]
                 },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+              "From_witness_locl":{
+                "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+              }
             }
           ]
         },
         "Flow_return_hint",
         {
-          "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+          "From_witness_locl":{
+            "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+          }
         }
       ]
     },
     "Flow_subtype_toplevel",
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rprj":[
+          "Prj":[
             {"Asymm":["Super","Prj_asymm_union"]},
             {
-              "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+              "From_witness_decl":{
+                "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rdef":[
+          "Def":[
             {"filename":"union_subtyping_r.php","line":3,"char_start":7,"char_end":7},
             {
-              "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":28,"char_end":28}]
+              "From_witness_decl":{
+                "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":28,"char_end":28}]
+              }
             }
           ]
         }
@@ -598,56 +676,68 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rdef":[
+                  "Def":[
                     {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
                     {
-                      "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                      "From_witness_decl":{
+                        "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                      }
                     }
                   ]
                 },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+              "From_witness_locl":{
+                "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+              }
             }
           ]
         },
         "Flow_return_hint",
         {
-          "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+          "From_witness_locl":{
+            "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+          }
         }
       ]
     },
     "Flow_subtype_toplevel",
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rprj":[
+          "Prj":[
             {"Asymm":["Super","Prj_asymm_union"]},
             {
-              "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+              "From_witness_decl":{
+                "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rdef":[
+          "Def":[
             {"filename":"union_subtyping_r.php","line":3,"char_start":7,"char_end":7},
             {
-              "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":28,"char_end":28}]
+              "From_witness_decl":{
+                "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":28,"char_end":28}]
+              }
             }
           ]
         }
@@ -664,37 +754,49 @@ Path:
   "stats":{"max_depth":1,"length":5,"reversals":0},
   "path_elems":[
     {
-      "Rdef":[
+      "Def":[
         {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
         {
-          "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+          }
         }
       ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
-      "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
-      "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
-      "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
-      "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+      }
     },
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","out_of":{"Asymm":["Super","Prj_asymm_union"]}}
     },
     {
-      "Rdef":[
+      "Def":[
         {"filename":"union_subtyping_r.php","line":3,"char_start":7,"char_end":7},
         {
-          "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":28,"char_end":28}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":28,"char_end":28}]
+          }
         }
       ]
     }

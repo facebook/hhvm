@@ -58,47 +58,53 @@ File "workplace_abstract_class_as_typeconst.php", line 13, character 57 - line 1
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rwitness":[
-            {
-              "filename":"workplace_abstract_class_as_typeconst.php",
-              "line":37,
-              "char_start":23,
-              "char_end":23
-            }
-          ]
+          "From_witness_locl":{
+            "Witness":[
+              {
+                "filename":"workplace_abstract_class_as_typeconst.php",
+                "line":37,
+                "char_start":23,
+                "char_end":23
+              }
+            ]
+          }
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rwitness":[
-                    {
-                      "filename":"workplace_abstract_class_as_typeconst.php",
-                      "line":37,
-                      "char_start":3,
-                      "char_end":24
-                    }
-                  ]
+                  "From_witness_locl":{
+                    "Witness":[
+                      {
+                        "filename":"workplace_abstract_class_as_typeconst.php",
+                        "line":37,
+                        "char_start":3,
+                        "char_end":24
+                      }
+                    ]
+                  }
                 },
                 "Flow_subtype",
                 {
-                  "Rrev":[
+                  "Rev":[
                     {
-                      "Rsupport_dynamic_type":[
-                        {
-                          "filename":"workplace_abstract_class_as_typeconst.php",
-                          "line":13,
-                          "char_start":19,
-                          "char_end":32
-                        }
-                      ]
+                      "From_witness_decl":{
+                        "Support_dynamic_type":[
+                          {
+                            "filename":"workplace_abstract_class_as_typeconst.php",
+                            "line":13,
+                            "char_start":19,
+                            "char_end":32
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -110,10 +116,10 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rtype_access":[
+      "Type_access":[
         {
-          "Rtypeconst":[
-            {"Rnone":[]},
+          "Typeconst":[
+            {"No_reason":[]},
             {
               "Tuple2":[
                 {
@@ -127,11 +133,11 @@ Raw:
             },
             "an object of type ContainerClass",
             {
-              "Rtype_access":[
+              "Type_access":[
                 {
-                  "Rtypeconst":[
+                  "Typeconst":[
                     {
-                      "Rdef":[
+                      "Def":[
                         {
                           "filename":"workplace_abstract_class_as_typeconst.php",
                           "line":3,
@@ -139,14 +145,16 @@ Raw:
                           "char_end":29
                         },
                         {
-                          "Rhint":[
-                            {
-                              "filename":"workplace_abstract_class_as_typeconst.php",
-                              "line":32,
-                              "char_start":32,
-                              "char_end":45
-                            }
-                          ]
+                          "From_witness_decl":{
+                            "Hint":[
+                              {
+                                "filename":"workplace_abstract_class_as_typeconst.php",
+                                "line":32,
+                                "char_start":32,
+                                "char_end":45
+                              }
+                            ]
+                          }
                         }
                       ]
                     },
@@ -163,57 +171,65 @@ Raw:
                     },
                     "an object of type ExampleArraykeyClass",
                     {
-                      "Rinstantiate":[
+                      "Instantiate":[
                         {
-                          "Rflow":[
+                          "Flow":[
                             {
-                              "Rflow":[
+                              "Flow":[
                                 {
-                                  "Rwitness":[
-                                    {
-                                      "filename":"workplace_abstract_class_as_typeconst.php",
-                                      "line":36,
-                                      "char_start":13,
-                                      "char_end":32
-                                    }
-                                  ]
+                                  "From_witness_locl":{
+                                    "Witness":[
+                                      {
+                                        "filename":"workplace_abstract_class_as_typeconst.php",
+                                        "line":36,
+                                        "char_start":13,
+                                        "char_end":32
+                                      }
+                                    ]
+                                  }
                                 },
                                 "Flow_assign",
                                 {
-                                  "Rwitness":[
-                                    {
-                                      "filename":"workplace_abstract_class_as_typeconst.php",
-                                      "line":36,
-                                      "char_start":3,
-                                      "char_end":5
-                                    }
-                                  ]
+                                  "From_witness_locl":{
+                                    "Witness":[
+                                      {
+                                        "filename":"workplace_abstract_class_as_typeconst.php",
+                                        "line":36,
+                                        "char_start":3,
+                                        "char_end":5
+                                      }
+                                    ]
+                                  }
                                 }
                               ]
                             },
                             "Flow_local",
                             {
-                              "Rwitness":[
-                                {
-                                  "filename":"workplace_abstract_class_as_typeconst.php",
-                                  "line":37,
-                                  "char_start":3,
-                                  "char_end":5
-                                }
-                              ]
+                              "From_witness_locl":{
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_abstract_class_as_typeconst.php",
+                                    "line":37,
+                                    "char_start":3,
+                                    "char_end":5
+                                  }
+                                ]
+                              }
                             }
                           ]
                         },
                         "this",
                         {
-                          "Rhint":[
-                            {
-                              "filename":"workplace_abstract_class_as_typeconst.php",
-                              "line":13,
-                              "char_start":34,
-                              "char_end":61
-                            }
-                          ]
+                          "From_witness_decl":{
+                            "Hint":[
+                              {
+                                "filename":"workplace_abstract_class_as_typeconst.php",
+                                "line":13,
+                                "char_start":34,
+                                "char_end":61
+                              }
+                            ]
+                          }
                         }
                       ]
                     }
@@ -223,14 +239,16 @@ Raw:
                   {
                     "Tuple2":[
                       {
-                        "Rhint":[
-                          {
-                            "filename":"workplace_abstract_class_as_typeconst.php",
-                            "line":13,
-                            "char_start":34,
-                            "char_end":61
-                          }
-                        ]
+                        "From_witness_decl":{
+                          "Hint":[
+                            {
+                              "filename":"workplace_abstract_class_as_typeconst.php",
+                              "line":13,
+                              "char_start":34,
+                              "char_end":61
+                            }
+                          ]
+                        }
                       },
                       "ExampleArraykeyClass::TContainerClass"
                     ]
@@ -244,14 +262,16 @@ Raw:
           {
             "Tuple2":[
               {
-                "Rhint":[
-                  {
-                    "filename":"workplace_abstract_class_as_typeconst.php",
-                    "line":13,
-                    "char_start":34,
-                    "char_end":61
-                  }
-                ]
+                "From_witness_decl":{
+                  "Hint":[
+                    {
+                      "filename":"workplace_abstract_class_as_typeconst.php",
+                      "line":13,
+                      "char_start":34,
+                      "char_end":61
+                    }
+                  ]
+                }
               },
               "ContainerClass::TType"
             ]
@@ -267,45 +287,51 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rwitness":[
-            {
-              "filename":"workplace_abstract_class_as_typeconst.php",
-              "line":37,
-              "char_start":23,
-              "char_end":23
-            }
-          ]
+          "From_witness_locl":{
+            "Witness":[
+              {
+                "filename":"workplace_abstract_class_as_typeconst.php",
+                "line":37,
+                "char_start":23,
+                "char_end":23
+              }
+            ]
+          }
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rwitness":[
-                    {
-                      "filename":"workplace_abstract_class_as_typeconst.php",
-                      "line":37,
-                      "char_start":3,
-                      "char_end":24
-                    }
-                  ]
+                  "From_witness_locl":{
+                    "Witness":[
+                      {
+                        "filename":"workplace_abstract_class_as_typeconst.php",
+                        "line":37,
+                        "char_start":3,
+                        "char_end":24
+                      }
+                    ]
+                  }
                 },
                 "Flow_subtype",
                 {
-                  "Rsupport_dynamic_type":[
-                    {
-                      "filename":"workplace_abstract_class_as_typeconst.php",
-                      "line":13,
-                      "char_start":19,
-                      "char_end":32
-                    }
-                  ]
+                  "From_witness_decl":{
+                    "Support_dynamic_type":[
+                      {
+                        "filename":"workplace_abstract_class_as_typeconst.php",
+                        "line":13,
+                        "char_start":19,
+                        "char_end":32
+                      }
+                    ]
+                  }
                 }
               ]
             }
@@ -315,10 +341,10 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rtype_access":[
+      "Type_access":[
         {
-          "Rtypeconst":[
-            {"Rnone":[]},
+          "Typeconst":[
+            {"No_reason":[]},
             {
               "Tuple2":[
                 {
@@ -332,11 +358,11 @@ Normalised:
             },
             "an object of type ContainerClass",
             {
-              "Rtype_access":[
+              "Type_access":[
                 {
-                  "Rtypeconst":[
+                  "Typeconst":[
                     {
-                      "Rdef":[
+                      "Def":[
                         {
                           "filename":"workplace_abstract_class_as_typeconst.php",
                           "line":3,
@@ -344,14 +370,16 @@ Normalised:
                           "char_end":29
                         },
                         {
-                          "Rhint":[
-                            {
-                              "filename":"workplace_abstract_class_as_typeconst.php",
-                              "line":32,
-                              "char_start":32,
-                              "char_end":45
-                            }
-                          ]
+                          "From_witness_decl":{
+                            "Hint":[
+                              {
+                                "filename":"workplace_abstract_class_as_typeconst.php",
+                                "line":32,
+                                "char_start":32,
+                                "char_end":45
+                              }
+                            ]
+                          }
                         }
                       ]
                     },
@@ -368,57 +396,65 @@ Normalised:
                     },
                     "an object of type ExampleArraykeyClass",
                     {
-                      "Rinstantiate":[
+                      "Instantiate":[
                         {
-                          "Rflow":[
+                          "Flow":[
                             {
-                              "Rflow":[
+                              "Flow":[
                                 {
-                                  "Rwitness":[
-                                    {
-                                      "filename":"workplace_abstract_class_as_typeconst.php",
-                                      "line":36,
-                                      "char_start":13,
-                                      "char_end":32
-                                    }
-                                  ]
+                                  "From_witness_locl":{
+                                    "Witness":[
+                                      {
+                                        "filename":"workplace_abstract_class_as_typeconst.php",
+                                        "line":36,
+                                        "char_start":13,
+                                        "char_end":32
+                                      }
+                                    ]
+                                  }
                                 },
                                 "Flow_assign",
                                 {
-                                  "Rwitness":[
-                                    {
-                                      "filename":"workplace_abstract_class_as_typeconst.php",
-                                      "line":36,
-                                      "char_start":3,
-                                      "char_end":5
-                                    }
-                                  ]
+                                  "From_witness_locl":{
+                                    "Witness":[
+                                      {
+                                        "filename":"workplace_abstract_class_as_typeconst.php",
+                                        "line":36,
+                                        "char_start":3,
+                                        "char_end":5
+                                      }
+                                    ]
+                                  }
                                 }
                               ]
                             },
                             "Flow_local",
                             {
-                              "Rwitness":[
-                                {
-                                  "filename":"workplace_abstract_class_as_typeconst.php",
-                                  "line":37,
-                                  "char_start":3,
-                                  "char_end":5
-                                }
-                              ]
+                              "From_witness_locl":{
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_abstract_class_as_typeconst.php",
+                                    "line":37,
+                                    "char_start":3,
+                                    "char_end":5
+                                  }
+                                ]
+                              }
                             }
                           ]
                         },
                         "this",
                         {
-                          "Rhint":[
-                            {
-                              "filename":"workplace_abstract_class_as_typeconst.php",
-                              "line":13,
-                              "char_start":34,
-                              "char_end":61
-                            }
-                          ]
+                          "From_witness_decl":{
+                            "Hint":[
+                              {
+                                "filename":"workplace_abstract_class_as_typeconst.php",
+                                "line":13,
+                                "char_start":34,
+                                "char_end":61
+                              }
+                            ]
+                          }
                         }
                       ]
                     }
@@ -428,14 +464,16 @@ Normalised:
                   {
                     "Tuple2":[
                       {
-                        "Rhint":[
-                          {
-                            "filename":"workplace_abstract_class_as_typeconst.php",
-                            "line":13,
-                            "char_start":34,
-                            "char_end":61
-                          }
-                        ]
+                        "From_witness_decl":{
+                          "Hint":[
+                            {
+                              "filename":"workplace_abstract_class_as_typeconst.php",
+                              "line":13,
+                              "char_start":34,
+                              "char_end":61
+                            }
+                          ]
+                        }
                       },
                       "ExampleArraykeyClass::TContainerClass"
                     ]
@@ -449,14 +487,16 @@ Normalised:
           {
             "Tuple2":[
               {
-                "Rhint":[
-                  {
-                    "filename":"workplace_abstract_class_as_typeconst.php",
-                    "line":13,
-                    "char_start":34,
-                    "char_end":61
-                  }
-                ]
+                "From_witness_decl":{
+                  "Hint":[
+                    {
+                      "filename":"workplace_abstract_class_as_typeconst.php",
+                      "line":13,
+                      "char_start":34,
+                      "char_end":61
+                    }
+                  ]
+                }
               },
               "ContainerClass::TType"
             ]
@@ -475,38 +515,44 @@ Path:
   "stats":{"max_depth":1,"length":3,"reversals":1},
   "path_elems":[
     {
-      "Rwitness":[
-        {
-          "filename":"workplace_abstract_class_as_typeconst.php",
-          "line":37,
-          "char_start":23,
-          "char_end":23
-        }
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {
+            "filename":"workplace_abstract_class_as_typeconst.php",
+            "line":37,
+            "char_start":23,
+            "char_end":23
+          }
+        ]
+      }
     },
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
     {
-      "Rwitness":[
-        {
-          "filename":"workplace_abstract_class_as_typeconst.php",
-          "line":37,
-          "char_start":3,
-          "char_end":24
-        }
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {
+            "filename":"workplace_abstract_class_as_typeconst.php",
+            "line":37,
+            "char_start":3,
+            "char_end":24
+          }
+        ]
+      }
     },
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
-      "Rsupport_dynamic_type":[
-        {
-          "filename":"workplace_abstract_class_as_typeconst.php",
-          "line":13,
-          "char_start":19,
-          "char_end":32
-        }
-      ]
+      "From_witness_decl":{
+        "Support_dynamic_type":[
+          {
+            "filename":"workplace_abstract_class_as_typeconst.php",
+            "line":13,
+            "char_start":19,
+            "char_end":32
+          }
+        ]
+      }
     },
     {
       "Edge":{
@@ -516,10 +562,10 @@ Path:
       }
     },
     {
-      "Rtype_access":[
+      "Type_access":[
         {
-          "Rtypeconst":[
-            {"Rnone":[]},
+          "Typeconst":[
+            {"No_reason":[]},
             {
               "Tuple2":[
                 {
@@ -533,11 +579,11 @@ Path:
             },
             "an object of type ContainerClass",
             {
-              "Rtype_access":[
+              "Type_access":[
                 {
-                  "Rtypeconst":[
+                  "Typeconst":[
                     {
-                      "Rdef":[
+                      "Def":[
                         {
                           "filename":"workplace_abstract_class_as_typeconst.php",
                           "line":3,
@@ -545,14 +591,16 @@ Path:
                           "char_end":29
                         },
                         {
-                          "Rhint":[
-                            {
-                              "filename":"workplace_abstract_class_as_typeconst.php",
-                              "line":32,
-                              "char_start":32,
-                              "char_end":45
-                            }
-                          ]
+                          "From_witness_decl":{
+                            "Hint":[
+                              {
+                                "filename":"workplace_abstract_class_as_typeconst.php",
+                                "line":32,
+                                "char_start":32,
+                                "char_end":45
+                              }
+                            ]
+                          }
                         }
                       ]
                     },
@@ -569,57 +617,65 @@ Path:
                     },
                     "an object of type ExampleArraykeyClass",
                     {
-                      "Rinstantiate":[
+                      "Instantiate":[
                         {
-                          "Rflow":[
+                          "Flow":[
                             {
-                              "Rflow":[
+                              "Flow":[
                                 {
-                                  "Rwitness":[
-                                    {
-                                      "filename":"workplace_abstract_class_as_typeconst.php",
-                                      "line":36,
-                                      "char_start":13,
-                                      "char_end":32
-                                    }
-                                  ]
+                                  "From_witness_locl":{
+                                    "Witness":[
+                                      {
+                                        "filename":"workplace_abstract_class_as_typeconst.php",
+                                        "line":36,
+                                        "char_start":13,
+                                        "char_end":32
+                                      }
+                                    ]
+                                  }
                                 },
                                 "Flow_assign",
                                 {
-                                  "Rwitness":[
-                                    {
-                                      "filename":"workplace_abstract_class_as_typeconst.php",
-                                      "line":36,
-                                      "char_start":3,
-                                      "char_end":5
-                                    }
-                                  ]
+                                  "From_witness_locl":{
+                                    "Witness":[
+                                      {
+                                        "filename":"workplace_abstract_class_as_typeconst.php",
+                                        "line":36,
+                                        "char_start":3,
+                                        "char_end":5
+                                      }
+                                    ]
+                                  }
                                 }
                               ]
                             },
                             "Flow_local",
                             {
-                              "Rwitness":[
-                                {
-                                  "filename":"workplace_abstract_class_as_typeconst.php",
-                                  "line":37,
-                                  "char_start":3,
-                                  "char_end":5
-                                }
-                              ]
+                              "From_witness_locl":{
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_abstract_class_as_typeconst.php",
+                                    "line":37,
+                                    "char_start":3,
+                                    "char_end":5
+                                  }
+                                ]
+                              }
                             }
                           ]
                         },
                         "this",
                         {
-                          "Rhint":[
-                            {
-                              "filename":"workplace_abstract_class_as_typeconst.php",
-                              "line":13,
-                              "char_start":34,
-                              "char_end":61
-                            }
-                          ]
+                          "From_witness_decl":{
+                            "Hint":[
+                              {
+                                "filename":"workplace_abstract_class_as_typeconst.php",
+                                "line":13,
+                                "char_start":34,
+                                "char_end":61
+                              }
+                            ]
+                          }
                         }
                       ]
                     }
@@ -629,14 +685,16 @@ Path:
                   {
                     "Tuple2":[
                       {
-                        "Rhint":[
-                          {
-                            "filename":"workplace_abstract_class_as_typeconst.php",
-                            "line":13,
-                            "char_start":34,
-                            "char_end":61
-                          }
-                        ]
+                        "From_witness_decl":{
+                          "Hint":[
+                            {
+                              "filename":"workplace_abstract_class_as_typeconst.php",
+                              "line":13,
+                              "char_start":34,
+                              "char_end":61
+                            }
+                          ]
+                        }
                       },
                       "ExampleArraykeyClass::TContainerClass"
                     ]
@@ -650,14 +708,16 @@ Path:
           {
             "Tuple2":[
               {
-                "Rhint":[
-                  {
-                    "filename":"workplace_abstract_class_as_typeconst.php",
-                    "line":13,
-                    "char_start":34,
-                    "char_end":61
-                  }
-                ]
+                "From_witness_decl":{
+                  "Hint":[
+                    {
+                      "filename":"workplace_abstract_class_as_typeconst.php",
+                      "line":13,
+                      "char_start":34,
+                      "char_end":61
+                    }
+                  ]
+                }
               },
               "ContainerClass::TType"
             ]

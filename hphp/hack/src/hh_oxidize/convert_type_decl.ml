@@ -670,6 +670,9 @@ let type_declaration ~mutual_rec ~safe_ints name td =
              curr_module_name () = "typing_defs_core"
              || curr_module_name () = "typing_defs") ->
       []
+    | ([({ ptyp_desc = Ptyp_any; _ }, _)], "witness")
+      when String.(curr_module_name () = "typing_reason") ->
+      []
     | ([({ ptyp_desc = Ptyp_any; _ }, _)], "t_")
       when String.(curr_module_name () = "typing_reason") ->
       []

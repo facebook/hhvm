@@ -265,5 +265,7 @@ typing_reason::Reason
 typing_reason::T_
 typing_reason::Ureason
 typing_reason::VarianceDir
+typing_reason::WitnessLocl
+typing_reason::WitnessDecl
 xhp_attribute::Tag
 xhp_attribute::XhpAttribute

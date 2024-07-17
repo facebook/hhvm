@@ -132,59 +132,71 @@ File "workplace_non_exact.php", line 4, character 21 - line 4, character 24:
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rdef":[
+          "Def":[
             {"filename":"workplace_non_exact.php","line":3,"char_start":16,"char_end":17},
             {
-              "Rhint":[{"filename":"workplace_non_exact.php","line":9,"char_start":11,"char_end":12}]
+              "From_witness_decl":{
+                "Hint":[{"filename":"workplace_non_exact.php","line":9,"char_start":11,"char_end":12}]
+              }
             }
           ]
         },
         "Flow_solved",
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rwitness":[
-                        {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":22}
-                      ]
+                      "From_witness_locl":{
+                        "Witness":[
+                          {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":22}
+                        ]
+                      }
                     },
                     "Flow_solved",
                     {
-                      "Rtype_variable":[
-                        {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
-                      ]
+                      "From_witness_locl":{
+                        "Type_variable":[
+                          {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
+                        ]
+                      }
                     }
                   ]
                 },
                 "Flow_fun_return",
                 {
-                  "Rwitness":[
-                    {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
-                  ]
+                  "From_witness_locl":{
+                    "Witness":[
+                      {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
+                    ]
+                  }
                 }
               ]
             },
             "Flow_prj",
             {
-              "Rprj":[
+              "Prj":[
                 {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rwitness":[{"filename":"workplace_non_exact.php","line":12,"char_start":5,"char_end":27}]
+                      "From_witness_locl":{
+                        "Witness":[{"filename":"workplace_non_exact.php","line":12,"char_start":5,"char_end":27}]
+                      }
                     },
                     "Flow_subtype",
                     {
-                      "Rrev":[
+                      "Rev":[
                         {
-                          "Rsupport_dynamic_type":[{"filename":"workplace_non_exact.php","line":4,"char_start":19,"char_end":19}]
+                          "From_witness_decl":{
+                            "Support_dynamic_type":[{"filename":"workplace_non_exact.php","line":4,"char_start":19,"char_end":19}]
+                          }
                         }
                       ]
                     }
@@ -198,9 +210,11 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rexpr_dep_type":[
+      "Expr_dep_type":[
         {
-          "Rhint":[{"filename":"workplace_non_exact.php","line":4,"char_start":21,"char_end":24}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"workplace_non_exact.php","line":4,"char_start":21,"char_end":24}]
+          }
         },
         {"filename":"workplace_non_exact.php","line":12,"char_start":5,"char_end":13},
         {"ERexpr":["3"]}
@@ -214,57 +228,69 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rdef":[
+          "Def":[
             {"filename":"workplace_non_exact.php","line":3,"char_start":16,"char_end":17},
             {
-              "Rhint":[{"filename":"workplace_non_exact.php","line":9,"char_start":11,"char_end":12}]
+              "From_witness_decl":{
+                "Hint":[{"filename":"workplace_non_exact.php","line":9,"char_start":11,"char_end":12}]
+              }
             }
           ]
         },
         "Flow_solved",
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rwitness":[
-                        {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":22}
-                      ]
+                      "From_witness_locl":{
+                        "Witness":[
+                          {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":22}
+                        ]
+                      }
                     },
                     "Flow_solved",
                     {
-                      "Rtype_variable":[
-                        {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
-                      ]
+                      "From_witness_locl":{
+                        "Type_variable":[
+                          {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
+                        ]
+                      }
                     }
                   ]
                 },
                 "Flow_fun_return",
                 {
-                  "Rwitness":[
-                    {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
-                  ]
+                  "From_witness_locl":{
+                    "Witness":[
+                      {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
+                    ]
+                  }
                 }
               ]
             },
             "Flow_prj",
             {
-              "Rprj":[
+              "Prj":[
                 {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rwitness":[{"filename":"workplace_non_exact.php","line":12,"char_start":5,"char_end":27}]
+                      "From_witness_locl":{
+                        "Witness":[{"filename":"workplace_non_exact.php","line":12,"char_start":5,"char_end":27}]
+                      }
                     },
                     "Flow_subtype",
                     {
-                      "Rsupport_dynamic_type":[{"filename":"workplace_non_exact.php","line":4,"char_start":19,"char_end":19}]
+                      "From_witness_decl":{
+                        "Support_dynamic_type":[{"filename":"workplace_non_exact.php","line":4,"char_start":19,"char_end":19}]
+                      }
                     }
                   ]
                 }
@@ -276,9 +302,11 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rexpr_dep_type":[
+      "Expr_dep_type":[
         {
-          "Rhint":[{"filename":"workplace_non_exact.php","line":4,"char_start":21,"char_end":24}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"workplace_non_exact.php","line":4,"char_start":21,"char_end":24}]
+          }
         },
         {"filename":"workplace_non_exact.php","line":12,"char_start":5,"char_end":13},
         {"ERexpr":["3"]}
@@ -295,40 +323,52 @@ Path:
   "stats":{"max_depth":1,"length":6,"reversals":1},
   "path_elems":[
     {
-      "Rdef":[
+      "Def":[
         {"filename":"workplace_non_exact.php","line":3,"char_start":16,"char_end":17},
         {
-          "Rhint":[{"filename":"workplace_non_exact.php","line":9,"char_start":11,"char_end":12}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"workplace_non_exact.php","line":9,"char_start":11,"char_end":12}]
+          }
         }
       ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_solved"}},
     {
-      "Rwitness":[
-        {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":22}
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":22}
+        ]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_solved"}},
     {
-      "Rtype_variable":[
-        {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
-      ]
+      "From_witness_locl":{
+        "Type_variable":[
+          {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
+        ]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_fun_return"}},
     {
-      "Rwitness":[
-        {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
+        ]
+      }
     },
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
     {
-      "Rwitness":[{"filename":"workplace_non_exact.php","line":12,"char_start":5,"char_end":27}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"workplace_non_exact.php","line":12,"char_start":5,"char_end":27}]
+      }
     },
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
-      "Rsupport_dynamic_type":[{"filename":"workplace_non_exact.php","line":4,"char_start":19,"char_end":19}]
+      "From_witness_decl":{
+        "Support_dynamic_type":[{"filename":"workplace_non_exact.php","line":4,"char_start":19,"char_end":19}]
+      }
     },
     {
       "Edge":{
@@ -338,9 +378,11 @@ Path:
       }
     },
     {
-      "Rexpr_dep_type":[
+      "Expr_dep_type":[
         {
-          "Rhint":[{"filename":"workplace_non_exact.php","line":4,"char_start":21,"char_end":24}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"workplace_non_exact.php","line":4,"char_start":21,"char_end":24}]
+          }
         },
         {"filename":"workplace_non_exact.php","line":12,"char_start":5,"char_end":13},
         {"ERexpr":["3"]}

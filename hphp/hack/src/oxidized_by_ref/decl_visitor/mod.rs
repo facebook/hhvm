@@ -24,6 +24,7 @@ mod test {
         use crate::relative_path::RelativePath;
         use crate::typing_defs_core::*;
         use crate::typing_reason::Reason;
+        use crate::typing_reason::WitnessDecl;
 
         struct PrintEveryTapplyVisitor<'a>(Vec<&'a Pos<'a>>, Vec<String>);
 
@@ -53,14 +54,14 @@ mod test {
             };
         }
         let ty = a!(Ty(
-            a!(Reason::hint(pos(1))),
+            a!(Reason::FromWitnessDecl(a!(WitnessDecl::Hint(pos(1))))),
             Ttuple(a!([
                 a!(Ty(
-                    a!(Reason::hint(pos(2))),
+                    a!(Reason::FromWitnessDecl(a!(WitnessDecl::Hint(pos(2))))),
                     Tapply(a!(((pos(3), "foo"), &[][..]))),
                 )),
                 a!(Ty(
-                    a!(Reason::hint(pos(4))),
+                    a!(Reason::FromWitnessDecl(a!(WitnessDecl::Hint(pos(4))))),
                     Tapply(a!(((pos(5), "bar"), &[][..]))),
                 )),
             ])),

@@ -84,6 +84,7 @@ use oxidized_by_ref::typing_defs::WhereConstraint;
 use oxidized_by_ref::typing_defs_flags::FunParamFlags;
 use oxidized_by_ref::typing_defs_flags::FunTypeFlags;
 use oxidized_by_ref::typing_reason::Reason;
+use oxidized_by_ref::typing_reason::WitnessDecl;
 use oxidized_by_ref::xhp_attribute;
 use parser_core_types::compact_token::CompactToken;
 use parser_core_types::indexed_source_text::IndexedSourceText;
@@ -1449,7 +1450,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     fn make_supportdyn(&self, pos: &'a Pos<'a>, ty: Ty_<'a>) -> Ty_<'a> {
         Ty_::Tapply(self.alloc((
             (pos, naming_special_names::typehints::HH_SUPPORTDYN),
-            self.alloc([self.alloc(Ty(self.alloc(Reason::witness_from_decl(pos)), ty))]),
+            self.alloc([self.alloc(Ty(
+                self.alloc(Reason::FromWitnessDecl(
+                    self.alloc(WitnessDecl::WitnessFromDecl(pos)),
+                )),
+                ty,
+            ))]),
         )))
     }
 
@@ -1496,33 +1502,46 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     }
                 }
                 Some(self.alloc(Ty(
-                    self.alloc(Reason::witness_from_decl(expr.1)),
+                    self.alloc(Reason::FromWitnessDecl(
+                        self.alloc(WitnessDecl::WitnessFromDecl(expr.1)),
+                    )),
                     expr_to_ty(self.arena, expr)?,
                 )))
             }
             Node::IntLiteral((_, pos)) => Some(self.alloc(Ty(
-                self.alloc(Reason::witness_from_decl(pos)),
+                self.alloc(Reason::FromWitnessDecl(
+                    self.alloc(WitnessDecl::WitnessFromDecl(pos)),
+                )),
                 Ty_::Tprim(self.alloc(aast::Tprim::Tint)),
             ))),
             Node::FloatingLiteral((_, pos)) => Some(self.alloc(Ty(
-                self.alloc(Reason::witness_from_decl(pos)),
+                self.alloc(Reason::FromWitnessDecl(
+                    self.alloc(WitnessDecl::WitnessFromDecl(pos)),
+                )),
                 Ty_::Tprim(self.alloc(aast::Tprim::Tfloat)),
             ))),
             Node::StringLiteral((_, pos)) => Some(self.alloc(Ty(
-                self.alloc(Reason::witness_from_decl(pos)),
+                self.alloc(Reason::FromWitnessDecl(
+                    self.alloc(WitnessDecl::WitnessFromDecl(pos)),
+                )),
                 Ty_::Tprim(self.alloc(aast::Tprim::Tstring)),
             ))),
             Node::BooleanLiteral((_, pos)) => Some(self.alloc(Ty(
-                self.alloc(Reason::witness_from_decl(pos)),
+                self.alloc(Reason::FromWitnessDecl(
+                    self.alloc(WitnessDecl::WitnessFromDecl(pos)),
+                )),
                 Ty_::Tprim(self.alloc(aast::Tprim::Tbool)),
             ))),
-            Node::Token(t) if t.kind() == TokenKind::This => {
-                Some(self.alloc(Ty(self.alloc(Reason::hint(self.token_pos(t))), Ty_::Tthis)))
-            }
+            Node::Token(t) if t.kind() == TokenKind::This => Some(self.alloc(Ty(
+                self.alloc(Reason::FromWitnessDecl(
+                    self.alloc(WitnessDecl::Hint(self.token_pos(t))),
+                )),
+                Ty_::Tthis,
+            ))),
             Node::Token(t) if t.kind() == TokenKind::NullLiteral => {
                 let pos = self.token_pos(t);
                 Some(self.alloc(Ty(
-                    self.alloc(Reason::hint(pos)),
+                    self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
                     Ty_::Tprim(self.alloc(aast::Tprim::Tnull)),
                 )))
             }
@@ -1530,12 +1549,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             // Node::Variable is used for the `$f` and `$v`, so that we don't
             // incorrectly attempt to elaborate them as names.
             Node::Variable(&(name, pos)) => Some(self.alloc(Ty(
-                self.alloc(Reason::hint(pos)),
+                self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
                 Ty_::Tapply(self.alloc(((pos, name), &[][..]))),
             ))),
             node => {
                 let Id(pos, name) = self.expect_name(node)?;
-                let reason = self.alloc(Reason::hint(pos));
+                let reason =
+                    self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos))));
                 let ty_ = if self.is_type_param_in_scope(name) {
                     // TODO (T69662957) must fill type args of Tgeneric
                     Ty_::Tgeneric(self.alloc((name, &[])))
@@ -1736,7 +1756,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             Node::Token(t) if t.kind() == TokenKind::NullLiteral => {
                 let pos = self.token_pos(t);
                 Some(self.alloc(Ty(
-                    self.alloc(Reason::witness_from_decl(pos)),
+                    self.alloc(Reason::FromWitnessDecl(
+                        self.alloc(WitnessDecl::WitnessFromDecl(pos)),
+                    )),
                     Ty_::Tprim(self.alloc(aast::Tprim::Tnull)),
                 )))
             }
@@ -1759,21 +1781,27 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         let pos = type_.get_pos().unwrap_or(NO_POS);
         match kind {
             FunKind::FAsyncGenerator => self.alloc(Ty(
-                self.alloc(Reason::RretFunKindFromDecl(self.alloc((pos, kind)))),
+                self.alloc(Reason::FromWitnessDecl(
+                    self.alloc(WitnessDecl::RetFunKindFromDecl(self.alloc((pos, kind)))),
+                )),
                 Ty_::Tapply(self.alloc((
                     (pos, naming_special_names::classes::ASYNC_GENERATOR),
                     self.alloc([type_, type_, type_]),
                 ))),
             )),
             FunKind::FGenerator => self.alloc(Ty(
-                self.alloc(Reason::RretFunKindFromDecl(self.alloc((pos, kind)))),
+                self.alloc(Reason::FromWitnessDecl(
+                    self.alloc(WitnessDecl::RetFunKindFromDecl(self.alloc((pos, kind)))),
+                )),
                 Ty_::Tapply(self.alloc((
                     (pos, naming_special_names::classes::GENERATOR),
                     self.alloc([type_, type_, type_]),
                 ))),
             )),
             FunKind::FAsync => self.alloc(Ty(
-                self.alloc(Reason::RretFunKindFromDecl(self.alloc((pos, kind)))),
+                self.alloc(Reason::FromWitnessDecl(
+                    self.alloc(WitnessDecl::RetFunKindFromDecl(self.alloc((pos, kind)))),
+                )),
                 Ty_::Tapply(self.alloc((
                     (pos, naming_special_names::classes::AWAITABLE),
                     self.alloc([type_]),
@@ -1834,7 +1862,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             Node::Token(t) if t.kind() == TokenKind::Construct => {
                 let pos = self.token_pos(t);
                 self.alloc(Ty(
-                    self.alloc(Reason::witness_from_decl(pos)),
+                    self.alloc(Reason::FromWitnessDecl(
+                        self.alloc(WitnessDecl::WitnessFromDecl(pos)),
+                    )),
                     Ty_::Tprim(self.alloc(aast::Tprim::Tvoid)),
                 ))
             }
@@ -1919,7 +1949,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         });
 
         let ty = self.alloc(Ty(
-            self.alloc(Reason::witness_from_decl(id.0)),
+            self.alloc(Reason::FromWitnessDecl(
+                self.alloc(WitnessDecl::WitnessFromDecl(id.0)),
+            )),
             Ty_::Tfun(ft),
         ));
         Some((id.into(), ty, properties))
@@ -1961,7 +1993,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                                     (pos, naming_special_names::collections::VEC),
                                     self.alloc([type_]),
                                 )));
-                                self.alloc(Ty(self.alloc(Reason::RvarParamFromDecl(pos)), ty_))
+                                self.alloc(Ty(
+                                    self.alloc(Reason::FromWitnessDecl(
+                                        self.alloc(WitnessDecl::VarParamFromDecl(pos)),
+                                    )),
+                                    ty_,
+                                ))
                             } else {
                                 type_
                             };
@@ -2024,9 +2061,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             let type_ = if variadic {
                                 self.alloc(Ty(
                                     self.alloc(if name.is_some() {
-                                        Reason::RvarParamFromDecl(pos)
+                                        Reason::FromWitnessDecl(
+                                            self.alloc(WitnessDecl::VarParamFromDecl(pos)),
+                                        )
                                     } else {
-                                        Reason::witness_from_decl(pos)
+                                        Reason::FromWitnessDecl(
+                                            self.alloc(WitnessDecl::WitnessFromDecl(pos)),
+                                        )
                                     }),
                                     type_.1,
                                 ))
@@ -2136,7 +2177,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         let extend_capability_pos = |implicit_params: &'a FunImplicitParams<'_>| {
             let capability = match implicit_params.capability {
                 CapTy(ty) => {
-                    let ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), ty.1));
+                    let ty = self.alloc(Ty(
+                        self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
+                        ty.1,
+                    ));
                     CapTy(ty)
                 }
                 CapDefaults(_) => CapDefaults(pos),
@@ -2159,7 +2203,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     }
 
     fn hint_ty(&self, pos: &'a Pos<'a>, ty_: Ty_<'a>) -> Node<'a> {
-        Node::Ty(self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_)))
+        Node::Ty(self.alloc(Ty(
+            self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
+            ty_,
+        )))
     }
 
     fn prim_ty(&self, tprim: aast::Tprim, pos: &'a Pos<'a>) -> Node<'a> {
@@ -2167,13 +2214,20 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     }
 
     fn tany_with_pos(&self, pos: &'a Pos<'a>) -> &'a Ty<'a> {
-        self.alloc(Ty(self.alloc(Reason::witness_from_decl(pos)), TANY_))
+        self.alloc(Ty(
+            self.alloc(Reason::FromWitnessDecl(
+                self.alloc(WitnessDecl::WitnessFromDecl(pos)),
+            )),
+            TANY_,
+        ))
     }
 
     /// The type used when a `vec_or_dict` typehint is missing its key type argument.
     fn vec_or_dict_key(&self, pos: &'a Pos<'a>) -> &'a Ty<'a> {
         self.alloc(Ty(
-            self.alloc(Reason::RvecOrDictKey(pos)),
+            self.alloc(Reason::FromWitnessDecl(
+                self.alloc(WitnessDecl::VecOrDictKey(pos)),
+            )),
             Ty_::Tprim(self.alloc(aast::Tprim::Tarraykey)),
         ))
     }
@@ -2541,7 +2595,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                         ),
                     ));
                     Ty(
-                        self.alloc(Reason::hint(param_pos)),
+                        self.alloc(Reason::FromWitnessDecl(
+                            self.alloc(WitnessDecl::Hint(param_pos)),
+                        )),
                         Ty_::Tgeneric(self.alloc((id.1, &[]))),
                     )
                 }
@@ -2884,7 +2940,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             TokenKind::Num => self.prim_ty(aast::Tprim::Tnum, token_pos(self)),
             TokenKind::Bool => self.prim_ty(aast::Tprim::Tbool, token_pos(self)),
             TokenKind::Mixed => {
-                let reason = self.alloc(Reason::hint(token_pos(self)));
+                let reason = self.alloc(Reason::FromWitnessDecl(
+                    self.alloc(WitnessDecl::Hint(token_pos(self))),
+                ));
                 if self.implicit_sdt() {
                     let ty_ = self.make_supportdyn(token_pos(self), Ty_::Tmixed);
                     Node::Ty(self.alloc(Ty(reason, ty_)))
@@ -3435,7 +3493,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let ty = match self.node_to_ty(ctx_list) {
             Some(ty) => ty,
             None => self.alloc(Ty(
-                self.alloc(Reason::hint(pos)),
+                self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
                 Ty_::Tapply(self.alloc(((pos, "\\HH\\Contexts\\defaults"), &[]))),
             )),
         };
@@ -3518,7 +3576,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     Node::ListItem(&(ty, _commas)) => self.node_to_ty(ty),
                     &x => self.node_to_ty(x),
                 }));
-                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tintersection(tys))))
+                Some(self.alloc(Ty(
+                    self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
+                    Ty_::Tintersection(tys),
+                )))
             }
         };
 
@@ -3528,7 +3589,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             _ => {
                 let pos = self.get_pos(variants);
                 let tys = self.slice(variants.iter().filter_map(|x| self.node_to_ty(*x)));
-                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tunion(tys))))
+                Some(self.alloc(Ty(
+                    self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
+                    Ty_::Tunion(tys),
+                )))
             }
         };
 
@@ -3854,7 +3918,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 // `function f((function ()[_]: void) $f)[ctx $f]: void {}`).
                 if let Some(Id(pos, "_")) = self.expect_name(ty) {
                     return Some(self.alloc(Ty(
-                        self.alloc(Reason::hint(pos)),
+                        self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
                         Ty_::Tapply(self.alloc(((pos, "_"), &[]))),
                     )));
                 }
@@ -4563,7 +4627,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     let ty = if self.opts.interpret_soft_types_as_like_types {
                         if attributes.soft {
                             self.alloc(Ty(
-                                self.alloc(Reason::hint(self.get_pos(hint))),
+                                self.alloc(Reason::FromWitnessDecl(
+                                    self.alloc(WitnessDecl::Hint(self.get_pos(hint))),
+                                )),
                                 Ty_::Tlike(ty),
                             ))
                         } else {
@@ -4656,7 +4722,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     Ty(_, Ty_::Toption(_)) | Ty(_, Ty_::Tmixed) => type_,
                     // make nullable
                     _ => self.alloc(Ty(
-                        self.alloc(Reason::hint(type_.get_pos()?)),
+                        self.alloc(Reason::FromWitnessDecl(
+                            self.alloc(WitnessDecl::Hint(type_.get_pos()?)),
+                        )),
                         Ty_::Toption(type_),
                     )),
                 }
@@ -4664,7 +4732,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 type_
             };
             let type_ = match like {
-                Some(p) => self.alloc(Ty(self.alloc(Reason::hint(p)), Ty_::Tlike(type_))),
+                Some(p) => self.alloc(Ty(
+                    self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(p)))),
+                    Ty_::Tlike(type_),
+                )),
                 None => type_,
             };
 
@@ -4717,7 +4788,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             .map(|node_ty| {
                 let pos = self.merge_positions(enum_keyword, right_brace);
                 let ty_ = node_ty.1;
-                self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_))
+                self.alloc(Ty(
+                    self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
+                    ty_,
+                ))
             });
         let mut values = bump::Vec::new_in(self.arena);
         for node in xhp_enum_values.iter() {
@@ -5078,7 +5152,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             .unwrap_or_else(|| self.tany_with_pos(name.0));
 
         let base = if self.opts.everything_sdt {
-            self.alloc(Ty(self.alloc(Reason::hint(base_pos)), Ty_::Tlike(base)))
+            self.alloc(Ty(
+                self.alloc(Reason::FromWitnessDecl(
+                    self.alloc(WitnessDecl::Hint(base_pos)),
+                )),
+                Ty_::Tlike(base),
+            ))
         } else {
             base
         };
@@ -5102,12 +5181,18 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let builtin_enum_class_ty = {
             let pos = name.0;
             let enum_class_ty_ = Ty_::Tapply(self.alloc((name.into(), &[])));
-            let enum_class_ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), enum_class_ty_));
+            let enum_class_ty = self.alloc(Ty(
+                self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
+                enum_class_ty_,
+            ));
             let elt_ty_ = Ty_::Tapply(self.alloc((
                 (pos, "\\HH\\MemberOf"),
                 bumpalo::vec![in self.arena; enum_class_ty, base].into_bump_slice(),
             )));
-            let elt_ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), elt_ty_));
+            let elt_ty = self.alloc(Ty(
+                self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
+                elt_ty_,
+            ));
             let builtin_enum_ty_ = if is_abstract {
                 Ty_::Tapply(self.alloc(((pos, "\\HH\\BuiltinAbstractEnumClass"), &[])))
             } else {
@@ -5116,7 +5201,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     std::slice::from_ref(self.alloc(elt_ty)),
                 )))
             };
-            self.alloc(Ty(self.alloc(Reason::hint(pos)), builtin_enum_ty_))
+            self.alloc(Ty(
+                self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
+                builtin_enum_ty_,
+            ))
         };
 
         let consts = self.slice(elements.iter().filter_map(|node| match *node {
@@ -5245,7 +5333,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             .node_to_ty(type_)
             .unwrap_or_else(|| self.tany_with_pos(name.0));
         let type_ = if self.opts.everything_sdt {
-            self.alloc(Ty(self.alloc(Reason::hint(type_pos)), Ty_::Tlike(type_)))
+            self.alloc(Ty(
+                self.alloc(Reason::FromWitnessDecl(
+                    self.alloc(WitnessDecl::Hint(type_pos)),
+                )),
+                Ty_::Tlike(type_),
+            ))
         } else {
             type_
         };
@@ -5254,12 +5347,18 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             None => return Node::Ignored(SyntaxKind::EnumClassEnumerator),
         };
         let enum_class_ty_ = Ty_::Tapply(self.alloc(((pos, class_name), &[])));
-        let enum_class_ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), enum_class_ty_));
+        let enum_class_ty = self.alloc(Ty(
+            self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
+            enum_class_ty_,
+        ));
         let type_ = Ty_::Tapply(self.alloc((
             (pos, "\\HH\\MemberOf"),
             bumpalo::vec![in self.arena; enum_class_ty, type_].into_bump_slice(),
         )));
-        let type_ = self.alloc(Ty(self.alloc(Reason::hint(pos)), type_));
+        let type_ = self.alloc(Ty(
+            self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
+            type_,
+        ));
         Node::Const(self.alloc(ShallowClassConst {
             abstract_,
             name: name.into(),
@@ -5343,7 +5442,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             }
         }
         let pos = self.get_pos(open);
-        let reason = self.alloc(Reason::hint(pos));
+        let reason = self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos))));
         let kind = match open.token_kind() {
             // Type of unknown fields is mixed, or supportdyn<mixed> under implicit SD
             Some(TokenKind::DotDotDot) => self.alloc(Ty(
@@ -5698,7 +5797,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 flags |= FunParamFlags::INOUT;
                 // Pessimise type for inout
                 param_type = if self.implicit_sdt() && !self.no_auto_likes() {
-                    self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tlike(param_type)))
+                    self.alloc(Ty(
+                        self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
+                        Ty_::Tlike(param_type),
+                    ))
                 } else {
                     param_type
                 }
@@ -5747,7 +5849,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         }
 
         let pess_return_type = if self.implicit_sdt() && !self.no_auto_likes() {
-            self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tlike(ret)))
+            self.alloc(Ty(
+                self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
+                Ty_::Tlike(ret),
+            ))
         } else {
             ret
         };
@@ -5948,7 +6053,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 } else {
                     class_name_pos
                 };
-                let reason = self.alloc(Reason::hint(self_pos));
+                let reason = self.alloc(Reason::FromWitnessDecl(
+                    self.alloc(WitnessDecl::Hint(self_pos)),
+                ));
                 let ty_ = Ty_::Tapply(self.alloc(((id_pos, name), &[][..])));
                 self.alloc(Ty(reason, ty_))
             }
@@ -5957,7 +6064,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 None => return Node::Ignored(SK::TypeConstant),
             },
         };
-        let reason = self.alloc(Reason::hint(pos));
+        let reason = self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos))));
         // The reason-rewriting here is only necessary to match the
         // behavior of OCaml decl (which flattens and then unflattens
         // Haccess hints, losing some position information).
@@ -6051,7 +6158,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         right_brace: Self::Output,
     ) -> Self::Output {
         let pos = self.merge_positions(root_type, right_brace);
-        let reason = self.alloc(Reason::hint(pos));
+        let reason = self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos))));
         let root_type = match self.node_to_ty(root_type) {
             Some(ty) => ty,
             None => return Node::Ignored(SK::TypeRefinement),

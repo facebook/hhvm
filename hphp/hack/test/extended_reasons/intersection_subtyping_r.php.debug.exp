@@ -74,15 +74,15 @@ File "intersection_subtyping_r.php", line 7, character 31 - line 7, character 31
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rdef":[
+                  "Def":[
                     {
                       "filename":"intersection_subtyping_r.php",
                       "line":5,
@@ -90,77 +90,87 @@ Raw:
                       "char_end":7
                     },
                     {
-                      "Rhint":[
-                        {
-                          "filename":"intersection_subtyping_r.php",
-                          "line":7,
-                          "char_start":18,
-                          "char_end":18
-                        }
-                      ]
+                      "From_witness_decl":{
+                        "Hint":[
+                          {
+                            "filename":"intersection_subtyping_r.php",
+                            "line":7,
+                            "char_start":18,
+                            "char_end":18
+                          }
+                        ]
+                      }
                     }
                   ]
                 },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[
-                    {
-                      "filename":"intersection_subtyping_r.php",
-                      "line":7,
-                      "char_start":20,
-                      "char_end":21
-                    }
-                  ]
+                  "From_witness_locl":{
+                    "Witness":[
+                      {
+                        "filename":"intersection_subtyping_r.php",
+                        "line":7,
+                        "char_start":20,
+                        "char_end":21
+                      }
+                    ]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[
-                {
-                  "filename":"intersection_subtyping_r.php",
-                  "line":8,
-                  "char_start":10,
-                  "char_end":11
-                }
-              ]
+              "From_witness_locl":{
+                "Witness":[
+                  {
+                    "filename":"intersection_subtyping_r.php",
+                    "line":8,
+                    "char_start":10,
+                    "char_end":11
+                  }
+                ]
+              }
             }
           ]
         },
         "Flow_return_hint",
         {
-          "Rwitness":[
-            {
-              "filename":"intersection_subtyping_r.php",
-              "line":8,
-              "char_start":3,
-              "char_end":12
-            }
-          ]
+          "From_witness_locl":{
+            "Witness":[
+              {
+                "filename":"intersection_subtyping_r.php",
+                "line":8,
+                "char_start":3,
+                "char_end":12
+              }
+            ]
+          }
         }
       ]
     },
     "Flow_subtype_toplevel",
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rprj":[
+          "Prj":[
             {"Asymm":["Super","Prj_asymm_inter"]},
             {
-              "Rhint":[
-                {
-                  "filename":"intersection_subtyping_r.php",
-                  "line":7,
-                  "char_start":26,
-                  "char_end":32
-                }
-              ]
+              "From_witness_decl":{
+                "Hint":[
+                  {
+                    "filename":"intersection_subtyping_r.php",
+                    "line":7,
+                    "char_start":26,
+                    "char_end":32
+                  }
+                ]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rdef":[
+          "Def":[
             {
               "filename":"intersection_subtyping_r.php",
               "line":3,
@@ -168,14 +178,16 @@ Raw:
               "char_end":11
             },
             {
-              "Rhint":[
-                {
-                  "filename":"intersection_subtyping_r.php",
-                  "line":7,
-                  "char_start":31,
-                  "char_end":31
-                }
-              ]
+              "From_witness_decl":{
+                "Hint":[
+                  {
+                    "filename":"intersection_subtyping_r.php",
+                    "line":7,
+                    "char_start":31,
+                    "char_end":31
+                  }
+                ]
+              }
             }
           ]
         }
@@ -189,15 +201,15 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rdef":[
+                  "Def":[
                     {
                       "filename":"intersection_subtyping_r.php",
                       "line":5,
@@ -205,77 +217,87 @@ Normalised:
                       "char_end":7
                     },
                     {
-                      "Rhint":[
-                        {
-                          "filename":"intersection_subtyping_r.php",
-                          "line":7,
-                          "char_start":18,
-                          "char_end":18
-                        }
-                      ]
+                      "From_witness_decl":{
+                        "Hint":[
+                          {
+                            "filename":"intersection_subtyping_r.php",
+                            "line":7,
+                            "char_start":18,
+                            "char_end":18
+                          }
+                        ]
+                      }
                     }
                   ]
                 },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[
-                    {
-                      "filename":"intersection_subtyping_r.php",
-                      "line":7,
-                      "char_start":20,
-                      "char_end":21
-                    }
-                  ]
+                  "From_witness_locl":{
+                    "Witness":[
+                      {
+                        "filename":"intersection_subtyping_r.php",
+                        "line":7,
+                        "char_start":20,
+                        "char_end":21
+                      }
+                    ]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[
-                {
-                  "filename":"intersection_subtyping_r.php",
-                  "line":8,
-                  "char_start":10,
-                  "char_end":11
-                }
-              ]
+              "From_witness_locl":{
+                "Witness":[
+                  {
+                    "filename":"intersection_subtyping_r.php",
+                    "line":8,
+                    "char_start":10,
+                    "char_end":11
+                  }
+                ]
+              }
             }
           ]
         },
         "Flow_return_hint",
         {
-          "Rwitness":[
-            {
-              "filename":"intersection_subtyping_r.php",
-              "line":8,
-              "char_start":3,
-              "char_end":12
-            }
-          ]
+          "From_witness_locl":{
+            "Witness":[
+              {
+                "filename":"intersection_subtyping_r.php",
+                "line":8,
+                "char_start":3,
+                "char_end":12
+              }
+            ]
+          }
         }
       ]
     },
     "Flow_subtype_toplevel",
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rprj":[
+          "Prj":[
             {"Asymm":["Super","Prj_asymm_inter"]},
             {
-              "Rhint":[
-                {
-                  "filename":"intersection_subtyping_r.php",
-                  "line":7,
-                  "char_start":26,
-                  "char_end":32
-                }
-              ]
+              "From_witness_decl":{
+                "Hint":[
+                  {
+                    "filename":"intersection_subtyping_r.php",
+                    "line":7,
+                    "char_start":26,
+                    "char_end":32
+                  }
+                ]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rdef":[
+          "Def":[
             {
               "filename":"intersection_subtyping_r.php",
               "line":3,
@@ -283,14 +305,16 @@ Normalised:
               "char_end":11
             },
             {
-              "Rhint":[
-                {
-                  "filename":"intersection_subtyping_r.php",
-                  "line":7,
-                  "char_start":31,
-                  "char_end":31
-                }
-              ]
+              "From_witness_decl":{
+                "Hint":[
+                  {
+                    "filename":"intersection_subtyping_r.php",
+                    "line":7,
+                    "char_start":31,
+                    "char_end":31
+                  }
+                ]
+              }
             }
           ]
         }
@@ -307,7 +331,7 @@ Path:
   "stats":{"max_depth":1,"length":5,"reversals":0},
   "path_elems":[
     {
-      "Rdef":[
+      "Def":[
         {
           "filename":"intersection_subtyping_r.php",
           "line":5,
@@ -315,66 +339,76 @@ Path:
           "char_end":7
         },
         {
-          "Rhint":[
-            {
-              "filename":"intersection_subtyping_r.php",
-              "line":7,
-              "char_start":18,
-              "char_end":18
-            }
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {
+                "filename":"intersection_subtyping_r.php",
+                "line":7,
+                "char_start":18,
+                "char_end":18
+              }
+            ]
+          }
         }
       ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
-      "Rwitness":[
-        {
-          "filename":"intersection_subtyping_r.php",
-          "line":7,
-          "char_start":20,
-          "char_end":21
-        }
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {
+            "filename":"intersection_subtyping_r.php",
+            "line":7,
+            "char_start":20,
+            "char_end":21
+          }
+        ]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
-      "Rwitness":[
-        {
-          "filename":"intersection_subtyping_r.php",
-          "line":8,
-          "char_start":10,
-          "char_end":11
-        }
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {
+            "filename":"intersection_subtyping_r.php",
+            "line":8,
+            "char_start":10,
+            "char_end":11
+          }
+        ]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
     {
-      "Rwitness":[
-        {
-          "filename":"intersection_subtyping_r.php",
-          "line":8,
-          "char_start":3,
-          "char_end":12
-        }
-      ]
+      "From_witness_locl":{
+        "Witness":[
+          {
+            "filename":"intersection_subtyping_r.php",
+            "line":8,
+            "char_start":3,
+            "char_end":12
+          }
+        ]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
-      "Rhint":[
-        {
-          "filename":"intersection_subtyping_r.php",
-          "line":7,
-          "char_start":26,
-          "char_end":32
-        }
-      ]
+      "From_witness_decl":{
+        "Hint":[
+          {
+            "filename":"intersection_subtyping_r.php",
+            "line":7,
+            "char_start":26,
+            "char_end":32
+          }
+        ]
+      }
     },
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","out_of":{"Asymm":["Super","Prj_asymm_inter"]}}
     },
     {
-      "Rdef":[
+      "Def":[
         {
           "filename":"intersection_subtyping_r.php",
           "line":3,
@@ -382,14 +416,16 @@ Path:
           "char_end":11
         },
         {
-          "Rhint":[
-            {
-              "filename":"intersection_subtyping_r.php",
-              "line":7,
-              "char_start":31,
-              "char_end":31
-            }
-          ]
+          "From_witness_decl":{
+            "Hint":[
+              {
+                "filename":"intersection_subtyping_r.php",
+                "line":7,
+                "char_start":31,
+                "char_end":31
+              }
+            ]
+          }
         }
       ]
     }

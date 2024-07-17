@@ -192,42 +192,52 @@ File "ctor_generic.php", line 20, character 63 - line 20, character 66:
 
 Raw:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":39,"char_end":44}]
+                  "From_witness_decl":{
+                    "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":39,"char_end":44}]
+                  }
                 },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[{"filename":"ctor_generic.php","line":20,"char_start":46,"char_end":47}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"ctor_generic.php","line":20,"char_start":46,"char_end":47}]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":29,"char_end":30}]
+              "From_witness_locl":{
+                "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":29,"char_end":30}]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_fn_param":[1,1]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
+                  }
                 },
                 "Flow_subtype",
                 {
-                  "Rrev":[
+                  "Rev":[
                     {
-                      "Rsupport_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
+                      "From_witness_decl":{
+                        "Support_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
+                      }
                     }
                   ]
                 }
@@ -239,88 +249,106 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rtype_variable_generics":[
-                {"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40},
-                "TB",
-                "TestServiceBase"
-              ]
+              "From_witness_locl":{
+                "Type_variable_generics":[
+                  {"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40},
+                  "TB",
+                  "TestServiceBase"
+                ]
+              }
             },
             "Flow_prj",
             {
-              "Rprj":[
+              "Prj":[
                 {"Asymm":["Sub","Prj_asymm_nullable"]},
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rhint":[{"filename":"ctor_generic.php","line":15,"char_start":17,"char_end":19}]
+                      "From_witness_decl":{
+                        "Hint":[{"filename":"ctor_generic.php","line":15,"char_start":17,"char_end":19}]
+                      }
                     },
                     "Flow_solved",
                     {
-                      "Rflow":[
+                      "Flow":[
                         {
-                          "Rhint":[{"filename":"ctor_generic.php","line":15,"char_start":17,"char_end":19}]
+                          "From_witness_decl":{
+                            "Hint":[{"filename":"ctor_generic.php","line":15,"char_start":17,"char_end":19}]
+                          }
                         },
                         "Flow_prj",
                         {
-                          "Rprj":[
+                          "Prj":[
                             {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\ISender",1,{"Dir":[{"Co":[]}]}]}]},
                             {
-                              "Rflow":[
+                              "Flow":[
                                 {
-                                  "Rdef":[
+                                  "Def":[
                                     {"filename":"ctor_generic.php","line":3,"char_start":11,"char_end":17},
                                     {
-                                      "Rhint":[{"filename":"ctor_generic.php","line":15,"char_start":5,"char_end":20}]
+                                      "From_witness_decl":{
+                                        "Hint":[{"filename":"ctor_generic.php","line":15,"char_start":5,"char_end":20}]
+                                      }
                                     }
                                   ]
                                 },
                                 "Flow_subtype",
                                 {
-                                  "Rrev":[
+                                  "Rev":[
                                     {
-                                      "Rflow":[
+                                      "Flow":[
                                         {
-                                          "Rflow":[
+                                          "Flow":[
                                             {
-                                              "Rflow":[
+                                              "Flow":[
                                                 {
-                                                  "Rdef":[
+                                                  "Def":[
                                                     {"filename":"ctor_generic.php","line":3,"char_start":11,"char_end":17},
                                                     {
-                                                      "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":50,"char_end":67}]
+                                                      "From_witness_decl":{
+                                                        "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":50,"char_end":67}]
+                                                      }
                                                     }
                                                   ]
                                                 },
                                                 "Flow_param_hint",
                                                 {
-                                                  "Rwitness":[{"filename":"ctor_generic.php","line":20,"char_start":69,"char_end":75}]
+                                                  "From_witness_locl":{
+                                                    "Witness":[{"filename":"ctor_generic.php","line":20,"char_start":69,"char_end":75}]
+                                                  }
                                                 }
                                               ]
                                             },
                                             "Flow_local",
                                             {
-                                              "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":33,"char_end":39}]
+                                              "From_witness_locl":{
+                                                "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":33,"char_end":39}]
+                                              }
                                             }
                                           ]
                                         },
                                         "Flow_prj",
                                         {
-                                          "Rprj":[
+                                          "Prj":[
                                             {"Symm":[{"Prj_symm_fn_param":[2,2]}]},
                                             {
-                                              "Rflow":[
+                                              "Flow":[
                                                 {
-                                                  "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
+                                                  "From_witness_locl":{
+                                                    "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
+                                                  }
                                                 },
                                                 "Flow_subtype",
                                                 {
-                                                  "Rrev":[
+                                                  "Rev":[
                                                     {
-                                                      "Rsupport_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
+                                                      "From_witness_decl":{
+                                                        "Support_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
+                                                      }
                                                     }
                                                   ]
                                                 }
@@ -346,7 +374,9 @@ Raw:
         },
         "Flow_transitive",
         {
-          "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":63,"char_end":66}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":63,"char_end":66}]
+          }
         }
       ]
     }
@@ -358,40 +388,50 @@ File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
 {
-  "Rflow":[
+  "Flow":[
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":39,"char_end":44}]
+                  "From_witness_decl":{
+                    "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":39,"char_end":44}]
+                  }
                 },
                 "Flow_param_hint",
                 {
-                  "Rwitness":[{"filename":"ctor_generic.php","line":20,"char_start":46,"char_end":47}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"ctor_generic.php","line":20,"char_start":46,"char_end":47}]
+                  }
                 }
               ]
             },
             "Flow_local",
             {
-              "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":29,"char_end":30}]
+              "From_witness_locl":{
+                "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":29,"char_end":30}]
+              }
             }
           ]
         },
         "Flow_prj",
         {
-          "Rprj":[
+          "Prj":[
             {"Symm":[{"Prj_symm_fn_param":[1,1]}]},
             {
-              "Rflow":[
+              "Flow":[
                 {
-                  "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
+                  "From_witness_locl":{
+                    "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
+                  }
                 },
                 "Flow_subtype",
                 {
-                  "Rsupport_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
+                  "From_witness_decl":{
+                    "Support_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
+                  }
                 }
               ]
             }
@@ -401,59 +441,71 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rflow":[
+      "Flow":[
         {
-          "Rflow":[
+          "Flow":[
             {
-              "Rtype_variable_generics":[
-                {"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40},
-                "TB",
-                "TestServiceBase"
-              ]
+              "From_witness_locl":{
+                "Type_variable_generics":[
+                  {"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40},
+                  "TB",
+                  "TestServiceBase"
+                ]
+              }
             },
             "Flow_prj",
             {
-              "Rprj":[
+              "Prj":[
                 {"Asymm":["Sub","Prj_asymm_nullable"]},
                 {
-                  "Rflow":[
+                  "Flow":[
                     {
-                      "Rhint":[{"filename":"ctor_generic.php","line":15,"char_start":17,"char_end":19}]
+                      "From_witness_decl":{
+                        "Hint":[{"filename":"ctor_generic.php","line":15,"char_start":17,"char_end":19}]
+                      }
                     },
                     "Flow_solved",
                     {
-                      "Rflow":[
+                      "Flow":[
                         {
-                          "Rhint":[{"filename":"ctor_generic.php","line":15,"char_start":17,"char_end":19}]
+                          "From_witness_decl":{
+                            "Hint":[{"filename":"ctor_generic.php","line":15,"char_start":17,"char_end":19}]
+                          }
                         },
                         "Flow_prj",
                         {
-                          "Rprj":[
+                          "Prj":[
                             {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\ISender",1,{"Dir":[{"Co":[]}]}]}]},
                             {
-                              "Rflow":[
+                              "Flow":[
                                 {
-                                  "Rdef":[
+                                  "Def":[
                                     {"filename":"ctor_generic.php","line":3,"char_start":11,"char_end":17},
                                     {
-                                      "Rhint":[{"filename":"ctor_generic.php","line":15,"char_start":5,"char_end":20}]
+                                      "From_witness_decl":{
+                                        "Hint":[{"filename":"ctor_generic.php","line":15,"char_start":5,"char_end":20}]
+                                      }
                                     }
                                   ]
                                 },
                                 "Flow_subtype",
                                 {
-                                  "Rflow":[
+                                  "Flow":[
                                     {
-                                      "Rprj":[
+                                      "Prj":[
                                         {"Symm":[{"Prj_symm_fn_param":[2,2]}]},
                                         {
-                                          "Rflow":[
+                                          "Flow":[
                                             {
-                                              "Rsupport_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
+                                              "From_witness_decl":{
+                                                "Support_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
+                                              }
                                             },
                                             "Flow_subtype",
                                             {
-                                              "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
+                                              "From_witness_locl":{
+                                                "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
+                                              }
                                             }
                                           ]
                                         }
@@ -461,22 +513,28 @@ Normalised:
                                     },
                                     "Flow_prj",
                                     {
-                                      "Rflow":[
+                                      "Flow":[
                                         {
-                                          "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":33,"char_end":39}]
+                                          "From_witness_locl":{
+                                            "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":33,"char_end":39}]
+                                          }
                                         },
                                         "Flow_local",
                                         {
-                                          "Rflow":[
+                                          "Flow":[
                                             {
-                                              "Rwitness":[{"filename":"ctor_generic.php","line":20,"char_start":69,"char_end":75}]
+                                              "From_witness_locl":{
+                                                "Witness":[{"filename":"ctor_generic.php","line":20,"char_start":69,"char_end":75}]
+                                              }
                                             },
                                             "Flow_param_hint",
                                             {
-                                              "Rdef":[
+                                              "Def":[
                                                 {"filename":"ctor_generic.php","line":3,"char_start":11,"char_end":17},
                                                 {
-                                                  "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":50,"char_end":67}]
+                                                  "From_witness_decl":{
+                                                    "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":50,"char_end":67}]
+                                                  }
                                                 }
                                               ]
                                             }
@@ -500,7 +558,9 @@ Normalised:
         },
         "Flow_transitive",
         {
-          "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":63,"char_end":66}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":63,"char_end":66}]
+          }
         }
       ]
     }
@@ -515,25 +575,35 @@ Path:
   "stats":{"max_depth":3,"length":14,"reversals":2},
   "path_elems":[
     {
-      "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":39,"char_end":44}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":39,"char_end":44}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
-      "Rwitness":[{"filename":"ctor_generic.php","line":20,"char_start":46,"char_end":47}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"ctor_generic.php","line":20,"char_start":46,"char_end":47}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
-      "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":29,"char_end":30}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":29,"char_end":30}]
+      }
     },
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[1,1]}]}}
     },
     {
-      "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
+      }
     },
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
-      "Rsupport_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
+      "From_witness_decl":{
+        "Support_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
+      }
     },
     {
       "Edge":{
@@ -543,21 +613,27 @@ Path:
       }
     },
     {
-      "Rtype_variable_generics":[
-        {"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40},
-        "TB",
-        "TestServiceBase"
-      ]
+      "From_witness_locl":{
+        "Type_variable_generics":[
+          {"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40},
+          "TB",
+          "TestServiceBase"
+        ]
+      }
     },
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_nullable"]}}
     },
     {
-      "Rhint":[{"filename":"ctor_generic.php","line":15,"char_start":17,"char_end":19}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"ctor_generic.php","line":15,"char_start":17,"char_end":19}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_solved"}},
     {
-      "Rhint":[{"filename":"ctor_generic.php","line":15,"char_start":17,"char_end":19}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"ctor_generic.php","line":15,"char_start":17,"char_end":19}]
+      }
     },
     {
       "Edge":{
@@ -567,10 +643,12 @@ Path:
       }
     },
     {
-      "Rdef":[
+      "Def":[
         {"filename":"ctor_generic.php","line":3,"char_start":11,"char_end":17},
         {
-          "Rhint":[{"filename":"ctor_generic.php","line":15,"char_start":5,"char_end":20}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"ctor_generic.php","line":15,"char_start":5,"char_end":20}]
+          }
         }
       ]
     },
@@ -582,28 +660,38 @@ Path:
       }
     },
     {
-      "Rsupport_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
+      "From_witness_decl":{
+        "Support_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
+      }
     },
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
     {
-      "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
+      }
     },
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","out_of":{"Symm":[{"Prj_symm_fn_param":[2,2]}]}}
     },
     {
-      "Rwitness":[{"filename":"ctor_generic.php","line":21,"char_start":33,"char_end":39}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":33,"char_end":39}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
     {
-      "Rwitness":[{"filename":"ctor_generic.php","line":20,"char_start":69,"char_end":75}]
+      "From_witness_locl":{
+        "Witness":[{"filename":"ctor_generic.php","line":20,"char_start":69,"char_end":75}]
+      }
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
-      "Rdef":[
+      "Def":[
         {"filename":"ctor_generic.php","line":3,"char_start":11,"char_end":17},
         {
-          "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":50,"char_end":67}]
+          "From_witness_decl":{
+            "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":50,"char_end":67}]
+          }
         }
       ]
     },
@@ -615,7 +703,9 @@ Path:
       }
     },
     {
-      "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":63,"char_end":66}]
+      "From_witness_decl":{
+        "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":63,"char_end":66}]
+      }
     }
   ]
 }

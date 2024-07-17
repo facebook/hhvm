@@ -12,8 +12,8 @@ from typing import Optional
 class Failure:
     path: str
     contents: str
-    stdout: str
-    stderr: str
+    stdout: bytes
+    stderr: bytes
 
 
 def milner_and_type_check(
@@ -22,10 +22,20 @@ def milner_and_type_check(
     temp_file = f"{template_file}.{seed}.out"
 
     # Run the generator on the template file and the number
-    subprocess.run(
+    result = subprocess.run(
         [milner_exe, os.path.abspath(template_file), "--seed", str(seed)],
         stdout=open(temp_file, "w"),
     )
+
+    if result.returncode != 0:
+        contents = open(temp_file).read()
+        os.remove(temp_file)
+        return Failure(
+            temp_file,
+            contents,
+            result.stdout,
+            result.stderr,
+        )
 
     # Run the verifier on the temporary file
     result = subprocess.run([hhstc_exe, temp_file], capture_output=True)
@@ -38,8 +48,8 @@ def milner_and_type_check(
         return Failure(
             temp_file,
             contents,
-            stdout,
-            result.stderr.decode(),
+            result.stdout,
+            result.stderr,
         )
 
     os.remove(temp_file)
@@ -85,11 +95,11 @@ def verify_well_typed(test_dir: str, milner_exe: str, hhstc_exe: str) -> int:
                 print("***")
                 print("* hh_single_type_check STDOUT:")
                 print("***")
-                print(res.stdout)
+                print(res.stdout.decode() if res.stdout is not None else "N/A")
                 print("***")
                 print("* hh_single_type_check STDERR:")
                 print("***")
-                print(res.stderr)
+                print(res.stderr.decode() if res.stderr is not None else "N/A")
                 return 1
 
     # If we made it here, then all templates only generated well-typed programs

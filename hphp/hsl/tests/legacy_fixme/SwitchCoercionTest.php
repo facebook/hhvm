@@ -367,7 +367,7 @@ class SwitchCoercionsTestDateTime implements DateTimeInterface {
   public function getOffset(): int { return 0; }
 }
 
-xhp class xhpclass {
+class :xhpclass {
  public function __construct(
     public darray<string,mixed> $a, // Attributes
     public varray<mixed> $c, // Children

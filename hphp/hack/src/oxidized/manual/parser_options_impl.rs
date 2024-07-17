@@ -14,8 +14,8 @@ impl Default for ParserOptions {
             const_default_func_args: false,
             abstract_static_props: false,
             disallow_func_ptrs_in_constants: false,
-            enable_xhp_class_modifier: false,    // true in ocaml
-            disable_xhp_element_mangling: false, // true in ocaml
+            enable_xhp_class_modifier: false,
+            disable_xhp_element_mangling: false,
             disallow_direct_superglobals_refs: false,
             enable_class_level_where_clauses: false,
             allow_unstable_features: false, // true in /etc/hh.conf
@@ -24,7 +24,7 @@ impl Default for ParserOptions {
             codegen: false,
             disable_legacy_soft_typehints: true,
             disable_legacy_attribute_syntax: false,
-            disable_xhp_children_declarations: false, // true in ocaml
+            disable_xhp_children_declarations: false,
             const_default_lambda_args: false,
             interpret_soft_types_as_like_types: false,
             is_systemlib: false,

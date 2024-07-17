@@ -8,12 +8,26 @@
 
 open Hh_prelude
 
+let max_hierarchy_depth = 3
+
+let max_branching_factor = 2
+
 let name_ctr = ref 0
 
 let fresh prefix =
   let n = !name_ctr in
   name_ctr := !name_ctr + 1;
   prefix ^ "_" ^ string_of_int n
+
+(** Utility function for choosing numbers between `min` and `max` where
+    approaching `max` gets harder and harder. *)
+let rec geometric_between min max =
+  if min > max then
+    max
+  else if Random.bool () then
+    min
+  else
+    geometric_between (min + 1) max
 
 let select l = List.length l - 1 |> Random.int_incl 0 |> List.nth_exn l
 
@@ -38,7 +52,7 @@ module Kind = struct
     | Mixed
     | Primitive
     | Option
-    | Class
+    | Classish
     | Alias
     | Newtype
     | Case
@@ -46,6 +60,17 @@ module Kind = struct
   [@@deriving enum]
 
   let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
+
+  type classish =
+    | Class
+    | Interface
+    | AbstractClass
+  [@@deriving enum, eq, ord]
+
+  let pick_classish () =
+    Random.int_incl min_classish max_classish
+    |> classish_of_enum
+    |> Option.value_exn
 end
 
 module rec Definition : sig
@@ -55,7 +80,8 @@ module rec Definition : sig
 
   val function_ : name:string -> ret:Type.t -> ret_expr:string -> t
 
-  val class_ : name:string -> t
+  val classish :
+    name:string -> parent:(Kind.classish * string) option -> Kind.classish -> t
 
   val alias : name:string -> Type.t -> t
 
@@ -76,7 +102,19 @@ end = struct
       (Type.show ret)
       ret_expr
 
-  let class_ ~name = Format.sprintf "class %s {}" name
+  let classish ~name ~parent kind =
+    let parent =
+      match parent with
+      | None -> ""
+      | Some (Kind.Interface, name)
+        when not (Kind.equal_classish kind Kind.Interface) ->
+        Format.sprintf "implements %s " name
+      | Some (_, name) -> Format.sprintf "extends %s " name
+    in
+    match kind with
+    | Kind.Class -> Format.sprintf "class %s %s{}" name parent
+    | Kind.AbstractClass -> Format.sprintf "abstract class %s %s{}" name parent
+    | Kind.Interface -> Format.sprintf "interface %s %s{}" name parent
 
   let alias ~name aliased =
     Format.sprintf "type %s = %s;" name (Type.show aliased)
@@ -105,7 +143,11 @@ end = struct
     | Mixed
     | Primitive of Primitive.t
     | Option of t
-    | Class of { name: string }
+    | Classish of {
+        name: string;
+        kind: Kind.classish;
+        children: t list;
+      }
     | Alias of {
         name: string;
         aliased: t;
@@ -143,7 +185,7 @@ end = struct
       | Num -> [Primitive Int; Primitive Float]
     end
     | Option ty -> Primitive Primitive.Null :: subtypes_of ty
-    | Class _ as cls -> [cls]
+    | Classish info -> List.concat_map ~f:subtypes_of info.children
     | Alias info -> subtypes_of info.aliased
     | Newtype _ -> []
     | Case info -> List.concat_map ~f:subtypes_of info.disjuncts
@@ -163,7 +205,7 @@ end = struct
       | Num -> "num"
     end
     | Option ty -> "?" ^ show ty
-    | Class info -> info.name
+    | Classish info -> info.name
     | Alias info -> info.name
     | Newtype info -> info.name
     | Case info -> info.name
@@ -175,16 +217,20 @@ end = struct
        it can only make disjointness more conservative. *)
     let rec weaken_for_disjointness ty =
       match ty with
-      | Mixed
-      | Primitive _
-      | Class _ ->
-        ty
+      | Classish info when Kind.equal_classish info.kind Kind.Interface ->
+        (* This can be improved on if we introduce an internal Object type which
+           is still disjoint to non classish types. *)
+        Mixed
       | Option ty -> Option (weaken_for_disjointness ty)
       | Alias info -> weaken_for_disjointness info.aliased
       | Newtype _ -> Mixed
       | Case { name; disjuncts } ->
         Case { name; disjuncts = List.map ~f:weaken_for_disjointness disjuncts }
       | Enum _ -> Primitive Primitive.Arraykey
+      | Mixed
+      | Primitive _
+      | Classish _ ->
+        ty
     in
     let ordered_subtypes ty =
       weaken_for_disjointness ty |> subtypes_of |> List.sort ~compare
@@ -220,7 +266,13 @@ end = struct
       | Arraykey -> None
       | Num -> None
     end
-    | Class info -> Some ("new " ^ info.name ^ "()")
+    | Classish info -> begin
+      match info.kind with
+      | Kind.AbstractClass
+      | Kind.Interface ->
+        None
+      | Kind.Class -> Some ("new " ^ info.name ^ "()")
+    end
     | Newtype info -> Some (info.producer ^ "()")
     | Enum info -> Some (info.name ^ "::A")
     | Mixed
@@ -240,6 +292,53 @@ end = struct
            ^ show ty
            ^ " but it is uninhabitaed. This indicates bug in `milner`.")
 
+  let rec mk_classish ~parent ~depth =
+    let kind =
+      if depth > max_hierarchy_depth then
+        Kind.Class
+      else
+        match parent with
+        | Some (Kind.(Class | AbstractClass), _) ->
+          select [Kind.Class; Kind.AbstractClass]
+        | Some (Kind.Interface, _)
+        | None ->
+          Kind.pick_classish ()
+    in
+    let gen_children ~parent n =
+      List.init n ~f:(fun _ -> mk_classish ~parent ~depth:(depth + 1))
+      |> List.fold ~init:([], []) ~f:(fun (tys, defss) (ty, defs) ->
+             (ty :: tys, defs @ defss))
+    in
+    let (name, num_of_children) =
+      match kind with
+      | Kind.AbstractClass ->
+        let name = fresh "AC" in
+        (* Since abstract classes are not instantiable, we add at least one
+           child. This way we can always find an inhabitant for this type. *)
+        let num_of_children = geometric_between 1 max_branching_factor in
+        (name, num_of_children)
+      | Kind.Interface ->
+        let name = fresh "I" in
+        (* Since interfaces are not instantiable, we add at least one child.
+           This way we can always find an inhabitant for this type. *)
+        let num_of_children = geometric_between 1 max_branching_factor in
+        (name, num_of_children)
+      | Kind.Class ->
+        let name = fresh "C" in
+        let num_of_children =
+          if depth > max_hierarchy_depth then
+            0
+          else
+            geometric_between 0 max_branching_factor
+        in
+        (name, num_of_children)
+    in
+    let (children, defs) =
+      gen_children ~parent:(Some (kind, name)) num_of_children
+    in
+    let def = Definition.classish kind ~name ~parent in
+    (Classish { name; kind; children }, def :: defs)
+
   let rec mk () =
     match Kind.pick () with
     | Kind.Mixed -> (Mixed, [])
@@ -256,9 +355,7 @@ end = struct
       in
       let (ty, defs) = candidate () in
       (Option ty, defs)
-    | Kind.Class ->
-      let name = fresh "C" in
-      (Class { name }, [Definition.class_ ~name])
+    | Kind.Classish -> mk_classish ~parent:None ~depth:0
     | Kind.Alias ->
       let name = fresh "A" in
       let (aliased, defs) = mk () in

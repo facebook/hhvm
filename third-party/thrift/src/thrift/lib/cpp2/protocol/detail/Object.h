@@ -22,7 +22,6 @@
 #include <type_traits>
 #include <unordered_set>
 
-#include <fatal/type/same_reference_as.h>
 #include <folly/CPortability.h>
 #include <folly/Conv.h>
 #include <folly/Utility.h>
@@ -56,7 +55,11 @@ namespace detail {
 
 template <typename C, typename T>
 decltype(auto) forward_elem(T& elem) {
-  return std::forward<typename fatal::same_reference_as<T, C>::type>(elem);
+  if constexpr (std::is_rvalue_reference_v<C>) {
+    return static_cast<T&&>(elem);
+  } else {
+    return elem;
+  }
 }
 
 template <typename TT, typename = void>
@@ -109,7 +112,7 @@ struct ValueHelper<type::list<V>> {
   static void set(Value& result, C&& value) {
     auto& result_list = result.ensure_list();
     for (auto& elem : value) {
-      ValueHelper<V>::set(result_list.emplace_back(), forward_elem<C>(elem));
+      ValueHelper<V>::set(result_list.emplace_back(), forward_elem<C&&>(elem));
     }
   }
 };
@@ -121,7 +124,7 @@ struct ValueHelper<type::set<V>> {
     auto& result_set = result.ensure_set();
     for (auto& elem : value) {
       Value elem_val;
-      ValueHelper<V>::set(elem_val, forward_elem<C>(elem));
+      ValueHelper<V>::set(elem_val, forward_elem<C&&>(elem));
       result_set.emplace(std::move(elem_val));
     }
   }
@@ -135,7 +138,7 @@ struct ValueHelper<type::map<K, V>> {
     for (auto& entry : value) {
       Value key;
       ValueHelper<K>::set(key, entry.first);
-      ValueHelper<V>::set(result_map[key], forward_elem<C>(entry.second));
+      ValueHelper<V>::set(result_map[key], forward_elem<C&&>(entry.second));
     }
   }
 };

@@ -129,8 +129,6 @@ let enable_global_access_check t =
 let global_access_check_enabled t =
   t.GlobalOptions.tco_global_access_check_enabled
 
-let like_type_hints t = t.GlobalOptions.tco_like_type_hints
-
 let like_casts t = t.GlobalOptions.tco_like_casts
 
 let check_xhp_attribute t = t.GlobalOptions.tco_check_xhp_attribute

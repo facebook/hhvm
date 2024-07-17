@@ -371,10 +371,6 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
         // typechecker option
         Box::<passes::elab_everything_sdt::ElabEverythingSdtPass>::default(),
 
-        // Validate use of `Hlike` hints - depends on `enable-like-type-hints`
-        // and `everything_sdt` typechecker options
-        Box::<passes::validate_like_hint::ValidateLikeHintPass>::default(),
-
         // Validate constructors under
         // `consistent-explicit_consistent_constructors` typechecker option
         Box::<passes::validate_class_consistent_construct::ValidateClassConsistentConstructPass>::default(),
@@ -459,8 +455,6 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
         Box::<passes::validate_expr_array_get::ValidateExprArrayGetPass>::default(),
 
         Box::<passes::validate_expr_list::ValidateExprListPass>::default(),
-
-        Box::<passes::validate_like_hint::ValidateLikeHintPass>::default(),
 
         Box::<passes::validate_clone_return_type::ValidateCloneReturnType>::default(),
     ]};

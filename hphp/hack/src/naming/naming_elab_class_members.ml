@@ -15,11 +15,6 @@
 open Hh_prelude
 module SN = Naming_special_names
 
-module Env = struct
-  let like_type_hints_enabled Naming_phase_env.{ like_type_hints_enabled; _ } =
-    like_type_hints_enabled
-end
-
 let exists_both p1 p2 xs =
   let rec aux (b1, b2) = function
     | _ when b1 && b2 -> (b1, b2)
@@ -73,8 +68,7 @@ let elab_non_static_class_prop
   in
   Aast.{ cv with cv_user_attributes }
 
-let elab_xhp_attr
-    like_type_hints_enabled (type_hint, cv, xhp_attr_tag_opt, enum_opt) =
+let elab_xhp_attr (type_hint, cv, xhp_attr_tag_opt, enum_opt) =
   let is_required = Option.is_some xhp_attr_tag_opt
   and has_default =
     Option.value_map
@@ -117,20 +111,16 @@ let elab_xhp_attr
         | _ -> (Some (pos, Aast.Hoption hint), None))
   in
 
-  let (hint_opt, like_err) =
-    Option.value ~default:(hint_opt, None)
+  let hint_opt =
+    Option.value ~default:hint_opt
     @@ Option.map2 hint_opt xai_like ~f:(fun hint pos ->
-           ( Some (pos, Aast.Hlike hint),
-             if like_type_hints_enabled then
-               None
-             else
-               Some (Naming_phase_error.like_type pos) ))
+           Some (pos, Aast.Hlike hint))
   in
   let cv_type = (fst type_hint, hint_opt)
   and cv_xhp_attr =
     Some Aast.{ xai_like; xai_tag = xhp_attr_tag_opt; xai_enum_values }
   in
-  let errs = List.filter_map ~f:Fn.id [req_attr_err; like_err] in
+  let errs = List.filter_map ~f:Fn.id [req_attr_err] in
   (Aast.{ cv with cv_xhp_attr; cv_type; cv_user_attributes = [] }, errs)
 
 let on_class_
@@ -146,10 +136,7 @@ let on_class_
       let static_props = List.map ~f:elab_class_prop static_props
       and props = List.map ~f:(elab_non_static_class_prop const_attr_opt) props
       and (xhp_attrs, xhp_attrs_err) =
-        List.unzip
-        @@ List.map
-             ~f:(elab_xhp_attr (Env.like_type_hints_enabled ctx))
-             c_xhp_attrs
+        List.unzip @@ List.map ~f:elab_xhp_attr c_xhp_attrs
       in
       (static_props @ props @ xhp_attrs, List.concat xhp_attrs_err)
     in

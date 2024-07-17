@@ -153,7 +153,6 @@ type t = {
   soft_as_like: bool;
   consistent_ctor_level: int;
   hkt_enabled: bool;
-  like_type_hints_enabled: bool;
   supportdynamic_type_hint_enabled: bool;
   is_systemlib: bool;
   is_hhi: bool;
@@ -179,7 +178,6 @@ let empty =
     soft_as_like = false;
     consistent_ctor_level = 0;
     hkt_enabled = false;
-    like_type_hints_enabled = false;
     supportdynamic_type_hint_enabled = false;
     is_systemlib = false;
     is_hhi = false;

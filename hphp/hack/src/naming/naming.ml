@@ -63,7 +63,6 @@ let mk_env filename tcopt =
       tcopt
       TypecheckerOptions.experimental_supportdynamic_type_hint
   and hkt_enabled = TypecheckerOptions.higher_kinded_types tcopt
-  and like_type_hints_enabled = TypecheckerOptions.like_type_hints tcopt
   and soft_as_like = TypecheckerOptions.interpret_soft_types_as_like_types tcopt
   and consistent_ctor_level =
     TypecheckerOptions.explicit_consistent_constructors tcopt
@@ -78,7 +77,6 @@ let mk_env filename tcopt =
       everything_sdt;
       supportdynamic_type_hint_enabled;
       hkt_enabled;
-      like_type_hints_enabled;
       soft_as_like;
       allow_ignore_readonly;
     }
@@ -155,8 +153,6 @@ let passes =
        typechecker option *)
     Naming_elab_everything_sdt.top_down_pass;
     Naming_elab_everything_sdt.bottom_up_pass;
-    (* Validate use of `Hlike` hints - depends on `enable-like-type-hints` typechecker option *)
-    Naming_validate_like_hint.pass on_error;
     (* Validate constructors under
        `consistent-explicit_consistent_constructors` typechecker option *)
     Naming_validate_consistent_construct.pass on_error;

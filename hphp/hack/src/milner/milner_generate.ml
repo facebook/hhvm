@@ -51,6 +51,7 @@ module Kind = struct
     | Alias
     | Newtype
     | Case
+    | Enum
   [@@deriving enum]
 
   let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
@@ -70,6 +71,8 @@ module rec Definition : sig
   val newtype : name:string -> Type.t -> t
 
   val case_type : name:string -> Type.t list -> t
+
+  val enum : name:string -> Type.t -> value:string -> t
 end = struct
   type t = string
 
@@ -93,6 +96,9 @@ end = struct
   let case_type ~name disjuncts =
     let rhs = String.concat ~sep:" | " (List.map ~f:Type.show disjuncts) in
     Format.sprintf "case type %s = %s;" name rhs
+
+  let enum ~name ty ~value =
+    Format.sprintf "enum %s: %s { A = %s; }" name (Type.show ty) value
 end
 
 and Type : sig
@@ -121,6 +127,7 @@ end = struct
         name: string;
         disjuncts: t list;
       }
+    | Enum of { name: string }
 
   let rec show ty =
     match ty with
@@ -141,6 +148,7 @@ end = struct
     | Alias info -> info.name
     | Newtype info -> info.name
     | Case info -> info.name
+    | Enum info -> info.name
 
   let rec are_disjoint ty ty' =
     match (ty, ty') with
@@ -153,6 +161,10 @@ end = struct
          statically checked to be disjoint since the typechecker cannot see the
          underlying type *)
       false
+    | (Enum _, Enum _)
+    | (Enum _, Primitive Primitive.(Arraykey | Num | String | Int))
+    | (Primitive Primitive.(Arraykey | Num | String | Int), Enum _) ->
+      false
     | (Alias info, ty') -> are_disjoint info.aliased ty'
     | (ty, Alias info) -> are_disjoint ty info.aliased
     | (Case info, ty)
@@ -162,6 +174,11 @@ end = struct
     | (Option ty, ty')
     | (ty', Option ty) ->
       are_disjoint (Primitive Primitive.Null) ty' && are_disjoint ty ty'
+    | (Enum _, _)
+    | (_, Enum _) ->
+      (* Each enum is distinct from primitives except those covered above. They
+         are also distinct from classes. *)
+      true
     | (Class _, _)
     | (_, Class _) ->
       (* Each class is distinct from any other type because we generate a fresh
@@ -193,6 +210,7 @@ end = struct
     | Alias info -> expr_of info.aliased
     | Newtype info -> (info.producer ^ "()", [])
     | Case info -> expr_of (select info.disjuncts)
+    | Enum info -> (info.name ^ "::A", [])
 
   and mk () =
     match Kind.pick () with
@@ -244,4 +262,12 @@ end = struct
       let (disjuncts, defs) = add_disjuncts ([ty], defs) in
       let case_type_def = Definition.case_type ~name disjuncts in
       (Case { name; disjuncts }, case_type_def :: defs)
+    | Kind.Enum ->
+      let name = fresh "E" in
+      let underlying_ty =
+        select Primitive.[Primitive Arraykey; Primitive String; Primitive Int]
+      in
+      let (value, defs) = expr_of underlying_ty in
+      let enum_def = Definition.enum ~name underlying_ty ~value in
+      (Enum { name }, enum_def :: defs)
 end

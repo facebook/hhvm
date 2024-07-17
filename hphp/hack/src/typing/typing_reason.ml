@@ -2083,9 +2083,19 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     ]
   | Rpattern p ->
     [(Pos_or_decl.of_raw_pos p, prefix ^ " because of this pattern")]
-  | Rflow (from, _kind, _into) -> to_string prefix from
-  | Rrev r -> to_string prefix @@ reverse r
-  | Rprj (_prj, r) -> to_string prefix r
+  | Rflow (r, _, _)
+  | Rprj (_, r) ->
+    to_string prefix r
+  | Rrev r -> to_rev_string prefix r
+
+and to_rev_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
+ fun prefix r ->
+  match r with
+  | Rflow (_, _, r)
+  | Rprj (_, r) ->
+    to_rev_string prefix r
+  | Rrev r -> to_string prefix r
+  | r -> to_string prefix r
 
 (* -- Constructors ---------------------------------------------------------- *)
 

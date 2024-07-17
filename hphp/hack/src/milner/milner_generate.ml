@@ -23,6 +23,7 @@ type primitive =
 type kind =
   | KMixed
   | KPrimitive
+  | KOption
   | KClass
   | KAlias
   | KNewtype
@@ -32,6 +33,7 @@ type kind =
 type ty =
   | TMixed
   | TPrimitive of primitive
+  | TOption of ty
   | TClass of { name: string }
   | TAlias of {
       name: string;
@@ -55,7 +57,7 @@ let fresh prefix =
 
 let pick l = List.length l - 1 |> Random.int_incl 0 |> List.nth_exn l
 
-let show_ty ty =
+let rec show_ty ty =
   match ty with
   | TMixed -> "mixed"
   | TPrimitive prim -> begin
@@ -68,6 +70,7 @@ let show_ty ty =
     | PArraykey -> "arraykey"
     | PNum -> "num"
   end
+  | TOption ty -> "?" ^ show_ty ty
   | TClass info -> info.name
   | TAlias info -> info.name
   | TNewtype info -> info.name
@@ -103,6 +106,9 @@ let rec are_disjoint_tys ty ty' =
   | (ty, TCase info) ->
     List.for_all info.disjuncts ~f:(are_disjoint_tys ty)
   | (TPrimitive prim, TPrimitive prim') -> are_disjoint_prims prim prim'
+  | (TOption ty, ty')
+  | (ty', TOption ty) ->
+    are_disjoint_tys (TPrimitive PNull) ty' && are_disjoint_tys ty ty'
   | (TClass _, _)
   | (_, TClass _) ->
     (* Each class is distinct from any other type because we generate a fresh
@@ -125,6 +131,7 @@ let rec expr_for = function
       let prim = pick [PInt; PFloat] in
       expr_for (TPrimitive prim)
   end
+  | TOption ty -> expr_for @@ pick [TPrimitive PNull; ty]
   | TClass info -> "new " ^ info.name ^ "()"
   | TAlias info -> expr_for info.aliased
   | TNewtype info -> info.producer ^ "()"
@@ -143,6 +150,17 @@ and ty () =
       |> Option.value_exn
     in
     TPrimitive prim
+  | KOption ->
+    let rec candidate () =
+      match ty () with
+      | TMixed
+      | TOption _ ->
+        (* Due to some misguided checks the parser and the typechecker has. We
+           need to eliminate these cases. *)
+        candidate ()
+      | ty -> ty
+    in
+    TOption (candidate ())
   | KClass ->
     let name = fresh "C" in
     let def = "class " ^ name ^ " {}" in

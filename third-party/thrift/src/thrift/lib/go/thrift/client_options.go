@@ -107,7 +107,22 @@ func WithConn(conn net.Conn) ClientOption {
 	}
 }
 
-// DialTLS dials and returns a TLS connection to the given address, including APLN for
+// NoTimeout is a special value for WithTimeout that disables timeouts.
+const NoTimeout = time.Duration(0)
+
+// WithTLS is a creates a TLS connection to the given address, including ALPN for thrift.
+func WithTLS(addr string, timeout time.Duration, tlsConfig *tls.Config) ClientOption {
+	return func(opts *clientOptions) error {
+		conn, err := DialTLS(addr, timeout, tlsConfig)
+		if err != nil {
+			return err
+		}
+		opts.conn = conn
+		return nil
+	}
+}
+
+// DialTLS dials and returns a TLS connection to the given address, including ALPN for thrift.
 func DialTLS(addr string, timeout time.Duration, tlsConfig *tls.Config) (net.Conn, error) {
 	dialer := net.Dialer{Timeout: timeout}
 	conn, err := dialer.Dial("tcp", addr)

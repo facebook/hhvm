@@ -26,20 +26,9 @@ module Primitive = struct
     | Bool
     | Arraykey
     | Num
-  [@@deriving enum, ord]
+  [@@deriving enum, eq, ord]
 
   let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
-
-  let are_disjoint prim prim' =
-    let expand_prim = function
-      | Arraykey -> [Int; String]
-      | Num -> [Int; Float]
-      | prim -> [prim]
-    in
-    let prims = expand_prim prim @ expand_prim prim' in
-    let raw_length = List.length prims in
-    let dedup_length = List.dedup_and_sort ~compare prims |> List.length in
-    raw_length = dedup_length
 end
 
 module Kind = struct
@@ -128,9 +117,37 @@ end = struct
         disjuncts: t list;
       }
     | Enum of { name: string }
+  [@@deriving eq, ord]
 
-  let rec show ty =
-    match ty with
+  (** Reflexive transitive subtypes of the given type. It is based only on the
+      knowledge about the structure of type and generalities in the system. For
+      example, for mixed, we give int as a subtype but no classes because the
+      function does not know which classes exist in the program. *)
+  let rec subtypes_of ty =
+    ty
+    ::
+    (match ty with
+    | Mixed -> []
+    | Primitive prim -> begin
+      let open Primitive in
+      match prim with
+      | Null
+      | Int
+      | String
+      | Float
+      | Bool ->
+        []
+      | Arraykey -> [Primitive Int; Primitive String]
+      | Num -> [Primitive Int; Primitive Float]
+    end
+    | Option ty -> Primitive Primitive.Null :: subtypes_of ty
+    | Class _ as cls -> [cls]
+    | Alias info -> subtypes_of info.aliased
+    | Newtype _ -> []
+    | Case info -> List.concat_map ~f:subtypes_of info.disjuncts
+    | Enum _ -> [])
+
+  let rec show = function
     | Mixed -> "mixed"
     | Primitive prim -> begin
       let open Primitive in
@@ -150,40 +167,44 @@ end = struct
     | Case info -> info.name
     | Enum info -> info.name
 
-  let rec are_disjoint ty ty' =
-    match (ty, ty') with
-    | (Mixed, _)
-    | (_, Mixed) ->
-      false
-    | (Newtype _, _)
-    | (_, Newtype _) ->
-      (* Opaque newtypes (which is all we represent at the moment) cannot be
-         statically checked to be disjoint since the typechecker cannot see the
-         underlying type *)
-      false
-    | (Enum _, Enum _)
-    | (Enum _, Primitive Primitive.(Arraykey | Num | String | Int))
-    | (Primitive Primitive.(Arraykey | Num | String | Int), Enum _) ->
-      false
-    | (Alias info, ty') -> are_disjoint info.aliased ty'
-    | (ty, Alias info) -> are_disjoint ty info.aliased
-    | (Case info, ty)
-    | (ty, Case info) ->
-      List.for_all info.disjuncts ~f:(are_disjoint ty)
-    | (Primitive prim, Primitive prim') -> Primitive.are_disjoint prim prim'
-    | (Option ty, ty')
-    | (ty', Option ty) ->
-      are_disjoint (Primitive Primitive.Null) ty' && are_disjoint ty ty'
-    | (Enum _, _)
-    | (_, Enum _) ->
-      (* Each enum is distinct from primitives except those covered above. They
-         are also distinct from classes. *)
-      true
-    | (Class _, _)
-    | (_, Class _) ->
-      (* Each class is distinct from any other type because we generate a fresh
-         class definition each time we generate a new type. *)
-      true
+  let are_disjoint ty ty' =
+    (* For the purposes of disjointness we can go higher up in the typing
+       hierarchy so that it is easy to enumerate subtypes. This is fine because
+       it can only make disjointness more conservative. *)
+    let rec weaken_for_disjointness ty =
+      match ty with
+      | Mixed
+      | Primitive _
+      | Class _ ->
+        ty
+      | Option ty -> Option (weaken_for_disjointness ty)
+      | Alias info -> weaken_for_disjointness info.aliased
+      | Newtype _ -> Mixed
+      | Case { name; disjuncts } ->
+        Case { name; disjuncts = List.map ~f:weaken_for_disjointness disjuncts }
+      | Enum _ -> Primitive Primitive.Arraykey
+    in
+    let ordered_subtypes ty =
+      weaken_for_disjointness ty |> subtypes_of |> List.sort ~compare
+    in
+    let subtypes = ordered_subtypes ty in
+    let subtypes' = ordered_subtypes ty' in
+    let rec have_overlapping_types = function
+      | (_, []) -> false
+      | ([], _) -> false
+      | (x :: xs, y :: ys) ->
+        let result = compare x y in
+        result = 0
+        ||
+        if result > 0 then
+          have_overlapping_types (x :: xs, ys)
+        else
+          have_overlapping_types (xs, y :: ys)
+    in
+    not
+    @@ (List.mem subtypes Mixed ~equal
+       || List.mem subtypes' Mixed ~equal
+       || have_overlapping_types (subtypes, subtypes'))
 
   let rec expr_of = function
     | Mixed ->

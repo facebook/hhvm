@@ -6,14 +6,18 @@
  *
  *)
 
-type ty
+module Definition : sig
+  type t
 
-type def
+  val show : t -> string
+end
 
-val show_def : def -> string
+module Type : sig
+  type t
 
-val expr_for : ty -> string * def list
+  val expr_of : t -> string * Definition.t list
 
-val show_ty : ty -> string
+  val show : t -> string
 
-val ty : unit -> ty * def list
+  val mk : unit -> t * Definition.t list
+end

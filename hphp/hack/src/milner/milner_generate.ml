@@ -8,48 +8,6 @@
 
 open Hh_prelude
 
-type def = string
-
-let show_def def = def
-
-type primitive =
-  | PNull
-  | PInt
-  | PString
-  | PFloat
-  | PBool
-  | PArraykey
-  | PNum
-[@@deriving enum, ord]
-
-type kind =
-  | KMixed
-  | KPrimitive
-  | KOption
-  | KClass
-  | KAlias
-  | KNewtype
-  | KCase
-[@@deriving enum]
-
-type ty =
-  | TMixed
-  | TPrimitive of primitive
-  | TOption of ty
-  | TClass of { name: string }
-  | TAlias of {
-      name: string;
-      aliased: ty;
-    }
-  | TNewtype of {
-      name: string;
-      producer: string;
-    }
-  | TCase of {
-      name: string;
-      disjuncts: ty list;
-    }
-
 let name_ctr = ref 0
 
 let fresh prefix =
@@ -57,160 +15,206 @@ let fresh prefix =
   name_ctr := !name_ctr + 1;
   prefix ^ string_of_int n
 
-let pick l = List.length l - 1 |> Random.int_incl 0 |> List.nth_exn l
+let select l = List.length l - 1 |> Random.int_incl 0 |> List.nth_exn l
 
-let rec show_ty ty =
-  match ty with
-  | TMixed -> "mixed"
-  | TPrimitive prim -> begin
-    match prim with
-    | PNull -> "null"
-    | PInt -> "int"
-    | PString -> "string"
-    | PFloat -> "float"
-    | PBool -> "bool"
-    | PArraykey -> "arraykey"
-    | PNum -> "num"
-  end
-  | TOption ty -> "?" ^ show_ty ty
-  | TClass info -> info.name
-  | TAlias info -> info.name
-  | TNewtype info -> info.name
-  | TCase info -> info.name
+module Definition = struct
+  type t = string
 
-let are_disjoint_prims prim prim' =
-  let expand_prim = function
-    | PArraykey -> [PInt; PString]
-    | PNum -> [PInt; PFloat]
-    | prim -> [prim]
-  in
-  let prims = expand_prim prim @ expand_prim prim' in
-  let raw_length = List.length prims in
-  let dedup_length =
-    List.dedup_and_sort ~compare:compare_primitive prims |> List.length
-  in
-  raw_length = dedup_length
+  let show def = def
+end
 
-let rec are_disjoint_tys ty ty' =
-  match (ty, ty') with
-  | (TMixed, _)
-  | (_, TMixed) ->
-    false
-  | (TNewtype _, _)
-  | (_, TNewtype _) ->
-    (* Opaque newtypes (which is all we represent at the moment) cannot be
-       statically checked to be disjoint since the typechecker cannot see the
-       underlying type *)
-    false
-  | (TAlias info, ty') -> are_disjoint_tys info.aliased ty'
-  | (ty, TAlias info) -> are_disjoint_tys ty info.aliased
-  | (TCase info, ty)
-  | (ty, TCase info) ->
-    List.for_all info.disjuncts ~f:(are_disjoint_tys ty)
-  | (TPrimitive prim, TPrimitive prim') -> are_disjoint_prims prim prim'
-  | (TOption ty, ty')
-  | (ty', TOption ty) ->
-    are_disjoint_tys (TPrimitive PNull) ty' && are_disjoint_tys ty ty'
-  | (TClass _, _)
-  | (_, TClass _) ->
-    (* Each class is distinct from any other type because we generate a fresh
-       class definition each time we generate a new type. *)
-    true
+module Primitive = struct
+  type t =
+    | Null
+    | Int
+    | String
+    | Float
+    | Bool
+    | Arraykey
+    | Num
+  [@@deriving enum, ord]
 
-let rec expr_for = function
-  | TMixed ->
-    let (ty, defs) = ty () in
-    let (str, defs') = expr_for ty in
-    (str, defs @ defs')
-  | TPrimitive prim -> begin
-    match prim with
-    | PNull -> ("null", [])
-    | PInt -> ("42", [])
-    | PString -> ("'apple'", [])
-    | PFloat -> ("42.0", [])
-    | PBool -> ("true", [])
-    | PArraykey ->
-      let prim = pick [PInt; PString] in
-      expr_for (TPrimitive prim)
-    | PNum ->
-      let prim = pick [PInt; PFloat] in
-      expr_for (TPrimitive prim)
-  end
-  | TOption ty -> expr_for @@ pick [TPrimitive PNull; ty]
-  | TClass info -> ("new " ^ info.name ^ "()", [])
-  | TAlias info -> expr_for info.aliased
-  | TNewtype info -> (info.producer ^ "()", [])
-  | TCase info -> expr_for (pick info.disjuncts)
+  let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
 
-and ty () =
-  let kind =
-    Random.int_incl min_kind max_kind |> kind_of_enum |> Option.value_exn
-  in
-  match kind with
-  | KMixed -> (TMixed, [])
-  | KPrimitive ->
-    let prim =
-      Random.int_incl min_primitive max_primitive
-      |> primitive_of_enum
-      |> Option.value_exn
+  let are_disjoint prim prim' =
+    let expand_prim = function
+      | Arraykey -> [Int; String]
+      | Num -> [Int; Float]
+      | prim -> [prim]
     in
-    (TPrimitive prim, [])
-  | KOption ->
-    let rec candidate () =
-      match ty () with
-      | (TMixed, _)
-      | (TOption _, _) ->
-        (* Due to some misguided checks the parser and the typechecker has. We
-           need to eliminate these cases. *)
-        candidate ()
-      | res -> res
-    in
-    let (ty, defs) = candidate () in
-    (TOption ty, defs)
-  | KClass ->
-    let name = fresh "C" in
-    let def_class = "class " ^ name ^ " {}" in
-    (TClass { name }, [def_class])
-  | KAlias ->
-    let name = fresh "A" in
-    let (aliased, defs) = ty () in
-    let def_alias = "type " ^ name ^ " = " ^ show_ty aliased ^ ";" in
-    (TAlias { name; aliased }, def_alias :: defs)
-  | KNewtype ->
-    let name = fresh "N" in
-    let (aliased, defs) = ty () in
-    let def_newtype = "newtype " ^ name ^ " = " ^ show_ty aliased ^ ";" in
-    let producer = fresh "mkNewtype" in
-    let (aliased_expr, expr_defs) = expr_for aliased in
-    let def_maker =
-      "function "
-      ^ producer
-      ^ "(): "
-      ^ name
-      ^ " { return "
-      ^ aliased_expr
-      ^ "; }"
-    in
-    (TNewtype { name; producer }, def_newtype :: def_maker :: (expr_defs @ defs))
-  | KCase ->
-    let name = fresh "CT" in
-    let rec add_disjuncts (disjuncts, defs) =
-      if Random.bool () then
-        let (disjunct, defs') = ty () in
-        if List.for_all disjuncts ~f:(are_disjoint_tys disjunct) then
-          add_disjuncts @@ (disjunct :: disjuncts, defs' @ defs)
+    let prims = expand_prim prim @ expand_prim prim' in
+    let raw_length = List.length prims in
+    let dedup_length = List.dedup_and_sort ~compare prims |> List.length in
+    raw_length = dedup_length
+end
+
+module Kind = struct
+  type t =
+    | Mixed
+    | Primitive
+    | Option
+    | Class
+    | Alias
+    | Newtype
+    | Case
+  [@@deriving enum]
+
+  let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
+end
+
+module Type = struct
+  type t =
+    | Mixed
+    | Primitive of Primitive.t
+    | Option of t
+    | Class of { name: string }
+    | Alias of {
+        name: string;
+        aliased: t;
+      }
+    | Newtype of {
+        name: string;
+        producer: string;
+      }
+    | Case of {
+        name: string;
+        disjuncts: t list;
+      }
+
+  let rec show ty =
+    match ty with
+    | Mixed -> "mixed"
+    | Primitive prim -> begin
+      let open Primitive in
+      match prim with
+      | Null -> "null"
+      | Int -> "int"
+      | String -> "string"
+      | Float -> "float"
+      | Bool -> "bool"
+      | Arraykey -> "arraykey"
+      | Num -> "num"
+    end
+    | Option ty -> "?" ^ show ty
+    | Class info -> info.name
+    | Alias info -> info.name
+    | Newtype info -> info.name
+    | Case info -> info.name
+
+  let rec are_disjoint ty ty' =
+    match (ty, ty') with
+    | (Mixed, _)
+    | (_, Mixed) ->
+      false
+    | (Newtype _, _)
+    | (_, Newtype _) ->
+      (* Opaque newtypes (which is all we represent at the moment) cannot be
+         statically checked to be disjoint since the typechecker cannot see the
+         underlying type *)
+      false
+    | (Alias info, ty') -> are_disjoint info.aliased ty'
+    | (ty, Alias info) -> are_disjoint ty info.aliased
+    | (Case info, ty)
+    | (ty, Case info) ->
+      List.for_all info.disjuncts ~f:(are_disjoint ty)
+    | (Primitive prim, Primitive prim') -> Primitive.are_disjoint prim prim'
+    | (Option ty, ty')
+    | (ty', Option ty) ->
+      are_disjoint (Primitive Primitive.Null) ty' && are_disjoint ty ty'
+    | (Class _, _)
+    | (_, Class _) ->
+      (* Each class is distinct from any other type because we generate a fresh
+         class definition each time we generate a new type. *)
+      true
+
+  let rec expr_of = function
+    | Mixed ->
+      let (ty, defs) = mk () in
+      let (str, defs') = expr_of ty in
+      (str, defs @ defs')
+    | Primitive prim -> begin
+      let open Primitive in
+      match prim with
+      | Null -> ("null", [])
+      | Int -> ("42", [])
+      | String -> ("'apple'", [])
+      | Float -> ("42.0", [])
+      | Bool -> ("true", [])
+      | Arraykey ->
+        let prim = select [Int; String] in
+        expr_of (Primitive prim)
+      | Num ->
+        let prim = select [Int; Float] in
+        expr_of (Primitive prim)
+    end
+    | Option ty -> expr_of @@ select [Primitive Primitive.Null; ty]
+    | Class info -> ("new " ^ info.name ^ "()", [])
+    | Alias info -> expr_of info.aliased
+    | Newtype info -> (info.producer ^ "()", [])
+    | Case info -> expr_of (select info.disjuncts)
+
+  and mk () =
+    match Kind.pick () with
+    | Kind.Mixed -> (Mixed, [])
+    | Kind.Primitive -> (Primitive (Primitive.pick ()), [])
+    | Kind.Option ->
+      let rec candidate () =
+        match mk () with
+        | (Mixed, _)
+        | (Option _, _) ->
+          (* Due to some misguided checks the parser and the typechecker has. We
+             need to eliminate these cases. *)
+          candidate ()
+        | res -> res
+      in
+      let (ty, defs) = candidate () in
+      (Option ty, defs)
+    | Kind.Class ->
+      let name = fresh "C" in
+      let def_class = "class " ^ name ^ " {}" in
+      (Class { name }, [def_class])
+    | Kind.Alias ->
+      let name = fresh "A" in
+      let (aliased, defs) = mk () in
+      let def_alias = "type " ^ name ^ " = " ^ show aliased ^ ";" in
+      (Alias { name; aliased }, def_alias :: defs)
+    | Kind.Newtype ->
+      let name = fresh "N" in
+      let (aliased, defs) = mk () in
+      let def_newtype = "newtype " ^ name ^ " = " ^ show aliased ^ ";" in
+      let producer = fresh "mkNewtype" in
+      let (aliased_expr, expr_defs) = expr_of aliased in
+      let def_maker =
+        "function "
+        ^ producer
+        ^ "(): "
+        ^ name
+        ^ " { return "
+        ^ aliased_expr
+        ^ "; }"
+      in
+      ( Newtype { name; producer },
+        def_newtype :: def_maker :: (expr_defs @ defs) )
+    | Kind.Case ->
+      let name = fresh "CT" in
+      let rec add_disjuncts (disjuncts, defs) =
+        if Random.bool () then
+          let (disjunct, defs') = mk () in
+          if List.for_all disjuncts ~f:(are_disjoint disjunct) then
+            add_disjuncts @@ (disjunct :: disjuncts, defs' @ defs)
+          else
+            add_disjuncts (disjuncts, defs)
         else
-          add_disjuncts (disjuncts, defs)
-      else
-        (disjuncts, defs)
-    in
-    let (ty, defs) = ty () in
-    let (disjuncts, defs) = add_disjuncts ([ty], defs) in
-    let def_case_type =
-      "case type "
-      ^ name
-      ^ " = "
-      ^ String.concat ~sep:" | " (List.map ~f:show_ty disjuncts)
-      ^ ";"
-    in
-    (TCase { name; disjuncts }, def_case_type :: defs)
+          (disjuncts, defs)
+      in
+      let (ty, defs) = mk () in
+      let (disjuncts, defs) = add_disjuncts ([ty], defs) in
+      let def_case_type =
+        "case type "
+        ^ name
+        ^ " = "
+        ^ String.concat ~sep:" | " (List.map ~f:show disjuncts)
+        ^ ";"
+      in
+      (Case { name; disjuncts }, def_case_type :: defs)
+end

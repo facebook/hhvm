@@ -82,6 +82,148 @@ which itself flows into this hint because they are required to be subtypes
 
 File "newtype1.php--file2.php", line 3, character 22 - line 3, character 25:
 
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":24,"char_end":26}]
+                        },
+                        "Flow_type_def",
+                        {
+                          "Rhint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
+                        }
+                      ]
+                    },
+                    "Flow_param_hint",
+                    {
+                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
+                    }
+                  ]
+                },
+                "Flow_local",
+                {
+                  "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
+                }
+              ]
+            },
+            "Flow_prj",
+            {
+              "Rprj":[
+                {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":10,"char_end":24}]
+                    },
+                    "Flow_subtype",
+                    {
+                      "Rrev":[
+                        {
+                          "Rsupport_dynamic_type":[{"filename":"newtype1.php--file2.php","line":3,"char_start":10,"char_end":20}]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "Flow_upper_bound",
+        {
+          "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":18,"char_end":20}]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"newtype1.php--file2.php","line":3,"char_start":22,"char_end":25}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":24,"char_end":26}]
+                        },
+                        "Flow_type_def",
+                        {
+                          "Rhint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
+                        }
+                      ]
+                    },
+                    "Flow_param_hint",
+                    {
+                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
+                    }
+                  ]
+                },
+                "Flow_local",
+                {
+                  "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
+                }
+              ]
+            },
+            "Flow_prj",
+            {
+              "Rprj":[
+                {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":10,"char_end":24}]
+                    },
+                    "Flow_subtype",
+                    {
+                      "Rsupport_dynamic_type":[{"filename":"newtype1.php--file2.php","line":3,"char_start":10,"char_end":20}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "Flow_upper_bound",
+        {
+          "Rhint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":18,"char_end":20}]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"newtype1.php--file2.php","line":3,"char_start":22,"char_end":25}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Path:
 {
   "stats":{"max_depth":1,"length":7,"reversals":1},

@@ -90,6 +90,116 @@ which itself flows down into this variadic parameter declaration as the 1st func
 
 File "fn_call_variadic.php", line 3, character 26 - line 3, character 27:
 
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"fn_call_variadic.php","line":5,"char_start":33,"char_end":36}]
+                },
+                "Flow_param_hint",
+                {
+                  "Rwitness":[{"filename":"fn_call_variadic.php","line":5,"char_start":38,"char_end":39}]
+                }
+              ]
+            },
+            "Flow_local",
+            {
+              "Rwitness":[{"filename":"fn_call_variadic.php","line":6,"char_start":15,"char_end":16}]
+            }
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{"Prj_symm_fn_param":[2,0]}]},
+            {
+              "Rflow":[
+                {
+                  "Rwitness":[{"filename":"fn_call_variadic.php","line":6,"char_start":3,"char_end":17}]
+                },
+                "Flow_subtype",
+                {
+                  "Rrev":[
+                    {
+                      "Rsupport_dynamic_type":[{"filename":"fn_call_variadic.php","line":3,"char_start":10,"char_end":12}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rvar_param_from_decl":[{"filename":"fn_call_variadic.php","line":3,"char_start":26,"char_end":27}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"fn_call_variadic.php","line":5,"char_start":33,"char_end":36}]
+                },
+                "Flow_param_hint",
+                {
+                  "Rwitness":[{"filename":"fn_call_variadic.php","line":5,"char_start":38,"char_end":39}]
+                }
+              ]
+            },
+            "Flow_local",
+            {
+              "Rwitness":[{"filename":"fn_call_variadic.php","line":6,"char_start":15,"char_end":16}]
+            }
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{"Prj_symm_fn_param":[2,0]}]},
+            {
+              "Rflow":[
+                {
+                  "Rwitness":[{"filename":"fn_call_variadic.php","line":6,"char_start":3,"char_end":17}]
+                },
+                "Flow_subtype",
+                {
+                  "Rsupport_dynamic_type":[{"filename":"fn_call_variadic.php","line":3,"char_start":10,"char_end":12}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rvar_param_from_decl":[{"filename":"fn_call_variadic.php","line":3,"char_start":26,"char_end":27}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Path:
 {
   "stats":{"max_depth":1,"length":5,"reversals":1},

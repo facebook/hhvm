@@ -130,6 +130,156 @@ which itself flows down into this hint as the 1st function parameter
 
 File "workplace_non_exact.php", line 4, character 21 - line 4, character 24:
 
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"workplace_non_exact.php","line":9,"char_start":11,"char_end":12}]
+        },
+        "Flow_solved",
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[
+                        {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":22}
+                      ]
+                    },
+                    "Flow_solved",
+                    {
+                      "Rtype_variable":[
+                        {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
+                      ]
+                    }
+                  ]
+                },
+                "Flow_fun_return",
+                {
+                  "Rwitness":[
+                    {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
+                  ]
+                }
+              ]
+            },
+            "Flow_prj",
+            {
+              "Rprj":[
+                {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[{"filename":"workplace_non_exact.php","line":12,"char_start":5,"char_end":27}]
+                    },
+                    "Flow_subtype",
+                    {
+                      "Rrev":[
+                        {
+                          "Rsupport_dynamic_type":[{"filename":"workplace_non_exact.php","line":4,"char_start":19,"char_end":19}]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rexpr_dep_type":[
+        {
+          "Rhint":[{"filename":"workplace_non_exact.php","line":4,"char_start":21,"char_end":24}]
+        },
+        {"filename":"workplace_non_exact.php","line":12,"char_start":5,"char_end":13},
+        {"ERexpr":["3"]}
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"workplace_non_exact.php","line":9,"char_start":11,"char_end":12}]
+        },
+        "Flow_solved",
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[
+                        {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":22}
+                      ]
+                    },
+                    "Flow_solved",
+                    {
+                      "Rtype_variable":[
+                        {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
+                      ]
+                    }
+                  ]
+                },
+                "Flow_fun_return",
+                {
+                  "Rwitness":[
+                    {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
+                  ]
+                }
+              ]
+            },
+            "Flow_prj",
+            {
+              "Rprj":[
+                {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[{"filename":"workplace_non_exact.php","line":12,"char_start":5,"char_end":27}]
+                    },
+                    "Flow_subtype",
+                    {
+                      "Rsupport_dynamic_type":[{"filename":"workplace_non_exact.php","line":4,"char_start":19,"char_end":19}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rexpr_dep_type":[
+        {
+          "Rhint":[{"filename":"workplace_non_exact.php","line":4,"char_start":21,"char_end":24}]
+        },
+        {"filename":"workplace_non_exact.php","line":12,"char_start":5,"char_end":13},
+        {"ERexpr":["3"]}
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Path:
 {
   "stats":{"max_depth":1,"length":6,"reversals":1},

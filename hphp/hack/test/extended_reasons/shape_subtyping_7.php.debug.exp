@@ -129,6 +129,186 @@ which itself flows down into no type since the shape field `'b'` is not defined
 
 File "", line 0, character 0 - line 0, character -1:
 
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping_7.php","line":4,"char_start":31,"char_end":33}]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{" Prj_symm_shape":["b",{"Required":[]},{"Absent":[]}]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rflow":[
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping_7.php","line":4,"char_start":18,"char_end":34}]
+                                },
+                                "Flow_type_def",
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping_7.php","line":12,"char_start":3,"char_end":11}]
+                                }
+                              ]
+                            },
+                            "Flow_param_hint",
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping_7.php","line":12,"char_start":13,"char_end":14}]
+                            }
+                          ]
+                        },
+                        "Flow_local",
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":35,"char_end":36}]
+                        }
+                      ]
+                    },
+                    "Flow_prj",
+                    {
+                      "Rprj":[
+                        {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":3,"char_end":37}]
+                            },
+                            "Flow_subtype",
+                            {
+                              "Rrev":[
+                                {
+                                  "Rsupport_dynamic_type":[{"filename":"shape_subtyping_7.php","line":6,"char_start":10,"char_end":40}]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "Flow_subtype",
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"shape_subtyping_7.php","line":3,"char_start":26,"char_end":42}]
+                    },
+                    "Flow_type_def",
+                    {
+                      "Rhint":[{"filename":"shape_subtyping_7.php","line":7,"char_start":3,"char_end":19}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {"Rmissing_field":[]}
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"shape_subtyping_7.php","line":4,"char_start":31,"char_end":33}]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{" Prj_symm_shape":["b",{"Required":[]},{"Absent":[]}]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rflow":[
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping_7.php","line":4,"char_start":18,"char_end":34}]
+                                },
+                                "Flow_type_def",
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping_7.php","line":12,"char_start":3,"char_end":11}]
+                                }
+                              ]
+                            },
+                            "Flow_param_hint",
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping_7.php","line":12,"char_start":13,"char_end":14}]
+                            }
+                          ]
+                        },
+                        "Flow_local",
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":35,"char_end":36}]
+                        }
+                      ]
+                    },
+                    "Flow_prj",
+                    {
+                      "Rprj":[
+                        {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":3,"char_end":37}]
+                            },
+                            "Flow_subtype",
+                            {
+                              "Rsupport_dynamic_type":[{"filename":"shape_subtyping_7.php","line":6,"char_start":10,"char_end":40}]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "Flow_subtype",
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"shape_subtyping_7.php","line":3,"char_start":26,"char_end":42}]
+                    },
+                    "Flow_type_def",
+                    {
+                      "Rhint":[{"filename":"shape_subtyping_7.php","line":7,"char_start":3,"char_end":19}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {"Rmissing_field":[]}
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Path:
 {
   "stats":{"max_depth":2,"length":9,"reversals":1},
@@ -321,6 +501,186 @@ which itself flows down into this hint as the required shape field `'a'`
  4 | type missing_a = shape('b' => int);
 
 File "shape_subtyping_7.php", line 3, character 39 - line 3, character 41:
+
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {"Rmissing_field":[]},
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{" Prj_symm_shape":["a",{"Absent":[]},{"Required":[]}]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rflow":[
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping_7.php","line":4,"char_start":18,"char_end":34}]
+                                },
+                                "Flow_type_def",
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping_7.php","line":12,"char_start":3,"char_end":11}]
+                                }
+                              ]
+                            },
+                            "Flow_param_hint",
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping_7.php","line":12,"char_start":13,"char_end":14}]
+                            }
+                          ]
+                        },
+                        "Flow_local",
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":35,"char_end":36}]
+                        }
+                      ]
+                    },
+                    "Flow_prj",
+                    {
+                      "Rprj":[
+                        {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":3,"char_end":37}]
+                            },
+                            "Flow_subtype",
+                            {
+                              "Rrev":[
+                                {
+                                  "Rsupport_dynamic_type":[{"filename":"shape_subtyping_7.php","line":6,"char_start":10,"char_end":40}]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "Flow_subtype",
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"shape_subtyping_7.php","line":3,"char_start":26,"char_end":42}]
+                    },
+                    "Flow_type_def",
+                    {
+                      "Rhint":[{"filename":"shape_subtyping_7.php","line":7,"char_start":3,"char_end":19}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"shape_subtyping_7.php","line":3,"char_start":39,"char_end":41}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {"Rmissing_field":[]},
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{" Prj_symm_shape":["a",{"Absent":[]},{"Required":[]}]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rflow":[
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping_7.php","line":4,"char_start":18,"char_end":34}]
+                                },
+                                "Flow_type_def",
+                                {
+                                  "Rhint":[{"filename":"shape_subtyping_7.php","line":12,"char_start":3,"char_end":11}]
+                                }
+                              ]
+                            },
+                            "Flow_param_hint",
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping_7.php","line":12,"char_start":13,"char_end":14}]
+                            }
+                          ]
+                        },
+                        "Flow_local",
+                        {
+                          "Rwitness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":35,"char_end":36}]
+                        }
+                      ]
+                    },
+                    "Flow_prj",
+                    {
+                      "Rprj":[
+                        {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":3,"char_end":37}]
+                            },
+                            "Flow_subtype",
+                            {
+                              "Rsupport_dynamic_type":[{"filename":"shape_subtyping_7.php","line":6,"char_start":10,"char_end":40}]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "Flow_subtype",
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"shape_subtyping_7.php","line":3,"char_start":26,"char_end":42}]
+                    },
+                    "Flow_type_def",
+                    {
+                      "Rhint":[{"filename":"shape_subtyping_7.php","line":7,"char_start":3,"char_end":19}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"shape_subtyping_7.php","line":3,"char_start":39,"char_end":41}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
 
 Path:
 {

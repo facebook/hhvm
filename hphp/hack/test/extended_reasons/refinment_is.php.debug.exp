@@ -129,6 +129,186 @@ which itself flows into this hint because they are required to be subtypes
 
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
+                },
+                "Flow_param_hint",
+                {
+                  "Rwitness":[{"filename":"refinment_is.php","line":7,"char_start":21,"char_end":22}]
+                }
+              ]
+            },
+            "Flow_local",
+            {
+              "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":7}]
+            }
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Asymm":["Sub","Prj_asymm_inter"]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Ris_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+                        },
+                        "Flow_local",
+                        {
+                          "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+                        }
+                      ]
+                    },
+                    "Flow_assign",
+                    {
+                      "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
+                    }
+                  ]
+                },
+                "Flow_prj",
+                {
+                  "Rprj":[
+                    {"Asymm":["Sub","Prj_asymm_union"]},
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                            },
+                            "Flow_local",
+                            {
+                              "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+                            }
+                          ]
+                        },
+                        "Flow_return_hint",
+                        {
+                          "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
+                },
+                "Flow_param_hint",
+                {
+                  "Rwitness":[{"filename":"refinment_is.php","line":7,"char_start":21,"char_end":22}]
+                }
+              ]
+            },
+            "Flow_local",
+            {
+              "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":7}]
+            }
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Asymm":["Sub","Prj_asymm_inter"]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Ris_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+                        },
+                        "Flow_local",
+                        {
+                          "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+                        }
+                      ]
+                    },
+                    "Flow_assign",
+                    {
+                      "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
+                    }
+                  ]
+                },
+                "Flow_prj",
+                {
+                  "Rprj":[
+                    {"Asymm":["Sub","Prj_asymm_union"]},
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                            },
+                            "Flow_local",
+                            {
+                              "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+                            }
+                          ]
+                        },
+                        "Flow_return_hint",
+                        {
+                          "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Path:
 {
   "stats":{"max_depth":2,"length":9,"reversals":0},
@@ -289,6 +469,128 @@ which itself flows into this hint because they are required to be subtypes
 
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Ris_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+                },
+                "Flow_local",
+                {
+                  "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+                }
+              ]
+            },
+            "Flow_assign",
+            {
+              "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
+            }
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Asymm":["Sub","Prj_asymm_union"]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                    },
+                    "Flow_local",
+                    {
+                      "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+                    }
+                  ]
+                },
+                "Flow_return_hint",
+                {
+                  "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Ris_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+                },
+                "Flow_local",
+                {
+                  "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+                }
+              ]
+            },
+            "Flow_assign",
+            {
+              "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
+            }
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Asymm":["Sub","Prj_asymm_union"]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                    },
+                    "Flow_local",
+                    {
+                      "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+                    }
+                  ]
+                },
+                "Flow_return_hint",
+                {
+                  "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Path:
 {
   "stats":{"max_depth":1,"length":6,"reversals":0},
@@ -447,6 +749,154 @@ which itself flows into this hint because they are required to be subtypes
  9 |     $z = $a;
 
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
+
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Asymm":["Sub","Prj_asymm_inter"]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Ris_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+                        },
+                        "Flow_local",
+                        {
+                          "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+                        }
+                      ]
+                    },
+                    "Flow_assign",
+                    {
+                      "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
+                    }
+                  ]
+                },
+                "Flow_prj",
+                {
+                  "Rprj":[
+                    {"Asymm":["Sub","Prj_asymm_union"]},
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                            },
+                            "Flow_local",
+                            {
+                              "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+                            }
+                          ]
+                        },
+                        "Flow_return_hint",
+                        {
+                          "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Asymm":["Sub","Prj_asymm_inter"]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Ris_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+                        },
+                        "Flow_local",
+                        {
+                          "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+                        }
+                      ]
+                    },
+                    "Flow_assign",
+                    {
+                      "Rwitness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
+                    }
+                  ]
+                },
+                "Flow_prj",
+                {
+                  "Rprj":[
+                    {"Asymm":["Sub","Prj_asymm_union"]},
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rwitness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                            },
+                            "Flow_local",
+                            {
+                              "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+                            }
+                          ]
+                        },
+                        "Flow_return_hint",
+                        {
+                          "Rwitness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
 
 Path:
 {

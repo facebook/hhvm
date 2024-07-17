@@ -153,6 +153,448 @@ which itself flows down into this hint as the 1st function parameter
 
 File "fn_subtyping_contra_2.php", line 6, character 36 - line 6, character 38:
 
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[
+            {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":36,"char_end":40}
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rhint":[
+                            {
+                              "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
+                              "line":6,
+                              "char_start":33,
+                              "char_end":45
+                            }
+                          ]
+                        },
+                        "Flow_type_def",
+                        {
+                          "Rhint":[
+                            {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":26,"char_end":48}
+                          ]
+                        }
+                      ]
+                    },
+                    "Flow_prj",
+                    {
+                      "Rhint":[
+                        {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":26,"char_end":48}
+                      ]
+                    }
+                  ]
+                },
+                "Flow_subtype",
+                {
+                  "Rrev":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rflow":[
+                                {
+                                  "Rhint":[
+                                    {
+                                      "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
+                                      "line":6,
+                                      "char_start":33,
+                                      "char_end":45
+                                    }
+                                  ]
+                                },
+                                "Flow_type_def",
+                                {
+                                  "Rhint":[
+                                    {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":26,"char_end":46}
+                                  ]
+                                }
+                              ]
+                            },
+                            "Flow_prj",
+                            {
+                              "Rprj":[
+                                {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+                                {
+                                  "Rflow":[
+                                    {
+                                      "Rflow":[
+                                        {
+                                          "Rflow":[
+                                            {
+                                              "Rhint":[
+                                                {
+                                                  "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
+                                                  "line":6,
+                                                  "char_start":33,
+                                                  "char_end":45
+                                                }
+                                              ]
+                                            },
+                                            "Flow_type_def",
+                                            {
+                                              "Rhint":[
+                                                {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":16,"char_end":54}
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "Flow_prj",
+                                        {
+                                          "Rwitness_from_decl":[
+                                            {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":16,"char_end":54}
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "Flow_subtype",
+                                    {
+                                      "Rrev":[
+                                        {
+                                          "Rflow":[
+                                            {
+                                              "Rflow":[
+                                                {
+                                                  "Rflow":[
+                                                    {
+                                                      "Rflow":[
+                                                        {
+                                                          "Rflow":[
+                                                            {
+                                                              "Rhint":[
+                                                                {
+                                                                  "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
+                                                                  "line":6,
+                                                                  "char_start":33,
+                                                                  "char_end":45
+                                                                }
+                                                              ]
+                                                            },
+                                                            "Flow_type_def",
+                                                            {
+                                                              "Rhint":[
+                                                                {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":16,"char_end":56}
+                                                              ]
+                                                            }
+                                                          ]
+                                                        },
+                                                        "Flow_param_hint",
+                                                        {
+                                                          "Rwitness":[
+                                                            {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":58,"char_end":59}
+                                                          ]
+                                                        }
+                                                      ]
+                                                    },
+                                                    "Flow_local",
+                                                    {
+                                                      "Rwitness":[
+                                                        {"filename":"fn_subtyping_contra_2.php","line":8,"char_start":9,"char_end":10}
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                "Flow_prj",
+                                                {
+                                                  "Rprj":[
+                                                    {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+                                                    {
+                                                      "Rflow":[
+                                                        {
+                                                          "Rwitness":[
+                                                            {"filename":"fn_subtyping_contra_2.php","line":8,"char_start":3,"char_end":11}
+                                                          ]
+                                                        },
+                                                        "Flow_subtype",
+                                                        {
+                                                          "Rrev":[
+                                                            {
+                                                              "Rsupport_dynamic_type":[
+                                                                {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":10,"char_end":14}
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "Flow_prj",
+                                            {
+                                              "Rhint":[
+                                                {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":16,"char_end":56}
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "Flow_prj",
+                        {
+                          "Rwitness_from_decl":[
+                            {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":26,"char_end":46}
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[
+        {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":36,"char_end":38}
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[
+            {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":36,"char_end":40}
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rhint":[
+                            {
+                              "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
+                              "line":6,
+                              "char_start":33,
+                              "char_end":45
+                            }
+                          ]
+                        },
+                        "Flow_type_def",
+                        {
+                          "Rhint":[
+                            {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":26,"char_end":48}
+                          ]
+                        }
+                      ]
+                    },
+                    "Flow_prj",
+                    {
+                      "Rhint":[
+                        {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":26,"char_end":48}
+                      ]
+                    }
+                  ]
+                },
+                "Flow_subtype",
+                {
+                  "Rflow":[
+                    {
+                      "Rwitness_from_decl":[
+                        {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":26,"char_end":46}
+                      ]
+                    },
+                    "Flow_prj",
+                    {
+                      "Rflow":[
+                        {
+                          "Rprj":[
+                            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+                            {
+                              "Rflow":[
+                                {
+                                  "Rflow":[
+                                    {
+                                      "Rflow":[
+                                        {
+                                          "Rflow":[
+                                            {
+                                              "Rflow":[
+                                                {
+                                                  "Rflow":[
+                                                    {
+                                                      "Rhint":[
+                                                        {
+                                                          "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
+                                                          "line":6,
+                                                          "char_start":33,
+                                                          "char_end":45
+                                                        }
+                                                      ]
+                                                    },
+                                                    "Flow_type_def",
+                                                    {
+                                                      "Rhint":[
+                                                        {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":16,"char_end":56}
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                "Flow_param_hint",
+                                                {
+                                                  "Rwitness":[
+                                                    {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":58,"char_end":59}
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "Flow_local",
+                                            {
+                                              "Rwitness":[
+                                                {"filename":"fn_subtyping_contra_2.php","line":8,"char_start":9,"char_end":10}
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "Flow_prj",
+                                        {
+                                          "Rprj":[
+                                            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+                                            {
+                                              "Rflow":[
+                                                {
+                                                  "Rwitness":[
+                                                    {"filename":"fn_subtyping_contra_2.php","line":8,"char_start":3,"char_end":11}
+                                                  ]
+                                                },
+                                                "Flow_subtype",
+                                                {
+                                                  "Rsupport_dynamic_type":[
+                                                    {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":10,"char_end":14}
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "Flow_prj",
+                                    {
+                                      "Rhint":[
+                                        {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":16,"char_end":56}
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "Flow_subtype",
+                                {
+                                  "Rflow":[
+                                    {
+                                      "Rwitness_from_decl":[
+                                        {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":16,"char_end":54}
+                                      ]
+                                    },
+                                    "Flow_prj",
+                                    {
+                                      "Rflow":[
+                                        {
+                                          "Rhint":[
+                                            {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":16,"char_end":54}
+                                          ]
+                                        },
+                                        "Flow_type_def",
+                                        {
+                                          "Rhint":[
+                                            {
+                                              "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
+                                              "line":6,
+                                              "char_start":33,
+                                              "char_end":45
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "Flow_prj",
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[
+                                {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":26,"char_end":46}
+                              ]
+                            },
+                            "Flow_type_def",
+                            {
+                              "Rhint":[
+                                {
+                                  "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
+                                  "line":6,
+                                  "char_start":33,
+                                  "char_end":45
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[
+        {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":36,"char_end":38}
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Path:
 {
   "stats":{"max_depth":3,"length":17,"reversals":3},
@@ -168,7 +610,7 @@ Path:
     {
       "Rhint":[
         {
-          "filename":"/tmp/uJLYXhtyp/supportdynamic.hhi",
+          "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
           "line":6,
           "char_start":33,
           "char_end":45
@@ -199,7 +641,7 @@ Path:
     {
       "Rhint":[
         {
-          "filename":"/tmp/uJLYXhtyp/supportdynamic.hhi",
+          "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
           "line":6,
           "char_start":33,
           "char_end":45
@@ -262,7 +704,7 @@ Path:
     {
       "Rhint":[
         {
-          "filename":"/tmp/uJLYXhtyp/supportdynamic.hhi",
+          "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
           "line":6,
           "char_start":33,
           "char_end":45
@@ -281,7 +723,7 @@ Path:
     {
       "Rhint":[
         {
-          "filename":"/tmp/uJLYXhtyp/supportdynamic.hhi",
+          "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
           "line":6,
           "char_start":33,
           "char_end":45

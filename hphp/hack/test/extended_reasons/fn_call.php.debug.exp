@@ -90,6 +90,100 @@ which itself flows down into this hint as the 1st function parameter
 
 File "fn_call.php", line 3, character 14 - line 3, character 19:
 
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {"Rhint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]},
+                "Flow_param_hint",
+                {
+                  "Rwitness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]
+                }
+              ]
+            },
+            "Flow_local",
+            {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]}
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+            {
+              "Rflow":[
+                {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":9}]},
+                "Flow_subtype",
+                {
+                  "Rrev":[
+                    {
+                      "Rsupport_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {"Rhint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {"Rhint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]},
+                "Flow_param_hint",
+                {
+                  "Rwitness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]
+                }
+              ]
+            },
+            "Flow_local",
+            {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]}
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+            {
+              "Rflow":[
+                {"Rwitness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":9}]},
+                "Flow_subtype",
+                {
+                  "Rsupport_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {"Rhint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Path:
 {
   "stats":{"max_depth":1,"length":5,"reversals":1},

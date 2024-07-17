@@ -63,7 +63,7 @@ which itself flows into this hint because it is the definition
  20 | 
  21 |   /**
 
-File "/tmp/VQnNiuMMav/classname.hhi", line 19, character 42 - line 19, character 52:
+File "/tmp/hHnCAJeBm2/classname.hhi", line 19, character 42 - line 19, character 52:
 
 which itself flows into this expression because they are required to be subtypes
 
@@ -88,7 +88,7 @@ which itself flows into this hint because it is the definition
  20 | 
  21 |   /**
 
-File "/tmp/VQnNiuMMav/classname.hhi", line 19, character 42 - line 19, character 52:
+File "/tmp/hHnCAJeBm2/classname.hhi", line 19, character 42 - line 19, character 52:
 
 which itself flows down into this thing (`Rinstantiate`) as the covariant, 1st type parameter of the this newtype `\HH\classname`
 
@@ -113,6 +113,286 @@ which itself flows down into this hint as the invariant, 1st type parameter of t
 10 |     return 1;
 
 File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
+
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[
+            {"filename":"workplace_invariant.php","line":15,"char_start":25,"char_end":27}
+          ]
+        },
+        "Flow_upper_bound",
+        {
+          "Rflow":[
+            {
+              "Rhint":[
+                {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
+              ]
+            },
+            "Flow_prj",
+            {
+              "Rprj":[
+                {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]}]},
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[
+                        {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
+                      ]
+                    },
+                    "Flow_subtype",
+                    {
+                      "Rrev":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                            },
+                            "Flow_extends",
+                            {
+                              "Rflow":[
+                                {
+                                  "Rinstantiate":[
+                                    {
+                                      "Rwitness":[
+                                        {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
+                                      ]
+                                    },
+                                    "this",
+                                    {
+                                      "Rclass_class":[
+                                        {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                        "\\foo"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "Flow_prj",
+                                {
+                                  "Rprj":[
+                                    {
+                                      "Symm":[{"Prj_symm_ctor":["Ctor_newtype","\\HH\\classname",0,{"Dir":[{"Co":[]}]}]}]
+                                    },
+                                    {
+                                      "Rflow":[
+                                        {
+                                          "Rflow":[
+                                            {
+                                              "Rflow":[
+                                                {
+                                                  "Rhint":[
+                                                    {
+                                                      "filename":"/tmp/hHnCAJeBm2/classname.hhi",
+                                                      "line":19,
+                                                      "char_start":42,
+                                                      "char_end":52
+                                                    }
+                                                  ]
+                                                },
+                                                "Flow_type_def",
+                                                {
+                                                  "Rclass_class":[
+                                                    {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                                    "\\foo"
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "Flow_return_hint",
+                                            {
+                                              "Rwitness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                            }
+                                          ]
+                                        },
+                                        "Flow_subtype",
+                                        {
+                                          "Rflow":[
+                                            {
+                                              "Rhint":[
+                                                {
+                                                  "filename":"/tmp/hHnCAJeBm2/classname.hhi",
+                                                  "line":19,
+                                                  "char_start":42,
+                                                  "char_end":52
+                                                }
+                                              ]
+                                            },
+                                            "Flow_type_def",
+                                            {
+                                              "Rhint":[
+                                                {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[
+            {"filename":"workplace_invariant.php","line":15,"char_start":25,"char_end":27}
+          ]
+        },
+        "Flow_upper_bound",
+        {
+          "Rflow":[
+            {
+              "Rhint":[
+                {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
+              ]
+            },
+            "Flow_prj",
+            {
+              "Rprj":[
+                {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]}]},
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[
+                        {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
+                      ]
+                    },
+                    "Flow_subtype",
+                    {
+                      "Rflow":[
+                        {
+                          "Rflow":[
+                            {
+                              "Rprj":[
+                                {
+                                  "Symm":[{"Prj_symm_ctor":["Ctor_newtype","\\HH\\classname",0,{"Dir":[{"Co":[]}]}]}]
+                                },
+                                {
+                                  "Rflow":[
+                                    {
+                                      "Rflow":[
+                                        {
+                                          "Rhint":[
+                                            {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
+                                          ]
+                                        },
+                                        "Flow_type_def",
+                                        {
+                                          "Rhint":[
+                                            {
+                                              "filename":"/tmp/hHnCAJeBm2/classname.hhi",
+                                              "line":19,
+                                              "char_start":42,
+                                              "char_end":52
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "Flow_subtype",
+                                    {
+                                      "Rflow":[
+                                        {
+                                          "Rwitness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                        },
+                                        "Flow_return_hint",
+                                        {
+                                          "Rflow":[
+                                            {
+                                              "Rclass_class":[
+                                                {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                                "\\foo"
+                                              ]
+                                            },
+                                            "Flow_type_def",
+                                            {
+                                              "Rhint":[
+                                                {
+                                                  "filename":"/tmp/hHnCAJeBm2/classname.hhi",
+                                                  "line":19,
+                                                  "char_start":42,
+                                                  "char_end":52
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            "Flow_prj",
+                            {
+                              "Rinstantiate":[
+                                {
+                                  "Rwitness":[
+                                    {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
+                                  ]
+                                },
+                                "this",
+                                {
+                                  "Rclass_class":[
+                                    {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                    "\\foo"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "Flow_extends",
+                        {
+                          "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
 
 Path:
 {
@@ -159,7 +439,7 @@ Path:
     {
       "Rhint":[
         {
-          "filename":"/tmp/VQnNiuMMav/classname.hhi",
+          "filename":"/tmp/hHnCAJeBm2/classname.hhi",
           "line":19,
           "char_start":42,
           "char_end":52
@@ -181,7 +461,7 @@ Path:
     {
       "Rhint":[
         {
-          "filename":"/tmp/VQnNiuMMav/classname.hhi",
+          "filename":"/tmp/hHnCAJeBm2/classname.hhi",
           "line":19,
           "char_start":42,
           "char_end":52
@@ -290,7 +570,7 @@ which itself flows into this hint because it is the definition
  20 | 
  21 |   /**
 
-File "/tmp/VQnNiuMMav/classname.hhi", line 19, character 42 - line 19, character 52:
+File "/tmp/hHnCAJeBm2/classname.hhi", line 19, character 42 - line 19, character 52:
 
 which itself flows into this expression because they are required to be subtypes
 
@@ -315,7 +595,7 @@ which itself flows into this hint because it is the definition
  20 | 
  21 |   /**
 
-File "/tmp/VQnNiuMMav/classname.hhi", line 19, character 42 - line 19, character 52:
+File "/tmp/hHnCAJeBm2/classname.hhi", line 19, character 42 - line 19, character 52:
 
 which itself flows down into this thing (`Rinstantiate`) as the covariant, 1st type parameter of the this newtype `\HH\classname`
 
@@ -340,6 +620,266 @@ which itself flows down into this hint as the invariant, 1st type parameter of t
 10 |     return 1;
 
 File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
+
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[
+            {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]}]},
+            {
+              "Rflow":[
+                {
+                  "Rhint":[
+                    {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
+                  ]
+                },
+                "Flow_subtype",
+                {
+                  "Rrev":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                        },
+                        "Flow_extends",
+                        {
+                          "Rflow":[
+                            {
+                              "Rinstantiate":[
+                                {
+                                  "Rwitness":[
+                                    {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
+                                  ]
+                                },
+                                "this",
+                                {
+                                  "Rclass_class":[
+                                    {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                    "\\foo"
+                                  ]
+                                }
+                              ]
+                            },
+                            "Flow_prj",
+                            {
+                              "Rprj":[
+                                {
+                                  "Symm":[{"Prj_symm_ctor":["Ctor_newtype","\\HH\\classname",0,{"Dir":[{"Co":[]}]}]}]
+                                },
+                                {
+                                  "Rflow":[
+                                    {
+                                      "Rflow":[
+                                        {
+                                          "Rflow":[
+                                            {
+                                              "Rhint":[
+                                                {
+                                                  "filename":"/tmp/hHnCAJeBm2/classname.hhi",
+                                                  "line":19,
+                                                  "char_start":42,
+                                                  "char_end":52
+                                                }
+                                              ]
+                                            },
+                                            "Flow_type_def",
+                                            {
+                                              "Rclass_class":[
+                                                {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                                "\\foo"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "Flow_return_hint",
+                                        {
+                                          "Rwitness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                        }
+                                      ]
+                                    },
+                                    "Flow_subtype",
+                                    {
+                                      "Rflow":[
+                                        {
+                                          "Rhint":[
+                                            {
+                                              "filename":"/tmp/hHnCAJeBm2/classname.hhi",
+                                              "line":19,
+                                              "char_start":42,
+                                              "char_end":52
+                                            }
+                                          ]
+                                        },
+                                        "Flow_type_def",
+                                        {
+                                          "Rhint":[
+                                            {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[
+            {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]}]},
+            {
+              "Rflow":[
+                {
+                  "Rhint":[
+                    {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
+                  ]
+                },
+                "Flow_subtype",
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rprj":[
+                            {
+                              "Symm":[{"Prj_symm_ctor":["Ctor_newtype","\\HH\\classname",0,{"Dir":[{"Co":[]}]}]}]
+                            },
+                            {
+                              "Rflow":[
+                                {
+                                  "Rflow":[
+                                    {
+                                      "Rhint":[
+                                        {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
+                                      ]
+                                    },
+                                    "Flow_type_def",
+                                    {
+                                      "Rhint":[
+                                        {
+                                          "filename":"/tmp/hHnCAJeBm2/classname.hhi",
+                                          "line":19,
+                                          "char_start":42,
+                                          "char_end":52
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "Flow_subtype",
+                                {
+                                  "Rflow":[
+                                    {
+                                      "Rwitness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                    },
+                                    "Flow_return_hint",
+                                    {
+                                      "Rflow":[
+                                        {
+                                          "Rclass_class":[
+                                            {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                            "\\foo"
+                                          ]
+                                        },
+                                        "Flow_type_def",
+                                        {
+                                          "Rhint":[
+                                            {
+                                              "filename":"/tmp/hHnCAJeBm2/classname.hhi",
+                                              "line":19,
+                                              "char_start":42,
+                                              "char_end":52
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "Flow_prj",
+                        {
+                          "Rinstantiate":[
+                            {
+                              "Rwitness":[
+                                {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
+                              ]
+                            },
+                            "this",
+                            {
+                              "Rclass_class":[
+                                {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                "\\foo"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "Flow_extends",
+                    {
+                      "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
 
 Path:
 {
@@ -380,7 +920,7 @@ Path:
     {
       "Rhint":[
         {
-          "filename":"/tmp/VQnNiuMMav/classname.hhi",
+          "filename":"/tmp/hHnCAJeBm2/classname.hhi",
           "line":19,
           "char_start":42,
           "char_end":52
@@ -402,7 +942,7 @@ Path:
     {
       "Rhint":[
         {
-          "filename":"/tmp/VQnNiuMMav/classname.hhi",
+          "filename":"/tmp/hHnCAJeBm2/classname.hhi",
           "line":19,
           "char_start":42,
           "char_end":52
@@ -511,7 +1051,7 @@ which itself flows up into this hint as the covariant, 1st type parameter of the
  20 | 
  21 |   /**
 
-File "/tmp/VQnNiuMMav/classname.hhi", line 19, character 42 - line 19, character 52:
+File "/tmp/hHnCAJeBm2/classname.hhi", line 19, character 42 - line 19, character 52:
 
 which itself flows into this thing (`Rclass_class`) because it is the definition
 
@@ -536,7 +1076,7 @@ which itself flows into this hint because they are required to be subtypes
  20 | 
  21 |   /**
 
-File "/tmp/VQnNiuMMav/classname.hhi", line 19, character 42 - line 19, character 52:
+File "/tmp/hHnCAJeBm2/classname.hhi", line 19, character 42 - line 19, character 52:
 
 which itself flows into this hint because it is the definition
 
@@ -561,6 +1101,262 @@ which itself flows down into this hint as the invariant, 1st type parameter of t
  17 | }
 
 File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
+
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                    },
+                    "Flow_extends",
+                    {
+                      "Rflow":[
+                        {
+                          "Rinstantiate":[
+                            {
+                              "Rwitness":[
+                                {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
+                              ]
+                            },
+                            "this",
+                            {
+                              "Rclass_class":[
+                                {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                "\\foo"
+                              ]
+                            }
+                          ]
+                        },
+                        "Flow_prj",
+                        {
+                          "Rprj":[
+                            {
+                              "Symm":[{"Prj_symm_ctor":["Ctor_newtype","\\HH\\classname",0,{"Dir":[{"Co":[]}]}]}]
+                            },
+                            {
+                              "Rflow":[
+                                {
+                                  "Rflow":[
+                                    {
+                                      "Rflow":[
+                                        {
+                                          "Rhint":[
+                                            {
+                                              "filename":"/tmp/hHnCAJeBm2/classname.hhi",
+                                              "line":19,
+                                              "char_start":42,
+                                              "char_end":52
+                                            }
+                                          ]
+                                        },
+                                        "Flow_type_def",
+                                        {
+                                          "Rclass_class":[
+                                            {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                            "\\foo"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "Flow_return_hint",
+                                    {
+                                      "Rwitness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                    }
+                                  ]
+                                },
+                                "Flow_subtype",
+                                {
+                                  "Rflow":[
+                                    {
+                                      "Rhint":[
+                                        {
+                                          "filename":"/tmp/hHnCAJeBm2/classname.hhi",
+                                          "line":19,
+                                          "char_start":42,
+                                          "char_end":52
+                                        }
+                                      ]
+                                    },
+                                    "Flow_type_def",
+                                    {
+                                      "Rhint":[
+                                        {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "Flow_subtype",
+                {
+                  "Rhint":[
+                    {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[
+        {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":32,"char_end":34}]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]}]},
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rhint":[{"filename":"workplace_invariant.php","line":8,"char_start":28,"char_end":35}]
+                    },
+                    "Flow_extends",
+                    {
+                      "Rflow":[
+                        {
+                          "Rinstantiate":[
+                            {
+                              "Rwitness":[
+                                {"filename":"workplace_invariant.php","line":16,"char_start":12,"char_end":14}
+                              ]
+                            },
+                            "this",
+                            {
+                              "Rclass_class":[
+                                {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                "\\foo"
+                              ]
+                            }
+                          ]
+                        },
+                        "Flow_prj",
+                        {
+                          "Rprj":[
+                            {
+                              "Symm":[{"Prj_symm_ctor":["Ctor_newtype","\\HH\\classname",0,{"Dir":[{"Co":[]}]}]}]
+                            },
+                            {
+                              "Rflow":[
+                                {
+                                  "Rflow":[
+                                    {
+                                      "Rflow":[
+                                        {
+                                          "Rhint":[
+                                            {
+                                              "filename":"/tmp/hHnCAJeBm2/classname.hhi",
+                                              "line":19,
+                                              "char_start":42,
+                                              "char_end":52
+                                            }
+                                          ]
+                                        },
+                                        "Flow_type_def",
+                                        {
+                                          "Rclass_class":[
+                                            {"filename":"workplace_invariant.php","line":8,"char_start":13,"char_end":15},
+                                            "\\foo"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "Flow_return_hint",
+                                    {
+                                      "Rwitness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
+                                    }
+                                  ]
+                                },
+                                "Flow_subtype",
+                                {
+                                  "Rflow":[
+                                    {
+                                      "Rhint":[
+                                        {
+                                          "filename":"/tmp/hHnCAJeBm2/classname.hhi",
+                                          "line":19,
+                                          "char_start":42,
+                                          "char_end":52
+                                        }
+                                      ]
+                                    },
+                                    "Flow_type_def",
+                                    {
+                                      "Rhint":[
+                                        {"filename":"workplace_invariant.php","line":15,"char_start":33,"char_end":50}
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "Flow_subtype",
+                {
+                  "Rhint":[
+                    {"filename":"workplace_invariant.php","line":15,"char_start":43,"char_end":49}
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[
+        {"filename":"workplace_invariant.php","line":15,"char_start":47,"char_end":48}
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
 
 Path:
 {
@@ -608,7 +1404,7 @@ Path:
     {
       "Rhint":[
         {
-          "filename":"/tmp/VQnNiuMMav/classname.hhi",
+          "filename":"/tmp/hHnCAJeBm2/classname.hhi",
           "line":19,
           "char_start":42,
           "char_end":52
@@ -630,7 +1426,7 @@ Path:
     {
       "Rhint":[
         {
-          "filename":"/tmp/VQnNiuMMav/classname.hhi",
+          "filename":"/tmp/hHnCAJeBm2/classname.hhi",
           "line":19,
           "char_start":42,
           "char_end":52

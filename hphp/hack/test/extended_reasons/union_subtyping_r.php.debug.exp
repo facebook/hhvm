@@ -72,6 +72,86 @@ which itself flows into this hint because they are required to be subtypes
 
 File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
 
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                },
+                "Flow_param_hint",
+                {
+                  "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                }
+              ]
+            },
+            "Flow_local",
+            {
+              "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+            }
+          ]
+        },
+        "Flow_return_hint",
+        {
+          "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                },
+                "Flow_param_hint",
+                {
+                  "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                }
+              ]
+            },
+            "Flow_local",
+            {
+              "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+            }
+          ]
+        },
+        "Flow_return_hint",
+        {
+          "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Path:
 {
   "stats":{"max_depth":0,"length":4,"reversals":0},
@@ -183,6 +263,112 @@ which itself flows down into this hint as an element of the union type
  8 | }
 
 File "union_subtyping_r.php", line 6, character 26 - line 6, character 26:
+
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                },
+                "Flow_param_hint",
+                {
+                  "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                }
+              ]
+            },
+            "Flow_local",
+            {
+              "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+            }
+          ]
+        },
+        "Flow_return_hint",
+        {
+          "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rflow":[
+        {
+          "Rprj":[
+            {"Asymm":["Super","Prj_asymm_union"]},
+            {
+              "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+            }
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":26,"char_end":26}]
+        }
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                },
+                "Flow_param_hint",
+                {
+                  "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                }
+              ]
+            },
+            "Flow_local",
+            {
+              "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+            }
+          ]
+        },
+        "Flow_return_hint",
+        {
+          "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rflow":[
+        {
+          "Rprj":[
+            {"Asymm":["Super","Prj_asymm_union"]},
+            {
+              "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+            }
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":26,"char_end":26}]
+        }
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
 
 Path:
 {
@@ -301,6 +487,112 @@ which itself flows down into this hint as an element of the union type
  8 | }
 
 File "union_subtyping_r.php", line 6, character 28 - line 6, character 28:
+
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                },
+                "Flow_param_hint",
+                {
+                  "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                }
+              ]
+            },
+            "Flow_local",
+            {
+              "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+            }
+          ]
+        },
+        "Flow_return_hint",
+        {
+          "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rflow":[
+        {
+          "Rprj":[
+            {"Asymm":["Super","Prj_asymm_union"]},
+            {
+              "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+            }
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":28,"char_end":28}]
+        }
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                },
+                "Flow_param_hint",
+                {
+                  "Rwitness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                }
+              ]
+            },
+            "Flow_local",
+            {
+              "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+            }
+          ]
+        },
+        "Flow_return_hint",
+        {
+          "Rwitness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rflow":[
+        {
+          "Rprj":[
+            {"Asymm":["Super","Prj_asymm_union"]},
+            {
+              "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+            }
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rhint":[{"filename":"union_subtyping_r.php","line":6,"char_start":28,"char_end":28}]
+        }
+      ]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
 
 Path:
 {

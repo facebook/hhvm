@@ -96,6 +96,148 @@ which itself flows down into this hint as the 1st function parameter
 
 File "assign_local.php", line 7, character 14 - line 7, character 16:
 
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rhint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
+                        },
+                        "Flow_param_hint",
+                        {
+                          "Rwitness":[{"filename":"assign_local.php","line":9,"char_start":20,"char_end":21}]
+                        }
+                      ]
+                    },
+                    "Flow_local",
+                    {
+                      "Rwitness":[{"filename":"assign_local.php","line":10,"char_start":8,"char_end":9}]
+                    }
+                  ]
+                },
+                "Flow_assign",
+                {
+                  "Rwitness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":4}]
+                }
+              ]
+            },
+            "Flow_local",
+            {
+              "Rwitness":[{"filename":"assign_local.php","line":11,"char_start":7,"char_end":8}]
+            }
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+            {
+              "Rflow":[
+                {
+                  "Rwitness":[{"filename":"assign_local.php","line":11,"char_start":3,"char_end":9}]
+                },
+                "Flow_subtype",
+                {
+                  "Rrev":[
+                    {
+                      "Rsupport_dynamic_type":[{"filename":"assign_local.php","line":7,"char_start":10,"char_end":12}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rhint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
+                        },
+                        "Flow_param_hint",
+                        {
+                          "Rwitness":[{"filename":"assign_local.php","line":9,"char_start":20,"char_end":21}]
+                        }
+                      ]
+                    },
+                    "Flow_local",
+                    {
+                      "Rwitness":[{"filename":"assign_local.php","line":10,"char_start":8,"char_end":9}]
+                    }
+                  ]
+                },
+                "Flow_assign",
+                {
+                  "Rwitness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":4}]
+                }
+              ]
+            },
+            "Flow_local",
+            {
+              "Rwitness":[{"filename":"assign_local.php","line":11,"char_start":7,"char_end":8}]
+            }
+          ]
+        },
+        "Flow_prj",
+        {
+          "Rprj":[
+            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+            {
+              "Rflow":[
+                {
+                  "Rwitness":[{"filename":"assign_local.php","line":11,"char_start":3,"char_end":9}]
+                },
+                "Flow_subtype",
+                {
+                  "Rsupport_dynamic_type":[{"filename":"assign_local.php","line":7,"char_start":10,"char_end":12}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Path:
 {
   "stats":{"max_depth":1,"length":7,"reversals":1},

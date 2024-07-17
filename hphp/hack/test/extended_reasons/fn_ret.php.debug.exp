@@ -40,6 +40,30 @@ flows into this hint because they are required to be subtypes
 
 File "fn_ret.php", line 7, character 17 - line 7, character 20:
 
+Raw:
+{
+  "Rflow":[
+    {"Rhint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+    "Flow_subtype_toplevel",
+    {"Rhint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {"Rhint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+    "Flow_subtype_toplevel",
+    {"Rhint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Path:
 {
   "stats":{"max_depth":0,"length":1,"reversals":0},
@@ -110,6 +134,54 @@ which itself flows into this hint because they are required to be subtypes
  9 | }
 
 File "fn_ret.php", line 7, character 17 - line 7, character 20:
+
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {"Rhint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+            "Flow_subtype",
+            {"Rwitness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]}
+          ]
+        },
+        "Flow_return_hint",
+        {"Rwitness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]}
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {"Rhint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {"Rhint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+            "Flow_subtype",
+            {"Rwitness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]}
+          ]
+        },
+        "Flow_return_hint",
+        {"Rwitness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]}
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {"Rhint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
 
 Path:
 {

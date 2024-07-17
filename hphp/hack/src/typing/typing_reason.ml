@@ -2875,11 +2875,19 @@ let explain_path { path_elems; stats } =
 let explain t ~complexity:_ = explain_path @@ to_path @@ normalize t
 
 let debug t =
-  let t = normalize t in
-  let path = to_path t in
+  let t_norm = normalize t in
+  let path = to_path t_norm in
 
   explain_path path
   @ [
+      ( Pos_or_decl.none,
+        Format.sprintf "Raw:\n%s"
+        @@ Hh_json.json_to_string ~pretty:true
+        @@ to_json t );
+      ( Pos_or_decl.none,
+        Format.sprintf "Normalised:\n%s"
+        @@ Hh_json.json_to_string ~pretty:true
+        @@ to_json t_norm );
       ( Pos_or_decl.none,
         Format.sprintf "Path:\n%s"
         @@ Hh_json.json_to_string ~pretty:true

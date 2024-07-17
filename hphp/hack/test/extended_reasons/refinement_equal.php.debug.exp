@@ -114,6 +114,150 @@ which itself flows into this hint because they are required to be subtypes
 
 File "refinement_equal.php", line 6, character 36 - line 6, character 36:
 
+Raw:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rhint":[{"filename":"refinement_equal.php","line":6,"char_start":22,"char_end":23}]
+                        },
+                        "Flow_param_hint",
+                        {
+                          "Rwitness":[{"filename":"refinement_equal.php","line":6,"char_start":25,"char_end":26}]
+                        }
+                      ]
+                    },
+                    "Flow_local",
+                    {
+                      "Rwitness":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":7}]
+                    }
+                  ]
+                },
+                "Flow_solved",
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rtype_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15}]
+                        },
+                        "Flow_local",
+                        {
+                          "Rwitness":[{"filename":"refinement_equal.php","line":8,"char_start":10,"char_end":11}]
+                        }
+                      ]
+                    },
+                    "Flow_assign",
+                    {
+                      "Rwitness":[{"filename":"refinement_equal.php","line":8,"char_start":5,"char_end":6}]
+                    }
+                  ]
+                }
+              ]
+            },
+            "Flow_local",
+            {
+              "Rwitness":[{"filename":"refinement_equal.php","line":12,"char_start":10,"char_end":11}]
+            }
+          ]
+        },
+        "Flow_return_hint",
+        {
+          "Rwitness":[{"filename":"refinement_equal.php","line":12,"char_start":3,"char_end":12}]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"refinement_equal.php","line":6,"char_start":36,"char_end":36}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
+Normalised:
+{
+  "Rflow":[
+    {
+      "Rflow":[
+        {
+          "Rflow":[
+            {
+              "Rflow":[
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rhint":[{"filename":"refinement_equal.php","line":6,"char_start":22,"char_end":23}]
+                        },
+                        "Flow_param_hint",
+                        {
+                          "Rwitness":[{"filename":"refinement_equal.php","line":6,"char_start":25,"char_end":26}]
+                        }
+                      ]
+                    },
+                    "Flow_local",
+                    {
+                      "Rwitness":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":7}]
+                    }
+                  ]
+                },
+                "Flow_solved",
+                {
+                  "Rflow":[
+                    {
+                      "Rflow":[
+                        {
+                          "Rtype_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15}]
+                        },
+                        "Flow_local",
+                        {
+                          "Rwitness":[{"filename":"refinement_equal.php","line":8,"char_start":10,"char_end":11}]
+                        }
+                      ]
+                    },
+                    "Flow_assign",
+                    {
+                      "Rwitness":[{"filename":"refinement_equal.php","line":8,"char_start":5,"char_end":6}]
+                    }
+                  ]
+                }
+              ]
+            },
+            "Flow_local",
+            {
+              "Rwitness":[{"filename":"refinement_equal.php","line":12,"char_start":10,"char_end":11}]
+            }
+          ]
+        },
+        "Flow_return_hint",
+        {
+          "Rwitness":[{"filename":"refinement_equal.php","line":12,"char_start":3,"char_end":12}]
+        }
+      ]
+    },
+    "Flow_subtype_toplevel",
+    {
+      "Rhint":[{"filename":"refinement_equal.php","line":6,"char_start":36,"char_end":36}]
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Path:
 {
   "stats":{"max_depth":0,"length":8,"reversals":0},

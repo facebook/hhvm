@@ -1,5 +1,7 @@
 <?hh
 
+<<file: __EnableUnstableFeatures('case_types')>>
+
 function takes(TYPE#1 $_): void {}
 
 <<__EntryPoint>>

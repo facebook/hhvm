@@ -131,12 +131,22 @@ Raw:
                 {
                   "Rtypeconst":[
                     {
-                      "Rhint":[
+                      "Rdef":[
                         {
                           "filename":"workplace_abstract_class_as_typeconst.php",
-                          "line":32,
-                          "char_start":32,
-                          "char_end":45
+                          "line":3,
+                          "char_start":16,
+                          "char_end":29
+                        },
+                        {
+                          "Rhint":[
+                            {
+                              "filename":"workplace_abstract_class_as_typeconst.php",
+                              "line":32,
+                              "char_start":32,
+                              "char_end":45
+                            }
+                          ]
                         }
                       ]
                     },
@@ -326,12 +336,22 @@ Normalised:
                 {
                   "Rtypeconst":[
                     {
-                      "Rhint":[
+                      "Rdef":[
                         {
                           "filename":"workplace_abstract_class_as_typeconst.php",
-                          "line":32,
-                          "char_start":32,
-                          "char_end":45
+                          "line":3,
+                          "char_start":16,
+                          "char_end":29
+                        },
+                        {
+                          "Rhint":[
+                            {
+                              "filename":"workplace_abstract_class_as_typeconst.php",
+                              "line":32,
+                              "char_start":32,
+                              "char_end":45
+                            }
+                          ]
                         }
                       ]
                     },
@@ -517,12 +537,22 @@ Path:
                 {
                   "Rtypeconst":[
                     {
-                      "Rhint":[
+                      "Rdef":[
                         {
                           "filename":"workplace_abstract_class_as_typeconst.php",
-                          "line":32,
-                          "char_start":32,
-                          "char_end":45
+                          "line":3,
+                          "char_start":16,
+                          "char_end":29
+                        },
+                        {
+                          "Rhint":[
+                            {
+                              "filename":"workplace_abstract_class_as_typeconst.php",
+                              "line":32,
+                              "char_start":32,
+                              "char_end":45
+                            }
+                          ]
                         }
                       ]
                     },

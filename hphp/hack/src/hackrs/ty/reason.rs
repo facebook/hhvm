@@ -251,6 +251,7 @@ pub trait Reason:
                 OR::Rflow(_) => RI::Rnone,
                 OR::Rrev(_) => RI::Rnone,
                 OR::Rprj(_) => RI::Rnone,
+                OR::Rdef(_) => RI::Rnone,
                 OR::RmissingField => RI::Rnone,
             }
         })

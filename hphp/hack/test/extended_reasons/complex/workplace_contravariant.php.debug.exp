@@ -325,12 +325,22 @@ Raw:
                             {
                               "Rflow":[
                                 {
-                                  "Rhint":[
+                                  "Rdef":[
                                     {
                                       "filename":"workplace_contravariant.php",
-                                      "line":7,
-                                      "char_start":5,
-                                      "char_end":20
+                                      "line":21,
+                                      "char_start":11,
+                                      "char_end":17
+                                    },
+                                    {
+                                      "Rhint":[
+                                        {
+                                          "filename":"workplace_contravariant.php",
+                                          "line":7,
+                                          "char_start":5,
+                                          "char_end":20
+                                        }
+                                      ]
                                     }
                                   ]
                                 },
@@ -344,12 +354,22 @@ Raw:
                                             {
                                               "Rflow":[
                                                 {
-                                                  "Rhint":[
+                                                  "Rdef":[
                                                     {
                                                       "filename":"workplace_contravariant.php",
-                                                      "line":12,
-                                                      "char_start":50,
-                                                      "char_end":67
+                                                      "line":21,
+                                                      "char_start":11,
+                                                      "char_end":17
+                                                    },
+                                                    {
+                                                      "Rhint":[
+                                                        {
+                                                          "filename":"workplace_contravariant.php",
+                                                          "line":12,
+                                                          "char_start":50,
+                                                          "char_end":67
+                                                        }
+                                                      ]
                                                     }
                                                   ]
                                                 },
@@ -580,12 +600,22 @@ Normalised:
                             {
                               "Rflow":[
                                 {
-                                  "Rhint":[
+                                  "Rdef":[
                                     {
                                       "filename":"workplace_contravariant.php",
-                                      "line":7,
-                                      "char_start":5,
-                                      "char_end":20
+                                      "line":21,
+                                      "char_start":11,
+                                      "char_end":17
+                                    },
+                                    {
+                                      "Rhint":[
+                                        {
+                                          "filename":"workplace_contravariant.php",
+                                          "line":7,
+                                          "char_start":5,
+                                          "char_end":20
+                                        }
+                                      ]
                                     }
                                   ]
                                 },
@@ -650,12 +680,22 @@ Normalised:
                                             },
                                             "Flow_param_hint",
                                             {
-                                              "Rhint":[
+                                              "Rdef":[
                                                 {
                                                   "filename":"workplace_contravariant.php",
-                                                  "line":12,
-                                                  "char_start":50,
-                                                  "char_end":67
+                                                  "line":21,
+                                                  "char_start":11,
+                                                  "char_end":17
+                                                },
+                                                {
+                                                  "Rhint":[
+                                                    {
+                                                      "filename":"workplace_contravariant.php",
+                                                      "line":12,
+                                                      "char_start":50,
+                                                      "char_end":67
+                                                    }
+                                                  ]
                                                 }
                                               ]
                                             }
@@ -807,12 +847,22 @@ Path:
       }
     },
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"workplace_contravariant.php",
-          "line":7,
-          "char_start":5,
-          "char_end":20
+          "line":21,
+          "char_start":11,
+          "char_end":17
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"workplace_contravariant.php",
+              "line":7,
+              "char_start":5,
+              "char_end":20
+            }
+          ]
         }
       ]
     },
@@ -870,12 +920,22 @@ Path:
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"workplace_contravariant.php",
-          "line":12,
-          "char_start":50,
-          "char_end":67
+          "line":21,
+          "char_start":11,
+          "char_end":17
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"workplace_contravariant.php",
+              "line":12,
+              "char_start":50,
+              "char_end":67
+            }
+          ]
         }
       ]
     },

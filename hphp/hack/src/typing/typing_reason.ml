@@ -410,7 +410,6 @@ type flow_kind =
   | Flow_solved
   | Flow_subtype
   | Flow_subtype_toplevel
-  | Flow_type_def
   | Flow_prj
   | Flow_extends
   | Flow_transitive
@@ -427,7 +426,6 @@ let flow_kind_to_json = function
   | Flow_solved -> Hh_json.string_ "Flow_solved"
   | Flow_subtype -> Hh_json.string_ "Flow_subtype"
   | Flow_subtype_toplevel -> Hh_json.string_ "Flow_subtype_toplevel"
-  | Flow_type_def -> Hh_json.string_ "Flow_type_def"
   | Flow_prj -> Hh_json.string_ "Flow_prj"
   | Flow_extends -> Hh_json.string_ "Flow_extends"
   | Flow_transitive -> Hh_json.string_ "Flow_transitive"
@@ -444,7 +442,6 @@ let explain_flow_kind_fwd = function
   | Flow_subtype
   | Flow_subtype_toplevel ->
     "because they are required to be subtypes"
-  | Flow_type_def -> "because it is the definition"
   | Flow_prj -> "because the type was decomposed"
   | Flow_extends -> "because they are subclass and superclass"
   | Flow_transitive -> "because of transitivity"
@@ -461,7 +458,6 @@ let explain_flow_kind_bwd = function
   | Flow_subtype
   | Flow_subtype_toplevel ->
     "because they are required to be subtypes"
-  | Flow_type_def -> "because it is the definition"
   | Flow_prj -> "because the type was decomposed"
   | Flow_extends -> "because they are subclass and superclass"
   | Flow_transitive -> "because of transitivity"
@@ -612,6 +608,7 @@ type _ t_ =
   | Rflow : locl_phase t_ * flow_kind * locl_phase t_ -> locl_phase t_
   | Rrev : locl_phase t_ -> locl_phase t_
   | Rprj : prj * locl_phase t_ -> locl_phase t_
+  | Rdef : (Pos_or_decl.t[@hash.ignore]) * locl_phase t_ -> locl_phase t_
   | Rmissing_field : locl_phase t_
   | Rpessimised_this : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
 [@@deriving hash]
@@ -621,12 +618,14 @@ let rec normalize : locl_phase t_ -> locl_phase t_ = function
   | Rflow (t1, kind, t2) -> Rflow (normalize t1, kind, normalize t2)
   | Rrev t -> reverse t
   | Rprj (prj, t) -> Rprj (prj, normalize t)
+  | Rdef (def, t) -> Rdef (def, normalize t)
   | t -> t
 
 and reverse : locl_phase t_ -> locl_phase t_ = function
   | Rflow (t1, kind, t2) -> Rflow (reverse t2, kind, reverse t1)
   | Rrev t -> normalize t
   | Rprj (prj, t) -> Rprj (prj, reverse t)
+  | Rdef (def, t) -> Rdef (def, reverse t)
   | t -> t
 
 let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
@@ -739,12 +738,15 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rmissing_class p -> Pos_or_decl.of_raw_pos p
   | Runsafe_cast p -> Pos_or_decl.of_raw_pos p
   | Rflow (from, _kind, _into) -> to_raw_pos from
+  | Rdef (_def, t) -> to_raw_pos t
   | Rrev r -> to_raw_pos_rev r
   | Rprj (_prj, r) -> to_raw_pos r
 
 and to_raw_pos_rev = function
   | Rprj (_, r)
-  | Rflow (_, _, r)
+  | Rdef (_, r)
+  | Rflow (_, _, r) ->
+    to_raw_pos_rev r
   | Rrev r
   | r ->
     to_raw_pos r
@@ -892,6 +894,7 @@ let rec map_pos :
     Rflow (map_pos pos pos_or_decl from, kind, map_pos pos pos_or_decl into)
   | Rrev t -> Rrev (map_pos pos pos_or_decl t)
   | Rprj (prj, t) -> Rprj (prj, map_pos pos pos_or_decl t)
+  | Rdef (def, of_) -> Rdef (pos_or_decl def, map_pos pos pos_or_decl of_)
 
 let to_constructor_string : type ph. ph t_ -> string = function
   | Rnone -> "Rnone"
@@ -997,6 +1000,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rprj _ -> "Rprj"
   | Rmissing_field -> "Rmissing_field"
   | Rpessimised_this _ -> "Rpessimised_this"
+  | Rdef _ -> "Rdef"
 
 let rec pp_t_ : type ph. _ -> ph t_ -> unit =
  fun fmt r ->
@@ -1223,7 +1227,8 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
     | Runsafe_cast p -> Pos.pp fmt p
     | Rflow (from, _kind, _into) -> pp_t_ fmt from
     | Rrev t -> pp_t_ fmt @@ normalize t
-    | Rprj (_, t) -> pp_t_ fmt t);
+    | Rprj (_, t) -> pp_t_ fmt t
+    | Rdef (_, t) -> pp_t_ fmt t);
     Format.fprintf fmt "@])"
 
 and show_t_ : type ph. ph t_ -> string = (fun r -> Format.asprintf "%a" pp_t_ r)
@@ -1616,6 +1621,9 @@ let rec to_json : type a. a t_ -> Hh_json.json =
           );
         ])
   | Rrev r -> Hh_json.(JSON_Object [("Rrev", JSON_Array [to_json r])])
+  | Rdef (def, r) ->
+    Hh_json.(
+      JSON_Object [("Rdef", JSON_Array [Pos_or_decl.json def; to_json r])])
   | Rprj (prj, r) ->
     Hh_json.(JSON_Object [("Rprj", JSON_Array [prj_to_json prj; to_json r])])
   | Rmissing_field -> Hh_json.(JSON_Object [("Rmissing_field", JSON_Array [])])
@@ -2084,6 +2092,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   | Rpattern p ->
     [(Pos_or_decl.of_raw_pos p, prefix ^ " because of this pattern")]
   | Rflow (r, _, _)
+  | Rdef (_, r)
   | Rprj (_, r) ->
     to_string prefix r
   | Rrev r -> to_rev_string prefix r
@@ -2092,6 +2101,7 @@ and to_rev_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
  fun prefix r ->
   match r with
   | Rflow (_, _, r)
+  | Rdef (_, r)
   | Rprj (_, r) ->
     to_rev_string prefix r
   | Rrev r -> to_string prefix r
@@ -2298,6 +2308,8 @@ let unsafe_cast p = Runsafe_cast p
 let pattern p = Rpattern p
 
 let flow ~from ~into ~kind = Rflow (from, kind, into)
+
+let definition def of_ = Rdef (def, of_)
 
 let reverse r = Rrev r
 
@@ -2537,6 +2549,7 @@ module Visitor = struct
         | Rflow (from, kind, into) ->
           Rflow (this#on_reason from, kind, this#on_reason into)
         | Rrev t -> Rrev (this#on_reason t)
+        | Rdef (def, t) -> Rdef (def, this#on_reason t)
         | Rprj (prj, t) -> Rprj (prj, this#on_reason t)
         | Rpessimised_this x -> Rpessimised_this x
 
@@ -2757,6 +2770,7 @@ let to_path t =
 (* TODO(mjt) refactor so that extended reasons use a separate type for witnesses
    and ensure we handle all cases statically *)
 let rec explain_witness = function
+  | Rdef (_pos_or_decl, r) -> explain_witness r
   | Rhint pos -> (pos, "this hint")
   | Ris_refinement pos -> (Pos_or_decl.of_raw_pos pos, "this `is` expression")
   | Rwitness pos -> (Pos_or_decl.of_raw_pos pos, "this expression")

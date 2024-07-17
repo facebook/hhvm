@@ -28,7 +28,7 @@ The field `_PIRANHA_SANDBOX_QUEUED_` is defined
 
 File "workplace_shape_mismatch.php", line 15, character 4 - line 15, character 29:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -40,31 +40,6 @@ Here's why: this hint
 File "workplace_shape_mismatch.php", line 15, character 34 - line 15, character 37:
 
 flows up into this hint as the optional shape field `'_PIRANHA_SANDBOX_QUEUED_'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -129,23 +104,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -190,7 +148,7 @@ The field `async_bulkapi_factor` is defined
 
 File "workplace_shape_mismatch.php", line 18, character 4 - line 18, character 25:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -202,31 +160,6 @@ Here's why: this hint
 File "workplace_shape_mismatch.php", line 18, character 30 - line 18, character 34:
 
 flows up into this hint as the optional shape field `'async_bulkapi_factor'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -291,23 +224,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -352,7 +268,7 @@ The field `devserver` is defined
 
 File "workplace_shape_mismatch.php", line 19, character 4 - line 19, character 14:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -364,31 +280,6 @@ Here's why: this hint
 File "workplace_shape_mismatch.php", line 19, character 19 - line 19, character 24:
 
 flows up into this hint as the optional shape field `'devserver'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -453,23 +344,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -514,7 +388,7 @@ The field `earlyreturn` is defined
 
 File "workplace_shape_mismatch.php", line 14, character 4 - line 14, character 16:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -526,31 +400,6 @@ Here's why: this hint
 File "workplace_shape_mismatch.php", line 14, character 21 - line 14, character 23:
 
 flows up into this hint as the optional shape field `'earlyreturn'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -615,23 +464,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -669,82 +501,25 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 The field `execute_after` is defined
 
- 5 | type AsyncJobOptions = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?»'execute_after'« => int,
  8 |   ?'execute_before' => int,
  9 |   ?'expire_after' => int,
-10 |   ?'region' => string,
-11 |   ?'scheduling_uid' => int,
-12 |   ?'tag' => string,
-13 |   ?'retry_attempt' => int,
-14 |   ?'earlyreturn' => int,
-15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
-16 |   ?'resource_requirement' => int,
-17 |   ?'execution_push_phase' => string,
-18 |   ?'async_bulkapi_factor' => float,
-19 |   ?'devserver' => string,
-20 |   ?'fifo_ordering_key' => string,
-21 |   ?'fifo_dedup_key' => string,
-22 |   ?'send_schedule_cats' => bool,
-23 | );
-24 | 
 
 File "workplace_shape_mismatch.php", line 7, character 4 - line 7, character 18:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
- 5 | type AsyncJobOptions = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => »int«,
  8 |   ?'execute_before' => int,
  9 |   ?'expire_after' => int,
-10 |   ?'region' => string,
-11 |   ?'scheduling_uid' => int,
-12 |   ?'tag' => string,
-13 |   ?'retry_attempt' => int,
-14 |   ?'earlyreturn' => int,
-15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
-16 |   ?'resource_requirement' => int,
-17 |   ?'execution_push_phase' => string,
-18 |   ?'async_bulkapi_factor' => float,
-19 |   ?'devserver' => string,
-20 |   ?'fifo_ordering_key' => string,
-21 |   ?'fifo_dedup_key' => string,
-22 |   ?'send_schedule_cats' => bool,
-23 | );
-24 | 
 
 File "workplace_shape_mismatch.php", line 7, character 23 - line 7, character 25:
 
 flows up into this hint as the optional shape field `'execute_after'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -809,23 +584,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -863,82 +621,25 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 The field `execute_before` is defined
 
- 5 | type AsyncJobOptions = shape(
- 6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
  8 |   ?»'execute_before'« => int,
  9 |   ?'expire_after' => int,
 10 |   ?'region' => string,
-11 |   ?'scheduling_uid' => int,
-12 |   ?'tag' => string,
-13 |   ?'retry_attempt' => int,
-14 |   ?'earlyreturn' => int,
-15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
-16 |   ?'resource_requirement' => int,
-17 |   ?'execution_push_phase' => string,
-18 |   ?'async_bulkapi_factor' => float,
-19 |   ?'devserver' => string,
-20 |   ?'fifo_ordering_key' => string,
-21 |   ?'fifo_dedup_key' => string,
-22 |   ?'send_schedule_cats' => bool,
-23 | );
-24 | 
 
 File "workplace_shape_mismatch.php", line 8, character 4 - line 8, character 19:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
- 5 | type AsyncJobOptions = shape(
- 6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
  8 |   ?'execute_before' => »int«,
  9 |   ?'expire_after' => int,
 10 |   ?'region' => string,
-11 |   ?'scheduling_uid' => int,
-12 |   ?'tag' => string,
-13 |   ?'retry_attempt' => int,
-14 |   ?'earlyreturn' => int,
-15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
-16 |   ?'resource_requirement' => int,
-17 |   ?'execution_push_phase' => string,
-18 |   ?'async_bulkapi_factor' => float,
-19 |   ?'devserver' => string,
-20 |   ?'fifo_ordering_key' => string,
-21 |   ?'fifo_dedup_key' => string,
-22 |   ?'send_schedule_cats' => bool,
-23 | );
-24 | 
 
 File "workplace_shape_mismatch.php", line 8, character 24 - line 8, character 26:
 
 flows up into this hint as the optional shape field `'execute_before'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1003,23 +704,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1064,7 +748,7 @@ The field `execution_push_phase` is defined
 
 File "workplace_shape_mismatch.php", line 17, character 4 - line 17, character 25:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -1076,31 +760,6 @@ Here's why: this hint
 File "workplace_shape_mismatch.php", line 17, character 30 - line 17, character 35:
 
 flows up into this hint as the optional shape field `'execution_push_phase'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1165,23 +824,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1226,7 +868,7 @@ The field `expire_after` is defined
 
 File "workplace_shape_mismatch.php", line 9, character 4 - line 9, character 17:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -1238,31 +880,6 @@ Here's why: this hint
 File "workplace_shape_mismatch.php", line 9, character 22 - line 9, character 24:
 
 flows up into this hint as the optional shape field `'expire_after'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1327,23 +944,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1388,7 +988,7 @@ The field `fifo_dedup_key` is defined
 
 File "workplace_shape_mismatch.php", line 21, character 4 - line 21, character 19:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -1400,31 +1000,6 @@ Here's why: this hint
 File "workplace_shape_mismatch.php", line 21, character 24 - line 21, character 29:
 
 flows up into this hint as the optional shape field `'fifo_dedup_key'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1489,23 +1064,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1550,7 +1108,7 @@ The field `fifo_ordering_key` is defined
 
 File "workplace_shape_mismatch.php", line 20, character 4 - line 20, character 22:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -1562,31 +1120,6 @@ Here's why: this hint
 File "workplace_shape_mismatch.php", line 20, character 27 - line 20, character 32:
 
 flows up into this hint as the optional shape field `'fifo_ordering_key'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1651,23 +1184,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1712,7 +1228,7 @@ The field `region` is defined
 
 File "workplace_shape_mismatch.php", line 10, character 4 - line 10, character 11:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -1724,31 +1240,6 @@ Here's why: this hint
 File "workplace_shape_mismatch.php", line 10, character 16 - line 10, character 21:
 
 flows up into this hint as the optional shape field `'region'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1813,23 +1304,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1874,7 +1348,7 @@ The field `resource_requirement` is defined
 
 File "workplace_shape_mismatch.php", line 16, character 4 - line 16, character 25:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -1886,31 +1360,6 @@ Here's why: this hint
 File "workplace_shape_mismatch.php", line 16, character 30 - line 16, character 32:
 
 flows up into this hint as the optional shape field `'resource_requirement'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1975,23 +1424,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2036,7 +1468,7 @@ The field `retry_attempt` is defined
 
 File "workplace_shape_mismatch.php", line 13, character 4 - line 13, character 18:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -2048,31 +1480,6 @@ Here's why: this hint
 File "workplace_shape_mismatch.php", line 13, character 23 - line 13, character 25:
 
 flows up into this hint as the optional shape field `'retry_attempt'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -2137,23 +1544,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2198,7 +1588,7 @@ The field `scheduling_uid` is defined
 
 File "workplace_shape_mismatch.php", line 11, character 4 - line 11, character 19:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -2210,31 +1600,6 @@ Here's why: this hint
 File "workplace_shape_mismatch.php", line 11, character 24 - line 11, character 26:
 
 flows up into this hint as the optional shape field `'scheduling_uid'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -2299,23 +1664,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2359,7 +1707,7 @@ The field `send_schedule_cats` is defined
 
 File "workplace_shape_mismatch.php", line 22, character 4 - line 22, character 23:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -2370,31 +1718,6 @@ Here's why: this hint
 File "workplace_shape_mismatch.php", line 22, character 28 - line 22, character 31:
 
 flows up into this hint as the optional shape field `'send_schedule_cats'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -2459,23 +1782,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2517,26 +1823,10 @@ The field `serialization_format` is defined
  6 |   ?»'serialization_format'« => SerializationFormat,
  7 |   ?'execute_after' => int,
  8 |   ?'execute_before' => int,
- 9 |   ?'expire_after' => int,
-10 |   ?'region' => string,
-11 |   ?'scheduling_uid' => int,
-12 |   ?'tag' => string,
-13 |   ?'retry_attempt' => int,
-14 |   ?'earlyreturn' => int,
-15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
-16 |   ?'resource_requirement' => int,
-17 |   ?'execution_push_phase' => string,
-18 |   ?'async_bulkapi_factor' => float,
-19 |   ?'devserver' => string,
-20 |   ?'fifo_ordering_key' => string,
-21 |   ?'fifo_dedup_key' => string,
-22 |   ?'send_schedule_cats' => bool,
-23 | );
-24 | 
 
 File "workplace_shape_mismatch.php", line 6, character 4 - line 6, character 25:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -2544,51 +1834,10 @@ Here's why: this hint
  6 |   ?'serialization_format' => »SerializationFormat«,
  7 |   ?'execute_after' => int,
  8 |   ?'execute_before' => int,
- 9 |   ?'expire_after' => int,
-10 |   ?'region' => string,
-11 |   ?'scheduling_uid' => int,
-12 |   ?'tag' => string,
-13 |   ?'retry_attempt' => int,
-14 |   ?'earlyreturn' => int,
-15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
-16 |   ?'resource_requirement' => int,
-17 |   ?'execution_push_phase' => string,
-18 |   ?'async_bulkapi_factor' => float,
-19 |   ?'devserver' => string,
-20 |   ?'fifo_ordering_key' => string,
-21 |   ?'fifo_dedup_key' => string,
-22 |   ?'send_schedule_cats' => bool,
-23 | );
-24 | 
 
 File "workplace_shape_mismatch.php", line 6, character 30 - line 6, character 48:
 
 flows up into this hint as the optional shape field `'serialization_format'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -2653,23 +1902,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2714,7 +1946,7 @@ The field `tag` is defined
 
 File "workplace_shape_mismatch.php", line 12, character 4 - line 12, character 8:
 
-This error has 10 steps, a maximum depth of 2 and contains 1 reversal.
+This error has 8 steps, a maximum depth of 2 and contains 1 reversal.
 
 Here's why: this hint
 
@@ -2726,31 +1958,6 @@ Here's why: this hint
 File "workplace_shape_mismatch.php", line 12, character 13 - line 12, character 18:
 
 flows up into this hint as the optional shape field `'tag'`
-
-  5 | type AsyncJobOptions = »shape(
-  6 |   ?'serialization_format' => SerializationFormat,
-  7 |   ?'execute_after' => int,
-  8 |   ?'execute_before' => int,
-  9 |   ?'expire_after' => int,
- 10 |   ?'region' => string,
- 11 |   ?'scheduling_uid' => int,
- 12 |   ?'tag' => string,
- 13 |   ?'retry_attempt' => int,
- 14 |   ?'earlyreturn' => int,
- 15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
- 16 |   ?'resource_requirement' => int,
- 17 |   ?'execution_push_phase' => string,
- 18 |   ?'async_bulkapi_factor' => float,
- 19 |   ?'devserver' => string,
- 20 |   ?'fifo_ordering_key' => string,
- 21 |   ?'fifo_dedup_key' => string,
- 22 |   ?'send_schedule_cats' => bool,
- 23 | );«
- 24 | 
-
-File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1:
-
-which itself flows into this hint because it is the definition
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -2815,23 +2022,6 @@ which itself flows down into this hint as the 1st function parameter
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
 which itself flows down into this hint as the non-null part of a nullable type
-
- 74 | type AsyncTierJobOptions = »shape(
- 75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
- 76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
- 77 |   ?AsyncTierJobOption::REGION_PREFERENCE => string,
- 78 |   ?AsyncTierJobOption::SANDBOX_HOST => string,
- 79 |   ?AsyncTierJobOption::EARLY_RETURN => int,
- 80 |   ?AsyncTierJobOption::SEND_SCHEDULE_CATS => bool,
- 81 |   ?AsyncTierJobOption::IPF_PRODUCT_OVERRIDE => IPFOverrideParams,
- 82 |   ?AsyncTierJobOption::RETRY_ATTEMPT_DEPRECATED => int,
- 83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
- 84 | );«
- 85 | 
-
-File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 1:
-
-which itself flows into this hint because it is the definition
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(

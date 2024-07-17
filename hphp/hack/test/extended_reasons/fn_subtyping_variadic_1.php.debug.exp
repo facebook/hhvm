@@ -25,7 +25,7 @@ But got `Super`
 
 File "fn_subtyping_variadic_1.php", line 6, character 40 - line 6, character 44:
 
-This error has 11 steps, a maximum depth of 2 and contains 2 reversals.
+This error has 9 steps, a maximum depth of 2 and contains 2 reversals.
 
 Here's why: this hint
 
@@ -123,12 +123,22 @@ Raw:
     {
       "Rflow":[
         {
-          "Rhint":[
+          "Rdef":[
             {
               "filename":"fn_subtyping_variadic_1.php",
-              "line":6,
-              "char_start":40,
-              "char_end":44
+              "line":3,
+              "char_start":7,
+              "char_end":11
+            },
+            {
+              "Rhint":[
+                {
+                  "filename":"fn_subtyping_variadic_1.php",
+                  "line":6,
+                  "char_start":40,
+                  "char_end":44
+                }
+              ]
             }
           ]
         },
@@ -141,18 +151,13 @@ Raw:
                 {
                   "Rflow":[
                     {
-                      "Rflow":[
+                      "Rdef":[
                         {
-                          "Rhint":[
-                            {
-                              "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
-                              "line":6,
-                              "char_start":33,
-                              "char_end":45
-                            }
-                          ]
+                          "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+                          "line":6,
+                          "char_start":11,
+                          "char_end":20
                         },
-                        "Flow_type_def",
                         {
                           "Rhint":[
                             {
@@ -190,18 +195,13 @@ Raw:
                                 {
                                   "Rflow":[
                                     {
-                                      "Rflow":[
+                                      "Rdef":[
                                         {
-                                          "Rhint":[
-                                            {
-                                              "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
-                                              "line":6,
-                                              "char_start":33,
-                                              "char_end":45
-                                            }
-                                          ]
+                                          "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+                                          "line":6,
+                                          "char_start":11,
+                                          "char_end":20
                                         },
-                                        "Flow_type_def",
                                         {
                                           "Rhint":[
                                             {
@@ -300,12 +300,17 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[
+      "Rdef":[
+        {"filename":"fn_subtyping_variadic_1.php","line":4,"char_start":7,"char_end":9},
         {
-          "filename":"fn_subtyping_variadic_1.php",
-          "line":7,
-          "char_start":35,
-          "char_end":37
+          "Rhint":[
+            {
+              "filename":"fn_subtyping_variadic_1.php",
+              "line":7,
+              "char_start":35,
+              "char_end":37
+            }
+          ]
         }
       ]
     }
@@ -321,12 +326,22 @@ Normalised:
     {
       "Rflow":[
         {
-          "Rhint":[
+          "Rdef":[
             {
               "filename":"fn_subtyping_variadic_1.php",
-              "line":6,
-              "char_start":40,
-              "char_end":44
+              "line":3,
+              "char_start":7,
+              "char_end":11
+            },
+            {
+              "Rhint":[
+                {
+                  "filename":"fn_subtyping_variadic_1.php",
+                  "line":6,
+                  "char_start":40,
+                  "char_end":44
+                }
+              ]
             }
           ]
         },
@@ -339,18 +354,13 @@ Normalised:
                 {
                   "Rflow":[
                     {
-                      "Rflow":[
+                      "Rdef":[
                         {
-                          "Rhint":[
-                            {
-                              "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
-                              "line":6,
-                              "char_start":33,
-                              "char_end":45
-                            }
-                          ]
+                          "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+                          "line":6,
+                          "char_start":11,
+                          "char_end":20
                         },
-                        "Flow_type_def",
                         {
                           "Rhint":[
                             {
@@ -450,7 +460,13 @@ Normalised:
                                 },
                                 "Flow_param_hint",
                                 {
-                                  "Rflow":[
+                                  "Rdef":[
+                                    {
+                                      "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
+                                      "line":6,
+                                      "char_start":11,
+                                      "char_end":20
+                                    },
                                     {
                                       "Rhint":[
                                         {
@@ -458,17 +474,6 @@ Normalised:
                                           "line":7,
                                           "char_start":25,
                                           "char_end":47
-                                        }
-                                      ]
-                                    },
-                                    "Flow_type_def",
-                                    {
-                                      "Rhint":[
-                                        {
-                                          "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
-                                          "line":6,
-                                          "char_start":33,
-                                          "char_end":45
                                         }
                                       ]
                                     }
@@ -490,12 +495,17 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[
+      "Rdef":[
+        {"filename":"fn_subtyping_variadic_1.php","line":4,"char_start":7,"char_end":9},
         {
-          "filename":"fn_subtyping_variadic_1.php",
-          "line":7,
-          "char_start":35,
-          "char_end":37
+          "Rhint":[
+            {
+              "filename":"fn_subtyping_variadic_1.php",
+              "line":7,
+              "char_start":35,
+              "char_end":37
+            }
+          ]
         }
       ]
     }
@@ -507,15 +517,25 @@ File "", line 0, character 0 - line 0, character -1:
 
 Path:
 {
-  "stats":{"max_depth":2,"length":11,"reversals":2},
+  "stats":{"max_depth":2,"length":9,"reversals":2},
   "path_elems":[
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"fn_subtyping_variadic_1.php",
-          "line":6,
-          "char_start":40,
-          "char_end":44
+          "line":3,
+          "char_start":7,
+          "char_end":11
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"fn_subtyping_variadic_1.php",
+              "line":6,
+              "char_start":40,
+              "char_end":44
+            }
+          ]
         }
       ]
     },
@@ -523,23 +543,22 @@ Path:
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[1,0]}]}}
     },
     {
-      "Rhint":[
+      "Rdef":[
         {
-          "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
+          "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
           "line":6,
-          "char_start":33,
-          "char_end":45
-        }
-      ]
-    },
-    {"Edge":{"dir":"Bwd","kind":"Flow_type_def"}},
-    {
-      "Rhint":[
+          "char_start":11,
+          "char_end":20
+        },
         {
-          "filename":"fn_subtyping_variadic_1.php",
-          "line":6,
-          "char_start":25,
-          "char_end":51
+          "Rhint":[
+            {
+              "filename":"fn_subtyping_variadic_1.php",
+              "line":6,
+              "char_start":25,
+              "char_end":51
+            }
+          ]
         }
       ]
     },
@@ -615,23 +634,22 @@ Path:
     },
     {"Edge":{"dir":"Bwd","kind":"Flow_param_hint"}},
     {
-      "Rhint":[
+      "Rdef":[
         {
-          "filename":"fn_subtyping_variadic_1.php",
-          "line":7,
-          "char_start":25,
-          "char_end":47
-        }
-      ]
-    },
-    {"Edge":{"dir":"Bwd","kind":"Flow_type_def"}},
-    {
-      "Rhint":[
-        {
-          "filename":"/tmp/Hzup3tWVN1/supportdynamic.hhi",
+          "filename":"/tmp/jWvHwsu0Cd/supportdynamic.hhi",
           "line":6,
-          "char_start":33,
-          "char_end":45
+          "char_start":11,
+          "char_end":20
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"fn_subtyping_variadic_1.php",
+              "line":7,
+              "char_start":25,
+              "char_end":47
+            }
+          ]
         }
       ]
     },
@@ -643,12 +661,17 @@ Path:
       }
     },
     {
-      "Rhint":[
+      "Rdef":[
+        {"filename":"fn_subtyping_variadic_1.php","line":4,"char_start":7,"char_end":9},
         {
-          "filename":"fn_subtyping_variadic_1.php",
-          "line":7,
-          "char_start":35,
-          "char_end":37
+          "Rhint":[
+            {
+              "filename":"fn_subtyping_variadic_1.php",
+              "line":7,
+              "char_start":35,
+              "char_end":37
+            }
+          ]
         }
       ]
     }

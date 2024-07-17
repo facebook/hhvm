@@ -271,7 +271,12 @@ Raw:
                             {
                               "Rflow":[
                                 {
-                                  "Rhint":[{"filename":"ctor_generic.php","line":15,"char_start":5,"char_end":20}]
+                                  "Rdef":[
+                                    {"filename":"ctor_generic.php","line":3,"char_start":11,"char_end":17},
+                                    {
+                                      "Rhint":[{"filename":"ctor_generic.php","line":15,"char_start":5,"char_end":20}]
+                                    }
+                                  ]
                                 },
                                 "Flow_subtype",
                                 {
@@ -283,7 +288,12 @@ Raw:
                                             {
                                               "Rflow":[
                                                 {
-                                                  "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":50,"char_end":67}]
+                                                  "Rdef":[
+                                                    {"filename":"ctor_generic.php","line":3,"char_start":11,"char_end":17},
+                                                    {
+                                                      "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":50,"char_end":67}]
+                                                    }
+                                                  ]
                                                 },
                                                 "Flow_param_hint",
                                                 {
@@ -423,7 +433,12 @@ Normalised:
                             {
                               "Rflow":[
                                 {
-                                  "Rhint":[{"filename":"ctor_generic.php","line":15,"char_start":5,"char_end":20}]
+                                  "Rdef":[
+                                    {"filename":"ctor_generic.php","line":3,"char_start":11,"char_end":17},
+                                    {
+                                      "Rhint":[{"filename":"ctor_generic.php","line":15,"char_start":5,"char_end":20}]
+                                    }
+                                  ]
                                 },
                                 "Flow_subtype",
                                 {
@@ -458,7 +473,12 @@ Normalised:
                                             },
                                             "Flow_param_hint",
                                             {
-                                              "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":50,"char_end":67}]
+                                              "Rdef":[
+                                                {"filename":"ctor_generic.php","line":3,"char_start":11,"char_end":17},
+                                                {
+                                                  "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":50,"char_end":67}]
+                                                }
+                                              ]
                                             }
                                           ]
                                         }
@@ -547,7 +567,12 @@ Path:
       }
     },
     {
-      "Rhint":[{"filename":"ctor_generic.php","line":15,"char_start":5,"char_end":20}]
+      "Rdef":[
+        {"filename":"ctor_generic.php","line":3,"char_start":11,"char_end":17},
+        {
+          "Rhint":[{"filename":"ctor_generic.php","line":15,"char_start":5,"char_end":20}]
+        }
+      ]
     },
     {
       "Edge":{
@@ -575,7 +600,12 @@ Path:
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
-      "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":50,"char_end":67}]
+      "Rdef":[
+        {"filename":"ctor_generic.php","line":3,"char_start":11,"char_end":17},
+        {
+          "Rhint":[{"filename":"ctor_generic.php","line":20,"char_start":50,"char_end":67}]
+        }
+      ]
     },
     {
       "Edge":{

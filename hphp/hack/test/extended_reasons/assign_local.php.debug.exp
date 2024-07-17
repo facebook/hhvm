@@ -110,7 +110,12 @@ Raw:
                     {
                       "Rflow":[
                         {
-                          "Rhint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
+                          "Rdef":[
+                            {"filename":"assign_local.php","line":3,"char_start":7,"char_end":11},
+                            {
+                              "Rhint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
+                            }
+                          ]
                         },
                         "Flow_param_hint",
                         {
@@ -161,7 +166,12 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
+      "Rdef":[
+        {"filename":"assign_local.php","line":4,"char_start":7,"char_end":9},
+        {
+          "Rhint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
+        }
+      ]
     }
   ]
 }
@@ -183,7 +193,12 @@ Normalised:
                     {
                       "Rflow":[
                         {
-                          "Rhint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
+                          "Rdef":[
+                            {"filename":"assign_local.php","line":3,"char_start":7,"char_end":11},
+                            {
+                              "Rhint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
+                            }
+                          ]
                         },
                         "Flow_param_hint",
                         {
@@ -230,7 +245,12 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
+      "Rdef":[
+        {"filename":"assign_local.php","line":4,"char_start":7,"char_end":9},
+        {
+          "Rhint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
+        }
+      ]
     }
   ]
 }
@@ -243,7 +263,12 @@ Path:
   "stats":{"max_depth":1,"length":7,"reversals":1},
   "path_elems":[
     {
-      "Rhint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
+      "Rdef":[
+        {"filename":"assign_local.php","line":3,"char_start":7,"char_end":11},
+        {
+          "Rhint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
+        }
+      ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
@@ -279,7 +304,12 @@ Path:
       }
     },
     {
-      "Rhint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
+      "Rdef":[
+        {"filename":"assign_local.php","line":4,"char_start":7,"char_end":9},
+        {
+          "Rhint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
+        }
+      ]
     }
   ]
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2249a719a8614c9fd8a4b07405bfb7cf>>
+// @generated SignedSource<<e1ab2154d77ed2f22225adcdbfee9d15>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -579,6 +579,9 @@ pub enum T_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Rprj(&'a (Prj<'a>, T_<'a>)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
+    Rdef(&'a (&'a pos_or_decl::PosOrDecl<'a>, T_<'a>)),
     #[rust_to_ocaml(name = "Rmissing_field")]
     RmissingField,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

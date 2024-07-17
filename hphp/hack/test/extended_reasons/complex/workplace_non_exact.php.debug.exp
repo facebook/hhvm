@@ -136,7 +136,12 @@ Raw:
     {
       "Rflow":[
         {
-          "Rhint":[{"filename":"workplace_non_exact.php","line":9,"char_start":11,"char_end":12}]
+          "Rdef":[
+            {"filename":"workplace_non_exact.php","line":3,"char_start":16,"char_end":17},
+            {
+              "Rhint":[{"filename":"workplace_non_exact.php","line":9,"char_start":11,"char_end":12}]
+            }
+          ]
         },
         "Flow_solved",
         {
@@ -213,7 +218,12 @@ Normalised:
     {
       "Rflow":[
         {
-          "Rhint":[{"filename":"workplace_non_exact.php","line":9,"char_start":11,"char_end":12}]
+          "Rdef":[
+            {"filename":"workplace_non_exact.php","line":3,"char_start":16,"char_end":17},
+            {
+              "Rhint":[{"filename":"workplace_non_exact.php","line":9,"char_start":11,"char_end":12}]
+            }
+          ]
         },
         "Flow_solved",
         {
@@ -285,7 +295,12 @@ Path:
   "stats":{"max_depth":1,"length":6,"reversals":1},
   "path_elems":[
     {
-      "Rhint":[{"filename":"workplace_non_exact.php","line":9,"char_start":11,"char_end":12}]
+      "Rdef":[
+        {"filename":"workplace_non_exact.php","line":3,"char_start":16,"char_end":17},
+        {
+          "Rhint":[{"filename":"workplace_non_exact.php","line":9,"char_start":11,"char_end":12}]
+        }
+      ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_solved"}},
     {

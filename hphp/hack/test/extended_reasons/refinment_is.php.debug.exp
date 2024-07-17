@@ -139,7 +139,12 @@ Raw:
             {
               "Rflow":[
                 {
-                  "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
+                  "Rdef":[
+                    {"filename":"refinment_is.php","line":4,"char_start":7,"char_end":7},
+                    {
+                      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
+                    }
+                  ]
                 },
                 "Flow_param_hint",
                 {
@@ -211,7 +216,12 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+      "Rdef":[
+        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+        {
+          "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+        }
+      ]
     }
   ]
 }
@@ -229,7 +239,12 @@ Normalised:
             {
               "Rflow":[
                 {
-                  "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
+                  "Rdef":[
+                    {"filename":"refinment_is.php","line":4,"char_start":7,"char_end":7},
+                    {
+                      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
+                    }
+                  ]
                 },
                 "Flow_param_hint",
                 {
@@ -301,7 +316,12 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+      "Rdef":[
+        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+        {
+          "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+        }
+      ]
     }
   ]
 }
@@ -314,7 +334,12 @@ Path:
   "stats":{"max_depth":2,"length":9,"reversals":0},
   "path_elems":[
     {
-      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
+      "Rdef":[
+        {"filename":"refinment_is.php","line":4,"char_start":7,"char_end":7},
+        {
+          "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
+        }
+      ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
@@ -354,7 +379,12 @@ Path:
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
-      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+      "Rdef":[
+        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+        {
+          "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+        }
+      ]
     }
   ]
 }
@@ -522,7 +552,12 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+      "Rdef":[
+        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+        {
+          "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+        }
+      ]
     }
   ]
 }
@@ -583,7 +618,12 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+      "Rdef":[
+        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+        {
+          "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+        }
+      ]
     }
   ]
 }
@@ -622,7 +662,12 @@ Path:
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
-      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+      "Rdef":[
+        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+        {
+          "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+        }
+      ]
     }
   ]
 }
@@ -756,7 +801,12 @@ Raw:
     {
       "Rflow":[
         {
-          "Rhint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
+          "Rdef":[
+            {"filename":"refinment_is.php","line":3,"char_start":11,"char_end":11},
+            {
+              "Rhint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
+            }
+          ]
         },
         "Flow_prj",
         {
@@ -816,7 +866,12 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+      "Rdef":[
+        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+        {
+          "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+        }
+      ]
     }
   ]
 }
@@ -830,7 +885,12 @@ Normalised:
     {
       "Rflow":[
         {
-          "Rhint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
+          "Rdef":[
+            {"filename":"refinment_is.php","line":3,"char_start":11,"char_end":11},
+            {
+              "Rhint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
+            }
+          ]
         },
         "Flow_prj",
         {
@@ -890,7 +950,12 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+      "Rdef":[
+        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+        {
+          "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+        }
+      ]
     }
   ]
 }
@@ -903,7 +968,12 @@ Path:
   "stats":{"max_depth":2,"length":7,"reversals":0},
   "path_elems":[
     {
-      "Rhint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
+      "Rdef":[
+        {"filename":"refinment_is.php","line":3,"char_start":11,"char_end":11},
+        {
+          "Rhint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
+        }
+      ]
     },
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_inter"]}}
@@ -935,7 +1005,12 @@ Path:
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
-      "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+      "Rdef":[
+        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+        {
+          "Rhint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+        }
+      ]
     }
   ]
 }

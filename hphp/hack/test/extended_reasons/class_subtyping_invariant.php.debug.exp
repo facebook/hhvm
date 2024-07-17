@@ -124,12 +124,22 @@ Raw:
     {
       "Rflow":[
         {
-          "Rhint":[
+          "Rdef":[
             {
               "filename":"class_subtyping_invariant.php",
-              "line":11,
-              "char_start":37,
-              "char_end":41
+              "line":7,
+              "char_start":7,
+              "char_end":11
+            },
+            {
+              "Rhint":[
+                {
+                  "filename":"class_subtyping_invariant.php",
+                  "line":11,
+                  "char_start":37,
+                  "char_end":41
+                }
+              ]
             }
           ]
         },
@@ -140,12 +150,22 @@ Raw:
             {
               "Rflow":[
                 {
-                  "Rhint":[
+                  "Rdef":[
                     {
                       "filename":"class_subtyping_invariant.php",
-                      "line":11,
-                      "char_start":21,
-                      "char_end":42
+                      "line":3,
+                      "char_start":7,
+                      "char_end":9
+                    },
+                    {
+                      "Rhint":[
+                        {
+                          "filename":"class_subtyping_invariant.php",
+                          "line":11,
+                          "char_start":21,
+                          "char_end":42
+                        }
+                      ]
                     }
                   ]
                 },
@@ -155,12 +175,22 @@ Raw:
                     {
                       "Rflow":[
                         {
-                          "Rhint":[
+                          "Rdef":[
                             {
                               "filename":"class_subtyping_invariant.php",
-                              "line":5,
-                              "char_start":28,
-                              "char_end":43
+                              "line":3,
+                              "char_start":7,
+                              "char_end":9
+                            },
+                            {
+                              "Rhint":[
+                                {
+                                  "filename":"class_subtyping_invariant.php",
+                                  "line":5,
+                                  "char_start":28,
+                                  "char_end":43
+                                }
+                              ]
                             }
                           ]
                         },
@@ -172,12 +202,22 @@ Raw:
                                 {
                                   "Rflow":[
                                     {
-                                      "Rhint":[
+                                      "Rdef":[
                                         {
                                           "filename":"class_subtyping_invariant.php",
-                                          "line":13,
-                                          "char_start":32,
-                                          "char_end":46
+                                          "line":5,
+                                          "char_start":7,
+                                          "char_end":9
+                                        },
+                                        {
+                                          "Rhint":[
+                                            {
+                                              "filename":"class_subtyping_invariant.php",
+                                              "line":13,
+                                              "char_start":32,
+                                              "char_end":46
+                                            }
+                                          ]
                                         }
                                       ]
                                     },
@@ -256,12 +296,22 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"class_subtyping_invariant.php",
-          "line":13,
-          "char_start":43,
-          "char_end":45
+          "line":9,
+          "char_start":7,
+          "char_end":9
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"class_subtyping_invariant.php",
+              "line":13,
+              "char_start":43,
+              "char_end":45
+            }
+          ]
         }
       ]
     }
@@ -277,12 +327,22 @@ Normalised:
     {
       "Rflow":[
         {
-          "Rhint":[
+          "Rdef":[
             {
               "filename":"class_subtyping_invariant.php",
-              "line":11,
-              "char_start":37,
-              "char_end":41
+              "line":7,
+              "char_start":7,
+              "char_end":11
+            },
+            {
+              "Rhint":[
+                {
+                  "filename":"class_subtyping_invariant.php",
+                  "line":11,
+                  "char_start":37,
+                  "char_end":41
+                }
+              ]
             }
           ]
         },
@@ -293,12 +353,22 @@ Normalised:
             {
               "Rflow":[
                 {
-                  "Rhint":[
+                  "Rdef":[
                     {
                       "filename":"class_subtyping_invariant.php",
-                      "line":11,
-                      "char_start":21,
-                      "char_end":42
+                      "line":3,
+                      "char_start":7,
+                      "char_end":9
+                    },
+                    {
+                      "Rhint":[
+                        {
+                          "filename":"class_subtyping_invariant.php",
+                          "line":11,
+                          "char_start":21,
+                          "char_end":42
+                        }
+                      ]
                     }
                   ]
                 },
@@ -365,12 +435,22 @@ Normalised:
                                 },
                                 "Flow_param_hint",
                                 {
-                                  "Rhint":[
+                                  "Rdef":[
                                     {
                                       "filename":"class_subtyping_invariant.php",
-                                      "line":13,
-                                      "char_start":32,
-                                      "char_end":46
+                                      "line":5,
+                                      "char_start":7,
+                                      "char_end":9
+                                    },
+                                    {
+                                      "Rhint":[
+                                        {
+                                          "filename":"class_subtyping_invariant.php",
+                                          "line":13,
+                                          "char_start":32,
+                                          "char_end":46
+                                        }
+                                      ]
                                     }
                                   ]
                                 }
@@ -382,12 +462,22 @@ Normalised:
                     },
                     "Flow_extends",
                     {
-                      "Rhint":[
+                      "Rdef":[
                         {
                           "filename":"class_subtyping_invariant.php",
-                          "line":5,
-                          "char_start":28,
-                          "char_end":43
+                          "line":3,
+                          "char_start":7,
+                          "char_end":9
+                        },
+                        {
+                          "Rhint":[
+                            {
+                              "filename":"class_subtyping_invariant.php",
+                              "line":5,
+                              "char_start":28,
+                              "char_end":43
+                            }
+                          ]
                         }
                       ]
                     }
@@ -401,12 +491,22 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"class_subtyping_invariant.php",
-          "line":13,
-          "char_start":43,
-          "char_end":45
+          "line":9,
+          "char_start":7,
+          "char_end":9
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"class_subtyping_invariant.php",
+              "line":13,
+              "char_start":43,
+              "char_end":45
+            }
+          ]
         }
       ]
     }
@@ -421,12 +521,22 @@ Path:
   "stats":{"max_depth":2,"length":8,"reversals":1},
   "path_elems":[
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"class_subtyping_invariant.php",
-          "line":11,
-          "char_start":37,
-          "char_end":41
+          "line":7,
+          "char_start":7,
+          "char_end":11
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"class_subtyping_invariant.php",
+              "line":11,
+              "char_start":37,
+              "char_end":41
+            }
+          ]
         }
       ]
     },
@@ -438,12 +548,22 @@ Path:
       }
     },
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"class_subtyping_invariant.php",
-          "line":11,
-          "char_start":21,
-          "char_end":42
+          "line":3,
+          "char_start":7,
+          "char_end":9
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"class_subtyping_invariant.php",
+              "line":11,
+              "char_start":21,
+              "char_end":42
+            }
+          ]
         }
       ]
     },
@@ -501,23 +621,43 @@ Path:
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"class_subtyping_invariant.php",
-          "line":13,
-          "char_start":32,
-          "char_end":46
+          "line":5,
+          "char_start":7,
+          "char_end":9
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"class_subtyping_invariant.php",
+              "line":13,
+              "char_start":32,
+              "char_end":46
+            }
+          ]
         }
       ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_extends"}},
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"class_subtyping_invariant.php",
-          "line":5,
-          "char_start":28,
-          "char_end":43
+          "line":3,
+          "char_start":7,
+          "char_end":9
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"class_subtyping_invariant.php",
+              "line":5,
+              "char_start":28,
+              "char_end":43
+            }
+          ]
         }
       ]
     },
@@ -529,12 +669,22 @@ Path:
       }
     },
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"class_subtyping_invariant.php",
-          "line":13,
-          "char_start":43,
-          "char_end":45
+          "line":9,
+          "char_start":7,
+          "char_end":9
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"class_subtyping_invariant.php",
+              "line":13,
+              "char_start":43,
+              "char_end":45
+            }
+          ]
         }
       ]
     }

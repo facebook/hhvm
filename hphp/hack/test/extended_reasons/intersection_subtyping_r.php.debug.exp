@@ -82,12 +82,22 @@ Raw:
             {
               "Rflow":[
                 {
-                  "Rhint":[
+                  "Rdef":[
                     {
                       "filename":"intersection_subtyping_r.php",
-                      "line":7,
-                      "char_start":18,
-                      "char_end":18
+                      "line":5,
+                      "char_start":7,
+                      "char_end":7
+                    },
+                    {
+                      "Rhint":[
+                        {
+                          "filename":"intersection_subtyping_r.php",
+                          "line":7,
+                          "char_start":18,
+                          "char_end":18
+                        }
+                      ]
                     }
                   ]
                 },
@@ -150,12 +160,22 @@ Raw:
         },
         "Flow_prj",
         {
-          "Rhint":[
+          "Rdef":[
             {
               "filename":"intersection_subtyping_r.php",
-              "line":7,
-              "char_start":31,
-              "char_end":31
+              "line":3,
+              "char_start":11,
+              "char_end":11
+            },
+            {
+              "Rhint":[
+                {
+                  "filename":"intersection_subtyping_r.php",
+                  "line":7,
+                  "char_start":31,
+                  "char_end":31
+                }
+              ]
             }
           ]
         }
@@ -177,12 +197,22 @@ Normalised:
             {
               "Rflow":[
                 {
-                  "Rhint":[
+                  "Rdef":[
                     {
                       "filename":"intersection_subtyping_r.php",
-                      "line":7,
-                      "char_start":18,
-                      "char_end":18
+                      "line":5,
+                      "char_start":7,
+                      "char_end":7
+                    },
+                    {
+                      "Rhint":[
+                        {
+                          "filename":"intersection_subtyping_r.php",
+                          "line":7,
+                          "char_start":18,
+                          "char_end":18
+                        }
+                      ]
                     }
                   ]
                 },
@@ -245,12 +275,22 @@ Normalised:
         },
         "Flow_prj",
         {
-          "Rhint":[
+          "Rdef":[
             {
               "filename":"intersection_subtyping_r.php",
-              "line":7,
-              "char_start":31,
-              "char_end":31
+              "line":3,
+              "char_start":11,
+              "char_end":11
+            },
+            {
+              "Rhint":[
+                {
+                  "filename":"intersection_subtyping_r.php",
+                  "line":7,
+                  "char_start":31,
+                  "char_end":31
+                }
+              ]
             }
           ]
         }
@@ -267,12 +307,22 @@ Path:
   "stats":{"max_depth":1,"length":5,"reversals":0},
   "path_elems":[
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"intersection_subtyping_r.php",
-          "line":7,
-          "char_start":18,
-          "char_end":18
+          "line":5,
+          "char_start":7,
+          "char_end":7
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"intersection_subtyping_r.php",
+              "line":7,
+              "char_start":18,
+              "char_end":18
+            }
+          ]
         }
       ]
     },
@@ -324,12 +374,22 @@ Path:
       "Edge":{"dir":"Fwd","kind":"Flow_prj","out_of":{"Asymm":["Super","Prj_asymm_inter"]}}
     },
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"intersection_subtyping_r.php",
-          "line":7,
-          "char_start":31,
-          "char_end":31
+          "line":3,
+          "char_start":11,
+          "char_end":11
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"intersection_subtyping_r.php",
+              "line":7,
+              "char_start":31,
+              "char_end":31
+            }
+          ]
         }
       ]
     }

@@ -25,7 +25,7 @@ But got `Super`
 
 File "fn_subtyping_contra_2.php", line 7, character 36 - line 7, character 40:
 
-This error has 17 steps, a maximum depth of 3 and contains 3 reversals.
+This error has 13 steps, a maximum depth of 3 and contains 3 reversals.
 
 Here's why: this hint
 
@@ -63,7 +63,7 @@ which itself flows from this declaration because they are required to be subtype
 
 File "fn_subtyping_contra_2.php", line 6, character 26 - line 6, character 46:
 
-which itself flows into this hint because it is the definition
+which itself flows up from this hint as the 1st function parameter
 
  6 | function foo_2((function((function(Sub): void)): void) $_): void {}
  7 | function bar_2(»(function((function(Super): void)): void)« $f): void {
@@ -135,7 +135,7 @@ which itself flows into this hint because the type was decomposed
 
 File "fn_subtyping_contra_2.php", line 6, character 16 - line 6, character 54:
 
-which itself flows into this hint because it is the definition
+which itself flows down from this hint as the 1st function parameter
 
  6 | function foo_2((function(»(function(Sub): void)«): void) $_): void {}
  7 | function bar_2((function((function(Super): void)): void) $f): void {

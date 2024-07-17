@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6a5b729bdfb41dd6d871ff5efbf1346e>>
+// @generated SignedSource<<566f5add49c6d043b0f48b319038a3ba>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -389,8 +389,6 @@ pub enum FlowKind {
     FlowSubtype,
     #[rust_to_ocaml(name = "Flow_subtype_toplevel")]
     FlowSubtypeToplevel,
-    #[rust_to_ocaml(name = "Flow_type_def")]
-    FlowTypeDef,
     #[rust_to_ocaml(name = "Flow_prj")]
     FlowPrj,
     #[rust_to_ocaml(name = "Flow_extends")]
@@ -620,6 +618,7 @@ pub enum T_ {
     Rflow(Box<T_>, FlowKind, Box<T_>),
     Rrev(Box<T_>),
     Rprj(Prj, Box<T_>),
+    Rdef(pos_or_decl::PosOrDecl, Box<T_>),
     #[rust_to_ocaml(name = "Rmissing_field")]
     RmissingField,
     #[rust_to_ocaml(name = "Rpessimised_this")]

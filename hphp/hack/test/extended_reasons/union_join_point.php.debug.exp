@@ -120,7 +120,12 @@ Raw:
                 {
                   "Rflow":[
                     {
-                      "Rhint":[{"filename":"union_join_point.php","line":5,"char_start":30,"char_end":30}]
+                      "Rdef":[
+                        {"filename":"union_join_point.php","line":3,"char_start":7,"char_end":7},
+                        {
+                          "Rhint":[{"filename":"union_join_point.php","line":5,"char_start":30,"char_end":30}]
+                        }
+                      ]
                     },
                     "Flow_param_hint",
                     {
@@ -169,7 +174,12 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"union_join_point.php","line":5,"char_start":37,"char_end":37}]
+      "Rdef":[
+        {"filename":"union_join_point.php","line":2,"char_start":7,"char_end":7},
+        {
+          "Rhint":[{"filename":"union_join_point.php","line":5,"char_start":37,"char_end":37}]
+        }
+      ]
     }
   ]
 }
@@ -189,7 +199,12 @@ Normalised:
                 {
                   "Rflow":[
                     {
-                      "Rhint":[{"filename":"union_join_point.php","line":5,"char_start":30,"char_end":30}]
+                      "Rdef":[
+                        {"filename":"union_join_point.php","line":3,"char_start":7,"char_end":7},
+                        {
+                          "Rhint":[{"filename":"union_join_point.php","line":5,"char_start":30,"char_end":30}]
+                        }
+                      ]
                     },
                     "Flow_param_hint",
                     {
@@ -238,7 +253,12 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"union_join_point.php","line":5,"char_start":37,"char_end":37}]
+      "Rdef":[
+        {"filename":"union_join_point.php","line":2,"char_start":7,"char_end":7},
+        {
+          "Rhint":[{"filename":"union_join_point.php","line":5,"char_start":37,"char_end":37}]
+        }
+      ]
     }
   ]
 }
@@ -251,7 +271,12 @@ Path:
   "stats":{"max_depth":1,"length":7,"reversals":0},
   "path_elems":[
     {
-      "Rhint":[{"filename":"union_join_point.php","line":5,"char_start":30,"char_end":30}]
+      "Rdef":[
+        {"filename":"union_join_point.php","line":3,"char_start":7,"char_end":7},
+        {
+          "Rhint":[{"filename":"union_join_point.php","line":5,"char_start":30,"char_end":30}]
+        }
+      ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
     {
@@ -281,7 +306,12 @@ Path:
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     {
-      "Rhint":[{"filename":"union_join_point.php","line":5,"char_start":37,"char_end":37}]
+      "Rdef":[
+        {"filename":"union_join_point.php","line":2,"char_start":7,"char_end":7},
+        {
+          "Rhint":[{"filename":"union_join_point.php","line":5,"char_start":37,"char_end":37}]
+        }
+      ]
     }
   ]
 }

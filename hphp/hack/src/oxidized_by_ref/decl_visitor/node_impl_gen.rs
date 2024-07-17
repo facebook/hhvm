@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e05fdd0ba01ee82c0e3782836bebeeb0>>
+// @generated SignedSource<<47b1fd9cbf6edece79db5c6a7ccef62c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1210,6 +1210,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::Rflow(ref __binding_0) => __binding_0.accept(v),
             T_::Rrev(ref __binding_0) => __binding_0.accept(v),
             T_::Rprj(ref __binding_0) => __binding_0.accept(v),
+            T_::Rdef(ref __binding_0) => __binding_0.accept(v),
             T_::RmissingField => {}
             T_::RpessimisedThis(ref __binding_0) => __binding_0.accept(v),
         }
@@ -1459,7 +1460,6 @@ impl<'a> Node<'a> for FlowKind {
             FlowKind::FlowSolved => {}
             FlowKind::FlowSubtype => {}
             FlowKind::FlowSubtypeToplevel => {}
-            FlowKind::FlowTypeDef => {}
             FlowKind::FlowPrj => {}
             FlowKind::FlowExtends => {}
             FlowKind::FlowTransitive => {}

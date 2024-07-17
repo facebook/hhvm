@@ -62,7 +62,6 @@ type flow_kind =
   | Flow_solved
   | Flow_subtype
   | Flow_subtype_toplevel
-  | Flow_type_def
   | Flow_prj
   | Flow_extends
   | Flow_transitive
@@ -367,6 +366,8 @@ val flow :
 
 (** Paths are reversed with contravariance; we use this constructor to perform reversals lazily *)
 val reverse : locl_phase t_ -> locl_phase t_
+
+val definition : Pos_or_decl.t -> locl_phase t_ -> locl_phase t_
 
 (** Record the decomposition of a covariant type parameter when simplifying a
     subtype constraint between two type constructors *)

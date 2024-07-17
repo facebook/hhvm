@@ -99,7 +99,12 @@ Raw:
                 {
                   "Rflow":[
                     {
-                      "Rhint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
+                      "Rdef":[
+                        {"filename":"assign_obj_get.php","line":3,"char_start":7,"char_end":11},
+                        {
+                          "Rhint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
+                        }
+                      ]
                     },
                     "Flow_subtype",
                     {
@@ -144,7 +149,12 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"assign_obj_get.php","line":12,"char_start":14,"char_end":16}]
+      "Rdef":[
+        {"filename":"assign_obj_get.php","line":4,"char_start":7,"char_end":9},
+        {
+          "Rhint":[{"filename":"assign_obj_get.php","line":12,"char_start":14,"char_end":16}]
+        }
+      ]
     }
   ]
 }
@@ -164,7 +174,12 @@ Normalised:
                 {
                   "Rflow":[
                     {
-                      "Rhint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
+                      "Rdef":[
+                        {"filename":"assign_obj_get.php","line":3,"char_start":7,"char_end":11},
+                        {
+                          "Rhint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
+                        }
+                      ]
                     },
                     "Flow_subtype",
                     {
@@ -205,7 +220,12 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[{"filename":"assign_obj_get.php","line":12,"char_start":14,"char_end":16}]
+      "Rdef":[
+        {"filename":"assign_obj_get.php","line":4,"char_start":7,"char_end":9},
+        {
+          "Rhint":[{"filename":"assign_obj_get.php","line":12,"char_start":14,"char_end":16}]
+        }
+      ]
     }
   ]
 }
@@ -218,7 +238,12 @@ Path:
   "stats":{"max_depth":1,"length":6,"reversals":1},
   "path_elems":[
     {
-      "Rhint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
+      "Rdef":[
+        {"filename":"assign_obj_get.php","line":3,"char_start":7,"char_end":11},
+        {
+          "Rhint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
+        }
+      ]
     },
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype"}},
     {
@@ -250,7 +275,12 @@ Path:
       }
     },
     {
-      "Rhint":[{"filename":"assign_obj_get.php","line":12,"char_start":14,"char_end":16}]
+      "Rdef":[
+        {"filename":"assign_obj_get.php","line":4,"char_start":7,"char_end":9},
+        {
+          "Rhint":[{"filename":"assign_obj_get.php","line":12,"char_start":14,"char_end":16}]
+        }
+      ]
     }
   ]
 }

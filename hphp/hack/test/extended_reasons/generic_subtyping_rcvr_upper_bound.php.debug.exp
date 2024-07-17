@@ -120,12 +120,22 @@ Raw:
             {
               "Rflow":[
                 {
-                  "Rhint":[
+                  "Rdef":[
                     {
                       "filename":"generic_subtyping_rcvr_upper_bound.php",
-                      "line":9,
-                      "char_start":40,
-                      "char_end":40
+                      "line":4,
+                      "char_start":7,
+                      "char_end":7
+                    },
+                    {
+                      "Rhint":[
+                        {
+                          "filename":"generic_subtyping_rcvr_upper_bound.php",
+                          "line":9,
+                          "char_start":40,
+                          "char_end":40
+                        }
+                      ]
                     }
                   ]
                 },
@@ -230,12 +240,22 @@ Normalised:
             {
               "Rflow":[
                 {
-                  "Rhint":[
+                  "Rdef":[
                     {
                       "filename":"generic_subtyping_rcvr_upper_bound.php",
-                      "line":9,
-                      "char_start":40,
-                      "char_end":40
+                      "line":4,
+                      "char_start":7,
+                      "char_end":7
+                    },
+                    {
+                      "Rhint":[
+                        {
+                          "filename":"generic_subtyping_rcvr_upper_bound.php",
+                          "line":9,
+                          "char_start":40,
+                          "char_end":40
+                        }
+                      ]
                     }
                   ]
                 },
@@ -331,12 +351,22 @@ Path:
   "stats":{"max_depth":1,"length":5,"reversals":1},
   "path_elems":[
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"generic_subtyping_rcvr_upper_bound.php",
-          "line":9,
-          "char_start":40,
-          "char_end":40
+          "line":4,
+          "char_start":7,
+          "char_end":7
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"generic_subtyping_rcvr_upper_bound.php",
+              "line":9,
+              "char_start":40,
+              "char_end":40
+            }
+          ]
         }
       ]
     },

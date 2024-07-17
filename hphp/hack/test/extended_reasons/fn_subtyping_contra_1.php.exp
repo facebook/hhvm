@@ -25,7 +25,7 @@ But got `Super`
 
 File "fn_subtyping_contra_1.php", line 6, character 26 - line 6, character 30:
 
-This error has 11 steps, a maximum depth of 2 and contains 2 reversals.
+This error has 9 steps, a maximum depth of 2 and contains 2 reversals.
 
 Here's why: this hint
 

@@ -499,12 +499,8 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
           set_origin_and_cache origin_opt env ty_err_opt lty (Some shp_def_pos)
         in
         let lty =
-          Typing_env.update_reason env lty ~f:(fun into ->
-              let from =
-                Typing_reason.localize
-                @@ Typing_defs.get_reason typedef_info.td_type
-              in
-              Typing_reason.(flow ~from ~into ~kind:Flow_type_def))
+          Typing_env.update_reason env lty ~f:(fun r ->
+              Typing_reason.(definition typedef_info.td_pos r))
         in
         ((env, ty_err_opt), lty)
       | Decl_entry.DoesNotExist
@@ -868,6 +864,12 @@ and localize_class_instantiation
         (not ety_env.make_internal_opaque)
         || Typing_modules.is_class_visible env class_info
       then
+        let r =
+          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
+            Typing_reason.(definition (Folded_class.pos class_info) r)
+          else
+            r
+        in
         ((env, err), mk (r, Tclass (sid, nonexact, tyl)))
       else
         let callee_module =

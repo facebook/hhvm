@@ -106,12 +106,22 @@ Raw:
     {
       "Rflow":[
         {
-          "Rhint":[
+          "Rdef":[
             {
               "filename":"generic_subtyping_caller_upper_bound.php",
-              "line":9,
-              "char_start":45,
-              "char_end":45
+              "line":4,
+              "char_start":7,
+              "char_end":7
+            },
+            {
+              "Rhint":[
+                {
+                  "filename":"generic_subtyping_caller_upper_bound.php",
+                  "line":9,
+                  "char_start":45,
+                  "char_end":45
+                }
+              ]
             }
           ]
         },
@@ -199,12 +209,22 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"generic_subtyping_caller_upper_bound.php",
-          "line":7,
-          "char_start":24,
-          "char_end":24
+          "line":5,
+          "char_start":7,
+          "char_end":7
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"generic_subtyping_caller_upper_bound.php",
+              "line":7,
+              "char_start":24,
+              "char_end":24
+            }
+          ]
         }
       ]
     }
@@ -220,12 +240,22 @@ Normalised:
     {
       "Rflow":[
         {
-          "Rhint":[
+          "Rdef":[
             {
               "filename":"generic_subtyping_caller_upper_bound.php",
-              "line":9,
-              "char_start":45,
-              "char_end":45
+              "line":4,
+              "char_start":7,
+              "char_end":7
+            },
+            {
+              "Rhint":[
+                {
+                  "filename":"generic_subtyping_caller_upper_bound.php",
+                  "line":9,
+                  "char_start":45,
+                  "char_end":45
+                }
+              ]
             }
           ]
         },
@@ -309,12 +339,22 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"generic_subtyping_caller_upper_bound.php",
-          "line":7,
-          "char_start":24,
-          "char_end":24
+          "line":5,
+          "char_start":7,
+          "char_end":7
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"generic_subtyping_caller_upper_bound.php",
+              "line":7,
+              "char_start":24,
+              "char_end":24
+            }
+          ]
         }
       ]
     }
@@ -329,12 +369,22 @@ Path:
   "stats":{"max_depth":1,"length":6,"reversals":1},
   "path_elems":[
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"generic_subtyping_caller_upper_bound.php",
-          "line":9,
-          "char_start":45,
-          "char_end":45
+          "line":4,
+          "char_start":7,
+          "char_end":7
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"generic_subtyping_caller_upper_bound.php",
+              "line":9,
+              "char_start":45,
+              "char_end":45
+            }
+          ]
         }
       ]
     },
@@ -403,12 +453,22 @@ Path:
       }
     },
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"generic_subtyping_caller_upper_bound.php",
-          "line":7,
-          "char_start":24,
-          "char_end":24
+          "line":5,
+          "char_start":7,
+          "char_end":7
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"generic_subtyping_caller_upper_bound.php",
+              "line":7,
+              "char_start":24,
+              "char_end":24
+            }
+          ]
         }
       ]
     }
@@ -594,12 +654,22 @@ Raw:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"generic_subtyping_caller_upper_bound.php",
-          "line":7,
-          "char_start":24,
-          "char_end":24
+          "line":5,
+          "char_start":7,
+          "char_end":7
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"generic_subtyping_caller_upper_bound.php",
+              "line":7,
+              "char_start":24,
+              "char_end":24
+            }
+          ]
         }
       ]
     }
@@ -689,12 +759,22 @@ Normalised:
     },
     "Flow_subtype_toplevel",
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"generic_subtyping_caller_upper_bound.php",
-          "line":7,
-          "char_start":24,
-          "char_end":24
+          "line":5,
+          "char_start":7,
+          "char_end":7
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"generic_subtyping_caller_upper_bound.php",
+              "line":7,
+              "char_start":24,
+              "char_end":24
+            }
+          ]
         }
       ]
     }
@@ -772,12 +852,22 @@ Path:
       }
     },
     {
-      "Rhint":[
+      "Rdef":[
         {
           "filename":"generic_subtyping_caller_upper_bound.php",
-          "line":7,
-          "char_start":24,
-          "char_end":24
+          "line":5,
+          "char_start":7,
+          "char_end":7
+        },
+        {
+          "Rhint":[
+            {
+              "filename":"generic_subtyping_caller_upper_bound.php",
+              "line":7,
+              "char_start":24,
+              "char_end":24
+            }
+          ]
         }
       ]
     }

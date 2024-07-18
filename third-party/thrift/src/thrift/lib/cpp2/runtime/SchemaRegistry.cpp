@@ -18,34 +18,18 @@
 
 #include <folly/Indestructible.h>
 #include <folly/compression/Compression.h>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/cpp2/runtime/BaseSchemaRegistry.h>
 
 namespace apache::thrift {
 
-void SchemaRegistry::registerSchema(
-    std::string_view name, std::string_view data, std::string_view path) {
-  if (accessed()) {
-    throw std::runtime_error("Schemas accessed before registration complete.");
-  }
-  if (auto it = getRawSchemas().find(name); it != getRawSchemas().end()) {
-    if (it->second.path != path) { // Needed to support dynamic linking
-      throw std::runtime_error(fmt::format(
-          "Checksum collision between {} and {}. Make any change to either file's content (e.g.. whitespace/comment) to fix it.",
-          it->second.path,
-          path));
-    }
-    return;
-  }
-  getRawSchemas()[name] = {data, path};
-}
-
-#ifdef FBTHRIFT_HAS_SCHEMA
 const type::Schema& SchemaRegistry::getMergedSchema() {
   static const folly::Indestructible<type::Schema> merged = [&] {
-    accessed() = true;
+    BaseSchemaRegistry::accessed() = true;
     type::Schema mergedSchema;
     std::unordered_set<type::ProgramId> includedPrograms;
 
-    for (auto& [name, data] : getRawSchemas()) {
+    for (auto& [name, data] : BaseSchemaRegistry::getRawSchemas()) {
       auto decompressed =
           folly::io::getCodec(folly::compression::CodecType::ZSTD)
               ->uncompress(data.data);
@@ -80,20 +64,6 @@ const type::Schema& SchemaRegistry::getMergedSchema() {
   }();
 
   return *merged;
-}
-#endif
-
-folly::F14FastMap<std::string_view, SchemaRegistry::RawSchema>&
-SchemaRegistry::getRawSchemas() {
-  static folly::Indestructible<
-      folly::F14FastMap<std::string_view, SchemaRegistry::RawSchema>>
-      schemas;
-  return *schemas;
-}
-
-bool& SchemaRegistry::accessed() {
-  static folly::Indestructible<bool> accessed = false;
-  return *accessed;
 }
 
 } // namespace apache::thrift

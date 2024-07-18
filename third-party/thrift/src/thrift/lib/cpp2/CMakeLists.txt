@@ -245,7 +245,7 @@ add_library(
   async/ThreadBoundAdaptorChannel.cpp
   gen/module_metadata_cpp.cpp
   gen/module_types_cpp.cpp
-  runtime/SchemaRegistry.cpp
+  runtime/BaseSchemaRegistry.cpp
   security/AsyncStopTLS.cpp
   security/FizzPeeker.cpp
   security/SSLUtil.cpp

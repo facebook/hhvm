@@ -16,4 +16,4 @@
 
 #pragma once
 
-#include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
+#include <thrift/lib/cpp2/runtime/BaseSchemaRegistry.h>

@@ -18,9 +18,7 @@
 
 {{#program:needs_sinit?}}
 
-{{#program:has_schema?}}{{! avoids circular dependency }}
 #include <thrift/lib/cpp2/gen/module_sinit_cpp.h>
-{{/program:has_schema?}}
 
 {{ > common/namespace_cpp2_begin}}
 
@@ -56,7 +54,7 @@ struct StaticInit {
     {{/program:any?}}
 
     {{#program:has_schema?}}
-    ::apache::thrift::SchemaRegistry::registerSchema("{{program:schema_name}}", {{program:name}}_constants::{{program:schema_name}}(), "{{program:autogen_path}}");
+    ::apache::thrift::BaseSchemaRegistry::registerSchema("{{program:schema_name}}", {{program:name}}_constants::{{program:schema_name}}(), "{{program:autogen_path}}");
     {{/program:has_schema?}}
   }
 };

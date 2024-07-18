@@ -16,13 +16,26 @@
 
 #pragma once
 
-#include <thrift/lib/thrift/gen-cpp2/schema_types.h>
+#include <string_view>
+
+#include <folly/container/F14Map.h>
 
 namespace apache::thrift {
 
-class SchemaRegistry {
+class BaseSchemaRegistry {
  public:
-  static const type::Schema& getMergedSchema();
+  static void registerSchema(
+      std::string_view name, std::string_view data, std::string_view path);
+
+ private:
+  struct RawSchema {
+    std::string_view data;
+    std::string_view path;
+  };
+  static folly::F14FastMap<std::string_view, RawSchema>& getRawSchemas();
+  static bool& accessed();
+
+  friend class SchemaRegistry;
 };
 
 } // namespace apache::thrift

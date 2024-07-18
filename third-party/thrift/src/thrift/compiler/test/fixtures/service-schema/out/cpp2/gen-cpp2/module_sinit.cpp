@@ -24,7 +24,7 @@ namespace {
 struct StaticInit {
   StaticInit() {
 
-    ::apache::thrift::SchemaRegistry::registerSchema("_fbthrift_schema_3bd6b8a55f23bc3b", module_constants::_fbthrift_schema_3bd6b8a55f23bc3b(), "thrift/compiler/test/fixtures/service-schema/src/module.thrift");
+    ::apache::thrift::BaseSchemaRegistry::registerSchema("_fbthrift_schema_3bd6b8a55f23bc3b", module_constants::_fbthrift_schema_3bd6b8a55f23bc3b(), "thrift/compiler/test/fixtures/service-schema/src/module.thrift");
   }
 };
 

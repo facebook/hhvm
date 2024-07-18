@@ -100,12 +100,12 @@ jobs:
   ubuntu-os-buck-build-and-test:
       needs: get-toolchains-to-install
       runs-on: ubuntu-latest
+      env:
+        PKG_CONFIG_PATH: ${{ github.workspace }}/tools/liboqs/build/src:${{ github.workspace }}/.github
       steps:
         - uses: actions/checkout@v4
           with:
             submodules: 'true'
-        - run: sudo apt-get update
-          shell: bash
         - uses: facebook/install-dotslash@latest
         - name: Install Rust toolchain
           if: needs.get-toolchains-to-install.outputs.uses_rust == 'true'
@@ -126,6 +126,25 @@ jobs:
           uses: actions/setup-python@v5
           with:
             python-version: '3.10'
+        - name: Install ubuntu deps
+          run: |
+            BUCK_GRAPH=$(./buck2 cquery "attrregexfilter(labels, 'third-party:ubuntu:', deps(//fizz/...))" --json --output-attribute=labels)
+            UBUNTU_PACKAGES=$(echo $BUCK_GRAPH | jq '[.[] | .labels] | flatten | unique | map(select(contains("third-party:ubuntu:")) | sub("third-party:ubuntu:"; "")) | .[] | @text')
+            echo $UBUNTU_PACKAGES | xargs sudo apt-get install -y
+        - run: |
+            sudo apt-get update
+            sudo apt install -y libfmt-dev libdouble-conversion-dev
+        - name: Checkout liboqs
+          uses: actions/checkout@v4
+          with:
+            repository: open-quantum-safe/liboqs
+            path: tools/liboqs
+        - name: Setup liboqs
+          run: |
+            sudo apt install astyle cmake gcc ninja-build libssl-dev python3-pytest python3-pytest-xdist unzip xsltproc doxygen graphviz python3-yaml valgrind
+            cd tools/liboqs
+            mkdir build && cd build
+            cmake -GNinja ..
         - name: buck2 build and test
           run: bash oss_buck_build_and_test.sh
   windows-os-buck-build-and-test:

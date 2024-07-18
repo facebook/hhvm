@@ -21,6 +21,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_MODULE_PATH
   "${CMAKE_CURRENT_SOURCE_DIR}/fizz/cmake"
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
   # for in-fbsource builds
   "${CMAKE_CURRENT_SOURCE_DIR}/../opensource/fbcode_builder/CMake"
   # For shipit-transformed builds
@@ -53,9 +54,6 @@ find_package(Glog REQUIRED)
 find_package(DoubleConversion REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Zstd REQUIRED)
-if (UNIX AND NOT APPLE)
-  find_package(Librt)
-endif()
 
 include(CheckAtomic)
 
@@ -86,16 +84,6 @@ else()
 endif()
 
 find_package(ZLIB REQUIRED)
-
-find_package(Libevent CONFIG QUIET)
-if(TARGET event)
-  message(STATUS "Found libevent from package config")
-  list(APPEND FIZZ_SHINY_DEPENDENCIES event)
-else()
-  find_package(Libevent MODULE REQUIRED)
-  list(APPEND FIZZ_LINK_LIBRARIES ${LIBEVENT_LIB})
-  list(APPEND FIZZ_INCLUDE_DIRECTORIES ${LIBEVENT_INCLUDE_DIR})
-endif()
 
 find_package(liboqs CONFIG)
 if (liboqs_FOUND)

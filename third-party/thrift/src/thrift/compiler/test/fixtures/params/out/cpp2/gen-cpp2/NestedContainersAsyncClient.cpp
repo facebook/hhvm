@@ -160,7 +160,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "NestedContainers.mapList",
       *header);
@@ -349,7 +349,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "NestedContainers.mapSet",
       *header);
@@ -538,7 +538,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "NestedContainers.listMap",
       *header);
@@ -727,7 +727,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "NestedContainers.listSet",
       *header);
@@ -916,7 +916,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "NestedContainers.turtles",
       *header);

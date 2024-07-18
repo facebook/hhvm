@@ -21,9 +21,10 @@
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
+
 class InteractionHandle;
+class ClientInterceptorBase;
 
 class GeneratedAsyncClient : public TClientBase {
  public:
@@ -52,6 +53,11 @@ class GeneratedAsyncClient : public TClientBase {
   GeneratedAsyncClient(std::shared_ptr<RequestChannel> channel);
   GeneratedAsyncClient(
       std::shared_ptr<RequestChannel> channel, Options options);
+  GeneratedAsyncClient(
+      std::shared_ptr<RequestChannel> channel,
+      std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>
+          interceptors,
+      Options options = Options());
 
   virtual const char* getServiceName() const noexcept = 0;
 
@@ -70,6 +76,8 @@ class GeneratedAsyncClient : public TClientBase {
       const InteractionHandle& handle, RpcOptions& rpcOptions);
 
   std::shared_ptr<RequestChannel> channel_;
+  std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>
+      interceptors_;
 };
 
 class InteractionHandle : public GeneratedAsyncClient {
@@ -95,5 +103,4 @@ class InteractionHandle : public GeneratedAsyncClient {
   friend class GeneratedAsyncClient;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

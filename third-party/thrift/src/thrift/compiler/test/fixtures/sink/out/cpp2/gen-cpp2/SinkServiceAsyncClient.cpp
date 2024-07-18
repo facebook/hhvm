@@ -199,7 +199,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "SinkService.method",
       *header);
@@ -328,7 +328,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "SinkService.methodAndReponse",
       *header);
@@ -457,7 +457,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "SinkService.methodThrow",
       *header);
@@ -586,7 +586,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "SinkService.methodSinkThrow",
       *header);
@@ -725,7 +725,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "SinkService.methodFinalThrow",
       *header);
@@ -854,7 +854,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "SinkService.methodBothThrow",
       *header);
@@ -993,7 +993,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "SinkService.methodFast",
       *header);

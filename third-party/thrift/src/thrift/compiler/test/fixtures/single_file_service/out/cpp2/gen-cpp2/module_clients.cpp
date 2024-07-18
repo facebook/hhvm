@@ -90,7 +90,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "A.foo",
       *header);
@@ -301,7 +301,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "A.I.interact",
       *header);
@@ -514,7 +514,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "B.bar",
       *header);
@@ -705,7 +705,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "B.stream_stuff",
       *header);
@@ -859,7 +859,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "B.sink_stuff",
       *header);
@@ -1038,7 +1038,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "C.I.interact",
       *header);

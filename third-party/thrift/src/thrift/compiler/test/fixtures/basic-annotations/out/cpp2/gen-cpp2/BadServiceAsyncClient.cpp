@@ -90,7 +90,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "BadService.bar",
       *header);
@@ -303,7 +303,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
-      nullptr, /* clientInterceptors */
+      interceptors_,
       getServiceName(),
       "BadService.BadInteraction.foo",
       *header);

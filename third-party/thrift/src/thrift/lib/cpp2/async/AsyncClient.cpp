@@ -37,6 +37,15 @@ GeneratedAsyncClient::GeneratedAsyncClient(
     std::shared_ptr<RequestChannel> channel, Options options)
     : TClientBase(options.clientBaseOptions_), channel_(std::move(channel)) {}
 
+GeneratedAsyncClient::GeneratedAsyncClient(
+    std::shared_ptr<RequestChannel> channel,
+    std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>
+        interceptors,
+    Options options)
+    : TClientBase(options.clientBaseOptions_),
+      channel_(std::move(channel)),
+      interceptors_(std::move(interceptors)) {}
+
 void GeneratedAsyncClient::setInteraction(
     const InteractionHandle& handle, RpcOptions& rpcOptions) {
   handle.setInteraction(rpcOptions);

@@ -338,6 +338,16 @@ enum FileAttributes {
 typedef unsigned64 RequestedAttributes
 
 /**
+ * Indicates whether getAttributesForFiles requests should include results for
+ * files, trees, or both.
+ */
+enum AttributesRequestScope {
+  TREES = 0,
+  FILES = 1,
+  TREES_AND_FILES = 2,
+}
+
+/**
  * Subset of attributes for a single file returned by getAttributesFromFiles()
  */
 struct FileAttributeData {
@@ -456,13 +466,16 @@ struct SyncBehavior {
 }
 
 /**
- * Parameters for the getAttributesFromFiles() function
+ * Parameters for the getAttributesFromFiles() function. By default, results
+ * for both files and trees will be returned. Clients can request for only one
+ * of trees or files by passing in an AttributesRequestScope.
  */
 struct GetAttributesFromFilesParams {
   1: PathString mountPoint;
   2: list<PathString> paths;
   3: RequestedAttributes requestedAttributes;
   4: SyncBehavior sync;
+  5: optional AttributesRequestScope scope;
 }
 
 /**
@@ -1907,9 +1920,10 @@ service EdenService extends fb303_core.BaseService {
    *
    * Unlike the getAttributesFromFiles endpoint, this does not assume that all
    * the inputs are regular files. This endpoint will attempt to return
-   * attributes for any type of file (directory included). Note that some
-   * attributes are not currently supported, like sha1 and size for directories
-   * and symlinks. At some point EdenFS may be able to support such attributes.
+   * attributes for any type of file (directory included) unless instructed
+   * otherwise. Note that some attributes are not currently supported, like
+   * sha1 and size for directories and symlinks. At some point EdenFS may be
+   * able to support such attributes.
    *
    * Note: may return stale data if synchronizeWorkingCopy isn't called, and if
    * the SyncBehavior specifies a 0 timeout. See the documentation for both of
@@ -1920,7 +1934,8 @@ service EdenService extends fb303_core.BaseService {
   ) throws (1: EdenError ex);
 
   /**
-   * DEPRECATED - prefer getAttributesFromFilesV2.
+   * DEPRECATED - prefer getAttributesFromFilesV2. Some parameters are not
+   * supported by this endpoint (namely the request scope param).
    *
    * Returns the requested file attributes for the provided list of files.
    *

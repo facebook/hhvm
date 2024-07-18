@@ -71,7 +71,7 @@ struct TypeConstraint {
     };
     using NamePtr = TaggedLowStringPtr<ClsNameKind>;
     /// Resolved class name. Only valid if this TypeConstraint represents a
-    /// resolved object or enum.
+    /// resolved object.
     NamePtr m_clsName;
     /// Source type name. In general this is the name from the source code.
     LowStringPtr m_typeName;

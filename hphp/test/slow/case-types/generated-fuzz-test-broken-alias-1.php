@@ -8,7 +8,7 @@
 
   <<file: __EnableUnstableFeatures('case_types')>>
 
-  
+
   enum MyEnum : string {
     A = 'A';
     B = 'B';
@@ -44,7 +44,7 @@
   case type CT0 = MyEnum|(mixed, mixed);
               type AliasCT0 = CT0;
 
-  
+
 class CheckAliasCT0<T as AliasCT0> extends BaseCheck {
   const type T = AliasCT0;
   const string NAME = 'AliasCT0';

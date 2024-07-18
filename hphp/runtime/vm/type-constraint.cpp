@@ -1893,9 +1893,7 @@ void TypeConstraint::resolveType(AnnotType t,
   }
   assertx(m_u.single.type == AnnotType::Unresolved);
   assertx(t != AnnotType::Unresolved);
-  assertx(IMPLIES(t == AnnotType::SubObject, clsName != nullptr));
-  assertx(IMPLIES(clsName != nullptr,
-                  t == AnnotType::SubObject || enumSupportsAnnot(t)));
+  assertx((t == AnnotType::SubObject) == (clsName != nullptr));
   m_flags |= TypeConstraintFlags::Resolved;
   if (nullable) m_flags |= TypeConstraintFlags::Nullable;
   m_u.single.type = t;

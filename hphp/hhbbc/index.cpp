@@ -11563,7 +11563,6 @@ private:
 
   static bool resolve_one(TypeConstraint& tc,
                           const TypeConstraint& tv,
-                          SString firstEnum,
                           TSStringSet* uses,
                           bool isProp,
                           bool isUnion) {
@@ -11572,9 +11571,6 @@ private:
     if (tv.isUnresolved()) return false;
     if (isProp && !propSupportsAnnot(tv.type())) return false;
     auto const value = [&] () -> SString {
-      // Store the first enum encountered during resolution. This
-      // lets us fixup the type later if needed.
-      if (firstEnum) return firstEnum;
       if (tv.isSubObject()) {
         auto clsName = tv.clsName();
         assertx(clsName);
@@ -11633,7 +11629,7 @@ private:
         for (auto& tv : eachTypeConstraintInUnion(tm->value)) {
           TypeConstraint copy = tv;
           copy.addFlags(flags);
-          if (!resolve_one(copy, tv, tm->firstEnum, uses, isProp, true)) {
+          if (!resolve_one(copy, tv, uses, isProp, true)) {
             return;
           }
           members.emplace_back(std::move(copy));
@@ -11644,7 +11640,7 @@ private:
 
       // This unresolved name resolves to a single type.
       assertx(!tm->value.isUnion());
-      resolve_one(tc, tm->value, tm->firstEnum, uses, isProp, false);
+      resolve_one(tc, tm->value, uses, isProp, false);
       return;
     }
 

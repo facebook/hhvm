@@ -702,6 +702,7 @@ let schema : schema_node list =
         [
           ("attribute", ZeroOrOne (Aggregate AttributeSpecification));
           ("visibility", ZeroOrOne Token);
+          ("optional", ZeroOrOne Token);
           ("call_convention", ZeroOrOne Token);
           ("readonly", ZeroOrOne Token);
           ("type", ZeroOrOne (Aggregate Specifier));

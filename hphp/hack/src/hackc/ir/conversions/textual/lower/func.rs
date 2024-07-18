@@ -100,6 +100,7 @@ fn add_reified_parameter(func: &mut Func) {
         is_variadic: false,
         is_inout: false,
         is_readonly: false,
+        is_optional: false,
         user_attributes: Default::default(),
         type_info: ir::Maybe::Just(ir::TypeInfo {
             user_type: None.into(),
@@ -122,6 +123,7 @@ fn add_self_trait_parameter(func: &mut Func) {
             is_variadic: false,
             is_inout: false,
             is_readonly: false,
+            is_optional: false,
             user_attributes: vec![].into(),
             type_info: ir::Maybe::Nothing,
         },

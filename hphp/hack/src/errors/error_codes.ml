@@ -772,6 +772,7 @@ module Typing = struct
     | InternalMethCaller [@value 4481]
     | ClassPointerToString [@value 4482]
     | InvalidXhpAttributeValue [@value 4483]
+    | OptionalParameterNotSupported [@value 4484]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

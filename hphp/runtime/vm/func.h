@@ -138,7 +138,8 @@ struct Func final {
       Variadic,   // Is this a `...' parameter?
       NativeArg,  // Does this use a NativeArg?
       AsVariant,  // Native function takes as const Variant&
-      AsTypedValue // Native function takes as TypedValue
+      AsTypedValue, // Native function takes as TypedValue
+      Optional,   // Marked as `optional` in an abstract method
     };
 
     ParamInfo();
@@ -152,6 +153,7 @@ struct Func final {
     bool isNativeArg() const;
     bool isTakenAsVariant() const;
     bool isTakenAsTypedValue() const;
+    bool isOptional() const;
     void setFlag(Flags flag);
     MaybeDataType builtinType() const;
 

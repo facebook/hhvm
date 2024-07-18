@@ -85,6 +85,10 @@ inline bool Func::ParamInfo::isReadonly() const {
   return flags & (1 << static_cast<int32_t>(Flags::Readonly));
 }
 
+inline bool Func::ParamInfo::isOptional() const {
+  return flags & (1 << static_cast<int32_t>(Flags::Optional));
+}
+
 inline bool Func::ParamInfo::isVariadic() const {
   return flags & (1 << static_cast<int32_t>(Flags::Variadic));
 }

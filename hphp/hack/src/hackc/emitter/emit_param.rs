@@ -164,6 +164,12 @@ fn from_ast<'a, 'd>(
         Some(ReadonlyKind::Readonly) => true,
         _ => false,
     };
+    let is_optional = match &param.info {
+        a::FunParamInfo::ParamOptional(None) => true,
+        a::FunParamInfo::ParamOptional(Some(_))
+        | a::FunParamInfo::ParamRequired
+        | a::FunParamInfo::ParamVariadic => false,
+    };
     let attrs = emit_attribute::from_asts(emitter, &param.user_attributes)?;
     Ok(Some((
         Param {
@@ -171,6 +177,7 @@ fn from_ast<'a, 'd>(
             is_variadic,
             is_inout: param.callconv.is_pinout(),
             is_readonly,
+            is_optional,
             user_attributes: attrs.into(),
             type_info: Maybe::from(type_info),
         },

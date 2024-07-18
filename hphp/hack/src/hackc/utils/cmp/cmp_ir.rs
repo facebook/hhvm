@@ -1259,6 +1259,7 @@ fn cmp_param(
         is_variadic: a_is_variadic,
         is_inout: a_is_inout,
         is_readonly: a_is_readonly,
+        is_optional: a_is_optional,
         user_attributes: a_user_attributes,
         type_info: a_type_info,
     } = a;
@@ -1267,6 +1268,7 @@ fn cmp_param(
         is_variadic: b_is_variadic,
         is_inout: b_is_inout,
         is_readonly: b_is_readonly,
+        is_optional: b_is_optional,
         user_attributes: b_user_attributes,
         type_info: b_type_info,
     } = b;
@@ -1275,6 +1277,7 @@ fn cmp_param(
     cmp_eq(a_is_variadic, b_is_variadic).qualified("is_variadic")?;
     cmp_eq(a_is_inout, b_is_inout).qualified("is_inout")?;
     cmp_eq(a_is_readonly, b_is_readonly).qualified("is_readonly")?;
+    cmp_eq(a_is_optional, b_is_optional).qualified("is_optional")?;
     cmp_attributes(a_user_attributes, b_user_attributes).qualified("user_attributes")?;
     cmp_option(
         a_type_info.as_ref().into(),

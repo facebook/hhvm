@@ -442,6 +442,7 @@ struct
     | ParameterDeclaration of {
         parameter_attribute: t;
         parameter_visibility: t;
+        parameter_optional: t;
         parameter_call_convention: t;
         parameter_readonly: t;
         parameter_type: t;

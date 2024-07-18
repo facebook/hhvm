@@ -939,6 +939,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         {
           parameter_attribute = attr;
           parameter_visibility = visibility;
+          parameter_optional = optional;
           parameter_call_convention = callconv;
           parameter_readonly = readonly;
           parameter_type = param_type;
@@ -953,6 +954,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present attr (fun _ -> Concat [Space; SplitWith Cost.Base]);
           t env visibility;
           when_present visibility space;
+          t env optional;
+          when_present optional space;
           t env callconv;
           when_present callconv space;
           t env readonly;

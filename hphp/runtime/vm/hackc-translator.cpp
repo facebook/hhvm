@@ -1061,6 +1061,7 @@ void translateParameter(TranslationState& ts,
   }
   if (p.is_inout) param.setFlag(Func::ParamInfo::Flags::InOut);
   if (p.is_readonly) param.setFlag(Func::ParamInfo::Flags::Readonly);
+  if (p.is_optional) param.setFlag(Func::ParamInfo::Flags::Optional);
   std::tie(param.userType, param.typeConstraint)  = maybeOrElse(p.type_info,
       [&](hhbc::TypeInfo& ti) {return translateTypeInfo(ti);},
       [&]() {return std::make_pair(nullptr, TypeConstraint{});});

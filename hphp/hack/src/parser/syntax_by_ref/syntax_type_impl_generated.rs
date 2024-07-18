@@ -547,10 +547,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_parameter_declaration(ctx: &C, attribute: Self, visibility: Self, call_convention: Self, readonly: Self, type_: Self, ellipsis: Self, name: Self, default_value: Self, parameter_end: Self) -> Self {
+    fn make_parameter_declaration(ctx: &C, attribute: Self, visibility: Self, optional: Self, call_convention: Self, readonly: Self, type_: Self, ellipsis: Self, name: Self, default_value: Self, parameter_end: Self) -> Self {
         let syntax = SyntaxVariant::ParameterDeclaration(ctx.get_arena().alloc(ParameterDeclarationChildren {
             attribute,
             visibility,
+            optional,
             call_convention,
             readonly,
             type_,

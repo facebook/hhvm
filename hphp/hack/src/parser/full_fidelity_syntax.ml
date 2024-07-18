@@ -1264,6 +1264,7 @@ module WithToken (Token : TokenType) = struct
           {
             parameter_attribute;
             parameter_visibility;
+            parameter_optional;
             parameter_call_convention;
             parameter_readonly;
             parameter_type;
@@ -1274,6 +1275,7 @@ module WithToken (Token : TokenType) = struct
           } ->
         let acc = f acc parameter_attribute in
         let acc = f acc parameter_visibility in
+        let acc = f acc parameter_optional in
         let acc = f acc parameter_call_convention in
         let acc = f acc parameter_readonly in
         let acc = f acc parameter_type in
@@ -3110,6 +3112,7 @@ module WithToken (Token : TokenType) = struct
           {
             parameter_attribute;
             parameter_visibility;
+            parameter_optional;
             parameter_call_convention;
             parameter_readonly;
             parameter_type;
@@ -3121,6 +3124,7 @@ module WithToken (Token : TokenType) = struct
         [
           parameter_attribute;
           parameter_visibility;
+          parameter_optional;
           parameter_call_convention;
           parameter_readonly;
           parameter_type;
@@ -4883,6 +4887,7 @@ module WithToken (Token : TokenType) = struct
           {
             parameter_attribute;
             parameter_visibility;
+            parameter_optional;
             parameter_call_convention;
             parameter_readonly;
             parameter_type;
@@ -4894,6 +4899,7 @@ module WithToken (Token : TokenType) = struct
         [
           "parameter_attribute";
           "parameter_visibility";
+          "parameter_optional";
           "parameter_call_convention";
           "parameter_readonly";
           "parameter_type";
@@ -6799,6 +6805,7 @@ module WithToken (Token : TokenType) = struct
           [
             parameter_attribute;
             parameter_visibility;
+            parameter_optional;
             parameter_call_convention;
             parameter_readonly;
             parameter_type;
@@ -6811,6 +6818,7 @@ module WithToken (Token : TokenType) = struct
           {
             parameter_attribute;
             parameter_visibility;
+            parameter_optional;
             parameter_call_convention;
             parameter_readonly;
             parameter_type;
@@ -8934,6 +8942,7 @@ module WithToken (Token : TokenType) = struct
       let make_parameter_declaration
           parameter_attribute
           parameter_visibility
+          parameter_optional
           parameter_call_convention
           parameter_readonly
           parameter_type
@@ -8946,6 +8955,7 @@ module WithToken (Token : TokenType) = struct
             {
               parameter_attribute;
               parameter_visibility;
+              parameter_optional;
               parameter_call_convention;
               parameter_readonly;
               parameter_type;

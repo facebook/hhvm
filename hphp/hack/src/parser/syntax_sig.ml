@@ -311,6 +311,7 @@ module type Syntax_S = sig
     | ParameterDeclaration of {
         parameter_attribute: t;
         parameter_visibility: t;
+        parameter_optional: t;
         parameter_call_convention: t;
         parameter_readonly: t;
         parameter_type: t;
@@ -1253,7 +1254,7 @@ module type Syntax_S = sig
   val make_decorated_expression : t -> t -> t
 
   val make_parameter_declaration :
-    t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_old_attribute_specification : t -> t -> t -> t
 

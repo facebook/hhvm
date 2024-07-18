@@ -1,0 +1,1 @@
+Fatal error: Declaration of E::foo() must be compatible with that of I::foo() in %s/test/slow/optional_parameters_incompat.php on line 11

@@ -48,5 +48,8 @@ val is_const_expr : ('a, 'b) Aast_defs.expr -> bool
 
 val is_param_variadic : ('a, 'b) Aast_defs.fun_param -> bool
 
+(** Optional *or* with a default expression *)
+val is_param_optional : ('a, 'b) Aast_defs.fun_param -> bool
+
 val get_param_default :
   ('a, 'b) Aast_defs.fun_param -> ('a, 'b) Aast_defs.expr option

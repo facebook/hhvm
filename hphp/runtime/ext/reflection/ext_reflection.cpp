@@ -818,11 +818,12 @@ static Array get_function_param_info(const Func* func) {
 
   bool isOptional = true;
   for (int i = func->numParams() - 1; i >= 0; i--) {
+    const Func::ParamInfo& fpi = params[i];
     auto& param = asArrRef(arr.lval(i));
-
-    isOptional = isOptional && (param.exists(s_default) ||
-                 param.exists(s_is_variadic));
-    param.set(s_is_optional, isOptional);
+    
+    isOptional = isOptional && (param.exists(s_default) || fpi.isOptional() ||
+                 param.exists(s_is_variadic));    
+    param.set(s_is_optional, isOptional);    
   }
   return arr;
 }

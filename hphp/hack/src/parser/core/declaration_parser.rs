@@ -1668,6 +1668,7 @@ where
         // errors are also reported in a later pass.
         let attrs = self.parse_attribute_specification_opt();
         let visibility = self.parse_visibility_modifier_opt();
+        let optional = self.parse_optional_opt();
         let callconv = self.parse_call_convention_opt();
         let readonly = self.parse_readonly_opt();
         let token = self.peek_token();
@@ -1688,6 +1689,7 @@ where
         self.sc_mut().make_parameter_declaration(
             attrs,
             visibility,
+            optional,
             callconv,
             readonly,
             type_specifier,
@@ -1744,6 +1746,20 @@ where
         let token_kind = self.peek_token_kind();
         match token_kind {
             TokenKind::Readonly => {
+                let token = self.next_token();
+                self.sc_mut().make_token(token)
+            }
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
+        }
+    }
+
+    fn parse_optional_opt(&mut self) -> S::Output {
+        let token_kind = self.peek_token_kind();
+        match token_kind {
+            TokenKind::Optional => {
                 let token = self.next_token();
                 self.sc_mut().make_token(token)
             }

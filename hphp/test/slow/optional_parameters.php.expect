@@ -1,0 +1,9 @@
+int(3)
+bool(false)
+string(1) "a"
+int(4)
+bool(true)
+string(1) "a"
+int(5)
+bool(true)
+string(1) "b"

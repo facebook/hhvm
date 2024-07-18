@@ -216,6 +216,11 @@ struct Param {
    */
   bool isVariadic: 1;
 
+  /*
+   * Whether this parameter is optional in an abstract method
+   */
+  bool isOptional: 1;
+
   template <typename SerDe> void serde(SerDe&);
 };
 

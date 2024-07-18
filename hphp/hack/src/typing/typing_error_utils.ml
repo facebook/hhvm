@@ -3946,6 +3946,37 @@ end = struct
       [],
       User_error_flags.empty )
 
+  let previous_default_or_optional p =
+    ( Error_code.PreviousDefault,
+      lazy
+        ( p,
+          "A previous parameter has a default value or is optional.\n"
+          ^ "Remove all the optional or default values for the preceding parameters,\n"
+          ^ "or add a default value or optional to this one." ),
+      lazy [],
+      [],
+      User_error_flags.empty )
+
+  let optional_parameter_not_supported p =
+    ( Error_code.OptionalParameterNotSupported,
+      lazy
+        ( p,
+          "Optional parameters are not supported. Use a default value instead.\n"
+        ),
+      lazy [],
+      [],
+      User_error_flags.empty )
+
+  let optional_parameter_not_abstract p =
+    ( Error_code.OptionalParameterNotSupported,
+      lazy
+        ( p,
+          "Optional parameters are not supported on top-level functions or non-abstract methods. Use a default value instead.\n"
+        ),
+      lazy [],
+      [],
+      User_error_flags.empty )
+
   let return_in_void pos1 pos2 =
     ( Error_code.ReturnInVoid,
       lazy (pos1, "You cannot return a value"),
@@ -5348,6 +5379,7 @@ end = struct
     | Unbound_name { pos; name; class_exists } ->
       unbound_name_typing pos name class_exists
     | Previous_default pos -> previous_default pos
+    | Previous_default_or_optional pos -> previous_default_or_optional pos
     | Return_in_void { pos; decl_pos } -> return_in_void pos decl_pos
     | This_var_outside_class pos -> this_var_outside_class pos
     | Unbound_global pos -> unbound_global pos
@@ -5477,6 +5509,9 @@ end = struct
         (List.map unsupported_tys ~f:Lazy.force)
     | Class_pointer_to_string { pos; cls_name } ->
       class_pointer_to_string pos cls_name
+    | Optional_parameter_not_supported pos ->
+      optional_parameter_not_supported pos
+    | Optional_parameter_not_abstract pos -> optional_parameter_not_abstract pos
 end
 
 module rec Eval_error : sig

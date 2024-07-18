@@ -244,6 +244,7 @@ fn create_default_closure_constructor(class: &mut Class) {
                 is_variadic: false,
                 is_inout: false,
                 is_readonly: false,
+                is_optional: false,
                 user_attributes: vec![].into(),
                 type_info: ir::Maybe::Just(prop.type_info.clone()),
             };

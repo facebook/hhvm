@@ -1,0 +1,6 @@
+ERROR: File "optional_parameters_not_supported.php", line 4, characters 45-46:
+Optional parameters are not supported. Use a default value instead.
+ (Typing[4484])
+ERROR: File "optional_parameters_not_supported.php", line 4, characters 65-66:
+Optional parameters are not supported. Use a default value instead.
+ (Typing[4484])

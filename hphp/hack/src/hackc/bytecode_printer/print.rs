@@ -1021,6 +1021,7 @@ fn print_param(
     print_param_user_attributes(ctx, w, param)?;
     write_if!(param.is_inout, w, "inout ")?;
     write_if!(param.is_readonly, w, "readonly ")?;
+    write_if!(param.is_optional, w, "optional ")?;
     write_if!(param.is_variadic, w, "...")?;
     option(w, param.type_info.as_ref(), |w, ty| {
         print_type_info(w, ty)?;

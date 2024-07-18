@@ -215,6 +215,12 @@ let is_param_variadic param =
   | Param_required -> false
   | Param_optional _ -> false
 
+let is_param_optional param =
+  match param.param_info with
+  | Param_variadic -> false
+  | Param_required -> false
+  | Param_optional _ -> true
+
 let get_param_default param =
   match param.param_info with
   | Param_variadic -> None

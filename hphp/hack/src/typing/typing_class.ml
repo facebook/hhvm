@@ -141,8 +141,13 @@ let method_def ~is_disposable env cls m =
   Profile.measure_elapsed_time_and_report tcopt (Some env) m.m_name @@ fun () ->
   Errors.run_with_span m.m_span @@ fun () ->
   with_timeout env m.m_name @@ fun env ->
-  let err_opt = FunUtils.check_params m.m_params in
-  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err_opt;
+  let errs =
+    FunUtils.check_params
+      ~from_abstract_method:m.m_abstract
+      env.decl_env
+      m.m_params
+  in
+  List.iter ~f:(Typing_error_utils.add_typing_error ~env) errs;
   let method_name = Ast_defs.get_id m.m_name in
   let is_ctor = String.equal method_name SN.Members.__construct in
   let env =

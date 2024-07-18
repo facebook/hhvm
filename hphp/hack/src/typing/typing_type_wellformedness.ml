@@ -292,8 +292,10 @@ let requirements env = List.concat_map ~f:(fun (h, _kind) -> hint env h)
 
 let fun_ tenv f =
   let env = { typedef_tparams = []; tenv } in
-  let err_opt = FunUtils.check_params f.f_params in
-  Option.iter ~f:(Typing_error_utils.add_typing_error ~env:tenv) err_opt;
+  let errs =
+    FunUtils.check_params ~from_abstract_method:false tenv.decl_env f.f_params
+  in
+  List.iter ~f:(Typing_error_utils.add_typing_error ~env:tenv) errs;
   type_hint env f.f_ret @ fun_params env f.f_params
 
 let fun_def tenv fd =

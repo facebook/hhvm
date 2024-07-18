@@ -1326,6 +1326,7 @@ fn assemble_param(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result<
     }
     let is_inout = token_iter.next_is_str(Token::is_identifier, "inout");
     let is_readonly = token_iter.next_is_str(Token::is_identifier, "readonly");
+    let is_optional = token_iter.next_is_str(Token::is_identifier, "optional");
     let is_variadic = token_iter.next_is(Token::is_variadic);
     let type_info = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     let name_tok = token_iter.expect_with(Token::into_variable)?;
@@ -1340,6 +1341,7 @@ fn assemble_param(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result<
     let param = hhbc::Param {
         name,
         is_variadic,
+        is_optional,
         is_inout,
         is_readonly,
         user_attributes: ua_vec.into(),

@@ -1015,6 +1015,7 @@ module Primary = struct
         class_exists: bool;
       }
     | Previous_default of Pos.t
+    | Previous_default_or_optional of Pos.t
     | Return_in_void of {
         pos: Pos.t;
         decl_pos: Pos.t;
@@ -1351,6 +1352,8 @@ module Primary = struct
         pos: Pos.t;
         cls_name: string;
       }
+    | Optional_parameter_not_supported of Pos.t
+    | Optional_parameter_not_abstract of Pos.t
   [@@deriving show]
 end
 

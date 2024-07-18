@@ -20,6 +20,7 @@ pub struct Param {
     pub is_variadic: bool,
     pub is_inout: bool,
     pub is_readonly: bool,
+    pub is_optional: bool,
     pub user_attributes: Vector<Attribute>,
     pub type_info: Maybe<TypeInfo>,
 }

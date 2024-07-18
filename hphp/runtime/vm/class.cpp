@@ -2063,7 +2063,7 @@ void checkDeclarationCompat(const PreClass* preClass,
   {
     size_t i = 0;
     for (; i < imeth->numNonVariadicParams(); ++i) {
-      if (!iparams[i].hasDefaultValue()) {
+      if (!iparams[i].hasDefaultValue() && !iparams[i].isOptional()) {
         // The leftmost of imeth's contiguous trailing optional parameters
         // must start somewhere to the right of this parameter (which may
         // be the variadic param)
@@ -2079,7 +2079,7 @@ void checkDeclarationCompat(const PreClass* preClass,
   // parameters and *not* including any variadic last param (variadics
   // don't have any default values).
   for (unsigned i = firstOptional; i < func->numNonVariadicParams(); ++i) {
-    if (!params[i].hasDefaultValue()) {
+    if (!params[i].hasDefaultValue() && !params[i].isOptional()) {
       raiseIncompat(preClass, imeth);
     }
   }

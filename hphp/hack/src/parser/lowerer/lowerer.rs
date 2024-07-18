@@ -3939,6 +3939,7 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
         ParameterDeclaration(ParameterDeclarationChildren {
             attribute,
             visibility,
+            optional,
             call_convention,
             readonly,
             type_,
@@ -3964,9 +3965,27 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
             }
             let expr = p_fun_param_default_value(default_value, env)?;
             let callconv = p_param_kind(call_convention, env)?;
+            if !optional.is_missing() && expr.is_some() {
+                raise_parsing_error(
+                    node,
+                    env,
+                    &syntax_error::invalid_optional_keyword_on_initializer,
+                );
+            }
+            if !optional.is_missing() && is_variadic {
+                raise_parsing_error(node, env, &syntax_error::no_optional_on_variadic_parameter);
+            }
+            let is_inout = match callconv {
+                ast::ParamKind::Pinout(_) => true,
+                _ => false,
+            };
+            if !optional.is_missing() && is_inout {
+                raise_parsing_error(node, env, &syntax_error::no_optional_on_inout_parameter);
+            }
             let info = match expr {
                 _ if is_variadic => ast::FunParamInfo::ParamVariadic,
                 Some(_) => ast::FunParamInfo::ParamOptional(expr),
+                None if !optional.is_missing() => ast::FunParamInfo::ParamOptional(None),
                 _ => ast::FunParamInfo::ParamRequired,
             };
 

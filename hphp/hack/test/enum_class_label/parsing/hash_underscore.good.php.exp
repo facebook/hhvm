@@ -536,6 +536,7 @@
                   "kind":"parameter_declaration",
                   "parameter_attribute":{"kind":"missing"},
                   "parameter_visibility":{"kind":"missing"},
+                  "parameter_optional":{"kind":"missing"},
                   "parameter_call_convention":{"kind":"missing"},
                   "parameter_readonly":{"kind":"missing"},
                   "parameter_type":{

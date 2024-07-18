@@ -541,10 +541,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_parameter_declaration(_: &C, parameter_attribute: Self, parameter_visibility: Self, parameter_call_convention: Self, parameter_readonly: Self, parameter_type: Self, parameter_ellipsis: Self, parameter_name: Self, parameter_default_value: Self, parameter_parameter_end: Self) -> Self {
+    fn make_parameter_declaration(_: &C, parameter_attribute: Self, parameter_visibility: Self, parameter_optional: Self, parameter_call_convention: Self, parameter_readonly: Self, parameter_type: Self, parameter_ellipsis: Self, parameter_name: Self, parameter_default_value: Self, parameter_parameter_end: Self) -> Self {
         let syntax = SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
             parameter_attribute,
             parameter_visibility,
+            parameter_optional,
             parameter_call_convention,
             parameter_readonly,
             parameter_type,
@@ -2432,9 +2433,10 @@ where
                 acc
             },
             SyntaxVariant::ParameterDeclaration(x) => {
-                let ParameterDeclarationChildren { parameter_attribute, parameter_visibility, parameter_call_convention, parameter_readonly, parameter_type, parameter_ellipsis, parameter_name, parameter_default_value, parameter_parameter_end } = *x;
+                let ParameterDeclarationChildren { parameter_attribute, parameter_visibility, parameter_optional, parameter_call_convention, parameter_readonly, parameter_type, parameter_ellipsis, parameter_name, parameter_default_value, parameter_parameter_end } = *x;
                 let acc = f(parameter_attribute, acc);
                 let acc = f(parameter_visibility, acc);
+                let acc = f(parameter_optional, acc);
                 let acc = f(parameter_call_convention, acc);
                 let acc = f(parameter_readonly, acc);
                 let acc = f(parameter_type, acc);
@@ -4037,7 +4039,7 @@ where
                  decorated_expression_decorator: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ParameterDeclaration, 9) => SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
+             (SyntaxKind::ParameterDeclaration, 10) => SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
                  parameter_parameter_end: ts.pop().unwrap(),
                  parameter_default_value: ts.pop().unwrap(),
                  parameter_name: ts.pop().unwrap(),
@@ -4045,6 +4047,7 @@ where
                  parameter_type: ts.pop().unwrap(),
                  parameter_readonly: ts.pop().unwrap(),
                  parameter_call_convention: ts.pop().unwrap(),
+                 parameter_optional: ts.pop().unwrap(),
                  parameter_visibility: ts.pop().unwrap(),
                  parameter_attribute: ts.pop().unwrap(),
                  
@@ -5027,7 +5030,7 @@ where
             SyntaxVariant::TypeConstDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.type_const_attribute_spec, 10) },
             SyntaxVariant::ContextConstDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.context_const_modifiers, 9) },
             SyntaxVariant::DecoratedExpression(x) => unsafe { std::slice::from_raw_parts(&x.decorated_expression_decorator, 2) },
-            SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.parameter_attribute, 9) },
+            SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.parameter_attribute, 10) },
             SyntaxVariant::OldAttributeSpecification(x) => unsafe { std::slice::from_raw_parts(&x.old_attribute_specification_left_double_angle, 3) },
             SyntaxVariant::AttributeSpecification(x) => unsafe { std::slice::from_raw_parts(&x.attribute_specification_attributes, 1) },
             SyntaxVariant::Attribute(x) => unsafe { std::slice::from_raw_parts(&x.attribute_at, 2) },
@@ -5218,7 +5221,7 @@ where
             SyntaxVariant::TypeConstDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_const_attribute_spec, 10) },
             SyntaxVariant::ContextConstDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.context_const_modifiers, 9) },
             SyntaxVariant::DecoratedExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.decorated_expression_decorator, 2) },
-            SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.parameter_attribute, 9) },
+            SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.parameter_attribute, 10) },
             SyntaxVariant::OldAttributeSpecification(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.old_attribute_specification_left_double_angle, 3) },
             SyntaxVariant::AttributeSpecification(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.attribute_specification_attributes, 1) },
             SyntaxVariant::Attribute(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.attribute_at, 2) },
@@ -5788,6 +5791,7 @@ pub struct DecoratedExpressionChildren<T, V> {
 pub struct ParameterDeclarationChildren<T, V> {
     pub parameter_attribute: Syntax<T, V>,
     pub parameter_visibility: Syntax<T, V>,
+    pub parameter_optional: Syntax<T, V>,
     pub parameter_call_convention: Syntax<T, V>,
     pub parameter_readonly: Syntax<T, V>,
     pub parameter_type: Syntax<T, V>,
@@ -7678,16 +7682,17 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ParameterDeclaration(x) => {
-                get_index(9).and_then(|index| { match index {
+                get_index(10).and_then(|index| { match index {
                         0 => Some(&x.parameter_attribute),
                     1 => Some(&x.parameter_visibility),
-                    2 => Some(&x.parameter_call_convention),
-                    3 => Some(&x.parameter_readonly),
-                    4 => Some(&x.parameter_type),
-                    5 => Some(&x.parameter_ellipsis),
-                    6 => Some(&x.parameter_name),
-                    7 => Some(&x.parameter_default_value),
-                    8 => Some(&x.parameter_parameter_end),
+                    2 => Some(&x.parameter_optional),
+                    3 => Some(&x.parameter_call_convention),
+                    4 => Some(&x.parameter_readonly),
+                    5 => Some(&x.parameter_type),
+                    6 => Some(&x.parameter_ellipsis),
+                    7 => Some(&x.parameter_name),
+                    8 => Some(&x.parameter_default_value),
+                    9 => Some(&x.parameter_parameter_end),
                         _ => None,
                     }
                 })

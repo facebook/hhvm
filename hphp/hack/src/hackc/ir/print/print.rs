@@ -1789,6 +1789,7 @@ pub(crate) fn print_param(
         is_inout,
         is_readonly,
         is_variadic,
+        is_optional,
         type_info: _,
         name,
         ref user_attributes,
@@ -1799,6 +1800,9 @@ pub(crate) fn print_param(
     }
     if is_readonly {
         write!(w, "readonly ")?;
+    }
+    if is_optional {
+        write!(w, "optional ")?;
     }
 
     if !user_attributes.is_empty() {

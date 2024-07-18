@@ -96,6 +96,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "Perform.foo",
       *header);
@@ -375,6 +376,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "Perform.MyInteraction.frobnicate",
       *header);
@@ -520,6 +522,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "Perform.MyInteraction.ping",
       *header);
@@ -620,6 +623,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "Perform.MyInteraction.truthify",
       *header);
@@ -752,6 +756,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "Perform.MyInteraction.encode",
       *header);
@@ -978,6 +983,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "Perform.MyInteractionFast.frobnicate",
       *header);
@@ -1123,6 +1129,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "Perform.MyInteractionFast.ping",
       *header);
@@ -1223,6 +1230,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "Perform.MyInteractionFast.truthify",
       *header);
@@ -1355,6 +1363,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "Perform.MyInteractionFast.encode",
       *header);
@@ -1512,6 +1521,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "Perform.SerialInteraction.frobnicate",
       *header);

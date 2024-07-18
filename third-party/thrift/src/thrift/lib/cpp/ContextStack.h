@@ -17,11 +17,14 @@
 #pragma once
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/experimental/coro/Task.h>
 
 #include <thrift/lib/cpp/SerializedMessage.h>
 #include <thrift/lib/cpp/TProcessorEventHandler.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp/transport/THeader.h>
+#include <thrift/lib/cpp2/async/ClientInterceptorBase.h>
+#include <thrift/lib/cpp2/async/ClientInterceptorStorage.h>
 #include <thrift/lib/cpp2/util/AllocationColocator.h>
 
 namespace apache::thrift {
@@ -54,6 +57,9 @@ class ContextStack {
   static UniquePtr createWithClientContext(
       const std::shared_ptr<
           std::vector<std::shared_ptr<TProcessorEventHandler>>>& handlers,
+      const std::shared_ptr<
+          std::vector<std::shared_ptr<ClientInterceptorBase>>>&
+          clientInterceptors,
       const char* serviceName,
       const char* method,
       transport::THeader& header);
@@ -61,6 +67,9 @@ class ContextStack {
   static ContextStack::UniquePtr createWithClientContextCopyNames(
       const std::shared_ptr<
           std::vector<std::shared_ptr<TProcessorEventHandler>>>& handlers,
+      const std::shared_ptr<
+          std::vector<std::shared_ptr<ClientInterceptorBase>>>&
+          clientInterceptors,
       const std::string& serviceName,
       const std::string& methodName,
       transport::THeader& header);
@@ -94,6 +103,8 @@ class ContextStack {
  private:
   std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>
       handlers_;
+  std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>
+      clientInterceptors_;
   const char* const serviceName_;
   const char* const method_;
   void** serviceContexts_;
@@ -107,6 +118,9 @@ class ContextStack {
       apache::thrift::util::AllocationColocator<>::Ptr<
           EmbeddedClientRequestContext>;
   EmbeddedClientContextPtr embeddedClientContext_;
+  util::AllocationColocator<>::ArrayPtr<
+      detail::ClientInterceptorOnRequestStorage>
+      clientInterceptorsStorage_;
 
   ContextStack(
       const std::shared_ptr<
@@ -119,10 +133,15 @@ class ContextStack {
   ContextStack(
       const std::shared_ptr<
           std::vector<std::shared_ptr<TProcessorEventHandler>>>& handlers,
+      const std::shared_ptr<
+          std::vector<std::shared_ptr<ClientInterceptorBase>>>&
+          clientInterceptors,
       const char* serviceName,
       const char* method,
       void** serviceContexts,
-      EmbeddedClientContextPtr embeddedClientContext);
+      EmbeddedClientContextPtr embeddedClientContext,
+      util::AllocationColocator<>::ArrayPtr<
+          detail::ClientInterceptorOnRequestStorage> clientInterceptorsStorage);
 
   void*& contextAt(size_t i);
 };

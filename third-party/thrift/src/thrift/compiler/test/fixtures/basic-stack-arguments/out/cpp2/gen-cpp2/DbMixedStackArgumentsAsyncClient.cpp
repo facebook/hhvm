@@ -106,6 +106,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "DbMixedStackArguments.getDataByKey0",
       *header);
@@ -339,6 +340,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "DbMixedStackArguments.getDataByKey1",
       *header);

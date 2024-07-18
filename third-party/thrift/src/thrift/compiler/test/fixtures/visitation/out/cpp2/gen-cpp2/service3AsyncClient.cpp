@@ -181,6 +181,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "service3.methodA",
       *header);
@@ -369,6 +370,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "service3.methodB",
       *header);
@@ -557,6 +559,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "service3.methodC",
       *header);
@@ -747,6 +750,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "service3.methodD",
       *header);
@@ -937,6 +941,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "service3.methodE",
       *header);
@@ -1125,6 +1130,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "service3.methodF",
       *header);

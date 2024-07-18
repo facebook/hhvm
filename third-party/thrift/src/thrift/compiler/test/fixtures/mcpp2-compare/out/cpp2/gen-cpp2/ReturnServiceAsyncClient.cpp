@@ -429,6 +429,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.noReturn",
       *header);
@@ -617,6 +618,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.boolReturn",
       *header);
@@ -807,6 +809,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.i16Return",
       *header);
@@ -997,6 +1000,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.i32Return",
       *header);
@@ -1187,6 +1191,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.i64Return",
       *header);
@@ -1377,6 +1382,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.floatReturn",
       *header);
@@ -1567,6 +1573,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.doubleReturn",
       *header);
@@ -1757,6 +1764,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.stringReturn",
       *header);
@@ -1945,6 +1953,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.binaryReturn",
       *header);
@@ -2133,6 +2142,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.mapReturn",
       *header);
@@ -2321,6 +2331,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.simpleTypedefReturn",
       *header);
@@ -2511,6 +2522,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.complexTypedefReturn",
       *header);
@@ -2699,6 +2711,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.list_mostComplexTypedefReturn",
       *header);
@@ -2887,6 +2900,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.enumReturn",
       *header);
@@ -3077,6 +3091,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.list_EnumReturn",
       *header);
@@ -3265,6 +3280,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.structReturn",
       *header);
@@ -3453,6 +3469,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.set_StructReturn",
       *header);
@@ -3641,6 +3658,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.unionReturn",
       *header);
@@ -3829,6 +3847,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.list_UnionReturn",
       *header);
@@ -4017,6 +4036,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.readDataEb",
       *header);
@@ -4205,6 +4225,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
+      nullptr, /* clientInterceptors */
       getServiceName(),
       "ReturnService.readData",
       *header);

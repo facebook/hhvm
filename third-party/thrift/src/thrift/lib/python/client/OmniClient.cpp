@@ -48,6 +48,9 @@ makeOmniClientRequestContext(
     std::shared_ptr<
         std::vector<std::shared_ptr<apache::thrift::TProcessorEventHandler>>>
         handlers,
+    const std::shared_ptr<
+        std::vector<std::shared_ptr<apache::thrift::ClientInterceptorBase>>>&
+        clientInterceptors,
     const std::string& serviceName,
     const std::string& functionName) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
@@ -55,7 +58,7 @@ makeOmniClientRequestContext(
   header->setProtocolId(protocolId);
   header->setHeaders(std::move(headers));
   auto ctx = apache::thrift::ContextStack::createWithClientContextCopyNames(
-      handlers, serviceName, functionName, *header);
+      handlers, clientInterceptors, serviceName, functionName, *header);
 
   return {std::move(ctx), std::move(header)};
 }
@@ -390,6 +393,8 @@ void OmniClient::sendImpl(
       channel_->getProtocolId(),
       rpcOptions.releaseWriteHeaders(),
       handlers_,
+      // TODO(praihan): Enable ClientInterceptors for Python
+      nullptr, /* clientInterceptors */
       serviceName,
       functionName);
   RequestCallback::Context callbackContext;

@@ -106,9 +106,17 @@ TEST(ContextStack, ClientHeaders) {
       auto handlers =
           std::make_shared<EventHandlerList>(EventHandlerList{handler});
       return copyNames ? ContextStack::createWithClientContextCopyNames(
-                             handlers, "Service", "method", header)
+                             handlers,
+                             nullptr /* clientInterceptors */,
+                             "Service",
+                             "method",
+                             header)
                        : ContextStack::createWithClientContext(
-                             handlers, "Service", "Service.method", header);
+                             handlers,
+                             nullptr /* clientInterceptors */,
+                             "Service",
+                             "Service.method",
+                             header);
     }();
     ASSERT_NE(contextStack, nullptr);
 

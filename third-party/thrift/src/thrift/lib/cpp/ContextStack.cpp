@@ -47,7 +47,9 @@ ContextStack::ContextStack(
       serviceName_(serviceName),
       method_(method),
       serviceContexts_(serviceContexts) {
-  CHECK(handlers_ && !handlers_->empty());
+  if (!handlers_ || handlers_->empty()) {
+    return;
+  }
   for (size_t i = 0; i < handlers_->size(); ++i) {
     contextAt(i) = (*handlers_)[i]->getServiceContext(
         serviceName_, method_, connectionContext);
@@ -57,22 +59,30 @@ ContextStack::ContextStack(
 ContextStack::ContextStack(
     const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
         handlers,
+    const std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>&
+        clientInterceptors,
     const char* serviceName,
     const char* method,
     void** serviceContexts,
-    EmbeddedClientContextPtr embeddedClientContext)
+    EmbeddedClientContextPtr embeddedClientContext,
+    util::AllocationColocator<>::ArrayPtr<
+        detail::ClientInterceptorOnRequestStorage> clientInterceptorsStorage)
     : ContextStack(
           handlers,
           serviceName,
           method,
           serviceContexts,
           embeddedClientContext.get()) {
+  clientInterceptors_ = clientInterceptors;
   embeddedClientContext_ = std::move(embeddedClientContext);
+  clientInterceptorsStorage_ = std::move(clientInterceptorsStorage);
 }
 
 ContextStack::~ContextStack() {
-  for (size_t i = 0; i < handlers_->size(); i++) {
-    (*handlers_)[i]->freeContext(contextAt(i), method_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->freeContext(contextAt(i), method_);
+    }
   }
 }
 
@@ -101,51 +111,75 @@ ContextStack::UniquePtr ContextStack::create(
 ContextStack::UniquePtr ContextStack::createWithClientContext(
     const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
         handlers,
+    const std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>&
+        clientInterceptors,
     const char* serviceName,
     const char* method,
     transport::THeader& header) {
-  if (!handlers || handlers->empty()) {
+  if ((!handlers || handlers->empty()) &&
+      (!clientInterceptors || clientInterceptors->empty())) {
     return nullptr;
   }
   if (apache::thrift::detail::EventHandlerRuntime::isClientMethodBypassed(
           serviceName, method)) {
     return nullptr;
   }
+  const auto numLegacyEventHandlers =
+      handlers == nullptr ? 0 : handlers->size();
+  const auto numClientInterceptors =
+      clientInterceptors == nullptr ? 0 : clientInterceptors->size();
 
   AllocationColocator<ContextStack> alloc;
   return alloc.allocate(
       [&,
        embeddedClientContext = alloc.object<EmbeddedClientRequestContext>(),
-       contexts = alloc.array<void*>(handlers->size())](auto make) mutable {
+       contexts = alloc.array<void*>(numLegacyEventHandlers),
+       clientInterceptorsStorage =
+           alloc.array<detail::ClientInterceptorOnRequestStorage>(
+               numClientInterceptors)](auto make) mutable {
         return ContextStack(
             handlers,
+            clientInterceptors,
             serviceName,
             method,
             make(std::move(contexts)),
             EmbeddedClientContextPtr(
-                make(std::move(embeddedClientContext), &header)));
+                make(std::move(embeddedClientContext), &header)),
+            make(std::move(clientInterceptorsStorage), [] {
+              return detail::ClientInterceptorOnRequestStorage();
+            }));
       });
 }
 
 ContextStack::UniquePtr ContextStack::createWithClientContextCopyNames(
     const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
         handlers,
+    const std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>&
+        clientInterceptors,
     const std::string& serviceName,
     const std::string& methodName,
     transport::THeader& header) {
-  if (!handlers || handlers->empty()) {
+  if ((!handlers || handlers->empty()) &&
+      (!clientInterceptors || clientInterceptors->empty())) {
     return nullptr;
   }
   if (apache::thrift::detail::EventHandlerRuntime::isClientMethodBypassed(
           serviceName, methodName)) {
     return nullptr;
   }
+  const auto numLegacyEventHandlers =
+      handlers == nullptr ? 0 : handlers->size();
+  const auto numClientInterceptors =
+      clientInterceptors == nullptr ? 0 : clientInterceptors->size();
 
   AllocationColocator<ContextStack> alloc;
   return alloc.allocate(
       [&,
        embeddedClientContext = alloc.object<EmbeddedClientRequestContext>(),
-       contexts = alloc.array<void*>(handlers->size()),
+       contexts = alloc.array<void*>(numLegacyEventHandlers),
+       clientInterceptorsStorage =
+           alloc.array<detail::ClientInterceptorOnRequestStorage>(
+               numClientInterceptors),
        serviceNameStorage = alloc.string(serviceName.size()),
        methodNameStorage =
            alloc.string(serviceName.size() + 1 /* dot */ + methodName.size())](
@@ -165,11 +199,15 @@ ContextStack::UniquePtr ContextStack::createWithClientContextCopyNames(
 
         return ContextStack(
             handlers,
+            clientInterceptors,
             make(std::move(serviceNameStorage), serviceName).data(),
             methodNamePtr,
             make(std::move(contexts)),
             EmbeddedClientContextPtr(
-                make(std::move(embeddedClientContext), &header)));
+                make(std::move(embeddedClientContext), &header)),
+            make(std::move(clientInterceptorsStorage), [] {
+              return detail::ClientInterceptorOnRequestStorage();
+            }));
       });
 }
 
@@ -186,8 +224,10 @@ void ContextStack::preWrite() {
 void ContextStack::onWriteData(const SerializedMessage& msg) {
   FOLLY_SDT(thrift, thrift_context_stack_on_write_data, serviceName_, method_);
 
-  for (size_t i = 0; i < handlers_->size(); i++) {
-    (*handlers_)[i]->onWriteData(contextAt(i), method_, msg);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->onWriteData(contextAt(i), method_, msg);
+    }
   }
 }
 
@@ -195,24 +235,30 @@ void ContextStack::postWrite(uint32_t bytes) {
   FOLLY_SDT(
       thrift, thrift_context_stack_post_write, serviceName_, method_, bytes);
 
-  for (size_t i = 0; i < handlers_->size(); i++) {
-    (*handlers_)[i]->postWrite(contextAt(i), method_, bytes);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->postWrite(contextAt(i), method_, bytes);
+    }
   }
 }
 
 void ContextStack::preRead() {
   FOLLY_SDT(thrift, thrift_context_stack_pre_read, serviceName_, method_);
 
-  for (size_t i = 0; i < handlers_->size(); i++) {
-    (*handlers_)[i]->preRead(contextAt(i), method_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->preRead(contextAt(i), method_);
+    }
   }
 }
 
 void ContextStack::onReadData(const SerializedMessage& msg) {
   FOLLY_SDT(thrift, thrift_context_stack_on_read_data, serviceName_, method_);
 
-  for (size_t i = 0; i < handlers_->size(); i++) {
-    (*handlers_)[i]->onReadData(contextAt(i), method_, msg);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->onReadData(contextAt(i), method_, msg);
+    }
   }
 }
 
@@ -221,8 +267,10 @@ void ContextStack::postRead(
   FOLLY_SDT(
       thrift, thrift_context_stack_post_read, serviceName_, method_, bytes);
 
-  for (size_t i = 0; i < handlers_->size(); i++) {
-    (*handlers_)[i]->postRead(contextAt(i), method_, header, bytes);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->postRead(contextAt(i), method_, header, bytes);
+    }
   }
 }
 
@@ -230,8 +278,10 @@ void ContextStack::onInteractionTerminate(int64_t id) {
   FOLLY_SDT(
       thrift, thrift_context_stack_on_interaction_terminate, serviceName_, id);
 
-  for (size_t i = 0; i < handlers_->size(); i++) {
-    (*handlers_)[i]->onInteractionTerminate(contextAt(i), id);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->onInteractionTerminate(contextAt(i), id);
+    }
   }
 }
 
@@ -242,8 +292,10 @@ void ContextStack::handlerErrorWrapped(const folly::exception_wrapper& ew) {
       serviceName_,
       method_);
 
-  for (size_t i = 0; i < handlers_->size(); i++) {
-    (*handlers_)[i]->handlerErrorWrapped(contextAt(i), method_, ew);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->handlerErrorWrapped(contextAt(i), method_, ew);
+    }
   }
 }
 
@@ -255,8 +307,11 @@ void ContextStack::userExceptionWrapped(
       serviceName_,
       method_);
 
-  for (size_t i = 0; i < handlers_->size(); i++) {
-    (*handlers_)[i]->userExceptionWrapped(contextAt(i), method_, declared, ew);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->userExceptionWrapped(
+          contextAt(i), method_, declared, ew);
+    }
   }
 }
 

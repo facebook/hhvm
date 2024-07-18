@@ -100,9 +100,10 @@ void moveObject(T& field, U&& object) {
 // Throws a runtime error if the mask contains a map mask.
 void throwIfContainsMapMask(const Mask& mask);
 
-template <typename T>
-void compare_impl(const T& original, const T& modified, FieldIdToMask& mask) {
-  op::for_each_field_id<T>([&](auto id) {
+template <typename Struct>
+void compare_impl(
+    const Struct& original, const Struct& modified, FieldIdToMask& mask) {
+  op::for_each_field_id<Struct>([&](auto id) {
     using Id = decltype(id);
     int16_t fieldId = folly::to_underlying(id());
     auto&& original_field = op::get<Id>(original);
@@ -121,8 +122,8 @@ void compare_impl(const T& original, const T& modified, FieldIdToMask& mask) {
       return;
     }
     // check if nested fields need to be added to mask
-    using FieldType = op::get_native_type<T, Id>;
-    if constexpr (is_thrift_class_v<FieldType>) {
+    using FieldType = op::get_native_type<Struct, Id>;
+    if constexpr (is_thrift_struct_v<FieldType>) {
       compare_impl(
           *original_ptr, *modified_ptr, mask[fieldId].includes_ref().emplace());
       return;

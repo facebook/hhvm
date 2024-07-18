@@ -220,13 +220,11 @@ template <typename Struct>
 using MaskAdapter = InlineAdapter<MaskBuilder<Struct>>;
 
 // Constructs a FieldMask object that includes the fields that are
-// different in the given two Thrift structs/unions.
+// different in the given two Thrift structs.
 // TODO: support map mask
-template <typename T>
-Mask compare(const T& original, const T& modified) {
-  static_assert(
-      is_thrift_class_v<T> || is_thrift_union_v<T>,
-      "not a thrift struct or union");
+template <typename Struct>
+Mask compare(const Struct& original, const Struct& modified) {
+  static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
   Mask result;
   detail::compare_impl(original, modified, result.includes_ref().emplace());
   return result;

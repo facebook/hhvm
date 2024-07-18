@@ -18,7 +18,9 @@
 
 {{#program:needs_sinit?}}
 
+{{#program:has_schema?}}{{! avoids circular dependency }}
 #include <thrift/lib/cpp2/gen/module_sinit_cpp.h>
+{{/program:has_schema?}}
 
 {{ > common/namespace_cpp2_begin}}
 

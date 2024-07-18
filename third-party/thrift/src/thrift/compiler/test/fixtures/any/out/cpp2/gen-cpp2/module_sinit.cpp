@@ -6,7 +6,6 @@
  */
 
 
-#include <thrift/lib/cpp2/gen/module_sinit_cpp.h>
 
 namespace facebook::thrift::compiler::test::fixtures::any {
 // Call all static init functions.

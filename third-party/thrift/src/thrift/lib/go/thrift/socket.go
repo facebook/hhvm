@@ -20,13 +20,6 @@ import (
 	"net"
 )
 
-type socket struct {
-	conn net.Conn
-}
-
-// SocketOption is the type used to set options on the socket
-type SocketOption func(*socket) error
-
 func resolveAddr(hostPort string) (net.Addr, error) {
 	addr, err := net.ResolveTCPAddr("tcp6", hostPort)
 	if err != nil {
@@ -54,24 +47,12 @@ func DialHostPort(hostPort string) (net.Conn, error) {
 	return conn, nil
 }
 
-// SocketConn sets the socket connection
-func SocketConn(conn net.Conn) SocketOption {
-	return func(socket *socket) error {
-		socket.conn = conn
-		return nil
-	}
+// Deprecated: this function does nothing, it just returns your input parameter.
+func SocketConn(conn net.Conn) net.Conn {
+	return conn
 }
 
-// NewSocket creates a net.Conn, given a host and port or an existing connection.
-//
-//	conn, err := thrift.NewSocket(thrift.SocketAddr("localhost:9090"))
-func NewSocket(options ...SocketOption) (net.Conn, error) {
-	socket := &socket{}
-	for _, option := range options {
-		err := option(socket)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return socket.conn, nil
+// Deprecated: this function does nothing, it just returns your input parameter and a nil error.
+func NewSocket(conn net.Conn) (net.Conn, error) {
+	return conn, nil
 }

@@ -2174,30 +2174,56 @@ std::string t_hack_generator::render_const_value_helper(
     const t_type* etype = tset->get_elem_type();
     indent_up();
     const auto& vals = value->get_list_or_empty_map();
-    std::string_view suffix = "", end_bracket = "]";
-    if (arraysets_) {
-      out << "dict[\n";
-      suffix = " => true";
-    } else if (arrays_ || structured_annotations) {
+    if (arrays_ || structured_annotations) {
       out << "keyset[\n";
+      for (const auto* val : vals) {
+        out << indent();
+        out << render_const_value_helper(
+            etype,
+            val,
+            temp_var_initializations_out,
+            namer,
+            immutable_collections,
+            false, // ignore_wrapper
+            structured_annotations);
+        out << ",\n";
+      }
+      indent_down();
+      indent(out) << "]";
+    } else if (arraysets_) {
+      out << "dict[\n";
+      for (const auto* val : vals) {
+        out << indent();
+        out << render_const_value_helper(
+            etype,
+            val,
+            temp_var_initializations_out,
+            namer,
+            immutable_collections,
+            false, // ignore_wrapper
+            structured_annotations);
+        out << " => true";
+        out << ",\n";
+      }
+      indent_down();
+      indent(out) << "]";
     } else {
       out << (immutable_collections ? "Imm" : "") << "Set {\n";
-      end_bracket = "}";
+      for (const auto* val : vals) {
+        out << indent();
+        out << render_const_value_helper(
+            etype,
+            val,
+            temp_var_initializations_out,
+            namer,
+            immutable_collections,
+            false, // ignore_wrapper
+            structured_annotations);
+        out << ",\n";
+      }
+      indent_down();
+      indent(out) << "}";
     }
-    for (const auto* val : vals) {
-      out << indent()
-          << render_const_value_helper(
-                 etype,
-                 val,
-                 temp_var_initializations_out,
-                 namer,
-                 immutable_collections,
-                 false, // ignore_wrapper
-                 structured_annotations)
-          << suffix << ",\n";
-    }
-    indent_down();
-    indent(out) << end_bracket;
   }
   return out.str();
 }

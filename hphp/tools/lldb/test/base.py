@@ -13,7 +13,11 @@ from libfb.py.testutil import BaseFacebookTestCase
 # For lldb, until there's a buck-visible library we can use.
 # Its path on TW containers starts at /host-mounts.
 lldb_path = None
-for path in ["/opt/llvm/bin/lldb", "/host-mounts/opt/llvm/bin/lldb"]:
+for path in [
+    os.getenv("HHVM_TEST_LLDB_BIN", ""),
+    "/opt/llvm/bin/lldb",
+    "/host-mounts/opt/llvm/bin/lldb",
+]:
     if os.path.exists(path):
         lldb_path = (
             subprocess.run([path, "-P"], stdout=subprocess.PIPE)

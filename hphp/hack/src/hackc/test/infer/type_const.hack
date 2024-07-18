@@ -2,12 +2,14 @@
 
 // TEST-CHECK-BAL: type C$static
 // CHECK: type C$static extends HH::classname = .kind="class" .static .abstract {
+// CHECK:   MyString: .public .constant .abstract *HackMixed;
 // CHECK:   TMyShape: .public .type_constant *HackMixed
 // CHECK: }
 
 abstract class C {
   <<__Enforceable>>
   abstract const type TMyShape;
+  abstract const string MyString;
 
   // TEST-CHECK-BAL: define C$static.check2
   // CHECK: define C$static.check2($this: .notnull *C$static, $a: *HackMixed) : .notnull *HackBool {
@@ -26,6 +28,7 @@ abstract class C {
 
 // TEST-CHECK-BAL: type D$static
 // CHECK: type D$static extends C$static = .kind="class" .static {
+// CHECK:   MyString: .public .constant *HackString;
 // CHECK:   TMyShape: .public .type_constant *HackMixed
 // CHECK: }
 
@@ -34,6 +37,7 @@ class D extends C {
     ?'a' => ?string,
     ?'b' => ?int,
   );
+  const string MyString = "hello";
 
   // TEST-CHECK-BAL: define D$static.check3
   // CHECK: define D$static.check3($this: .notnull *D$static, $shape: .const_type="self::TMyShape" *HackMixed) : *void {

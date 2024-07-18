@@ -26,6 +26,8 @@ use log::trace;
 
 use crate::class::IsStatic;
 
+pub(crate) const INFER_ABSTRACT: &str = "abstract";
+
 /// This indicates a static property that started life as a class constant.
 pub(crate) const INFER_CONSTANT: &str = "constant";
 pub(crate) const INFER_TYPE_CONSTANT: &str = "type_constant";
@@ -88,6 +90,13 @@ fn compute_tc_attribute(typed_value: &TypedValue) -> Option<String> {
                 })
         }
         _ => None,
+    }
+}
+
+fn simple_attribute(s: &str) -> Attribute {
+    Attribute {
+        name: ClassName::intern(s),
+        arguments: vec![].into(),
     }
 }
 
@@ -154,10 +163,10 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
     for constant in std::mem::take(&mut class.constants) {
         let Constant { name, value, attrs } = constant;
         // Mark the property as originally being a constant.
-        let attributes = vec![Attribute {
-            name: ClassName::intern(INFER_CONSTANT),
-            arguments: vec![].into(),
-        }];
+        let mut attributes = vec![simple_attribute(INFER_CONSTANT)];
+        if attrs.is_abstract() {
+            attributes.push(simple_attribute(INFER_ABSTRACT));
+        }
         let type_info = if let Some(value) = value.as_ref().into_option() {
             TypeInfo::from_typed_value(value)
         } else {

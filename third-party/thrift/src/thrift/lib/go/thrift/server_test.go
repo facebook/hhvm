@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"errors"
 	"testing"
 )
 
@@ -54,7 +55,10 @@ func TestSimpleServer(t *testing.T) {
 		t.Fatalf("could not send message: %s", err)
 	}
 	cancel()
-	<-errChan
+	err = <-errChan
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected %v, got %v", context.Canceled, err)
+	}
 }
 
 type testProcessor struct {

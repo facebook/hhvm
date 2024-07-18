@@ -18,6 +18,7 @@ package gotest
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"reflect"
@@ -44,7 +45,7 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (context.CancelFunc, 
 	server := thrift.NewSimpleServer(processor, transport, thrift.TransportIDHeader)
 	go func(server *thrift.SimpleServer) {
 		err = server.ServeContext(ctx)
-		if err != nil && err != thrift.ErrServerClosed {
+		if err != nil && !errors.Is(err, context.Canceled) {
 			panic(fmt.Errorf("failed to begin serving test socket: %s", err))
 		}
 	}(server)

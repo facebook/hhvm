@@ -18,16 +18,12 @@ package thrift
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"runtime/debug"
 )
-
-// ErrServerClosed is returned by the Serve methods after a call to Stop
-var ErrServerClosed = errors.New("thrift: Server closed")
 
 // SimpleServer is a functional but unoptimized server that is easy to
 // understand.  In its accept loop, it performs an accept on an
@@ -77,7 +73,7 @@ func (p *SimpleServer) acceptLoopContext(ctx context.Context) error {
 		if err != nil {
 			select {
 			case <-p.quit:
-				return ErrServerClosed
+				return nil
 			default:
 			}
 			return err

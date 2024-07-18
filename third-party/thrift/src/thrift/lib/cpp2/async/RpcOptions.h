@@ -138,10 +138,6 @@ class RpcOptions {
   RpcOptions& setRoutingData(std::shared_ptr<void> data);
   const std::shared_ptr<void>& getRoutingData() const;
 
-  // Opaque 64-bit host hint to be used by the routing layer (best-effort)
-  RpcOptions& setRoutingHint(uint64_t hint);
-  uint64_t getRoutingHint() const;
-
   RpcOptions& setContextPropMask(uint8_t mask);
   uint8_t getContextPropMask() const;
 
@@ -180,7 +176,6 @@ class RpcOptions {
   bool enableChecksum_{false};
   BufferOptions bufferOptions_;
   int64_t interactionId_{0};
-  uint64_t routingHint_{0};
   uint8_t contextPropComponentEnabledMask_{0xff};
 
   std::string routingKey_;

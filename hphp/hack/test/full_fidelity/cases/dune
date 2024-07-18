@@ -105,6 +105,7 @@
    %{exe:../../../src/hh_parse.exe}
    --flags
    --full-fidelity-errors
+   --disable-lval-as-an-expression
    --allow-unstable-features)))
 
 (rule
@@ -215,6 +216,7 @@
    --full-fidelity-json-parse-tree
    --pretty-print-json
    --allow-unstable-features
+   --disable-lval-as-an-expression
    --ignore-missing-json)))
 
 (alias

@@ -18,9 +18,6 @@
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_constants_h.h>
-{{#program:interning?}}
-#include <thrift/lib/cpp2/gen/intern_list.h>
-{{/program:interning?}}
 
 #include "{{program:include_prefix}}{{program:name}}_types.h"
 
@@ -51,10 +48,6 @@ namespace {{program:name}}_constants {
 {{/constant:outline_init?}}
 
 {{/constant:value}}{{/constant:type}}{{/program:constants}}
-{{#program:interning?}}
-
-  const ::apache::thrift::type::AnyValue& getValue(::apache::thrift::type::ValueId id);
-{{/program:interning?}}
 
 } // namespace {{program:name}}_constants
 {{ > common/namespace_cpp2_end}}

@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <array>
-
 #include <folly/Indestructible.h>
 #include <folly/lang/Exception.h>
 

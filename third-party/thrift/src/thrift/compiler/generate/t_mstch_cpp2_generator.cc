@@ -343,7 +343,6 @@ class cpp_mstch_program : public mstch_program {
     register_has_option("program:no_metadata?", "no_metadata");
     register_has_option(
         "program:enforce_required?", "deprecated_enforce_required");
-    register_has_option("program:interning?", "interning");
   }
   std::string get_program_namespace(const t_program* program) override {
     return t_mstch_cpp2_generator::get_cpp2_namespace(program);

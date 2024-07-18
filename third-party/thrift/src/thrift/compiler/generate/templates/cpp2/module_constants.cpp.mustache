@@ -56,33 +56,6 @@ std::string_view {{constant:name}}() {
 {{/type:binary?}}{{/constant:generated?}}{{/constant:outline_init?}}
 
 {{/constant:value}}{{/constant:type}}{{/program:constants}}
-{{#program:interning?}}
-
-const ::apache::thrift::type::AnyValue& getValue(::apache::thrift::type::ValueId vid) {
-  if (vid == ::apache::thrift::type::ValueId{}) {
-    throw std::out_of_range("Invalid ValueId");
-  }
-  {{#program:interned_values?}}
-  auto pos = ::apache::thrift::type::toPosition(static_cast<::apache::thrift::type::Ordinal>(vid), {{program:num_interned_values}});
-
-  static const folly::Indestructible<::std::array<::apache::thrift::type::AnyValue, {{program:num_interned_values}}>> values { { {
-  {{#program:interned_values}}
-    {{#constant:type}}
-    {{#constant:value}}
-    ::apache::thrift::type::AnyValue::create<{{type:type_tag}}>({{ > common/iterate_const_values}}),
-    {{/constant:value}}
-    {{/constant:type}}
-  {{/program:interned_values}}
-  }}};
-
-  return (*values)[pos];
-  {{/program:interned_values?}}
-  {{^program:interned_values?}}
-    throw std::out_of_range("Invalid ValueId");
-  {{/program:interned_values?}}
-}
-
-{{/program:interning?}}
 } // namespace {{program:name}}_constants
 {{ > common/namespace_cpp2_end}}
 {{/program:constants?}}

@@ -271,15 +271,6 @@ class t_program : public t_named {
 
   enum class value_id : int64_t {};
 
-  // Adds value to intern list and returns ID
-  value_id intern_value(std::unique_ptr<t_const_value> val) {
-    auto type = val->ttype();
-    intern_list_.push_back(
-        std::make_unique<t_const>(this, type, "", std::move(val)));
-    return static_cast<value_id>(intern_list_.size());
-  }
-  const node_list<t_const>& intern_list() const { return intern_list_; }
-
  private:
   t_package package_;
 
@@ -307,7 +298,6 @@ class t_program : public t_named {
   std::vector<t_service*> services_;
   std::vector<t_include*> includes_;
   std::vector<t_interaction*> interactions_;
-  node_list<t_const> intern_list_;
 
   std::string path_; // initialized in ctor init-list
   std::string include_prefix_;

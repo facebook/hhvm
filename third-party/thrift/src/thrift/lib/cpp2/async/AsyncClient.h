@@ -34,13 +34,13 @@ class GeneratedAsyncClient : public TClientBase {
    public:
     Options() {}
 
-    Options& includeGlobalEventHandlers(bool include) {
-      clientBaseOptions_.includeGlobalEventHandlers = include;
+    Options& includeGlobalLegacyEventHandlers(bool include) {
+      clientBaseOptions_.includeGlobalLegacyClientHandlers = include;
       return *this;
     }
 
     static Options zeroDependency() {
-      return Options().includeGlobalEventHandlers(false);
+      return Options().includeGlobalLegacyEventHandlers(false);
     }
 
    private:

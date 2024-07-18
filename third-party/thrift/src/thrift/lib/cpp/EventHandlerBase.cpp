@@ -92,7 +92,7 @@ TProcessorBase::getHandlers() {
 TClientBase::TClientBase() : TClientBase(Options()) {}
 
 TClientBase::TClientBase(Options options) {
-  if (!options.includeGlobalEventHandlers) {
+  if (!options.includeGlobalLegacyClientHandlers) {
     return;
   }
 

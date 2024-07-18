@@ -89,13 +89,12 @@ class TClientBase : public EventHandlerBase {
  protected:
   struct Options {
     /**
-     * If set to true (default), newly constructed objects automatically include
-     * all event handlers returned by getHandlers() and getFactories().
-     *
-     * If set to false, the initial list of handlers is empty but new handlers
-     * may be added by calling addEventHandler.
+     * If set, newly constructed client objects automatically include
+     * all event handlers returned by getHandlers(). Otherwise, the initial
+     * list of handlers is empty but new handlers may be added by calling
+     * addEventHandler.
      */
-    bool includeGlobalEventHandlers = true;
+    bool includeGlobalLegacyClientHandlers = true;
   };
   explicit TClientBase(Options options);
 

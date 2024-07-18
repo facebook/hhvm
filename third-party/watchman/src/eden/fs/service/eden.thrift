@@ -1062,6 +1062,7 @@ enum HgResourceType {
   BLOB = 1,
   TREE = 2,
   BLOBMETA = 3,
+  TREEMETA = 4,
 }
 
 enum HgImportPriority {

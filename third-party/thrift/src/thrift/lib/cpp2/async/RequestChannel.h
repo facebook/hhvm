@@ -228,7 +228,7 @@ class RequestChannel : virtual public folly::DelayedDestruction {
   uint64_t checksumSamplingRate_{0};
 };
 
-template <bool oneWay, bool sync>
+template <bool IsOneway, bool IsSync>
 class ClientBatonCallback : public RequestClientCallback {
  public:
   explicit ClientBatonCallback(
@@ -262,8 +262,8 @@ class ClientBatonCallback : public RequestClientCallback {
   folly::fibers::Baton& co_waitUntilDone() { return doneBaton_; }
 
   void onResponse(ClientReceiveState&& rs) noexcept override {
-    if (!oneWay) {
-      assert(rs.hasResponseBuffer());
+    if constexpr (!IsOneway) {
+      DCHECK(rs.hasResponseBuffer());
       *rs_ = std::move(rs);
     }
     doneBaton_.post();
@@ -275,7 +275,7 @@ class ClientBatonCallback : public RequestClientCallback {
 
   bool isInlineSafe() const override { return true; }
 
-  bool isSync() const override { return sync; }
+  bool isSync() const override { return IsSync; }
 
   folly::Executor::KeepAlive<> getExecutor() const override {
     return executor_;
@@ -287,11 +287,11 @@ class ClientBatonCallback : public RequestClientCallback {
   folly::Executor* executor_{};
 };
 
-template <bool oneWay>
-using ClientSyncCallback = ClientBatonCallback<oneWay, true>;
+template <bool IsOneWay>
+using ClientSyncCallback = ClientBatonCallback<IsOneWay, true>;
 
-template <bool oneWay>
-using ClientCoroCallback = ClientBatonCallback<oneWay, false>;
+template <bool IsOneWay>
+using ClientCoroCallback = ClientBatonCallback<IsOneWay, false>;
 
 StreamClientCallback* createStreamClientCallback(
     RequestClientCallback::Ptr requestCallback,

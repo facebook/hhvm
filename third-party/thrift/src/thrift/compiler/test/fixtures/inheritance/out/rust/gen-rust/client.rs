@@ -41,7 +41,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -89,6 +89,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "MyRoot.do_root"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyRootImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -183,9 +192,8 @@ where
 #[allow(deprecated)]
 impl<S, T> MyRootExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyRoot + 'static>,
-    S: ::std::convert::AsRef<dyn MyRootExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn MyRoot + 'static> + ::std::convert::AsRef<dyn MyRootExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn do_root_with_rpc_opts(
@@ -198,7 +206,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn MyRootExt<T> as MyRootExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyRootExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -323,7 +331,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        self.parent.transport()
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -371,6 +379,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "MyNode.do_mid"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyNodeImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        self.parent.transport()
     }
 }
 
@@ -492,11 +509,9 @@ where
 #[allow(deprecated)]
 impl<S, T> MyNodeExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyNode + 'static>,
-    S: ::std::convert::AsRef<dyn MyNodeExt<T> + 'static>,
-    S: crate::client::MyRoot,
-    S: crate::client::MyRootExt<T>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn MyNode + 'static> + ::std::convert::AsRef<dyn MyNodeExt<T> + 'static>,
+    S: crate::client::MyRoot + crate::client::MyRootExt<T>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn do_mid_with_rpc_opts(
@@ -630,7 +645,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        self.parent.transport()
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -678,6 +693,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "MyLeaf.do_leaf"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyLeafImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        self.parent.transport()
     }
 }
 
@@ -832,13 +856,10 @@ where
 #[allow(deprecated)]
 impl<S, T> MyLeafExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyLeaf + 'static>,
-    S: ::std::convert::AsRef<dyn MyLeafExt<T> + 'static>,
-    S: crate::client::MyNode,
-    S: crate::client::MyNodeExt<T>,
-    S: crate::client::MyRoot,
-    S: crate::client::MyRootExt<T>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn MyLeaf + 'static> + ::std::convert::AsRef<dyn MyLeafExt<T> + 'static>,
+    S: crate::client::MyNode + crate::client::MyNodeExt<T>,
+    S: crate::client::MyRoot + crate::client::MyRootExt<T>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn do_leaf_with_rpc_opts(

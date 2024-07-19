@@ -41,7 +41,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -139,6 +139,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "Foo.super"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for FooImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -301,9 +310,8 @@ where
 #[allow(deprecated)]
 impl<S, T> FooExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn Foo + 'static>,
-    S: ::std::convert::AsRef<dyn FooExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn Foo + 'static> + ::std::convert::AsRef<dyn FooExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn r#return_with_rpc_opts(
@@ -328,7 +336,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn FooExt<T> as FooExt<T>>::transport(<Self as ::std::convert::AsRef<dyn FooExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

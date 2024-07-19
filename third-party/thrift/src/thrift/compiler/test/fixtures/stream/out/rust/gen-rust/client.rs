@@ -41,7 +41,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -680,6 +680,15 @@ where
     }
 }
 
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for PubSubStreamingServiceImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
+    }
+}
+
 pub trait PubSubStreamingService: ::std::marker::Send {
     fn returnstream(
         &self,
@@ -1255,9 +1264,8 @@ where
 #[allow(deprecated)]
 impl<S, T> PubSubStreamingServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn PubSubStreamingService + 'static>,
-    S: ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn PubSubStreamingService + 'static> + ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn returnstream_with_rpc_opts(
@@ -1356,7 +1364,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn PubSubStreamingServiceExt<T> as PubSubStreamingServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

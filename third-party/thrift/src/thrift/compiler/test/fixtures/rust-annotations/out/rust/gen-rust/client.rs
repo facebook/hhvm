@@ -41,7 +41,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -89,6 +89,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "S1.r"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for Service1Impl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -183,9 +192,8 @@ where
 #[allow(deprecated)]
 impl<S, T> Service1Ext<T> for S
 where
-    S: ::std::convert::AsRef<dyn Service1 + 'static>,
-    S: ::std::convert::AsRef<dyn Service1Ext<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn Service1 + 'static> + ::std::convert::AsRef<dyn Service1Ext<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn r_with_rpc_opts(
@@ -198,7 +206,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn Service1Ext<T> as Service1Ext<T>>::transport(<Self as ::std::convert::AsRef<dyn Service1Ext<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -326,7 +334,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -374,6 +382,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "S2.r"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for S2Impl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -468,9 +485,8 @@ where
 #[allow(deprecated)]
 impl<S, T> S2Ext<T> for S
 where
-    S: ::std::convert::AsRef<dyn S2 + 'static>,
-    S: ::std::convert::AsRef<dyn S2Ext<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn S2 + 'static> + ::std::convert::AsRef<dyn S2Ext<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn s_with_rpc_opts(
@@ -483,7 +499,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn S2Ext<T> as S2Ext<T>>::transport(<Self as ::std::convert::AsRef<dyn S2Ext<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -611,7 +627,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -705,6 +721,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "AllMethods.bar"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for AllMethodsImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -843,9 +868,8 @@ where
 #[allow(deprecated)]
 impl<S, T> AllMethodsExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn AllMethods + 'static>,
-    S: ::std::convert::AsRef<dyn AllMethodsExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn AllMethods + 'static> + ::std::convert::AsRef<dyn AllMethodsExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn foo_with_rpc_opts(
@@ -866,7 +890,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn AllMethodsExt<T> as AllMethodsExt<T>>::transport(<Self as ::std::convert::AsRef<dyn AllMethodsExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -994,7 +1018,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -1088,6 +1112,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "OneMethod.bar"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for OneMethodImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -1226,9 +1259,8 @@ where
 #[allow(deprecated)]
 impl<S, T> OneMethodExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn OneMethod + 'static>,
-    S: ::std::convert::AsRef<dyn OneMethodExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn OneMethod + 'static> + ::std::convert::AsRef<dyn OneMethodExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn foo_with_rpc_opts(
@@ -1249,7 +1281,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn OneMethodExt<T> as OneMethodExt<T>>::transport(<Self as ::std::convert::AsRef<dyn OneMethodExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -1377,7 +1409,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -1471,6 +1503,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "OneMethodOptOut.bar"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for OneMethodOptOutImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -1609,9 +1650,8 @@ where
 #[allow(deprecated)]
 impl<S, T> OneMethodOptOutExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn OneMethodOptOut + 'static>,
-    S: ::std::convert::AsRef<dyn OneMethodOptOutExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn OneMethodOptOut + 'static> + ::std::convert::AsRef<dyn OneMethodOptOutExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn foo_with_rpc_opts(
@@ -1632,7 +1672,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn OneMethodOptOutExt<T> as OneMethodOptOutExt<T>>::transport(<Self as ::std::convert::AsRef<dyn OneMethodOptOutExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

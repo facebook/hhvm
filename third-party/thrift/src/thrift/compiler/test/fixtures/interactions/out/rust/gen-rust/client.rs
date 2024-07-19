@@ -41,7 +41,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -203,6 +203,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "MyInteraction.truthify"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -386,9 +395,8 @@ where
 #[allow(deprecated)]
 impl<S, T> MyInteractionExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyInteraction + 'static>,
-    S: ::std::convert::AsRef<dyn MyInteractionExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn MyInteraction + 'static> + ::std::convert::AsRef<dyn MyInteractionExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn frobnicate_with_rpc_opts(
@@ -417,7 +425,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn MyInteractionExt<T> as MyInteractionExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -545,7 +553,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -707,6 +715,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.truthify"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionFastImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -890,9 +907,8 @@ where
 #[allow(deprecated)]
 impl<S, T> MyInteractionFastExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyInteractionFast + 'static>,
-    S: ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn MyInteractionFast + 'static> + ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn frobnicate_with_rpc_opts(
@@ -921,7 +937,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn MyInteractionFastExt<T> as MyInteractionFastExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -1049,7 +1065,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -1097,6 +1113,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "SerialInteraction.frobnicate"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for SerialInteractionImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -1191,9 +1216,8 @@ where
 #[allow(deprecated)]
 impl<S, T> SerialInteractionExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn SerialInteraction + 'static>,
-    S: ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn SerialInteraction + 'static> + ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn frobnicate_with_rpc_opts(
@@ -1206,7 +1230,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn SerialInteractionExt<T> as SerialInteractionExt<T>>::transport(<Self as ::std::convert::AsRef<dyn SerialInteractionExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -1334,7 +1358,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -1566,6 +1590,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "MyService.serialize"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyServiceImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -1879,9 +1912,8 @@ where
 #[allow(deprecated)]
 impl<S, T> MyServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyService + 'static>,
-    S: ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn MyService + 'static> + ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn foo_with_rpc_opts(
@@ -1920,7 +1952,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn MyServiceExt<T> as MyServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -2048,7 +2080,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -2210,6 +2242,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "MyInteraction.truthify"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -2393,9 +2434,8 @@ where
 #[allow(deprecated)]
 impl<S, T> MyInteractionExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyInteraction + 'static>,
-    S: ::std::convert::AsRef<dyn MyInteractionExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn MyInteraction + 'static> + ::std::convert::AsRef<dyn MyInteractionExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn frobnicate_with_rpc_opts(
@@ -2424,7 +2464,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn MyInteractionExt<T> as MyInteractionExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -2552,7 +2592,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -2714,6 +2754,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.truthify"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionFastImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -2897,9 +2946,8 @@ where
 #[allow(deprecated)]
 impl<S, T> MyInteractionFastExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyInteractionFast + 'static>,
-    S: ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn MyInteractionFast + 'static> + ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn frobnicate_with_rpc_opts(
@@ -2928,7 +2976,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn MyInteractionFastExt<T> as MyInteractionFastExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -3056,7 +3104,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -3104,6 +3152,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "SerialInteraction.frobnicate"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for SerialInteractionImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -3198,9 +3255,8 @@ where
 #[allow(deprecated)]
 impl<S, T> SerialInteractionExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn SerialInteraction + 'static>,
-    S: ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn SerialInteraction + 'static> + ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn frobnicate_with_rpc_opts(
@@ -3213,7 +3269,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn SerialInteractionExt<T> as SerialInteractionExt<T>>::transport(<Self as ::std::convert::AsRef<dyn SerialInteractionExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -3341,7 +3397,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -3573,6 +3629,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "Factories.serialize"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for FactoriesImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -3811,9 +3876,8 @@ where
 #[allow(deprecated)]
 impl<S, T> FactoriesExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn Factories + 'static>,
-    S: ::std::convert::AsRef<dyn FactoriesExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn Factories + 'static> + ::std::convert::AsRef<dyn FactoriesExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn foo_with_rpc_opts(
@@ -3852,7 +3916,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn FactoriesExt<T> as FactoriesExt<T>>::transport(<Self as ::std::convert::AsRef<dyn FactoriesExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -3980,7 +4044,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -4142,6 +4206,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "MyInteraction.truthify"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -4325,9 +4398,8 @@ where
 #[allow(deprecated)]
 impl<S, T> MyInteractionExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyInteraction + 'static>,
-    S: ::std::convert::AsRef<dyn MyInteractionExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn MyInteraction + 'static> + ::std::convert::AsRef<dyn MyInteractionExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn frobnicate_with_rpc_opts(
@@ -4356,7 +4428,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn MyInteractionExt<T> as MyInteractionExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -4484,7 +4556,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -4646,6 +4718,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.truthify"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionFastImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -4829,9 +4910,8 @@ where
 #[allow(deprecated)]
 impl<S, T> MyInteractionFastExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyInteractionFast + 'static>,
-    S: ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn MyInteractionFast + 'static> + ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn frobnicate_with_rpc_opts(
@@ -4860,7 +4940,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn MyInteractionFastExt<T> as MyInteractionFastExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -4988,7 +5068,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -5036,6 +5116,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "SerialInteraction.frobnicate"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for SerialInteractionImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -5130,9 +5219,8 @@ where
 #[allow(deprecated)]
 impl<S, T> SerialInteractionExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn SerialInteraction + 'static>,
-    S: ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn SerialInteraction + 'static> + ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn frobnicate_with_rpc_opts(
@@ -5145,7 +5233,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn SerialInteractionExt<T> as SerialInteractionExt<T>>::transport(<Self as ::std::convert::AsRef<dyn SerialInteractionExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -5273,7 +5361,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -5321,6 +5409,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "Perform.foo"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for PerformImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -5490,9 +5587,8 @@ where
 #[allow(deprecated)]
 impl<S, T> PerformExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn Perform + 'static>,
-    S: ::std::convert::AsRef<dyn PerformExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn Perform + 'static> + ::std::convert::AsRef<dyn PerformExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn foo_with_rpc_opts(
@@ -5505,7 +5601,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn PerformExt<T> as PerformExt<T>>::transport(<Self as ::std::convert::AsRef<dyn PerformExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

@@ -41,7 +41,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -89,6 +89,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "FooService.simple_rpc"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for FooServiceImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -183,9 +192,8 @@ where
 #[allow(deprecated)]
 impl<S, T> FooServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn FooService + 'static>,
-    S: ::std::convert::AsRef<dyn FooServiceExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn FooService + 'static> + ::std::convert::AsRef<dyn FooServiceExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn simple_rpc_with_rpc_opts(
@@ -198,7 +206,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn FooServiceExt<T> as FooServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn FooServiceExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -326,7 +334,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -376,6 +384,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "FB303Service.simple_rpc"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for FB303ServiceImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -482,9 +499,8 @@ where
 #[allow(deprecated)]
 impl<S, T> FB303ServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn FB303Service + 'static>,
-    S: ::std::convert::AsRef<dyn FB303ServiceExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn FB303Service + 'static> + ::std::convert::AsRef<dyn FB303ServiceExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn simple_rpc_with_rpc_opts(
@@ -499,7 +515,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn FB303ServiceExt<T> as FB303ServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn FB303ServiceExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -627,7 +643,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -1105,6 +1121,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "MyService.rpc_skipped_codegen"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyServiceImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -1691,9 +1716,8 @@ where
 #[allow(deprecated)]
 impl<S, T> MyServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyService + 'static>,
-    S: ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn MyService + 'static> + ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn ping_with_rpc_opts(
@@ -1794,7 +1818,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn MyServiceExt<T> as MyServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -1922,7 +1946,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -2020,6 +2044,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "DbMixedStackArguments.getDataByKey1"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for DbMixedStackArgumentsImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -2182,9 +2215,8 @@ where
 #[allow(deprecated)]
 impl<S, T> DbMixedStackArgumentsExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn DbMixedStackArguments + 'static>,
-    S: ::std::convert::AsRef<dyn DbMixedStackArgumentsExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn DbMixedStackArguments + 'static> + ::std::convert::AsRef<dyn DbMixedStackArgumentsExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn getDataByKey0_with_rpc_opts(
@@ -2209,7 +2241,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn DbMixedStackArgumentsExt<T> as DbMixedStackArgumentsExt<T>>::transport(<Self as ::std::convert::AsRef<dyn DbMixedStackArgumentsExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

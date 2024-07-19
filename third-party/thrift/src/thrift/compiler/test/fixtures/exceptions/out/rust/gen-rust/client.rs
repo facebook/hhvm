@@ -41,7 +41,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -227,6 +227,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "Raiser.get500"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for RaiserImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -453,9 +462,8 @@ where
 #[allow(deprecated)]
 impl<S, T> RaiserExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn Raiser + 'static>,
-    S: ::std::convert::AsRef<dyn RaiserExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn Raiser + 'static> + ::std::convert::AsRef<dyn RaiserExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn doBland_with_rpc_opts(
@@ -492,7 +500,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn RaiserExt<T> as RaiserExt<T>>::transport(<Self as ::std::convert::AsRef<dyn RaiserExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

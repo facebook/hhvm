@@ -43,6 +43,7 @@ use crate::ResultInfo;
 use crate::ResultType;
 use crate::Serialize;
 use crate::SerializedMessage;
+use crate::Transport;
 
 // Note: `variants_by_number` must be sorted by the i32 values.
 pub fn enum_display(
@@ -74,6 +75,10 @@ pub fn buf_len<B: Buf>(b: &B) -> anyhow::Result<u32> {
         format!("Unable to report a buffer length of {length} bytes as a `u32`")
     })?;
     Ok(length)
+}
+
+pub trait GetTransport<T: Transport> {
+    fn transport(&self) -> &T;
 }
 
 pub trait SerializeExn {

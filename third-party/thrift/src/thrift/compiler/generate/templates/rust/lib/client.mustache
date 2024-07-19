@@ -55,12 +55,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        {{#service:extends}}
-        self.parent.transport()
-        {{/service:extends}}
-        {{^service:extends}}
-        &self.transport
-        {{/service:extends}}
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
     {{#service:rustFunctions}}
@@ -206,6 +201,20 @@ where
     }
     {{/function:sink?}}{{/function:starts_interaction?}}
     {{/service:rustFunctions}}
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for {{service:rust_name}}Impl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        {{#service:extends}}
+        self.parent.transport()
+        {{/service:extends}}
+        {{^service:extends}}
+        &self.transport
+        {{/service:extends}}
+    }
 }
 
 {{#service:extendedClients}}
@@ -471,15 +480,13 @@ where
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
 impl<S, T> {{service:rust_name}}Ext<T> for S
 where
-    S: ::std::convert::AsRef<dyn {{service:rust_name}} + 'static>,
-    S: ::std::convert::AsRef<dyn {{service:rust_name}}Ext<T> + 'static>,
+    S: ::std::convert::AsRef<dyn {{service:rust_name}} + 'static> + ::std::convert::AsRef<dyn {{service:rust_name}}Ext<T> + 'static>,
     {{#service:extendedClients}}
     {{#extendedService:service}}
-    S: {{extendedService:packagePrefix}}::{{service:rust_name}},
-    S: {{extendedService:packagePrefix}}::{{service:rust_name}}Ext<T>,
+    S: {{extendedService:packagePrefix}}::{{service:rust_name}} + {{extendedService:packagePrefix}}::{{service:rust_name}}Ext<T>,
     {{/extendedService:service}}
     {{/service:extendedClients}}
-    S: ::std::marker::Send,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     {{#service:rustFunctions}}
@@ -503,7 +510,7 @@ where
     {{^service:extendedClients}}
 
     fn transport(&self) -> &T {
-        <dyn {{service:rust_name}}Ext<T> as {{service:rust_name}}Ext<T>>::transport(<Self as ::std::convert::AsRef<dyn {{service:rust_name}}Ext<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
     {{/service:extendedClients}}
 }

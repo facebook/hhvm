@@ -41,7 +41,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -377,6 +377,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "MyService.doNothing"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyServiceImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -807,9 +816,8 @@ where
 #[allow(deprecated)]
 impl<S, T> MyServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyService + 'static>,
-    S: ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn MyService + 'static> + ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn ping_with_rpc_opts(
@@ -882,7 +890,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn MyServiceExt<T> as MyServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -1010,7 +1018,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -1104,6 +1112,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "MyServicePrioParent.pong"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyServicePrioParentImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -1242,9 +1259,8 @@ where
 #[allow(deprecated)]
 impl<S, T> MyServicePrioParentExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyServicePrioParent + 'static>,
-    S: ::std::convert::AsRef<dyn MyServicePrioParentExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn MyServicePrioParent + 'static> + ::std::convert::AsRef<dyn MyServicePrioParentExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn ping_with_rpc_opts(
@@ -1265,7 +1281,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn MyServicePrioParentExt<T> as MyServicePrioParentExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyServicePrioParentExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -1390,7 +1406,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        self.parent.transport()
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -1438,6 +1454,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "MyServicePrioChild.pang"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyServicePrioChildImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        self.parent.transport()
     }
 }
 
@@ -1559,11 +1584,9 @@ where
 #[allow(deprecated)]
 impl<S, T> MyServicePrioChildExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyServicePrioChild + 'static>,
-    S: ::std::convert::AsRef<dyn MyServicePrioChildExt<T> + 'static>,
-    S: crate::client::MyServicePrioParent,
-    S: crate::client::MyServicePrioParentExt<T>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn MyServicePrioChild + 'static> + ::std::convert::AsRef<dyn MyServicePrioChildExt<T> + 'static>,
+    S: crate::client::MyServicePrioParent + crate::client::MyServicePrioParentExt<T>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn pang_with_rpc_opts(
@@ -1700,7 +1723,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -1748,6 +1771,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "BadInteraction.foo"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for BadInteractionImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -1842,9 +1874,8 @@ where
 #[allow(deprecated)]
 impl<S, T> BadInteractionExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn BadInteraction + 'static>,
-    S: ::std::convert::AsRef<dyn BadInteractionExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn BadInteraction + 'static> + ::std::convert::AsRef<dyn BadInteractionExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn foo_with_rpc_opts(
@@ -1857,7 +1888,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn BadInteractionExt<T> as BadInteractionExt<T>>::transport(<Self as ::std::convert::AsRef<dyn BadInteractionExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -1985,7 +2016,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -2033,6 +2064,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "BadService.bar"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for BadServiceImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -2152,9 +2192,8 @@ where
 #[allow(deprecated)]
 impl<S, T> BadServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn BadService + 'static>,
-    S: ::std::convert::AsRef<dyn BadServiceExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn BadService + 'static> + ::std::convert::AsRef<dyn BadServiceExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn bar_with_rpc_opts(
@@ -2167,7 +2206,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn BadServiceExt<T> as BadServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn BadServiceExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -2295,7 +2334,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -2435,6 +2474,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "FooBarBazService.baz"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for FooBarBazServiceImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -2617,9 +2665,8 @@ where
 #[allow(deprecated)]
 impl<S, T> FooBarBazServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn FooBarBazService + 'static>,
-    S: ::std::convert::AsRef<dyn FooBarBazServiceExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn FooBarBazService + 'static> + ::std::convert::AsRef<dyn FooBarBazServiceExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn foo_with_rpc_opts(
@@ -2648,7 +2695,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn FooBarBazServiceExt<T> as FooBarBazServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn FooBarBazServiceExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

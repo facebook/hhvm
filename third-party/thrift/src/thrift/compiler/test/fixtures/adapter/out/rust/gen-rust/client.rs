@@ -41,7 +41,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -95,6 +95,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "Service.func"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for ServiceImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -225,9 +234,8 @@ where
 #[allow(deprecated)]
 impl<S, T> ServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn Service + 'static>,
-    S: ::std::convert::AsRef<dyn ServiceExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn Service + 'static> + ::std::convert::AsRef<dyn ServiceExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn func_with_rpc_opts(
@@ -246,7 +254,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn ServiceExt<T> as ServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn ServiceExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -374,7 +382,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -470,6 +478,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "AdapterService.adaptedTypes"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for AdapterServiceImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -620,9 +637,8 @@ where
 #[allow(deprecated)]
 impl<S, T> AdapterServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn AdapterService + 'static>,
-    S: ::std::convert::AsRef<dyn AdapterServiceExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn AdapterService + 'static> + ::std::convert::AsRef<dyn AdapterServiceExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn count_with_rpc_opts(
@@ -645,7 +661,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn AdapterServiceExt<T> as AdapterServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn AdapterServiceExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

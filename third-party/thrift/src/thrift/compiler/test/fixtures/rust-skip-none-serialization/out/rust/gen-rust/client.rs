@@ -41,7 +41,7 @@ where
     }
 
     pub fn transport(&self) -> &T {
-        &self.transport
+        ::fbthrift::help::GetTransport::transport(self)
     }
 
 
@@ -331,6 +331,15 @@ where
         }
         .instrument(::tracing::info_span!("stream", method = "MyService.lobDataById"))
         .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyServiceImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
     }
 }
 
@@ -717,9 +726,8 @@ where
 #[allow(deprecated)]
 impl<S, T> MyServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyService + 'static>,
-    S: ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
-    S: ::std::marker::Send,
+    S: ::std::convert::AsRef<dyn MyService + 'static> + ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
     fn ping_with_rpc_opts(
@@ -784,7 +792,7 @@ where
     }
 
     fn transport(&self) -> &T {
-        <dyn MyServiceExt<T> as MyServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self))
+        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

@@ -25,6 +25,10 @@ from thrift.python.client.request_channel cimport RequestChannel
 from thrift.python.exceptions cimport create_py_exception
 from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 from thrift.python.serializer import serialize_iobuf, deserialize
+from thrift.python.mutable_serializer import (
+    serialize_iobuf as serialize_iobuf_mutable,
+    deserialize as deserialize_mutable,
+)
 from thrift.python.common cimport cRpcOptions, RpcOptions
 
 cdef string blank_interaction = b""
@@ -63,12 +67,18 @@ cdef class SyncClient:
         *,
         string uri_or_name = b"",
         RpcOptions rpc_options = None,
+        is_mutable_types = False,
     ):
         if not self._omni_client:
             raise RuntimeError("Connection already closed")
 
         protocol = deref(self._omni_client).getChannelProtocolId()
-        cdef IOBuf args_iobuf = serialize_iobuf(args, protocol=protocol)
+        cdef IOBuf args_iobuf = (
+            serialize_iobuf(args, protocol=protocol)
+            if not is_mutable_types
+            else serialize_iobuf_mutable(args, protocol=protocol)
+        )
+
         cdef unique_ptr[cIOBuf] args_ciobuf = cmove(args_iobuf.c_clone())
         cdef cRpcOptions c_rpc_options
         if rpc_options is not None:
@@ -96,7 +106,12 @@ cdef class SyncClient:
                 )
             if resp.buf.hasValue():
                 response_iobuf = folly.iobuf.from_unique_ptr(cmove(resp.buf.value()))
-                return deserialize(response_cls, response_iobuf, protocol=protocol)
+                return (
+                    deserialize(response_cls, response_iobuf, protocol=protocol)
+                    if not is_mutable_types
+                    else deserialize_mutable(response_cls, response_iobuf, protocol=protocol)
+                )
+
             elif resp.buf.hasError():
                 raise create_py_exception(resp.buf.error(), rpc_options)
             else:

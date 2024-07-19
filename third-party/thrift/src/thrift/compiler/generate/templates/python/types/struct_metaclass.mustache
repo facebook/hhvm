@@ -15,5 +15,10 @@
   limitations under the License.
 
 }}{{!
-This is the struct that wraps function args
-}}{{^program:is_types_file?}}{{program:module_path}}.{{>types/types_import_path}}.{{/program:is_types_file?}}_fbthrift_{{service:name}}_{{function:name}}_args
+This is the metaclass for Thrift struct
+}}{{#program:generate_mutable_types}}{{!
+}}_fbthrift_python_mutable_types.MutableStructMeta{{!
+}}{{/program:generate_mutable_types}}{{!
+}}{{^program:generate_mutable_types}}{{!
+}}_fbthrift_python_types.StructMeta{{!
+}}{{/program:generate_mutable_types}}

@@ -602,7 +602,6 @@ class python_mstch_type : public mstch_type {
     register_cached_methods(
         this,
         {
-            {"type:module_path", &python_mstch_type::module_path},
             {"type:program_name", &python_mstch_type::program_name},
             {"type:metadata_path", &python_mstch_type::metadata_path},
             {"type:py3_namespace", &python_mstch_type::py3_namespace},
@@ -614,14 +613,18 @@ class python_mstch_type : public mstch_type {
     register_volatile_methods(
         this,
         {
+            {"type:module_path", &python_mstch_type::module_path},
             {"type:need_module_path?", &python_mstch_type::need_module_path},
         });
   }
 
   mstch::node module_path() {
+    std::string_view types_import_path =
+        get_option("generate_mutable_types").empty() ? ".thrift_types"
+                                                     : ".thrift_mutable_types";
     return get_py3_namespace_with_name_and_prefix(
-               get_type_program(), get_option("root_module_prefix")) +
-        ".thrift_types";
+               get_type_program(), get_option("root_module_prefix"))
+        .append(types_import_path);
   }
 
   mstch::node program_name() { return get_type_program()->name(); }
@@ -1247,7 +1250,18 @@ void t_mstch_python_generator::generate_clients() {
     return;
   }
 
-  generate_file("thrift_clients.py", NotTypesFile, false, generate_root_path_);
+  generate_file(
+      "thrift_clients.py",
+      NotTypesFile,
+      false, // generate_mutable_types
+      generate_root_path_);
+  if (has_option("experimental_generate_mutable_types")) {
+    generate_file(
+        "thrift_mutable_clients.py",
+        NotTypesFile,
+        true, // generate_mutable_types
+        generate_root_path_);
+  }
 }
 
 void t_mstch_python_generator::generate_services() {

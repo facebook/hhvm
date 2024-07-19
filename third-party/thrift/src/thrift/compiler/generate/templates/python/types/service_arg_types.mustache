@@ -19,7 +19,7 @@ The argument and result types for functions on thrift services (and interactions
 }}{{#service:supported_functions}}
 
 
-class {{> types/function_args_type}}(metaclass=_fbthrift_python_types.StructMeta):
+class {{> types/function_args_type}}(metaclass={{> types/struct_metaclass}}):
     _fbthrift_SPEC = (
         {{#function:args}}
         _fbthrift_python_types.FieldInfo(
@@ -30,14 +30,17 @@ class {{> types/function_args_type}}(metaclass=_fbthrift_python_types.StructMeta
             {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{> fields/adapter_info }},  # adapter info
-            {{> fields/is_primitive }}, # field type is primitive
+            {{> fields/is_primitive }}, # field type is primitive{{!
+}}{{#program:generate_mutable_types}}
+            {{field:idl_type}}, # IDL type (see BaseTypeEnum){{!
+}}{{/program:generate_mutable_types}}
         ),
         {{/function:args}}
     )
 {{^function:oneway?}}
 
 
-class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass={{> types/struct_metaclass}}):
     _fbthrift_SPEC = (
         {{#function:regular_response_type}}
         {{^type:void?}}
@@ -62,7 +65,10 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass=_fbthrift_py
             {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{> fields/adapter_info }},  # adapter info
-            {{> fields/is_primitive }}, # field type is primitive
+            {{> fields/is_primitive }}, # field type is primitive{{!
+}}{{#program:generate_mutable_types}}
+            {{field:idl_type}}, # IDL type (see BaseTypeEnum){{!
+}}{{/program:generate_mutable_types}}
         ),
         {{/function:exceptions}}
     )
@@ -70,7 +76,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass=_fbthrift_py
 {{#function:stream?}}
 
 
-class _fbthrift_{{service:name}}_{{function:name}}_result_stream(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_{{service:name}}_{{function:name}}_result_stream(metaclass={{> types/struct_metaclass}}):
     _fbthrift_SPEC = (
         {{#function:stream_elem_type}}
         _fbthrift_python_types.FieldInfo(
@@ -93,7 +99,10 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream(metaclass=_fbth
             {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{> fields/adapter_info }},  # adapter info
-            {{> fields/is_primitive }}, # field type is primitive
+            {{> fields/is_primitive }}, # field type is primitive{{!
+}}{{#program:generate_mutable_types}}
+            {{field:idl_type}}, # IDL type (see BaseTypeEnum){{!
+}}{{/program:generate_mutable_types}}
         ),
         {{/function:stream_exceptions}}
     )

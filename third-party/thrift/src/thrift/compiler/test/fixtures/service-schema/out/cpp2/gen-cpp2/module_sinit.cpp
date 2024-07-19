@@ -16,7 +16,7 @@ namespace cpp2 {
 
 
 namespace module_constants {
-extern std::string_view _fbthrift_schema_3bd6b8a55f23bc3b();
+extern ::std::string_view _fbthrift_schema_3bd6b8a55f23bc3b();
 }
 
 namespace {

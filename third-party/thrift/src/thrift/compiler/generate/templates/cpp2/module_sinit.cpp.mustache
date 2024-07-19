@@ -39,7 +39,7 @@ void __fbthrift_static_init_{{struct:cpp_underlying_name}}();
 
 {{#program:has_schema?}}
 namespace {{program:name}}_constants {
-extern std::string_view {{program:schema_name}}();
+extern ::std::string_view {{program:schema_name}}();
 }
 {{/program:has_schema?}}
 

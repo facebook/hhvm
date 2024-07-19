@@ -55,8 +55,8 @@ namespace module_constants {
     return longDoubleValue_;
   }
 
-  constexpr std::string_view bin_{"a\000z", 3};
-  constexpr std::string_view bin() {
+  constexpr ::std::string_view bin_{"a\000z", 3};
+  constexpr ::std::string_view bin() {
     return bin_;
   }
 

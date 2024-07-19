@@ -53,8 +53,8 @@ namespace module_constants {
     return A_WORD_;
   }
 
-  constexpr std::string_view SOME_BYTES_{"bytes", 5};
-  constexpr std::string_view SOME_BYTES() {
+  constexpr ::std::string_view SOME_BYTES_{"bytes", 5};
+  constexpr ::std::string_view SOME_BYTES() {
     return SOME_BYTES_;
   }
 

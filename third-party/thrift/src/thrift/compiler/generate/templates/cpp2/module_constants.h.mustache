@@ -33,7 +33,7 @@ namespace {{program:name}}_constants {
   constexpr {{ > types/const_value_type}} const {{constant:name}}_ = {{ > common/const_value}};
 {{/type:binary?}}
 {{#type:binary?}}
-  constexpr std::string_view {{constant:name}}_{"{{value:string_value}}", {{value:string_length}}};
+  constexpr ::std::string_view {{constant:name}}_{"{{value:string_value}}", {{value:string_length}}};
 {{/type:binary?}}
   constexpr {{ > types/const_value_type}} {{constant:name}}() {
     return {{constant:name}}_;

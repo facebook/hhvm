@@ -50,7 +50,7 @@ namespace {{program:name}}_constants {
 {{/constant:outline_init?}}
 {{^constant:outline_init?}}{{#constant:generated?}}{{#type:binary?}}
 std::string_view {{constant:name}}() {
-  constexpr static std::string_view {{constant:name}}_{"{{value:string_value}}", {{value:string_length}}};
+  constexpr static ::std::string_view {{constant:name}}_{"{{value:string_value}}", {{value:string_length}}};
   return {{constant:name}}_;
 }
 {{/type:binary?}}{{/constant:generated?}}{{/constant:outline_init?}}

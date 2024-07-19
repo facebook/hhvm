@@ -194,6 +194,7 @@
   default_injector_config
   folly_stubs
   hackfmt
+  linttool
   hackfmt_debug
   utils_config_file
   utils_ocaml_overrides))

@@ -126,10 +126,30 @@ module Env = struct
   }
 end
 
-let usage =
-  sprintf "Usage: %s [--range s e] [filename or read from stdin]\n" Sys.argv.(0)
+type options =
+  | Option_normal of
+      (string list
+      * string option
+      * range option
+      * int option
+      * bool
+      * bool
+      * bool
+      * bool
+      * FEnv.t)
+      * Path.t
+      * Full_fidelity_parser_env.t
+      * (bool * bool)
+  | Option_linttool of string list
 
-let parse_options () =
+let usage =
+  sprintf
+    {|Usage: %s [--range s e] [filename or read from stdin]
+or --linttool [filenames or @filename containing newline-separated paths]|}
+    Sys.argv.(0)
+
+let parse_options () : options =
+  let linttool = ref false in
   let files = ref [] in
   let filename_for_logging = ref None in
   let start_char = ref None in
@@ -154,6 +174,10 @@ let parse_options () =
   let rec options =
     ref
       [
+        ( "--linttool",
+          Arg.Unit (fun () -> linttool := true),
+          "For use by an external tool that runs linters (https://fburl.com/wiki/g5m0d3zt)"
+        );
         ( "--range",
           Arg.Tuple
             [
@@ -227,58 +251,63 @@ let parse_options () =
       ]
   in
   Arg.parse_dynamic options (fun file -> files := file :: !files) usage;
-  let range =
-    match (!start_char, !end_char, !start_line, !end_line) with
-    | (Some s, Some e, None, None) -> Some (Byte (s - 1, e - 1))
-    | (None, None, Some s, Some e) -> Some (Line (s, e))
-    | (Some _, Some _, Some _, Some _) ->
-      raise (InvalidCliArg "Cannot use --range with --line-range")
-    | _ -> None
-  in
-  let root =
-    match !cli_root with
-    | Some p -> Path.make p
-    | None ->
-      if !diff then
-        get_root_for_diff ()
+  if !linttool then
+    Option_linttool !files
+  else begin
+    let range =
+      match (!start_char, !end_char, !start_line, !end_line) with
+      | (Some s, Some e, None, None) -> Some (Byte (s - 1, e - 1))
+      | (None, None, Some s, Some e) -> Some (Line (s, e))
+      | (Some _, Some _, Some _, Some _) ->
+        raise (InvalidCliArg "Cannot use --range with --line-range")
+      | _ -> None
+    in
+    let root =
+      match !cli_root with
+      | Some p -> Path.make p
+      | None ->
+        if !diff then
+          get_root_for_diff ()
+        else
+          get_root_for_format !files
+    in
+    let hhconfig_path = Path.concat root ".hhconfig" |> Path.to_string in
+    let (config, parser_env) =
+      if file_exists hhconfig_path then
+        read_hhconfig hhconfig_path
       else
-        get_root_for_format !files
-  in
-  let hhconfig_path = Path.concat root ".hhconfig" |> Path.to_string in
-  let (config, parser_env) =
-    if file_exists hhconfig_path then
-      read_hhconfig hhconfig_path
-    else
-      (FEnv.default, Full_fidelity_parser_env.default)
-  in
-  let config =
-    FEnv.
-      {
-        add_trailing_commas = config.add_trailing_commas;
-        indent_width = opt_default !cli_indent_width config.indent_width;
-        indent_with_tabs = !cli_indent_with_tabs || config.indent_with_tabs;
-        line_width = opt_default !cli_line_width config.line_width;
-        format_generated_code =
-          !cli_format_generated_code || config.format_generated_code;
-        version =
-          (if Option.is_some !cli_version then
-            !cli_version
-          else
-            config.version);
-      }
-  in
-  ( ( !files,
-      !filename_for_logging,
-      range,
-      !at_char,
-      !inplace,
-      !diff,
-      !diff_dry,
-      !check,
-      config ),
-    root,
-    parser_env,
-    (!debug, !test) )
+        (FEnv.default, Full_fidelity_parser_env.default)
+    in
+    let config =
+      FEnv.
+        {
+          add_trailing_commas = config.add_trailing_commas;
+          indent_width = opt_default !cli_indent_width config.indent_width;
+          indent_with_tabs = !cli_indent_with_tabs || config.indent_with_tabs;
+          line_width = opt_default !cli_line_width config.line_width;
+          format_generated_code =
+            !cli_format_generated_code || config.format_generated_code;
+          version =
+            (if Option.is_some !cli_version then
+              !cli_version
+            else
+              config.version);
+        }
+    in
+    Option_normal
+      ( ( !files,
+          !filename_for_logging,
+          range,
+          !at_char,
+          !inplace,
+          !diff,
+          !diff_dry,
+          !check,
+          config ),
+        root,
+        parser_env,
+        (!debug, !test) )
+  end
 
 type format_options =
   | Print of {
@@ -659,48 +688,50 @@ let () =
   Daemon.check_entry_point ();
   Folly.ensure_folly_init ();
 
-  let (options, root, parser_env, (debug, test)) = parse_options () in
-  let env =
-    {
-      Env.debug;
-      test;
-      mode = None;
-      text_source = Stdin None;
-      root = Path.to_string root;
-    }
-  in
-  let start_time = Unix.gettimeofday () in
-  if not env.Env.test then Logger.init start_time;
+  match parse_options () with
+  | Option_normal (options, root, parser_env, (debug, test)) ->
+    let env =
+      {
+        Env.debug;
+        test;
+        mode = None;
+        text_source = Stdin None;
+        root = Path.to_string root;
+      }
+    in
+    let start_time = Unix.gettimeofday () in
+    if not env.Env.test then Logger.init start_time;
 
-  let (err_msg, exit_code) =
-    try
-      let options = validate_options env options in
-      main env options parser_env;
-      (None, 0)
-    with
-    | exn ->
-      let exit_code = get_exception_exit_value exn in
-      if exit_code = 255 then Printexc.print_backtrace stderr;
-      let err_str = get_error_string_from_exn exn in
-      let err_msg =
-        match exn with
-        | InvalidSyntax -> err_str
-        | InvalidCliArg s
-        | InvalidDiff s ->
-          err_str ^ ": " ^ s
-        | _ -> err_str ^ ": " ^ Exn.to_string exn
-      in
-      (Some err_msg, exit_code)
-  in
-  (if not env.Env.test then
-    let time_taken = Unix.gettimeofday () -. start_time in
-    Logger.exit
-      ~time_taken
-      ~error:err_msg
-      ~exit_code:(Some exit_code)
-      ~mode:env.Env.mode
-      ~file:(text_source_to_filename env.Env.text_source)
-      ~root:env.Env.root);
+    let (err_msg, exit_code) =
+      try
+        let options = validate_options env options in
+        main env options parser_env;
+        (None, 0)
+      with
+      | exn ->
+        let exit_code = get_exception_exit_value exn in
+        if exit_code = 255 then Printexc.print_backtrace stderr;
+        let err_str = get_error_string_from_exn exn in
+        let err_msg =
+          match exn with
+          | InvalidSyntax -> err_str
+          | InvalidCliArg s
+          | InvalidDiff s ->
+            err_str ^ ": " ^ s
+          | _ -> err_str ^ ": " ^ Exn.to_string exn
+        in
+        (Some err_msg, exit_code)
+    in
+    (if not env.Env.test then
+      let time_taken = Unix.gettimeofday () -. start_time in
+      Logger.exit
+        ~time_taken
+        ~error:err_msg
+        ~exit_code:(Some exit_code)
+        ~mode:env.Env.mode
+        ~file:(text_source_to_filename env.Env.text_source)
+        ~root:env.Env.root);
 
-  Option.iter err_msg ~f:(eprintf "%s\n");
-  exit exit_code
+    Option.iter err_msg ~f:(eprintf "%s\n");
+    exit exit_code
+  | Option_linttool argv -> Linttool.run argv

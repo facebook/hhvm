@@ -59,6 +59,10 @@ func NewCompactSerializer() *Serializer {
 	return &Serializer{transport, protocol}
 }
 
+func serializeCompact(msg Struct) ([]byte, error) {
+	return NewCompactSerializer().Write(msg)
+}
+
 // NewJSONSerializer creates a new serializer using the JSON protocol
 func NewJSONSerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)

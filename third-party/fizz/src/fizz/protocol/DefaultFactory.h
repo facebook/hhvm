@@ -8,62 +8,17 @@
 
 #pragma once
 
-#include <fizz/protocol/Factory.h>
+#include <fizz/backend/openssl/OpenSSLFactory.h>
 
 namespace fizz {
 
+// TODO: This needs to be wired up from fizz-config.h
+
 /**
- * This class instantiates various objects to facilitate testing.
+ * DefaultFactory is a type alias that points to a concrete, non-abstract
+ * Factory instance that can be used by various internal components of Fizz
+ * to get the "default compile time configured" Factory.
  */
-class DefaultFactory : public Factory {
- public:
-  [[nodiscard]] std::unique_ptr<PlaintextReadRecordLayer>
-  makePlaintextReadRecordLayer() const override {
-    return std::make_unique<PlaintextReadRecordLayer>();
-  }
+using DefaultFactory = ::fizz::openssl::OpenSSLFactory;
 
-  [[nodiscard]] std::unique_ptr<PlaintextWriteRecordLayer>
-  makePlaintextWriteRecordLayer() const override {
-    return std::make_unique<PlaintextWriteRecordLayer>();
-  }
-
-  [[nodiscard]] std::unique_ptr<EncryptedReadRecordLayer>
-  makeEncryptedReadRecordLayer(EncryptionLevel encryptionLevel) const override {
-    return std::make_unique<EncryptedReadRecordLayer>(encryptionLevel);
-  }
-
-  [[nodiscard]] std::unique_ptr<EncryptedWriteRecordLayer>
-  makeEncryptedWriteRecordLayer(
-      EncryptionLevel encryptionLevel) const override {
-    return std::make_unique<EncryptedWriteRecordLayer>(encryptionLevel);
-  }
-
-  [[nodiscard]] std::unique_ptr<KeyScheduler> makeKeyScheduler(
-      CipherSuite cipher) const override {
-    auto keyDer = makeKeyDeriver(cipher);
-    return std::make_unique<KeyScheduler>(std::move(keyDer));
-  }
-
-  [[nodiscard]] Random makeRandom() const override {
-    return RandomGenerator<Random().size()>().generateRandom();
-  }
-
-  [[nodiscard]] uint32_t makeTicketAgeAdd() const override {
-    return RandomNumGenerator<uint32_t>().generateRandom();
-  }
-
-  [[nodiscard]] std::unique_ptr<folly::IOBuf> makeRandomBytes(
-      size_t count) const override {
-    return RandomBufGenerator(count).generateRandom();
-  }
-
-  [[nodiscard]] std::shared_ptr<Cert> makeIdentityOnlyCert(
-      std::string ident) const override {
-    return std::make_shared<IdentityCert>(std::move(ident));
-  }
-
-  [[nodiscard]] std::string getHkdfPrefix() const override {
-    return kHkdfLabelPrefix.str();
-  }
-};
 } // namespace fizz

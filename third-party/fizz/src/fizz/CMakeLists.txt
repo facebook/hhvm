@@ -218,6 +218,7 @@ set(FIZZ_SOURCES
   protocol/Events.cpp
   protocol/KeyScheduler.cpp
   protocol/Certificate.cpp
+  protocol/Factory.cpp
   backend/openssl/certificate/CertUtils.cpp
   backend/openssl/OpenSSLFactory.cpp
   protocol/Params.cpp

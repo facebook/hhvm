@@ -28,28 +28,51 @@ namespace fizz {
 class PeerCert;
 
 /**
- * This class instantiates various objects to facilitate testing.
+ * `fizz::Factory` creates objects that are used by other components of Fizz.
+ *
+ * Fizz does not directly handle certain parts of TLS (such as cryptographic
+ * algorithms, X509, etc.). These portions are considered "primitives".
+ * Primitives are provided by various backends (which are typically third
+ * party libraries, such as OpenSSL).
+ *
+ * The role of the factory is to compose primitives from one or more backends
+ * in order to implement other Fizz interfaces.
  */
 class Factory {
  public:
   enum class KeyExchangeMode { Server, Client };
 
-  virtual ~Factory() = default;
+  virtual ~Factory();
 
+  /**
+   * Should not be overridden *unless* for testing.
+   */
   virtual std::unique_ptr<PlaintextReadRecordLayer>
-  makePlaintextReadRecordLayer() const = 0;
+  makePlaintextReadRecordLayer() const;
 
+  /**
+   * Should not be overridden *unless* for testing.
+   */
   virtual std::unique_ptr<PlaintextWriteRecordLayer>
-  makePlaintextWriteRecordLayer() const = 0;
+  makePlaintextWriteRecordLayer() const;
 
+  /**
+   * Should not be overridden *unless* for testing.
+   */
   virtual std::unique_ptr<EncryptedReadRecordLayer>
-  makeEncryptedReadRecordLayer(EncryptionLevel encryptionLevel) const = 0;
+  makeEncryptedReadRecordLayer(EncryptionLevel encryptionLevel) const;
 
+  /**
+   * Should not be overridden *unless* for testing.
+   */
   virtual std::unique_ptr<EncryptedWriteRecordLayer>
-  makeEncryptedWriteRecordLayer(EncryptionLevel encryptionLevel) const = 0;
+  makeEncryptedWriteRecordLayer(EncryptionLevel encryptionLevel) const;
 
+  /**
+   * Should not be overridden *unless* for testing.
+   */
   virtual std::unique_ptr<KeyScheduler> makeKeyScheduler(
-      CipherSuite cipher) const = 0;
+      CipherSuite cipher) const;
 
   virtual std::unique_ptr<KeyDerivation> makeKeyDeriver(
       CipherSuite cipher) const = 0;
@@ -61,23 +84,35 @@ class Factory {
       NamedGroup group,
       KeyExchangeMode mode) const = 0;
 
-  [[nodiscard]] virtual std::unique_ptr<Aead> makeAead(
-      CipherSuite cipher) const = 0;
+  virtual std::unique_ptr<Aead> makeAead(CipherSuite cipher) const = 0;
 
-  [[nodiscard]] virtual Random makeRandom() const = 0;
+  /**
+   * Should not be overridden *unless* for testing.
+   */
+  virtual Random makeRandom() const;
 
-  [[nodiscard]] virtual uint32_t makeTicketAgeAdd() const = 0;
+  /**
+   * Should not be overridden *unless* for testing.
+   */
+  virtual uint32_t makeTicketAgeAdd() const;
 
-  [[nodiscard]] virtual std::unique_ptr<folly::IOBuf> makeRandomBytes(
-      size_t count) const = 0;
+  /**
+   * Should not be overridden *unless* for testing.
+   */
+  virtual std::unique_ptr<folly::IOBuf> makeRandomBytes(size_t count) const;
 
   virtual std::unique_ptr<PeerCert> makePeerCert(
       CertificateEntry certEntry,
       bool /*leaf*/) const = 0;
 
-  [[nodiscard]] virtual std::shared_ptr<Cert> makeIdentityOnlyCert(
-      std::string ident) const = 0;
+  /**
+   * Should not be overridden *unless* for testing.
+   */
+  virtual std::shared_ptr<Cert> makeIdentityOnlyCert(std::string ident) const;
 
-  [[nodiscard]] virtual std::string getHkdfPrefix() const = 0;
+  /**
+   * Should not be overridden *unless* for testing.
+   */
+  virtual std::string getHkdfPrefix() const;
 };
 } // namespace fizz

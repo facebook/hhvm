@@ -372,7 +372,7 @@ module Simple = struct
       (ty : decl_ty) =
     let (r, ty_) = deref ty in
     let use_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos in
-    let check ty =
+    let check ?(ignore_package_errors = ignore_package_errors) ty =
       check_well_kinded_type
         ~allow_missing_targs:false
         ~in_signature
@@ -401,8 +401,8 @@ module Simple = struct
     | Tthis ->
       ()
     | Tvec_or_dict (tk, tv) ->
-      check tk;
-      check tv
+      check ~ignore_package_errors:true tk;
+      check ~ignore_package_errors:true tv
     | Tlike ty
     | Toption ty ->
       check ty
@@ -423,11 +423,14 @@ module Simple = struct
       check ty;
       Class_refinement.iter check rs
     | Tshape { s_fields = map; _ } ->
-      TShapeMap.iter (fun _ sft -> check sft.sft_ty) map
+      TShapeMap.iter
+        (fun _ sft -> check ~ignore_package_errors:true sft.sft_ty)
+        map
     | Tfun ({ ft_params; ft_ret; _ } : _ fun_type) ->
       (* FIXME shall we inspect tparams and where_constraints? *)
-      check ft_ret;
-      List.iter ft_params ~f:(fun p -> check p.fp_type)
+      check ~ignore_package_errors:true ft_ret;
+      List.iter ft_params ~f:(fun p ->
+          check ~ignore_package_errors:true p.fp_type)
     (* Interesting cases--------------------------------- *)
     | Tgeneric (name, targs) -> begin
       match Env.get_pos_and_kind_of_generic env name with

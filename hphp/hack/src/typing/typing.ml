@@ -2313,11 +2313,15 @@ module rec Expr : sig
       * locl_ty
       * bool)
 
+  (** Typechecks a `new` expression.
+      If `is_attribute` is true, it's used for checking an attribute instantiation
+      as in `<<MyAttr()>> class C` (note that attributes are classes) *)
   val new_object :
     expected:ExpectedTy.t option ->
     check_parent:bool ->
     check_not_abstract:bool ->
     is_using_clause:bool ->
+    is_attribute:bool ->
     pos ->
     env ->
     unit * pos * (unit, unit) class_id_ ->
@@ -4232,6 +4236,7 @@ end = struct
           ~is_using_clause:ctxt.Context.is_using_clause
           ~check_parent:false
           ~check_not_abstract:true
+          ~is_attribute:false
           pos
           env
           cid
@@ -4445,7 +4450,13 @@ end = struct
     | Xml (sid, attrl, el) ->
       let cid = CI sid in
       let (env, _tal, _te, classes) =
-        Class_id.class_id_for_new ~exact:nonexact p env cid []
+        Class_id.class_id_for_new
+          ~exact:nonexact
+          ~is_attribute:false
+          p
+          env
+          cid
+          []
       in
       (* OK to ignore rest of list; class_info only used for errors, and
          * cid = CI sid cannot produce a union of classes anyhow *)
@@ -4774,6 +4785,7 @@ end = struct
       ~check_parent
       ~check_not_abstract
       ~is_using_clause
+      ~is_attribute
       p
       env
       ((_, _, cid_) as cid)
@@ -4787,7 +4799,13 @@ end = struct
       new $classname();
      *)
     let (env, tal, tcid, classes) =
-      Class_id.instantiable_cid ~exact:Exact p env cid_ explicit_targs
+      Class_id.instantiable_cid
+        ~is_attribute
+        ~exact:Exact
+        p
+        env
+        cid_
+        explicit_targs
     in
     let allow_abstract_bound_generic =
       match tcid with
@@ -5113,6 +5131,7 @@ end = struct
         ~check_parent:true
         ~check_not_abstract
         ~is_using_clause:false
+        ~is_attribute:false
         pos
         env
         ((), recv_pos, CIparent)
@@ -9348,6 +9367,7 @@ end = struct
           ~check_parent:false
           ~check_not_abstract:false
           ~is_using_clause:false
+          ~is_attribute:true
           attr_pos
           env
           ((), attr_pos, Aast.CI (attr_pos, cid_))
@@ -9387,13 +9407,18 @@ and Class_id : sig
     ?check_explicit_targs:bool ->
     ?inside_nameof:bool ->
     ?is_const:bool ->
+    ?is_attribute:bool ->
     env ->
     Nast.targ list ->
     Nast.class_id ->
     env * Tast.targ list * Tast.class_id * locl_ty
 
+  (** Computes class information for the class id in an instance.
+      When `is_attribute` is true, this is used for the attribute
+      instantiation as in `<<MyAtrr()>> class C` (note that attributes are classes) *)
   val class_id_for_new :
     exact:exact ->
+    is_attribute:bool ->
     pos ->
     env ->
     (unit, unit) class_id_ ->
@@ -9439,6 +9464,7 @@ and Class_id : sig
     concrete_classname<T>, where T cannot be an interface. *)
   val instantiable_cid :
     ?exact:exact ->
+    ?is_attribute:bool ->
     pos ->
     env ->
     Nast.class_id_ ->
@@ -9452,6 +9478,7 @@ end = struct
       ?(check_explicit_targs = false)
       ?(inside_nameof = false)
       ?(is_const = false)
+      ?(is_attribute = false)
       (env : env)
       (tal : Nast.targ list)
       ((_, p, cid_) : Nast.class_id) :
@@ -9567,6 +9594,7 @@ end = struct
             let ignore_package_errors =
               Env.package_v2 env
               && (inside_nameof
+                 || is_attribute
                  || Env.package_v2_bypass_package_check_for_class_const env
                     && is_const)
             in
@@ -9747,13 +9775,18 @@ end = struct
       x
 
   let class_id_for_new
-      ~exact p env (cid : Nast.class_id_) (explicit_targs : Nast.targ list) :
-      newable_class_info =
+      ~exact
+      ~is_attribute
+      p
+      env
+      (cid : Nast.class_id_)
+      (explicit_targs : Nast.targ list) : newable_class_info =
     let (env, tal, te, cid_ty) =
       class_expr
         ~check_targs_well_kinded:true
         ~check_explicit_targs:true
         ~exact
+        ~is_attribute
         env
         explicit_targs
         ((), p, cid)
@@ -9828,10 +9861,11 @@ end = struct
       ExprDepTy.make env ~cid:CIstatic ty
     | _ -> (env, default_ty)
 
-  and instantiable_cid ?(exact = nonexact) p env cid explicit_targs :
+  and instantiable_cid
+      ?(exact = nonexact) ?(is_attribute = false) p env cid explicit_targs :
       newable_class_info =
     let (env, tal, te, classes) =
-      class_id_for_new ~exact p env cid explicit_targs
+      class_id_for_new ~exact ~is_attribute p env cid explicit_targs
     in
     List.iter classes ~f:(function
         | `Dynamic -> ()

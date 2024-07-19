@@ -190,9 +190,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> MyRootExt<T> for S
+impl<'a, S, T> MyRootExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyRoot + 'static> + ::std::convert::AsRef<dyn MyRootExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn MyRoot + 'a> + ::std::convert::AsRef<dyn MyRootExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -392,7 +392,7 @@ where
 }
 
 #[allow(deprecated)]
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyRoot + 'static> for MyNodeImpl<P, T, S>
+impl<'a, P, T, S> ::std::convert::AsRef<dyn crate::client::MyRoot + 'a> for MyNodeImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -401,14 +401,14 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyRoot + 'static)
+    fn as_ref(&self) -> &(dyn crate::client::MyRoot + 'a)
     {
         &self.parent
     }
 }
 
 #[allow(deprecated)]
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyRootExt<T> + 'static> for MyNodeImpl<P, T, S>
+impl<'a, P, T, S> ::std::convert::AsRef<dyn crate::client::MyRootExt<T> + 'a> for MyNodeImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -417,7 +417,7 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyRootExt<T> + 'static)
+    fn as_ref(&self) -> &(dyn crate::client::MyRootExt<T> + 'a)
     {
         &self.parent
     }
@@ -507,9 +507,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> MyNodeExt<T> for S
+impl<'a, S, T> MyNodeExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyNode + 'static> + ::std::convert::AsRef<dyn MyNodeExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn MyNode + 'a> + ::std::convert::AsRef<dyn MyNodeExt<T> + 'a>,
     S: crate::client::MyRoot + crate::client::MyRootExt<T>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
@@ -706,7 +706,7 @@ where
 }
 
 #[allow(deprecated)]
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyNode + 'static> for MyLeafImpl<P, T, S>
+impl<'a, P, T, S> ::std::convert::AsRef<dyn crate::client::MyNode + 'a> for MyLeafImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -715,14 +715,14 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyNode + 'static)
+    fn as_ref(&self) -> &(dyn crate::client::MyNode + 'a)
     {
         &self.parent
     }
 }
 
 #[allow(deprecated)]
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyNodeExt<T> + 'static> for MyLeafImpl<P, T, S>
+impl<'a, P, T, S> ::std::convert::AsRef<dyn crate::client::MyNodeExt<T> + 'a> for MyLeafImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -731,14 +731,14 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyNodeExt<T> + 'static)
+    fn as_ref(&self) -> &(dyn crate::client::MyNodeExt<T> + 'a)
     {
         &self.parent
     }
 }
 
 #[allow(deprecated)]
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyRoot + 'static> for MyLeafImpl<P, T, S>
+impl<'a, P, T, S> ::std::convert::AsRef<dyn crate::client::MyRoot + 'a> for MyLeafImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -747,14 +747,14 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyRoot + 'static)
+    fn as_ref(&self) -> &(dyn crate::client::MyRoot + 'a)
     {
         self.parent.as_ref()
     }
 }
 
 #[allow(deprecated)]
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyRootExt<T> + 'static> for MyLeafImpl<P, T, S>
+impl<'a, P, T, S> ::std::convert::AsRef<dyn crate::client::MyRootExt<T> + 'a> for MyLeafImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -763,7 +763,7 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyRootExt<T> + 'static)
+    fn as_ref(&self) -> &(dyn crate::client::MyRootExt<T> + 'a)
     {
         self.parent.as_ref()
     }
@@ -854,9 +854,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> MyLeafExt<T> for S
+impl<'a, S, T> MyLeafExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyLeaf + 'static> + ::std::convert::AsRef<dyn MyLeafExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn MyLeaf + 'a> + ::std::convert::AsRef<dyn MyLeafExt<T> + 'a>,
     S: crate::client::MyNode + crate::client::MyNodeExt<T>,
     S: crate::client::MyRoot + crate::client::MyRootExt<T>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,

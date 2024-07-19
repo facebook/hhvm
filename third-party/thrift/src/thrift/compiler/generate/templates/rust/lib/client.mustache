@@ -219,9 +219,9 @@ where
 
 {{#service:extendedClients}}
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
-impl<P, T, S> {{!
+impl<'a, P, T, S> {{!
     }}{{#extendedService:service}}{{!
-    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:rust_name}} + 'static> {{!
+    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:rust_name}} + 'a> {{!
     }}{{/extendedService:service}}{{!
     }}for {{service:rust_name}}Impl<P, T, S>
 where
@@ -236,16 +236,16 @@ where
     fn as_ref(&self) -> &(dyn {{#extendedService:service}}{{!
         }}{{extendedService:packagePrefix}}::{{service:rust_name}}{{!
         }}{{/extendedService:service}}{{!
-        }} + 'static)
+        }} + 'a)
     {
         {{extendedService:asRefImpl}}
     }
 }
 
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
-impl<P, T, S> {{!
+impl<'a, P, T, S> {{!
     }}{{#extendedService:service}}{{!
-    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:rust_name}}Ext<T> + 'static> {{!
+    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:rust_name}}Ext<T> + 'a> {{!
     }}{{/extendedService:service}}{{!
     }}for {{service:rust_name}}Impl<P, T, S>
 where
@@ -260,7 +260,7 @@ where
     fn as_ref(&self) -> &(dyn {{#extendedService:service}}{{!
         }}{{extendedService:packagePrefix}}::{{service:rust_name}}Ext<T>{{!
         }}{{/extendedService:service}}{{!
-        }} + 'static)
+        }} + 'a)
     {
         {{extendedService:asRefImpl}}
     }
@@ -478,9 +478,9 @@ where
 }
 
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
-impl<S, T> {{service:rust_name}}Ext<T> for S
+impl<'a, S, T> {{service:rust_name}}Ext<T> for S
 where
-    S: ::std::convert::AsRef<dyn {{service:rust_name}} + 'static> + ::std::convert::AsRef<dyn {{service:rust_name}}Ext<T> + 'static>,
+    S: ::std::convert::AsRef<dyn {{service:rust_name}} + 'a> + ::std::convert::AsRef<dyn {{service:rust_name}}Ext<T> + 'a>,
     {{#service:extendedClients}}
     {{#extendedService:service}}
     S: {{extendedService:packagePrefix}}::{{service:rust_name}} + {{extendedService:packagePrefix}}::{{service:rust_name}}Ext<T>,

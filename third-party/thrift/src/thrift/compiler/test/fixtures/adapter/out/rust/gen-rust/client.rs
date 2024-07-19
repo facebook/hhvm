@@ -232,9 +232,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> ServiceExt<T> for S
+impl<'a, S, T> ServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn Service + 'static> + ::std::convert::AsRef<dyn ServiceExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn Service + 'a> + ::std::convert::AsRef<dyn ServiceExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -635,9 +635,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> AdapterServiceExt<T> for S
+impl<'a, S, T> AdapterServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn AdapterService + 'static> + ::std::convert::AsRef<dyn AdapterServiceExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn AdapterService + 'a> + ::std::convert::AsRef<dyn AdapterServiceExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {

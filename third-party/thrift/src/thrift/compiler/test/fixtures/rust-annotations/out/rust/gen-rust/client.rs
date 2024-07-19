@@ -190,9 +190,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> Service1Ext<T> for S
+impl<'a, S, T> Service1Ext<T> for S
 where
-    S: ::std::convert::AsRef<dyn Service1 + 'static> + ::std::convert::AsRef<dyn Service1Ext<T> + 'static>,
+    S: ::std::convert::AsRef<dyn Service1 + 'a> + ::std::convert::AsRef<dyn Service1Ext<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -483,9 +483,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> S2Ext<T> for S
+impl<'a, S, T> S2Ext<T> for S
 where
-    S: ::std::convert::AsRef<dyn S2 + 'static> + ::std::convert::AsRef<dyn S2Ext<T> + 'static>,
+    S: ::std::convert::AsRef<dyn S2 + 'a> + ::std::convert::AsRef<dyn S2Ext<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -866,9 +866,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> AllMethodsExt<T> for S
+impl<'a, S, T> AllMethodsExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn AllMethods + 'static> + ::std::convert::AsRef<dyn AllMethodsExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn AllMethods + 'a> + ::std::convert::AsRef<dyn AllMethodsExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -1257,9 +1257,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> OneMethodExt<T> for S
+impl<'a, S, T> OneMethodExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn OneMethod + 'static> + ::std::convert::AsRef<dyn OneMethodExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn OneMethod + 'a> + ::std::convert::AsRef<dyn OneMethodExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -1648,9 +1648,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> OneMethodOptOutExt<T> for S
+impl<'a, S, T> OneMethodOptOutExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn OneMethodOptOut + 'static> + ::std::convert::AsRef<dyn OneMethodOptOutExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn OneMethodOptOut + 'a> + ::std::convert::AsRef<dyn OneMethodOptOutExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {

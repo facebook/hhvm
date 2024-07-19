@@ -1262,9 +1262,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> PubSubStreamingServiceExt<T> for S
+impl<'a, S, T> PubSubStreamingServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn PubSubStreamingService + 'static> + ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn PubSubStreamingService + 'a> + ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {

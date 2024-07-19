@@ -204,9 +204,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> TestServiceExt<T> for S
+impl<'a, S, T> TestServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn TestService + 'static> + ::std::convert::AsRef<dyn TestServiceExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn TestService + 'a> + ::std::convert::AsRef<dyn TestServiceExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {

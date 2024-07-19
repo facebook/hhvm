@@ -460,9 +460,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> RaiserExt<T> for S
+impl<'a, S, T> RaiserExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn Raiser + 'static> + ::std::convert::AsRef<dyn RaiserExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn Raiser + 'a> + ::std::convert::AsRef<dyn RaiserExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {

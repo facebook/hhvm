@@ -814,9 +814,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> MyServiceExt<T> for S
+impl<'a, S, T> MyServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyService + 'static> + ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn MyService + 'a> + ::std::convert::AsRef<dyn MyServiceExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -1257,9 +1257,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> MyServicePrioParentExt<T> for S
+impl<'a, S, T> MyServicePrioParentExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyServicePrioParent + 'static> + ::std::convert::AsRef<dyn MyServicePrioParentExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn MyServicePrioParent + 'a> + ::std::convert::AsRef<dyn MyServicePrioParentExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -1467,7 +1467,7 @@ where
 }
 
 #[allow(deprecated)]
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyServicePrioParent + 'static> for MyServicePrioChildImpl<P, T, S>
+impl<'a, P, T, S> ::std::convert::AsRef<dyn crate::client::MyServicePrioParent + 'a> for MyServicePrioChildImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -1476,14 +1476,14 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyServicePrioParent + 'static)
+    fn as_ref(&self) -> &(dyn crate::client::MyServicePrioParent + 'a)
     {
         &self.parent
     }
 }
 
 #[allow(deprecated)]
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyServicePrioParentExt<T> + 'static> for MyServicePrioChildImpl<P, T, S>
+impl<'a, P, T, S> ::std::convert::AsRef<dyn crate::client::MyServicePrioParentExt<T> + 'a> for MyServicePrioChildImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -1492,7 +1492,7 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyServicePrioParentExt<T> + 'static)
+    fn as_ref(&self) -> &(dyn crate::client::MyServicePrioParentExt<T> + 'a)
     {
         &self.parent
     }
@@ -1582,9 +1582,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> MyServicePrioChildExt<T> for S
+impl<'a, S, T> MyServicePrioChildExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyServicePrioChild + 'static> + ::std::convert::AsRef<dyn MyServicePrioChildExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn MyServicePrioChild + 'a> + ::std::convert::AsRef<dyn MyServicePrioChildExt<T> + 'a>,
     S: crate::client::MyServicePrioParent + crate::client::MyServicePrioParentExt<T>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
@@ -1872,9 +1872,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> BadInteractionExt<T> for S
+impl<'a, S, T> BadInteractionExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn BadInteraction + 'static> + ::std::convert::AsRef<dyn BadInteractionExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn BadInteraction + 'a> + ::std::convert::AsRef<dyn BadInteractionExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -2190,9 +2190,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> BadServiceExt<T> for S
+impl<'a, S, T> BadServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn BadService + 'static> + ::std::convert::AsRef<dyn BadServiceExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn BadService + 'a> + ::std::convert::AsRef<dyn BadServiceExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -2663,9 +2663,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> FooBarBazServiceExt<T> for S
+impl<'a, S, T> FooBarBazServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn FooBarBazService + 'static> + ::std::convert::AsRef<dyn FooBarBazServiceExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn FooBarBazService + 'a> + ::std::convert::AsRef<dyn FooBarBazServiceExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {

@@ -441,9 +441,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> CExt<T> for S
+impl<'a, S, T> CExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn C + 'static> + ::std::convert::AsRef<dyn CExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn C + 'a> + ::std::convert::AsRef<dyn CExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {

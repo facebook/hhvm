@@ -190,9 +190,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> FooServiceExt<T> for S
+impl<'a, S, T> FooServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn FooService + 'static> + ::std::convert::AsRef<dyn FooServiceExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn FooService + 'a> + ::std::convert::AsRef<dyn FooServiceExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -497,9 +497,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> FB303ServiceExt<T> for S
+impl<'a, S, T> FB303ServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn FB303Service + 'static> + ::std::convert::AsRef<dyn FB303ServiceExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn FB303Service + 'a> + ::std::convert::AsRef<dyn FB303ServiceExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -1714,9 +1714,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> MyServiceExt<T> for S
+impl<'a, S, T> MyServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyService + 'static> + ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn MyService + 'a> + ::std::convert::AsRef<dyn MyServiceExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -2213,9 +2213,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> DbMixedStackArgumentsExt<T> for S
+impl<'a, S, T> DbMixedStackArgumentsExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn DbMixedStackArguments + 'static> + ::std::convert::AsRef<dyn DbMixedStackArgumentsExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn DbMixedStackArguments + 'a> + ::std::convert::AsRef<dyn DbMixedStackArgumentsExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {

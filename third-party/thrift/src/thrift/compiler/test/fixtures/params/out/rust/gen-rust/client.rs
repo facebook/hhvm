@@ -620,9 +620,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> NestedContainersExt<T> for S
+impl<'a, S, T> NestedContainersExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn NestedContainers + 'static> + ::std::convert::AsRef<dyn NestedContainersExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn NestedContainers + 'a> + ::std::convert::AsRef<dyn NestedContainersExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {

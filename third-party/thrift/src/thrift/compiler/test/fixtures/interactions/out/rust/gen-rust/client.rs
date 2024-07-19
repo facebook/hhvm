@@ -393,9 +393,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> MyInteractionExt<T> for S
+impl<'a, S, T> MyInteractionExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyInteraction + 'static> + ::std::convert::AsRef<dyn MyInteractionExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn MyInteraction + 'a> + ::std::convert::AsRef<dyn MyInteractionExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -905,9 +905,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> MyInteractionFastExt<T> for S
+impl<'a, S, T> MyInteractionFastExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyInteractionFast + 'static> + ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn MyInteractionFast + 'a> + ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -1214,9 +1214,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> SerialInteractionExt<T> for S
+impl<'a, S, T> SerialInteractionExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn SerialInteraction + 'static> + ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn SerialInteraction + 'a> + ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -1910,9 +1910,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> MyServiceExt<T> for S
+impl<'a, S, T> MyServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyService + 'static> + ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn MyService + 'a> + ::std::convert::AsRef<dyn MyServiceExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -2432,9 +2432,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> MyInteractionExt<T> for S
+impl<'a, S, T> MyInteractionExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyInteraction + 'static> + ::std::convert::AsRef<dyn MyInteractionExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn MyInteraction + 'a> + ::std::convert::AsRef<dyn MyInteractionExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -2944,9 +2944,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> MyInteractionFastExt<T> for S
+impl<'a, S, T> MyInteractionFastExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyInteractionFast + 'static> + ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn MyInteractionFast + 'a> + ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -3253,9 +3253,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> SerialInteractionExt<T> for S
+impl<'a, S, T> SerialInteractionExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn SerialInteraction + 'static> + ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn SerialInteraction + 'a> + ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -3874,9 +3874,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> FactoriesExt<T> for S
+impl<'a, S, T> FactoriesExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn Factories + 'static> + ::std::convert::AsRef<dyn FactoriesExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn Factories + 'a> + ::std::convert::AsRef<dyn FactoriesExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -4396,9 +4396,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> MyInteractionExt<T> for S
+impl<'a, S, T> MyInteractionExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyInteraction + 'static> + ::std::convert::AsRef<dyn MyInteractionExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn MyInteraction + 'a> + ::std::convert::AsRef<dyn MyInteractionExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -4908,9 +4908,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> MyInteractionFastExt<T> for S
+impl<'a, S, T> MyInteractionFastExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn MyInteractionFast + 'static> + ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn MyInteractionFast + 'a> + ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -5217,9 +5217,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> SerialInteractionExt<T> for S
+impl<'a, S, T> SerialInteractionExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn SerialInteraction + 'static> + ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn SerialInteraction + 'a> + ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
@@ -5585,9 +5585,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> PerformExt<T> for S
+impl<'a, S, T> PerformExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn Perform + 'static> + ::std::convert::AsRef<dyn PerformExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn Perform + 'a> + ::std::convert::AsRef<dyn PerformExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {

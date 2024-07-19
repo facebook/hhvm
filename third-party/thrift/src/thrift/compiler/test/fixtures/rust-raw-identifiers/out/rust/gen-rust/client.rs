@@ -308,9 +308,9 @@ where
 }
 
 #[allow(deprecated)]
-impl<S, T> FooExt<T> for S
+impl<'a, S, T> FooExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn Foo + 'static> + ::std::convert::AsRef<dyn FooExt<T> + 'static>,
+    S: ::std::convert::AsRef<dyn Foo + 'a> + ::std::convert::AsRef<dyn FooExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {

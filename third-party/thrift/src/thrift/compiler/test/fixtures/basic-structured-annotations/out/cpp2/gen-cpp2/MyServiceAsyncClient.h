@@ -99,6 +99,10 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       firstImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
@@ -109,6 +113,9 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -213,6 +220,10 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       secondImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_count);
     } else {
@@ -223,6 +234,9 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));

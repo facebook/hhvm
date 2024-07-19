@@ -93,6 +93,10 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       mapListImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
@@ -103,6 +107,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -205,6 +212,10 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       mapSetImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
@@ -215,6 +226,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -317,6 +331,10 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       listMapImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
@@ -327,6 +345,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -429,6 +450,10 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       listSetImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
@@ -439,6 +464,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -541,6 +569,10 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       turtlesImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
@@ -551,6 +583,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));

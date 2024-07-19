@@ -136,6 +136,10 @@
   {{#function:creates_interaction?}}
     {{function:created_interaction}} handle(channel_, "{{function:created_interaction}}");
   {{/function:creates_interaction?}}
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       {{function:cpp_name}}Impl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
     } else {
@@ -146,6 +150,9 @@
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));

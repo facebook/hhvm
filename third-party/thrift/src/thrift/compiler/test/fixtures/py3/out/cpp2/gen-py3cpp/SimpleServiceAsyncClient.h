@@ -93,6 +93,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       get_fiveImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
@@ -103,6 +107,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -207,6 +214,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       add_fiveImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_num);
     } else {
@@ -217,6 +228,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -321,6 +335,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       do_nothingImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
@@ -331,6 +349,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -433,6 +454,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       concatImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_first, p_second);
     } else {
@@ -443,6 +468,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -547,6 +575,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       get_valueImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_simple_struct);
     } else {
@@ -557,6 +589,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -661,6 +696,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       negateImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_input);
     } else {
@@ -671,6 +710,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -775,6 +817,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       tinyImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_input);
     } else {
@@ -785,6 +831,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -889,6 +938,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       smallImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_input);
     } else {
@@ -899,6 +952,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -1003,6 +1059,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       bigImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_input);
     } else {
@@ -1013,6 +1073,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -1117,6 +1180,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       twoImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_input);
     } else {
@@ -1127,6 +1194,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -1231,6 +1301,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       expected_exceptionImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
@@ -1241,6 +1315,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -1343,6 +1420,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       unexpected_exceptionImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
@@ -1353,6 +1434,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -1457,6 +1541,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       sum_i16_listImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_numbers);
     } else {
@@ -1467,6 +1555,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -1571,6 +1662,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       sum_i32_listImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_numbers);
     } else {
@@ -1581,6 +1676,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -1685,6 +1783,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       sum_i64_listImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_numbers);
     } else {
@@ -1695,6 +1797,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -1799,6 +1904,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       concat_manyImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_words);
     } else {
@@ -1809,6 +1918,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -1913,6 +2025,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       count_structsImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_items);
     } else {
@@ -1923,6 +2039,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -2027,6 +2146,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       sum_setImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_numbers);
     } else {
@@ -2037,6 +2160,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -2141,6 +2267,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       contains_wordImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_words, p_word);
     } else {
@@ -2151,6 +2281,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -2255,6 +2388,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       get_map_valueImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_words, p_key);
     } else {
@@ -2265,6 +2402,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -2369,6 +2509,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       map_lengthImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_items);
     } else {
@@ -2379,6 +2523,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -2483,6 +2630,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       sum_map_valuesImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_items);
     } else {
@@ -2493,6 +2644,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -2597,6 +2751,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       complex_sum_i32Impl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_counter);
     } else {
@@ -2607,6 +2765,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -2711,6 +2872,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       repeat_nameImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_counter);
     } else {
@@ -2721,6 +2886,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -2825,6 +2993,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       get_structImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
@@ -2835,6 +3007,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -2939,6 +3114,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       fibImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_n);
     } else {
@@ -2949,6 +3128,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -3053,6 +3235,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       unique_wordsImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_words);
     } else {
@@ -3063,6 +3249,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -3167,6 +3356,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       words_countImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_words);
     } else {
@@ -3177,6 +3370,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -3281,6 +3477,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       set_enumImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_in_enum);
     } else {
@@ -3291,6 +3491,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -3395,6 +3598,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       list_of_listsImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_num_lists, p_num_items);
     } else {
@@ -3405,6 +3612,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -3509,6 +3719,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       word_character_frequencyImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_sentence);
     } else {
@@ -3519,6 +3733,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -3623,6 +3840,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       list_of_setsImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_some_words);
     } else {
@@ -3633,6 +3854,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -3737,6 +3961,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       nested_map_argumentImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_struct_map);
     } else {
@@ -3747,6 +3975,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -3851,6 +4082,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       make_sentenceImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_word_chars);
     } else {
@@ -3861,6 +4096,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -3965,6 +4203,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       get_unionImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_sets);
     } else {
@@ -3975,6 +4217,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -4079,6 +4324,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       get_keysImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_string_map);
     } else {
@@ -4089,6 +4338,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -4193,6 +4445,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       lookup_doubleImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_key);
     } else {
@@ -4203,6 +4459,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -4307,6 +4566,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       retrieve_binaryImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_something);
     } else {
@@ -4317,6 +4580,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -4421,6 +4687,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       contain_binaryImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_binaries);
     } else {
@@ -4431,6 +4701,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -4535,6 +4808,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       contain_enumImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_the_enum);
     } else {
@@ -4545,6 +4822,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -4649,6 +4929,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       get_binary_union_structImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_u);
     } else {
@@ -4659,6 +4943,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -4763,6 +5050,10 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnRequest();
+    }
     if constexpr (hasRpcOptions) {
       get_struct_hiddenImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
@@ -4773,6 +5064,9 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
+    }
+    if (shouldProcessClientInterceptors) {
+      co_await ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));

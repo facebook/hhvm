@@ -68,12 +68,6 @@ pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {
         "Hack.Lang.EnableXHPClassModifier",
     )?;
 
-    // Only hdf option in use. Kill variant in options_cli.rs
-    init(
-        &mut flags.enable_class_level_where_clauses,
-        "Hack.Lang.EnableClassLevelWhereClauses",
-    )?;
-
     // Only hdf option in use
     init(
         &mut flags.disallow_direct_superglobals_refs,

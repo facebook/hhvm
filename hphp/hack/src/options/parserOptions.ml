@@ -16,7 +16,6 @@ type t = {
   enable_xhp_class_modifier: bool;
   disable_xhp_element_mangling: bool;
   disallow_direct_superglobals_refs: bool;
-  enable_class_level_where_clauses: bool;
   allow_unstable_features: bool;
   (* These options are set in hack config, but use the defaults in (from parser_options_impl.rs) hhvm*)
   hhvm_compat_mode: bool;
@@ -59,7 +58,6 @@ let default =
     enable_xhp_class_modifier = false;
     disable_xhp_element_mangling = false;
     disallow_direct_superglobals_refs = false;
-    enable_class_level_where_clauses = false;
     allow_unstable_features = false;
     hhvm_compat_mode = false;
     hhi_mode = false;

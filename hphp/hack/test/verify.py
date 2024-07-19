@@ -22,7 +22,6 @@ DEFAULT_EXP_EXT = ".exp"
 flags_pessimise_unsupported = [
     "--complex-coercion",
     "--enable-higher-kinded-types",
-    "--enable-class-level-where-clauses",
     "--enable-global-access-check",
 ]
 max_workers = 48

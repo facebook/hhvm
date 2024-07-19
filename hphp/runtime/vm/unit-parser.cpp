@@ -125,7 +125,6 @@ CompilerResult hackc_compile(
     .decl_provider = reinterpret_cast<uint64_t>(provider),
     .filepath = filename,
     .parser_flags = hackc::ParserFlags {
-      .enable_class_level_where_clauses = Cfg::HackLang::EnableClassLevelWhereClauses,
     },
     .flags = hackc::EnvFlags {
       .is_systemlib = isSystemLib,

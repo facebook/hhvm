@@ -25,8 +25,6 @@ type t = {
          'lookup side'. *)
   disallow_direct_superglobals_refs: bool;
       (** block accessing superglobals via their variable names *)
-  enable_class_level_where_clauses: bool;
-      (** Enable class-level where clauses, i.e. class base<T> where T = int {} *)
   allow_unstable_features: bool;
       (** Allows enabling unstable features via the __EnableUnstableFeatures attribute *)
   (* These options are set in hh config, but use the defaults in (from parser_options_impl.rs) hhvm *)

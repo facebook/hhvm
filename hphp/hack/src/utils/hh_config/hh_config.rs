@@ -241,7 +241,6 @@ impl HhConfig {
                 "union_intersection_type_hints",
                 default.union_intersection_type_hints,
             )?,
-            enable_class_level_where_clauses: default.enable_class_level_where_clauses,
             disable_legacy_soft_typehints: default.disable_legacy_soft_typehints,
             allowed_decl_fixme_codes: hhconfig
                 .get_int_set_or("allowed_decl_fixme_codes", default.allowed_decl_fixme_codes)?,

@@ -99,7 +99,6 @@ impl FeatureName {
     ) -> bool {
         (match self {
             UnionIntersectionTypeHints => po.union_intersection_type_hints,
-            ClassLevelWhere => po.enable_class_level_where_clauses,
             _ => false,
         }) || active_experimental_features.contains(self)
             || (matches!(mode, Mode::ForCodegen)

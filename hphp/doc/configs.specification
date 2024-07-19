@@ -304,11 +304,6 @@ The format can be found in hphp/tools/configs/generate-configs.rs
   users, unless you really explicitly want to set them differently for
   some reason.
 
-- bool Hack.Lang.EnableClassLevelWhereClauses = false, UNKNOWN, unitcacheflag|hackc(parser)
-
-  Enables the class-level where constraints
-  true => allow the feature, false => disable the feature
-
 - uint64_t Hack.Lang.Phpism.DisableCallUserFunc = 0, UNKNOWN
 
   Disables PHP's call_user_func function.

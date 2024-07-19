@@ -340,9 +340,6 @@ let load_config config options =
         deregister_php_stdlib =
           bool_opt "deregister_php_stdlib" config
           >?? po_opt.deregister_php_stdlib;
-        enable_class_level_where_clauses =
-          bool_opt "class_level_where_clauses" config
-          >?? po_opt.enable_class_level_where_clauses;
         union_intersection_type_hints =
           bool_opt "union_intersection_type_hints" config
           >?? po_opt.union_intersection_type_hints;

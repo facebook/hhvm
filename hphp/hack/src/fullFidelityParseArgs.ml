@@ -32,7 +32,6 @@ type t = {
   (* Defining the input *)
   files: string list;
   disable_lval_as_an_expression: bool;
-  enable_class_level_where_clauses: bool;
   disable_legacy_soft_typehints: bool;
   disable_legacy_attribute_syntax: bool;
   const_default_func_args: bool;
@@ -72,7 +71,6 @@ let make
     show_file_name
     files
     disable_lval_as_an_expression
-    enable_class_level_where_clauses
     disable_legacy_soft_typehints
     disable_legacy_attribute_syntax
     const_default_func_args
@@ -110,7 +108,6 @@ let make
     show_file_name;
     files;
     disable_lval_as_an_expression;
-    enable_class_level_where_clauses;
     disable_legacy_soft_typehints;
     disable_legacy_attribute_syntax;
     const_default_func_args;
@@ -169,7 +166,6 @@ let parse_args () =
   let set_show_file_name () = show_file_name := true in
   let files = ref [] in
   let push_file file = files := file :: !files in
-  let enable_class_level_where_clauses = ref false in
   let disable_legacy_soft_typehints = ref false in
   let disable_legacy_attribute_syntax = ref false in
   let const_default_func_args = ref false in
@@ -271,9 +267,6 @@ No errors are filtered out."
       ( "--disable-lval-as-an-expression",
         Arg.Set disable_lval_as_an_expression,
         "Disable lval as an expression." );
-      ( "--enable-class-level-where-clauses",
-        Arg.Set enable_class_level_where_clauses,
-        "Enables support for class-level where clauses" );
       ( "--disable-legacy-soft-typehints",
         Arg.Set disable_legacy_soft_typehints,
         "Disables the legacy @ syntax for soft typehints (use __Soft instead)"
@@ -368,7 +361,6 @@ No errors are filtered out."
     !show_file_name
     (List.rev !files)
     !disable_lval_as_an_expression
-    !enable_class_level_where_clauses
     !disable_legacy_soft_typehints
     !disable_legacy_attribute_syntax
     !const_default_func_args
@@ -390,7 +382,6 @@ let to_parser_options (args : t) : ParserOptions.t =
     ParserOptions.default with
     ParserOptions.codegen = args.codegen;
     disable_lval_as_an_expression = args.disable_lval_as_an_expression;
-    enable_class_level_where_clauses = args.enable_class_level_where_clauses;
     disable_legacy_soft_typehints = args.disable_legacy_soft_typehints;
     disable_legacy_attribute_syntax = args.disable_legacy_attribute_syntax;
     const_default_func_args = args.const_default_func_args;

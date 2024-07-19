@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<336a6b458a3f837784009075f2f577e8>>
+// @generated SignedSource<<4f10cace1829e4a535feb2f94d62d526>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -44,7 +44,6 @@ pub struct ParserOptions {
     pub enable_xhp_class_modifier: bool,
     pub disable_xhp_element_mangling: bool,
     pub disallow_direct_superglobals_refs: bool,
-    pub enable_class_level_where_clauses: bool,
     pub allow_unstable_features: bool,
     pub hhvm_compat_mode: bool,
     pub hhi_mode: bool,

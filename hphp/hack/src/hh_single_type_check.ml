@@ -248,7 +248,6 @@ let parse_options () =
   let check_redundant_generics = ref false in
   let disallow_static_memoized = ref false in
   let enable_supportdyn_hint = ref false in
-  let enable_class_level_where_clauses = ref false in
   let disable_legacy_soft_typehints = ref false in
   let allow_toplevel_requires = ref false in
   let const_static_props = ref false in
@@ -555,9 +554,6 @@ let parse_options () =
       ( "--enable-supportdyn-hint",
         Arg.Set enable_supportdyn_hint,
         " Allow the supportdyn type hint" );
-      ( "--enable-class-level-where-clauses",
-        Arg.Set enable_class_level_where_clauses,
-        " Enables support for class-level where clauses" );
       ( "--disable-legacy-soft-typehints",
         Arg.Set disable_legacy_soft_typehints,
         " Disables the legacy @ syntax for soft typehints (use __Soft instead)"
@@ -868,7 +864,6 @@ let parse_options () =
         deregister_php_stdlib =
           !deregister_attributes >?? default.deregister_php_stdlib;
         everything_sdt = true;
-        enable_class_level_where_clauses = !enable_class_level_where_clauses;
         union_intersection_type_hints = !union_intersection_type_hints;
         disallow_silence = !disallow_silence;
         disable_hh_ignore_error = !disable_hh_ignore_error;

@@ -146,6 +146,44 @@ impl<'mock> ::::SomeService for SomeService<'mock> {
     }
 }
 
+impl<'mock, T> ::::SomeServiceExt<T> for SomeService<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn bounce_map_with_rpc_opts(
+        &self,
+        arg_m: &included__types::SomeMap,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>> {
+        <Self as ::::SomeService>::bounce_map(
+            self,
+            arg_m,
+        )
+    }
+    fn binary_keyed_map_with_rpc_opts(
+        &self,
+        arg_r: &[::std::primitive::i64],
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>, crate::errors::some_service::BinaryKeyedMapError>> {
+        <Self as ::::SomeService>::binary_keyed_map(
+            self,
+            arg_r,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for SomeService<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("SomeServiceExt::transport is not implemented for mock client")
+    }
+}
+
 pub mod r#impl {
     pub mod some_service {
 

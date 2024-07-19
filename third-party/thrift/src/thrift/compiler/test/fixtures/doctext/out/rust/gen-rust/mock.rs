@@ -156,6 +156,54 @@ impl<'mock> ::::C for C<'mock> {
     }
 }
 
+impl<'mock, T> ::::CExt<T> for C<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn f_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::c::FError>> {
+        <Self as ::::C>::f(
+            self,
+        )
+    }
+    fn numbers_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError>>, crate::errors::c::NumbersError>> {
+        <Self as ::::C>::numbers(
+            self,
+        )
+    }
+    fn thing_with_rpc_opts(
+        &self,
+        arg_a: ::std::primitive::i32,
+        arg_b: &::std::primitive::str,
+        arg_c: &::std::collections::BTreeSet<::std::primitive::i32>,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::c::ThingError>> {
+        <Self as ::::C>::thing(
+            self,
+            arg_a,
+            arg_b,
+            arg_c,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for C<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("CExt::transport is not implemented for mock client")
+    }
+}
+
 pub mod r#impl {
     pub mod c {
 

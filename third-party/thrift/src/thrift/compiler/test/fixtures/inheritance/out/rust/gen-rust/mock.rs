@@ -135,6 +135,32 @@ impl<'mock> ::::MyRoot for MyRoot<'mock> {
     }
 }
 
+impl<'mock, T> ::::MyRootExt<T> for MyRoot<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn do_root_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_root::DoRootError>> {
+        <Self as ::::MyRoot>::do_root(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for MyRoot<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("MyRootExt::transport is not implemented for mock client")
+    }
+}
+
 pub struct MyNode<'mock> {
     pub parent: crate::MyRoot<'mock>,
     pub do_mid: r#impl::my_node::do_mid<'mock>,
@@ -162,11 +188,42 @@ impl<'mock> ::::MyNode for MyNode<'mock> {
     }
 }
 
-#[::async_trait::async_trait]
+impl<'mock, T> ::::MyNodeExt<T> for MyNode<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn do_mid_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_node::DoMidError>> {
+        <Self as ::::MyNode>::do_mid(
+            self,
+        )
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for MyNode<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("MyNodeExt::transport is not implemented for mock client")
+    }
+}
+
 #[allow(deprecated)]
 impl<'mock> ::std::convert::AsRef<dyn crate::client::MyRoot + 'mock> for MyNode<'mock>
 {
     fn as_ref(&self) -> &(dyn crate::client::MyRoot + 'mock) {
+        &self.parent
+    }
+}
+
+#[allow(deprecated)]
+impl<'mock, T> ::std::convert::AsRef<dyn crate::client::MyRootExt<T> + 'mock> for MyNode<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn as_ref(&self) -> &(dyn crate::client::MyRootExt<T> + 'mock) {
         &self.parent
     }
 }
@@ -198,7 +255,28 @@ impl<'mock> ::::MyLeaf for MyLeaf<'mock> {
     }
 }
 
-#[::async_trait::async_trait]
+impl<'mock, T> ::::MyLeafExt<T> for MyLeaf<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn do_leaf_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_leaf::DoLeafError>> {
+        <Self as ::::MyLeaf>::do_leaf(
+            self,
+        )
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for MyLeaf<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("MyLeafExt::transport is not implemented for mock client")
+    }
+}
+
 #[allow(deprecated)]
 impl<'mock> ::std::convert::AsRef<dyn crate::client::MyNode + 'mock> for MyLeaf<'mock>
 {
@@ -207,11 +285,30 @@ impl<'mock> ::std::convert::AsRef<dyn crate::client::MyNode + 'mock> for MyLeaf<
     }
 }
 
-#[::async_trait::async_trait]
+#[allow(deprecated)]
+impl<'mock, T> ::std::convert::AsRef<dyn crate::client::MyNodeExt<T> + 'mock> for MyLeaf<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn as_ref(&self) -> &(dyn crate::client::MyNodeExt<T> + 'mock) {
+        &self.parent
+    }
+}
+
 #[allow(deprecated)]
 impl<'mock> ::std::convert::AsRef<dyn crate::client::MyRoot + 'mock> for MyLeaf<'mock>
 {
     fn as_ref(&self) -> &(dyn crate::client::MyRoot + 'mock) {
+        &self.parent
+    }
+}
+
+#[allow(deprecated)]
+impl<'mock, T> ::std::convert::AsRef<dyn crate::client::MyRootExt<T> + 'mock> for MyLeaf<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn as_ref(&self) -> &(dyn crate::client::MyRootExt<T> + 'mock) {
         &self.parent
     }
 }

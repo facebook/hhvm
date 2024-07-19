@@ -176,6 +176,74 @@ impl<'mock> ::::NestedContainers for NestedContainers<'mock> {
     }
 }
 
+impl<'mock, T> ::::NestedContainersExt<T> for NestedContainers<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn mapList_with_rpc_opts(
+        &self,
+        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapListError>> {
+        <Self as ::::NestedContainers>::mapList(
+            self,
+            arg_foo,
+        )
+    }
+    fn mapSet_with_rpc_opts(
+        &self,
+        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapSetError>> {
+        <Self as ::::NestedContainers>::mapSet(
+            self,
+            arg_foo,
+        )
+    }
+    fn listMap_with_rpc_opts(
+        &self,
+        arg_foo: &[::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>],
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListMapError>> {
+        <Self as ::::NestedContainers>::listMap(
+            self,
+            arg_foo,
+        )
+    }
+    fn listSet_with_rpc_opts(
+        &self,
+        arg_foo: &[::std::collections::BTreeSet<::std::primitive::i32>],
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListSetError>> {
+        <Self as ::::NestedContainers>::listSet(
+            self,
+            arg_foo,
+        )
+    }
+    fn turtles_with_rpc_opts(
+        &self,
+        arg_foo: &[::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>],
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::TurtlesError>> {
+        <Self as ::::NestedContainers>::turtles(
+            self,
+            arg_foo,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for NestedContainers<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("NestedContainersExt::transport is not implemented for mock client")
+    }
+}
+
 pub mod r#impl {
     pub mod nested_containers {
 

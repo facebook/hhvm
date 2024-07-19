@@ -186,6 +186,84 @@ impl<'mock> ::::MyService for MyService<'mock> {
     }
 }
 
+impl<'mock, T> ::::MyServiceExt<T> for MyService<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn ping_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PingError>> {
+        <Self as ::::MyService>::ping(
+            self,
+        )
+    }
+    fn getRandomData_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetRandomDataError>> {
+        <Self as ::::MyService>::getRandomData(
+            self,
+        )
+    }
+    fn hasDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_service::HasDataByIdError>> {
+        <Self as ::::MyService>::hasDataById(
+            self,
+            arg_id,
+        )
+    }
+    fn getDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetDataByIdError>> {
+        <Self as ::::MyService>::getDataById(
+            self,
+            arg_id,
+        )
+    }
+    fn putDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        arg_data: &::std::primitive::str,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PutDataByIdError>> {
+        <Self as ::::MyService>::putDataById(
+            self,
+            arg_id,
+            arg_data,
+        )
+    }
+    fn lobDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        arg_data: &::std::primitive::str,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::LobDataByIdError>> {
+        <Self as ::::MyService>::lobDataById(
+            self,
+            arg_id,
+            arg_data,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for MyService<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("MyServiceExt::transport is not implemented for mock client")
+    }
+}
+
 pub mod r#impl {
     pub mod my_service {
 

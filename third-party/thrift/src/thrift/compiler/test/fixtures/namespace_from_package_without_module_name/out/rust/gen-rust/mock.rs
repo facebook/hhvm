@@ -136,6 +136,34 @@ impl<'mock> ::::TestService for TestService<'mock> {
     }
 }
 
+impl<'mock, T> ::::TestServiceExt<T> for TestService<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn init_with_rpc_opts(
+        &self,
+        arg_int1: ::std::primitive::i64,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i64, crate::errors::test_service::InitError>> {
+        <Self as ::::TestService>::init(
+            self,
+            arg_int1,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for TestService<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("TestServiceExt::transport is not implemented for mock client")
+    }
+}
+
 pub mod r#impl {
     pub mod test_service {
 

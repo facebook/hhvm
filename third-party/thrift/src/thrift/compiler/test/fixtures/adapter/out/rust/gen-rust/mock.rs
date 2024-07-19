@@ -138,6 +138,38 @@ impl<'mock> ::::Service for Service<'mock> {
     }
 }
 
+impl<'mock, T> ::::ServiceExt<T> for Service<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn func_with_rpc_opts(
+        &self,
+        arg_arg1: &::std::primitive::str,
+        arg_arg2: &::std::primitive::str,
+        arg_arg3: &crate::types::Foo,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::MyI32_4873, crate::errors::service::FuncError>> {
+        <Self as ::::Service>::func(
+            self,
+            arg_arg1,
+            arg_arg2,
+            arg_arg3,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for Service<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("ServiceExt::transport is not implemented for mock client")
+    }
+}
+
 pub struct AdapterService<'mock> {
     pub count: r#impl::adapter_service::count<'mock>,
     pub adaptedTypes: r#impl::adapter_service::adaptedTypes<'mock>,
@@ -170,6 +202,42 @@ impl<'mock> ::::AdapterService for AdapterService<'mock> {
         let mut closure = self.adaptedTypes.closure.lock().unwrap();
         let closure: &mut dyn ::std::ops::FnMut(crate::types::HeapAllocated) -> _ = &mut **closure;
         ::std::boxed::Box::pin(::futures::future::ready(closure(arg_arg.clone())))
+    }
+}
+
+impl<'mock, T> ::::AdapterServiceExt<T> for AdapterService<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn count_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::CountingStruct, crate::errors::adapter_service::CountError>> {
+        <Self as ::::AdapterService>::count(
+            self,
+        )
+    }
+    fn adaptedTypes_with_rpc_opts(
+        &self,
+        arg_arg: &crate::types::HeapAllocated,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::HeapAllocated, crate::errors::adapter_service::AdaptedTypesError>> {
+        <Self as ::::AdapterService>::adaptedTypes(
+            self,
+            arg_arg,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for AdapterService<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("AdapterServiceExt::transport is not implemented for mock client")
     }
 }
 

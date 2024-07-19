@@ -135,6 +135,32 @@ impl<'mock> ::::Service1 for Service1<'mock> {
     }
 }
 
+impl<'mock, T> ::::Service1Ext<T> for Service1<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn r_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>> {
+        <Self as ::::Service1>::r(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for Service1<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("Service1Ext::transport is not implemented for mock client")
+    }
+}
+
 pub struct S2<'mock> {
     pub s: r#impl::s2_proxy::s<'mock>,
     _marker: ::std::marker::PhantomData<&'mock ()>,
@@ -157,6 +183,32 @@ impl<'mock> ::::S2 for S2<'mock> {
         let mut closure = self.s.closure.lock().unwrap();
         let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
         ::std::boxed::Box::pin(::futures::future::ready(closure()))
+    }
+}
+
+impl<'mock, T> ::::S2Ext<T> for S2<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn s_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>> {
+        <Self as ::::S2>::s(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for S2<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("S2Ext::transport is not implemented for mock client")
     }
 }
 
@@ -194,6 +246,40 @@ impl<'mock> ::::AllMethods for AllMethods<'mock> {
     }
 }
 
+impl<'mock, T> ::::AllMethodsExt<T> for AllMethods<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn foo_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>> {
+        <Self as ::::AllMethods>::foo(
+            self,
+        )
+    }
+    fn bar_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>> {
+        <Self as ::::AllMethods>::bar(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for AllMethods<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("AllMethodsExt::transport is not implemented for mock client")
+    }
+}
+
 pub struct OneMethod<'mock> {
     pub foo: r#impl::one_method::foo<'mock>,
     pub bar: r#impl::one_method::bar<'mock>,
@@ -228,6 +314,40 @@ impl<'mock> ::::OneMethod for OneMethod<'mock> {
     }
 }
 
+impl<'mock, T> ::::OneMethodExt<T> for OneMethod<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn foo_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>> {
+        <Self as ::::OneMethod>::foo(
+            self,
+        )
+    }
+    fn bar_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>> {
+        <Self as ::::OneMethod>::bar(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for OneMethod<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("OneMethodExt::transport is not implemented for mock client")
+    }
+}
+
 pub struct OneMethodOptOut<'mock> {
     pub foo: r#impl::one_method_opt_out::foo<'mock>,
     pub bar: r#impl::one_method_opt_out::bar<'mock>,
@@ -259,6 +379,40 @@ impl<'mock> ::::OneMethodOptOut for OneMethodOptOut<'mock> {
         let mut closure = self.bar.closure.lock().unwrap();
         let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
         ::std::boxed::Box::pin(::futures::future::ready(closure()))
+    }
+}
+
+impl<'mock, T> ::::OneMethodOptOutExt<T> for OneMethodOptOut<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn foo_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>> {
+        <Self as ::::OneMethodOptOut>::foo(
+            self,
+        )
+    }
+    fn bar_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>> {
+        <Self as ::::OneMethodOptOut>::bar(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for OneMethodOptOut<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("OneMethodOptOutExt::transport is not implemented for mock client")
     }
 }
 

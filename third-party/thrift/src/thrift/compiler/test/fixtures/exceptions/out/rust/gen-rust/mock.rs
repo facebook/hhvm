@@ -162,6 +162,56 @@ impl<'mock> ::::Raiser for Raiser<'mock> {
     }
 }
 
+impl<'mock, T> ::::RaiserExt<T> for Raiser<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn doBland_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoBlandError>> {
+        <Self as ::::Raiser>::doBland(
+            self,
+        )
+    }
+    fn doRaise_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoRaiseError>> {
+        <Self as ::::Raiser>::doRaise(
+            self,
+        )
+    }
+    fn get200_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get200Error>> {
+        <Self as ::::Raiser>::get200(
+            self,
+        )
+    }
+    fn get500_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get500Error>> {
+        <Self as ::::Raiser>::get500(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for Raiser<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("RaiserExt::transport is not implemented for mock client")
+    }
+}
+
 pub mod r#impl {
     pub mod raiser {
 

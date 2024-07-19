@@ -195,6 +195,92 @@ impl<'mock> ::::MyService for MyService<'mock> {
     }
 }
 
+impl<'mock, T> ::::MyServiceExt<T> for MyService<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn ping_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PingError>> {
+        <Self as ::::MyService>::ping(
+            self,
+        )
+    }
+    fn getRandomData_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetRandomDataError>> {
+        <Self as ::::MyService>::getRandomData(
+            self,
+        )
+    }
+    fn hasDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_service::HasDataByIdError>> {
+        <Self as ::::MyService>::hasDataById(
+            self,
+            arg_id,
+        )
+    }
+    fn getDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetDataByIdError>> {
+        <Self as ::::MyService>::getDataById(
+            self,
+            arg_id,
+        )
+    }
+    fn putDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        arg_data: &::std::primitive::str,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PutDataByIdError>> {
+        <Self as ::::MyService>::putDataById(
+            self,
+            arg_id,
+            arg_data,
+        )
+    }
+    fn lobDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        arg_data: &::std::primitive::str,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::LobDataByIdError>> {
+        <Self as ::::MyService>::lobDataById(
+            self,
+            arg_id,
+            arg_data,
+        )
+    }
+    fn doNothing_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::DoNothingError>> {
+        <Self as ::::MyService>::doNothing(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for MyService<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("MyServiceExt::transport is not implemented for mock client")
+    }
+}
+
 pub struct MyServicePrioParent<'mock> {
     pub ping: r#impl::my_service_prio_parent::ping<'mock>,
     pub pong: r#impl::my_service_prio_parent::pong<'mock>,
@@ -229,6 +315,40 @@ impl<'mock> ::::MyServicePrioParent for MyServicePrioParent<'mock> {
     }
 }
 
+impl<'mock, T> ::::MyServicePrioParentExt<T> for MyServicePrioParent<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn ping_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service_prio_parent::PingError>> {
+        <Self as ::::MyServicePrioParent>::ping(
+            self,
+        )
+    }
+    fn pong_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service_prio_parent::PongError>> {
+        <Self as ::::MyServicePrioParent>::pong(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for MyServicePrioParent<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("MyServicePrioParentExt::transport is not implemented for mock client")
+    }
+}
+
 pub struct MyServicePrioChild<'mock> {
     pub parent: crate::MyServicePrioParent<'mock>,
     pub pang: r#impl::my_service_prio_child::pang<'mock>,
@@ -256,11 +376,42 @@ impl<'mock> ::::MyServicePrioChild for MyServicePrioChild<'mock> {
     }
 }
 
-#[::async_trait::async_trait]
+impl<'mock, T> ::::MyServicePrioChildExt<T> for MyServicePrioChild<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn pang_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service_prio_child::PangError>> {
+        <Self as ::::MyServicePrioChild>::pang(
+            self,
+        )
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for MyServicePrioChild<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("MyServicePrioChildExt::transport is not implemented for mock client")
+    }
+}
+
 #[allow(deprecated)]
 impl<'mock> ::std::convert::AsRef<dyn crate::client::MyServicePrioParent + 'mock> for MyServicePrioChild<'mock>
 {
     fn as_ref(&self) -> &(dyn crate::client::MyServicePrioParent + 'mock) {
+        &self.parent
+    }
+}
+
+#[allow(deprecated)]
+impl<'mock, T> ::std::convert::AsRef<dyn crate::client::MyServicePrioParentExt<T> + 'mock> for MyServicePrioChild<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn as_ref(&self) -> &(dyn crate::client::MyServicePrioParentExt<T> + 'mock) {
         &self.parent
     }
 }
@@ -293,6 +444,32 @@ impl<'mock> ::::BadService for BadService<'mock> {
         let mut closure = self.bar.closure.lock().unwrap();
         let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
         ::std::boxed::Box::pin(::futures::future::ready(closure()))
+    }
+}
+
+impl<'mock, T> ::::BadServiceExt<T> for BadService<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn bar_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bad_service::BarError>> {
+        <Self as ::::BadService>::bar(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for BadService<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("BadServiceExt::transport is not implemented for mock client")
     }
 }
 
@@ -336,6 +513,48 @@ impl<'mock> ::::FooBarBazService for FooBarBazService<'mock> {
         let mut closure = self.baz.closure.lock().unwrap();
         let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
         ::std::boxed::Box::pin(::futures::future::ready(closure()))
+    }
+}
+
+impl<'mock, T> ::::FooBarBazServiceExt<T> for FooBarBazService<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn foo_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::FooError>> {
+        <Self as ::::FooBarBazService>::foo(
+            self,
+        )
+    }
+    fn bar_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BarError>> {
+        <Self as ::::FooBarBazService>::bar(
+            self,
+        )
+    }
+    fn baz_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BazError>> {
+        <Self as ::::FooBarBazService>::baz(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for FooBarBazService<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("FooBarBazServiceExt::transport is not implemented for mock client")
     }
 }
 

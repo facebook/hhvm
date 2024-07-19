@@ -178,6 +178,58 @@ impl<'mock> ::::MyService for MyService<'mock> {
     }
 }
 
+impl<'mock, T> ::::MyServiceExt<T> for MyService<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn foo_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::FooError>> {
+        <Self as ::::MyService>::foo(
+            self,
+        )
+    }
+    fn interact_with_rpc_opts(
+        &self,
+        arg_arg: ::std::primitive::i32,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>> {
+        <Self as ::::MyService>::interact(
+            self,
+            arg_arg,
+        )
+    }
+    fn interactFast_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
+        <Self as ::::MyService>::interactFast(
+            self,
+        )
+    }
+    fn serialize_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
+        <Self as ::::MyService>::serialize(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for MyService<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("MyServiceExt::transport is not implemented for mock client")
+    }
+}
+
 pub struct Factories<'mock> {
     pub foo: r#impl::factories::foo<'mock>,
     pub interact: r#impl::factories::interact<'mock>,
@@ -228,6 +280,58 @@ impl<'mock> ::::Factories for Factories<'mock> {
     }
 }
 
+impl<'mock, T> ::::FactoriesExt<T> for Factories<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn foo_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::factories::FooError>> {
+        <Self as ::::Factories>::foo(
+            self,
+        )
+    }
+    fn interact_with_rpc_opts(
+        &self,
+        arg_arg: ::std::primitive::i32,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>> {
+        <Self as ::::Factories>::interact(
+            self,
+            arg_arg,
+        )
+    }
+    fn interactFast_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
+        <Self as ::::Factories>::interactFast(
+            self,
+        )
+    }
+    fn serialize_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
+        <Self as ::::Factories>::serialize(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for Factories<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("FactoriesExt::transport is not implemented for mock client")
+    }
+}
+
 pub struct Perform<'mock> {
     pub foo: r#impl::perform::foo<'mock>,
     _marker: ::std::marker::PhantomData<&'mock ()>,
@@ -268,6 +372,32 @@ impl<'mock> ::::Perform for Perform<'mock> {
         let mut closure = self.foo.closure.lock().unwrap();
         let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
         ::std::boxed::Box::pin(::futures::future::ready(closure()))
+    }
+}
+
+impl<'mock, T> ::::PerformExt<T> for Perform<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn foo_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::perform::FooError>> {
+        <Self as ::::Perform>::foo(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for Perform<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("PerformExt::transport is not implemented for mock client")
     }
 }
 

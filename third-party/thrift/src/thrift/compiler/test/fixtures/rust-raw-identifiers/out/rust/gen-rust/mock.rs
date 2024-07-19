@@ -146,6 +146,44 @@ impl<'mock> ::::Foo for Foo<'mock> {
     }
 }
 
+impl<'mock, T> ::::FooExt<T> for Foo<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn r#return_with_rpc_opts(
+        &self,
+        arg_bar: &crate::types::ThereAreNoPascalCaseKeywords,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo::ReturnError>> {
+        <Self as ::::Foo>::r#return(
+            self,
+            arg_bar,
+        )
+    }
+    fn super__with_rpc_opts(
+        &self,
+        arg_bar: &crate::types::ThereAreNoPascalCaseKeywords,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo::SuperError>> {
+        <Self as ::::Foo>::super_(
+            self,
+            arg_bar,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for Foo<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("FooExt::transport is not implemented for mock client")
+    }
+}
+
 pub mod r#impl {
     pub mod foo {
 

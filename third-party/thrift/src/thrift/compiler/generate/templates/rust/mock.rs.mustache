@@ -216,8 +216,46 @@ impl<'mock> {{program:clients}}::{{service:rust_name}} for {{service:rust_name}}
     }}{{/function:starts_interaction?}}{{/service:rustFunctions}}
 }
 
+impl<'mock, T> {{program:clients}}::{{service:rust_name}}Ext<T> for {{service:rust_name}}<'mock>
+where
+    T: ::fbthrift::Transport,
+{{>lib/block}}{{!
+    }}{{#service:rustFunctions}}
+    {{^function:starts_interaction?}}{{^function:sink?}}
+    fn {{function:rust_name}}_with_rpc_opts(
+        &self,{{!
+        }}{{#function:args}}
+        arg_{{field:name}}: {{>lib/arg}},{{!
+        }}{{/function:args}}
+        _rpc_options: T::RpcOptions,
+    ) -> {{>lib/client_return_type}} {
+        <Self as {{program:clients}}::{{service:rust_name}}>::{{function:rust_name}}(
+            self,
+            {{#function:args}}
+            arg_{{field:name}},
+            {{/function:args}}
+        )
+    }
+    {{/function:sink?}}{{/function:starts_interaction?}}
+    {{/service:rustFunctions}}
+    {{^service:extendedClients}}
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+    {{/service:extendedClients}}
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for {{service:rust_name}}<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("{{service:rust_name}}Ext::transport is not implemented for mock client")
+    }
+}
+
 {{#service:extendedClients}}
-#[::async_trait::async_trait]
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
 impl<'mock> {{!
     }}{{#extendedService:service}}{{!
@@ -227,6 +265,22 @@ impl<'mock> {{!
 {
     {{#extendedService:service}}
     fn as_ref(&self) -> &(dyn {{extendedService:packagePrefix}}::{{service:rust_name}} + 'mock) {
+        &self.parent
+    }
+    {{/extendedService:service}}
+}
+
+#[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
+impl<'mock, T> {{!
+    }}{{#extendedService:service}}{{!
+    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:rust_name}}Ext<T> + 'mock> {{!
+    }}{{/extendedService:service}}{{!
+    }}for {{service:rust_name}}<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    {{#extendedService:service}}
+    fn as_ref(&self) -> &(dyn {{extendedService:packagePrefix}}::{{service:rust_name}}Ext<T> + 'mock) {
         &self.parent
     }
     {{/extendedService:service}}

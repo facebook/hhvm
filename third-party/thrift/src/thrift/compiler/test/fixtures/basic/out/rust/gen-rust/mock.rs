@@ -135,6 +135,32 @@ impl<'mock> ::::FooService for FooService<'mock> {
     }
 }
 
+impl<'mock, T> ::::FooServiceExt<T> for FooService<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn simple_rpc_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_service::SimpleRpcError>> {
+        <Self as ::::FooService>::simple_rpc(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for FooService<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("FooServiceExt::transport is not implemented for mock client")
+    }
+}
+
 pub struct FB303Service<'mock> {
     pub simple_rpc: r#impl::f_b303_service::simple_rpc<'mock>,
     _marker: ::std::marker::PhantomData<&'mock ()>,
@@ -158,6 +184,34 @@ impl<'mock> ::::FB303Service for FB303Service<'mock> {
         let mut closure = self.simple_rpc.closure.lock().unwrap();
         let closure: &mut dyn ::std::ops::FnMut(::std::primitive::i32) -> _ = &mut **closure;
         ::std::boxed::Box::pin(::futures::future::ready(closure(arg_int_parameter.clone())))
+    }
+}
+
+impl<'mock, T> ::::FB303ServiceExt<T> for FB303Service<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn simple_rpc_with_rpc_opts(
+        &self,
+        arg_int_parameter: ::std::primitive::i32,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ReservedKeyword, crate::errors::f_b303_service::SimpleRpcError>> {
+        <Self as ::::FB303Service>::simple_rpc(
+            self,
+            arg_int_parameter,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for FB303Service<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("FB303ServiceExt::transport is not implemented for mock client")
     }
 }
 
@@ -275,6 +329,120 @@ impl<'mock> ::::MyService for MyService<'mock> {
     }
 }
 
+impl<'mock, T> ::::MyServiceExt<T> for MyService<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn ping_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PingError>> {
+        <Self as ::::MyService>::ping(
+            self,
+        )
+    }
+    fn getRandomData_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetRandomDataError>> {
+        <Self as ::::MyService>::getRandomData(
+            self,
+        )
+    }
+    fn sink_with_rpc_opts(
+        &self,
+        arg_sink: ::std::primitive::i64,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::SinkError>> {
+        <Self as ::::MyService>::sink(
+            self,
+            arg_sink,
+        )
+    }
+    fn putDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        arg_data: &::std::primitive::str,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PutDataByIdError>> {
+        <Self as ::::MyService>::putDataById(
+            self,
+            arg_id,
+            arg_data,
+        )
+    }
+    fn hasDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_service::HasDataByIdError>> {
+        <Self as ::::MyService>::hasDataById(
+            self,
+            arg_id,
+        )
+    }
+    fn getDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetDataByIdError>> {
+        <Self as ::::MyService>::getDataById(
+            self,
+            arg_id,
+        )
+    }
+    fn deleteDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::DeleteDataByIdError>> {
+        <Self as ::::MyService>::deleteDataById(
+            self,
+            arg_id,
+        )
+    }
+    fn lobDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        arg_data: &::std::primitive::str,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::LobDataByIdError>> {
+        <Self as ::::MyService>::lobDataById(
+            self,
+            arg_id,
+            arg_data,
+        )
+    }
+    fn invalid_return_for_hack_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>, crate::errors::my_service::InvalidReturnForHackError>> {
+        <Self as ::::MyService>::invalid_return_for_hack(
+            self,
+        )
+    }
+    fn rpc_skipped_codegen_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::RpcSkippedCodegenError>> {
+        <Self as ::::MyService>::rpc_skipped_codegen(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for MyService<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("MyServiceExt::transport is not implemented for mock client")
+    }
+}
+
 pub struct DbMixedStackArguments<'mock> {
     pub getDataByKey0: r#impl::db_mixed_stack_arguments::getDataByKey0<'mock>,
     pub getDataByKey1: r#impl::db_mixed_stack_arguments::getDataByKey1<'mock>,
@@ -308,6 +476,44 @@ impl<'mock> ::::DbMixedStackArguments for DbMixedStackArguments<'mock> {
         let mut closure = self.getDataByKey1.closure.lock().unwrap();
         let closure: &mut dyn ::std::ops::FnMut(::std::string::String) -> _ = &mut **closure;
         ::std::boxed::Box::pin(::futures::future::ready(closure(arg_key.to_owned())))
+    }
+}
+
+impl<'mock, T> ::::DbMixedStackArgumentsExt<T> for DbMixedStackArguments<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn getDataByKey0_with_rpc_opts(
+        &self,
+        arg_key: &::std::primitive::str,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey0Error>> {
+        <Self as ::::DbMixedStackArguments>::getDataByKey0(
+            self,
+            arg_key,
+        )
+    }
+    fn getDataByKey1_with_rpc_opts(
+        &self,
+        arg_key: &::std::primitive::str,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey1Error>> {
+        <Self as ::::DbMixedStackArguments>::getDataByKey1(
+            self,
+            arg_key,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for DbMixedStackArguments<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("DbMixedStackArgumentsExt::transport is not implemented for mock client")
     }
 }
 

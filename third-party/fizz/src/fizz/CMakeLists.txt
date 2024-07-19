@@ -214,7 +214,6 @@ set(FIZZ_SOURCES
   protocol/AsyncFizzBase.cpp
   protocol/Types.cpp
   protocol/Exporter.cpp
-  protocol/MultiBackendFactory.cpp
   protocol/DefaultCertificateVerifier.cpp
   protocol/Events.cpp
   protocol/KeyScheduler.cpp

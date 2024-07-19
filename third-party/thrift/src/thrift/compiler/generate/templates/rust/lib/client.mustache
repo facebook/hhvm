@@ -305,8 +305,10 @@ where
     ) -> {{>lib/client_return_type}};
     {{/function:sink?}}{{/function:starts_interaction?}}
     {{/service:rustFunctions}}
+    {{^service:extendedClients}}
 
     fn transport(&self) -> &T;
+    {{/service:extendedClients}}
 }
 {{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
 
@@ -422,10 +424,12 @@ where
     }
     {{/function:sink?}}{{/function:starts_interaction?}}
     {{/service:rustFunctions}}
+    {{^service:extendedClients}}
 
     fn transport(&self) -> &T {
-      self.transport()
+        self.transport()
     }
+    {{/service:extendedClients}}
 }
 
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
@@ -496,10 +500,12 @@ where
     }
     {{/function:sink?}}{{/function:starts_interaction?}}
     {{/service:rustFunctions}}
+    {{^service:extendedClients}}
 
     fn transport(&self) -> &T {
         <dyn {{service:rust_name}}Ext<T> as {{service:rust_name}}Ext<T>>::transport(<Self as ::std::convert::AsRef<dyn {{service:rust_name}}Ext<T>>>::as_ref(self))
     }
+    {{/service:extendedClients}}
 }
 
 #[derive(Clone)]

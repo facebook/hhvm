@@ -395,7 +395,7 @@ where
     }
 
     fn transport(&self) -> &T {
-      self.transport()
+        self.transport()
     }
 }
 

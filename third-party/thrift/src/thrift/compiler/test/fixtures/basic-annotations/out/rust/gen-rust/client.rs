@@ -738,7 +738,7 @@ where
     }
 
     fn transport(&self) -> &T {
-      self.transport()
+        self.transport()
     }
 }
 
@@ -1215,7 +1215,7 @@ where
     }
 
     fn transport(&self) -> &T {
-      self.transport()
+        self.transport()
     }
 }
 
@@ -1487,8 +1487,6 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service_prio_child::PangError>>;
-
-    fn transport(&self) -> &T;
 }
 
 struct Args_MyServicePrioChild_pang<'a> {
@@ -1541,10 +1539,6 @@ where
             rpc_options,
         )
     }
-
-    fn transport(&self) -> &T {
-      self.transport()
-    }
 }
 
 #[allow(deprecated)]
@@ -1579,10 +1573,6 @@ where
         <Self as ::std::convert::AsRef<dyn MyServicePrioChildExt<T>>>::as_ref(self).pang_with_rpc_opts(
             rpc_options,
         )
-    }
-
-    fn transport(&self) -> &T {
-        <dyn MyServicePrioChildExt<T> as MyServicePrioChildExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyServicePrioChildExt<T>>>::as_ref(self))
     }
 }
 
@@ -1831,7 +1821,7 @@ where
     }
 
     fn transport(&self) -> &T {
-      self.transport()
+        self.transport()
     }
 }
 
@@ -2136,7 +2126,7 @@ where
     }
 
     fn transport(&self) -> &T {
-      self.transport()
+        self.transport()
     }
 }
 
@@ -2594,7 +2584,7 @@ where
     }
 
     fn transport(&self) -> &T {
-      self.transport()
+        self.transport()
     }
 }
 

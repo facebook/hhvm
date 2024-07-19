@@ -162,7 +162,7 @@ where
     }
 
     fn transport(&self) -> &T {
-      self.transport()
+        self.transport()
     }
 }
 
@@ -459,7 +459,7 @@ where
     }
 
     fn transport(&self) -> &T {
-      self.transport()
+        self.transport()
     }
 }
 
@@ -1600,7 +1600,7 @@ where
     }
 
     fn transport(&self) -> &T {
-      self.transport()
+        self.transport()
     }
 }
 
@@ -2151,7 +2151,7 @@ where
     }
 
     fn transport(&self) -> &T {
-      self.transport()
+        self.transport()
     }
 }
 

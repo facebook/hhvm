@@ -162,7 +162,7 @@ where
     }
 
     fn transport(&self) -> &T {
-      self.transport()
+        self.transport()
     }
 }
 
@@ -420,8 +420,6 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_node::DoMidError>>;
-
-    fn transport(&self) -> &T;
 }
 
 struct Args_MyNode_do_mid<'a> {
@@ -474,10 +472,6 @@ where
             rpc_options,
         )
     }
-
-    fn transport(&self) -> &T {
-      self.transport()
-    }
 }
 
 #[allow(deprecated)]
@@ -512,10 +506,6 @@ where
         <Self as ::std::convert::AsRef<dyn MyNodeExt<T>>>::as_ref(self).do_mid_with_rpc_opts(
             rpc_options,
         )
-    }
-
-    fn transport(&self) -> &T {
-        <dyn MyNodeExt<T> as MyNodeExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyNodeExt<T>>>::as_ref(self))
     }
 }
 
@@ -769,8 +759,6 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_leaf::DoLeafError>>;
-
-    fn transport(&self) -> &T;
 }
 
 struct Args_MyLeaf_do_leaf<'a> {
@@ -823,10 +811,6 @@ where
             rpc_options,
         )
     }
-
-    fn transport(&self) -> &T {
-      self.transport()
-    }
 }
 
 #[allow(deprecated)]
@@ -864,10 +848,6 @@ where
         <Self as ::std::convert::AsRef<dyn MyLeafExt<T>>>::as_ref(self).do_leaf_with_rpc_opts(
             rpc_options,
         )
-    }
-
-    fn transport(&self) -> &T {
-        <dyn MyLeafExt<T> as MyLeafExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyLeafExt<T>>>::as_ref(self))
     }
 }
 

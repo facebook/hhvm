@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include <fizz/backend/openssl/OpenSSLFactory.h>
 #include <fizz/client/PskCache.h>
 #include <fizz/client/PskSerializationUtils.h>
+#include <fizz/protocol/DefaultFactory.h>
 #include <fizz/protocol/Factory.h>
 #include <wangle/client/persistence/FilePersistentCache.h>
 
@@ -28,7 +28,7 @@ class PersistentFizzPskCache : public fizz::client::PskCache {
   PersistentFizzPskCache(const std::string& filename,
                          wangle::PersistentCacheConfig config,
                          std::unique_ptr<fizz::Factory> factory =
-                             std::make_unique<fizz::openssl::OpenSSLFactory>())
+                             std::make_unique<::fizz::DefaultFactory>())
       : cache_(filename, std::move(config)), factory_(std::move(factory)) {
   }
 

@@ -145,7 +145,10 @@ module Raw_options = struct
 
   type t =
     | Normal of normal
-    | Linttool of string list
+    | Linttool of {
+        linttool_filenames_or_pathsfile: string list;
+        linttool_severity: string option;
+      }  (** see Linttool.mli documentation *)
 end
 
 let usage =
@@ -156,6 +159,7 @@ or --linttool [filenames or @filename containing newline-separated paths]|}
 
 let parse_options () : Raw_options.t =
   let linttool = ref false in
+  let linttool_severity : string option ref = ref None in
   let files = ref [] in
   let filename_for_logging = ref None in
   let start_char = ref None in
@@ -183,6 +187,10 @@ let parse_options () : Raw_options.t =
         ( "--linttool",
           Arg.Unit (fun () -> linttool := true),
           "For use by an external tool that runs linters (https://fburl.com/wiki/g5m0d3zt)"
+        );
+        ( "--linttool-severity",
+          Arg.String (fun severity -> linttool_severity := Some severity),
+          "For use with --linttool. Makes us emit 'lints' with the given severity (we just give back the same severity that was passed in)"
         );
         ( "--range",
           Arg.Tuple
@@ -258,7 +266,13 @@ let parse_options () : Raw_options.t =
   in
   Arg.parse_dynamic options (fun file -> files := file :: !files) usage;
   if !linttool then
-    Raw_options.Linttool !files
+    Raw_options.Linttool
+      {
+        linttool_filenames_or_pathsfile = !files;
+        linttool_severity = !linttool_severity;
+      }
+  else if Option.is_some !linttool_severity then
+    raise (InvalidCliArg "cannot use --linttool-severity without --linttool")
   else begin
     let range =
       match (!start_char, !end_char, !start_line, !end_line) with
@@ -748,4 +762,6 @@ let () =
 
     Option.iter err_msg ~f:(eprintf "%s\n");
     exit exit_code
-  | Raw_options.Linttool argv -> Linttool.run argv
+  | Raw_options.Linttool
+      { linttool_filenames_or_pathsfile; linttool_severity = severity } ->
+    Linttool.run linttool_filenames_or_pathsfile ~severity

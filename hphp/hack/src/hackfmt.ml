@@ -126,21 +126,27 @@ module Env = struct
   }
 end
 
-type options =
-  | Option_normal of
-      (string list
-      * string option
-      * range option
-      * int option
-      * bool
-      * bool
-      * bool
-      * bool
-      * FEnv.t)
-      * Path.t
-      * Full_fidelity_parser_env.t
-      * (bool * bool)
-  | Option_linttool of string list
+module Raw_options = struct
+  type normal = {
+    files: string list;
+    filename_for_logging: string option;
+    range: range option;
+    at_char: int option;
+    inplace: bool;
+    diff: bool;
+    diff_dry: bool;
+    check: bool;
+    config: FEnv.t;
+    root: Path.t;
+    parser_env: Full_fidelity_parser_env.t;
+    debug: bool;
+    test: bool;
+  }
+
+  type t =
+    | Normal of normal
+    | Linttool of string list
+end
 
 let usage =
   sprintf
@@ -148,7 +154,7 @@ let usage =
 or --linttool [filenames or @filename containing newline-separated paths]|}
     Sys.argv.(0)
 
-let parse_options () : options =
+let parse_options () : Raw_options.t =
   let linttool = ref false in
   let files = ref [] in
   let filename_for_logging = ref None in
@@ -252,7 +258,7 @@ let parse_options () : options =
   in
   Arg.parse_dynamic options (fun file -> files := file :: !files) usage;
   if !linttool then
-    Option_linttool !files
+    Raw_options.Linttool !files
   else begin
     let range =
       match (!start_char, !end_char, !start_line, !end_line) with
@@ -294,19 +300,23 @@ let parse_options () : options =
               config.version);
         }
     in
-    Option_normal
-      ( ( !files,
-          !filename_for_logging,
-          range,
-          !at_char,
-          !inplace,
-          !diff,
-          !diff_dry,
-          !check,
-          config ),
-        root,
-        parser_env,
-        (!debug, !test) )
+    Raw_options.(
+      Normal
+        {
+          files = !files;
+          filename_for_logging = !filename_for_logging;
+          range;
+          at_char = !at_char;
+          inplace = !inplace;
+          diff = !diff;
+          diff_dry = !diff_dry;
+          check = !check;
+          config;
+          root;
+          parser_env;
+          debug = !debug;
+          test = !test;
+        })
   end
 
 type format_options =
@@ -356,15 +366,19 @@ type validate_options_input = {
 
 let validate_options
     env
-    ( files,
-      filename_for_logging,
-      range,
-      at_char,
-      inplace,
-      diff,
-      diff_dry,
-      check,
-      config ) =
+    Raw_options.
+      {
+        files;
+        filename_for_logging;
+        range;
+        at_char;
+        inplace;
+        diff;
+        diff_dry;
+        check;
+        config;
+        _;
+      } : format_options =
   let fail msg = raise (InvalidCliArg msg) in
   let multifile_allowed = inplace || check in
   let filename =
@@ -689,7 +703,7 @@ let () =
   Folly.ensure_folly_init ();
 
   match parse_options () with
-  | Option_normal (options, root, parser_env, (debug, test)) ->
+  | Raw_options.(Normal ({ root; parser_env; debug; test; _ } as options)) ->
     let env =
       {
         Env.debug;
@@ -734,4 +748,4 @@ let () =
 
     Option.iter err_msg ~f:(eprintf "%s\n");
     exit exit_code
-  | Option_linttool argv -> Linttool.run argv
+  | Raw_options.Linttool argv -> Linttool.run argv

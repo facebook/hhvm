@@ -218,7 +218,6 @@ add_library(
   async/AsyncProcessor.cpp
   async/AsyncProcessorHelper.cpp
   async/ClientChannel.cpp
-  async/ClientInterceptorBase.cpp
   async/ClientSinkBridge.cpp
   async/ClientStreamBridge.cpp
   async/Cpp2Channel.cpp

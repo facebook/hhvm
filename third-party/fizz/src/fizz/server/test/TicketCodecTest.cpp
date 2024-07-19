@@ -13,6 +13,7 @@
 #include <fizz/server/TicketCodec.h>
 
 #include <fizz/crypto/test/TestUtil.h>
+#include <fizz/protocol/DefaultFactory.h>
 #include <fizz/protocol/test/Mocks.h>
 #include <fizz/server/test/Mocks.h>
 
@@ -54,7 +55,7 @@ static ResumptionState getTestResumptionState(
 }
 
 static ResumptionState x509Decode(Buf encoded) {
-  openssl::OpenSSLFactory factory;
+  fizz::DefaultFactory factory;
   CertManager certManager;
   return TicketCodec<CertificateStorage::X509>::decode(
       std::move(encoded), factory, certManager);

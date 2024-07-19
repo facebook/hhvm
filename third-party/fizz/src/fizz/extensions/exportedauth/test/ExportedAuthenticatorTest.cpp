@@ -12,6 +12,7 @@
 #include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/extensions/exportedauth/ExportedAuthenticator.h>
+#include <fizz/protocol/DefaultFactory.h>
 #include <fizz/protocol/test/Mocks.h>
 #include <fizz/protocol/test/TestMessages.h>
 #include <fizz/record/Extensions.h>
@@ -72,7 +73,7 @@ class AuthenticatorTest : public ::testing::Test {
     auto authRequest = encode<CertificateRequest>(std::move(cr));
     authrequest_ = std::move(authRequest);
     CipherSuite cipher = CipherSuite::TLS_AES_128_GCM_SHA256;
-    deriver_ = openssl::OpenSSLFactory().makeKeyDeriver(cipher);
+    deriver_ = ::fizz::DefaultFactory().makeKeyDeriver(cipher);
     handshakeContext_ =
         folly::IOBuf::copyBuffer("12345678901234567890123456789012");
     finishedKey_ = folly::IOBuf::copyBuffer("12345678901234567890123456789012");
@@ -146,7 +147,7 @@ class ValidateAuthenticatorTest : public ::testing::Test {
  public:
   void SetUp() override {
     CipherSuite cipher = CipherSuite::TLS_AES_128_GCM_SHA256;
-    deriver_ = openssl::OpenSSLFactory().makeKeyDeriver(cipher);
+    deriver_ = ::fizz::DefaultFactory().makeKeyDeriver(cipher);
     schemes_.push_back(SignatureScheme::ecdsa_secp256r1_sha256);
     authrequest_ = {
         "14303132333435363738396162636465666768696a0008000d000400020403"};

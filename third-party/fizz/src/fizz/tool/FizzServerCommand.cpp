@@ -7,9 +7,9 @@
  */
 
 #include <fizz/backend/openssl/OpenSSL.h>
-#include <fizz/backend/openssl/OpenSSLFactory.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialCertManager.h>
 #include <fizz/extensions/delegatedcred/SelfDelegatedCredential.h>
+#include <fizz/protocol/DefaultFactory.h>
 #ifdef FIZZ_TOOL_ENABLE_BROTLI
 #include <fizz/compression/BrotliCertificateCompressor.h>
 #endif
@@ -864,8 +864,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
 
   auto ticketCipher = std::make_shared<
       Aead128GCMTicketCipher<TicketCodec<CertificateStorage::X509>>>(
-      std::make_shared<openssl::OpenSSLFactory>(),
-      std::make_shared<CertManager>());
+      std::make_shared<DefaultFactory>(), std::make_shared<CertManager>());
   auto ticketSeed = RandomGenerator<32>().generateRandom();
   ticketCipher->setTicketSecrets({{range(ticketSeed)}});
   serverContext->setTicketCipher(ticketCipher);

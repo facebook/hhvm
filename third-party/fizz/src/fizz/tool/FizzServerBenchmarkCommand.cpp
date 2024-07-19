@@ -11,7 +11,7 @@
 #include <fizz/experimental/server/BatchSignatureAsyncSelfCert.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialCertManager.h>
 
-#include <fizz/backend/openssl/OpenSSLFactory.h>
+#include <fizz/protocol/DefaultFactory.h>
 #include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/SlidingBloomReplayCache.h>
 #include <fizz/server/TicketTypes.h>
@@ -222,8 +222,7 @@ int fizzServerBenchmarkCommand(const std::vector<std::string>& args) {
   serverContext->setSupportedCiphers(std::move(ciphers));
   auto ticketCipher = std::make_shared<
       Aead128GCMTicketCipher<TicketCodec<CertificateStorage::X509>>>(
-      std::make_shared<openssl::OpenSSLFactory>(),
-      std::make_shared<CertManager>());
+      std::make_shared<DefaultFactory>(), std::make_shared<CertManager>());
   auto ticketSeed = RandomGenerator<32>().generateRandom();
   ticketCipher->setTicketSecrets({{range(ticketSeed)}});
   serverContext->setTicketCipher(ticketCipher);

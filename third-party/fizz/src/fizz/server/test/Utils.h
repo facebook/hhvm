@@ -8,10 +8,10 @@
 #pragma once
 
 #include <fizz/backend/openssl/OpenSSL.h>
-#include <fizz/backend/openssl/OpenSSLFactory.h>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/protocol/DefaultCertificateVerifier.h>
+#include <fizz/protocol/DefaultFactory.h>
 #include <fizz/protocol/test/Utilities.h>
 #include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/TicketTypes.h>
@@ -90,8 +90,7 @@ class FizzTestServer : public folly::AsyncServerSocket::AcceptCallback {
     if (enable) {
       auto ticketCipher = std::make_shared<
           Aead128GCMTicketCipher<TicketCodec<CertificateStorage::X509>>>(
-          std::make_shared<openssl::OpenSSLFactory>(),
-          std::make_shared<CertManager>());
+          std::make_shared<DefaultFactory>(), std::make_shared<CertManager>());
       auto ticketSeed = RandomGenerator<32>().generateRandom();
       ticketCipher->setTicketSecrets({{folly::range(ticketSeed)}});
       ctx_->setTicketCipher(ticketCipher);

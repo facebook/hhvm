@@ -6,10 +6,10 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/backend/openssl/OpenSSLFactory.h>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/extensions/exportedauth/ExportedAuthenticator.h>
 #include <fizz/extensions/exportedauth/Util.h>
+#include <fizz/protocol/DefaultFactory.h>
 
 namespace fizz {
 
@@ -34,7 +34,7 @@ Buf ExportedAuthenticator::getAuthenticator(
     const SelfCert& cert,
     Buf authenticatorRequest) {
   auto cipher = transport.getCipher();
-  auto deriver = openssl::OpenSSLFactory().makeKeyDeriver(*cipher);
+  auto deriver = DefaultFactory().makeKeyDeriver(*cipher);
   auto hashLength = deriver->hashLength();
   auto supportedSchemes = transport.getSupportedSigSchemes();
   Buf handshakeContext;

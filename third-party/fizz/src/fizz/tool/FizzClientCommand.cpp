@@ -10,6 +10,7 @@
 #include <fizz/crypto/hpke/Utils.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialClientExtension.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialFactory.h>
+#include <fizz/protocol/DefaultFactory.h>
 #ifdef FIZZ_TOOL_ENABLE_BROTLI
 #include <fizz/compression/BrotliCertificateDecompressor.h>
 #endif
@@ -487,7 +488,7 @@ class BasicPersistentPskCache : public BasicPskCache {
     std::string serializedPsk;
     readFile(loadFile_.c_str(), serializedPsk);
     try {
-      return deserializePsk(serializedPsk, openssl::OpenSSLFactory());
+      return deserializePsk(serializedPsk, DefaultFactory());
     } catch (const std::exception& e) {
       LOG(ERROR) << "Error deserializing: " << loadFile_ << "\n" << e.what();
       throw;

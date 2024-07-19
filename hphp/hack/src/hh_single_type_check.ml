@@ -234,7 +234,6 @@ let parse_options () =
   let timeout = ref None in
   let set_bool x () = x := Some true in
   let set_bool_ x () = x := true in
-  let rust_elab = ref false in
   let rust_provider_backend = ref false in
   let skip_hierarchy_checks = ref false in
   let skip_tast_checks = ref false in
@@ -520,9 +519,6 @@ let parse_options () =
       ( "--check-xhp-attribute",
         Arg.Set check_xhp_attribute,
         " Typechecks xhp required attributes" );
-      ( "--rust-elab",
-        Arg.Set rust_elab,
-        " Use the Rust implementation of naming elaboration and NAST checks" );
       ( "--rust-provider-backend",
         Arg.Set rust_provider_backend,
         " Use the Rust implementation of Provider_backend (including decl-folding)"
@@ -920,7 +916,7 @@ let parse_options () =
       ~tco_allow_all_files_for_module_declarations:
         !allow_all_files_for_module_declarations
       ~tco_loop_iteration_upper_bound:!loop_iteration_upper_bound
-      ~tco_rust_elab:!rust_elab
+      ~tco_rust_elab:false
       GlobalOptions.default
   in
 

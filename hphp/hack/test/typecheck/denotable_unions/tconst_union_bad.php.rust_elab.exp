@@ -1,4 +1,0 @@
-ERROR: File "tconst_union_bad.php", line 13, characters 59-60:
-No type constant `TP` in `C` (Typing[4090])
-  File "tconst_union_bad.php", line 5, characters 7-7:
-  Declaration of `C` is here

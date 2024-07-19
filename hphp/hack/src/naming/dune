@@ -136,22 +136,6 @@
  (preprocess
   (pps ppx_deriving.std)))
 
-(library
- (name elab_ffi)
- (modules)
- (wrapped false)
- (foreign_archives elab_ffi))
-
-(rule
- (targets libelab_ffi.a)
- (deps
-  (source_tree %{workspace_root}/hack/src))
- (locks /cargo)
- (action
-  (run
-   %{workspace_root}/hack/scripts/invoke_cargo.sh
-   elab_ffi
-   elab_ffi)))
 
 (library
  (name naming)
@@ -218,6 +202,5 @@
   typing_deps
   typechecker_options
   user_error)
- (foreign_archives elab_ffi)
  (preprocess
   (pps ppx_deriving.std)))

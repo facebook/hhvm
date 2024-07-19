@@ -208,157 +208,85 @@ let program_filename defs =
 (* The entry points to CHECK the program, and transform the program *)
 (**************************************************************************)
 
-module Rust_elab_core = struct
-  external elab_program :
-    TypecheckerOptions.t ->
-    Relative_path.t ->
-    (unit, unit) Aast.program ->
-    Nast.program * Naming_phase_error.t list = "hh_elab_program"
-
-  external elab_fun_def :
-    TypecheckerOptions.t ->
-    Relative_path.t ->
-    (unit, unit) Aast.fun_def ->
-    Nast.fun_def * Naming_phase_error.t list = "hh_elab_fun_def"
-
-  external elab_class_ :
-    TypecheckerOptions.t ->
-    Relative_path.t ->
-    (unit, unit) Aast.class_ ->
-    Nast.class_ * Naming_phase_error.t list = "hh_elab_class_"
-
-  external elab_module_def :
-    TypecheckerOptions.t ->
-    Relative_path.t ->
-    (unit, unit) Aast.module_def ->
-    Nast.module_def * Naming_phase_error.t list = "hh_elab_module_def"
-
-  external elab_gconst :
-    TypecheckerOptions.t ->
-    Relative_path.t ->
-    (unit, unit) Aast.gconst ->
-    Nast.gconst * Naming_phase_error.t list = "hh_elab_gconst"
-
-  external elab_typedef :
-    TypecheckerOptions.t ->
-    Relative_path.t ->
-    (unit, unit) Aast.typedef ->
-    Nast.typedef * Naming_phase_error.t list = "hh_elab_typedef"
-
-  let add_errors elab_x tcopt filename x =
-    let (x, errs) = elab_x tcopt filename x in
-    errs
-    |> List.fold ~init:Naming_phase_error.empty ~f:Naming_phase_error.add
-    |> Naming_phase_error.emit;
-    x
-
-  let elab_program = add_errors elab_program
-
-  let elab_fun_def = add_errors elab_fun_def
-
-  let elab_class_ = add_errors elab_class_
-
-  let elab_module_def = add_errors elab_module_def
-
-  let elab_gconst = add_errors elab_gconst
-
-  let elab_typedef = add_errors elab_typedef
-end
-
 let fun_def ctx fd =
   let tcopt = Provider_context.get_tcopt ctx in
   let filename = Pos.filename fd.Aast.fd_fun.Aast.f_span in
-  if TypecheckerOptions.rust_elab tcopt then
-    Rust_elab_core.elab_fun_def tcopt filename fd
-  else
-    let elab_ns = Naming_elaborate_namespaces_endo.elaborate_fun_def
-    and elab_capture = Naming_captures.elab_fun_def
-    and elab_typed_locals = Naming_typed_locals.elab_fun_def
-    and validate_await = Naming_validate_await.validate_fun_def on_error
-    and elab_core = elab_core_fun_def (mk_env filename tcopt) in
-    elab_elem
-      ~elab_ns
-      ~elab_capture
-      ~elab_typed_locals
-      ~validate_await
-      ~elab_core
-      fd
+  let elab_ns = Naming_elaborate_namespaces_endo.elaborate_fun_def
+  and elab_capture = Naming_captures.elab_fun_def
+  and elab_typed_locals = Naming_typed_locals.elab_fun_def
+  and validate_await = Naming_validate_await.validate_fun_def on_error
+  and elab_core = elab_core_fun_def (mk_env filename tcopt) in
+  elab_elem
+    ~elab_ns
+    ~elab_capture
+    ~elab_typed_locals
+    ~validate_await
+    ~elab_core
+    fd
 
 let class_ ctx c =
   let tcopt = Provider_context.get_tcopt ctx in
   let filename = Pos.filename c.Aast.c_span in
-  if TypecheckerOptions.rust_elab tcopt then
-    Rust_elab_core.elab_class_ tcopt filename c
-  else
-    let elab_ns = Naming_elaborate_namespaces_endo.elaborate_class_
-    and elab_capture = Naming_captures.elab_class
-    and elab_typed_locals = Naming_typed_locals.elab_class
-    and validate_await = Naming_validate_await.validate_class on_error
-    and elab_core = elab_core_class (mk_env filename tcopt) in
-    elab_elem
-      ~elab_ns
-      ~elab_capture
-      ~elab_typed_locals
-      ~validate_await
-      ~elab_core
-      c
+  let elab_ns = Naming_elaborate_namespaces_endo.elaborate_class_
+  and elab_capture = Naming_captures.elab_class
+  and elab_typed_locals = Naming_typed_locals.elab_class
+  and validate_await = Naming_validate_await.validate_class on_error
+  and elab_core = elab_core_class (mk_env filename tcopt) in
+  elab_elem
+    ~elab_ns
+    ~elab_capture
+    ~elab_typed_locals
+    ~validate_await
+    ~elab_core
+    c
 
 let module_ ctx md =
   let tcopt = Provider_context.get_tcopt ctx in
   let filename = Pos.filename md.Aast.md_span in
-  if TypecheckerOptions.rust_elab tcopt then
-    Rust_elab_core.elab_module_def tcopt filename md
-  else
-    let elab_ns = Naming_elaborate_namespaces_endo.elaborate_module_def
-    and elab_capture = Naming_captures.elab_module_def
-    and elab_typed_locals x = x
-    and validate_await _ = ()
-    and elab_core = elab_core_module_def (mk_env filename tcopt) in
-    elab_elem
-      ~elab_ns
-      ~elab_capture
-      ~elab_typed_locals
-      ~validate_await
-      ~elab_core
-      md
+  let elab_ns = Naming_elaborate_namespaces_endo.elaborate_module_def
+  and elab_capture = Naming_captures.elab_module_def
+  and elab_typed_locals x = x
+  and validate_await _ = ()
+  and elab_core = elab_core_module_def (mk_env filename tcopt) in
+  elab_elem
+    ~elab_ns
+    ~elab_capture
+    ~elab_typed_locals
+    ~validate_await
+    ~elab_core
+    md
 
 let global_const ctx cst =
   let tcopt = Provider_context.get_tcopt ctx in
   let filename = Pos.filename cst.Aast.cst_span in
-  if TypecheckerOptions.rust_elab tcopt then
-    Rust_elab_core.elab_gconst tcopt filename cst
-  else
-    let elab_ns = Naming_elaborate_namespaces_endo.elaborate_gconst
-    and elab_capture = Naming_captures.elab_gconst
-    and elab_typed_locals x = x
-    and validate_await _ = ()
-    and elab_core = elab_core_gconst (mk_env filename tcopt) in
-    elab_elem
-      ~elab_ns
-      ~elab_capture
-      ~elab_typed_locals
-      ~validate_await
-      ~elab_core
-      cst
+  let elab_ns = Naming_elaborate_namespaces_endo.elaborate_gconst
+  and elab_capture = Naming_captures.elab_gconst
+  and elab_typed_locals x = x
+  and validate_await _ = ()
+  and elab_core = elab_core_gconst (mk_env filename tcopt) in
+  elab_elem
+    ~elab_ns
+    ~elab_capture
+    ~elab_typed_locals
+    ~validate_await
+    ~elab_core
+    cst
 
 let typedef ctx td =
   let tcopt = Provider_context.get_tcopt ctx in
   let filename = Pos.filename @@ td.Aast.t_span in
-  if TypecheckerOptions.rust_elab tcopt then
-    Rust_elab_core.elab_typedef tcopt filename td
-  else
-    let elab_ns = Naming_elaborate_namespaces_endo.elaborate_typedef
-    and elab_capture = Naming_captures.elab_typedef
-    and elab_typed_locals x = x
-    and validate_await _ = ()
-    and elab_core = elab_core_typedef (mk_env filename tcopt) in
-    elab_elem
-      ~elab_ns
-      ~elab_capture
-      ~elab_typed_locals
-      ~validate_await
-      ~elab_core
-      td
+  let elab_ns = Naming_elaborate_namespaces_endo.elaborate_typedef
+  and elab_capture = Naming_captures.elab_typedef
+  and elab_typed_locals x = x
+  and validate_await _ = ()
+  and elab_core = elab_core_typedef (mk_env filename tcopt) in
+  elab_elem
+    ~elab_ns
+    ~elab_capture
+    ~elab_typed_locals
+    ~validate_await
+    ~elab_core
+    td
 
 let emit_toplevel_stmt_errors positions =
   positions
@@ -452,18 +380,15 @@ let program ctx program =
   let tcopt = Provider_context.get_tcopt ctx in
   let filename = program_filename program in
   let program = adjust_toplevel_stmts ctx program in
-  if TypecheckerOptions.rust_elab tcopt then
-    Rust_elab_core.elab_program tcopt filename program
-  else
-    let elab_ns = Naming_elaborate_namespaces_endo.elaborate_program
-    and elab_capture = Naming_captures.elab_program
-    and elab_typed_locals = Naming_typed_locals.elab_program
-    and validate_await = Naming_validate_await.validate_program on_error
-    and elab_core = elab_core_program (mk_env filename tcopt) in
-    elab_elem
-      ~elab_ns
-      ~elab_capture
-      ~elab_typed_locals
-      ~validate_await
-      ~elab_core
-      program
+  let elab_ns = Naming_elaborate_namespaces_endo.elaborate_program
+  and elab_capture = Naming_captures.elab_program
+  and elab_typed_locals = Naming_typed_locals.elab_program
+  and validate_await = Naming_validate_await.validate_program on_error
+  and elab_core = elab_core_program (mk_env filename tcopt) in
+  elab_elem
+    ~elab_ns
+    ~elab_capture
+    ~elab_typed_locals
+    ~validate_await
+    ~elab_core
+    program

@@ -1499,27 +1499,14 @@ version = "0.0.0"
 dependencies = [
  "bitflags 2.4.0",
  "bstr",
- "core_utils_rust",
  "elaborate_namespaces_visitor",
- "file_info",
  "hack_macros",
- "hash",
  "itertools 0.11.0",
  "naming_special_names_rust",
  "oxidized",
  "relative_path",
  "stack_limit",
  "vec1",
-]
-
-[[package]]
-name = "elab_ffi"
-version = "0.0.0"
-dependencies = [
- "elab",
- "ocamlrep_ocamlpool",
- "oxidized",
- "relative_path",
 ]
 
 [[package]]

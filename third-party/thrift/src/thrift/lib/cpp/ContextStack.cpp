@@ -324,6 +324,52 @@ void ContextStack::resetClientRequestContextHeader() {
   connectionContext->resetRequestHeader();
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<void> ContextStack::processClientInterceptorsOnRequest() {
+  DCHECK(shouldProcessClientInterceptors());
+
+  std::vector<ClientInterceptorException::SingleExceptionInfo> exceptions;
+  for (const auto& clientInterceptor : *clientInterceptors_) {
+    ClientInterceptorBase::RequestInfo requestInfo;
+    try {
+      co_await clientInterceptor->internal_onRequest(std::move(requestInfo));
+    } catch (...) {
+      exceptions.emplace_back(ClientInterceptorException::SingleExceptionInfo{
+          clientInterceptor->getName(),
+          folly::exception_wrapper(folly::current_exception())});
+    }
+  }
+
+  if (!exceptions.empty()) {
+    co_yield folly::coro::co_error(ClientInterceptorException(
+        ClientInterceptorException::CallbackKind::ON_REQUEST,
+        std::move(exceptions)));
+  }
+}
+
+folly::coro::Task<void> ContextStack::processClientInterceptorsOnResponse() {
+  DCHECK(shouldProcessClientInterceptors());
+
+  std::vector<ClientInterceptorException::SingleExceptionInfo> exceptions;
+  for (const auto& clientInterceptor : *clientInterceptors_) {
+    ClientInterceptorBase::ResponseInfo responseInfo;
+    try {
+      co_await clientInterceptor->internal_onResponse(std::move(responseInfo));
+    } catch (...) {
+      exceptions.emplace_back(ClientInterceptorException::SingleExceptionInfo{
+          clientInterceptor->getName(),
+          folly::exception_wrapper(folly::current_exception())});
+    }
+  }
+
+  if (!exceptions.empty()) {
+    co_yield folly::coro::co_error(ClientInterceptorException(
+        ClientInterceptorException::CallbackKind::ON_RESPONSE,
+        std::move(exceptions)));
+  }
+}
+#endif
+
 void*& ContextStack::contextAt(size_t i) {
   return serviceContexts_[i];
 }

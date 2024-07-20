@@ -355,6 +355,9 @@ void MemoryManager::sweep() {
     }
   } while (!m_sweepables.empty());
 
+  FTRACE(1, "heap-id {} sweep: sweepable {} native {}\n",
+         tl_heap_id, num_sweepables, num_natives);
+
   if (debug) checkHeap("after MM::sweep");
 }
 

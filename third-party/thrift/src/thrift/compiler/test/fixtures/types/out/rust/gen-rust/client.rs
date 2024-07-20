@@ -50,14 +50,11 @@ where
         arg_m: &included__types::SomeMap,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "SomeService";
-            SERVICE_METHOD_NAME = "SomeService.bounce_map";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"SomeService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"SomeService.bounce_map";
         let args = self::Args_SomeService_bounce_map {
             m: arg_m,
             _phantom: ::std::marker::PhantomData,
@@ -72,7 +69,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "SomeService.bounce_map"));
 
         async move {
@@ -98,14 +95,11 @@ where
         arg_r: &[::std::primitive::i64],
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>, crate::errors::some_service::BinaryKeyedMapError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "SomeService";
-            SERVICE_METHOD_NAME = "SomeService.binary_keyed_map";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"SomeService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"SomeService.binary_keyed_map";
         let args = self::Args_SomeService_binary_keyed_map {
             r: arg_r,
             _phantom: ::std::marker::PhantomData,
@@ -120,7 +114,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "SomeService.binary_keyed_map"));
 
         async move {

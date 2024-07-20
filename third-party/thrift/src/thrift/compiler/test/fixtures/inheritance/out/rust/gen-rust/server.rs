@@ -142,24 +142,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyRoot";
-            METHOD_NAME = "do_root";
-            SERVICE_METHOD_NAME = "MyRoot.do_root";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyRoot";
+        const METHOD_NAME: &::std::ffi::CStr = c"do_root";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyRoot.do_root";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_MyRoot_do_root = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -190,7 +184,7 @@ where
 
         let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_root::DoRootExn>(
             "do_root",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -494,24 +488,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyNode";
-            METHOD_NAME = "do_mid";
-            SERVICE_METHOD_NAME = "MyNode.do_mid";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyNode";
+        const METHOD_NAME: &::std::ffi::CStr = c"do_mid";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyNode.do_mid";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_MyNode_do_mid = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -542,7 +530,7 @@ where
 
         let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_node::DoMidExn>(
             "do_mid",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -858,24 +846,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyLeaf";
-            METHOD_NAME = "do_leaf";
-            SERVICE_METHOD_NAME = "MyLeaf.do_leaf";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyLeaf";
+        const METHOD_NAME: &::std::ffi::CStr = c"do_leaf";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyLeaf.do_leaf";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_MyLeaf_do_leaf = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -906,7 +888,7 @@ where
 
         let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_leaf::DoLeafExn>(
             "do_leaf",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,

@@ -364,24 +364,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "NestedContainers";
-            METHOD_NAME = "mapList";
-            SERVICE_METHOD_NAME = "NestedContainers.mapList";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
+        const METHOD_NAME: &::std::ffi::CStr = c"mapList";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"NestedContainers.mapList";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_NestedContainers_mapList = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -413,7 +407,7 @@ where
 
         let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::nested_containers::MapListExn>(
             "mapList",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -432,24 +426,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "NestedContainers";
-            METHOD_NAME = "mapSet";
-            SERVICE_METHOD_NAME = "NestedContainers.mapSet";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
+        const METHOD_NAME: &::std::ffi::CStr = c"mapSet";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"NestedContainers.mapSet";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_NestedContainers_mapSet = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -481,7 +469,7 @@ where
 
         let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::nested_containers::MapSetExn>(
             "mapSet",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -500,24 +488,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "NestedContainers";
-            METHOD_NAME = "listMap";
-            SERVICE_METHOD_NAME = "NestedContainers.listMap";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
+        const METHOD_NAME: &::std::ffi::CStr = c"listMap";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"NestedContainers.listMap";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_NestedContainers_listMap = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -549,7 +531,7 @@ where
 
         let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::nested_containers::ListMapExn>(
             "listMap",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -568,24 +550,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "NestedContainers";
-            METHOD_NAME = "listSet";
-            SERVICE_METHOD_NAME = "NestedContainers.listSet";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
+        const METHOD_NAME: &::std::ffi::CStr = c"listSet";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"NestedContainers.listSet";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_NestedContainers_listSet = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -617,7 +593,7 @@ where
 
         let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::nested_containers::ListSetExn>(
             "listSet",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -636,24 +612,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "NestedContainers";
-            METHOD_NAME = "turtles";
-            SERVICE_METHOD_NAME = "NestedContainers.turtles";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
+        const METHOD_NAME: &::std::ffi::CStr = c"turtles";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"NestedContainers.turtles";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_NestedContainers_turtles = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -685,7 +655,7 @@ where
 
         let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::nested_containers::TurtlesExn>(
             "turtles",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,

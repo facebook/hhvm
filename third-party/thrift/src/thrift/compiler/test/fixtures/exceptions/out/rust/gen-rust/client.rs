@@ -49,14 +49,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoBlandError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Raiser";
-            SERVICE_METHOD_NAME = "Raiser.doBland";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Raiser";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Raiser.doBland";
         let args = self::Args_Raiser_doBland {
             _phantom: ::std::marker::PhantomData,
         };
@@ -70,7 +67,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Raiser.doBland"));
 
         async move {
@@ -95,14 +92,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoRaiseError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Raiser";
-            SERVICE_METHOD_NAME = "Raiser.doRaise";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Raiser";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Raiser.doRaise";
         let args = self::Args_Raiser_doRaise {
             _phantom: ::std::marker::PhantomData,
         };
@@ -116,7 +110,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Raiser.doRaise"));
 
         async move {
@@ -141,14 +135,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get200Error>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Raiser";
-            SERVICE_METHOD_NAME = "Raiser.get200";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Raiser";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Raiser.get200";
         let args = self::Args_Raiser_get200 {
             _phantom: ::std::marker::PhantomData,
         };
@@ -162,7 +153,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Raiser.get200"));
 
         async move {
@@ -187,14 +178,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get500Error>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Raiser";
-            SERVICE_METHOD_NAME = "Raiser.get500";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Raiser";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Raiser.get500";
         let args = self::Args_Raiser_get500 {
             _phantom: ::std::marker::PhantomData,
         };
@@ -208,7 +196,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Raiser.get500"));
 
         async move {

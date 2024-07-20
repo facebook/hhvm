@@ -50,14 +50,11 @@ where
         arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapListError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "NestedContainers";
-            SERVICE_METHOD_NAME = "NestedContainers.mapList";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"NestedContainers.mapList";
         let args = self::Args_NestedContainers_mapList {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -72,7 +69,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "NestedContainers.mapList"));
 
         async move {
@@ -98,14 +95,11 @@ where
         arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapSetError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "NestedContainers";
-            SERVICE_METHOD_NAME = "NestedContainers.mapSet";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"NestedContainers.mapSet";
         let args = self::Args_NestedContainers_mapSet {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -120,7 +114,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "NestedContainers.mapSet"));
 
         async move {
@@ -146,14 +140,11 @@ where
         arg_foo: &[::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>],
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListMapError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "NestedContainers";
-            SERVICE_METHOD_NAME = "NestedContainers.listMap";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"NestedContainers.listMap";
         let args = self::Args_NestedContainers_listMap {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -168,7 +159,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "NestedContainers.listMap"));
 
         async move {
@@ -194,14 +185,11 @@ where
         arg_foo: &[::std::collections::BTreeSet<::std::primitive::i32>],
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListSetError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "NestedContainers";
-            SERVICE_METHOD_NAME = "NestedContainers.listSet";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"NestedContainers.listSet";
         let args = self::Args_NestedContainers_listSet {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -216,7 +204,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "NestedContainers.listSet"));
 
         async move {
@@ -242,14 +230,11 @@ where
         arg_foo: &[::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>],
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::TurtlesError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "NestedContainers";
-            SERVICE_METHOD_NAME = "NestedContainers.turtles";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"NestedContainers.turtles";
         let args = self::Args_NestedContainers_turtles {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -264,7 +249,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "NestedContainers.turtles"));
 
         async move {

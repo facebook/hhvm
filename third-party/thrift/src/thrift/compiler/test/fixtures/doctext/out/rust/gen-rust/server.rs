@@ -259,24 +259,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "C";
-            METHOD_NAME = "f";
-            SERVICE_METHOD_NAME = "C.f";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"C";
+        const METHOD_NAME: &::std::ffi::CStr = c"f";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"C.f";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_C_f = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -307,7 +301,7 @@ where
 
         let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::c::FExn>(
             "f",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -326,24 +320,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "C";
-            METHOD_NAME = "numbers";
-            SERVICE_METHOD_NAME = "C.numbers";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"C";
+        const METHOD_NAME: &::std::ffi::CStr = c"numbers";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"C.numbers";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_C_numbers = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -408,7 +396,7 @@ where
 
         let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::c::NumbersExn>(
             "numbers",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -428,24 +416,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "C";
-            METHOD_NAME = "thing";
-            SERVICE_METHOD_NAME = "C.thing";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"C";
+        const METHOD_NAME: &::std::ffi::CStr = c"thing";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"C.thing";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_C_thing = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -479,7 +461,7 @@ where
 
         let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::c::ThingExn>(
             "thing",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,

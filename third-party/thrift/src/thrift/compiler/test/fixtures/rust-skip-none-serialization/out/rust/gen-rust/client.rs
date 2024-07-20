@@ -49,14 +49,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PingError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.ping";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.ping";
         let args = self::Args_MyService_ping {
             _phantom: ::std::marker::PhantomData,
         };
@@ -70,7 +67,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyService.ping"));
 
         async move {
@@ -95,14 +92,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetRandomDataError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.getRandomData";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.getRandomData";
         let args = self::Args_MyService_getRandomData {
             _phantom: ::std::marker::PhantomData,
         };
@@ -116,7 +110,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyService.getRandomData"));
 
         async move {
@@ -142,14 +136,11 @@ where
         arg_id: ::std::primitive::i64,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_service::HasDataByIdError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.hasDataById";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.hasDataById";
         let args = self::Args_MyService_hasDataById {
             id: arg_id,
             _phantom: ::std::marker::PhantomData,
@@ -164,7 +155,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyService.hasDataById"));
 
         async move {
@@ -190,14 +181,11 @@ where
         arg_id: ::std::primitive::i64,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetDataByIdError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.getDataById";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.getDataById";
         let args = self::Args_MyService_getDataById {
             id: arg_id,
             _phantom: ::std::marker::PhantomData,
@@ -212,7 +200,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyService.getDataById"));
 
         async move {
@@ -239,14 +227,11 @@ where
         arg_data: &::std::primitive::str,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PutDataByIdError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.putDataById";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.putDataById";
         let args = self::Args_MyService_putDataById {
             id: arg_id,
             data: arg_data,
@@ -262,7 +247,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyService.putDataById"));
 
         async move {
@@ -289,14 +274,11 @@ where
         arg_data: &::std::primitive::str,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::LobDataByIdError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.lobDataById";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.lobDataById";
         let args = self::Args_MyService_lobDataById {
             id: arg_id,
             data: arg_data,
@@ -312,7 +294,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyService.lobDataById"));
 
         async move {

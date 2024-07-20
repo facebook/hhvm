@@ -662,24 +662,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            METHOD_NAME = "returnstream";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.returnstream";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const METHOD_NAME: &::std::ffi::CStr = c"returnstream";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.returnstream";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_PubSubStreamingService_returnstream = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -746,7 +740,7 @@ where
 
         let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ReturnstreamExn>(
             "returnstream",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -766,24 +760,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            METHOD_NAME = "streamthrows";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.streamthrows";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const METHOD_NAME: &::std::ffi::CStr = c"streamthrows";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.streamthrows";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_PubSubStreamingService_streamthrows = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -857,7 +845,7 @@ where
 
         let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::StreamthrowsExn>(
             "streamthrows",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -877,24 +865,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            METHOD_NAME = "servicethrows";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.servicethrows";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const METHOD_NAME: &::std::ffi::CStr = c"servicethrows";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.servicethrows";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_PubSubStreamingService_servicethrows = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -960,7 +942,7 @@ where
 
         let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ServicethrowsExn>(
             "servicethrows",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -980,24 +962,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            METHOD_NAME = "servicethrows2";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.servicethrows2";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const METHOD_NAME: &::std::ffi::CStr = c"servicethrows2";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.servicethrows2";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_PubSubStreamingService_servicethrows2 = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -1063,7 +1039,7 @@ where
 
         let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::Servicethrows2Exn>(
             "servicethrows2",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -1083,24 +1059,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            METHOD_NAME = "boththrows";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.boththrows";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const METHOD_NAME: &::std::ffi::CStr = c"boththrows";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.boththrows";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_PubSubStreamingService_boththrows = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -1174,7 +1144,7 @@ where
 
         let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::BoththrowsExn>(
             "boththrows",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -1194,24 +1164,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            METHOD_NAME = "responseandstreamstreamthrows";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.responseandstreamstreamthrows";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const METHOD_NAME: &::std::ffi::CStr = c"responseandstreamstreamthrows";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.responseandstreamstreamthrows";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_PubSubStreamingService_responseandstreamstreamthrows = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -1285,7 +1249,7 @@ where
 
         let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn>(
             "responseandstreamstreamthrows",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -1305,24 +1269,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            METHOD_NAME = "responseandstreamservicethrows";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.responseandstreamservicethrows";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const METHOD_NAME: &::std::ffi::CStr = c"responseandstreamservicethrows";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.responseandstreamservicethrows";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_PubSubStreamingService_responseandstreamservicethrows = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -1388,7 +1346,7 @@ where
 
         let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn>(
             "responseandstreamservicethrows",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -1408,24 +1366,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            METHOD_NAME = "responseandstreamboththrows";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.responseandstreamboththrows";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const METHOD_NAME: &::std::ffi::CStr = c"responseandstreamboththrows";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.responseandstreamboththrows";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_PubSubStreamingService_responseandstreamboththrows = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -1499,7 +1451,7 @@ where
 
         let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn>(
             "responseandstreamboththrows",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,
@@ -1519,24 +1471,18 @@ where
         reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        use ::const_cstr::const_cstr;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            METHOD_NAME = "returnstreamFast";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.returnstreamFast";
-        }
-        let mut ctx_stack = req_ctxt.get_context_stack(
-            SERVICE_NAME.as_cstr(),
-            SERVICE_METHOD_NAME.as_cstr(),
-        )?;
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const METHOD_NAME: &::std::ffi::CStr = c"returnstreamFast";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.returnstreamFast";
+        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
         let _args: self::Args_PubSubStreamingService_returnstreamFast = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME.as_cstr(),
+            method_name: METHOD_NAME,
             buffer: req,
         })?;
         ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
@@ -1603,7 +1549,7 @@ where
 
         let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::pub_sub_streaming_service::ReturnstreamFastExn>(
             "returnstreamFast",
-            METHOD_NAME.as_cstr(),
+            METHOD_NAME,
             _seqid,
             req_ctxt,
             &mut ctx_stack,

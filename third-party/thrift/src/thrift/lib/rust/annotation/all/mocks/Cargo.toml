@@ -24,7 +24,6 @@ codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/fac
 compat = { version = "0.0.1+unstable", path = "../../compat" }
 compat_clients = { version = "0.0.1+unstable", path = "../../compat/clients" }
 compat_mocks = { version = "0.0.1+unstable", path = "../../compat/mocks" }
-const-cstr = "0.3.0"
 cpp = { version = "0.0.1+unstable", path = "../../cpp" }
 cpp_clients = { version = "0.0.1+unstable", path = "../../cpp/clients" }
 cpp_mocks = { version = "0.0.1+unstable", path = "../../cpp/mocks" }

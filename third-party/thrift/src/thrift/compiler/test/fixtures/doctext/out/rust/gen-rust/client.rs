@@ -49,14 +49,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::c::FError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "C";
-            SERVICE_METHOD_NAME = "C.f";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"C";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"C.f";
         let args = self::Args_C_f {
             _phantom: ::std::marker::PhantomData,
         };
@@ -70,7 +67,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "C.f"));
 
         async move {
@@ -95,16 +92,13 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError>>, crate::errors::c::NumbersError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "C";
-            SERVICE_METHOD_NAME = "C.numbers";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"C";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"C.numbers";
         let args = self::Args_C_numbers {
             _phantom: ::std::marker::PhantomData,
         };
@@ -118,7 +112,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "C.numbers"));
 
         async move {
@@ -166,14 +160,11 @@ where
         arg_c: &::std::collections::BTreeSet<::std::primitive::i32>,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::c::ThingError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "C";
-            SERVICE_METHOD_NAME = "C.thing";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"C";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"C.thing";
         let args = self::Args_C_thing {
             a: arg_a,
             b: arg_b,
@@ -190,7 +181,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "C.thing"));
 
         async move {

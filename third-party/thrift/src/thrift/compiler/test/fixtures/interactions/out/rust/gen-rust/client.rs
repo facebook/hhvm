@@ -49,14 +49,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.MyInteraction.frobnicate";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.frobnicate";
         let args = self::Args_MyInteraction_frobnicate {
             _phantom: ::std::marker::PhantomData,
         };
@@ -70,7 +67,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyInteraction.frobnicate"));
 
         async move {
@@ -95,14 +92,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.MyInteraction.ping";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.ping";
         let args = self::Args_MyInteraction_ping {
             _phantom: ::std::marker::PhantomData,
         };
@@ -116,7 +110,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyInteraction.ping"));
 
         async move {
@@ -141,16 +135,13 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.MyInteraction.truthify";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.truthify";
         let args = self::Args_MyInteraction_truthify {
             _phantom: ::std::marker::PhantomData,
         };
@@ -164,7 +155,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "MyInteraction.truthify"));
 
         async move {
@@ -561,14 +552,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.MyInteractionFast.frobnicate";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.frobnicate";
         let args = self::Args_MyInteractionFast_frobnicate {
             _phantom: ::std::marker::PhantomData,
         };
@@ -582,7 +570,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.frobnicate"));
 
         async move {
@@ -607,14 +595,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.MyInteractionFast.ping";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.ping";
         let args = self::Args_MyInteractionFast_ping {
             _phantom: ::std::marker::PhantomData,
         };
@@ -628,7 +613,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.ping"));
 
         async move {
@@ -653,16 +638,13 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.MyInteractionFast.truthify";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.truthify";
         let args = self::Args_MyInteractionFast_truthify {
             _phantom: ::std::marker::PhantomData,
         };
@@ -676,7 +658,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "MyInteractionFast.truthify"));
 
         async move {
@@ -1073,14 +1055,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.SerialInteraction.frobnicate";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.SerialInteraction.frobnicate";
         let args = self::Args_SerialInteraction_frobnicate {
             _phantom: ::std::marker::PhantomData,
         };
@@ -1094,7 +1073,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "SerialInteraction.frobnicate"));
 
         async move {
@@ -1366,14 +1345,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::FooError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.foo";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.foo";
         let args = self::Args_MyService_foo {
             _phantom: ::std::marker::PhantomData,
         };
@@ -1387,7 +1363,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyService.foo"));
 
         async move {
@@ -1413,21 +1389,18 @@ where
         arg_arg: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.interact";
-            INTERACTION_NAME = "MyInteraction";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.interact";
+        const INTERACTION_NAME: &::std::ffi::CStr = c"MyInteraction";
         let args = self::Args_MyService_interact {
             arg: arg_arg,
             _phantom: ::std::marker::PhantomData,
         };
 
-        let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME.as_cstr()) {
+        let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME) {
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
@@ -1441,7 +1414,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyService.interact"));
 
         async move {
@@ -1468,20 +1441,17 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.interactFast";
-            INTERACTION_NAME = "MyInteractionFast";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.interactFast";
+        const INTERACTION_NAME: &::std::ffi::CStr = c"MyInteractionFast";
         let args = self::Args_MyService_interactFast {
             _phantom: ::std::marker::PhantomData,
         };
 
-        let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME.as_cstr()) {
+        let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME) {
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
@@ -1495,7 +1465,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyService.interactFast"));
 
         async move {
@@ -1521,22 +1491,19 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.serialize";
-            INTERACTION_NAME = "SerialInteraction";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.serialize";
+        const INTERACTION_NAME: &::std::ffi::CStr = c"SerialInteraction";
         let args = self::Args_MyService_serialize {
             _phantom: ::std::marker::PhantomData,
         };
 
-        let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME.as_cstr()) {
+        let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME) {
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
@@ -1550,7 +1517,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "MyService.serialize"));
 
         async move {
@@ -1731,14 +1698,10 @@ where
     fn createMyInteraction(
         &self,
     ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
-        use ::const_cstr::const_cstr;
-        const_cstr! {
-            INTERACTION_NAME = "MyInteraction";
-        }
         Ok(
             ::std::sync::Arc::new(
                 MyInteractionImpl::<P, T, S>::new(
-                    self.transport().create_interaction(INTERACTION_NAME.as_cstr())?
+                    self.transport().create_interaction(c"MyInteraction")?
                 )
             )
         )
@@ -1747,14 +1710,10 @@ where
     fn createMyInteractionFast(
         &self,
     ) -> ::std::result::Result<MyInteractionFastClient, ::anyhow::Error> {
-        use ::const_cstr::const_cstr;
-        const_cstr! {
-            INTERACTION_NAME = "MyInteractionFast";
-        }
         Ok(
             ::std::sync::Arc::new(
                 MyInteractionFastImpl::<P, T, S>::new(
-                    self.transport().create_interaction(INTERACTION_NAME.as_cstr())?
+                    self.transport().create_interaction(c"MyInteractionFast")?
                 )
             )
         )
@@ -1763,14 +1722,10 @@ where
     fn createSerialInteraction(
         &self,
     ) -> ::std::result::Result<SerialInteractionClient, ::anyhow::Error> {
-        use ::const_cstr::const_cstr;
-        const_cstr! {
-            INTERACTION_NAME = "SerialInteraction";
-        }
         Ok(
             ::std::sync::Arc::new(
                 SerialInteractionImpl::<P, T, S>::new(
-                    self.transport().create_interaction(INTERACTION_NAME.as_cstr())?
+                    self.transport().create_interaction(c"SerialInteraction")?
                 )
             )
         )
@@ -2088,14 +2043,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Factories";
-            SERVICE_METHOD_NAME = "Factories.MyInteraction.frobnicate";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.frobnicate";
         let args = self::Args_MyInteraction_frobnicate {
             _phantom: ::std::marker::PhantomData,
         };
@@ -2109,7 +2061,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyInteraction.frobnicate"));
 
         async move {
@@ -2134,14 +2086,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Factories";
-            SERVICE_METHOD_NAME = "Factories.MyInteraction.ping";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.ping";
         let args = self::Args_MyInteraction_ping {
             _phantom: ::std::marker::PhantomData,
         };
@@ -2155,7 +2104,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyInteraction.ping"));
 
         async move {
@@ -2180,16 +2129,13 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Factories";
-            SERVICE_METHOD_NAME = "Factories.MyInteraction.truthify";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.truthify";
         let args = self::Args_MyInteraction_truthify {
             _phantom: ::std::marker::PhantomData,
         };
@@ -2203,7 +2149,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "MyInteraction.truthify"));
 
         async move {
@@ -2600,14 +2546,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Factories";
-            SERVICE_METHOD_NAME = "Factories.MyInteractionFast.frobnicate";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.frobnicate";
         let args = self::Args_MyInteractionFast_frobnicate {
             _phantom: ::std::marker::PhantomData,
         };
@@ -2621,7 +2564,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.frobnicate"));
 
         async move {
@@ -2646,14 +2589,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Factories";
-            SERVICE_METHOD_NAME = "Factories.MyInteractionFast.ping";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.ping";
         let args = self::Args_MyInteractionFast_ping {
             _phantom: ::std::marker::PhantomData,
         };
@@ -2667,7 +2607,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.ping"));
 
         async move {
@@ -2692,16 +2632,13 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Factories";
-            SERVICE_METHOD_NAME = "Factories.MyInteractionFast.truthify";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.truthify";
         let args = self::Args_MyInteractionFast_truthify {
             _phantom: ::std::marker::PhantomData,
         };
@@ -2715,7 +2652,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "MyInteractionFast.truthify"));
 
         async move {
@@ -3112,14 +3049,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Factories";
-            SERVICE_METHOD_NAME = "Factories.SerialInteraction.frobnicate";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.SerialInteraction.frobnicate";
         let args = self::Args_SerialInteraction_frobnicate {
             _phantom: ::std::marker::PhantomData,
         };
@@ -3133,7 +3067,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "SerialInteraction.frobnicate"));
 
         async move {
@@ -3405,14 +3339,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::factories::FooError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Factories";
-            SERVICE_METHOD_NAME = "Factories.foo";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.foo";
         let args = self::Args_Factories_foo {
             _phantom: ::std::marker::PhantomData,
         };
@@ -3426,7 +3357,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Factories.foo"));
 
         async move {
@@ -3452,21 +3383,18 @@ where
         arg_arg: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Factories";
-            SERVICE_METHOD_NAME = "Factories.interact";
-            INTERACTION_NAME = "MyInteraction";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.interact";
+        const INTERACTION_NAME: &::std::ffi::CStr = c"MyInteraction";
         let args = self::Args_Factories_interact {
             arg: arg_arg,
             _phantom: ::std::marker::PhantomData,
         };
 
-        let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME.as_cstr()) {
+        let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME) {
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
@@ -3480,7 +3408,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Factories.interact"));
 
         async move {
@@ -3507,20 +3435,17 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Factories";
-            SERVICE_METHOD_NAME = "Factories.interactFast";
-            INTERACTION_NAME = "MyInteractionFast";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.interactFast";
+        const INTERACTION_NAME: &::std::ffi::CStr = c"MyInteractionFast";
         let args = self::Args_Factories_interactFast {
             _phantom: ::std::marker::PhantomData,
         };
 
-        let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME.as_cstr()) {
+        let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME) {
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
@@ -3534,7 +3459,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Factories.interactFast"));
 
         async move {
@@ -3560,22 +3485,19 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Factories";
-            SERVICE_METHOD_NAME = "Factories.serialize";
-            INTERACTION_NAME = "SerialInteraction";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.serialize";
+        const INTERACTION_NAME: &::std::ffi::CStr = c"SerialInteraction";
         let args = self::Args_Factories_serialize {
             _phantom: ::std::marker::PhantomData,
         };
 
-        let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME.as_cstr()) {
+        let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME) {
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
@@ -3589,7 +3511,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "Factories.serialize"));
 
         async move {
@@ -4052,14 +3974,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Perform";
-            SERVICE_METHOD_NAME = "Perform.MyInteraction.frobnicate";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.frobnicate";
         let args = self::Args_MyInteraction_frobnicate {
             _phantom: ::std::marker::PhantomData,
         };
@@ -4073,7 +3992,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyInteraction.frobnicate"));
 
         async move {
@@ -4098,14 +4017,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Perform";
-            SERVICE_METHOD_NAME = "Perform.MyInteraction.ping";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.ping";
         let args = self::Args_MyInteraction_ping {
             _phantom: ::std::marker::PhantomData,
         };
@@ -4119,7 +4035,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyInteraction.ping"));
 
         async move {
@@ -4144,16 +4060,13 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Perform";
-            SERVICE_METHOD_NAME = "Perform.MyInteraction.truthify";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.truthify";
         let args = self::Args_MyInteraction_truthify {
             _phantom: ::std::marker::PhantomData,
         };
@@ -4167,7 +4080,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "MyInteraction.truthify"));
 
         async move {
@@ -4564,14 +4477,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Perform";
-            SERVICE_METHOD_NAME = "Perform.MyInteractionFast.frobnicate";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.frobnicate";
         let args = self::Args_MyInteractionFast_frobnicate {
             _phantom: ::std::marker::PhantomData,
         };
@@ -4585,7 +4495,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.frobnicate"));
 
         async move {
@@ -4610,14 +4520,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Perform";
-            SERVICE_METHOD_NAME = "Perform.MyInteractionFast.ping";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.ping";
         let args = self::Args_MyInteractionFast_ping {
             _phantom: ::std::marker::PhantomData,
         };
@@ -4631,7 +4538,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.ping"));
 
         async move {
@@ -4656,16 +4563,13 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Perform";
-            SERVICE_METHOD_NAME = "Perform.MyInteractionFast.truthify";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.truthify";
         let args = self::Args_MyInteractionFast_truthify {
             _phantom: ::std::marker::PhantomData,
         };
@@ -4679,7 +4583,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "MyInteractionFast.truthify"));
 
         async move {
@@ -5076,14 +4980,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Perform";
-            SERVICE_METHOD_NAME = "Perform.SerialInteraction.frobnicate";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.SerialInteraction.frobnicate";
         let args = self::Args_SerialInteraction_frobnicate {
             _phantom: ::std::marker::PhantomData,
         };
@@ -5097,7 +4998,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "SerialInteraction.frobnicate"));
 
         async move {
@@ -5369,14 +5270,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::perform::FooError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Perform";
-            SERVICE_METHOD_NAME = "Perform.foo";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.foo";
         let args = self::Args_Perform_foo {
             _phantom: ::std::marker::PhantomData,
         };
@@ -5390,7 +5288,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Perform.foo"));
 
         async move {
@@ -5478,14 +5376,10 @@ where
     fn createMyInteraction(
         &self,
     ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
-        use ::const_cstr::const_cstr;
-        const_cstr! {
-            INTERACTION_NAME = "MyInteraction";
-        }
         Ok(
             ::std::sync::Arc::new(
                 MyInteractionImpl::<P, T, S>::new(
-                    self.transport().create_interaction(INTERACTION_NAME.as_cstr())?
+                    self.transport().create_interaction(c"MyInteraction")?
                 )
             )
         )
@@ -5494,14 +5388,10 @@ where
     fn createMyInteractionFast(
         &self,
     ) -> ::std::result::Result<MyInteractionFastClient, ::anyhow::Error> {
-        use ::const_cstr::const_cstr;
-        const_cstr! {
-            INTERACTION_NAME = "MyInteractionFast";
-        }
         Ok(
             ::std::sync::Arc::new(
                 MyInteractionFastImpl::<P, T, S>::new(
-                    self.transport().create_interaction(INTERACTION_NAME.as_cstr())?
+                    self.transport().create_interaction(c"MyInteractionFast")?
                 )
             )
         )
@@ -5510,14 +5400,10 @@ where
     fn createSerialInteraction(
         &self,
     ) -> ::std::result::Result<SerialInteractionClient, ::anyhow::Error> {
-        use ::const_cstr::const_cstr;
-        const_cstr! {
-            INTERACTION_NAME = "SerialInteraction";
-        }
         Ok(
             ::std::sync::Arc::new(
                 SerialInteractionImpl::<P, T, S>::new(
-                    self.transport().create_interaction(INTERACTION_NAME.as_cstr())?
+                    self.transport().create_interaction(c"SerialInteraction")?
                 )
             )
         )

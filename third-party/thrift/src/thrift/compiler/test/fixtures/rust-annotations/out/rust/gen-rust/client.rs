@@ -49,14 +49,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "S1";
-            SERVICE_METHOD_NAME = "S1.r";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"S1";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"S1.r";
         let args = self::Args_Service1_r {
             _phantom: ::std::marker::PhantomData,
         };
@@ -70,7 +67,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "S1.r"));
 
         async move {
@@ -342,14 +339,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "S2";
-            SERVICE_METHOD_NAME = "S2.r";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"S2";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"S2.r";
         let args = self::Args_S2_r {
             _phantom: ::std::marker::PhantomData,
         };
@@ -363,7 +357,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "S2.r"));
 
         async move {
@@ -635,14 +629,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "AllMethods";
-            SERVICE_METHOD_NAME = "AllMethods.foo";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"AllMethods";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"AllMethods.foo";
         let args = self::Args_AllMethods_foo {
             _phantom: ::std::marker::PhantomData,
         };
@@ -656,7 +647,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "AllMethods.foo"));
 
         async move {
@@ -681,14 +672,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "AllMethods";
-            SERVICE_METHOD_NAME = "AllMethods.bar";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"AllMethods";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"AllMethods.bar";
         let args = self::Args_AllMethods_bar {
             _phantom: ::std::marker::PhantomData,
         };
@@ -702,7 +690,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "AllMethods.bar"));
 
         async move {
@@ -1026,14 +1014,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "OneMethod";
-            SERVICE_METHOD_NAME = "OneMethod.foo";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"OneMethod";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"OneMethod.foo";
         let args = self::Args_OneMethod_foo {
             _phantom: ::std::marker::PhantomData,
         };
@@ -1047,7 +1032,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "OneMethod.foo"));
 
         async move {
@@ -1072,14 +1057,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "OneMethod";
-            SERVICE_METHOD_NAME = "OneMethod.bar";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"OneMethod";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"OneMethod.bar";
         let args = self::Args_OneMethod_bar {
             _phantom: ::std::marker::PhantomData,
         };
@@ -1093,7 +1075,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "OneMethod.bar"));
 
         async move {
@@ -1417,14 +1399,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "OneMethodOptOut";
-            SERVICE_METHOD_NAME = "OneMethodOptOut.foo";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"OneMethodOptOut";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"OneMethodOptOut.foo";
         let args = self::Args_OneMethodOptOut_foo {
             _phantom: ::std::marker::PhantomData,
         };
@@ -1438,7 +1417,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "OneMethodOptOut.foo"));
 
         async move {
@@ -1463,14 +1442,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "OneMethodOptOut";
-            SERVICE_METHOD_NAME = "OneMethodOptOut.bar";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"OneMethodOptOut";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"OneMethodOptOut.bar";
         let args = self::Args_OneMethodOptOut_bar {
             _phantom: ::std::marker::PhantomData,
         };
@@ -1484,7 +1460,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "OneMethodOptOut.bar"));
 
         async move {

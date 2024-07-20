@@ -50,14 +50,11 @@ where
         arg_int1: ::std::primitive::i64,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i64, crate::errors::test_service::InitError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "TestService";
-            SERVICE_METHOD_NAME = "TestService.init";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"TestService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"TestService.init";
         let args = self::Args_TestService_init {
             int1: arg_int1,
             _phantom: ::std::marker::PhantomData,
@@ -72,7 +69,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "TestService.init"));
 
         async move {

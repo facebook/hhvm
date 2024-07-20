@@ -49,14 +49,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_root::DoRootError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyRoot";
-            SERVICE_METHOD_NAME = "MyRoot.do_root";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyRoot";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyRoot.do_root";
         let args = self::Args_MyRoot_do_root {
             _phantom: ::std::marker::PhantomData,
         };
@@ -70,7 +67,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyRoot.do_root"));
 
         async move {
@@ -339,14 +336,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_node::DoMidError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyNode";
-            SERVICE_METHOD_NAME = "MyNode.do_mid";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyNode";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyNode.do_mid";
         let args = self::Args_MyNode_do_mid {
             _phantom: ::std::marker::PhantomData,
         };
@@ -360,7 +354,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyNode.do_mid"));
 
         async move {
@@ -653,14 +647,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_leaf::DoLeafError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "MyLeaf";
-            SERVICE_METHOD_NAME = "MyLeaf.do_leaf";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"MyLeaf";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyLeaf.do_leaf";
         let args = self::Args_MyLeaf_do_leaf {
             _phantom: ::std::marker::PhantomData,
         };
@@ -674,7 +665,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyLeaf.do_leaf"));
 
         async move {

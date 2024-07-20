@@ -52,14 +52,11 @@ where
         arg_arg3: &crate::types::Foo,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::MyI32_4873, crate::errors::service::FuncError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Service";
-            SERVICE_METHOD_NAME = "Service.func";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Service";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Service.func";
         let args = self::Args_Service_func {
             arg1: arg_arg1,
             arg2: arg_arg2,
@@ -76,7 +73,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Service.func"));
 
         async move {
@@ -390,14 +387,11 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::CountingStruct, crate::errors::adapter_service::CountError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "AdapterService";
-            SERVICE_METHOD_NAME = "AdapterService.count";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"AdapterService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"AdapterService.count";
         let args = self::Args_AdapterService_count {
             _phantom: ::std::marker::PhantomData,
         };
@@ -411,7 +405,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "AdapterService.count"));
 
         async move {
@@ -437,14 +431,11 @@ where
         arg_arg: &crate::types::HeapAllocated,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::HeapAllocated, crate::errors::adapter_service::AdaptedTypesError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "AdapterService";
-            SERVICE_METHOD_NAME = "AdapterService.adaptedTypes";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"AdapterService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"AdapterService.adaptedTypes";
         let args = self::Args_AdapterService_adaptedTypes {
             arg: arg_arg,
             _phantom: ::std::marker::PhantomData,
@@ -459,7 +450,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "AdapterService.adaptedTypes"));
 
         async move {

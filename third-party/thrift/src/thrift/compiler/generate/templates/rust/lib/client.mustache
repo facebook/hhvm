@@ -68,7 +68,6 @@ where
         }}{{/function:args}}
         rpc_options: T::RpcOptions,
     ) -> {{>lib/client_return_type}} {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         {{#function:stream?}}
@@ -76,13 +75,11 @@ where
         use ::fbthrift::Deserialize as _;
         {{/function:stream?}}
 
-        const_cstr! {
-            SERVICE_NAME = "{{service:parent_service_name}}";
-            SERVICE_METHOD_NAME = "{{service:parent_service_name}}.{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}";
-            {{#function:creates_interaction?}}
-            INTERACTION_NAME = "{{function:interaction_name}}";
-            {{/function:creates_interaction?}}
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"{{service:parent_service_name}}";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"{{service:parent_service_name}}.{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}";
+        {{#function:creates_interaction?}}
+        const INTERACTION_NAME: &::std::ffi::CStr = c"{{function:interaction_name}}";
+        {{/function:creates_interaction?}}
         let args = self::Args_{{service:rust_name}}_{{function:name}} {
             {{#function:args}}
             {{field:rust_name}}: arg_{{field:name}},
@@ -91,7 +88,7 @@ where
         };
 
         {{#function:creates_interaction?}}
-        let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME.as_cstr()) {
+        let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME) {
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
@@ -109,11 +106,11 @@ where
 
         {{#function:stream?}}
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "{{service:name}}.{{function:name}}"));
         {{/function:stream?}}{{^function:stream?}}
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "{{service:name}}.{{function:name}}"));
         {{/function:stream?}}
 
@@ -389,14 +386,10 @@ where
     ) -> ::std::result::Result<{{!
     }}{{function:interaction_name}}Client, {{!
     }}::anyhow::Error> {
-        use ::const_cstr::const_cstr;
-        const_cstr! {
-            INTERACTION_NAME = "{{function:interaction_name}}";
-        }
         Ok(
             ::std::sync::Arc::new(
                 {{function:interaction_name}}Impl::<P, T, S>::new(
-                    self.transport().create_interaction(INTERACTION_NAME.as_cstr())?
+                    self.transport().create_interaction(c"{{function:interaction_name}}")?
                 )
             )
         )

@@ -51,16 +51,13 @@ where
         arg_i32_to: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.returnstream";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.returnstream";
         let args = self::Args_PubSubStreamingService_returnstream {
             i32_from: arg_i32_from,
             i32_to: arg_i32_to,
@@ -76,7 +73,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.returnstream"));
 
         async move {
@@ -122,16 +119,13 @@ where
         arg_foo: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::StreamthrowsStreamError>>, crate::errors::pub_sub_streaming_service::StreamthrowsError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.streamthrows";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.streamthrows";
         let args = self::Args_PubSubStreamingService_streamthrows {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -146,7 +140,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.streamthrows"));
 
         async move {
@@ -192,16 +186,13 @@ where
         arg_foo: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, crate::errors::pub_sub_streaming_service::ServicethrowsError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.servicethrows";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.servicethrows";
         let args = self::Args_PubSubStreamingService_servicethrows {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -216,7 +207,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.servicethrows"));
 
         async move {
@@ -262,16 +253,13 @@ where
         arg_foo: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.servicethrows2";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.servicethrows2";
         let args = self::Args_PubSubStreamingService_servicethrows2 {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -286,7 +274,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.servicethrows2"));
 
         async move {
@@ -332,16 +320,13 @@ where
         arg_foo: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::BoththrowsStreamError>>, crate::errors::pub_sub_streaming_service::BoththrowsError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.boththrows";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.boththrows";
         let args = self::Args_PubSubStreamingService_boththrows {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -356,7 +341,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.boththrows"));
 
         async move {
@@ -402,16 +387,13 @@ where
         arg_foo: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.responseandstreamstreamthrows";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.responseandstreamstreamthrows";
         let args = self::Args_PubSubStreamingService_responseandstreamstreamthrows {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -426,7 +408,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.responseandstreamstreamthrows"));
 
         async move {
@@ -472,16 +454,13 @@ where
         arg_foo: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.responseandstreamservicethrows";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.responseandstreamservicethrows";
         let args = self::Args_PubSubStreamingService_responseandstreamservicethrows {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -496,7 +475,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.responseandstreamservicethrows"));
 
         async move {
@@ -542,16 +521,13 @@ where
         arg_foo: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.responseandstreamboththrows";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.responseandstreamboththrows";
         let args = self::Args_PubSubStreamingService_responseandstreamboththrows {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -566,7 +542,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.responseandstreamboththrows"));
 
         async move {
@@ -613,16 +589,13 @@ where
         arg_i32_to: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamFastError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const_cstr! {
-            SERVICE_NAME = "PubSubStreamingService";
-            SERVICE_METHOD_NAME = "PubSubStreamingService.returnstreamFast";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.returnstreamFast";
         let args = self::Args_PubSubStreamingService_returnstreamFast {
             i32_from: arg_i32_from,
             i32_to: arg_i32_to,
@@ -638,7 +611,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.returnstreamFast"));
 
         async move {

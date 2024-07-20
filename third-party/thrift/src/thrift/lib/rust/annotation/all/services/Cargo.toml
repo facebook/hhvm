@@ -22,7 +22,6 @@ async-trait = "0.1.71"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
 compat = { version = "0.0.1+unstable", path = "../../compat" }
 compat_services = { version = "0.0.1+unstable", path = "../../compat/services" }
-const-cstr = "0.3.0"
 cpp = { version = "0.0.1+unstable", path = "../../cpp" }
 cpp_services = { version = "0.0.1+unstable", path = "../../cpp/services" }
 fbthrift = { version = "0.0.1+unstable", path = "../../.." }

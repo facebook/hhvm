@@ -50,14 +50,11 @@ where
         arg_bar: &crate::types::ThereAreNoPascalCaseKeywords,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo::ReturnError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Foo";
-            SERVICE_METHOD_NAME = "Foo.return";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Foo";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Foo.return";
         let args = self::Args_Foo_return {
             bar: arg_bar,
             _phantom: ::std::marker::PhantomData,
@@ -72,7 +69,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Foo.return"));
 
         async move {
@@ -98,14 +95,11 @@ where
         arg_bar: &crate::types::ThereAreNoPascalCaseKeywords,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo::SuperError>> {
-        use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const_cstr! {
-            SERVICE_NAME = "Foo";
-            SERVICE_METHOD_NAME = "Foo.super";
-        }
+        const SERVICE_NAME: &::std::ffi::CStr = c"Foo";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Foo.super";
         let args = self::Args_Foo_super {
             bar: arg_bar,
             _phantom: ::std::marker::PhantomData,
@@ -120,7 +114,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Foo.super"));
 
         async move {

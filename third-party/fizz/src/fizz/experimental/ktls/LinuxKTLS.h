@@ -114,4 +114,16 @@
 #define TLS_CIPHER_AES_GCM_256_REC_SEQ_SIZE 8
 #endif
 
+#ifndef TCP_ULP
+#define TCP_ULP 31
+#endif
+
+#ifndef SOL_TCP
+#define SOL_TCP 6
+#endif
+
+#ifndef SOL_TLS
+#define SOL_TLS 282
+#endif
+
 #endif

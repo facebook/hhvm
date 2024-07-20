@@ -30,7 +30,7 @@ impl ::fbthrift::GetTType for {{struct:rust_name}} {
 {{#struct:thrift_uri}}
 
 impl ::fbthrift::GetUri for self::{{struct:rust_name}} {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "{{struct:thrift_uri}}"
     }
 }
@@ -116,12 +116,12 @@ where
 
 impl {{struct:rust_name}} {
     /// Return current union variant name as a tuple of (Rust name, original name).
-    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
         match self {
             {{#struct:fields}}
-            Self::{{field:rust_name}}(_) => Some(("{{field:rust_name}}", "{{field:name}}")),
+            Self::{{field:rust_name}}(_) => ::std::option::Option::Some(("{{field:rust_name}}", "{{field:name}}")),
             {{/struct:fields}}
-            Self::UnknownField(_) => None,
+            Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
 }

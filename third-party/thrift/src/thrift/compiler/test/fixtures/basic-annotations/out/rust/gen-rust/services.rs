@@ -26,7 +26,7 @@ pub mod my_service {
     }
 
     impl ::fbthrift::ExceptionInfo for PingExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::myExcept(exn) => exn.exn_name(),
@@ -63,7 +63,7 @@ pub mod my_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -128,7 +128,7 @@ pub mod my_service {
     }
 
     impl ::fbthrift::ExceptionInfo for GetRandomDataExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -161,7 +161,7 @@ pub mod my_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -218,7 +218,7 @@ pub mod my_service {
     }
 
     impl ::fbthrift::ExceptionInfo for HasDataByIdExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -251,7 +251,7 @@ pub mod my_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -308,7 +308,7 @@ pub mod my_service {
     }
 
     impl ::fbthrift::ExceptionInfo for GetDataByIdExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -341,7 +341,7 @@ pub mod my_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -398,7 +398,7 @@ pub mod my_service {
     }
 
     impl ::fbthrift::ExceptionInfo for PutDataByIdExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -431,7 +431,7 @@ pub mod my_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -488,7 +488,7 @@ pub mod my_service {
     }
 
     impl ::fbthrift::ExceptionInfo for LobDataByIdExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -521,7 +521,7 @@ pub mod my_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -578,7 +578,7 @@ pub mod my_service {
     }
 
     impl ::fbthrift::ExceptionInfo for DoNothingExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -611,7 +611,7 @@ pub mod my_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -671,7 +671,7 @@ pub mod my_service_prio_parent {
     }
 
     impl ::fbthrift::ExceptionInfo for PingExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -704,7 +704,7 @@ pub mod my_service_prio_parent {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -761,7 +761,7 @@ pub mod my_service_prio_parent {
     }
 
     impl ::fbthrift::ExceptionInfo for PongExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -794,7 +794,7 @@ pub mod my_service_prio_parent {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -854,7 +854,7 @@ pub mod my_service_prio_child {
     }
 
     impl ::fbthrift::ExceptionInfo for PangExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -887,7 +887,7 @@ pub mod my_service_prio_child {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -948,7 +948,7 @@ pub mod bad_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for FooExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -981,7 +981,7 @@ pub mod bad_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1040,7 +1040,7 @@ pub mod bad_service {
     }
 
     impl ::fbthrift::ExceptionInfo for BarExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1073,7 +1073,7 @@ pub mod bad_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1133,7 +1133,7 @@ pub mod foo_bar_baz_service {
     }
 
     impl ::fbthrift::ExceptionInfo for FooExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1166,7 +1166,7 @@ pub mod foo_bar_baz_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1223,7 +1223,7 @@ pub mod foo_bar_baz_service {
     }
 
     impl ::fbthrift::ExceptionInfo for BarExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1256,7 +1256,7 @@ pub mod foo_bar_baz_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1313,7 +1313,7 @@ pub mod foo_bar_baz_service {
     }
 
     impl ::fbthrift::ExceptionInfo for BazExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1346,7 +1346,7 @@ pub mod foo_bar_baz_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,

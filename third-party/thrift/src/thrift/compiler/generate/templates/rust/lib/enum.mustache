@@ -36,7 +36,7 @@ impl {{enum:rust_name}} {{>lib/block}}{{!
 }
 
 impl ::fbthrift::ThriftEnum for {{enum:rust_name}} {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             {{#enum:values}}
             (Self::{{enum_value:rust_name}}, "{{enum_value:name}}"),
@@ -44,7 +44,7 @@ impl ::fbthrift::ThriftEnum for {{enum:rust_name}} {
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             {{#enum:values}}
             "{{enum_value:name}}",
@@ -131,7 +131,7 @@ impl ::fbthrift::GetTType for {{enum:rust_name}} {
 {{#enum:thrift_uri}}
 
 impl ::fbthrift::GetUri for self::{{enum:rust_name}} {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "{{enum:thrift_uri}}"
     }
 }

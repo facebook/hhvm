@@ -34,7 +34,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     }
 
     impl ::fbthrift::ExceptionInfo for {{function:upcamel}}StreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 {{#function:stream_exceptions}}
@@ -106,7 +106,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -203,7 +203,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     }
 
     impl ::fbthrift::ExceptionInfo for {{function:upcamel}}Exn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 {{#function:exceptions}}
@@ -256,7 +256,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,

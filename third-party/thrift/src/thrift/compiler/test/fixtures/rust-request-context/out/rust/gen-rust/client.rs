@@ -1258,7 +1258,7 @@ where
     fn createMyInteraction(
         &self,
     ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
-        Ok(
+        ::std::result::Result::Ok(
             ::std::sync::Arc::new(
                 MyInteractionImpl::<P, T, S>::new(
                     self.transport().create_interaction(c"MyInteraction")?

@@ -27,7 +27,7 @@ pub mod my_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for FrobnicateExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::ex(exn) => exn.exn_name(),
@@ -64,7 +64,7 @@ pub mod my_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -129,7 +129,7 @@ pub mod my_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for PingExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -162,7 +162,7 @@ pub mod my_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -193,7 +193,7 @@ pub mod my_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for TruthifyStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -232,7 +232,7 @@ pub mod my_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -293,7 +293,7 @@ pub mod my_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for TruthifyExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -326,7 +326,7 @@ pub mod my_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -385,7 +385,7 @@ pub mod my_interaction_fast {
     }
 
     impl ::fbthrift::ExceptionInfo for FrobnicateExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -418,7 +418,7 @@ pub mod my_interaction_fast {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -475,7 +475,7 @@ pub mod my_interaction_fast {
     }
 
     impl ::fbthrift::ExceptionInfo for PingExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -508,7 +508,7 @@ pub mod my_interaction_fast {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -539,7 +539,7 @@ pub mod my_interaction_fast {
     }
 
     impl ::fbthrift::ExceptionInfo for TruthifyStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -578,7 +578,7 @@ pub mod my_interaction_fast {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -639,7 +639,7 @@ pub mod my_interaction_fast {
     }
 
     impl ::fbthrift::ExceptionInfo for TruthifyExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -672,7 +672,7 @@ pub mod my_interaction_fast {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -731,7 +731,7 @@ pub mod serial_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for FrobnicateExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -764,7 +764,7 @@ pub mod serial_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -823,7 +823,7 @@ pub mod my_service {
     }
 
     impl ::fbthrift::ExceptionInfo for FooExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -856,7 +856,7 @@ pub mod my_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -913,7 +913,7 @@ pub mod my_service {
     }
 
     impl ::fbthrift::ExceptionInfo for InteractExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -946,7 +946,7 @@ pub mod my_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1003,7 +1003,7 @@ pub mod my_service {
     }
 
     impl ::fbthrift::ExceptionInfo for InteractFastExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1036,7 +1036,7 @@ pub mod my_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1067,7 +1067,7 @@ pub mod my_service {
     }
 
     impl ::fbthrift::ExceptionInfo for SerializeStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1106,7 +1106,7 @@ pub mod my_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1167,7 +1167,7 @@ pub mod my_service {
     }
 
     impl ::fbthrift::ExceptionInfo for SerializeExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1200,7 +1200,7 @@ pub mod my_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1248,7 +1248,7 @@ pub mod my_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for FrobnicateExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::ex(exn) => exn.exn_name(),
@@ -1285,7 +1285,7 @@ pub mod my_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1350,7 +1350,7 @@ pub mod my_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for PingExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1383,7 +1383,7 @@ pub mod my_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1414,7 +1414,7 @@ pub mod my_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for TruthifyStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1453,7 +1453,7 @@ pub mod my_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1514,7 +1514,7 @@ pub mod my_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for TruthifyExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1547,7 +1547,7 @@ pub mod my_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1606,7 +1606,7 @@ pub mod my_interaction_fast {
     }
 
     impl ::fbthrift::ExceptionInfo for FrobnicateExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1639,7 +1639,7 @@ pub mod my_interaction_fast {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1696,7 +1696,7 @@ pub mod my_interaction_fast {
     }
 
     impl ::fbthrift::ExceptionInfo for PingExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1729,7 +1729,7 @@ pub mod my_interaction_fast {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1760,7 +1760,7 @@ pub mod my_interaction_fast {
     }
 
     impl ::fbthrift::ExceptionInfo for TruthifyStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1799,7 +1799,7 @@ pub mod my_interaction_fast {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1860,7 +1860,7 @@ pub mod my_interaction_fast {
     }
 
     impl ::fbthrift::ExceptionInfo for TruthifyExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1893,7 +1893,7 @@ pub mod my_interaction_fast {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1952,7 +1952,7 @@ pub mod serial_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for FrobnicateExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1985,7 +1985,7 @@ pub mod serial_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -2044,7 +2044,7 @@ pub mod factories {
     }
 
     impl ::fbthrift::ExceptionInfo for FooExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -2077,7 +2077,7 @@ pub mod factories {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -2134,7 +2134,7 @@ pub mod factories {
     }
 
     impl ::fbthrift::ExceptionInfo for InteractExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -2167,7 +2167,7 @@ pub mod factories {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -2224,7 +2224,7 @@ pub mod factories {
     }
 
     impl ::fbthrift::ExceptionInfo for InteractFastExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -2257,7 +2257,7 @@ pub mod factories {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -2288,7 +2288,7 @@ pub mod factories {
     }
 
     impl ::fbthrift::ExceptionInfo for SerializeStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -2327,7 +2327,7 @@ pub mod factories {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -2388,7 +2388,7 @@ pub mod factories {
     }
 
     impl ::fbthrift::ExceptionInfo for SerializeExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -2421,7 +2421,7 @@ pub mod factories {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -2469,7 +2469,7 @@ pub mod my_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for FrobnicateExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::ex(exn) => exn.exn_name(),
@@ -2506,7 +2506,7 @@ pub mod my_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -2571,7 +2571,7 @@ pub mod my_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for PingExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -2604,7 +2604,7 @@ pub mod my_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -2635,7 +2635,7 @@ pub mod my_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for TruthifyStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -2674,7 +2674,7 @@ pub mod my_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -2735,7 +2735,7 @@ pub mod my_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for TruthifyExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -2768,7 +2768,7 @@ pub mod my_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -2827,7 +2827,7 @@ pub mod my_interaction_fast {
     }
 
     impl ::fbthrift::ExceptionInfo for FrobnicateExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -2860,7 +2860,7 @@ pub mod my_interaction_fast {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -2917,7 +2917,7 @@ pub mod my_interaction_fast {
     }
 
     impl ::fbthrift::ExceptionInfo for PingExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -2950,7 +2950,7 @@ pub mod my_interaction_fast {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -2981,7 +2981,7 @@ pub mod my_interaction_fast {
     }
 
     impl ::fbthrift::ExceptionInfo for TruthifyStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -3020,7 +3020,7 @@ pub mod my_interaction_fast {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -3081,7 +3081,7 @@ pub mod my_interaction_fast {
     }
 
     impl ::fbthrift::ExceptionInfo for TruthifyExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -3114,7 +3114,7 @@ pub mod my_interaction_fast {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -3173,7 +3173,7 @@ pub mod serial_interaction {
     }
 
     impl ::fbthrift::ExceptionInfo for FrobnicateExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -3206,7 +3206,7 @@ pub mod serial_interaction {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -3265,7 +3265,7 @@ pub mod perform {
     }
 
     impl ::fbthrift::ExceptionInfo for FooExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -3298,7 +3298,7 @@ pub mod perform {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,

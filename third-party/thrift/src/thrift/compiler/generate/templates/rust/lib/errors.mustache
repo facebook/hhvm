@@ -22,21 +22,21 @@ pub mod {{service:snake}} {
 
     {{#service:rust_exceptions}}
     pub trait As{{#rust_exception:type}}{{type:rust_name}}{{/rust_exception:type}} {
-        fn as_{{#rust_exception:type}}{{type:rust_name_snake}}{{/rust_exception:type}}(&self) -> Option<&{{#rust_exception:type}}{{>lib/type}}{{/rust_exception:type}}>;
+        fn as_{{#rust_exception:type}}{{type:rust_name_snake}}{{/rust_exception:type}}(&self) -> ::std::option::Option<&{{#rust_exception:type}}{{>lib/type}}{{/rust_exception:type}}>;
     }
 
     impl As{{#rust_exception:type}}{{type:rust_name}}{{/rust_exception:type}} for ::anyhow::Error {
-        fn as_{{#rust_exception:type}}{{type:rust_name_snake}}{{/rust_exception:type}}(&self) -> Option<&{{#rust_exception:type}}{{>lib/type}}{{/rust_exception:type}}> {
+        fn as_{{#rust_exception:type}}{{type:rust_name_snake}}{{/rust_exception:type}}(&self) -> ::std::option::Option<&{{#rust_exception:type}}{{>lib/type}}{{/rust_exception:type}}> {
             for cause in self.chain() {
             {{#rust_exception:functions}}
             {{#rust_exception_function:function}}
-                if let Some({{function:upcamel}}Error::{{#rust_exception_function:field}}{{field:rust_name}}{{/rust_exception_function:field}}(e)) = cause.downcast_ref::<{{function:upcamel}}Error>() {
-                    return Some(e);
+                if let ::std::option::Option::Some({{function:upcamel}}Error::{{#rust_exception_function:field}}{{field:rust_name}}{{/rust_exception_function:field}}(e)) = cause.downcast_ref::<{{function:upcamel}}Error>() {
+                    return ::std::option::Option::Some(e);
                 }
             {{/rust_exception_function:function}}
             {{/rust_exception:functions}}
             }
-            None
+            ::std::option::Option::None
         }
     }
 
@@ -87,7 +87,7 @@ pub mod {{service:snake}} {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -96,14 +96,14 @@ pub mod {{service:snake}} {
             match self {
                 {{#function:exceptions}}
                 Self::{{field:rust_name}}(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 {{/function:exceptions}}
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -117,10 +117,10 @@ pub mod {{service:snake}} {
     }
 
     impl As{{#field:type}}{{type:rust_name}}{{/field:type}} for {{function:upcamel}}Error {
-        fn as_{{#field:type}}{{type:rust_name_snake}}{{/field:type}}(&self) -> Option<&{{#field:type}}{{>lib/type}}{{/field:type}}> {
+        fn as_{{#field:type}}{{type:rust_name_snake}}{{/field:type}}(&self) -> ::std::option::Option<&{{#field:type}}{{>lib/type}}{{/field:type}}> {
             match self {
-                Self::{{field:rust_name}}(inner) => Some(inner),
-                _ => None,
+                Self::{{field:rust_name}}(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -322,7 +322,7 @@ pub mod {{service:snake}} {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -331,14 +331,14 @@ pub mod {{service:snake}} {
             match self {
                 {{#function:stream_exceptions}}
                 Self::{{field:rust_name}}(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 {{/function:stream_exceptions}}
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }

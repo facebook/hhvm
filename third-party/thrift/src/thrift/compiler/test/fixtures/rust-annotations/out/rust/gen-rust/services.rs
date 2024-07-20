@@ -39,7 +39,7 @@ pub mod service1 {
     }
 
     impl ::fbthrift::ExceptionInfo for RExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -72,7 +72,7 @@ pub mod service1 {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -132,7 +132,7 @@ pub mod s2_proxy {
     }
 
     impl ::fbthrift::ExceptionInfo for RExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -165,7 +165,7 @@ pub mod s2_proxy {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -236,7 +236,7 @@ pub mod all_methods {
     }
 
     impl ::fbthrift::ExceptionInfo for FooExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -269,7 +269,7 @@ pub mod all_methods {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -324,7 +324,7 @@ pub mod all_methods {
     }
 
     impl ::fbthrift::ExceptionInfo for BarExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::se(exn) => exn.exn_name(),
@@ -361,7 +361,7 @@ pub mod all_methods {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -440,7 +440,7 @@ pub mod one_method {
     }
 
     impl ::fbthrift::ExceptionInfo for FooExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -473,7 +473,7 @@ pub mod one_method {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -517,7 +517,7 @@ pub mod one_method {
     }
 
     impl ::fbthrift::ExceptionInfo for BarExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::se(exn) => exn.exn_name(),
@@ -554,7 +554,7 @@ pub mod one_method {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -633,7 +633,7 @@ pub mod one_method_opt_out {
     }
 
     impl ::fbthrift::ExceptionInfo for FooExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -666,7 +666,7 @@ pub mod one_method_opt_out {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -710,7 +710,7 @@ pub mod one_method_opt_out {
     }
 
     impl ::fbthrift::ExceptionInfo for BarExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::se(exn) => exn.exn_name(),
@@ -747,7 +747,7 @@ pub mod one_method_opt_out {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,

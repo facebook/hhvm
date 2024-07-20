@@ -13,7 +13,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for ReturnstreamStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -52,7 +52,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -113,7 +113,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for ReturnstreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -146,7 +146,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -176,7 +176,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for StreamthrowsStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::e(exn) => exn.exn_name(),
@@ -225,7 +225,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -294,7 +294,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for StreamthrowsExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -327,7 +327,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -357,7 +357,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for ServicethrowsStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -396,7 +396,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -444,7 +444,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for ServicethrowsExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::e(exn) => exn.exn_name(),
@@ -481,7 +481,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -519,7 +519,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for Servicethrows2StreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -558,7 +558,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -612,7 +612,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for Servicethrows2Exn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::e1(exn) => exn.exn_name(),
@@ -653,7 +653,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -699,7 +699,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for BoththrowsStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::e(exn) => exn.exn_name(),
@@ -748,7 +748,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -804,7 +804,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for BoththrowsExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::e(exn) => exn.exn_name(),
@@ -841,7 +841,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -879,7 +879,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for ResponseandstreamstreamthrowsStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::e(exn) => exn.exn_name(),
@@ -928,7 +928,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -997,7 +997,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for ResponseandstreamstreamthrowsExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1030,7 +1030,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1061,7 +1061,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for ResponseandstreamservicethrowsStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1100,7 +1100,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1148,7 +1148,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for ResponseandstreamservicethrowsExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::e(exn) => exn.exn_name(),
@@ -1185,7 +1185,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1224,7 +1224,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for ResponseandstreamboththrowsStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::e(exn) => exn.exn_name(),
@@ -1273,7 +1273,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1329,7 +1329,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for ResponseandstreamboththrowsExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
                 Self::e(exn) => exn.exn_name(),
@@ -1366,7 +1366,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1405,7 +1405,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for ReturnstreamFastStreamExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1444,7 +1444,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,
@@ -1505,7 +1505,7 @@ pub mod pub_sub_streaming_service {
     }
 
     impl ::fbthrift::ExceptionInfo for ReturnstreamFastExn {
-        fn exn_name(&self) -> &'static str {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_name(),
             }
@@ -1538,7 +1538,7 @@ pub mod pub_sub_streaming_service {
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
             p: &mut P,
-            function_name: &'static str,
+            function_name: &'static ::std::primitive::str,
         )
         where
             P: ::fbthrift::ProtocolWriter,

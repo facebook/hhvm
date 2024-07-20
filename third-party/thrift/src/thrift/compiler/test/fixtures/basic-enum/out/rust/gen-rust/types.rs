@@ -30,12 +30,12 @@ impl EmptyEnum {
 }
 
 impl ::fbthrift::ThriftEnum for EmptyEnum {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
         ]
     }
@@ -131,14 +131,14 @@ impl MyEnum {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::ONE, "ONE"),
             (Self::TWO, "TWO"),
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "ONE",
             "TWO",
@@ -260,7 +260,7 @@ impl MyBigEnum {
 }
 
 impl ::fbthrift::ThriftEnum for MyBigEnum {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::UNKNOWN, "UNKNOWN"),
             (Self::ONE, "ONE"),
@@ -285,7 +285,7 @@ impl ::fbthrift::ThriftEnum for MyBigEnum {
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "UNKNOWN",
             "ONE",
@@ -545,10 +545,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -561,7 +561,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -577,7 +577,7 @@ mod dot_dot {
 }
 
 pub(crate) mod r#impl {
-    use ref_cast::RefCast;
+    use ::ref_cast::RefCast;
 
     #[derive(RefCast)]
     #[repr(transparent)]

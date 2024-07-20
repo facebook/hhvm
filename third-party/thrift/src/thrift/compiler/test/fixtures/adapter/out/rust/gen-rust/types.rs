@@ -511,7 +511,7 @@ impl Color {
 }
 
 impl ::fbthrift::ThriftEnum for Color {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::UNKNOWN, "UNKNOWN"),
             (Self::RED, "RED"),
@@ -520,7 +520,7 @@ impl ::fbthrift::ThriftEnum for Color {
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "UNKNOWN",
             "RED",
@@ -604,7 +604,7 @@ impl ::fbthrift::GetTType for Color {
 }
 
 impl ::fbthrift::GetUri for self::Color {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/Color"
     }
 }
@@ -638,14 +638,14 @@ impl ThriftAdaptedEnum {
 }
 
 impl ::fbthrift::ThriftEnum for ThriftAdaptedEnum {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::Zero, "Zero"),
             (Self::One, "One"),
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "Zero",
             "One",
@@ -721,7 +721,7 @@ impl ::fbthrift::GetTType for ThriftAdaptedEnum {
 }
 
 impl ::fbthrift::GetUri for self::ThriftAdaptedEnum {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/ThriftAdaptedEnum"
     }
 }
@@ -778,7 +778,7 @@ impl ::fbthrift::GetTType for self::MyAnnotation {
 }
 
 impl ::fbthrift::GetUri for self::MyAnnotation {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/MyAnnotation"
     }
 }
@@ -846,33 +846,33 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyAnnotation {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<python__types::Adapter>() {
-            let mut tmp = Some(python__types::Adapter {
+            let mut tmp = ::std::option::Option::Some(python__types::Adapter {
                 name: "my.module.Adapter2".to_owned(),
                 typeHint: "my.another.module.AdaptedType2[]".to_owned(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <python__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <python__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
         if type_id == ::std::any::TypeId::of::<scope__types::Transitive>() {
-            let mut tmp = Some(scope__types::Transitive {
+            let mut tmp = ::std::option::Option::Some(scope__types::Transitive {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -885,7 +885,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyAnnotation {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -940,7 +940,7 @@ impl ::fbthrift::GetTType for self::Foo {
 }
 
 impl ::fbthrift::GetUri for self::Foo {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/compiler/test/fixtures/adapter/src/module/Foo"
     }
 }
@@ -1076,10 +1076,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -1088,17 +1088,17 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
-                    let mut tmp = Some(hack__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Adapter {
                         name: "\\Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -1107,38 +1107,38 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Adapter>() {
-                    let mut tmp = Some(rust__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             2 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
-                    let mut tmp = Some(hack__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Adapter {
                         name: "\\Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -1147,38 +1147,38 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Adapter>() {
-                    let mut tmp = Some(rust__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             3 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
-                    let mut tmp = Some(hack__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Adapter {
                         name: "\\Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -1187,21 +1187,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Adapter>() {
-                    let mut tmp = Some(rust__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
@@ -1212,17 +1212,17 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
             6 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
-                    let mut tmp = Some(hack__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Adapter {
                         name: "\\Adapter3".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter3".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -1231,38 +1231,38 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Adapter>() {
-                    let mut tmp = Some(rust__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Adapter {
                         name: "::my::Adapter3".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             7 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
-                    let mut tmp = Some(hack__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Adapter {
                         name: "\\Adapter3".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter3".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -1271,38 +1271,38 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Adapter>() {
-                    let mut tmp = Some(rust__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Adapter {
                         name: "::my::Adapter3".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             8 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
-                    let mut tmp = Some(hack__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Adapter {
                         name: "\\Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter3".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -1311,21 +1311,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Adapter>() {
-                    let mut tmp = Some(rust__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Adapter {
                         name: "::my::Adapter3".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
@@ -1334,7 +1334,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
             10 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter2".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -1343,36 +1343,36 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<python__types::Adapter>() {
-                    let mut tmp = Some(python__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(python__types::Adapter {
                         name: "my.Adapter3".to_owned(),
                         typeHint: "my.AdaptedType3[]".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <python__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <python__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Adapter>() {
-                    let mut tmp = Some(rust__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Adapter {
                         name: "::my::Adapter2".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
@@ -1381,7 +1381,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1398,7 +1398,7 @@ impl ::fbthrift::GetTType for Baz {
 }
 
 impl ::fbthrift::GetUri for self::Baz {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/Baz"
     }
 }
@@ -1505,14 +1505,14 @@ where
 
 impl Baz {
     /// Return current union variant name as a tuple of (Rust name, original name).
-    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
         match self {
-            Self::intField(_) => Some(("intField", "intField")),
-            Self::setField(_) => Some(("setField", "setField")),
-            Self::mapField(_) => Some(("mapField", "mapField")),
-            Self::binaryField(_) => Some(("binaryField", "binaryField")),
-            Self::longField(_) => Some(("longField", "longField")),
-            Self::UnknownField(_) => None,
+            Self::intField(_) => ::std::option::Option::Some(("intField", "intField")),
+            Self::setField(_) => ::std::option::Option::Some(("setField", "setField")),
+            Self::mapField(_) => ::std::option::Option::Some(("mapField", "mapField")),
+            Self::binaryField(_) => ::std::option::Option::Some(("binaryField", "binaryField")),
+            Self::longField(_) => ::std::option::Option::Some(("longField", "longField")),
+            Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
 }
@@ -1522,10 +1522,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -1534,17 +1534,17 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
-                    let mut tmp = Some(hack__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Adapter {
                         name: "\\Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -1553,21 +1553,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Adapter>() {
-                    let mut tmp = Some(rust__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
@@ -1576,17 +1576,17 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
             6 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
-                    let mut tmp = Some(hack__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Adapter {
                         name: "\\Adapter3".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter3".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -1595,38 +1595,38 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Adapter>() {
-                    let mut tmp = Some(rust__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Adapter {
                         name: "::my::Adapter3".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             8 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
-                    let mut tmp = Some(hack__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Adapter {
                         name: "\\Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -1635,21 +1635,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Adapter>() {
-                    let mut tmp = Some(rust__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
@@ -1658,7 +1658,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1704,7 +1704,7 @@ impl ::fbthrift::GetTType for self::Bar {
 }
 
 impl ::fbthrift::GetUri for self::Bar {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/Bar"
     }
 }
@@ -1812,10 +1812,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -1824,17 +1824,17 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
-                    let mut tmp = Some(hack__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Adapter {
                         name: "\\Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: "::my::Cpp::Type1".to_owned(),
                         underlyingName: ::std::default::Default::default(),
@@ -1843,28 +1843,28 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             2 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
-                    let mut tmp = Some(hack__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Adapter {
                         name: "\\Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -1873,12 +1873,12 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             3 => {
@@ -1888,17 +1888,17 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
             5 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
-                    let mut tmp = Some(hack__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Adapter {
                         name: "\\Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -1907,28 +1907,28 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             6 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
-                    let mut tmp = Some(hack__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Adapter {
                         name: "\\Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -1937,12 +1937,12 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             7 => {
@@ -1950,7 +1950,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1985,7 +1985,7 @@ impl ::fbthrift::GetTType for self::DirectlyAdapted {
 }
 
 impl ::fbthrift::GetUri for self::DirectlyAdapted {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/DirectlyAdapted"
     }
 }
@@ -2046,7 +2046,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for DirectlyAdapted {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-            let mut tmp = Some(cpp__types::Adapter {
+            let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                 name: "::my::Adapter".to_owned(),
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
@@ -2055,33 +2055,33 @@ impl ::fbthrift::metadata::ThriftAnnotations for DirectlyAdapted {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
         if type_id == ::std::any::TypeId::of::<python__types::Adapter>() {
-            let mut tmp = Some(python__types::Adapter {
+            let mut tmp = ::std::option::Option::Some(python__types::Adapter {
                 name: "my.module.Adapter".to_owned(),
                 typeHint: "my.another.module.AdaptedType".to_owned(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <python__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <python__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -2092,7 +2092,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for DirectlyAdapted {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -2127,7 +2127,7 @@ impl ::fbthrift::GetTType for self::IndependentDirectlyAdapted {
 }
 
 impl ::fbthrift::GetUri for self::IndependentDirectlyAdapted {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/IndependentDirectlyAdapted"
     }
 }
@@ -2188,7 +2188,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for IndependentDirectlyAdapted {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-            let mut tmp = Some(cpp__types::Adapter {
+            let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                 name: "::my::Adapter".to_owned(),
                 adaptedType: "::my::Type".to_owned(),
                 underlyingName: ::std::default::Default::default(),
@@ -2197,18 +2197,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for IndependentDirectlyAdapted {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -2219,7 +2219,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for IndependentDirectlyAdapted {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -2260,7 +2260,7 @@ impl ::fbthrift::GetTType for self::StructWithFieldAdapter {
 }
 
 impl ::fbthrift::GetUri for self::StructWithFieldAdapter {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/StructWithFieldAdapter"
     }
 }
@@ -2345,10 +2345,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -2357,7 +2357,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -2366,43 +2366,43 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<python__types::Adapter>() {
-                    let mut tmp = Some(python__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(python__types::Adapter {
                         name: "my.Adapter1".to_owned(),
                         typeHint: "my.AdaptedType1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <python__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <python__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Adapter>() {
-                    let mut tmp = Some(rust__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Adapter {
                         name: "::my::Adapter1<>".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             2 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -2411,28 +2411,28 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                    let mut tmp = Some(cpp__types::Ref {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Shared,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             3 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -2441,38 +2441,38 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                    let mut tmp = Some(cpp__types::Ref {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Shared,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Adapter>() {
-                    let mut tmp = Some(rust__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Adapter {
                         name: "::my::Adapter1<>".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             4 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -2481,27 +2481,27 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
-                    let mut tmp = Some(thrift__types::Box {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -2540,7 +2540,7 @@ impl ::fbthrift::GetTType for self::TerseAdaptedFields {
 }
 
 impl ::fbthrift::GetUri for self::TerseAdaptedFields {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/TerseAdaptedFields"
     }
 }
@@ -2614,10 +2614,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseAdaptedFields {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -2626,7 +2626,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseAdaptedFields {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -2635,27 +2635,27 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseAdaptedFields {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             2 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -2664,27 +2664,27 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseAdaptedFields {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             3 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -2693,27 +2693,27 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseAdaptedFields {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -2748,7 +2748,7 @@ impl ::fbthrift::GetTType for self::B {
 }
 
 impl ::fbthrift::GetUri for self::B {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/B"
     }
 }
@@ -2808,10 +2808,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for B {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -2822,7 +2822,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for B {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -2855,7 +2855,7 @@ impl ::fbthrift::GetTType for self::A {
 }
 
 impl ::fbthrift::GetUri for self::A {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/A"
     }
 }
@@ -2908,10 +2908,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for A {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -2920,7 +2920,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for A {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -2955,7 +2955,7 @@ impl ::fbthrift::GetTType for self::Config {
 }
 
 impl ::fbthrift::GetUri for self::Config {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/Config"
     }
 }
@@ -3016,7 +3016,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Config {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-            let mut tmp = Some(cpp__types::Adapter {
+            let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                 name: "MyVarAdapter".to_owned(),
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
@@ -3025,55 +3025,55 @@ impl ::fbthrift::metadata::ThriftAnnotations for Config {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
         if type_id == ::std::any::TypeId::of::<python__types::Adapter>() {
-            let mut tmp = Some(python__types::Adapter {
+            let mut tmp = ::std::option::Option::Some(python__types::Adapter {
                 name: "my.ConfigAdapter".to_owned(),
                 typeHint: "my.ConfiguredVar[]".to_owned(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <python__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <python__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
         if type_id == ::std::any::TypeId::of::<scope__types::Transitive>() {
-            let mut tmp = Some(scope__types::Transitive {
+            let mut tmp = ::std::option::Option::Some(scope__types::Transitive {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
         if type_id == ::std::any::TypeId::of::<thrift__types::Experimental>() {
-            let mut tmp = Some(thrift__types::Experimental {
+            let mut tmp = ::std::option::Option::Some(thrift__types::Experimental {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <thrift__types::Experimental as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <thrift__types::Experimental as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -3084,7 +3084,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Config {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -3121,7 +3121,7 @@ impl ::fbthrift::GetTType for self::MyStruct {
 }
 
 impl ::fbthrift::GetUri for self::MyStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/MyStruct"
     }
 }
@@ -3188,10 +3188,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -3204,7 +3204,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -3257,7 +3257,7 @@ impl ::fbthrift::GetTType for self::AdaptTestStruct {
 }
 
 impl ::fbthrift::GetUri for self::AdaptTestStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/AdaptTestStruct"
     }
 }
@@ -3380,10 +3380,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -3396,7 +3396,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
             3 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::AdaptTestMsAdapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -3405,18 +3405,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             4 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::AdapterWithContext".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -3425,12 +3425,12 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             5 => {
@@ -3440,7 +3440,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
             7 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::AdapterWithContext".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -3449,18 +3449,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             8 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::TemplatedTestAdapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -3469,18 +3469,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             9 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::AdapterWithContext".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -3489,18 +3489,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             10 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::AdapterWithContext".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -3509,18 +3509,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -3607,7 +3607,7 @@ impl ::fbthrift::GetTType for self::AdaptTemplatedTestStruct {
 }
 
 impl ::fbthrift::GetUri for self::AdaptTemplatedTestStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/AdaptTemplatedTestStruct"
     }
 }
@@ -3824,10 +3824,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -3850,7 +3850,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
             8 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::TemplatedTestAdapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -3859,18 +3859,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             9 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::TemplatedTestAdapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -3879,18 +3879,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             10 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::TemplatedTestAdapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -3899,12 +3899,12 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             11 => {
@@ -3926,7 +3926,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
             19 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::TemplatedTestAdapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -3935,28 +3935,28 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Adapter>() {
-                    let mut tmp = Some(rust__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Adapter {
                         name: "::fbthrift_adapters::test::TestAdapter".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             20 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::TemplatedTestAdapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -3965,28 +3965,28 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Adapter>() {
-                    let mut tmp = Some(rust__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Adapter {
                         name: "::fbthrift_adapters::test::TestAdapter".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             21 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::TemplatedTestAdapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -3995,21 +3995,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Adapter>() {
-                    let mut tmp = Some(rust__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Adapter {
                         name: "::fbthrift_adapters::test::TestAdapter".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
@@ -4018,7 +4018,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -4053,7 +4053,7 @@ impl ::fbthrift::GetTType for self::AdaptTemplatedNestedTestStruct {
 }
 
 impl ::fbthrift::GetUri for self::AdaptTemplatedNestedTestStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/AdaptTemplatedNestedTestStruct"
     }
 }
@@ -4113,10 +4113,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedNestedTestStruct 
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -4127,7 +4127,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedNestedTestStruct 
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -4144,7 +4144,7 @@ impl ::fbthrift::GetTType for AdaptTestUnion {
 }
 
 impl ::fbthrift::GetUri for self::AdaptTestUnion {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/AdaptTestUnion"
     }
 }
@@ -4221,11 +4221,11 @@ where
 
 impl AdaptTestUnion {
     /// Return current union variant name as a tuple of (Rust name, original name).
-    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
         match self {
-            Self::delay(_) => Some(("delay", "delay")),
-            Self::custom(_) => Some(("custom", "custom")),
-            Self::UnknownField(_) => None,
+            Self::delay(_) => ::std::option::Option::Some(("delay", "delay")),
+            Self::custom(_) => ::std::option::Option::Some(("custom", "custom")),
+            Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
 }
@@ -4236,23 +4236,23 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestUnion {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<cpp__types::Name>() {
-            let mut tmp = Some(cpp__types::Name {
+            let mut tmp = ::std::option::Option::Some(cpp__types::Name {
                 value: "ThriftAdaptTestUnion".to_owned(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <cpp__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <cpp__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -4265,7 +4265,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestUnion {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -4299,7 +4299,7 @@ impl ::fbthrift::GetTType for self::AdaptedStruct {
 }
 
 impl ::fbthrift::GetUri for self::AdaptedStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/AdaptedStruct"
     }
 }
@@ -4360,23 +4360,23 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStruct {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<cpp__types::Name>() {
-            let mut tmp = Some(cpp__types::Name {
+            let mut tmp = ::std::option::Option::Some(cpp__types::Name {
                 value: "ThriftAdaptedStruct".to_owned(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <cpp__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <cpp__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -4387,7 +4387,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -4422,7 +4422,7 @@ impl ::fbthrift::GetTType for self::DirectlyAdaptedStruct {
 }
 
 impl ::fbthrift::GetUri for self::DirectlyAdaptedStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/DirectlyAdaptedStruct"
     }
 }
@@ -4483,7 +4483,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for DirectlyAdaptedStruct {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-            let mut tmp = Some(cpp__types::Adapter {
+            let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                 name: "::apache::thrift::test::TemplatedTestAdapter".to_owned(),
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
@@ -4492,18 +4492,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for DirectlyAdaptedStruct {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -4514,7 +4514,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for DirectlyAdaptedStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -4555,7 +4555,7 @@ impl ::fbthrift::GetTType for self::StructFieldAdaptedStruct {
 }
 
 impl ::fbthrift::GetUri for self::StructFieldAdaptedStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/StructFieldAdaptedStruct"
     }
 }
@@ -4636,10 +4636,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructFieldAdaptedStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -4648,7 +4648,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructFieldAdaptedStruct {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::TemplatedTestAdapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -4657,12 +4657,12 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructFieldAdaptedStruct {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             2 => {
@@ -4674,7 +4674,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructFieldAdaptedStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -4709,7 +4709,7 @@ impl ::fbthrift::GetTType for self::CircularAdaptee {
 }
 
 impl ::fbthrift::GetUri for self::CircularAdaptee {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/CircularAdaptee"
     }
 }
@@ -4769,10 +4769,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for CircularAdaptee {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -4783,7 +4783,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for CircularAdaptee {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -4818,7 +4818,7 @@ impl ::fbthrift::GetTType for self::CircularStruct {
 }
 
 impl ::fbthrift::GetUri for self::CircularStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/CircularStruct"
     }
 }
@@ -4880,10 +4880,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for CircularStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -4892,19 +4892,19 @@ impl ::fbthrift::metadata::ThriftAnnotations for CircularStruct {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                    let mut tmp = Some(cpp__types::Ref {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -4939,7 +4939,7 @@ impl ::fbthrift::GetTType for self::ReorderedStruct {
 }
 
 impl ::fbthrift::GetUri for self::ReorderedStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/ReorderedStruct"
     }
 }
@@ -4999,10 +4999,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ReorderedStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -5011,19 +5011,19 @@ impl ::fbthrift::metadata::ThriftAnnotations for ReorderedStruct {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                    let mut tmp = Some(cpp__types::Ref {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -5056,7 +5056,7 @@ impl ::fbthrift::GetTType for self::DeclaredAfterStruct {
 }
 
 impl ::fbthrift::GetUri for self::DeclaredAfterStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/DeclaredAfterStruct"
     }
 }
@@ -5110,7 +5110,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for DeclaredAfterStruct {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-            let mut tmp = Some(cpp__types::Adapter {
+            let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                 name: "::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>".to_owned(),
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
@@ -5119,18 +5119,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for DeclaredAfterStruct {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -5139,7 +5139,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for DeclaredAfterStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -5174,7 +5174,7 @@ impl ::fbthrift::GetTType for self::RenamedStruct {
 }
 
 impl ::fbthrift::GetUri for self::RenamedStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/RenamedStruct"
     }
 }
@@ -5235,7 +5235,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for RenamedStruct {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-            let mut tmp = Some(cpp__types::Adapter {
+            let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                 name: "::apache::thrift::test::TemplatedTestAdapter".to_owned(),
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: "UnderlyingRenamedStruct".to_owned(),
@@ -5244,18 +5244,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for RenamedStruct {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -5266,7 +5266,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for RenamedStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -5301,7 +5301,7 @@ impl ::fbthrift::GetTType for self::SameNamespaceStruct {
 }
 
 impl ::fbthrift::GetUri for self::SameNamespaceStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/SameNamespaceStruct"
     }
 }
@@ -5362,7 +5362,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for SameNamespaceStruct {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-            let mut tmp = Some(cpp__types::Adapter {
+            let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                 name: "::apache::thrift::test::TemplatedTestAdapter".to_owned(),
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: "UnderlyingSameNamespaceStruct".to_owned(),
@@ -5371,18 +5371,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for SameNamespaceStruct {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -5393,7 +5393,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for SameNamespaceStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -5426,7 +5426,7 @@ impl ::fbthrift::GetTType for self::HeapAllocated {
 }
 
 impl ::fbthrift::GetUri for self::HeapAllocated {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/HeapAllocated"
     }
 }
@@ -5480,7 +5480,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for HeapAllocated {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-            let mut tmp = Some(cpp__types::Adapter {
+            let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                 name: "::apache::thrift::test::MoveOnlyAdapter".to_owned(),
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
@@ -5489,18 +5489,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for HeapAllocated {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -5509,7 +5509,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for HeapAllocated {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -5544,7 +5544,7 @@ impl ::fbthrift::GetTType for self::MoveOnly {
 }
 
 impl ::fbthrift::GetUri for self::MoveOnly {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/MoveOnly"
     }
 }
@@ -5604,10 +5604,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MoveOnly {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -5618,7 +5618,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MoveOnly {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -5653,7 +5653,7 @@ impl ::fbthrift::GetTType for self::AlsoMoveOnly {
 }
 
 impl ::fbthrift::GetUri for self::AlsoMoveOnly {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/AlsoMoveOnly"
     }
 }
@@ -5713,10 +5713,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for AlsoMoveOnly {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -5725,7 +5725,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AlsoMoveOnly {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::MoveOnlyAdapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -5734,18 +5734,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for AlsoMoveOnly {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -5778,7 +5778,7 @@ impl ::fbthrift::GetTType for self::ApplyAdapter {
 }
 
 impl ::fbthrift::GetUri for self::ApplyAdapter {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/ApplyAdapter"
     }
 }
@@ -5832,7 +5832,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ApplyAdapter {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-            let mut tmp = Some(cpp__types::Adapter {
+            let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                 name: "::apache::thrift::test::TemplatedTestAdapter".to_owned(),
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
@@ -5841,27 +5841,27 @@ impl ::fbthrift::metadata::ThriftAnnotations for ApplyAdapter {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
         if type_id == ::std::any::TypeId::of::<scope__types::Transitive>() {
-            let mut tmp = Some(scope__types::Transitive {
+            let mut tmp = ::std::option::Option::Some(scope__types::Transitive {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -5870,7 +5870,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ApplyAdapter {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -5903,7 +5903,7 @@ impl ::fbthrift::GetTType for self::TransitiveAdapted {
 }
 
 impl ::fbthrift::GetUri for self::TransitiveAdapted {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/TransitiveAdapted"
     }
 }
@@ -5957,22 +5957,22 @@ impl ::fbthrift::metadata::ThriftAnnotations for TransitiveAdapted {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<crate::types::ApplyAdapter>() {
-            let mut tmp = Some(crate::types::ApplyAdapter {
+            let mut tmp = ::std::option::Option::Some(crate::types::ApplyAdapter {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <crate::types::ApplyAdapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <crate::types::ApplyAdapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -5981,7 +5981,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for TransitiveAdapted {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -6020,7 +6020,7 @@ impl ::fbthrift::GetTType for self::CountingStruct {
 }
 
 impl ::fbthrift::GetUri for self::CountingStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/CountingStruct"
     }
 }
@@ -6100,10 +6100,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for CountingStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -6112,7 +6112,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for CountingStruct {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::CountingAdapter<false, int>".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -6121,12 +6121,12 @@ impl ::fbthrift::metadata::ThriftAnnotations for CountingStruct {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             2 => {
@@ -6134,7 +6134,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for CountingStruct {
             3 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::apache::thrift::test::CountingAdapter<false, std::string>".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -6143,18 +6143,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for CountingStruct {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -6189,7 +6189,7 @@ impl ::fbthrift::GetTType for self::Person {
 }
 
 impl ::fbthrift::GetUri for self::Person {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/Person"
     }
 }
@@ -6250,7 +6250,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Person {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-            let mut tmp = Some(cpp__types::Adapter {
+            let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                 name: "::apache::thrift::test::VariableAdapter".to_owned(),
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
@@ -6259,27 +6259,27 @@ impl ::fbthrift::metadata::ThriftAnnotations for Person {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
         if type_id == ::std::any::TypeId::of::<scope__types::Transitive>() {
-            let mut tmp = Some(scope__types::Transitive {
+            let mut tmp = ::std::option::Option::Some(scope__types::Transitive {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -6290,7 +6290,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Person {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -6325,7 +6325,7 @@ impl ::fbthrift::GetTType for self::Person2 {
 }
 
 impl ::fbthrift::GetUri for self::Person2 {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/Person2"
     }
 }
@@ -6385,10 +6385,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Person2 {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -6399,7 +6399,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Person2 {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -6425,7 +6425,7 @@ mod dot_dot {
 }
 
 pub(crate) mod r#impl {
-    use ref_cast::RefCast;
+    use ::ref_cast::RefCast;
 
     #[derive(RefCast)]
     #[repr(transparent)]

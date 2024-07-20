@@ -38,7 +38,7 @@ pub struct {{struct:rust_name}} {{>lib/block}}{{!
     #[serde(default)]{{!
     }}{{/field:optional?}}{{!
     }}{{#field:optional?}}{{#struct:serde?}}{{#program:skip_none_serialization?}}
-    #[serde(skip_serializing_if = "Option::is_none")]{{!
+    #[serde(skip_serializing_if = "::std::option::Option::is_none")]{{!
     }}{{/program:skip_none_serialization?}}{{/struct:serde?}}{{/field:optional?}}{{!
     }}{{/struct:serde?}}{{#field:docs?}}
     #[doc = {{field:docs}}]{{!

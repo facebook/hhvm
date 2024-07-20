@@ -110,7 +110,7 @@ pub fn init_registry(registry: &mut ::fbthrift_conformance::AnyRegistry) -> ::an
     registry.register_type::<{{struct:rust_name}}>()?;
 {{/program:structs}}
 
-    Ok(true)
+    ::std::result::Result::Ok(true)
 }
 
 {{/program:any?}}{{!

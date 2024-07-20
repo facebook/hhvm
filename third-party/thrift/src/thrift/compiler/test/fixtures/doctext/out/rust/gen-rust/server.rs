@@ -308,7 +308,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "C.numbers"))]
@@ -389,9 +389,9 @@ where
                         }
                     })
                     .boxed();
-                (response, Some(stream))
+                (response, ::std::option::Option::Some(stream))
             },
-            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), None),
+            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), ::std::option::Option::None),
         };
 
         let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::c::NumbersExn>(
@@ -404,7 +404,7 @@ where
         )?;
 
         let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "C.thing"))]
@@ -468,7 +468,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 }
 
@@ -529,7 +529,7 @@ where
 
     #[allow(clippy::match_single_binding)]
     #[inline]
-    fn create_interaction_idx(&self, name: &str) -> ::anyhow::Result<::std::primitive::usize> {
+    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
         match name {
             _ => ::anyhow::bail!("Unknown interaction"),
         }
@@ -598,12 +598,12 @@ where
         self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
         p.read_message_end()?;
 
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     fn create_interaction(
         &self,
-        name: &str,
+        name: &::std::primitive::str,
     ) -> ::anyhow::Result<
         ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
     > {
@@ -618,7 +618,7 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static str] {
+    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
         &[
             // From module.C:
             "f",

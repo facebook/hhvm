@@ -202,15 +202,15 @@ where
 
 impl ComplexUnion {
     /// Return current union variant name as a tuple of (Rust name, original name).
-    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
         match self {
-            Self::intValue(_) => Some(("intValue", "intValue")),
-            Self::stringValue(_) => Some(("stringValue", "stringValue")),
-            Self::intListValue(_) => Some(("intListValue", "intListValue")),
-            Self::stringListValue(_) => Some(("stringListValue", "stringListValue")),
-            Self::typedefValue(_) => Some(("typedefValue", "typedefValue")),
-            Self::stringRef(_) => Some(("stringRef", "stringRef")),
-            Self::UnknownField(_) => None,
+            Self::intValue(_) => ::std::option::Option::Some(("intValue", "intValue")),
+            Self::stringValue(_) => ::std::option::Option::Some(("stringValue", "stringValue")),
+            Self::intListValue(_) => ::std::option::Option::Some(("intListValue", "intListValue")),
+            Self::stringListValue(_) => ::std::option::Option::Some(("stringListValue", "stringListValue")),
+            Self::typedefValue(_) => ::std::option::Option::Some(("typedefValue", "typedefValue")),
+            Self::stringRef(_) => ::std::option::Option::Some(("stringRef", "stringRef")),
+            Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
 }
@@ -220,10 +220,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ComplexUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -242,19 +242,19 @@ impl ::fbthrift::metadata::ThriftAnnotations for ComplexUnion {
             14 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                    let mut tmp = Some(cpp__types::Ref {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -341,11 +341,11 @@ where
 
 impl ListUnion {
     /// Return current union variant name as a tuple of (Rust name, original name).
-    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
         match self {
-            Self::intListValue(_) => Some(("intListValue", "intListValue")),
-            Self::stringListValue(_) => Some(("stringListValue", "stringListValue")),
-            Self::UnknownField(_) => None,
+            Self::intListValue(_) => ::std::option::Option::Some(("intListValue", "intListValue")),
+            Self::stringListValue(_) => ::std::option::Option::Some(("stringListValue", "stringListValue")),
+            Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
 }
@@ -355,10 +355,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ListUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -371,7 +371,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ListUnion {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -458,11 +458,11 @@ where
 
 impl DataUnion {
     /// Return current union variant name as a tuple of (Rust name, original name).
-    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
         match self {
-            Self::binaryData(_) => Some(("binaryData", "binaryData")),
-            Self::stringData(_) => Some(("stringData", "stringData")),
-            Self::UnknownField(_) => None,
+            Self::binaryData(_) => ::std::option::Option::Some(("binaryData", "binaryData")),
+            Self::stringData(_) => ::std::option::Option::Some(("stringData", "stringData")),
+            Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
 }
@@ -472,10 +472,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for DataUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -488,7 +488,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for DataUnion {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -594,10 +594,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Val {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -612,7 +612,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Val {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -700,11 +700,11 @@ where
 
 impl ValUnion {
     /// Return current union variant name as a tuple of (Rust name, original name).
-    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
         match self {
-            Self::v1(_) => Some(("v1", "v1")),
-            Self::v2(_) => Some(("v2", "v2")),
-            Self::UnknownField(_) => None,
+            Self::v1(_) => ::std::option::Option::Some(("v1", "v1")),
+            Self::v2(_) => ::std::option::Option::Some(("v2", "v2")),
+            Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
 }
@@ -714,10 +714,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ValUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -730,7 +730,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ValUnion {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -817,11 +817,11 @@ where
 
 impl VirtualComplexUnion {
     /// Return current union variant name as a tuple of (Rust name, original name).
-    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
         match self {
-            Self::thingOne(_) => Some(("thingOne", "thingOne")),
-            Self::thingTwo(_) => Some(("thingTwo", "thingTwo")),
-            Self::UnknownField(_) => None,
+            Self::thingOne(_) => ::std::option::Option::Some(("thingOne", "thingOne")),
+            Self::thingTwo(_) => ::std::option::Option::Some(("thingTwo", "thingTwo")),
+            Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
 }
@@ -831,10 +831,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for VirtualComplexUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -847,7 +847,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for VirtualComplexUnion {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -935,10 +935,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for NonCopyableStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -949,7 +949,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for NonCopyableStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1027,10 +1027,10 @@ where
 
 impl NonCopyableUnion {
     /// Return current union variant name as a tuple of (Rust name, original name).
-    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
         match self {
-            Self::s(_) => Some(("s", "s")),
-            Self::UnknownField(_) => None,
+            Self::s(_) => ::std::option::Option::Some(("s", "s")),
+            Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
 }
@@ -1040,10 +1040,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for NonCopyableUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -1054,7 +1054,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for NonCopyableUnion {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1069,7 +1069,7 @@ mod dot_dot {
 }
 
 pub(crate) mod r#impl {
-    use ref_cast::RefCast;
+    use ::ref_cast::RefCast;
 
     #[derive(RefCast)]
     #[repr(transparent)]

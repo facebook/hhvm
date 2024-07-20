@@ -7,17 +7,17 @@
 pub mod my_service {
 
     pub trait AsMyException {
-        fn as_my_exception(&self) -> Option<&crate::types::MyException>;
+        fn as_my_exception(&self) -> ::std::option::Option<&crate::types::MyException>;
     }
 
     impl AsMyException for ::anyhow::Error {
-        fn as_my_exception(&self) -> Option<&crate::types::MyException> {
+        fn as_my_exception(&self) -> ::std::option::Option<&crate::types::MyException> {
             for cause in self.chain() {
-                if let Some(PingError::myExcept(e)) = cause.downcast_ref::<PingError>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(PingError::myExcept(e)) = cause.downcast_ref::<PingError>() {
+                    return ::std::option::Option::Some(e);
                 }
             }
-            None
+            ::std::option::Option::None
         }
     }
 
@@ -60,7 +60,7 @@ pub mod my_service {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -68,13 +68,13 @@ pub mod my_service {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::myExcept(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -87,10 +87,10 @@ pub mod my_service {
     }
 
     impl AsMyException for PingError {
-        fn as_my_exception(&self) -> Option<&crate::types::MyException> {
+        fn as_my_exception(&self) -> ::std::option::Option<&crate::types::MyException> {
             match self {
-                Self::myExcept(inner) => Some(inner),
-                _ => None,
+                Self::myExcept(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }

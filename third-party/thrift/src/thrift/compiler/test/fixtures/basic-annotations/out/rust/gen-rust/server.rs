@@ -544,7 +544,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyService.getRandomData"))]
@@ -605,7 +605,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyService.hasDataById"))]
@@ -667,7 +667,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyService.getDataById"))]
@@ -729,7 +729,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyService.putDataById"))]
@@ -792,7 +792,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyService.lobDataById"))]
@@ -855,7 +855,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyService.doNothing"))]
@@ -916,7 +916,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 }
 
@@ -993,7 +993,7 @@ where
 
     #[allow(clippy::match_single_binding)]
     #[inline]
-    fn create_interaction_idx(&self, name: &str) -> ::anyhow::Result<::std::primitive::usize> {
+    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
         match name {
             _ => ::anyhow::bail!("Unknown interaction"),
         }
@@ -1062,12 +1062,12 @@ where
         self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
         p.read_message_end()?;
 
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     fn create_interaction(
         &self,
-        name: &str,
+        name: &::std::primitive::str,
     ) -> ::anyhow::Result<
         ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
     > {
@@ -1082,7 +1082,7 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static str] {
+    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
         &[
             // From module.MyService:
             "ping",
@@ -1336,7 +1336,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyServicePrioParent.pong"))]
@@ -1397,7 +1397,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 }
 
@@ -1454,7 +1454,7 @@ where
 
     #[allow(clippy::match_single_binding)]
     #[inline]
-    fn create_interaction_idx(&self, name: &str) -> ::anyhow::Result<::std::primitive::usize> {
+    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
         match name {
             _ => ::anyhow::bail!("Unknown interaction"),
         }
@@ -1523,12 +1523,12 @@ where
         self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
         p.read_message_end()?;
 
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     fn create_interaction(
         &self,
-        name: &str,
+        name: &::std::primitive::str,
     ) -> ::anyhow::Result<
         ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
     > {
@@ -1543,7 +1543,7 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static str] {
+    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
         &[
             // From module.MyServicePrioParent:
             "ping",
@@ -1748,7 +1748,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 }
 
@@ -1803,7 +1803,7 @@ where
 
     #[allow(clippy::match_single_binding)]
     #[inline]
-    fn create_interaction_idx(&self, name: &str) -> ::anyhow::Result<::std::primitive::usize> {
+    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
         match name {
             _ => ::anyhow::bail!("Unknown interaction"),
         }
@@ -1875,12 +1875,12 @@ where
         self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
         p.read_message_end()?;
 
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     fn create_interaction(
         &self,
-        name: &str,
+        name: &::std::primitive::str,
     ) -> ::anyhow::Result<
         ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
     > {
@@ -1895,7 +1895,7 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static str] {
+    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
         &[
             // From module.MyServicePrioChild:
             "pang",
@@ -2112,7 +2112,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 }
 
@@ -2165,7 +2165,7 @@ where
 
     #[allow(clippy::match_single_binding)]
     #[inline]
-    fn create_interaction_idx(&self, name: &str) -> ::anyhow::Result<::std::primitive::usize> {
+    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
         match name {
             _ => ::anyhow::bail!("Unknown interaction"),
         }
@@ -2237,12 +2237,12 @@ where
         self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
         p.read_message_end()?;
 
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     fn create_interaction(
         &self,
-        name: &str,
+        name: &::std::primitive::str,
     ) -> ::anyhow::Result<
         ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
     > {
@@ -2257,7 +2257,7 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static str] {
+    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
         &[
             // From module.BadInteraction:
             // Interaction's method names are never queried directly.
@@ -2450,7 +2450,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 }
 
@@ -2503,7 +2503,7 @@ where
 
     #[allow(clippy::match_single_binding)]
     #[inline]
-    fn create_interaction_idx(&self, name: &str) -> ::anyhow::Result<::std::primitive::usize> {
+    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
         match name {
             "BadInteraction" => ::std::result::Result::Ok(0usize),
             _ => ::anyhow::bail!("Unknown interaction"),
@@ -2521,7 +2521,7 @@ where
             0usize => {
                 let handler = self.handle_createBadInteraction()?;
                 let server = ::std::sync::Arc::new(BadInteractionProcessor::<P, ::std::boxed::Box<dyn BadInteraction>, R, RS>::new(handler));
-                Ok(server)
+                ::std::result::Result::Ok(server)
             }
             bad => panic!(
                 "{}: unexpected method idx {}",
@@ -2578,12 +2578,12 @@ where
         self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
         p.read_message_end()?;
 
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     fn create_interaction(
         &self,
-        name: &str,
+        name: &::std::primitive::str,
     ) -> ::anyhow::Result<
         ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
     > {
@@ -2598,7 +2598,7 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static str] {
+    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
         &[
             // From module.BadService:
             "bar",
@@ -2893,7 +2893,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "FooBarBazService.bar"))]
@@ -2954,7 +2954,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "FooBarBazService.baz"))]
@@ -3015,7 +3015,7 @@ where
             res,
         )?;
         reply_state.send_reply(env);
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 }
 
@@ -3076,7 +3076,7 @@ where
 
     #[allow(clippy::match_single_binding)]
     #[inline]
-    fn create_interaction_idx(&self, name: &str) -> ::anyhow::Result<::std::primitive::usize> {
+    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
         match name {
             _ => ::anyhow::bail!("Unknown interaction"),
         }
@@ -3145,12 +3145,12 @@ where
         self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
         p.read_message_end()?;
 
-        Ok(())
+        ::std::result::Result::Ok(())
     }
 
     fn create_interaction(
         &self,
-        name: &str,
+        name: &::std::primitive::str,
     ) -> ::anyhow::Result<
         ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
     > {
@@ -3165,7 +3165,7 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static str] {
+    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
         &[
             // From module.FooBarBazService:
             "foo",

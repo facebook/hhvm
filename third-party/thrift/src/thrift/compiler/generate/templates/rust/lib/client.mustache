@@ -386,7 +386,7 @@ where
     ) -> ::std::result::Result<{{!
     }}{{function:interaction_name}}Client, {{!
     }}::anyhow::Error> {
-        Ok(
+        ::std::result::Result::Ok(
             ::std::sync::Arc::new(
                 {{function:interaction_name}}Impl::<P, T, S>::new(
                     self.transport().create_interaction(c"{{function:interaction_name}}")?

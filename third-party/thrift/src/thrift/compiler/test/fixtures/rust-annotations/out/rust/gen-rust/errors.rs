@@ -137,17 +137,17 @@ pub use self::s2_proxy::*;
 pub mod all_methods {
 
     pub trait AsSomeError {
-        fn as_some_error(&self) -> Option<&crate::types::SomeError>;
+        fn as_some_error(&self) -> ::std::option::Option<&crate::types::SomeError>;
     }
 
     impl AsSomeError for ::anyhow::Error {
-        fn as_some_error(&self) -> Option<&crate::types::SomeError> {
+        fn as_some_error(&self) -> ::std::option::Option<&crate::types::SomeError> {
             for cause in self.chain() {
-                if let Some(BarError::se(e)) = cause.downcast_ref::<BarError>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(BarError::se(e)) = cause.downcast_ref::<BarError>() {
+                    return ::std::option::Option::Some(e);
                 }
             }
-            None
+            ::std::option::Option::None
         }
     }
 
@@ -240,7 +240,7 @@ pub mod all_methods {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -248,13 +248,13 @@ pub mod all_methods {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::se(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -267,10 +267,10 @@ pub mod all_methods {
     }
 
     impl AsSomeError for BarError {
-        fn as_some_error(&self) -> Option<&crate::types::SomeError> {
+        fn as_some_error(&self) -> ::std::option::Option<&crate::types::SomeError> {
             match self {
-                Self::se(inner) => Some(inner),
-                _ => None,
+                Self::se(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -379,17 +379,17 @@ pub use self::all_methods::*;
 pub mod one_method {
 
     pub trait AsSomeError {
-        fn as_some_error(&self) -> Option<&crate::types::SomeError>;
+        fn as_some_error(&self) -> ::std::option::Option<&crate::types::SomeError>;
     }
 
     impl AsSomeError for ::anyhow::Error {
-        fn as_some_error(&self) -> Option<&crate::types::SomeError> {
+        fn as_some_error(&self) -> ::std::option::Option<&crate::types::SomeError> {
             for cause in self.chain() {
-                if let Some(BarError::se(e)) = cause.downcast_ref::<BarError>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(BarError::se(e)) = cause.downcast_ref::<BarError>() {
+                    return ::std::option::Option::Some(e);
                 }
             }
-            None
+            ::std::option::Option::None
         }
     }
 
@@ -482,7 +482,7 @@ pub mod one_method {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -490,13 +490,13 @@ pub mod one_method {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::se(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -509,10 +509,10 @@ pub mod one_method {
     }
 
     impl AsSomeError for BarError {
-        fn as_some_error(&self) -> Option<&crate::types::SomeError> {
+        fn as_some_error(&self) -> ::std::option::Option<&crate::types::SomeError> {
             match self {
-                Self::se(inner) => Some(inner),
-                _ => None,
+                Self::se(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -621,17 +621,17 @@ pub use self::one_method::*;
 pub mod one_method_opt_out {
 
     pub trait AsSomeError {
-        fn as_some_error(&self) -> Option<&crate::types::SomeError>;
+        fn as_some_error(&self) -> ::std::option::Option<&crate::types::SomeError>;
     }
 
     impl AsSomeError for ::anyhow::Error {
-        fn as_some_error(&self) -> Option<&crate::types::SomeError> {
+        fn as_some_error(&self) -> ::std::option::Option<&crate::types::SomeError> {
             for cause in self.chain() {
-                if let Some(BarError::se(e)) = cause.downcast_ref::<BarError>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(BarError::se(e)) = cause.downcast_ref::<BarError>() {
+                    return ::std::option::Option::Some(e);
                 }
             }
-            None
+            ::std::option::Option::None
         }
     }
 
@@ -724,7 +724,7 @@ pub mod one_method_opt_out {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -732,13 +732,13 @@ pub mod one_method_opt_out {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::se(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -751,10 +751,10 @@ pub mod one_method_opt_out {
     }
 
     impl AsSomeError for BarError {
-        fn as_some_error(&self) -> Option<&crate::types::SomeError> {
+        fn as_some_error(&self) -> ::std::option::Option<&crate::types::SomeError> {
             match self {
-                Self::se(inner) => Some(inner),
-                _ => None,
+                Self::se(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }

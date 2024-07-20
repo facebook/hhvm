@@ -1698,7 +1698,7 @@ where
     fn createMyInteraction(
         &self,
     ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
-        Ok(
+        ::std::result::Result::Ok(
             ::std::sync::Arc::new(
                 MyInteractionImpl::<P, T, S>::new(
                     self.transport().create_interaction(c"MyInteraction")?
@@ -1710,7 +1710,7 @@ where
     fn createMyInteractionFast(
         &self,
     ) -> ::std::result::Result<MyInteractionFastClient, ::anyhow::Error> {
-        Ok(
+        ::std::result::Result::Ok(
             ::std::sync::Arc::new(
                 MyInteractionFastImpl::<P, T, S>::new(
                     self.transport().create_interaction(c"MyInteractionFast")?
@@ -1722,7 +1722,7 @@ where
     fn createSerialInteraction(
         &self,
     ) -> ::std::result::Result<SerialInteractionClient, ::anyhow::Error> {
-        Ok(
+        ::std::result::Result::Ok(
             ::std::sync::Arc::new(
                 SerialInteractionImpl::<P, T, S>::new(
                     self.transport().create_interaction(c"SerialInteraction")?
@@ -5376,7 +5376,7 @@ where
     fn createMyInteraction(
         &self,
     ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
-        Ok(
+        ::std::result::Result::Ok(
             ::std::sync::Arc::new(
                 MyInteractionImpl::<P, T, S>::new(
                     self.transport().create_interaction(c"MyInteraction")?
@@ -5388,7 +5388,7 @@ where
     fn createMyInteractionFast(
         &self,
     ) -> ::std::result::Result<MyInteractionFastClient, ::anyhow::Error> {
-        Ok(
+        ::std::result::Result::Ok(
             ::std::sync::Arc::new(
                 MyInteractionFastImpl::<P, T, S>::new(
                     self.transport().create_interaction(c"MyInteractionFast")?
@@ -5400,7 +5400,7 @@ where
     fn createSerialInteraction(
         &self,
     ) -> ::std::result::Result<SerialInteractionClient, ::anyhow::Error> {
-        Ok(
+        ::std::result::Result::Ok(
             ::std::sync::Arc::new(
                 SerialInteractionImpl::<P, T, S>::new(
                     self.transport().create_interaction(c"SerialInteraction")?

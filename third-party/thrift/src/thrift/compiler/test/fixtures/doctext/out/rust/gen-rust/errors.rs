@@ -7,17 +7,17 @@
 pub mod c {
 
     pub trait AsBang {
-        fn as_bang(&self) -> Option<&crate::types::Bang>;
+        fn as_bang(&self) -> ::std::option::Option<&crate::types::Bang>;
     }
 
     impl AsBang for ::anyhow::Error {
-        fn as_bang(&self) -> Option<&crate::types::Bang> {
+        fn as_bang(&self) -> ::std::option::Option<&crate::types::Bang> {
             for cause in self.chain() {
-                if let Some(ThingError::bang(e)) = cause.downcast_ref::<ThingError>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(ThingError::bang(e)) = cause.downcast_ref::<ThingError>() {
+                    return ::std::option::Option::Some(e);
                 }
             }
-            None
+            ::std::option::Option::None
         }
     }
 
@@ -215,7 +215,7 @@ pub mod c {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -223,13 +223,13 @@ pub mod c {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::bang(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -242,10 +242,10 @@ pub mod c {
     }
 
     impl AsBang for ThingError {
-        fn as_bang(&self) -> Option<&crate::types::Bang> {
+        fn as_bang(&self) -> ::std::option::Option<&crate::types::Bang> {
             match self {
-                Self::bang(inner) => Some(inner),
-                _ => None,
+                Self::bang(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }

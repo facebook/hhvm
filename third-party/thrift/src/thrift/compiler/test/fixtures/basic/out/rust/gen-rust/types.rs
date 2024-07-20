@@ -156,14 +156,14 @@ impl MyEnum {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::MyValue1, "MyValue1"),
             (Self::MyValue2, "MyValue2"),
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "MyValue1",
             "MyValue2",
@@ -239,7 +239,7 @@ impl ::fbthrift::GetTType for MyEnum {
 }
 
 impl ::fbthrift::GetUri for self::MyEnum {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/basic/MyEnum"
     }
 }
@@ -273,14 +273,14 @@ impl HackEnum {
 }
 
 impl ::fbthrift::ThriftEnum for HackEnum {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::Value1, "Value1"),
             (Self::Value2, "Value2"),
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "Value1",
             "Value2",
@@ -356,7 +356,7 @@ impl ::fbthrift::GetTType for HackEnum {
 }
 
 impl ::fbthrift::GetUri for self::HackEnum {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/basic/HackEnum"
     }
 }
@@ -427,7 +427,7 @@ impl ::fbthrift::GetTType for self::MyStruct {
 }
 
 impl ::fbthrift::GetUri for self::MyStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/basic/MyStruct"
     }
 }
@@ -543,10 +543,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -569,31 +569,31 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             8 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::SkipCodegen>() {
-                    let mut tmp = Some(hack__types::SkipCodegen {
+                    let mut tmp = ::std::option::Option::Some(hack__types::SkipCodegen {
                         reason: "Invalid key type".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             9 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::SkipCodegen>() {
-                    let mut tmp = Some(hack__types::SkipCodegen {
+                    let mut tmp = ::std::option::Option::Some(hack__types::SkipCodegen {
                         reason: "skip field codegen for deprecation".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -632,7 +632,7 @@ impl ::fbthrift::GetTType for self::Containers {
 }
 
 impl ::fbthrift::GetUri for self::Containers {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/basic/Containers"
     }
 }
@@ -706,10 +706,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Containers {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -724,7 +724,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Containers {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -757,7 +757,7 @@ impl ::fbthrift::GetTType for self::MyDataItem {
 }
 
 impl ::fbthrift::GetUri for self::MyDataItem {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/basic/MyDataItem"
     }
 }
@@ -810,10 +810,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyDataItem {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -822,7 +822,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyDataItem {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -839,7 +839,7 @@ impl ::fbthrift::GetTType for MyUnion {
 }
 
 impl ::fbthrift::GetUri for self::MyUnion {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/basic/MyUnion"
     }
 }
@@ -936,13 +936,13 @@ where
 
 impl MyUnion {
     /// Return current union variant name as a tuple of (Rust name, original name).
-    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
         match self {
-            Self::myEnum(_) => Some(("myEnum", "myEnum")),
-            Self::myStruct(_) => Some(("myStruct", "myStruct")),
-            Self::myDataItem(_) => Some(("myDataItem", "myDataItem")),
-            Self::floatSet(_) => Some(("floatSet", "floatSet")),
-            Self::UnknownField(_) => None,
+            Self::myEnum(_) => ::std::option::Option::Some(("myEnum", "myEnum")),
+            Self::myStruct(_) => ::std::option::Option::Some(("myStruct", "myStruct")),
+            Self::myDataItem(_) => ::std::option::Option::Some(("myDataItem", "myDataItem")),
+            Self::floatSet(_) => ::std::option::Option::Some(("floatSet", "floatSet")),
+            Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
 }
@@ -952,10 +952,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -970,19 +970,19 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
             4 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::SkipCodegen>() {
-                    let mut tmp = Some(hack__types::SkipCodegen {
+                    let mut tmp = ::std::option::Option::Some(hack__types::SkipCodegen {
                         reason: "Invalid key type".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1022,7 +1022,7 @@ impl ::fbthrift::GetTType for self::MyException {
 }
 
 impl ::fbthrift::GetUri for self::MyException {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/basic/MyException"
     }
 }
@@ -1103,10 +1103,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyException {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -1123,7 +1123,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyException {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1164,7 +1164,7 @@ impl ::fbthrift::GetTType for self::MyExceptionWithMessage {
 }
 
 impl ::fbthrift::GetUri for self::MyExceptionWithMessage {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/basic/MyExceptionWithMessage"
     }
 }
@@ -1245,10 +1245,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyExceptionWithMessage {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -1259,11 +1259,11 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyExceptionWithMessage {
             2 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
-                    let mut tmp = Some(thrift__types::ExceptionMessage {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
@@ -1274,7 +1274,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyExceptionWithMessage {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1309,7 +1309,7 @@ impl ::fbthrift::GetTType for self::ReservedKeyword {
 }
 
 impl ::fbthrift::GetUri for self::ReservedKeyword {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/basic/ReservedKeyword"
     }
 }
@@ -1370,24 +1370,24 @@ impl ::fbthrift::metadata::ThriftAnnotations for ReservedKeyword {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<hack__types::Name>() {
-            let mut tmp = Some(hack__types::Name {
+            let mut tmp = ::std::option::Option::Some(hack__types::Name {
                 name: "MyRenamedStruct".to_owned(),
                 reason: ::std::default::Default::default(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <hack__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <hack__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -1396,24 +1396,24 @@ impl ::fbthrift::metadata::ThriftAnnotations for ReservedKeyword {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Name>() {
-                    let mut tmp = Some(hack__types::Name {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Name {
                         name: "renamed_field".to_owned(),
                         reason: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <hack__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <hack__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1430,7 +1430,7 @@ impl ::fbthrift::GetTType for UnionToBeRenamed {
 }
 
 impl ::fbthrift::GetUri for self::UnionToBeRenamed {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/basic/UnionToBeRenamed"
     }
 }
@@ -1497,10 +1497,10 @@ where
 
 impl UnionToBeRenamed {
     /// Return current union variant name as a tuple of (Rust name, original name).
-    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
         match self {
-            Self::reserved_field(_) => Some(("reserved_field", "reserved_field")),
-            Self::UnknownField(_) => None,
+            Self::reserved_field(_) => ::std::option::Option::Some(("reserved_field", "reserved_field")),
+            Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
 }
@@ -1511,24 +1511,24 @@ impl ::fbthrift::metadata::ThriftAnnotations for UnionToBeRenamed {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<hack__types::Name>() {
-            let mut tmp = Some(hack__types::Name {
+            let mut tmp = ::std::option::Option::Some(hack__types::Name {
                 name: "MyRenamedUnion".to_owned(),
                 reason: ::std::default::Default::default(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        if let Some(r) = <hack__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
+        if let ::std::option::Option::Some(r) = <hack__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -1537,24 +1537,24 @@ impl ::fbthrift::metadata::ThriftAnnotations for UnionToBeRenamed {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Name>() {
-                    let mut tmp = Some(hack__types::Name {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Name {
                         name: "renamed_field".to_owned(),
                         reason: ::std::default::Default::default(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <hack__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <hack__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1569,7 +1569,7 @@ mod dot_dot {
 }
 
 pub(crate) mod r#impl {
-    use ref_cast::RefCast;
+    use ::ref_cast::RefCast;
 
     #[derive(RefCast)]
     #[repr(transparent)]

@@ -7,44 +7,44 @@
 pub mod pub_sub_streaming_service {
 
     pub trait AsFooEx {
-        fn as_foo_ex(&self) -> Option<&crate::types::FooEx>;
+        fn as_foo_ex(&self) -> ::std::option::Option<&crate::types::FooEx>;
     }
 
     impl AsFooEx for ::anyhow::Error {
-        fn as_foo_ex(&self) -> Option<&crate::types::FooEx> {
+        fn as_foo_ex(&self) -> ::std::option::Option<&crate::types::FooEx> {
             for cause in self.chain() {
-                if let Some(ServicethrowsError::e(e)) = cause.downcast_ref::<ServicethrowsError>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(ServicethrowsError::e(e)) = cause.downcast_ref::<ServicethrowsError>() {
+                    return ::std::option::Option::Some(e);
                 }
-                if let Some(Servicethrows2Error::e1(e)) = cause.downcast_ref::<Servicethrows2Error>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(Servicethrows2Error::e1(e)) = cause.downcast_ref::<Servicethrows2Error>() {
+                    return ::std::option::Option::Some(e);
                 }
-                if let Some(BoththrowsError::e(e)) = cause.downcast_ref::<BoththrowsError>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(BoththrowsError::e(e)) = cause.downcast_ref::<BoththrowsError>() {
+                    return ::std::option::Option::Some(e);
                 }
-                if let Some(ResponseandstreamservicethrowsError::e(e)) = cause.downcast_ref::<ResponseandstreamservicethrowsError>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(ResponseandstreamservicethrowsError::e(e)) = cause.downcast_ref::<ResponseandstreamservicethrowsError>() {
+                    return ::std::option::Option::Some(e);
                 }
-                if let Some(ResponseandstreamboththrowsError::e(e)) = cause.downcast_ref::<ResponseandstreamboththrowsError>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(ResponseandstreamboththrowsError::e(e)) = cause.downcast_ref::<ResponseandstreamboththrowsError>() {
+                    return ::std::option::Option::Some(e);
                 }
             }
-            None
+            ::std::option::Option::None
         }
     }
 
     pub trait AsFooEx2 {
-        fn as_foo_ex2(&self) -> Option<&crate::types::FooEx2>;
+        fn as_foo_ex2(&self) -> ::std::option::Option<&crate::types::FooEx2>;
     }
 
     impl AsFooEx2 for ::anyhow::Error {
-        fn as_foo_ex2(&self) -> Option<&crate::types::FooEx2> {
+        fn as_foo_ex2(&self) -> ::std::option::Option<&crate::types::FooEx2> {
             for cause in self.chain() {
-                if let Some(Servicethrows2Error::e2(e)) = cause.downcast_ref::<Servicethrows2Error>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(Servicethrows2Error::e2(e)) = cause.downcast_ref::<Servicethrows2Error>() {
+                    return ::std::option::Option::Some(e);
                 }
             }
-            None
+            ::std::option::Option::None
         }
     }
 
@@ -241,7 +241,7 @@ pub mod pub_sub_streaming_service {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -249,13 +249,13 @@ pub mod pub_sub_streaming_service {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::e(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -386,7 +386,7 @@ pub mod pub_sub_streaming_service {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -394,13 +394,13 @@ pub mod pub_sub_streaming_service {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::e(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -413,10 +413,10 @@ pub mod pub_sub_streaming_service {
     }
 
     impl AsFooEx for ServicethrowsError {
-        fn as_foo_ex(&self) -> Option<&crate::types::FooEx> {
+        fn as_foo_ex(&self) -> ::std::option::Option<&crate::types::FooEx> {
             match self {
-                Self::e(inner) => Some(inner),
-                _ => None,
+                Self::e(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -612,7 +612,7 @@ pub mod pub_sub_streaming_service {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -620,16 +620,16 @@ pub mod pub_sub_streaming_service {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::e1(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::e2(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -642,10 +642,10 @@ pub mod pub_sub_streaming_service {
     }
 
     impl AsFooEx for Servicethrows2Error {
-        fn as_foo_ex(&self) -> Option<&crate::types::FooEx> {
+        fn as_foo_ex(&self) -> ::std::option::Option<&crate::types::FooEx> {
             match self {
-                Self::e1(inner) => Some(inner),
-                _ => None,
+                Self::e1(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -657,10 +657,10 @@ pub mod pub_sub_streaming_service {
     }
 
     impl AsFooEx2 for Servicethrows2Error {
-        fn as_foo_ex2(&self) -> Option<&crate::types::FooEx2> {
+        fn as_foo_ex2(&self) -> ::std::option::Option<&crate::types::FooEx2> {
             match self {
-                Self::e2(inner) => Some(inner),
-                _ => None,
+                Self::e2(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -857,7 +857,7 @@ pub mod pub_sub_streaming_service {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -865,13 +865,13 @@ pub mod pub_sub_streaming_service {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::e(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -884,10 +884,10 @@ pub mod pub_sub_streaming_service {
     }
 
     impl AsFooEx for BoththrowsError {
-        fn as_foo_ex(&self) -> Option<&crate::types::FooEx> {
+        fn as_foo_ex(&self) -> ::std::option::Option<&crate::types::FooEx> {
             match self {
-                Self::e(inner) => Some(inner),
-                _ => None,
+                Self::e(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -1018,7 +1018,7 @@ pub mod pub_sub_streaming_service {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -1026,13 +1026,13 @@ pub mod pub_sub_streaming_service {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::e(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -1219,7 +1219,7 @@ pub mod pub_sub_streaming_service {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -1227,13 +1227,13 @@ pub mod pub_sub_streaming_service {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::e(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -1364,7 +1364,7 @@ pub mod pub_sub_streaming_service {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -1372,13 +1372,13 @@ pub mod pub_sub_streaming_service {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::e(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -1391,10 +1391,10 @@ pub mod pub_sub_streaming_service {
     }
 
     impl AsFooEx for ResponseandstreamservicethrowsError {
-        fn as_foo_ex(&self) -> Option<&crate::types::FooEx> {
+        fn as_foo_ex(&self) -> ::std::option::Option<&crate::types::FooEx> {
             match self {
-                Self::e(inner) => Some(inner),
-                _ => None,
+                Self::e(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -1588,7 +1588,7 @@ pub mod pub_sub_streaming_service {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -1596,13 +1596,13 @@ pub mod pub_sub_streaming_service {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::e(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -1615,10 +1615,10 @@ pub mod pub_sub_streaming_service {
     }
 
     impl AsFooEx for ResponseandstreamboththrowsError {
-        fn as_foo_ex(&self) -> Option<&crate::types::FooEx> {
+        fn as_foo_ex(&self) -> ::std::option::Option<&crate::types::FooEx> {
             match self {
-                Self::e(inner) => Some(inner),
-                _ => None,
+                Self::e(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -1755,7 +1755,7 @@ pub mod pub_sub_streaming_service {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -1763,13 +1763,13 @@ pub mod pub_sub_streaming_service {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::e(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }

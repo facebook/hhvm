@@ -137,18 +137,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<thrift__types::SerializeInFieldIdOrder>() {
-            let mut tmp = Some(thrift__types::SerializeInFieldIdOrder {
+            let mut tmp = ::std::option::Option::Some(thrift__types::SerializeInFieldIdOrder {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -163,7 +163,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -270,10 +270,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo2 {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -288,7 +288,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo2 {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -304,7 +304,7 @@ mod dot_dot {
 }
 
 pub(crate) mod r#impl {
-    use ref_cast::RefCast;
+    use ::ref_cast::RefCast;
 
     #[derive(RefCast)]
     #[repr(transparent)]

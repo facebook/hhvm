@@ -7,17 +7,17 @@
 pub mod my_interaction {
 
     pub trait AsCustomException {
-        fn as_custom_exception(&self) -> Option<&crate::types::CustomException>;
+        fn as_custom_exception(&self) -> ::std::option::Option<&crate::types::CustomException>;
     }
 
     impl AsCustomException for ::anyhow::Error {
-        fn as_custom_exception(&self) -> Option<&crate::types::CustomException> {
+        fn as_custom_exception(&self) -> ::std::option::Option<&crate::types::CustomException> {
             for cause in self.chain() {
-                if let Some(FrobnicateError::ex(e)) = cause.downcast_ref::<FrobnicateError>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(FrobnicateError::ex(e)) = cause.downcast_ref::<FrobnicateError>() {
+                    return ::std::option::Option::Some(e);
                 }
             }
-            None
+            ::std::option::Option::None
         }
     }
 
@@ -60,7 +60,7 @@ pub mod my_interaction {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -68,13 +68,13 @@ pub mod my_interaction {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::ex(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -87,10 +87,10 @@ pub mod my_interaction {
     }
 
     impl AsCustomException for FrobnicateError {
-        fn as_custom_exception(&self) -> Option<&crate::types::CustomException> {
+        fn as_custom_exception(&self) -> ::std::option::Option<&crate::types::CustomException> {
             match self {
-                Self::ex(inner) => Some(inner),
-                _ => None,
+                Self::ex(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -909,17 +909,17 @@ pub use self::my_service::*;
 pub mod my_interaction {
 
     pub trait AsCustomException {
-        fn as_custom_exception(&self) -> Option<&crate::types::CustomException>;
+        fn as_custom_exception(&self) -> ::std::option::Option<&crate::types::CustomException>;
     }
 
     impl AsCustomException for ::anyhow::Error {
-        fn as_custom_exception(&self) -> Option<&crate::types::CustomException> {
+        fn as_custom_exception(&self) -> ::std::option::Option<&crate::types::CustomException> {
             for cause in self.chain() {
-                if let Some(FrobnicateError::ex(e)) = cause.downcast_ref::<FrobnicateError>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(FrobnicateError::ex(e)) = cause.downcast_ref::<FrobnicateError>() {
+                    return ::std::option::Option::Some(e);
                 }
             }
-            None
+            ::std::option::Option::None
         }
     }
 
@@ -962,7 +962,7 @@ pub mod my_interaction {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -970,13 +970,13 @@ pub mod my_interaction {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::ex(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -989,10 +989,10 @@ pub mod my_interaction {
     }
 
     impl AsCustomException for FrobnicateError {
-        fn as_custom_exception(&self) -> Option<&crate::types::CustomException> {
+        fn as_custom_exception(&self) -> ::std::option::Option<&crate::types::CustomException> {
             match self {
-                Self::ex(inner) => Some(inner),
-                _ => None,
+                Self::ex(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -1811,17 +1811,17 @@ pub use self::factories::*;
 pub mod my_interaction {
 
     pub trait AsCustomException {
-        fn as_custom_exception(&self) -> Option<&crate::types::CustomException>;
+        fn as_custom_exception(&self) -> ::std::option::Option<&crate::types::CustomException>;
     }
 
     impl AsCustomException for ::anyhow::Error {
-        fn as_custom_exception(&self) -> Option<&crate::types::CustomException> {
+        fn as_custom_exception(&self) -> ::std::option::Option<&crate::types::CustomException> {
             for cause in self.chain() {
-                if let Some(FrobnicateError::ex(e)) = cause.downcast_ref::<FrobnicateError>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(FrobnicateError::ex(e)) = cause.downcast_ref::<FrobnicateError>() {
+                    return ::std::option::Option::Some(e);
                 }
             }
-            None
+            ::std::option::Option::None
         }
     }
 
@@ -1864,7 +1864,7 @@ pub mod my_interaction {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -1872,13 +1872,13 @@ pub mod my_interaction {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::ex(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -1891,10 +1891,10 @@ pub mod my_interaction {
     }
 
     impl AsCustomException for FrobnicateError {
-        fn as_custom_exception(&self) -> Option<&crate::types::CustomException> {
+        fn as_custom_exception(&self) -> ::std::option::Option<&crate::types::CustomException> {
             match self {
-                Self::ex(inner) => Some(inner),
-                _ => None,
+                Self::ex(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }

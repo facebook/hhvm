@@ -2089,7 +2089,7 @@ where
     fn createBadInteraction(
         &self,
     ) -> ::std::result::Result<BadInteractionClient, ::anyhow::Error> {
-        Ok(
+        ::std::result::Result::Ok(
             ::std::sync::Arc::new(
                 BadInteractionImpl::<P, T, S>::new(
                     self.transport().create_interaction(c"BadInteraction")?

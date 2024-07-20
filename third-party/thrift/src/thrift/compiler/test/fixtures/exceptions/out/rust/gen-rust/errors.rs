@@ -7,56 +7,56 @@
 pub mod raiser {
 
     pub trait AsBanal {
-        fn as_banal(&self) -> Option<&crate::types::Banal>;
+        fn as_banal(&self) -> ::std::option::Option<&crate::types::Banal>;
     }
 
     impl AsBanal for ::anyhow::Error {
-        fn as_banal(&self) -> Option<&crate::types::Banal> {
+        fn as_banal(&self) -> ::std::option::Option<&crate::types::Banal> {
             for cause in self.chain() {
-                if let Some(DoRaiseError::b(e)) = cause.downcast_ref::<DoRaiseError>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(DoRaiseError::b(e)) = cause.downcast_ref::<DoRaiseError>() {
+                    return ::std::option::Option::Some(e);
                 }
-                if let Some(Get500Error::b(e)) = cause.downcast_ref::<Get500Error>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(Get500Error::b(e)) = cause.downcast_ref::<Get500Error>() {
+                    return ::std::option::Option::Some(e);
                 }
             }
-            None
+            ::std::option::Option::None
         }
     }
 
     pub trait AsFiery {
-        fn as_fiery(&self) -> Option<&crate::types::Fiery>;
+        fn as_fiery(&self) -> ::std::option::Option<&crate::types::Fiery>;
     }
 
     impl AsFiery for ::anyhow::Error {
-        fn as_fiery(&self) -> Option<&crate::types::Fiery> {
+        fn as_fiery(&self) -> ::std::option::Option<&crate::types::Fiery> {
             for cause in self.chain() {
-                if let Some(DoRaiseError::f(e)) = cause.downcast_ref::<DoRaiseError>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(DoRaiseError::f(e)) = cause.downcast_ref::<DoRaiseError>() {
+                    return ::std::option::Option::Some(e);
                 }
-                if let Some(Get500Error::f(e)) = cause.downcast_ref::<Get500Error>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(Get500Error::f(e)) = cause.downcast_ref::<Get500Error>() {
+                    return ::std::option::Option::Some(e);
                 }
             }
-            None
+            ::std::option::Option::None
         }
     }
 
     pub trait AsSerious {
-        fn as_serious(&self) -> Option<&crate::types::Serious>;
+        fn as_serious(&self) -> ::std::option::Option<&crate::types::Serious>;
     }
 
     impl AsSerious for ::anyhow::Error {
-        fn as_serious(&self) -> Option<&crate::types::Serious> {
+        fn as_serious(&self) -> ::std::option::Option<&crate::types::Serious> {
             for cause in self.chain() {
-                if let Some(DoRaiseError::s(e)) = cause.downcast_ref::<DoRaiseError>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(DoRaiseError::s(e)) = cause.downcast_ref::<DoRaiseError>() {
+                    return ::std::option::Option::Some(e);
                 }
-                if let Some(Get500Error::s(e)) = cause.downcast_ref::<Get500Error>() {
-                    return Some(e);
+                if let ::std::option::Option::Some(Get500Error::s(e)) = cause.downcast_ref::<Get500Error>() {
+                    return ::std::option::Option::Some(e);
                 }
             }
-            None
+            ::std::option::Option::None
         }
     }
 
@@ -165,7 +165,7 @@ pub mod raiser {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -173,19 +173,19 @@ pub mod raiser {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::b(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::f(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::s(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -198,10 +198,10 @@ pub mod raiser {
     }
 
     impl AsBanal for DoRaiseError {
-        fn as_banal(&self) -> Option<&crate::types::Banal> {
+        fn as_banal(&self) -> ::std::option::Option<&crate::types::Banal> {
             match self {
-                Self::b(inner) => Some(inner),
-                _ => None,
+                Self::b(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -213,10 +213,10 @@ pub mod raiser {
     }
 
     impl AsFiery for DoRaiseError {
-        fn as_fiery(&self) -> Option<&crate::types::Fiery> {
+        fn as_fiery(&self) -> ::std::option::Option<&crate::types::Fiery> {
             match self {
-                Self::f(inner) => Some(inner),
-                _ => None,
+                Self::f(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -228,10 +228,10 @@ pub mod raiser {
     }
 
     impl AsSerious for DoRaiseError {
-        fn as_serious(&self) -> Option<&crate::types::Serious> {
+        fn as_serious(&self) -> ::std::option::Option<&crate::types::Serious> {
             match self {
-                Self::s(inner) => Some(inner),
-                _ => None,
+                Self::s(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -451,7 +451,7 @@ pub mod raiser {
                 }
             }
 
-            Ok(())
+            ::std::result::Result::Ok(())
         }
     }
 
@@ -459,19 +459,19 @@ pub mod raiser {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 Self::f(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::b(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::s(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ApplicationException(ref inner) => {
-                    Some(inner)
+                    ::std::option::Option::Some(inner)
                 }
                 Self::ThriftError(ref inner) => {
-                    Some(inner.as_ref())
+                    ::std::option::Option::Some(inner.as_ref())
                 }
             }
         }
@@ -484,10 +484,10 @@ pub mod raiser {
     }
 
     impl AsFiery for Get500Error {
-        fn as_fiery(&self) -> Option<&crate::types::Fiery> {
+        fn as_fiery(&self) -> ::std::option::Option<&crate::types::Fiery> {
             match self {
-                Self::f(inner) => Some(inner),
-                _ => None,
+                Self::f(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -499,10 +499,10 @@ pub mod raiser {
     }
 
     impl AsBanal for Get500Error {
-        fn as_banal(&self) -> Option<&crate::types::Banal> {
+        fn as_banal(&self) -> ::std::option::Option<&crate::types::Banal> {
             match self {
-                Self::b(inner) => Some(inner),
-                _ => None,
+                Self::b(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }
@@ -514,10 +514,10 @@ pub mod raiser {
     }
 
     impl AsSerious for Get500Error {
-        fn as_serious(&self) -> Option<&crate::types::Serious> {
+        fn as_serious(&self) -> ::std::option::Option<&crate::types::Serious> {
             match self {
-                Self::s(inner) => Some(inner),
-                _ => None,
+                Self::s(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
             }
         }
     }

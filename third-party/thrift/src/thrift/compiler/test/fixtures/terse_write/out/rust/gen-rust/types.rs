@@ -200,14 +200,14 @@ impl MyEnum {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::ME0, "ME0"),
             (Self::ME1, "ME1"),
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "ME0",
             "ME1",
@@ -283,7 +283,7 @@ impl ::fbthrift::GetTType for MyEnum {
 }
 
 impl ::fbthrift::GetUri for self::MyEnum {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/terse_write/MyEnum"
     }
 }
@@ -336,7 +336,7 @@ impl ::fbthrift::GetTType for self::MyStruct {
 }
 
 impl ::fbthrift::GetUri for self::MyStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/terse_write/MyStruct"
     }
 }
@@ -389,10 +389,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -401,7 +401,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -418,7 +418,7 @@ impl ::fbthrift::GetTType for MyUnion {
 }
 
 impl ::fbthrift::GetUri for self::MyUnion {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/terse_write/MyUnion"
     }
 }
@@ -615,23 +615,23 @@ where
 
 impl MyUnion {
     /// Return current union variant name as a tuple of (Rust name, original name).
-    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
         match self {
-            Self::bool_field(_) => Some(("bool_field", "bool_field")),
-            Self::byte_field(_) => Some(("byte_field", "byte_field")),
-            Self::short_field(_) => Some(("short_field", "short_field")),
-            Self::int_field(_) => Some(("int_field", "int_field")),
-            Self::long_field(_) => Some(("long_field", "long_field")),
-            Self::float_field(_) => Some(("float_field", "float_field")),
-            Self::double_field(_) => Some(("double_field", "double_field")),
-            Self::string_field(_) => Some(("string_field", "string_field")),
-            Self::binary_field(_) => Some(("binary_field", "binary_field")),
-            Self::enum_field(_) => Some(("enum_field", "enum_field")),
-            Self::list_field(_) => Some(("list_field", "list_field")),
-            Self::set_field(_) => Some(("set_field", "set_field")),
-            Self::map_field(_) => Some(("map_field", "map_field")),
-            Self::struct_field(_) => Some(("struct_field", "struct_field")),
-            Self::UnknownField(_) => None,
+            Self::bool_field(_) => ::std::option::Option::Some(("bool_field", "bool_field")),
+            Self::byte_field(_) => ::std::option::Option::Some(("byte_field", "byte_field")),
+            Self::short_field(_) => ::std::option::Option::Some(("short_field", "short_field")),
+            Self::int_field(_) => ::std::option::Option::Some(("int_field", "int_field")),
+            Self::long_field(_) => ::std::option::Option::Some(("long_field", "long_field")),
+            Self::float_field(_) => ::std::option::Option::Some(("float_field", "float_field")),
+            Self::double_field(_) => ::std::option::Option::Some(("double_field", "double_field")),
+            Self::string_field(_) => ::std::option::Option::Some(("string_field", "string_field")),
+            Self::binary_field(_) => ::std::option::Option::Some(("binary_field", "binary_field")),
+            Self::enum_field(_) => ::std::option::Option::Some(("enum_field", "enum_field")),
+            Self::list_field(_) => ::std::option::Option::Some(("list_field", "list_field")),
+            Self::set_field(_) => ::std::option::Option::Some(("set_field", "set_field")),
+            Self::map_field(_) => ::std::option::Option::Some(("map_field", "map_field")),
+            Self::struct_field(_) => ::std::option::Option::Some(("struct_field", "struct_field")),
+            Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
 }
@@ -641,10 +641,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -681,7 +681,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -715,7 +715,7 @@ impl ::fbthrift::GetTType for self::MyStructWithCustomDefault {
 }
 
 impl ::fbthrift::GetUri for self::MyStructWithCustomDefault {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/terse_write/MyStructWithCustomDefault"
     }
 }
@@ -775,10 +775,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStructWithCustomDefault {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -789,7 +789,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStructWithCustomDefault {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -852,7 +852,7 @@ impl ::fbthrift::GetTType for self::StructLevelTerseStruct {
 }
 
 impl ::fbthrift::GetUri for self::StructLevelTerseStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/terse_write/StructLevelTerseStruct"
     }
 }
@@ -1011,18 +1011,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructLevelTerseStruct {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-            let mut tmp = Some(thrift__types::TerseWrite {
+            let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -1061,7 +1061,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructLevelTerseStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1154,7 +1154,7 @@ impl ::fbthrift::GetTType for self::FieldLevelTerseStruct {
 }
 
 impl ::fbthrift::GetUri for self::FieldLevelTerseStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/terse_write/FieldLevelTerseStruct"
     }
 }
@@ -1417,10 +1417,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -1429,165 +1429,165 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             2 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             3 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             4 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             5 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             6 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             7 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             8 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             9 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             10 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             11 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             12 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             13 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             14 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             29 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                    let mut tmp = Some(thrift__types::TerseWrite {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
@@ -1624,7 +1624,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1695,7 +1695,7 @@ impl ::fbthrift::GetTType for self::TerseStructWithCustomDefault {
 }
 
 impl ::fbthrift::GetUri for self::TerseStructWithCustomDefault {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/terse_write/TerseStructWithCustomDefault"
     }
 }
@@ -1857,18 +1857,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseStructWithCustomDefault {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-            let mut tmp = Some(thrift__types::TerseWrite {
+            let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -1905,7 +1905,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseStructWithCustomDefault {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1944,7 +1944,7 @@ impl ::fbthrift::GetTType for self::AdaptedFields {
 }
 
 impl ::fbthrift::GetUri for self::AdaptedFields {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/terse_write/AdaptedFields"
     }
 }
@@ -2019,18 +2019,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedFields {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-            let mut tmp = Some(thrift__types::TerseWrite {
+            let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -2041,17 +2041,17 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedFields {
             2 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
-                    let mut tmp = Some(hack__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(hack__types::Adapter {
                         name: "\\Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -2060,18 +2060,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedFields {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             3 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                    let mut tmp = Some(cpp__types::Adapter {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -2080,18 +2080,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedFields {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
 
-                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -2126,7 +2126,7 @@ impl ::fbthrift::GetTType for self::WrappedFields {
 }
 
 impl ::fbthrift::GetUri for self::WrappedFields {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/terse_write/WrappedFields"
     }
 }
@@ -2187,18 +2187,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for WrappedFields {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-            let mut tmp = Some(thrift__types::TerseWrite {
+            let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -2207,19 +2207,19 @@ impl ::fbthrift::metadata::ThriftAnnotations for WrappedFields {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<hack__types::FieldWrapper>() {
-                    let mut tmp = Some(hack__types::FieldWrapper {
+                    let mut tmp = ::std::option::Option::Some(hack__types::FieldWrapper {
                         name: "\\MyFieldWrapper".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -2254,7 +2254,7 @@ impl ::fbthrift::GetTType for self::TerseException {
 }
 
 impl ::fbthrift::GetUri for self::TerseException {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "facebook.com/thrift/test/terse_write/TerseException"
     }
 }
@@ -2315,18 +2315,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseException {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-            let mut tmp = Some(thrift__types::TerseWrite {
+            let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -2335,18 +2335,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseException {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
-                    let mut tmp = Some(thrift__types::ExceptionMessage {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -2362,7 +2362,7 @@ mod dot_dot {
 }
 
 pub(crate) mod r#impl {
-    use ref_cast::RefCast;
+    use ::ref_cast::RefCast;
 
     #[derive(RefCast)]
     #[repr(transparent)]

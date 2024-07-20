@@ -293,10 +293,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Fiery {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -305,18 +305,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for Fiery {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
-                    let mut tmp = Some(thrift__types::ExceptionMessage {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -407,10 +407,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Serious {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -419,18 +419,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for Serious {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
-                    let mut tmp = Some(thrift__types::ExceptionMessage {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -528,10 +528,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ComplexFieldNames {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -542,18 +542,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for ComplexFieldNames {
             2 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
-                    let mut tmp = Some(thrift__types::ExceptionMessage {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -651,10 +651,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for CustomFieldNames {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -665,18 +665,18 @@ impl ::fbthrift::metadata::ThriftAnnotations for CustomFieldNames {
             2 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
-                    let mut tmp = Some(thrift__types::ExceptionMessage {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -774,10 +774,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithPrimitiveField {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -786,11 +786,11 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithPrimitiveField {
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
-                    let mut tmp = Some(thrift__types::ExceptionMessage {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
@@ -799,7 +799,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithPrimitiveField {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -897,10 +897,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithStructuredAnnotati
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -909,11 +909,11 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithStructuredAnnotati
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
-                    let mut tmp = Some(thrift__types::ExceptionMessage {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
@@ -922,7 +922,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithStructuredAnnotati
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1002,10 +1002,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Banal {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -1014,7 +1014,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Banal {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1030,7 +1030,7 @@ mod dot_dot {
 }
 
 pub(crate) mod r#impl {
-    use ref_cast::RefCast;
+    use ::ref_cast::RefCast;
 
     #[derive(RefCast)]
     #[repr(transparent)]

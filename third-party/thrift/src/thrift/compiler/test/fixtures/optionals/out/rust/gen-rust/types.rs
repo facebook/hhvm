@@ -69,7 +69,7 @@ impl Animal {
 }
 
 impl ::fbthrift::ThriftEnum for Animal {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::DOG, "DOG"),
             (Self::CAT, "CAT"),
@@ -77,7 +77,7 @@ impl ::fbthrift::ThriftEnum for Animal {
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "DOG",
             "CAT",
@@ -287,10 +287,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Color {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -307,7 +307,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Color {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -440,10 +440,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Vehicle {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -462,7 +462,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Vehicle {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -648,10 +648,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Person {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -680,7 +680,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Person {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -696,7 +696,7 @@ mod dot_dot {
 }
 
 pub(crate) mod r#impl {
-    use ref_cast::RefCast;
+    use ::ref_cast::RefCast;
 
     #[derive(RefCast)]
     #[repr(transparent)]

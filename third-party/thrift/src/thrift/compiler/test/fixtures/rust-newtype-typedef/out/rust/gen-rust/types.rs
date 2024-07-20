@@ -250,10 +250,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -276,7 +276,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -292,7 +292,7 @@ mod dot_dot {
 }
 
 pub(crate) mod r#impl {
-    use ref_cast::RefCast;
+    use ::ref_cast::RefCast;
 
     #[derive(RefCast)]
     #[repr(transparent)]
@@ -341,10 +341,10 @@ pub(crate) mod r#impl {
         fn with_capacity(capacity: usize) -> Self {
             LocalImpl(<::smallvec::SmallVec<[u8; 16]>>::with_capacity(capacity))
         }
-        fn extend_from_slice(&mut self, other: &[u8]) {
+        fn extend_from_slice(&mut self, other: &[::std::primitive::u8]) {
             self.0.extend_from_slice(other)
         }
-        fn from_vec(vec: ::std::vec::Vec<u8>) -> Self {
+        fn from_vec(vec: ::std::vec::Vec<::std::primitive::u8>) -> Self {
             LocalImpl(::std::convert::Into::into(vec))
         }
     }
@@ -373,10 +373,10 @@ pub(crate) mod r#impl {
         fn with_capacity(capacity: usize) -> Self {
             LocalImpl(<::smallvec::SmallVec<[u8; 32]>>::with_capacity(capacity))
         }
-        fn extend_from_slice(&mut self, other: &[u8]) {
+        fn extend_from_slice(&mut self, other: &[::std::primitive::u8]) {
             self.0.extend_from_slice(other)
         }
-        fn from_vec(vec: ::std::vec::Vec<u8>) -> Self {
+        fn from_vec(vec: ::std::vec::Vec<::std::primitive::u8>) -> Self {
             LocalImpl(::std::convert::Into::into(vec))
         }
     }
@@ -411,8 +411,8 @@ pub(crate) mod r#impl {
             let (_key_ty, _val_ty, len) = p.read_map_begin()?;
             let mut map = <crate::types::MapType>::with_capacity(len.unwrap_or_default());
 
-            if let Some(0) = len {
-                return Ok(LocalImpl(map));
+            if let ::std::option::Option::Some(0) = len {
+                return ::std::result::Result::Ok(LocalImpl(map));
             }
 
             let mut idx = 0;

@@ -16,7 +16,7 @@
 
 }}
 
-    use ref_cast::RefCast;
+    use ::ref_cast::RefCast;
 
     #[derive(RefCast)]
     #[repr(transparent)]
@@ -71,8 +71,8 @@
             let (_elem_ty, len) = p.read_set_begin()?;
             let mut set = <{{>lib/type}}>::with_capacity(len.unwrap_or_default());
 
-            if let Some(0) = len {
-                return Ok(LocalImpl(set));
+            if let ::std::option::Option::Some(0) = len {
+                return ::std::result::Result::Ok(LocalImpl(set));
             }
 
             let mut idx = 0;
@@ -128,8 +128,8 @@
             let (_key_ty, _val_ty, len) = p.read_map_begin()?;
             let mut map = <{{>lib/type}}>::with_capacity(len.unwrap_or_default());
 
-            if let Some(0) = len {
-                return Ok(LocalImpl(map));
+            if let ::std::option::Option::Some(0) = len {
+                return ::std::result::Result::Ok(LocalImpl(map));
             }
 
             let mut idx = 0;
@@ -181,10 +181,10 @@
         fn with_capacity(capacity: usize) -> Self {
             LocalImpl(<{{>lib/rawtype}}>::with_capacity(capacity))
         }
-        fn extend_from_slice(&mut self, other: &[u8]) {
+        fn extend_from_slice(&mut self, other: &[::std::primitive::u8]) {
             self.0.extend_from_slice(other)
         }
-        fn from_vec(vec: ::std::vec::Vec<u8>) -> Self {
+        fn from_vec(vec: ::std::vec::Vec<::std::primitive::u8>) -> Self {
             LocalImpl(::std::convert::Into::into(vec))
         }
     }{{!
@@ -210,7 +210,7 @@
     {
         #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
-          Ok(LocalImpl({{>lib/type}}::read(p)?))
+            ::std::result::Result::Ok(LocalImpl({{>lib/type}}::read(p)?))
         }
     }{{!
     }}{{/type:i64?}}{{/typedef:newtype?}}{{!
@@ -246,8 +246,8 @@
             let (_elem_ty, len) = p.read_set_begin()?;
             let mut set = <{{>lib/annfieldtype}}>::with_capacity(len.unwrap_or_default());
 
-            if let Some(0) = len {
-                return Ok(LocalImpl(set));
+            if let ::std::option::Option::Some(0) = len {
+                return ::std::result::Result::Ok(LocalImpl(set));
             }
 
             let mut idx = 0;
@@ -303,8 +303,8 @@
             let (_key_ty, _val_ty, len) = p.read_map_begin()?;
             let mut map = <{{>lib/annfieldtype}}>::with_capacity(len.unwrap_or_default());
 
-            if let Some(0) = len {
-                return Ok(LocalImpl(map));
+            if let ::std::option::Option::Some(0) = len {
+                return ::std::result::Result::Ok(LocalImpl(map));
             }
 
             let mut idx = 0;
@@ -356,10 +356,10 @@
         fn with_capacity(capacity: usize) -> Self {
             LocalImpl(<{{>lib/annfieldtype}}>::with_capacity(capacity))
         }
-        fn extend_from_slice(&mut self, other: &[u8]) {
+        fn extend_from_slice(&mut self, other: &[::std::primitive::u8]) {
             self.0.extend_from_slice(other)
         }
-        fn from_vec(vec: ::std::vec::Vec<u8>) -> Self {
+        fn from_vec(vec: ::std::vec::Vec<::std::primitive::u8>) -> Self {
             LocalImpl(::std::convert::Into::into(vec))
         }
     }{{!
@@ -385,7 +385,7 @@
     {
         #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
-          Ok(LocalImpl({{>lib/annfieldtype}}::read(p)?))
+            ::std::result::Result::Ok(LocalImpl({{>lib/annfieldtype}}::read(p)?))
         }
     }{{!
 

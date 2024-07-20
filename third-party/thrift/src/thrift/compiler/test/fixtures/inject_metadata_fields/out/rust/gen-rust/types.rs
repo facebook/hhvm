@@ -140,10 +140,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Fields {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -154,7 +154,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Fields {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -244,19 +244,19 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedToEmptyStruct {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<internal__types::InjectMetadataFields>() {
-            let mut tmp = Some(internal__types::InjectMetadataFields {
+            let mut tmp = ::std::option::Option::Some(internal__types::InjectMetadataFields {
                 r#type: "Fields".to_owned(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -267,7 +267,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedToEmptyStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -366,19 +366,19 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedToStruct {
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<internal__types::InjectMetadataFields>() {
-            let mut tmp = Some(internal__types::InjectMetadataFields {
+            let mut tmp = ::std::option::Option::Some(internal__types::InjectMetadataFields {
                 r#type: "Fields".to_owned(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -391,7 +391,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedToStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -512,19 +512,19 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedWithIncludedStruc
         let type_id = ::std::any::TypeId::of::<T>();
 
         if type_id == ::std::any::TypeId::of::<internal__types::InjectMetadataFields>() {
-            let mut tmp = Some(internal__types::InjectMetadataFields {
+            let mut tmp = ::std::option::Option::Some(internal__types::InjectMetadataFields {
                 r#type: "foo.Fields".to_owned(),
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -537,29 +537,29 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedWithIncludedStruc
             -1101 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
-                    let mut tmp = Some(thrift__types::Box {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             -1102 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
-                    let mut tmp = Some(thrift__types::Box {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
             },
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -575,7 +575,7 @@ mod dot_dot {
 }
 
 pub(crate) mod r#impl {
-    use ref_cast::RefCast;
+    use ::ref_cast::RefCast;
 
     #[derive(RefCast)]
     #[repr(transparent)]

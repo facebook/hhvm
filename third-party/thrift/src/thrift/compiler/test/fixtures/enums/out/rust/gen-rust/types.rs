@@ -47,7 +47,7 @@ impl Metasyntactic {
 }
 
 impl ::fbthrift::ThriftEnum for Metasyntactic {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::FOO, "FOO"),
             (Self::BAR, "BAR"),
@@ -56,7 +56,7 @@ impl ::fbthrift::ThriftEnum for Metasyntactic {
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "FOO",
             "BAR",
@@ -140,7 +140,7 @@ impl ::fbthrift::GetTType for Metasyntactic {
 }
 
 impl ::fbthrift::GetUri for self::Metasyntactic {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/enums/Metasyntactic"
     }
 }
@@ -178,7 +178,7 @@ impl MyEnum1 {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum1 {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::ME1_0, "ME1_0"),
             (Self::ME1_1, "ME1_1"),
@@ -189,7 +189,7 @@ impl ::fbthrift::ThriftEnum for MyEnum1 {
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "ME1_0",
             "ME1_1",
@@ -281,7 +281,7 @@ impl ::fbthrift::GetTType for MyEnum1 {
 }
 
 impl ::fbthrift::GetUri for self::MyEnum1 {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/enums/MyEnum1"
     }
 }
@@ -316,7 +316,7 @@ impl MyEnum2 {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum2 {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::ME2_0, "ME2_0"),
             (Self::ME2_1, "ME2_1"),
@@ -324,7 +324,7 @@ impl ::fbthrift::ThriftEnum for MyEnum2 {
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "ME2_0",
             "ME2_1",
@@ -404,7 +404,7 @@ impl ::fbthrift::GetTType for MyEnum2 {
 }
 
 impl ::fbthrift::GetUri for self::MyEnum2 {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/enums/MyEnum2"
     }
 }
@@ -442,7 +442,7 @@ impl MyEnum3 {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum3 {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::ME3_0, "ME3_0"),
             (Self::ME3_1, "ME3_1"),
@@ -453,7 +453,7 @@ impl ::fbthrift::ThriftEnum for MyEnum3 {
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "ME3_0",
             "ME3_1",
@@ -545,7 +545,7 @@ impl ::fbthrift::GetTType for MyEnum3 {
 }
 
 impl ::fbthrift::GetUri for self::MyEnum3 {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/enums/MyEnum3"
     }
 }
@@ -581,7 +581,7 @@ impl MyEnum4 {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum4 {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::ME4_A, "ME4_A"),
             (Self::ME4_B, "ME4_B"),
@@ -590,7 +590,7 @@ impl ::fbthrift::ThriftEnum for MyEnum4 {
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "ME4_A",
             "ME4_B",
@@ -674,7 +674,7 @@ impl ::fbthrift::GetTType for MyEnum4 {
 }
 
 impl ::fbthrift::GetUri for self::MyEnum4 {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/enums/MyEnum4"
     }
 }
@@ -709,7 +709,7 @@ impl MyBitmaskEnum1 {
 }
 
 impl ::fbthrift::ThriftEnum for MyBitmaskEnum1 {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::ONE, "ONE"),
             (Self::TWO, "TWO"),
@@ -717,7 +717,7 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum1 {
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "ONE",
             "TWO",
@@ -797,7 +797,7 @@ impl ::fbthrift::GetTType for MyBitmaskEnum1 {
 }
 
 impl ::fbthrift::GetUri for self::MyBitmaskEnum1 {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/enums/MyBitmaskEnum1"
     }
 }
@@ -832,7 +832,7 @@ impl MyBitmaskEnum2 {
 }
 
 impl ::fbthrift::ThriftEnum for MyBitmaskEnum2 {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::ONE, "ONE"),
             (Self::TWO, "TWO"),
@@ -840,7 +840,7 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum2 {
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "ONE",
             "TWO",
@@ -920,7 +920,7 @@ impl ::fbthrift::GetTType for MyBitmaskEnum2 {
 }
 
 impl ::fbthrift::GetUri for self::MyBitmaskEnum2 {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/enums/MyBitmaskEnum2"
     }
 }
@@ -981,7 +981,7 @@ impl ::fbthrift::GetTType for self::SomeStruct {
 }
 
 impl ::fbthrift::GetUri for self::SomeStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/enums/SomeStruct"
     }
 }
@@ -1062,10 +1062,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for SomeStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -1082,7 +1082,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for SomeStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1123,7 +1123,7 @@ impl ::fbthrift::GetTType for self::MyStruct {
 }
 
 impl ::fbthrift::GetUri for self::MyStruct {
-    fn uri() -> &'static str {
+    fn uri() -> &'static ::std::primitive::str {
         "test.dev/fixtures/enums/MyStruct"
     }
 }
@@ -1204,10 +1204,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -1224,7 +1224,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -1240,7 +1240,7 @@ mod dot_dot {
 }
 
 pub(crate) mod r#impl {
-    use ref_cast::RefCast;
+    use ::ref_cast::RefCast;
 
     #[derive(RefCast)]
     #[repr(transparent)]

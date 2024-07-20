@@ -78,14 +78,14 @@ impl MyEnum {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum {
-    fn enumerate() -> &'static [(Self, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
             (Self::MyValue1, "MyValue1"),
             (Self::MyValue2, "MyValue2"),
         ]
     }
 
-    fn variants() -> &'static [&'static str] {
+    fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
             "MyValue1",
             "MyValue2",
@@ -291,10 +291,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -311,7 +311,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -391,10 +391,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyDataItem {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -403,7 +403,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyDataItem {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -501,12 +501,12 @@ where
 
 impl MyUnion {
     /// Return current union variant name as a tuple of (Rust name, original name).
-    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
         match self {
-            Self::myEnum(_) => Some(("myEnum", "myEnum")),
-            Self::myStruct(_) => Some(("myStruct", "myStruct")),
-            Self::myDataItem(_) => Some(("myDataItem", "myDataItem")),
-            Self::UnknownField(_) => None,
+            Self::myEnum(_) => ::std::option::Option::Some(("myEnum", "myEnum")),
+            Self::myStruct(_) => ::std::option::Option::Some(("myStruct", "myStruct")),
+            Self::myDataItem(_) => ::std::option::Option::Some(("myDataItem", "myDataItem")),
+            Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
 }
@@ -516,10 +516,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -534,7 +534,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -613,10 +613,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyException {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -625,7 +625,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyException {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -641,7 +641,7 @@ mod dot_dot {
 }
 
 pub(crate) mod r#impl {
-    use ref_cast::RefCast;
+    use ::ref_cast::RefCast;
 
     #[derive(RefCast)]
     #[repr(transparent)]

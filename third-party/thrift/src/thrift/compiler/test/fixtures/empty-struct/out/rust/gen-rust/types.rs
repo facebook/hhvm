@@ -98,10 +98,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Empty {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -110,7 +110,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Empty {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -178,9 +178,9 @@ where
 
 impl Nada {
     /// Return current union variant name as a tuple of (Rust name, original name).
-    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
         match self {
-            Self::UnknownField(_) => None,
+            Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
 }
@@ -190,10 +190,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Nada {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        None
+        ::std::option::Option::None
     }
 
-    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
@@ -202,7 +202,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Nada {
             _ => {}
         }
 
-        None
+        ::std::option::Option::None
     }
 }
 
@@ -217,7 +217,7 @@ mod dot_dot {
 }
 
 pub(crate) mod r#impl {
-    use ref_cast::RefCast;
+    use ::ref_cast::RefCast;
 
     #[derive(RefCast)]
     #[repr(transparent)]

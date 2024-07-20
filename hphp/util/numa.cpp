@@ -18,6 +18,8 @@
 #ifdef HAVE_NUMA
 #include "hphp/util/portability.h"
 #include <folly/Bits.h>
+#include <numaif.h>
+
 extern "C" {
 HHVM_ATTRIBUTE_WEAK extern void numa_init();
 }
@@ -137,6 +139,17 @@ void numa_interleave(void* start, size_t size) {
 void numa_bind_to(void* start, size_t size, uint32_t node) {
   if (!use_numa) return;
   numa_tonode_memory(start, size, (int)node);
+}
+
+void SavedNumaPolicy::save() {
+  needRestore = !get_mempolicy(&oldPolicy, &oldMask, sizeof(oldMask),
+                               nullptr, 0);
+}
+
+SavedNumaPolicy::~SavedNumaPolicy() {
+  if (needRestore) {
+    set_mempolicy(oldPolicy, &oldMask, sizeof(oldMask));
+  }
 }
 
 #endif

@@ -395,32 +395,6 @@ inline void* mmap_1g_impl(void* addr, bool map_fixed) {
 }
 #endif
 
-#ifdef HAVE_NUMA
-namespace {
-// We support at most 32 NUMA nodes (numa_node_set in 32-bit), so a single
-// unsigned long is more than enough for the mask.  This can be used in jemalloc
-// allocation hooks, so it is wise to avoid calling malloc/free here, even
-// though jemalloc might still be able to handle reentrance correctly.  Thus, we
-// bypass libnuma and do the syscalls directly here.
-struct SavedNumaPolicy {
-  bool needRestore{false};
-  int oldPolicy{0};
-  unsigned long oldMask{0};
-
-  // Save NUMA policy for the current thread.
-  void save() {
-    needRestore = !get_mempolicy(&oldPolicy, &oldMask, sizeof(oldMask),
-                                 nullptr, 0);
-  }
-  ~SavedNumaPolicy() {
-    if (needRestore) {
-      set_mempolicy(oldPolicy, &oldMask, sizeof(oldMask));
-    }
-  }
-};
-}
-#endif
-
 void* mmap_2m(int node) {
 #ifdef __linux__
   if (get_huge2m_info(node).free_hugepages <= 0) return nullptr;

@@ -75,6 +75,19 @@ inline bool numa_node_allowed(uint32_t node) {
   return numa_node_set & (1u << node);
 }
 
+// Utility to save previous NUMA policy while doing node-specific allocations.
+// Note that we cannot call `malloc()` in the implementation here, because we
+// want to use it in jemalloc allocation hooks.
+struct SavedNumaPolicy {
+  bool needRestore{false};
+  int oldPolicy{0};
+  unsigned long oldMask{0};
+
+  // Save NUMA policy for the current thread.
+  void save();
+  ~SavedNumaPolicy();
+};
+
 #else // HAVE_NUMA undefined
 
 inline void init_numa() {}

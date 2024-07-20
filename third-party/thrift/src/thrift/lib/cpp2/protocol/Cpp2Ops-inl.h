@@ -670,7 +670,7 @@ class Cpp2Ops<
     typedef typename std::remove_cv<
         typename std::remove_reference<decltype(*value->begin())>::type>::type
         PairType;
-    typedef typename PairType::second_type ValueType;
+    typedef folly::remove_cvref_t<typename PairType::second_type> ValueType;
     uint32_t xfer = 0;
     xfer += prot->writeMapBegin(
         Cpp2Ops<KeyType>::thriftType(),
@@ -692,7 +692,7 @@ class Cpp2Ops<
     typedef typename std::remove_cv<
         typename std::remove_reference<decltype(*value->begin())>::type>::type
         PairType;
-    typedef typename PairType::second_type ValueType;
+    typedef folly::remove_cvref_t<typename PairType::second_type> ValueType;
     value->clear();
     uint32_t size;
     protocol::TType keytype, valuetype;
@@ -712,7 +712,7 @@ class Cpp2Ops<
     typedef typename std::remove_cv<
         typename std::remove_reference<decltype(*value->begin())>::type>::type
         PairType;
-    typedef typename PairType::second_type ValueType;
+    typedef folly::remove_cvref_t<typename PairType::second_type> ValueType;
     uint32_t xfer = 0;
     xfer += prot->serializedSizeMapBegin(
         Cpp2Ops<KeyType>::thriftType(),
@@ -731,7 +731,7 @@ class Cpp2Ops<
     typedef typename std::remove_cv<
         typename std::remove_reference<decltype(*value->begin())>::type>::type
         PairType;
-    typedef typename PairType::second_type ValueType;
+    typedef folly::remove_cvref_t<typename PairType::second_type> ValueType;
     uint32_t xfer = 0;
     xfer += prot->serializedSizeMapBegin(
         Cpp2Ops<KeyType>::thriftType(),

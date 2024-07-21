@@ -104,15 +104,45 @@ struct RangeMapper {
 };
 
 
-struct Bump1GMapper : public RangeMapper {
+// A Bump matter that adds a single huge page a time in a NUMA-aware way.
+// Subclasses need to overwrite
+struct BumpSinglePageMapper : public RangeMapper {
  public:
   template<typename... Args>
-  explicit Bump1GMapper(Args&&... args)
+  explicit BumpSinglePageMapper(Args&&... args)
     : RangeMapper(std::forward<Args>(args)...) {}
 
  protected:
   Direction direction() const override { return Direction::LowToHigh; }
   bool addMappingImpl() override;
+
+  // Implement the following in subclasses.
+  virtual size_t pagesize() const = 0;
+  virtual void* addPage(void* addr, int node) = 0;
+};
+
+
+struct Bump1GMapper : public BumpSinglePageMapper {
+ public:
+  template<typename... Args>
+  explicit Bump1GMapper(Args&&... args)
+    : BumpSinglePageMapper(std::forward<Args>(args)...) {}
+
+  virtual size_t pagesize() const override {
+    return 1ull << 30;
+  }
+  virtual void* addPage(void* addr, int node) override;
+};
+
+
+struct BumpTHPMapper : public BumpSinglePageMapper {
+ public:
+  template<typename... Args>
+  explicit BumpTHPMapper(Args&&... args)
+    : BumpSinglePageMapper(std::forward<Args>(args)...) {}
+
+  virtual size_t pagesize() const override;
+  virtual void* addPage(void* addr, int node) override;
 };
 
 

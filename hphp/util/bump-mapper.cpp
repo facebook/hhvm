@@ -17,6 +17,7 @@
 #include "hphp/util/bump-mapper.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/maphuge.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/numa.h"
 
@@ -43,14 +44,13 @@ bool g_useTHPUponHugeTLBFailure = false;
 
 namespace alloc {
 
-bool Bump1GMapper::addMappingImpl() {
+bool BumpSinglePageMapper::addMappingImpl() {
   if (m_currHugePages >= m_maxHugePages) return false;
-  if (get_huge1g_info().free_hugepages <= 0) return false;
 
   auto _ = m_state.lock();
   auto const currFrontier = m_state.low_map.load(std::memory_order_acquire);
-  if (currFrontier % size1g != 0) return false;
-  auto const newFrontier = currFrontier + size1g;
+  if (currFrontier % pagesize() != 0) return false;
+  auto const newFrontier = currFrontier + pagesize();
   if (newFrontier > m_state.high_map.load(std::memory_order_acquire)) {
     return false;
   }
@@ -68,7 +68,7 @@ bool Bump1GMapper::addMappingImpl() {
           // Node not allowed, try next one.
           continue;
         }
-        if (mmap_1g((void*)currFrontier, currNode, /* MAP_FIXED */ true)) {
+        if (addPage((void*)currFrontier, currNode)) {
           ++m_currHugePages;
           m_state.low_map.store(newFrontier, std::memory_order_release);
           return true;
@@ -78,13 +78,47 @@ bool Bump1GMapper::addMappingImpl() {
     }
   }
 #endif
-  if (mmap_1g((void*)currFrontier, -1, /* MAP_FIXED */ true)) {
+  if (addPage((void*)currFrontier, -1)) {
     ++m_currHugePages;
     m_state.low_map.store(newFrontier, std::memory_order_release);
     return true;
   }
   return false;
 }
+
+
+void* Bump1GMapper::addPage(void* addr, int node) {
+  return mmap_1g(addr, node, /* map_fixed */ true);
+}
+
+
+size_t BumpTHPMapper::pagesize() const {
+  return THPPageSize();
+}
+
+void* BumpTHPMapper::addPage(void* addr, int node) {
+#ifdef HAVE_NUMA
+  SavedNumaPolicy numaPolicy;
+  if (node >= 0 && numa_num_nodes > 1) {
+    numaPolicy.save();
+    unsigned long singleNodeMask = 1ul << node;
+    set_mempolicy(MPOL_BIND, &singleNodeMask, sizeof(singleNodeMask));
+  }
+#endif
+  auto const size = pagesize();
+  void* ret = mmap(addr, size, PROT_READ | PROT_WRITE,
+                   MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, -1, 0);
+  if (ret == MAP_FAILED) {
+    return nullptr;
+  }
+  if (ret != addr) {
+    munmap(ret, size);
+    return nullptr;
+  }
+  madvise(ret, size, MADV_HUGEPAGE);  // let's hope kernel can get what we want.
+  return ret;
+}
+
 
 constexpr size_t kChunkSize = 4 * size2m;
 
@@ -98,6 +132,7 @@ bool Bump2MMapper::addMappingImpl() {
   auto _ = m_state.lock();
   // Recheck the mapping frontiers after grabbing the lock
   auto const currFrontier = m_state.low_map.load(std::memory_order_acquire);
+
   if (currFrontier % size2m != 0) return false;
   auto nPages = std::min(m_maxHugePages - m_currHugePages, freePages);
   if (nPages <= 0) return false;
@@ -112,6 +147,7 @@ bool Bump2MMapper::addMappingImpl() {
                         -1, 0);
   if (newPages == MAP_FAILED) {
     if (!g_useTHPUponHugeTLBFailure) return false;
+    if (THPPageSize() != size2m) return false;
     // Use transparent hugepages instead.
     newPages = mmap((void*)currFrontier, hugeSize,
                     PROT_READ | PROT_WRITE,
@@ -142,6 +178,7 @@ bool Bump2MMapper::addMappingImpl() {
   m_state.low_map.store(newFrontier, std::memory_order_release);
   return true;
 }
+
 
 template<Direction D>
 bool BumpNormalMapper<D>::addMappingImpl() {

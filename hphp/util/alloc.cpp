@@ -32,6 +32,7 @@
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/kernel-version.h"
 #include "hphp/util/managed-arena.h"
+#include "hphp/util/maphuge.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/slab-manager.h"
 
@@ -197,8 +198,20 @@ RangeMapper* getMapperChain(RangeState& range, unsigned n1GPages,
   RangeMapper* head = nullptr;
   RangeMapper** ptail = &head;
   if (n1GPages) {
-    RangeMapper::append(ptail,
-                        new Bump1GMapper(range, n1GPages, numaMask, nextNode));
+    if (get_huge1g_info().nr_hugepages) {
+      RangeMapper::append(ptail,
+                          new Bump1GMapper(range, n1GPages, numaMask, nextNode));
+    }
+#ifdef __aarch64__
+    else {
+      auto const thpSize = THPPageSize();
+      if (thpSize > size2m && thpSize <= size1g) {
+        auto mapper = new BumpTHPMapper(range, n1GPages * (size1g / thpSize),
+                                        numaMask, nextNode);
+        RangeMapper::append(ptail, mapper);
+      }
+    }
+#endif
   }
   if (use2MPages) {
     RangeMapper::append(ptail, new Bump2MMapper(range, n2MPages, numaMask));
@@ -462,9 +475,11 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
   }
 
 #if USE_JEMALLOC_EXTENT_HOOKS
+#ifdef __x86_64__
   spec.n1GPages = std::min(spec.n1GPages, get_huge1g_info().nr_hugepages);
-  spec.n1GPages /= num_numa_nodes();
   spec.n2MPages = std::min(spec.n2MPages, get_huge2m_info().nr_hugepages);
+#endif
+  spec.n1GPages /= num_numa_nodes();
   spec.n2MPages /= num_numa_nodes();
   const size_t reserveSize =
     spec.n1GPages * size1g + spec.n2MPages * size2m;
@@ -639,8 +654,14 @@ struct JEMallocInitializer {
       }
     }
 
+    // Do some reallocation between low and high 1G arenas based on the total 
+    // number of pages reserved.
+    auto const origHigh1G = high_1g_pages;
     HugePageInfo info = get_huge1g_info();
     unsigned remaining = static_cast<unsigned>(info.nr_hugepages);
+    if (low_1g_pages > 2) low_1g_pages = 2;
+#ifdef __x86_64__
+    auto const origLow1G = low_1g_pages;
     if (remaining == 0) {
       low_1g_pages = high_1g_pages = 0;
     } else if (low_1g_pages > 0 || high_1g_pages > 0) {
@@ -652,27 +673,29 @@ struct JEMallocInitializer {
       }
     }
 
-    // Do some allocation between low and high 1G arenas.  We use at most 2 1G
-    // pages for the low 1G arena; usually 1 is good enough.
-    auto const origLow1G = low_1g_pages;
-    auto const origHigh1G = high_1g_pages;
     if (low_1g_pages > 0) {
-      if (low_1g_pages > 2) {
-        low_1g_pages = 2;
-      }
       if (low_1g_pages + high_1g_pages > remaining) {
         low_1g_pages = 1;
       }
       assert(remaining >= low_1g_pages);
       remaining -= low_1g_pages;
     }
+
     if (origLow1G) {
       fprintf(stderr,
               "using %u (specified %u) 1G huge pages for low arena\n",
               low_1g_pages, origLow1G);
     }
-    setup_low_arena({low_1g_pages, low_2m_pages});
+#else
+    if (low_1g_pages && !remaining) {
+      fprintf(stderr,
+              "specified %u 1G huge pages for low arena but the host doesn't "
+              "have any, will try to use THP\n",
+              low_1g_pages);
+    }
+#endif
 
+    setup_low_arena({low_1g_pages, low_2m_pages});
     if (high_1g_pages > remaining) {
       high_1g_pages = remaining;
     }

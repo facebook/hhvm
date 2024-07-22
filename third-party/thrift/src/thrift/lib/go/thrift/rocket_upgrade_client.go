@@ -112,11 +112,6 @@ func (p *upgradeToRocketClient) GetRequestHeaders() map[string]string {
 	return p.Protocol.(RequestHeaders).GetRequestHeaders()
 }
 
-func (p *upgradeToRocketClient) GetResponseHeader(key string) (string, bool) {
-	v, ok := p.GetResponseHeaders()[key]
-	return v, ok
-}
-
 func (p *upgradeToRocketClient) GetResponseHeaders() map[string]string {
 	if p.Protocol == nil {
 		headers := p.headerProtocol.GetResponseHeaders()

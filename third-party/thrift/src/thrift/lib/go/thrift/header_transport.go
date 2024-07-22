@@ -126,18 +126,6 @@ func (t *headerTransport) clearRequestHeaders() {
 	}
 }
 
-func (t *headerTransport) GetResponseHeader(key string) (string, bool) {
-	if t.readHeader == nil {
-		return "", false
-	}
-	// per the C++ implementation, prefer persistent headers
-	if v, ok := t.readHeader.pHeaders[key]; ok {
-		return v, ok
-	}
-	v, ok := t.readHeader.headers[key]
-	return v, ok
-}
-
 func (t *headerTransport) GetResponseHeaders() map[string]string {
 	res := map[string]string{}
 	if t.readHeader == nil {

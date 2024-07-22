@@ -378,14 +378,6 @@ func (p *rocketClient) GetRequestHeaders() map[string]string {
 	return p.reqMetadata.Other
 }
 
-func (p *rocketClient) GetResponseHeader(key string) (string, bool) {
-	if p.respMetadata == nil {
-		return "", false
-	}
-	value, ok := p.respMetadata.OtherMetadata[key]
-	return value, ok
-}
-
 func (p *rocketClient) GetResponseHeaders() map[string]string {
 	if p.respMetadata == nil {
 		return nil

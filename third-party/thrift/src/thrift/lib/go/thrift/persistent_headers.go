@@ -31,7 +31,6 @@ var _ PersistentHeaders = (*httpProtocol)(nil)
 
 // ResponseHeaderGetter is a temporary measure to allow protocols to expose headers received with the response.
 type ResponseHeaderGetter interface {
-	GetResponseHeader(key string) (string, bool)
 	GetResponseHeaders() map[string]string
 }
 

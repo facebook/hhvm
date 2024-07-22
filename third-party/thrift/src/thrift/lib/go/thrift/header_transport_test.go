@@ -162,7 +162,7 @@ func TestHeaderHeaders(t *testing.T) {
 	trans2 := newHeaderTransport(tmb)
 
 	// make sure we don't barf reading header with no frame
-	_, ok := trans1.GetResponseHeader("something")
+	_, ok := trans1.GetResponseHeaders()["something"]
 	assertEq(t, false, ok)
 	assertEq(t, 0, len(trans1.GetResponseHeaders()))
 
@@ -200,12 +200,12 @@ func TestHeaderHeaders(t *testing.T) {
 		t.Fatalf("failed to reset proto for frame %d: %s", n, err)
 	}
 
-	headerval, _ = trans2.GetResponseHeader("thrift_protocol")
+	headerval, _ = trans2.GetResponseHeaders()["thrift_protocol"]
 	assertEq(t, "compact", headerval)
-	headerval, _ = trans2.GetResponseHeader("thrift_transport")
+	headerval, _ = trans2.GetResponseHeaders()["thrift_transport"]
 	assertEq(t, "header", headerval)
 	// make sure we prefer persistent headers
-	headerval, _ = trans2.GetResponseHeader("preferred_cheese")
+	headerval, _ = trans2.GetResponseHeaders()["preferred_cheese"]
 	assertEq(t, "gouda", headerval)
 	assertEq(t, "localhost", peerIdentity(trans2))
 	assertEq(t, 5, len(trans2.GetResponseHeaders()))

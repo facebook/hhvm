@@ -141,10 +141,6 @@ func (p *headerProtocol) GetRequestHeaders() map[string]string {
 	return p.trans.getRequestHeaders()
 }
 
-func (p *headerProtocol) GetResponseHeader(key string) (string, bool) {
-	return p.trans.GetResponseHeader(key)
-}
-
 func (p *headerProtocol) GetResponseHeaders() map[string]string {
 	return p.trans.GetResponseHeaders()
 }

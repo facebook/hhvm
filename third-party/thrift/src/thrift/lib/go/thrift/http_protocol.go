@@ -82,10 +82,6 @@ func (p *httpProtocol) GetPersistentHeader(key string) (string, bool) {
 	return v, ok
 }
 
-func (p *httpProtocol) GetResponseHeader(key string) (string, bool) {
-	return "", false
-}
-
 func (p *httpProtocol) GetResponseHeaders() map[string]string {
 	return nil
 }

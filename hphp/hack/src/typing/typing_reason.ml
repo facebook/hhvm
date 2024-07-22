@@ -211,6 +211,14 @@ type prj_symm =
   | Prj_symm_fn_ret
 [@@deriving hash]
 
+let reverse_prj_symm = function
+  | Prj_symm_shape (nm, kind_sub, kind_sup) ->
+    Prj_symm_shape (nm, kind_sup, kind_sub)
+  | Prj_symm_fn_param (idx_sub, idx_sup) -> Prj_symm_fn_param (idx_sup, idx_sub)
+  | Prj_symm_fn_param_inout (idx_sub, idx_sup, var) ->
+    Prj_symm_fn_param_inout (idx_sup, idx_sub, var)
+  | t -> t
+
 let prj_symm_is_contra = function
   | Prj_symm_ctor (_, _, _, var) -> cstr_variance_is_contra var
   | Prj_symm_fn_param _
@@ -381,6 +389,10 @@ type prj =
   | Symm of prj_symm
   | Asymm of side * prj_asymm
 [@@deriving hash]
+
+let reverse_prj = function
+  | Symm prj_symm -> Symm (reverse_prj_symm prj_symm)
+  | t -> t
 
 let prj_to_json = function
   | Symm prj_symm ->
@@ -1611,7 +1623,7 @@ and reverse : locl_phase t_ -> locl_phase t_ =
   match t with
   | Flow (t1, kind, t2) -> Flow (reverse t2, kind, reverse t1)
   | Rev t -> normalize t
-  | Prj (prj, t) -> Prj (prj, reverse t)
+  | Prj (prj, t) -> Prj (reverse_prj prj, reverse t)
   | Def (def, t) -> Def (def, reverse t)
   | Idx (pos, t) -> Idx (pos, reverse t)
   | Arith_ret_float (pos, t, arg_pos) ->

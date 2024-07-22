@@ -59,6 +59,14 @@ func WithUpgradeToRocket() ClientOption {
 	}
 }
 
+// Deprecated: Use WithUpgradeToRocket. This is only used for testing purposes.
+func WithRocket() ClientOption {
+	return func(opts *clientOptions) error {
+		opts.transport = TransportIDRocket
+		return nil
+	}
+}
+
 // WithPersistentHeader sets a Header persistent info value
 func WithPersistentHeader(name, value string) ClientOption {
 	return func(opts *clientOptions) error {

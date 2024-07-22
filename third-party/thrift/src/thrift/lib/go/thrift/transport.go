@@ -31,7 +31,7 @@ const (
 	TransportIDUnknown TransportID = 0
 	// TransportIDHeader is the header transport
 	TransportIDHeader TransportID = 1
-	// TransportIDRocket is the rocket transport
+	// Deprecated: use TransportIDUpgradeToRocket, this is only used for testing purposes.
 	TransportIDRocket TransportID = 2
 	// TransportIDUpgradeToRocket is the transport that upgrades header to rocket
 	TransportIDUpgradeToRocket TransportID = 3

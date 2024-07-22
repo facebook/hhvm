@@ -45,7 +45,18 @@ func AddHeader(ctx context.Context, key string, value string) (context.Context, 
 
 // WithHeaders attaches thrift headers to a ctx.
 func WithHeaders(ctx context.Context, headers map[string]string) context.Context {
-	return context.WithValue(ctx, headersKey, headers)
+	storedHeaders := ctx.Value(headersKey)
+	if storedHeaders == nil {
+		return context.WithValue(ctx, headersKey, headers)
+	}
+	headersMap, ok := storedHeaders.(map[string]string)
+	if !ok {
+		return context.WithValue(ctx, headersKey, headers)
+	}
+	for k, v := range headers {
+		headersMap[k] = v
+	}
+	return context.WithValue(ctx, headersKey, headersMap)
 }
 
 // GetHeaders gets thrift headers from ctx.

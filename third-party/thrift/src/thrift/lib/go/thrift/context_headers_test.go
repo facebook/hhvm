@@ -118,3 +118,18 @@ func TestUpgradeToRocketProtocolSetNilHeaders(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestWithHeadersDoNotOverride(t *testing.T) {
+	ctx := context.Background()
+	input1 := map[string]string{"key1": "value1"}
+	input2 := map[string]string{"key2": "value2"}
+	want := map[string]string{"key1": "value1", "key2": "value2"}
+	var err error
+	ctx, err = AddHeader(ctx, "key1", "value1")
+	assert.NoError(t, err)
+	output1 := GetHeaders(ctx)
+	assert.Equal(t, input1, output1)
+	ctx = WithHeaders(ctx, input2)
+	output2 := GetHeaders(ctx)
+	assert.Equal(t, want, output2)
+}

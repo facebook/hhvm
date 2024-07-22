@@ -38,12 +38,12 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (context.CancelFunc, 
 
 	transport, err := thrift.NewServerSocket("[::]:0")
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to open test socket: %s", err)
+		return cancel, nil, fmt.Errorf("failed to open test socket: %w", err)
 	}
 	taddr := transport.Addr()
 
 	server := thrift.NewSimpleServer(processor, transport, thrift.TransportIDHeader)
-	go func(server *thrift.SimpleServer) {
+	go func(server thrift.Server) {
 		err = server.ServeContext(ctx)
 		if err != nil && !errors.Is(err, context.Canceled) {
 			panic(fmt.Errorf("failed to begin serving test socket: %s", err))

@@ -23,7 +23,6 @@ module Fun : sig
     async: bool;
     generator: bool;
     fun_kind: Ast_defs.fun_kind;
-    instantiated_targs: bool;
     is_function_pointer: bool;
     returns_readonly: bool;
     readonly_this: bool;
@@ -43,10 +42,6 @@ module Fun : sig
   val generator : t -> bool
 
   val set_generator : bool -> t -> t
-
-  val instantiated_targs : t -> bool
-
-  val set_instantiated_targs : bool -> t -> t
 
   val is_function_pointer : t -> bool
 

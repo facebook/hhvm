@@ -20,10 +20,9 @@
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false;
                async = false; generator = false; fun_kind = FSync;
-               instantiated_targs = false; is_function_pointer = false;
-               returns_readonly = false; readonly_this = false;
-               support_dynamic_type = true; is_memoized = false;
-               variadic = false };
+               is_function_pointer = false; returns_readonly = false;
+               readonly_this = false; support_dynamic_type = true;
+               is_memoized = false; variadic = false };
              ft_cross_package = None }));
        fe_pos = [5:10-20]; fe_php_std_lib = false;
        fe_support_dynamic_type = true; fe_no_auto_dynamic = false;
@@ -60,10 +59,9 @@
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
-                instantiated_targs = false; is_function_pointer = false;
-                returns_readonly = false; readonly_this = false;
-                support_dynamic_type = false; is_memoized = false;
-                variadic = false };
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
               ft_cross_package = None }));
         fe_pos = [7:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -116,10 +114,9 @@
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = false; generator = false; fun_kind = FSync;
-                   instantiated_targs = false; is_function_pointer = false;
-                   returns_readonly = false; readonly_this = false;
-                   support_dynamic_type = false; is_memoized = false;
-                   variadic = false };
+                   is_function_pointer = false; returns_readonly = false;
+                   readonly_this = false; support_dynamic_type = false;
+                   is_memoized = false; variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5999ccf99b03183586cfe0976da54c01>>
+// @generated SignedSource<<f3499329b1126fd3cf40d7f7da9524db>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -55,7 +55,6 @@ arena_deserializer::impl_deserialize_in_arena!(CeVisibility<'arena>);
 #[rust_to_ocaml(attr = "deriving (eq, hash, ord, (show { with_path = false }))")]
 pub type CrossPackageDecl<'a> = Option<&'a str>;
 
-pub use oxidized::typing_defs_core::FunTparamsKind;
 pub use oxidized::typing_defs_core::ValKind;
 
 #[derive(

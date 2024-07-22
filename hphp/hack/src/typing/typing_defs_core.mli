@@ -39,19 +39,6 @@ type val_kind =
   | Other
 [@@deriving eq]
 
-type fun_tparams_kind =
-  | FTKtparams
-      (** If ft_tparams is empty, the containing fun_type is a concrete function type.
-      Otherwise, it is a generic function and ft_tparams specifies its type parameters. *)
-  | FTKinstantiated_targs
-      (** The containing fun_type is a concrete function type which is an
-      instantiation of a generic function with at least one reified type
-      parameter. This means that the function requires explicit type arguments
-      at every invocation, and ft_tparams specifies the type arguments with
-      which the generic function was instantiated, as well as whether each
-      explicit type argument must be reified. *)
-[@@deriving eq]
-
 (** The origin of a type is a succinct key that is unique to the
     type containing it. Consequently, two types with the same
     origin are necessarily identical. Any change to a type with
@@ -449,10 +436,6 @@ module Flags : sig
   val get_ft_async : 'a fun_type -> bool
 
   val get_ft_generator : 'a fun_type -> bool
-
-  val get_ft_ftk : 'a fun_type -> fun_tparams_kind
-
-  val set_ft_ftk : 'a fun_type -> fun_tparams_kind -> 'a fun_type
 
   val set_ft_is_function_pointer : 'a fun_type -> bool -> 'a fun_type
 

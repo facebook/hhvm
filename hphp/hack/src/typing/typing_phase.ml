@@ -1151,14 +1151,6 @@ and localize_ft
     (env, { capability })
   in
   let ((env, ret_ty_err_opt), ret) = localize ~ety_env env ft.ft_ret in
-  let ft =
-    set_ft_ftk
-      ft
-      (if Option.is_some instantiation then
-        FTKinstantiated_targs
-      else
-        FTKtparams)
-  in
   let ty_err_opt =
     Typing_error.multiple_opt
     @@ List.filter_map

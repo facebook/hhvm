@@ -297,7 +297,6 @@ module Full = struct
       async;
       generator = _;
       fun_kind = _;
-      instantiated_targs = _;
       is_function_pointer = _;
       returns_readonly = _;
       readonly_this = _;
@@ -332,16 +331,10 @@ module Full = struct
 
     let (fuel, tparams_doc) =
       let (_, tparams) = split_desugared_ctx_tparams ft_tparams in
-      (* only print tparams when they have been instantiated with targs
-       * so that they correctly express reified parameterization *)
-      match tparams with
-      | [] -> (fuel, Nothing)
-      | _ ->
-        (match (verbose, Typing_defs.get_ft_ftk ft) with
-        | (false, FTKtparams) -> (fuel, Nothing)
-        | (true, FTKtparams)
-        | (_, FTKinstantiated_targs) ->
-          list ~fuel "<" (tparam ~ty to_doc st penv) tparams ">")
+      if List.is_empty tparams then
+        (fuel, Nothing)
+      else
+        list ~fuel "<" (tparam ~ty to_doc st penv) tparams ">"
     in
     let (fuel, return_doc) = ty ~fuel to_doc st penv ft_ret in
     let (fuel, capabilities_doc) =

@@ -1,6 +1,6 @@
 notToThrow
   INSERT notToThrow()
-  function(): void
+  function<TRet as mixed>(): void
 SORT TEXT: none
 check
   INSERT check()

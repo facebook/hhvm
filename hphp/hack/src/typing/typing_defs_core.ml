@@ -41,19 +41,6 @@ type val_kind =
   | Other
 [@@deriving eq]
 
-type fun_tparams_kind =
-  | FTKtparams
-      (** If ft_tparams is empty, the containing fun_type is a concrete function type.
-      Otherwise, it is a generic function and ft_tparams specifies its type parameters. *)
-  | FTKinstantiated_targs
-      (** The containing fun_type is a concrete function type which is an
-      instantiation of a generic function with at least one reified type
-      parameter. This means that the function requires explicit type arguments
-      at every invocation, and ft_tparams specifies the type arguments with
-      which the generic function was instantiated, as well as whether each
-      explicit type argument must be reified. *)
-[@@deriving eq]
-
 type type_origin =
   | Missing_origin
   | From_alias of
@@ -485,23 +472,6 @@ module Flags = struct
 
   (* This flag is set true only if the exact method has the memoized attribute. *)
   let get_ft_is_memoized ft = Fun.is_memoized ft.ft_flags
-
-  let get_ft_ftk ft =
-    if Fun.instantiated_targs ft.ft_flags then
-      FTKinstantiated_targs
-    else
-      FTKtparams
-
-  let set_ft_ftk ft ftk =
-    {
-      ft with
-      ft_flags =
-        Fun.set_instantiated_targs
-          (match ftk with
-          | FTKinstantiated_targs -> true
-          | FTKtparams -> false)
-          ft.ft_flags;
-    }
 
   let set_ft_is_function_pointer ft is_fp =
     { ft with ft_flags = Fun.set_is_function_pointer is_fp ft.ft_flags }

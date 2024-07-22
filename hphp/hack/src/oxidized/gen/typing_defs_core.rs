@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1eac7889055433be4ade57fe2d10ecee>>
+// @generated SignedSource<<ec1ec5c690f15756938c12dc58b34ff9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -76,41 +76,6 @@ pub enum ValKind {
 }
 impl TrivialDrop for ValKind {}
 arena_deserializer::impl_deserialize_in_arena!(ValKind);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving eq")]
-#[repr(u8)]
-pub enum FunTparamsKind {
-    /// If ft_tparams is empty, the containing fun_type is a concrete function type.
-    /// Otherwise, it is a generic function and ft_tparams specifies its type parameters.
-    FTKtparams,
-    /// The containing fun_type is a concrete function type which is an
-    /// instantiation of a generic function with at least one reified type
-    /// parameter. This means that the function requires explicit type arguments
-    /// at every invocation, and ft_tparams specifies the type arguments with
-    /// which the generic function was instantiated, as well as whether each
-    /// explicit type argument must be reified.
-    #[rust_to_ocaml(name = "FTKinstantiated_targs")]
-    FTKinstantiatedTargs,
-}
-impl TrivialDrop for FunTparamsKind {}
-arena_deserializer::impl_deserialize_in_arena!(FunTparamsKind);
 
 #[derive(
     Clone,

@@ -52,10 +52,9 @@ File root|module_static_prop.php--A.php
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
-                instantiated_targs = false; is_function_pointer = false;
-                returns_readonly = false; readonly_this = false;
-                support_dynamic_type = false; is_memoized = false;
-                variadic = false };
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
               ft_cross_package = None }));
         fe_pos = [12:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -76,10 +75,9 @@ File root|module_static_prop.php--B.php
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false;
                async = false; generator = false; fun_kind = FSync;
-               instantiated_targs = false; is_function_pointer = false;
-               returns_readonly = false; readonly_this = false;
-               support_dynamic_type = false; is_memoized = false;
-               variadic = false };
+               is_function_pointer = false; returns_readonly = false;
+               readonly_this = false; support_dynamic_type = false;
+               is_memoized = false; variadic = false };
              ft_cross_package = None }));
        fe_pos = [8:10-11]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -100,10 +98,9 @@ File root|module_static_prop.php--no-module.php
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false;
                async = false; generator = false; fun_kind = FSync;
-               instantiated_targs = false; is_function_pointer = false;
-               returns_readonly = false; readonly_this = false;
-               support_dynamic_type = false; is_memoized = false;
-               variadic = false };
+               is_function_pointer = false; returns_readonly = false;
+               readonly_this = false; support_dynamic_type = false;
+               is_memoized = false; variadic = false };
              ft_cross_package = None }));
        fe_pos = [4:10-14]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;

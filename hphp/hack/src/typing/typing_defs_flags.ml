@@ -34,7 +34,6 @@ module Fun = struct
     async: bool;
     generator: bool;
     fun_kind: Ast_defs.fun_kind;
-    instantiated_targs: bool;
     is_function_pointer: bool;
     returns_readonly: bool;
     readonly_this: bool;
@@ -75,12 +74,6 @@ module Fun = struct
     | (true, false) -> Ast_defs.FAsync
     | (false, true) -> Ast_defs.FGenerator
     | (true, true) -> Ast_defs.FAsyncGenerator
-
-  let instantiated_targs_mask = 1 lsl 8
-
-  let instantiated_targs = is_set instantiated_targs_mask
-
-  let set_instantiated_targs = set_bit instantiated_targs_mask
 
   let is_function_pointer_mask = 1 lsl 9
 
@@ -142,7 +135,6 @@ module Fun = struct
       async = async t;
       generator = generator t;
       fun_kind = fun_kind t;
-      instantiated_targs = instantiated_targs t;
       is_function_pointer = is_function_pointer t;
       returns_readonly = returns_readonly t;
       readonly_this = readonly_this t;

@@ -136,6 +136,12 @@ class CurlClient
     eomFunc_ = eomFunc;
   }
 
+  void setOnBodyFunc(
+      const std::function<void(const proxygen::HTTPMessage& request,
+                               const folly::IOBuf* chainBuf)>& onBodyFunc) {
+    onBodyFunc_ = onBodyFunc;
+  }
+
  protected:
   void sendBodyFromFile();
 
@@ -168,6 +174,10 @@ class CurlClient
   std::chrono::time_point<std::chrono::steady_clock> txnStartTime_;
 
   folly::Optional<std::function<void()>> eomFunc_;
+
+  folly::Optional<std::function<void(const proxygen::HTTPMessage& request,
+                                     const folly::IOBuf* chainBuf)>>
+      onBodyFunc_;
 
   friend class CurlPushHandler;
 };

@@ -8,11 +8,13 @@
 
 #pragma once
 
+#include <folly/io/IOBuf.h>
 #include <list>
 #include <memory>
 #include <proxygen/httpclient/samples/curl/CurlClient.h>
 #include <proxygen/httpserver/samples/hq/H1QUpstreamSession.h>
 #include <proxygen/httpserver/samples/hq/HQCommandLine.h>
+#include <proxygen/lib/http/HTTPMessage.h>
 #include <proxygen/lib/http/session/HQUpstreamSession.h>
 #include <quic/common/events/HighResQuicTimer.h>
 
@@ -30,6 +32,12 @@ class HQClient : private quic::QuicSocket::ConnectionSetupCallback {
   ~HQClient() override = default;
 
   int start();
+
+  void setOnBodyFunc(
+      const std::function<void(const proxygen::HTTPMessage& request,
+                               const folly::IOBuf* chainBuf)>& onBodyFunc) {
+    onBodyFunc_ = onBodyFunc;
+  }
 
  private:
   // Conn setup callback
@@ -98,6 +106,10 @@ class HQClient : private quic::QuicSocket::ConnectionSetupCallback {
   std::deque<folly::StringPiece> httpPaths_;
 
   std::deque<std::chrono::milliseconds> requestGaps_;
+
+  folly::Optional<std::function<void(const proxygen::HTTPMessage& request,
+                                     const folly::IOBuf* chainBuf)>>
+      onBodyFunc_;
 
   bool failed_{false};
 

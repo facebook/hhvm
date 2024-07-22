@@ -29,10 +29,10 @@ struct HQToolClientParams : public HQBaseParams {
   proxygen::HTTPHeaders httpHeaders;
   std::string httpBody;
   proxygen::HTTPMethod httpMethod;
-  std::vector<folly::StringPiece> httpPaths;
+  std::vector<std::string> httpPaths;
   bool migrateClient{false};
   bool sendRequestsSequentially;
-  std::vector<folly::StringPiece> requestGaps;
+  std::vector<std::string> requestGaps;
 };
 
 struct HQToolServerParams : public HQServerParams {

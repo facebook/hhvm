@@ -439,6 +439,7 @@ HQToolParamsBuilderFromCmdline::HQToolParamsBuilderFromCmdline(
   gflags::FlagSaver saver;
 
   for (auto& kv : initial) {
+    LOG(INFO) << "Overriding HQToolParams " << kv.first << " to " << kv.second;
     gflags::SetCommandLineOptionWithMode(
         kv.first.c_str(),
         kv.second.c_str(),

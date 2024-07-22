@@ -251,6 +251,9 @@ void CurlClient::onHeadersComplete(unique_ptr<HTTPMessage> msg) noexcept {
 }
 
 void CurlClient::onBody(std::unique_ptr<folly::IOBuf> chain) noexcept {
+  if (onBodyFunc_ && chain) {
+    onBodyFunc_.value()(request_, chain.get());
+  }
   if (!loggingEnabled_) {
     return;
   }

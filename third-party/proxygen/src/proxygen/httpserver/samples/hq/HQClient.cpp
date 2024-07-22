@@ -143,6 +143,10 @@ HQClient::sendRequest(const proxygen::URL& requestUrl) {
     }
   }
   client->sendRequest(txn);
+
+  if (onBodyFunc_) {
+    client->setOnBodyFunc(onBodyFunc_.value());
+  }
   curls_.emplace_back(std::move(client));
   return txn;
 }

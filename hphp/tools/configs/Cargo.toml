@@ -16,4 +16,4 @@ nom = "7.1"
 
 [build-dependencies]
 anyhow = "1.0.75"
-cc = "1.0.95"
+cc = "1.0.90"

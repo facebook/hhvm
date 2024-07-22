@@ -91,135 +91,81 @@ which itself flows down into this variadic parameter declaration as the 1st func
 File "fn_call_variadic.php", line 3, character 26 - line 3, character 27:
 
 Raw:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Hint":[{"filename":"fn_call_variadic.php","line":5,"char_start":33,"char_end":36}]
+  },
+  "Flow_param_hint",
+  {
+    "Witness":[{"filename":"fn_call_variadic.php","line":5,"char_start":38,"char_end":39}]
+  },
+  "Flow_local",
+  {
+    "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":15,"char_end":16}]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{"Prj_symm_fn_param":[2,0]}]},
+      [
         {
-          "Flow":[
-            {
-              "Flow":[
-                {
-                  "From_witness_decl":{
-                    "Hint":[{"filename":"fn_call_variadic.php","line":5,"char_start":33,"char_end":36}]
-                  }
-                },
-                "Flow_param_hint",
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"fn_call_variadic.php","line":5,"char_start":38,"char_end":39}]
-                  }
-                }
-              ]
-            },
-            "Flow_local",
-            {
-              "From_witness_locl":{
-                "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":15,"char_end":16}]
-              }
-            }
-          ]
+          "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":3,"char_end":17}]
         },
-        "Flow_prj",
+        "Flow_subtype",
         {
-          "Prj":[
-            {"Symm":[{"Prj_symm_fn_param":[2,0]}]},
-            {
-              "Flow":[
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":3,"char_end":17}]
-                  }
-                },
-                "Flow_subtype",
-                {
-                  "Rev":[
-                    {
-                      "From_witness_decl":{
-                        "Support_dynamic_type":[{"filename":"fn_call_variadic.php","line":3,"char_start":10,"char_end":12}]
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
+          "Rev":[
+            [
+              {
+                "Support_dynamic_type":[{"filename":"fn_call_variadic.php","line":3,"char_start":10,"char_end":12}]
+              }
+            ]
           ]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "From_witness_decl":{
-        "Var_param_from_decl":[{"filename":"fn_call_variadic.php","line":3,"char_start":26,"char_end":27}]
-      }
-    }
-  ]
-}
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Var_param_from_decl":[{"filename":"fn_call_variadic.php","line":3,"char_start":26,"char_end":27}]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Hint":[{"filename":"fn_call_variadic.php","line":5,"char_start":33,"char_end":36}]
+  },
+  "Flow_param_hint",
+  {
+    "Witness":[{"filename":"fn_call_variadic.php","line":5,"char_start":38,"char_end":39}]
+  },
+  "Flow_local",
+  {
+    "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":15,"char_end":16}]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{"Prj_symm_fn_param":[2,0]}]},
+      [
         {
-          "Flow":[
-            {
-              "Flow":[
-                {
-                  "From_witness_decl":{
-                    "Hint":[{"filename":"fn_call_variadic.php","line":5,"char_start":33,"char_end":36}]
-                  }
-                },
-                "Flow_param_hint",
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"fn_call_variadic.php","line":5,"char_start":38,"char_end":39}]
-                  }
-                }
-              ]
-            },
-            "Flow_local",
-            {
-              "From_witness_locl":{
-                "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":15,"char_end":16}]
-              }
-            }
-          ]
+          "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":3,"char_end":17}]
         },
-        "Flow_prj",
+        "Flow_subtype",
         {
-          "Prj":[
-            {"Symm":[{"Prj_symm_fn_param":[2,0]}]},
-            {
-              "Flow":[
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":3,"char_end":17}]
-                  }
-                },
-                "Flow_subtype",
-                {
-                  "From_witness_decl":{
-                    "Support_dynamic_type":[{"filename":"fn_call_variadic.php","line":3,"char_start":10,"char_end":12}]
-                  }
-                }
-              ]
-            }
-          ]
+          "Support_dynamic_type":[{"filename":"fn_call_variadic.php","line":3,"char_start":10,"char_end":12}]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "From_witness_decl":{
-        "Var_param_from_decl":[{"filename":"fn_call_variadic.php","line":3,"char_start":26,"char_end":27}]
-      }
-    }
-  ]
-}
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Var_param_from_decl":[{"filename":"fn_call_variadic.php","line":3,"char_start":26,"char_end":27}]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -228,37 +174,37 @@ Path:
 {
   "stats":{"max_depth":1,"length":5,"reversals":1},
   "path_elems":[
-    {
-      "From_witness_decl":{
+    [
+      {
         "Hint":[{"filename":"fn_call_variadic.php","line":5,"char_start":33,"char_end":36}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"fn_call_variadic.php","line":5,"char_start":38,"char_end":39}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":15,"char_end":16}]
       }
-    },
+    ],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[2,0]}]}}
     },
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"fn_call_variadic.php","line":6,"char_start":3,"char_end":17}]
       }
-    },
+    ],
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
-    {
-      "From_witness_decl":{
+    [
+      {
         "Support_dynamic_type":[{"filename":"fn_call_variadic.php","line":3,"char_start":10,"char_end":12}]
       }
-    },
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -266,11 +212,11 @@ Path:
         "out_of":{"Symm":[{"Prj_symm_fn_param":[2,0]}]}
       }
     },
-    {
-      "From_witness_decl":{
+    [
+      {
         "Var_param_from_decl":[{"filename":"fn_call_variadic.php","line":3,"char_start":26,"char_end":27}]
       }
-    }
+    ]
   ]
 }
 

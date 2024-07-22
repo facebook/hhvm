@@ -118,439 +118,359 @@ which itself flows down into this hint as the 1st function parameter
 File "fn_subtyping_variadic_1.php", line 7, character 35 - line 7, character 37:
 
 Raw:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Def":[
+      {
+        "filename":"fn_subtyping_variadic_1.php",
+        "line":3,
+        "char_start":7,
+        "char_end":11
+      },
+      [
+        {
+          "Hint":[
+            {
+              "filename":"fn_subtyping_variadic_1.php",
+              "line":6,
+              "char_start":40,
+              "char_end":44
+            }
+          ]
+        }
+      ]
+    ]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{"Prj_symm_fn_param":[1,0]}]},
+      [
         {
           "Def":[
             {
-              "filename":"fn_subtyping_variadic_1.php",
-              "line":3,
-              "char_start":7,
-              "char_end":11
+              "filename":"/tmp/J6c3h9hIfA/supportdynamic.hhi",
+              "line":6,
+              "char_start":11,
+              "char_end":20
             },
-            {
-              "From_witness_decl":{
+            [
+              {
                 "Hint":[
                   {
                     "filename":"fn_subtyping_variadic_1.php",
                     "line":6,
-                    "char_start":40,
-                    "char_end":44
+                    "char_start":25,
+                    "char_end":51
                   }
                 ]
               }
-            }
+            ]
           ]
         },
         "Flow_prj",
         {
-          "Prj":[
-            {"Symm":[{"Prj_symm_fn_param":[1,0]}]},
+          "Witness_from_decl":[
             {
-              "Flow":[
-                {
-                  "Flow":[
+              "filename":"fn_subtyping_variadic_1.php",
+              "line":6,
+              "char_start":25,
+              "char_end":51
+            }
+          ]
+        },
+        "Flow_subtype",
+        {
+          "Rev":[
+            [
+              {
+                "Def":[
+                  {
+                    "filename":"/tmp/J6c3h9hIfA/supportdynamic.hhi",
+                    "line":6,
+                    "char_start":11,
+                    "char_end":20
+                  },
+                  [
                     {
-                      "Def":[
+                      "Hint":[
                         {
-                          "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
-                          "line":6,
-                          "char_start":11,
+                          "filename":"fn_subtyping_variadic_1.php",
+                          "line":7,
+                          "char_start":25,
+                          "char_end":47
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              },
+              "Flow_param_hint",
+              {
+                "Witness":[
+                  {
+                    "filename":"fn_subtyping_variadic_1.php",
+                    "line":7,
+                    "char_start":49,
+                    "char_end":50
+                  }
+                ]
+              },
+              "Flow_local",
+              {
+                "Witness":[
+                  {
+                    "filename":"fn_subtyping_variadic_1.php",
+                    "line":8,
+                    "char_start":18,
+                    "char_end":19
+                  }
+                ]
+              },
+              "Flow_prj",
+              {
+                "Prj":[
+                  {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+                  [
+                    {
+                      "Witness":[
+                        {
+                          "filename":"fn_subtyping_variadic_1.php",
+                          "line":8,
+                          "char_start":3,
                           "char_end":20
-                        },
-                        {
-                          "From_witness_decl":{
-                            "Hint":[
-                              {
-                                "filename":"fn_subtyping_variadic_1.php",
-                                "line":6,
-                                "char_start":25,
-                                "char_end":51
-                              }
-                            ]
-                          }
                         }
                       ]
                     },
-                    "Flow_prj",
+                    "Flow_subtype",
                     {
-                      "From_witness_decl":{
-                        "Witness_from_decl":[
+                      "Rev":[
+                        [
                           {
-                            "filename":"fn_subtyping_variadic_1.php",
-                            "line":6,
-                            "char_start":25,
-                            "char_end":51
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                },
-                "Flow_subtype",
-                {
-                  "Rev":[
-                    {
-                      "Flow":[
-                        {
-                          "Flow":[
-                            {
-                              "Flow":[
-                                {
-                                  "Flow":[
-                                    {
-                                      "Def":[
-                                        {
-                                          "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
-                                          "line":6,
-                                          "char_start":11,
-                                          "char_end":20
-                                        },
-                                        {
-                                          "From_witness_decl":{
-                                            "Hint":[
-                                              {
-                                                "filename":"fn_subtyping_variadic_1.php",
-                                                "line":7,
-                                                "char_start":25,
-                                                "char_end":47
-                                              }
-                                            ]
-                                          }
-                                        }
-                                      ]
-                                    },
-                                    "Flow_param_hint",
-                                    {
-                                      "From_witness_locl":{
-                                        "Witness":[
-                                          {
-                                            "filename":"fn_subtyping_variadic_1.php",
-                                            "line":7,
-                                            "char_start":49,
-                                            "char_end":50
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  ]
-                                },
-                                "Flow_local",
-                                {
-                                  "From_witness_locl":{
-                                    "Witness":[
-                                      {
-                                        "filename":"fn_subtyping_variadic_1.php",
-                                        "line":8,
-                                        "char_start":18,
-                                        "char_end":19
-                                      }
-                                    ]
-                                  }
-                                }
-                              ]
-                            },
-                            "Flow_prj",
-                            {
-                              "Prj":[
-                                {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-                                {
-                                  "Flow":[
-                                    {
-                                      "From_witness_locl":{
-                                        "Witness":[
-                                          {
-                                            "filename":"fn_subtyping_variadic_1.php",
-                                            "line":8,
-                                            "char_start":3,
-                                            "char_end":20
-                                          }
-                                        ]
-                                      }
-                                    },
-                                    "Flow_subtype",
-                                    {
-                                      "Rev":[
-                                        {
-                                          "From_witness_decl":{
-                                            "Support_dynamic_type":[
-                                              {
-                                                "filename":"fn_subtyping_variadic_1.php",
-                                                "line":6,
-                                                "char_start":10,
-                                                "char_end":23
-                                              }
-                                            ]
-                                          }
-                                        }
-                                      ]
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        "Flow_prj",
-                        {
-                          "From_witness_decl":{
-                            "Hint":[
+                            "Support_dynamic_type":[
                               {
                                 "filename":"fn_subtyping_variadic_1.php",
-                                "line":7,
-                                "char_start":25,
-                                "char_end":47
+                                "line":6,
+                                "char_start":10,
+                                "char_end":23
                               }
                             ]
                           }
-                        }
+                        ]
                       ]
                     }
                   ]
-                }
-              ]
+                ]
+              },
+              "Flow_prj",
+              {
+                "Hint":[
+                  {
+                    "filename":"fn_subtyping_variadic_1.php",
+                    "line":7,
+                    "char_start":25,
+                    "char_end":47
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      ]
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {"filename":"fn_subtyping_variadic_1.php","line":4,"char_start":7,"char_end":9},
+      [
+        {
+          "Hint":[
+            {
+              "filename":"fn_subtyping_variadic_1.php",
+              "line":7,
+              "char_start":35,
+              "char_end":37
             }
           ]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {"filename":"fn_subtyping_variadic_1.php","line":4,"char_start":7,"char_end":9},
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"fn_subtyping_variadic_1.php",
-                "line":7,
-                "char_start":35,
-                "char_end":37
-              }
-            ]
-          }
-        }
-      ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Def":[
+      {
+        "filename":"fn_subtyping_variadic_1.php",
+        "line":3,
+        "char_start":7,
+        "char_end":11
+      },
+      [
+        {
+          "Hint":[
+            {
+              "filename":"fn_subtyping_variadic_1.php",
+              "line":6,
+              "char_start":40,
+              "char_end":44
+            }
+          ]
+        }
+      ]
+    ]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{"Prj_symm_fn_param":[1,0]}]},
+      [
         {
           "Def":[
             {
-              "filename":"fn_subtyping_variadic_1.php",
-              "line":3,
-              "char_start":7,
-              "char_end":11
+              "filename":"/tmp/J6c3h9hIfA/supportdynamic.hhi",
+              "line":6,
+              "char_start":11,
+              "char_end":20
             },
-            {
-              "From_witness_decl":{
+            [
+              {
                 "Hint":[
                   {
                     "filename":"fn_subtyping_variadic_1.php",
                     "line":6,
-                    "char_start":40,
-                    "char_end":44
+                    "char_start":25,
+                    "char_end":51
                   }
                 ]
               }
+            ]
+          ]
+        },
+        "Flow_prj",
+        {
+          "Witness_from_decl":[
+            {
+              "filename":"fn_subtyping_variadic_1.php",
+              "line":6,
+              "char_start":25,
+              "char_end":51
+            }
+          ]
+        },
+        "Flow_subtype",
+        {
+          "Hint":[
+            {
+              "filename":"fn_subtyping_variadic_1.php",
+              "line":7,
+              "char_start":25,
+              "char_end":47
             }
           ]
         },
         "Flow_prj",
         {
           "Prj":[
-            {"Symm":[{"Prj_symm_fn_param":[1,0]}]},
+            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+            [
+              {
+                "Support_dynamic_type":[
+                  {
+                    "filename":"fn_subtyping_variadic_1.php",
+                    "line":6,
+                    "char_start":10,
+                    "char_end":23
+                  }
+                ]
+              },
+              "Flow_subtype",
+              {
+                "Witness":[
+                  {
+                    "filename":"fn_subtyping_variadic_1.php",
+                    "line":8,
+                    "char_start":3,
+                    "char_end":20
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "Flow_prj",
+        {
+          "Witness":[
             {
-              "Flow":[
-                {
-                  "Flow":[
-                    {
-                      "Def":[
-                        {
-                          "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
-                          "line":6,
-                          "char_start":11,
-                          "char_end":20
-                        },
-                        {
-                          "From_witness_decl":{
-                            "Hint":[
-                              {
-                                "filename":"fn_subtyping_variadic_1.php",
-                                "line":6,
-                                "char_start":25,
-                                "char_end":51
-                              }
-                            ]
-                          }
-                        }
-                      ]
-                    },
-                    "Flow_prj",
-                    {
-                      "From_witness_decl":{
-                        "Witness_from_decl":[
-                          {
-                            "filename":"fn_subtyping_variadic_1.php",
-                            "line":6,
-                            "char_start":25,
-                            "char_end":51
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                },
-                "Flow_subtype",
-                {
-                  "Flow":[
-                    {
-                      "From_witness_decl":{
-                        "Hint":[
-                          {
-                            "filename":"fn_subtyping_variadic_1.php",
-                            "line":7,
-                            "char_start":25,
-                            "char_end":47
-                          }
-                        ]
-                      }
-                    },
-                    "Flow_prj",
-                    {
-                      "Flow":[
-                        {
-                          "Prj":[
-                            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-                            {
-                              "Flow":[
-                                {
-                                  "From_witness_decl":{
-                                    "Support_dynamic_type":[
-                                      {
-                                        "filename":"fn_subtyping_variadic_1.php",
-                                        "line":6,
-                                        "char_start":10,
-                                        "char_end":23
-                                      }
-                                    ]
-                                  }
-                                },
-                                "Flow_subtype",
-                                {
-                                  "From_witness_locl":{
-                                    "Witness":[
-                                      {
-                                        "filename":"fn_subtyping_variadic_1.php",
-                                        "line":8,
-                                        "char_start":3,
-                                        "char_end":20
-                                      }
-                                    ]
-                                  }
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        "Flow_prj",
-                        {
-                          "Flow":[
-                            {
-                              "From_witness_locl":{
-                                "Witness":[
-                                  {
-                                    "filename":"fn_subtyping_variadic_1.php",
-                                    "line":8,
-                                    "char_start":18,
-                                    "char_end":19
-                                  }
-                                ]
-                              }
-                            },
-                            "Flow_local",
-                            {
-                              "Flow":[
-                                {
-                                  "From_witness_locl":{
-                                    "Witness":[
-                                      {
-                                        "filename":"fn_subtyping_variadic_1.php",
-                                        "line":7,
-                                        "char_start":49,
-                                        "char_end":50
-                                      }
-                                    ]
-                                  }
-                                },
-                                "Flow_param_hint",
-                                {
-                                  "Def":[
-                                    {
-                                      "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
-                                      "line":6,
-                                      "char_start":11,
-                                      "char_end":20
-                                    },
-                                    {
-                                      "From_witness_decl":{
-                                        "Hint":[
-                                          {
-                                            "filename":"fn_subtyping_variadic_1.php",
-                                            "line":7,
-                                            "char_start":25,
-                                            "char_end":47
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
+              "filename":"fn_subtyping_variadic_1.php",
+              "line":8,
+              "char_start":18,
+              "char_end":19
+            }
+          ]
+        },
+        "Flow_local",
+        {
+          "Witness":[
+            {
+              "filename":"fn_subtyping_variadic_1.php",
+              "line":7,
+              "char_start":49,
+              "char_end":50
+            }
+          ]
+        },
+        "Flow_param_hint",
+        {
+          "Def":[
+            {
+              "filename":"/tmp/J6c3h9hIfA/supportdynamic.hhi",
+              "line":6,
+              "char_start":11,
+              "char_end":20
+            },
+            [
+              {
+                "Hint":[
+                  {
+                    "filename":"fn_subtyping_variadic_1.php",
+                    "line":7,
+                    "char_start":25,
+                    "char_end":47
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      ]
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {"filename":"fn_subtyping_variadic_1.php","line":4,"char_start":7,"char_end":9},
+      [
+        {
+          "Hint":[
+            {
+              "filename":"fn_subtyping_variadic_1.php",
+              "line":7,
+              "char_start":35,
+              "char_end":37
             }
           ]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {"filename":"fn_subtyping_variadic_1.php","line":4,"char_start":7,"char_end":9},
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"fn_subtyping_variadic_1.php",
-                "line":7,
-                "char_start":35,
-                "char_end":37
-              }
-            ]
-          }
-        }
-      ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -559,56 +479,60 @@ Path:
 {
   "stats":{"max_depth":2,"length":9,"reversals":2},
   "path_elems":[
-    {
-      "Def":[
-        {
-          "filename":"fn_subtyping_variadic_1.php",
-          "line":3,
-          "char_start":7,
-          "char_end":11
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"fn_subtyping_variadic_1.php",
-                "line":6,
-                "char_start":40,
-                "char_end":44
-              }
-            ]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {
+            "filename":"fn_subtyping_variadic_1.php",
+            "line":3,
+            "char_start":7,
+            "char_end":11
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"fn_subtyping_variadic_1.php",
+                  "line":6,
+                  "char_start":40,
+                  "char_end":44
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[1,0]}]}}
     },
-    {
-      "Def":[
-        {
-          "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
-          "line":6,
-          "char_start":11,
-          "char_end":20
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"fn_subtyping_variadic_1.php",
-                "line":6,
-                "char_start":25,
-                "char_end":51
-              }
-            ]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {
+            "filename":"/tmp/J6c3h9hIfA/supportdynamic.hhi",
+            "line":6,
+            "char_start":11,
+            "char_end":20
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"fn_subtyping_variadic_1.php",
+                  "line":6,
+                  "char_start":25,
+                  "char_end":51
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
     {"Edge":{"dir":"Bwd","kind":"Flow_prj"}},
-    {
-      "From_witness_decl":{
+    [
+      {
         "Witness_from_decl":[
           {
             "filename":"fn_subtyping_variadic_1.php",
@@ -618,10 +542,10 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
-    {
-      "From_witness_decl":{
+    [
+      {
         "Hint":[
           {
             "filename":"fn_subtyping_variadic_1.php",
@@ -631,12 +555,12 @@ Path:
           }
         ]
       }
-    },
+    ],
     {
       "Edge":{"dir":"Bwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
-    {
-      "From_witness_decl":{
+    [
+      {
         "Support_dynamic_type":[
           {
             "filename":"fn_subtyping_variadic_1.php",
@@ -646,10 +570,10 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[
           {
             "filename":"fn_subtyping_variadic_1.php",
@@ -659,12 +583,12 @@ Path:
           }
         ]
       }
-    },
+    ],
     {
       "Edge":{"dir":"Bwd","kind":"Flow_prj","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[
           {
             "filename":"fn_subtyping_variadic_1.php",
@@ -674,10 +598,10 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Bwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[
           {
             "filename":"fn_subtyping_variadic_1.php",
@@ -687,30 +611,32 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Bwd","kind":"Flow_param_hint"}},
-    {
-      "Def":[
-        {
-          "filename":"/tmp/FyPbe1Rknp/supportdynamic.hhi",
-          "line":6,
-          "char_start":11,
-          "char_end":20
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"fn_subtyping_variadic_1.php",
-                "line":7,
-                "char_start":25,
-                "char_end":47
-              }
-            ]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {
+            "filename":"/tmp/J6c3h9hIfA/supportdynamic.hhi",
+            "line":6,
+            "char_start":11,
+            "char_end":20
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"fn_subtyping_variadic_1.php",
+                  "line":7,
+                  "char_start":25,
+                  "char_end":47
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -718,23 +644,25 @@ Path:
         "out_of":{"Symm":[{"Prj_symm_fn_param":[1,0]}]}
       }
     },
-    {
-      "Def":[
-        {"filename":"fn_subtyping_variadic_1.php","line":4,"char_start":7,"char_end":9},
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"fn_subtyping_variadic_1.php",
-                "line":7,
-                "char_start":35,
-                "char_end":37
-              }
-            ]
-          }
-        }
-      ]
-    }
+    [
+      {
+        "Def":[
+          {"filename":"fn_subtyping_variadic_1.php","line":4,"char_start":7,"char_end":9},
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"fn_subtyping_variadic_1.php",
+                  "line":7,
+                  "char_start":35,
+                  "char_end":37
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ]
   ]
 }
 

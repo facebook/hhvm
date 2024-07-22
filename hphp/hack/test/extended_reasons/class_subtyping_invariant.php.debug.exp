@@ -119,435 +119,371 @@ which itself flows down into this hint as the invariant, 3rd type parameter of t
 File "class_subtyping_invariant.php", line 13, character 43 - line 13, character 45:
 
 Raw:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Def":[
+      {
+        "filename":"class_subtyping_invariant.php",
+        "line":7,
+        "char_start":7,
+        "char_end":11
+      },
+      [
+        {
+          "Hint":[
+            {
+              "filename":"class_subtyping_invariant.php",
+              "line":11,
+              "char_start":37,
+              "char_end":41
+            }
+          ]
+        }
+      ]
+    ]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",2,{"Inv":[{"Co":[]}]}]}]},
+      [
         {
           "Def":[
             {
               "filename":"class_subtyping_invariant.php",
-              "line":7,
+              "line":3,
               "char_start":7,
-              "char_end":11
+              "char_end":9
             },
-            {
-              "From_witness_decl":{
+            [
+              {
                 "Hint":[
                   {
                     "filename":"class_subtyping_invariant.php",
                     "line":11,
-                    "char_start":37,
-                    "char_end":41
+                    "char_start":21,
+                    "char_end":42
                   }
                 ]
               }
-            }
+            ]
           ]
         },
-        "Flow_prj",
+        "Flow_subtype",
         {
-          "Prj":[
-            {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",2,{"Inv":[{"Co":[]}]}]}]},
-            {
-              "Flow":[
-                {
-                  "Def":[
+          "Rev":[
+            [
+              {
+                "Def":[
+                  {
+                    "filename":"class_subtyping_invariant.php",
+                    "line":3,
+                    "char_start":7,
+                    "char_end":9
+                  },
+                  [
                     {
-                      "filename":"class_subtyping_invariant.php",
-                      "line":3,
-                      "char_start":7,
-                      "char_end":9
-                    },
-                    {
-                      "From_witness_decl":{
-                        "Hint":[
-                          {
-                            "filename":"class_subtyping_invariant.php",
-                            "line":11,
-                            "char_start":21,
-                            "char_end":42
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                },
-                "Flow_subtype",
-                {
-                  "Rev":[
-                    {
-                      "Flow":[
+                      "Hint":[
                         {
-                          "Def":[
-                            {
-                              "filename":"class_subtyping_invariant.php",
-                              "line":3,
-                              "char_start":7,
-                              "char_end":9
-                            },
-                            {
-                              "From_witness_decl":{
-                                "Hint":[
-                                  {
-                                    "filename":"class_subtyping_invariant.php",
-                                    "line":5,
-                                    "char_start":28,
-                                    "char_end":43
-                                  }
-                                ]
-                              }
-                            }
-                          ]
-                        },
-                        "Flow_extends",
-                        {
-                          "Flow":[
-                            {
-                              "Flow":[
-                                {
-                                  "Flow":[
-                                    {
-                                      "Def":[
-                                        {
-                                          "filename":"class_subtyping_invariant.php",
-                                          "line":5,
-                                          "char_start":7,
-                                          "char_end":9
-                                        },
-                                        {
-                                          "From_witness_decl":{
-                                            "Hint":[
-                                              {
-                                                "filename":"class_subtyping_invariant.php",
-                                                "line":13,
-                                                "char_start":32,
-                                                "char_end":46
-                                              }
-                                            ]
-                                          }
-                                        }
-                                      ]
-                                    },
-                                    "Flow_param_hint",
-                                    {
-                                      "From_witness_locl":{
-                                        "Witness":[
-                                          {
-                                            "filename":"class_subtyping_invariant.php",
-                                            "line":13,
-                                            "char_start":48,
-                                            "char_end":49
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  ]
-                                },
-                                "Flow_local",
-                                {
-                                  "From_witness_locl":{
-                                    "Witness":[
-                                      {
-                                        "filename":"class_subtyping_invariant.php",
-                                        "line":14,
-                                        "char_start":14,
-                                        "char_end":15
-                                      }
-                                    ]
-                                  }
-                                }
-                              ]
-                            },
-                            "Flow_prj",
-                            {
-                              "Prj":[
-                                {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-                                {
-                                  "Flow":[
-                                    {
-                                      "From_witness_locl":{
-                                        "Witness":[
-                                          {
-                                            "filename":"class_subtyping_invariant.php",
-                                            "line":14,
-                                            "char_start":3,
-                                            "char_end":16
-                                          }
-                                        ]
-                                      }
-                                    },
-                                    "Flow_subtype",
-                                    {
-                                      "Rev":[
-                                        {
-                                          "From_witness_decl":{
-                                            "Support_dynamic_type":[
-                                              {
-                                                "filename":"class_subtyping_invariant.php",
-                                                "line":11,
-                                                "char_start":10,
-                                                "char_end":19
-                                              }
-                                            ]
-                                          }
-                                        }
-                                      ]
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
+                          "filename":"class_subtyping_invariant.php",
+                          "line":5,
+                          "char_start":28,
+                          "char_end":43
                         }
                       ]
                     }
                   ]
-                }
-              ]
+                ]
+              },
+              "Flow_extends",
+              {
+                "Def":[
+                  {
+                    "filename":"class_subtyping_invariant.php",
+                    "line":5,
+                    "char_start":7,
+                    "char_end":9
+                  },
+                  [
+                    {
+                      "Hint":[
+                        {
+                          "filename":"class_subtyping_invariant.php",
+                          "line":13,
+                          "char_start":32,
+                          "char_end":46
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              },
+              "Flow_param_hint",
+              {
+                "Witness":[
+                  {
+                    "filename":"class_subtyping_invariant.php",
+                    "line":13,
+                    "char_start":48,
+                    "char_end":49
+                  }
+                ]
+              },
+              "Flow_local",
+              {
+                "Witness":[
+                  {
+                    "filename":"class_subtyping_invariant.php",
+                    "line":14,
+                    "char_start":14,
+                    "char_end":15
+                  }
+                ]
+              },
+              "Flow_prj",
+              {
+                "Prj":[
+                  {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+                  [
+                    {
+                      "Witness":[
+                        {
+                          "filename":"class_subtyping_invariant.php",
+                          "line":14,
+                          "char_start":3,
+                          "char_end":16
+                        }
+                      ]
+                    },
+                    "Flow_subtype",
+                    {
+                      "Rev":[
+                        [
+                          {
+                            "Support_dynamic_type":[
+                              {
+                                "filename":"class_subtyping_invariant.php",
+                                "line":11,
+                                "char_start":10,
+                                "char_end":19
+                              }
+                            ]
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          ]
+        }
+      ]
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {
+        "filename":"class_subtyping_invariant.php",
+        "line":9,
+        "char_start":7,
+        "char_end":9
+      },
+      [
+        {
+          "Hint":[
+            {
+              "filename":"class_subtyping_invariant.php",
+              "line":13,
+              "char_start":43,
+              "char_end":45
             }
           ]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {
-          "filename":"class_subtyping_invariant.php",
-          "line":9,
-          "char_start":7,
-          "char_end":9
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"class_subtyping_invariant.php",
-                "line":13,
-                "char_start":43,
-                "char_end":45
-              }
-            ]
-          }
-        }
-      ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Def":[
+      {
+        "filename":"class_subtyping_invariant.php",
+        "line":7,
+        "char_start":7,
+        "char_end":11
+      },
+      [
+        {
+          "Hint":[
+            {
+              "filename":"class_subtyping_invariant.php",
+              "line":11,
+              "char_start":37,
+              "char_end":41
+            }
+          ]
+        }
+      ]
+    ]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",2,{"Inv":[{"Co":[]}]}]}]},
+      [
         {
           "Def":[
             {
               "filename":"class_subtyping_invariant.php",
-              "line":7,
+              "line":3,
               "char_start":7,
-              "char_end":11
+              "char_end":9
             },
-            {
-              "From_witness_decl":{
+            [
+              {
                 "Hint":[
                   {
                     "filename":"class_subtyping_invariant.php",
                     "line":11,
-                    "char_start":37,
-                    "char_end":41
+                    "char_start":21,
+                    "char_end":42
                   }
                 ]
               }
-            }
+            ]
+          ]
+        },
+        "Flow_subtype",
+        {
+          "Prj":[
+            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+            [
+              {
+                "Support_dynamic_type":[
+                  {
+                    "filename":"class_subtyping_invariant.php",
+                    "line":11,
+                    "char_start":10,
+                    "char_end":19
+                  }
+                ]
+              },
+              "Flow_subtype",
+              {
+                "Witness":[
+                  {
+                    "filename":"class_subtyping_invariant.php",
+                    "line":14,
+                    "char_start":3,
+                    "char_end":16
+                  }
+                ]
+              }
+            ]
           ]
         },
         "Flow_prj",
         {
-          "Prj":[
-            {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",2,{"Inv":[{"Co":[]}]}]}]},
+          "Witness":[
             {
-              "Flow":[
-                {
-                  "Def":[
-                    {
-                      "filename":"class_subtyping_invariant.php",
-                      "line":3,
-                      "char_start":7,
-                      "char_end":9
-                    },
-                    {
-                      "From_witness_decl":{
-                        "Hint":[
-                          {
-                            "filename":"class_subtyping_invariant.php",
-                            "line":11,
-                            "char_start":21,
-                            "char_end":42
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                },
-                "Flow_subtype",
-                {
-                  "Flow":[
-                    {
-                      "Flow":[
-                        {
-                          "Prj":[
-                            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-                            {
-                              "Flow":[
-                                {
-                                  "From_witness_decl":{
-                                    "Support_dynamic_type":[
-                                      {
-                                        "filename":"class_subtyping_invariant.php",
-                                        "line":11,
-                                        "char_start":10,
-                                        "char_end":19
-                                      }
-                                    ]
-                                  }
-                                },
-                                "Flow_subtype",
-                                {
-                                  "From_witness_locl":{
-                                    "Witness":[
-                                      {
-                                        "filename":"class_subtyping_invariant.php",
-                                        "line":14,
-                                        "char_start":3,
-                                        "char_end":16
-                                      }
-                                    ]
-                                  }
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        "Flow_prj",
-                        {
-                          "Flow":[
-                            {
-                              "From_witness_locl":{
-                                "Witness":[
-                                  {
-                                    "filename":"class_subtyping_invariant.php",
-                                    "line":14,
-                                    "char_start":14,
-                                    "char_end":15
-                                  }
-                                ]
-                              }
-                            },
-                            "Flow_local",
-                            {
-                              "Flow":[
-                                {
-                                  "From_witness_locl":{
-                                    "Witness":[
-                                      {
-                                        "filename":"class_subtyping_invariant.php",
-                                        "line":13,
-                                        "char_start":48,
-                                        "char_end":49
-                                      }
-                                    ]
-                                  }
-                                },
-                                "Flow_param_hint",
-                                {
-                                  "Def":[
-                                    {
-                                      "filename":"class_subtyping_invariant.php",
-                                      "line":5,
-                                      "char_start":7,
-                                      "char_end":9
-                                    },
-                                    {
-                                      "From_witness_decl":{
-                                        "Hint":[
-                                          {
-                                            "filename":"class_subtyping_invariant.php",
-                                            "line":13,
-                                            "char_start":32,
-                                            "char_end":46
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    "Flow_extends",
-                    {
-                      "Def":[
-                        {
-                          "filename":"class_subtyping_invariant.php",
-                          "line":3,
-                          "char_start":7,
-                          "char_end":9
-                        },
-                        {
-                          "From_witness_decl":{
-                            "Hint":[
-                              {
-                                "filename":"class_subtyping_invariant.php",
-                                "line":5,
-                                "char_start":28,
-                                "char_end":43
-                              }
-                            ]
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
+              "filename":"class_subtyping_invariant.php",
+              "line":14,
+              "char_start":14,
+              "char_end":15
+            }
+          ]
+        },
+        "Flow_local",
+        {
+          "Witness":[
+            {
+              "filename":"class_subtyping_invariant.php",
+              "line":13,
+              "char_start":48,
+              "char_end":49
+            }
+          ]
+        },
+        "Flow_param_hint",
+        {
+          "Def":[
+            {
+              "filename":"class_subtyping_invariant.php",
+              "line":5,
+              "char_start":7,
+              "char_end":9
+            },
+            [
+              {
+                "Hint":[
+                  {
+                    "filename":"class_subtyping_invariant.php",
+                    "line":13,
+                    "char_start":32,
+                    "char_end":46
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "Flow_extends",
+        {
+          "Def":[
+            {
+              "filename":"class_subtyping_invariant.php",
+              "line":3,
+              "char_start":7,
+              "char_end":9
+            },
+            [
+              {
+                "Hint":[
+                  {
+                    "filename":"class_subtyping_invariant.php",
+                    "line":5,
+                    "char_start":28,
+                    "char_end":43
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      ]
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {
+        "filename":"class_subtyping_invariant.php",
+        "line":9,
+        "char_start":7,
+        "char_end":9
+      },
+      [
+        {
+          "Hint":[
+            {
+              "filename":"class_subtyping_invariant.php",
+              "line":13,
+              "char_start":43,
+              "char_end":45
             }
           ]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {
-          "filename":"class_subtyping_invariant.php",
-          "line":9,
-          "char_start":7,
-          "char_end":9
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"class_subtyping_invariant.php",
-                "line":13,
-                "char_start":43,
-                "char_end":45
-              }
-            ]
-          }
-        }
-      ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -556,28 +492,30 @@ Path:
 {
   "stats":{"max_depth":2,"length":8,"reversals":1},
   "path_elems":[
-    {
-      "Def":[
-        {
-          "filename":"class_subtyping_invariant.php",
-          "line":7,
-          "char_start":7,
-          "char_end":11
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"class_subtyping_invariant.php",
-                "line":11,
-                "char_start":37,
-                "char_end":41
-              }
-            ]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {
+            "filename":"class_subtyping_invariant.php",
+            "line":7,
+            "char_start":7,
+            "char_end":11
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"class_subtyping_invariant.php",
+                  "line":11,
+                  "char_start":37,
+                  "char_end":41
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -585,28 +523,30 @@ Path:
         "in_to":{"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",2,{"Inv":[{"Co":[]}]}]}]}
       }
     },
-    {
-      "Def":[
-        {
-          "filename":"class_subtyping_invariant.php",
-          "line":3,
-          "char_start":7,
-          "char_end":9
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"class_subtyping_invariant.php",
-                "line":11,
-                "char_start":21,
-                "char_end":42
-              }
-            ]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {
+            "filename":"class_subtyping_invariant.php",
+            "line":3,
+            "char_start":7,
+            "char_end":9
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"class_subtyping_invariant.php",
+                  "line":11,
+                  "char_start":21,
+                  "char_end":42
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -614,8 +554,8 @@ Path:
         "in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
       }
     },
-    {
-      "From_witness_decl":{
+    [
+      {
         "Support_dynamic_type":[
           {
             "filename":"class_subtyping_invariant.php",
@@ -625,10 +565,10 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[
           {
             "filename":"class_subtyping_invariant.php",
@@ -638,12 +578,12 @@ Path:
           }
         ]
       }
-    },
+    ],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[
           {
             "filename":"class_subtyping_invariant.php",
@@ -653,10 +593,10 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[
           {
             "filename":"class_subtyping_invariant.php",
@@ -666,53 +606,57 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
-    {
-      "Def":[
-        {
-          "filename":"class_subtyping_invariant.php",
-          "line":5,
-          "char_start":7,
-          "char_end":9
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"class_subtyping_invariant.php",
-                "line":13,
-                "char_start":32,
-                "char_end":46
-              }
-            ]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {
+            "filename":"class_subtyping_invariant.php",
+            "line":5,
+            "char_start":7,
+            "char_end":9
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"class_subtyping_invariant.php",
+                  "line":13,
+                  "char_start":32,
+                  "char_end":46
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_extends"}},
-    {
-      "Def":[
-        {
-          "filename":"class_subtyping_invariant.php",
-          "line":3,
-          "char_start":7,
-          "char_end":9
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"class_subtyping_invariant.php",
-                "line":5,
-                "char_start":28,
-                "char_end":43
-              }
-            ]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {
+            "filename":"class_subtyping_invariant.php",
+            "line":3,
+            "char_start":7,
+            "char_end":9
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"class_subtyping_invariant.php",
+                  "line":5,
+                  "char_start":28,
+                  "char_end":43
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -720,28 +664,30 @@ Path:
         "out_of":{"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",2,{"Inv":[{"Co":[]}]}]}]}
       }
     },
-    {
-      "Def":[
-        {
-          "filename":"class_subtyping_invariant.php",
-          "line":9,
-          "char_start":7,
-          "char_end":9
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"class_subtyping_invariant.php",
-                "line":13,
-                "char_start":43,
-                "char_end":45
-              }
-            ]
-          }
-        }
-      ]
-    }
+    [
+      {
+        "Def":[
+          {
+            "filename":"class_subtyping_invariant.php",
+            "line":9,
+            "char_start":7,
+            "char_end":9
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"class_subtyping_invariant.php",
+                  "line":13,
+                  "char_start":43,
+                  "char_end":45
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ]
   ]
 }
 

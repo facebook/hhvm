@@ -109,191 +109,119 @@ which itself flows into this hint because they are required to be subtypes
 File "union_join_point.php", line 5, character 37 - line 5, character 37:
 
 Raw:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Def":[
+      {"filename":"union_join_point.php","line":3,"char_start":7,"char_end":7},
+      [
         {
-          "Flow":[
-            {
-              "Flow":[
-                {
-                  "Flow":[
-                    {
-                      "Def":[
-                        {"filename":"union_join_point.php","line":3,"char_start":7,"char_end":7},
-                        {
-                          "From_witness_decl":{
-                            "Hint":[{"filename":"union_join_point.php","line":5,"char_start":30,"char_end":30}]
-                          }
-                        }
-                      ]
-                    },
-                    "Flow_param_hint",
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"union_join_point.php","line":5,"char_start":32,"char_end":33}]
-                      }
-                    }
-                  ]
-                },
-                "Flow_local",
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"union_join_point.php","line":9,"char_start":10,"char_end":11}]
-                  }
-                }
-              ]
-            },
-            "Flow_assign",
-            {
-              "From_witness_locl":{
-                "Witness":[{"filename":"union_join_point.php","line":9,"char_start":5,"char_end":6}]
-              }
-            }
-          ]
+          "Hint":[{"filename":"union_join_point.php","line":5,"char_start":30,"char_end":30}]
+        }
+      ]
+    ]
+  },
+  "Flow_param_hint",
+  {
+    "Witness":[{"filename":"union_join_point.php","line":5,"char_start":32,"char_end":33}]
+  },
+  "Flow_local",
+  {
+    "Witness":[{"filename":"union_join_point.php","line":9,"char_start":10,"char_end":11}]
+  },
+  "Flow_assign",
+  {
+    "Witness":[{"filename":"union_join_point.php","line":9,"char_start":5,"char_end":6}]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Asymm":["Sub","Prj_asymm_union"]},
+      [
+        {
+          "Witness":[{"filename":"union_join_point.php","line":6,"char_start":3,"char_end":49}]
         },
-        "Flow_prj",
+        "Flow_local",
         {
-          "Prj":[
-            {"Asymm":["Sub","Prj_asymm_union"]},
-            {
-              "Flow":[
-                {
-                  "Flow":[
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"union_join_point.php","line":6,"char_start":3,"char_end":49}]
-                      }
-                    },
-                    "Flow_local",
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"union_join_point.php","line":12,"char_start":10,"char_end":11}]
-                      }
-                    }
-                  ]
-                },
-                "Flow_return_hint",
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"union_join_point.php","line":12,"char_start":3,"char_end":12}]
-                  }
-                }
-              ]
-            }
-          ]
+          "Witness":[{"filename":"union_join_point.php","line":12,"char_start":10,"char_end":11}]
+        },
+        "Flow_return_hint",
+        {
+          "Witness":[{"filename":"union_join_point.php","line":12,"char_start":3,"char_end":12}]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {"filename":"union_join_point.php","line":2,"char_start":7,"char_end":7},
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {"filename":"union_join_point.php","line":2,"char_start":7,"char_end":7},
+      [
         {
-          "From_witness_decl":{
-            "Hint":[{"filename":"union_join_point.php","line":5,"char_start":37,"char_end":37}]
-          }
+          "Hint":[{"filename":"union_join_point.php","line":5,"char_start":37,"char_end":37}]
         }
       ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Def":[
+      {"filename":"union_join_point.php","line":3,"char_start":7,"char_end":7},
+      [
         {
-          "Flow":[
-            {
-              "Flow":[
-                {
-                  "Flow":[
-                    {
-                      "Def":[
-                        {"filename":"union_join_point.php","line":3,"char_start":7,"char_end":7},
-                        {
-                          "From_witness_decl":{
-                            "Hint":[{"filename":"union_join_point.php","line":5,"char_start":30,"char_end":30}]
-                          }
-                        }
-                      ]
-                    },
-                    "Flow_param_hint",
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"union_join_point.php","line":5,"char_start":32,"char_end":33}]
-                      }
-                    }
-                  ]
-                },
-                "Flow_local",
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"union_join_point.php","line":9,"char_start":10,"char_end":11}]
-                  }
-                }
-              ]
-            },
-            "Flow_assign",
-            {
-              "From_witness_locl":{
-                "Witness":[{"filename":"union_join_point.php","line":9,"char_start":5,"char_end":6}]
-              }
-            }
-          ]
+          "Hint":[{"filename":"union_join_point.php","line":5,"char_start":30,"char_end":30}]
+        }
+      ]
+    ]
+  },
+  "Flow_param_hint",
+  {
+    "Witness":[{"filename":"union_join_point.php","line":5,"char_start":32,"char_end":33}]
+  },
+  "Flow_local",
+  {
+    "Witness":[{"filename":"union_join_point.php","line":9,"char_start":10,"char_end":11}]
+  },
+  "Flow_assign",
+  {
+    "Witness":[{"filename":"union_join_point.php","line":9,"char_start":5,"char_end":6}]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Asymm":["Sub","Prj_asymm_union"]},
+      [
+        {
+          "Witness":[{"filename":"union_join_point.php","line":6,"char_start":3,"char_end":49}]
         },
-        "Flow_prj",
+        "Flow_local",
         {
-          "Prj":[
-            {"Asymm":["Sub","Prj_asymm_union"]},
-            {
-              "Flow":[
-                {
-                  "Flow":[
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"union_join_point.php","line":6,"char_start":3,"char_end":49}]
-                      }
-                    },
-                    "Flow_local",
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"union_join_point.php","line":12,"char_start":10,"char_end":11}]
-                      }
-                    }
-                  ]
-                },
-                "Flow_return_hint",
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"union_join_point.php","line":12,"char_start":3,"char_end":12}]
-                  }
-                }
-              ]
-            }
-          ]
+          "Witness":[{"filename":"union_join_point.php","line":12,"char_start":10,"char_end":11}]
+        },
+        "Flow_return_hint",
+        {
+          "Witness":[{"filename":"union_join_point.php","line":12,"char_start":3,"char_end":12}]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {"filename":"union_join_point.php","line":2,"char_start":7,"char_end":7},
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {"filename":"union_join_point.php","line":2,"char_start":7,"char_end":7},
+      [
         {
-          "From_witness_decl":{
-            "Hint":[{"filename":"union_join_point.php","line":5,"char_start":37,"char_end":37}]
-          }
+          "Hint":[{"filename":"union_join_point.php","line":5,"char_start":37,"char_end":37}]
         }
       ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -302,65 +230,69 @@ Path:
 {
   "stats":{"max_depth":1,"length":7,"reversals":0},
   "path_elems":[
-    {
-      "Def":[
-        {"filename":"union_join_point.php","line":3,"char_start":7,"char_end":7},
-        {
-          "From_witness_decl":{
-            "Hint":[{"filename":"union_join_point.php","line":5,"char_start":30,"char_end":30}]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {"filename":"union_join_point.php","line":3,"char_start":7,"char_end":7},
+          [
+            {
+              "Hint":[{"filename":"union_join_point.php","line":5,"char_start":30,"char_end":30}]
+            }
+          ]
+        ]
+      }
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"union_join_point.php","line":5,"char_start":32,"char_end":33}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"union_join_point.php","line":9,"char_start":10,"char_end":11}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"union_join_point.php","line":9,"char_start":5,"char_end":6}]
       }
-    },
+    ],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_union"]}}
     },
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"union_join_point.php","line":6,"char_start":3,"char_end":49}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"union_join_point.php","line":12,"char_start":10,"char_end":11}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"union_join_point.php","line":12,"char_start":3,"char_end":12}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
-    {
-      "Def":[
-        {"filename":"union_join_point.php","line":2,"char_start":7,"char_end":7},
-        {
-          "From_witness_decl":{
-            "Hint":[{"filename":"union_join_point.php","line":5,"char_start":37,"char_end":37}]
-          }
-        }
-      ]
-    }
+    [
+      {
+        "Def":[
+          {"filename":"union_join_point.php","line":2,"char_start":7,"char_end":7},
+          [
+            {
+              "Hint":[{"filename":"union_join_point.php","line":5,"char_start":37,"char_end":37}]
+            }
+          ]
+        ]
+      }
+    ]
   ]
 }
 

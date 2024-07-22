@@ -130,241 +130,149 @@ which itself flows into this hint because they are required to be subtypes
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
 Raw:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Def":[
+      {"filename":"refinment_is.php","line":4,"char_start":7,"char_end":7},
+      [
         {
-          "Flow":[
-            {
-              "Flow":[
-                {
-                  "Def":[
-                    {"filename":"refinment_is.php","line":4,"char_start":7,"char_end":7},
-                    {
-                      "From_witness_decl":{
-                        "Hint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
-                      }
-                    }
-                  ]
-                },
-                "Flow_param_hint",
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"refinment_is.php","line":7,"char_start":21,"char_end":22}]
-                  }
-                }
-              ]
-            },
-            "Flow_local",
-            {
-              "From_witness_locl":{
-                "Witness":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":7}]
-              }
-            }
-          ]
+          "Hint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
+        }
+      ]
+    ]
+  },
+  "Flow_param_hint",
+  {
+    "Witness":[{"filename":"refinment_is.php","line":7,"char_start":21,"char_end":22}]
+  },
+  "Flow_local",
+  {
+    "Witness":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":7}]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Asymm":["Sub","Prj_asymm_inter"]},
+      [
+        {
+          "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+        },
+        "Flow_local",
+        {
+          "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+        },
+        "Flow_assign",
+        {
+          "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
         },
         "Flow_prj",
         {
           "Prj":[
-            {"Asymm":["Sub","Prj_asymm_inter"]},
-            {
-              "Flow":[
-                {
-                  "Flow":[
-                    {
-                      "Flow":[
-                        {
-                          "From_witness_locl":{
-                            "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
-                          }
-                        },
-                        "Flow_local",
-                        {
-                          "From_witness_locl":{
-                            "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
-                          }
-                        }
-                      ]
-                    },
-                    "Flow_assign",
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
-                      }
-                    }
-                  ]
-                },
-                "Flow_prj",
-                {
-                  "Prj":[
-                    {"Asymm":["Sub","Prj_asymm_union"]},
-                    {
-                      "Flow":[
-                        {
-                          "Flow":[
-                            {
-                              "From_witness_locl":{
-                                "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
-                              }
-                            },
-                            "Flow_local",
-                            {
-                              "From_witness_locl":{
-                                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
-                              }
-                            }
-                          ]
-                        },
-                        "Flow_return_hint",
-                        {
-                          "From_witness_locl":{
-                            "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
+            {"Asymm":["Sub","Prj_asymm_union"]},
+            [
+              {
+                "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+              },
+              "Flow_local",
+              {
+                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+              },
+              "Flow_return_hint",
+              {
+                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
+              }
+            ]
           ]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+      [
         {
-          "From_witness_decl":{
-            "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
-          }
+          "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
         }
       ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Def":[
+      {"filename":"refinment_is.php","line":4,"char_start":7,"char_end":7},
+      [
         {
-          "Flow":[
-            {
-              "Flow":[
-                {
-                  "Def":[
-                    {"filename":"refinment_is.php","line":4,"char_start":7,"char_end":7},
-                    {
-                      "From_witness_decl":{
-                        "Hint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
-                      }
-                    }
-                  ]
-                },
-                "Flow_param_hint",
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"refinment_is.php","line":7,"char_start":21,"char_end":22}]
-                  }
-                }
-              ]
-            },
-            "Flow_local",
-            {
-              "From_witness_locl":{
-                "Witness":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":7}]
-              }
-            }
-          ]
+          "Hint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
+        }
+      ]
+    ]
+  },
+  "Flow_param_hint",
+  {
+    "Witness":[{"filename":"refinment_is.php","line":7,"char_start":21,"char_end":22}]
+  },
+  "Flow_local",
+  {
+    "Witness":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":7}]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Asymm":["Sub","Prj_asymm_inter"]},
+      [
+        {
+          "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+        },
+        "Flow_local",
+        {
+          "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+        },
+        "Flow_assign",
+        {
+          "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
         },
         "Flow_prj",
         {
           "Prj":[
-            {"Asymm":["Sub","Prj_asymm_inter"]},
-            {
-              "Flow":[
-                {
-                  "Flow":[
-                    {
-                      "Flow":[
-                        {
-                          "From_witness_locl":{
-                            "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
-                          }
-                        },
-                        "Flow_local",
-                        {
-                          "From_witness_locl":{
-                            "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
-                          }
-                        }
-                      ]
-                    },
-                    "Flow_assign",
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
-                      }
-                    }
-                  ]
-                },
-                "Flow_prj",
-                {
-                  "Prj":[
-                    {"Asymm":["Sub","Prj_asymm_union"]},
-                    {
-                      "Flow":[
-                        {
-                          "Flow":[
-                            {
-                              "From_witness_locl":{
-                                "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
-                              }
-                            },
-                            "Flow_local",
-                            {
-                              "From_witness_locl":{
-                                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
-                              }
-                            }
-                          ]
-                        },
-                        "Flow_return_hint",
-                        {
-                          "From_witness_locl":{
-                            "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
+            {"Asymm":["Sub","Prj_asymm_union"]},
+            [
+              {
+                "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+              },
+              "Flow_local",
+              {
+                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+              },
+              "Flow_return_hint",
+              {
+                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
+              }
+            ]
           ]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+      [
         {
-          "From_witness_decl":{
-            "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
-          }
+          "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
         }
       ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -373,79 +281,83 @@ Path:
 {
   "stats":{"max_depth":2,"length":9,"reversals":0},
   "path_elems":[
-    {
-      "Def":[
-        {"filename":"refinment_is.php","line":4,"char_start":7,"char_end":7},
-        {
-          "From_witness_decl":{
-            "Hint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {"filename":"refinment_is.php","line":4,"char_start":7,"char_end":7},
+          [
+            {
+              "Hint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
+            }
+          ]
+        ]
+      }
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":7,"char_start":21,"char_end":22}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":7}]
       }
-    },
+    ],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_inter"]}}
     },
-    {
-      "From_witness_locl":{
+    [
+      {
         "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
       }
-    },
+    ],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_union"]}}
     },
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
-    {
-      "Def":[
-        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
-        {
-          "From_witness_decl":{
-            "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
-          }
-        }
-      ]
-    }
+    [
+      {
+        "Def":[
+          {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+          [
+            {
+              "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+            }
+          ]
+        ]
+      }
+    ]
   ]
 }
 
@@ -560,161 +472,97 @@ which itself flows into this hint because they are required to be subtypes
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
 Raw:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+  },
+  "Flow_local",
+  {
+    "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+  },
+  "Flow_assign",
+  {
+    "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Asymm":["Sub","Prj_asymm_union"]},
+      [
         {
-          "Flow":[
-            {
-              "Flow":[
-                {
-                  "From_witness_locl":{
-                    "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
-                  }
-                },
-                "Flow_local",
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
-                  }
-                }
-              ]
-            },
-            "Flow_assign",
-            {
-              "From_witness_locl":{
-                "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
-              }
-            }
-          ]
+          "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
         },
-        "Flow_prj",
+        "Flow_local",
         {
-          "Prj":[
-            {"Asymm":["Sub","Prj_asymm_union"]},
-            {
-              "Flow":[
-                {
-                  "Flow":[
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
-                      }
-                    },
-                    "Flow_local",
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
-                      }
-                    }
-                  ]
-                },
-                "Flow_return_hint",
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
-                  }
-                }
-              ]
-            }
-          ]
+          "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+        },
+        "Flow_return_hint",
+        {
+          "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+      [
         {
-          "From_witness_decl":{
-            "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
-          }
+          "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
         }
       ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+  },
+  "Flow_local",
+  {
+    "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+  },
+  "Flow_assign",
+  {
+    "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Asymm":["Sub","Prj_asymm_union"]},
+      [
         {
-          "Flow":[
-            {
-              "Flow":[
-                {
-                  "From_witness_locl":{
-                    "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
-                  }
-                },
-                "Flow_local",
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
-                  }
-                }
-              ]
-            },
-            "Flow_assign",
-            {
-              "From_witness_locl":{
-                "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
-              }
-            }
-          ]
+          "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
         },
-        "Flow_prj",
+        "Flow_local",
         {
-          "Prj":[
-            {"Asymm":["Sub","Prj_asymm_union"]},
-            {
-              "Flow":[
-                {
-                  "Flow":[
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
-                      }
-                    },
-                    "Flow_local",
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
-                      }
-                    }
-                  ]
-                },
-                "Flow_return_hint",
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
-                  }
-                }
-              ]
-            }
-          ]
+          "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+        },
+        "Flow_return_hint",
+        {
+          "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+      [
         {
-          "From_witness_decl":{
-            "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
-          }
+          "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
         }
       ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -723,54 +571,56 @@ Path:
 {
   "stats":{"max_depth":1,"length":6,"reversals":0},
   "path_elems":[
-    {
-      "From_witness_locl":{
+    [
+      {
         "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
       }
-    },
+    ],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_union"]}}
     },
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
-    {
-      "Def":[
-        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
-        {
-          "From_witness_decl":{
-            "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
-          }
-        }
-      ]
-    }
+    [
+      {
+        "Def":[
+          {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+          [
+            {
+              "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+            }
+          ]
+        ]
+      }
+    ]
   ]
 }
 
@@ -898,201 +748,133 @@ which itself flows into this hint because they are required to be subtypes
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
 Raw:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Def":[
+      {"filename":"refinment_is.php","line":3,"char_start":11,"char_end":11},
+      [
         {
-          "Def":[
-            {"filename":"refinment_is.php","line":3,"char_start":11,"char_end":11},
-            {
-              "From_witness_decl":{
-                "Hint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
-              }
-            }
-          ]
+          "Hint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
+        }
+      ]
+    ]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Asymm":["Sub","Prj_asymm_inter"]},
+      [
+        {
+          "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+        },
+        "Flow_local",
+        {
+          "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+        },
+        "Flow_assign",
+        {
+          "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
         },
         "Flow_prj",
         {
           "Prj":[
-            {"Asymm":["Sub","Prj_asymm_inter"]},
-            {
-              "Flow":[
-                {
-                  "Flow":[
-                    {
-                      "Flow":[
-                        {
-                          "From_witness_locl":{
-                            "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
-                          }
-                        },
-                        "Flow_local",
-                        {
-                          "From_witness_locl":{
-                            "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
-                          }
-                        }
-                      ]
-                    },
-                    "Flow_assign",
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
-                      }
-                    }
-                  ]
-                },
-                "Flow_prj",
-                {
-                  "Prj":[
-                    {"Asymm":["Sub","Prj_asymm_union"]},
-                    {
-                      "Flow":[
-                        {
-                          "Flow":[
-                            {
-                              "From_witness_locl":{
-                                "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
-                              }
-                            },
-                            "Flow_local",
-                            {
-                              "From_witness_locl":{
-                                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
-                              }
-                            }
-                          ]
-                        },
-                        "Flow_return_hint",
-                        {
-                          "From_witness_locl":{
-                            "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
+            {"Asymm":["Sub","Prj_asymm_union"]},
+            [
+              {
+                "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+              },
+              "Flow_local",
+              {
+                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+              },
+              "Flow_return_hint",
+              {
+                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
+              }
+            ]
           ]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+      [
         {
-          "From_witness_decl":{
-            "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
-          }
+          "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
         }
       ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Def":[
+      {"filename":"refinment_is.php","line":3,"char_start":11,"char_end":11},
+      [
         {
-          "Def":[
-            {"filename":"refinment_is.php","line":3,"char_start":11,"char_end":11},
-            {
-              "From_witness_decl":{
-                "Hint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
-              }
-            }
-          ]
+          "Hint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
+        }
+      ]
+    ]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Asymm":["Sub","Prj_asymm_inter"]},
+      [
+        {
+          "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+        },
+        "Flow_local",
+        {
+          "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+        },
+        "Flow_assign",
+        {
+          "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
         },
         "Flow_prj",
         {
           "Prj":[
-            {"Asymm":["Sub","Prj_asymm_inter"]},
-            {
-              "Flow":[
-                {
-                  "Flow":[
-                    {
-                      "Flow":[
-                        {
-                          "From_witness_locl":{
-                            "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
-                          }
-                        },
-                        "Flow_local",
-                        {
-                          "From_witness_locl":{
-                            "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
-                          }
-                        }
-                      ]
-                    },
-                    "Flow_assign",
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
-                      }
-                    }
-                  ]
-                },
-                "Flow_prj",
-                {
-                  "Prj":[
-                    {"Asymm":["Sub","Prj_asymm_union"]},
-                    {
-                      "Flow":[
-                        {
-                          "Flow":[
-                            {
-                              "From_witness_locl":{
-                                "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
-                              }
-                            },
-                            "Flow_local",
-                            {
-                              "From_witness_locl":{
-                                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
-                              }
-                            }
-                          ]
-                        },
-                        "Flow_return_hint",
-                        {
-                          "From_witness_locl":{
-                            "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
+            {"Asymm":["Sub","Prj_asymm_union"]},
+            [
+              {
+                "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+              },
+              "Flow_local",
+              {
+                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+              },
+              "Flow_return_hint",
+              {
+                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
+              }
+            ]
           ]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+      [
         {
-          "From_witness_decl":{
-            "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
-          }
+          "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
         }
       ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -1101,67 +883,71 @@ Path:
 {
   "stats":{"max_depth":2,"length":7,"reversals":0},
   "path_elems":[
-    {
-      "Def":[
-        {"filename":"refinment_is.php","line":3,"char_start":11,"char_end":11},
-        {
-          "From_witness_decl":{
-            "Hint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {"filename":"refinment_is.php","line":3,"char_start":11,"char_end":11},
+          [
+            {
+              "Hint":[{"filename":"refinment_is.php","line":8,"char_start":12,"char_end":12}]
+            }
+          ]
+        ]
+      }
+    ],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_inter"]}}
     },
-    {
-      "From_witness_locl":{
+    [
+      {
         "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
       }
-    },
+    ],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_union"]}}
     },
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
-    {
-      "Def":[
-        {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
-        {
-          "From_witness_decl":{
-            "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
-          }
-        }
-      ]
-    }
+    [
+      {
+        "Def":[
+          {"filename":"refinment_is.php","line":5,"char_start":7,"char_end":7},
+          [
+            {
+              "Hint":[{"filename":"refinment_is.php","line":7,"char_start":32,"char_end":32}]
+            }
+          ]
+        ]
+      }
+    ]
   ]
 }
 

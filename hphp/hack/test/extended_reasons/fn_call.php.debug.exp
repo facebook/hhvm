@@ -91,115 +91,61 @@ which itself flows down into this hint as the 1st function parameter
 File "fn_call.php", line 3, character 14 - line 3, character 19:
 
 Raw:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {"Hint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]},
+  "Flow_param_hint",
+  {"Witness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]},
+  "Flow_local",
+  {"Witness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]},
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+      [
+        {"Witness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":9}]},
+        "Flow_subtype",
         {
-          "Flow":[
-            {
-              "Flow":[
-                {
-                  "From_witness_decl":{"Hint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]}
-                },
-                "Flow_param_hint",
-                {
-                  "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]}
-                }
-              ]
-            },
-            "Flow_local",
-            {
-              "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]}
-            }
-          ]
-        },
-        "Flow_prj",
-        {
-          "Prj":[
-            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-            {
-              "Flow":[
-                {
-                  "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":9}]}
-                },
-                "Flow_subtype",
-                {
-                  "Rev":[
-                    {
-                      "From_witness_decl":{
-                        "Support_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
+          "Rev":[
+            [
+              {
+                "Support_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
+              }
+            ]
           ]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "From_witness_decl":{"Hint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}
-    }
-  ]
-}
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {"Hint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {"Hint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]},
+  "Flow_param_hint",
+  {"Witness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]},
+  "Flow_local",
+  {"Witness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]},
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+      [
+        {"Witness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":9}]},
+        "Flow_subtype",
         {
-          "Flow":[
-            {
-              "Flow":[
-                {
-                  "From_witness_decl":{"Hint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]}
-                },
-                "Flow_param_hint",
-                {
-                  "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]}
-                }
-              ]
-            },
-            "Flow_local",
-            {
-              "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]}
-            }
-          ]
-        },
-        "Flow_prj",
-        {
-          "Prj":[
-            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-            {
-              "Flow":[
-                {
-                  "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":9}]}
-                },
-                "Flow_subtype",
-                {
-                  "From_witness_decl":{
-                    "Support_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
-                  }
-                }
-              ]
-            }
-          ]
+          "Support_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "From_witness_decl":{"Hint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}
-    }
-  ]
-}
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {"Hint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -208,29 +154,23 @@ Path:
 {
   "stats":{"max_depth":1,"length":5,"reversals":1},
   "path_elems":[
-    {
-      "From_witness_decl":{"Hint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]}
-    },
+    [{"Hint":[{"filename":"fn_call.php","line":5,"char_start":14,"char_end":16}]}],
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
-    {
-      "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]}
-    },
+    [
+      {"Witness":[{"filename":"fn_call.php","line":5,"char_start":18,"char_end":19}]}
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]}
-    },
+    [{"Witness":[{"filename":"fn_call.php","line":6,"char_start":7,"char_end":8}]}],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
-    {
-      "From_witness_locl":{"Witness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":9}]}
-    },
+    [{"Witness":[{"filename":"fn_call.php","line":6,"char_start":3,"char_end":9}]}],
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
-    {
-      "From_witness_decl":{
+    [
+      {
         "Support_dynamic_type":[{"filename":"fn_call.php","line":3,"char_start":10,"char_end":12}]
       }
-    },
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -238,9 +178,7 @@ Path:
         "out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
       }
     },
-    {
-      "From_witness_decl":{"Hint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}
-    }
+    [{"Hint":[{"filename":"fn_call.php","line":3,"char_start":14,"char_end":19}]}]
   ]
 }
 

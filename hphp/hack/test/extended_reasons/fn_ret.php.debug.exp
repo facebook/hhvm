@@ -41,33 +41,21 @@ flows into this hint because they are required to be subtypes
 File "fn_ret.php", line 7, character 17 - line 7, character 20:
 
 Raw:
-{
-  "Flow":[
-    {
-      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}
-    },
-    "Flow_subtype_toplevel",
-    {
-      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
-    }
-  ]
-}
+[
+  {"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+  "Flow_subtype_toplevel",
+  {"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
-{
-  "Flow":[
-    {
-      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}
-    },
-    "Flow_subtype_toplevel",
-    {
-      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
-    }
-  ]
-}
+[
+  {"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+  "Flow_subtype_toplevel",
+  {"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -76,13 +64,9 @@ Path:
 {
   "stats":{"max_depth":0,"length":1,"reversals":0},
   "path_elems":[
-    {
-      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}
-    },
+    [{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}],
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
-    {
-      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
-    }
+    [{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}]
   ]
 }
 
@@ -148,65 +132,29 @@ which itself flows into this hint because they are required to be subtypes
 File "fn_ret.php", line 7, character 17 - line 7, character 20:
 
 Raw:
-{
-  "Flow":[
-    {
-      "Flow":[
-        {
-          "Flow":[
-            {
-              "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}
-            },
-            "Flow_subtype",
-            {
-              "From_witness_locl":{"Witness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]}
-            }
-          ]
-        },
-        "Flow_return_hint",
-        {
-          "From_witness_locl":{"Witness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]}
-        }
-      ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
-    }
-  ]
-}
+[
+  {"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+  "Flow_subtype",
+  {"Witness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]},
+  "Flow_return_hint",
+  {"Witness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]},
+  "Flow_subtype_toplevel",
+  {"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
-{
-  "Flow":[
-    {
-      "Flow":[
-        {
-          "Flow":[
-            {
-              "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}
-            },
-            "Flow_subtype",
-            {
-              "From_witness_locl":{"Witness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]}
-            }
-          ]
-        },
-        "Flow_return_hint",
-        {
-          "From_witness_locl":{"Witness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]}
-        }
-      ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
-    }
-  ]
-}
+[
+  {"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
+  "Flow_subtype",
+  {"Witness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]},
+  "Flow_return_hint",
+  {"Witness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]},
+  "Flow_subtype_toplevel",
+  {"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -215,21 +163,15 @@ Path:
 {
   "stats":{"max_depth":0,"length":3,"reversals":0},
   "path_elems":[
-    {
-      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}
-    },
+    [{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}],
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype"}},
-    {
-      "From_witness_locl":{"Witness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]}
-    },
+    [
+      {"Witness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]}
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
-    {
-      "From_witness_locl":{"Witness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]}
-    },
+    [{"Witness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]}],
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
-    {
-      "From_witness_decl":{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
-    }
+    [{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}]
   ]
 }
 

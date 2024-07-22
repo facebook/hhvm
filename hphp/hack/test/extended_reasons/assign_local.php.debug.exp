@@ -97,195 +97,125 @@ which itself flows down into this hint as the 1st function parameter
 File "assign_local.php", line 7, character 14 - line 7, character 16:
 
 Raw:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Def":[
+      {"filename":"assign_local.php","line":3,"char_start":7,"char_end":11},
+      [
         {
-          "Flow":[
-            {
-              "Flow":[
-                {
-                  "Flow":[
-                    {
-                      "Flow":[
-                        {
-                          "Def":[
-                            {"filename":"assign_local.php","line":3,"char_start":7,"char_end":11},
-                            {
-                              "From_witness_decl":{
-                                "Hint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
-                              }
-                            }
-                          ]
-                        },
-                        "Flow_param_hint",
-                        {
-                          "From_witness_locl":{
-                            "Witness":[{"filename":"assign_local.php","line":9,"char_start":20,"char_end":21}]
-                          }
-                        }
-                      ]
-                    },
-                    "Flow_local",
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"assign_local.php","line":10,"char_start":8,"char_end":9}]
-                      }
-                    }
-                  ]
-                },
-                "Flow_assign",
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":4}]
-                  }
-                }
-              ]
-            },
-            "Flow_local",
-            {
-              "From_witness_locl":{
-                "Witness":[{"filename":"assign_local.php","line":11,"char_start":7,"char_end":8}]
-              }
-            }
-          ]
+          "Hint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
+        }
+      ]
+    ]
+  },
+  "Flow_param_hint",
+  {
+    "Witness":[{"filename":"assign_local.php","line":9,"char_start":20,"char_end":21}]
+  },
+  "Flow_local",
+  {
+    "Witness":[{"filename":"assign_local.php","line":10,"char_start":8,"char_end":9}]
+  },
+  "Flow_assign",
+  {
+    "Witness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":4}]
+  },
+  "Flow_local",
+  {
+    "Witness":[{"filename":"assign_local.php","line":11,"char_start":7,"char_end":8}]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+      [
+        {
+          "Witness":[{"filename":"assign_local.php","line":11,"char_start":3,"char_end":9}]
         },
-        "Flow_prj",
+        "Flow_subtype",
         {
-          "Prj":[
-            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-            {
-              "Flow":[
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"assign_local.php","line":11,"char_start":3,"char_end":9}]
-                  }
-                },
-                "Flow_subtype",
-                {
-                  "Rev":[
-                    {
-                      "From_witness_decl":{
-                        "Support_dynamic_type":[{"filename":"assign_local.php","line":7,"char_start":10,"char_end":12}]
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
+          "Rev":[
+            [
+              {
+                "Support_dynamic_type":[{"filename":"assign_local.php","line":7,"char_start":10,"char_end":12}]
+              }
+            ]
           ]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {"filename":"assign_local.php","line":4,"char_start":7,"char_end":9},
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {"filename":"assign_local.php","line":4,"char_start":7,"char_end":9},
+      [
         {
-          "From_witness_decl":{
-            "Hint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
-          }
+          "Hint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
         }
       ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Def":[
+      {"filename":"assign_local.php","line":3,"char_start":7,"char_end":11},
+      [
         {
-          "Flow":[
-            {
-              "Flow":[
-                {
-                  "Flow":[
-                    {
-                      "Flow":[
-                        {
-                          "Def":[
-                            {"filename":"assign_local.php","line":3,"char_start":7,"char_end":11},
-                            {
-                              "From_witness_decl":{
-                                "Hint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
-                              }
-                            }
-                          ]
-                        },
-                        "Flow_param_hint",
-                        {
-                          "From_witness_locl":{
-                            "Witness":[{"filename":"assign_local.php","line":9,"char_start":20,"char_end":21}]
-                          }
-                        }
-                      ]
-                    },
-                    "Flow_local",
-                    {
-                      "From_witness_locl":{
-                        "Witness":[{"filename":"assign_local.php","line":10,"char_start":8,"char_end":9}]
-                      }
-                    }
-                  ]
-                },
-                "Flow_assign",
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":4}]
-                  }
-                }
-              ]
-            },
-            "Flow_local",
-            {
-              "From_witness_locl":{
-                "Witness":[{"filename":"assign_local.php","line":11,"char_start":7,"char_end":8}]
-              }
-            }
-          ]
+          "Hint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
+        }
+      ]
+    ]
+  },
+  "Flow_param_hint",
+  {
+    "Witness":[{"filename":"assign_local.php","line":9,"char_start":20,"char_end":21}]
+  },
+  "Flow_local",
+  {
+    "Witness":[{"filename":"assign_local.php","line":10,"char_start":8,"char_end":9}]
+  },
+  "Flow_assign",
+  {
+    "Witness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":4}]
+  },
+  "Flow_local",
+  {
+    "Witness":[{"filename":"assign_local.php","line":11,"char_start":7,"char_end":8}]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+      [
+        {
+          "Witness":[{"filename":"assign_local.php","line":11,"char_start":3,"char_end":9}]
         },
-        "Flow_prj",
+        "Flow_subtype",
         {
-          "Prj":[
-            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-            {
-              "Flow":[
-                {
-                  "From_witness_locl":{
-                    "Witness":[{"filename":"assign_local.php","line":11,"char_start":3,"char_end":9}]
-                  }
-                },
-                "Flow_subtype",
-                {
-                  "From_witness_decl":{
-                    "Support_dynamic_type":[{"filename":"assign_local.php","line":7,"char_start":10,"char_end":12}]
-                  }
-                }
-              ]
-            }
-          ]
+          "Support_dynamic_type":[{"filename":"assign_local.php","line":7,"char_start":10,"char_end":12}]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {"filename":"assign_local.php","line":4,"char_start":7,"char_end":9},
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {"filename":"assign_local.php","line":4,"char_start":7,"char_end":9},
+      [
         {
-          "From_witness_decl":{
-            "Hint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
-          }
+          "Hint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
         }
       ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -294,54 +224,56 @@ Path:
 {
   "stats":{"max_depth":1,"length":7,"reversals":1},
   "path_elems":[
-    {
-      "Def":[
-        {"filename":"assign_local.php","line":3,"char_start":7,"char_end":11},
-        {
-          "From_witness_decl":{
-            "Hint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {"filename":"assign_local.php","line":3,"char_start":7,"char_end":11},
+          [
+            {
+              "Hint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
+            }
+          ]
+        ]
+      }
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"assign_local.php","line":9,"char_start":20,"char_end":21}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"assign_local.php","line":10,"char_start":8,"char_end":9}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_assign"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":4}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"assign_local.php","line":11,"char_start":7,"char_end":8}]
       }
-    },
+    ],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"assign_local.php","line":11,"char_start":3,"char_end":9}]
       }
-    },
+    ],
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
-    {
-      "From_witness_decl":{
+    [
+      {
         "Support_dynamic_type":[{"filename":"assign_local.php","line":7,"char_start":10,"char_end":12}]
       }
-    },
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -349,16 +281,18 @@ Path:
         "out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
       }
     },
-    {
-      "Def":[
-        {"filename":"assign_local.php","line":4,"char_start":7,"char_end":9},
-        {
-          "From_witness_decl":{
-            "Hint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
-          }
-        }
-      ]
-    }
+    [
+      {
+        "Def":[
+          {"filename":"assign_local.php","line":4,"char_start":7,"char_end":9},
+          [
+            {
+              "Hint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
+            }
+          ]
+        ]
+      }
+    ]
   ]
 }
 

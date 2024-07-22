@@ -119,431 +119,365 @@ which itself flows down into this hint as the covariant, 1st type parameter of t
 File "class_subtyping_covariant.php", line 11, character 25 - line 11, character 27:
 
 Raw:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Def":[
+      {
+        "filename":"class_subtyping_covariant.php",
+        "line":7,
+        "char_start":7,
+        "char_end":11
+      },
+      [
+        {
+          "Hint":[
+            {
+              "filename":"class_subtyping_covariant.php",
+              "line":13,
+              "char_start":36,
+              "char_end":40
+            }
+          ]
+        }
+      ]
+    ]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",0,{"Dir":[{"Co":[]}]}]}]},
+      [
         {
           "Def":[
             {
               "filename":"class_subtyping_covariant.php",
-              "line":7,
+              "line":3,
               "char_start":7,
-              "char_end":11
+              "char_end":9
             },
+            [
+              {
+                "Hint":[
+                  {
+                    "filename":"class_subtyping_covariant.php",
+                    "line":5,
+                    "char_start":28,
+                    "char_end":45
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "Flow_extends",
+        {
+          "Def":[
             {
-              "From_witness_decl":{
+              "filename":"class_subtyping_covariant.php",
+              "line":5,
+              "char_start":7,
+              "char_end":9
+            },
+            [
+              {
                 "Hint":[
                   {
                     "filename":"class_subtyping_covariant.php",
                     "line":13,
-                    "char_start":36,
-                    "char_end":40
+                    "char_start":32,
+                    "char_end":48
                   }
                 ]
               }
+            ]
+          ]
+        },
+        "Flow_param_hint",
+        {
+          "Witness":[
+            {
+              "filename":"class_subtyping_covariant.php",
+              "line":13,
+              "char_start":50,
+              "char_end":51
+            }
+          ]
+        },
+        "Flow_local",
+        {
+          "Witness":[
+            {
+              "filename":"class_subtyping_covariant.php",
+              "line":14,
+              "char_start":14,
+              "char_end":15
             }
           ]
         },
         "Flow_prj",
         {
           "Prj":[
-            {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",0,{"Dir":[{"Co":[]}]}]}]},
-            {
-              "Flow":[
-                {
-                  "Flow":[
+            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+            [
+              {
+                "Witness":[
+                  {
+                    "filename":"class_subtyping_covariant.php",
+                    "line":14,
+                    "char_start":3,
+                    "char_end":16
+                  }
+                ]
+              },
+              "Flow_subtype",
+              {
+                "Rev":[
+                  [
                     {
-                      "Def":[
+                      "Support_dynamic_type":[
                         {
                           "filename":"class_subtyping_covariant.php",
-                          "line":3,
-                          "char_start":7,
-                          "char_end":9
-                        },
-                        {
-                          "From_witness_decl":{
-                            "Hint":[
-                              {
-                                "filename":"class_subtyping_covariant.php",
-                                "line":5,
-                                "char_start":28,
-                                "char_end":45
-                              }
-                            ]
-                          }
-                        }
-                      ]
-                    },
-                    "Flow_extends",
-                    {
-                      "Flow":[
-                        {
-                          "Flow":[
-                            {
-                              "Flow":[
-                                {
-                                  "Def":[
-                                    {
-                                      "filename":"class_subtyping_covariant.php",
-                                      "line":5,
-                                      "char_start":7,
-                                      "char_end":9
-                                    },
-                                    {
-                                      "From_witness_decl":{
-                                        "Hint":[
-                                          {
-                                            "filename":"class_subtyping_covariant.php",
-                                            "line":13,
-                                            "char_start":32,
-                                            "char_end":48
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  ]
-                                },
-                                "Flow_param_hint",
-                                {
-                                  "From_witness_locl":{
-                                    "Witness":[
-                                      {
-                                        "filename":"class_subtyping_covariant.php",
-                                        "line":13,
-                                        "char_start":50,
-                                        "char_end":51
-                                      }
-                                    ]
-                                  }
-                                }
-                              ]
-                            },
-                            "Flow_local",
-                            {
-                              "From_witness_locl":{
-                                "Witness":[
-                                  {
-                                    "filename":"class_subtyping_covariant.php",
-                                    "line":14,
-                                    "char_start":14,
-                                    "char_end":15
-                                  }
-                                ]
-                              }
-                            }
-                          ]
-                        },
-                        "Flow_prj",
-                        {
-                          "Prj":[
-                            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-                            {
-                              "Flow":[
-                                {
-                                  "From_witness_locl":{
-                                    "Witness":[
-                                      {
-                                        "filename":"class_subtyping_covariant.php",
-                                        "line":14,
-                                        "char_start":3,
-                                        "char_end":16
-                                      }
-                                    ]
-                                  }
-                                },
-                                "Flow_subtype",
-                                {
-                                  "Rev":[
-                                    {
-                                      "From_witness_decl":{
-                                        "Support_dynamic_type":[
-                                          {
-                                            "filename":"class_subtyping_covariant.php",
-                                            "line":11,
-                                            "char_start":10,
-                                            "char_end":19
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
+                          "line":11,
+                          "char_start":10,
+                          "char_end":19
                         }
                       ]
                     }
                   ]
-                },
-                "Flow_subtype",
-                {
-                  "Def":[
-                    {
-                      "filename":"class_subtyping_covariant.php",
-                      "line":3,
-                      "char_start":7,
-                      "char_end":9
-                    },
-                    {
-                      "From_witness_decl":{
-                        "Hint":[
-                          {
-                            "filename":"class_subtyping_covariant.php",
-                            "line":11,
-                            "char_start":21,
-                            "char_end":42
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                }
-              ]
+                ]
+              }
+            ]
+          ]
+        },
+        "Flow_subtype",
+        {
+          "Def":[
+            {
+              "filename":"class_subtyping_covariant.php",
+              "line":3,
+              "char_start":7,
+              "char_end":9
+            },
+            [
+              {
+                "Hint":[
+                  {
+                    "filename":"class_subtyping_covariant.php",
+                    "line":11,
+                    "char_start":21,
+                    "char_end":42
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      ]
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {
+        "filename":"class_subtyping_covariant.php",
+        "line":9,
+        "char_start":7,
+        "char_end":9
+      },
+      [
+        {
+          "Hint":[
+            {
+              "filename":"class_subtyping_covariant.php",
+              "line":11,
+              "char_start":25,
+              "char_end":27
             }
           ]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {
-          "filename":"class_subtyping_covariant.php",
-          "line":9,
-          "char_start":7,
-          "char_end":9
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"class_subtyping_covariant.php",
-                "line":11,
-                "char_start":25,
-                "char_end":27
-              }
-            ]
-          }
-        }
-      ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Def":[
+      {
+        "filename":"class_subtyping_covariant.php",
+        "line":7,
+        "char_start":7,
+        "char_end":11
+      },
+      [
+        {
+          "Hint":[
+            {
+              "filename":"class_subtyping_covariant.php",
+              "line":13,
+              "char_start":36,
+              "char_end":40
+            }
+          ]
+        }
+      ]
+    ]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",0,{"Dir":[{"Co":[]}]}]}]},
+      [
         {
           "Def":[
             {
               "filename":"class_subtyping_covariant.php",
-              "line":7,
+              "line":3,
               "char_start":7,
-              "char_end":11
+              "char_end":9
             },
+            [
+              {
+                "Hint":[
+                  {
+                    "filename":"class_subtyping_covariant.php",
+                    "line":5,
+                    "char_start":28,
+                    "char_end":45
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "Flow_extends",
+        {
+          "Def":[
             {
-              "From_witness_decl":{
+              "filename":"class_subtyping_covariant.php",
+              "line":5,
+              "char_start":7,
+              "char_end":9
+            },
+            [
+              {
                 "Hint":[
                   {
                     "filename":"class_subtyping_covariant.php",
                     "line":13,
-                    "char_start":36,
-                    "char_end":40
+                    "char_start":32,
+                    "char_end":48
                   }
                 ]
               }
+            ]
+          ]
+        },
+        "Flow_param_hint",
+        {
+          "Witness":[
+            {
+              "filename":"class_subtyping_covariant.php",
+              "line":13,
+              "char_start":50,
+              "char_end":51
+            }
+          ]
+        },
+        "Flow_local",
+        {
+          "Witness":[
+            {
+              "filename":"class_subtyping_covariant.php",
+              "line":14,
+              "char_start":14,
+              "char_end":15
             }
           ]
         },
         "Flow_prj",
         {
           "Prj":[
-            {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",0,{"Dir":[{"Co":[]}]}]}]},
+            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+            [
+              {
+                "Witness":[
+                  {
+                    "filename":"class_subtyping_covariant.php",
+                    "line":14,
+                    "char_start":3,
+                    "char_end":16
+                  }
+                ]
+              },
+              "Flow_subtype",
+              {
+                "Support_dynamic_type":[
+                  {
+                    "filename":"class_subtyping_covariant.php",
+                    "line":11,
+                    "char_start":10,
+                    "char_end":19
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "Flow_subtype",
+        {
+          "Def":[
             {
-              "Flow":[
-                {
-                  "Flow":[
-                    {
-                      "Def":[
-                        {
-                          "filename":"class_subtyping_covariant.php",
-                          "line":3,
-                          "char_start":7,
-                          "char_end":9
-                        },
-                        {
-                          "From_witness_decl":{
-                            "Hint":[
-                              {
-                                "filename":"class_subtyping_covariant.php",
-                                "line":5,
-                                "char_start":28,
-                                "char_end":45
-                              }
-                            ]
-                          }
-                        }
-                      ]
-                    },
-                    "Flow_extends",
-                    {
-                      "Flow":[
-                        {
-                          "Flow":[
-                            {
-                              "Flow":[
-                                {
-                                  "Def":[
-                                    {
-                                      "filename":"class_subtyping_covariant.php",
-                                      "line":5,
-                                      "char_start":7,
-                                      "char_end":9
-                                    },
-                                    {
-                                      "From_witness_decl":{
-                                        "Hint":[
-                                          {
-                                            "filename":"class_subtyping_covariant.php",
-                                            "line":13,
-                                            "char_start":32,
-                                            "char_end":48
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  ]
-                                },
-                                "Flow_param_hint",
-                                {
-                                  "From_witness_locl":{
-                                    "Witness":[
-                                      {
-                                        "filename":"class_subtyping_covariant.php",
-                                        "line":13,
-                                        "char_start":50,
-                                        "char_end":51
-                                      }
-                                    ]
-                                  }
-                                }
-                              ]
-                            },
-                            "Flow_local",
-                            {
-                              "From_witness_locl":{
-                                "Witness":[
-                                  {
-                                    "filename":"class_subtyping_covariant.php",
-                                    "line":14,
-                                    "char_start":14,
-                                    "char_end":15
-                                  }
-                                ]
-                              }
-                            }
-                          ]
-                        },
-                        "Flow_prj",
-                        {
-                          "Prj":[
-                            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-                            {
-                              "Flow":[
-                                {
-                                  "From_witness_locl":{
-                                    "Witness":[
-                                      {
-                                        "filename":"class_subtyping_covariant.php",
-                                        "line":14,
-                                        "char_start":3,
-                                        "char_end":16
-                                      }
-                                    ]
-                                  }
-                                },
-                                "Flow_subtype",
-                                {
-                                  "From_witness_decl":{
-                                    "Support_dynamic_type":[
-                                      {
-                                        "filename":"class_subtyping_covariant.php",
-                                        "line":11,
-                                        "char_start":10,
-                                        "char_end":19
-                                      }
-                                    ]
-                                  }
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                "Flow_subtype",
-                {
-                  "Def":[
-                    {
-                      "filename":"class_subtyping_covariant.php",
-                      "line":3,
-                      "char_start":7,
-                      "char_end":9
-                    },
-                    {
-                      "From_witness_decl":{
-                        "Hint":[
-                          {
-                            "filename":"class_subtyping_covariant.php",
-                            "line":11,
-                            "char_start":21,
-                            "char_end":42
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                }
-              ]
+              "filename":"class_subtyping_covariant.php",
+              "line":3,
+              "char_start":7,
+              "char_end":9
+            },
+            [
+              {
+                "Hint":[
+                  {
+                    "filename":"class_subtyping_covariant.php",
+                    "line":11,
+                    "char_start":21,
+                    "char_end":42
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      ]
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Def":[
+      {
+        "filename":"class_subtyping_covariant.php",
+        "line":9,
+        "char_start":7,
+        "char_end":9
+      },
+      [
+        {
+          "Hint":[
+            {
+              "filename":"class_subtyping_covariant.php",
+              "line":11,
+              "char_start":25,
+              "char_end":27
             }
           ]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Def":[
-        {
-          "filename":"class_subtyping_covariant.php",
-          "line":9,
-          "char_start":7,
-          "char_end":9
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"class_subtyping_covariant.php",
-                "line":11,
-                "char_start":25,
-                "char_end":27
-              }
-            ]
-          }
-        }
-      ]
-    }
-  ]
-}
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -552,28 +486,30 @@ Path:
 {
   "stats":{"max_depth":2,"length":8,"reversals":1},
   "path_elems":[
-    {
-      "Def":[
-        {
-          "filename":"class_subtyping_covariant.php",
-          "line":7,
-          "char_start":7,
-          "char_end":11
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"class_subtyping_covariant.php",
-                "line":13,
-                "char_start":36,
-                "char_end":40
-              }
-            ]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {
+            "filename":"class_subtyping_covariant.php",
+            "line":7,
+            "char_start":7,
+            "char_end":11
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"class_subtyping_covariant.php",
+                  "line":13,
+                  "char_start":36,
+                  "char_end":40
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -581,54 +517,58 @@ Path:
         "in_to":{"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",0,{"Dir":[{"Co":[]}]}]}]}
       }
     },
-    {
-      "Def":[
-        {
-          "filename":"class_subtyping_covariant.php",
-          "line":3,
-          "char_start":7,
-          "char_end":9
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"class_subtyping_covariant.php",
-                "line":5,
-                "char_start":28,
-                "char_end":45
-              }
-            ]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {
+            "filename":"class_subtyping_covariant.php",
+            "line":3,
+            "char_start":7,
+            "char_end":9
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"class_subtyping_covariant.php",
+                  "line":5,
+                  "char_start":28,
+                  "char_end":45
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_extends"}},
-    {
-      "Def":[
-        {
-          "filename":"class_subtyping_covariant.php",
-          "line":5,
-          "char_start":7,
-          "char_end":9
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"class_subtyping_covariant.php",
-                "line":13,
-                "char_start":32,
-                "char_end":48
-              }
-            ]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {
+            "filename":"class_subtyping_covariant.php",
+            "line":5,
+            "char_start":7,
+            "char_end":9
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"class_subtyping_covariant.php",
+                  "line":13,
+                  "char_start":32,
+                  "char_end":48
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[
           {
             "filename":"class_subtyping_covariant.php",
@@ -638,10 +578,10 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[
           {
             "filename":"class_subtyping_covariant.php",
@@ -651,12 +591,12 @@ Path:
           }
         ]
       }
-    },
+    ],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[
           {
             "filename":"class_subtyping_covariant.php",
@@ -666,10 +606,10 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
-    {
-      "From_witness_decl":{
+    [
+      {
         "Support_dynamic_type":[
           {
             "filename":"class_subtyping_covariant.php",
@@ -679,7 +619,7 @@ Path:
           }
         ]
       }
-    },
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -687,28 +627,30 @@ Path:
         "out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
       }
     },
-    {
-      "Def":[
-        {
-          "filename":"class_subtyping_covariant.php",
-          "line":3,
-          "char_start":7,
-          "char_end":9
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"class_subtyping_covariant.php",
-                "line":11,
-                "char_start":21,
-                "char_end":42
-              }
-            ]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {
+            "filename":"class_subtyping_covariant.php",
+            "line":3,
+            "char_start":7,
+            "char_end":9
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"class_subtyping_covariant.php",
+                  "line":11,
+                  "char_start":21,
+                  "char_end":42
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -716,28 +658,30 @@ Path:
         "out_of":{"Symm":[{"Prj_symm_ctor":["Ctor_class","\\MyA",0,{"Dir":[{"Co":[]}]}]}]}
       }
     },
-    {
-      "Def":[
-        {
-          "filename":"class_subtyping_covariant.php",
-          "line":9,
-          "char_start":7,
-          "char_end":9
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"class_subtyping_covariant.php",
-                "line":11,
-                "char_start":25,
-                "char_end":27
-              }
-            ]
-          }
-        }
-      ]
-    }
+    [
+      {
+        "Def":[
+          {
+            "filename":"class_subtyping_covariant.php",
+            "line":9,
+            "char_start":7,
+            "char_end":9
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"class_subtyping_covariant.php",
+                  "line":11,
+                  "char_start":25,
+                  "char_end":27
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ]
   ]
 }
 

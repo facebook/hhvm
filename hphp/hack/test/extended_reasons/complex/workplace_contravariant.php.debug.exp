@@ -191,607 +191,469 @@ which itself flows down into this hint as the covariant, 2nd type parameter of t
 File "workplace_contravariant.php", line 12, character 63 - line 12, character 66:
 
 Raw:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Hint":[
+      {
+        "filename":"workplace_contravariant.php",
+        "line":12,
+        "char_start":39,
+        "char_end":44
+      }
+    ]
+  },
+  "Flow_param_hint",
+  {
+    "Witness":[
+      {
+        "filename":"workplace_contravariant.php",
+        "line":12,
+        "char_start":46,
+        "char_end":47
+      }
+    ]
+  },
+  "Flow_local",
+  {
+    "Witness":[
+      {
+        "filename":"workplace_contravariant.php",
+        "line":13,
+        "char_start":29,
+        "char_end":30
+      }
+    ]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{"Prj_symm_fn_param":[1,1]}]},
+      [
         {
-          "Flow":[
+          "Witness":[
             {
-              "Flow":[
-                {
-                  "From_witness_decl":{
-                    "Hint":[
-                      {
-                        "filename":"workplace_contravariant.php",
-                        "line":12,
-                        "char_start":39,
-                        "char_end":44
-                      }
-                    ]
-                  }
-                },
-                "Flow_param_hint",
-                {
-                  "From_witness_locl":{
-                    "Witness":[
-                      {
-                        "filename":"workplace_contravariant.php",
-                        "line":12,
-                        "char_start":46,
-                        "char_end":47
-                      }
-                    ]
-                  }
-                }
-              ]
-            },
-            "Flow_local",
-            {
-              "From_witness_locl":{
-                "Witness":[
+              "filename":"workplace_contravariant.php",
+              "line":13,
+              "char_start":5,
+              "char_end":40
+            }
+          ]
+        },
+        "Flow_subtype",
+        {
+          "Rev":[
+            [
+              {
+                "Support_dynamic_type":[
                   {
                     "filename":"workplace_contravariant.php",
-                    "line":13,
-                    "char_start":29,
-                    "char_end":30
+                    "line":4,
+                    "char_start":19,
+                    "char_end":29
                   }
                 ]
               }
+            ]
+          ]
+        }
+      ]
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Type_variable_generics":[
+      {
+        "filename":"workplace_contravariant.php",
+        "line":13,
+        "char_start":5,
+        "char_end":40
+      },
+      "TB",
+      "TestServiceBase"
+    ]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Asymm":["Sub","Prj_asymm_nullable"]},
+      [
+        {
+          "Hint":[
+            {
+              "filename":"workplace_contravariant.php",
+              "line":7,
+              "char_start":17,
+              "char_end":19
+            }
+          ]
+        },
+        "Flow_solved",
+        {
+          "Hint":[
+            {
+              "filename":"workplace_contravariant.php",
+              "line":7,
+              "char_start":17,
+              "char_end":19
             }
           ]
         },
         "Flow_prj",
         {
           "Prj":[
-            {"Symm":[{"Prj_symm_fn_param":[1,1]}]},
-            {
-              "Flow":[
-                {
-                  "From_witness_locl":{
-                    "Witness":[
-                      {
-                        "filename":"workplace_contravariant.php",
-                        "line":13,
-                        "char_start":5,
-                        "char_end":40
-                      }
-                    ]
-                  }
-                },
-                "Flow_subtype",
-                {
-                  "Rev":[
-                    {
-                      "From_witness_decl":{
-                        "Support_dynamic_type":[
-                          {
-                            "filename":"workplace_contravariant.php",
-                            "line":4,
-                            "char_start":19,
-                            "char_end":29
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Flow":[
-        {
-          "Flow":[
-            {
-              "From_witness_locl":{
-                "Type_variable_generics":[
+            {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\ISender",1,{"Dir":[{"Co":[]}]}]}]},
+            [
+              {
+                "Def":[
                   {
                     "filename":"workplace_contravariant.php",
-                    "line":13,
-                    "char_start":5,
-                    "char_end":40
+                    "line":21,
+                    "char_start":11,
+                    "char_end":17
                   },
-                  "TB",
-                  "TestServiceBase"
-                ]
-              }
-            },
-            "Flow_prj",
-            {
-              "Prj":[
-                {"Asymm":["Sub","Prj_asymm_nullable"]},
-                {
-                  "Flow":[
+                  [
                     {
-                      "From_witness_decl":{
-                        "Hint":[
-                          {
-                            "filename":"workplace_contravariant.php",
-                            "line":7,
-                            "char_start":17,
-                            "char_end":19
-                          }
-                        ]
-                      }
-                    },
-                    "Flow_solved",
-                    {
-                      "Flow":[
+                      "Hint":[
                         {
-                          "From_witness_decl":{
-                            "Hint":[
-                              {
-                                "filename":"workplace_contravariant.php",
-                                "line":7,
-                                "char_start":17,
-                                "char_end":19
-                              }
-                            ]
-                          }
-                        },
-                        "Flow_prj",
-                        {
-                          "Prj":[
-                            {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\ISender",1,{"Dir":[{"Co":[]}]}]}]},
-                            {
-                              "Flow":[
-                                {
-                                  "Def":[
-                                    {
-                                      "filename":"workplace_contravariant.php",
-                                      "line":21,
-                                      "char_start":11,
-                                      "char_end":17
-                                    },
-                                    {
-                                      "From_witness_decl":{
-                                        "Hint":[
-                                          {
-                                            "filename":"workplace_contravariant.php",
-                                            "line":7,
-                                            "char_start":5,
-                                            "char_end":20
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  ]
-                                },
-                                "Flow_subtype",
-                                {
-                                  "Rev":[
-                                    {
-                                      "Flow":[
-                                        {
-                                          "Flow":[
-                                            {
-                                              "Flow":[
-                                                {
-                                                  "Def":[
-                                                    {
-                                                      "filename":"workplace_contravariant.php",
-                                                      "line":21,
-                                                      "char_start":11,
-                                                      "char_end":17
-                                                    },
-                                                    {
-                                                      "From_witness_decl":{
-                                                        "Hint":[
-                                                          {
-                                                            "filename":"workplace_contravariant.php",
-                                                            "line":12,
-                                                            "char_start":50,
-                                                            "char_end":67
-                                                          }
-                                                        ]
-                                                      }
-                                                    }
-                                                  ]
-                                                },
-                                                "Flow_param_hint",
-                                                {
-                                                  "From_witness_locl":{
-                                                    "Witness":[
-                                                      {
-                                                        "filename":"workplace_contravariant.php",
-                                                        "line":12,
-                                                        "char_start":69,
-                                                        "char_end":75
-                                                      }
-                                                    ]
-                                                  }
-                                                }
-                                              ]
-                                            },
-                                            "Flow_local",
-                                            {
-                                              "From_witness_locl":{
-                                                "Witness":[
-                                                  {
-                                                    "filename":"workplace_contravariant.php",
-                                                    "line":13,
-                                                    "char_start":33,
-                                                    "char_end":39
-                                                  }
-                                                ]
-                                              }
-                                            }
-                                          ]
-                                        },
-                                        "Flow_prj",
-                                        {
-                                          "Prj":[
-                                            {"Symm":[{"Prj_symm_fn_param":[2,2]}]},
-                                            {
-                                              "Flow":[
-                                                {
-                                                  "From_witness_locl":{
-                                                    "Witness":[
-                                                      {
-                                                        "filename":"workplace_contravariant.php",
-                                                        "line":13,
-                                                        "char_start":5,
-                                                        "char_end":40
-                                                      }
-                                                    ]
-                                                  }
-                                                },
-                                                "Flow_subtype",
-                                                {
-                                                  "Rev":[
-                                                    {
-                                                      "From_witness_decl":{
-                                                        "Support_dynamic_type":[
-                                                          {
-                                                            "filename":"workplace_contravariant.php",
-                                                            "line":4,
-                                                            "char_start":19,
-                                                            "char_end":29
-                                                          }
-                                                        ]
-                                                      }
-                                                    }
-                                                  ]
-                                                }
-                                              ]
-                                            }
-                                          ]
-                                        }
-                                      ]
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
+                          "filename":"workplace_contravariant.php",
+                          "line":7,
+                          "char_start":5,
+                          "char_end":20
                         }
                       ]
                     }
                   ]
-                }
-              ]
-            }
-          ]
-        },
-        "Flow_transitive",
-        {
-          "From_witness_decl":{
-            "Hint":[
+                ]
+              },
+              "Flow_subtype",
               {
-                "filename":"workplace_contravariant.php",
-                "line":12,
-                "char_start":63,
-                "char_end":66
+                "Rev":[
+                  [
+                    {
+                      "Def":[
+                        {
+                          "filename":"workplace_contravariant.php",
+                          "line":21,
+                          "char_start":11,
+                          "char_end":17
+                        },
+                        [
+                          {
+                            "Hint":[
+                              {
+                                "filename":"workplace_contravariant.php",
+                                "line":12,
+                                "char_start":50,
+                                "char_end":67
+                              }
+                            ]
+                          }
+                        ]
+                      ]
+                    },
+                    "Flow_param_hint",
+                    {
+                      "Witness":[
+                        {
+                          "filename":"workplace_contravariant.php",
+                          "line":12,
+                          "char_start":69,
+                          "char_end":75
+                        }
+                      ]
+                    },
+                    "Flow_local",
+                    {
+                      "Witness":[
+                        {
+                          "filename":"workplace_contravariant.php",
+                          "line":13,
+                          "char_start":33,
+                          "char_end":39
+                        }
+                      ]
+                    },
+                    "Flow_prj",
+                    {
+                      "Prj":[
+                        {"Symm":[{"Prj_symm_fn_param":[2,2]}]},
+                        [
+                          {
+                            "Witness":[
+                              {
+                                "filename":"workplace_contravariant.php",
+                                "line":13,
+                                "char_start":5,
+                                "char_end":40
+                              }
+                            ]
+                          },
+                          "Flow_subtype",
+                          {
+                            "Rev":[
+                              [
+                                {
+                                  "Support_dynamic_type":[
+                                    {
+                                      "filename":"workplace_contravariant.php",
+                                      "line":4,
+                                      "char_start":19,
+                                      "char_end":29
+                                    }
+                                  ]
+                                }
+                              ]
+                            ]
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                ]
               }
             ]
-          }
+          ]
         }
       ]
-    }
-  ]
-}
+    ]
+  },
+  "Flow_transitive",
+  {
+    "Hint":[
+      {
+        "filename":"workplace_contravariant.php",
+        "line":12,
+        "char_start":63,
+        "char_end":66
+      }
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Hint":[
+      {
+        "filename":"workplace_contravariant.php",
+        "line":12,
+        "char_start":39,
+        "char_end":44
+      }
+    ]
+  },
+  "Flow_param_hint",
+  {
+    "Witness":[
+      {
+        "filename":"workplace_contravariant.php",
+        "line":12,
+        "char_start":46,
+        "char_end":47
+      }
+    ]
+  },
+  "Flow_local",
+  {
+    "Witness":[
+      {
+        "filename":"workplace_contravariant.php",
+        "line":13,
+        "char_start":29,
+        "char_end":30
+      }
+    ]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{"Prj_symm_fn_param":[1,1]}]},
+      [
         {
-          "Flow":[
+          "Witness":[
             {
-              "Flow":[
-                {
-                  "From_witness_decl":{
-                    "Hint":[
-                      {
-                        "filename":"workplace_contravariant.php",
-                        "line":12,
-                        "char_start":39,
-                        "char_end":44
-                      }
-                    ]
-                  }
-                },
-                "Flow_param_hint",
-                {
-                  "From_witness_locl":{
-                    "Witness":[
-                      {
-                        "filename":"workplace_contravariant.php",
-                        "line":12,
-                        "char_start":46,
-                        "char_end":47
-                      }
-                    ]
-                  }
-                }
-              ]
-            },
-            "Flow_local",
+              "filename":"workplace_contravariant.php",
+              "line":13,
+              "char_start":5,
+              "char_end":40
+            }
+          ]
+        },
+        "Flow_subtype",
+        {
+          "Support_dynamic_type":[
             {
-              "From_witness_locl":{
-                "Witness":[
-                  {
-                    "filename":"workplace_contravariant.php",
-                    "line":13,
-                    "char_start":29,
-                    "char_end":30
-                  }
-                ]
-              }
+              "filename":"workplace_contravariant.php",
+              "line":4,
+              "char_start":19,
+              "char_end":29
+            }
+          ]
+        }
+      ]
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Type_variable_generics":[
+      {
+        "filename":"workplace_contravariant.php",
+        "line":13,
+        "char_start":5,
+        "char_end":40
+      },
+      "TB",
+      "TestServiceBase"
+    ]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Asymm":["Sub","Prj_asymm_nullable"]},
+      [
+        {
+          "Hint":[
+            {
+              "filename":"workplace_contravariant.php",
+              "line":7,
+              "char_start":17,
+              "char_end":19
+            }
+          ]
+        },
+        "Flow_solved",
+        {
+          "Hint":[
+            {
+              "filename":"workplace_contravariant.php",
+              "line":7,
+              "char_start":17,
+              "char_end":19
             }
           ]
         },
         "Flow_prj",
         {
           "Prj":[
-            {"Symm":[{"Prj_symm_fn_param":[1,1]}]},
-            {
-              "Flow":[
-                {
-                  "From_witness_locl":{
-                    "Witness":[
-                      {
-                        "filename":"workplace_contravariant.php",
-                        "line":13,
-                        "char_start":5,
-                        "char_end":40
-                      }
-                    ]
-                  }
-                },
-                "Flow_subtype",
-                {
-                  "From_witness_decl":{
-                    "Support_dynamic_type":[
-                      {
-                        "filename":"workplace_contravariant.php",
-                        "line":4,
-                        "char_start":19,
-                        "char_end":29
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "Flow":[
-        {
-          "Flow":[
-            {
-              "From_witness_locl":{
-                "Type_variable_generics":[
+            {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\ISender",1,{"Dir":[{"Co":[]}]}]}]},
+            [
+              {
+                "Def":[
                   {
                     "filename":"workplace_contravariant.php",
-                    "line":13,
-                    "char_start":5,
-                    "char_end":40
+                    "line":21,
+                    "char_start":11,
+                    "char_end":17
                   },
-                  "TB",
-                  "TestServiceBase"
-                ]
-              }
-            },
-            "Flow_prj",
-            {
-              "Prj":[
-                {"Asymm":["Sub","Prj_asymm_nullable"]},
-                {
-                  "Flow":[
+                  [
                     {
-                      "From_witness_decl":{
-                        "Hint":[
-                          {
-                            "filename":"workplace_contravariant.php",
-                            "line":7,
-                            "char_start":17,
-                            "char_end":19
-                          }
-                        ]
-                      }
-                    },
-                    "Flow_solved",
-                    {
-                      "Flow":[
+                      "Hint":[
                         {
-                          "From_witness_decl":{
-                            "Hint":[
-                              {
-                                "filename":"workplace_contravariant.php",
-                                "line":7,
-                                "char_start":17,
-                                "char_end":19
-                              }
-                            ]
-                          }
-                        },
-                        "Flow_prj",
-                        {
-                          "Prj":[
-                            {"Symm":[{"Prj_symm_ctor":["Ctor_class","\\ISender",1,{"Dir":[{"Co":[]}]}]}]},
-                            {
-                              "Flow":[
-                                {
-                                  "Def":[
-                                    {
-                                      "filename":"workplace_contravariant.php",
-                                      "line":21,
-                                      "char_start":11,
-                                      "char_end":17
-                                    },
-                                    {
-                                      "From_witness_decl":{
-                                        "Hint":[
-                                          {
-                                            "filename":"workplace_contravariant.php",
-                                            "line":7,
-                                            "char_start":5,
-                                            "char_end":20
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  ]
-                                },
-                                "Flow_subtype",
-                                {
-                                  "Flow":[
-                                    {
-                                      "Prj":[
-                                        {"Symm":[{"Prj_symm_fn_param":[2,2]}]},
-                                        {
-                                          "Flow":[
-                                            {
-                                              "From_witness_decl":{
-                                                "Support_dynamic_type":[
-                                                  {
-                                                    "filename":"workplace_contravariant.php",
-                                                    "line":4,
-                                                    "char_start":19,
-                                                    "char_end":29
-                                                  }
-                                                ]
-                                              }
-                                            },
-                                            "Flow_subtype",
-                                            {
-                                              "From_witness_locl":{
-                                                "Witness":[
-                                                  {
-                                                    "filename":"workplace_contravariant.php",
-                                                    "line":13,
-                                                    "char_start":5,
-                                                    "char_end":40
-                                                  }
-                                                ]
-                                              }
-                                            }
-                                          ]
-                                        }
-                                      ]
-                                    },
-                                    "Flow_prj",
-                                    {
-                                      "Flow":[
-                                        {
-                                          "From_witness_locl":{
-                                            "Witness":[
-                                              {
-                                                "filename":"workplace_contravariant.php",
-                                                "line":13,
-                                                "char_start":33,
-                                                "char_end":39
-                                              }
-                                            ]
-                                          }
-                                        },
-                                        "Flow_local",
-                                        {
-                                          "Flow":[
-                                            {
-                                              "From_witness_locl":{
-                                                "Witness":[
-                                                  {
-                                                    "filename":"workplace_contravariant.php",
-                                                    "line":12,
-                                                    "char_start":69,
-                                                    "char_end":75
-                                                  }
-                                                ]
-                                              }
-                                            },
-                                            "Flow_param_hint",
-                                            {
-                                              "Def":[
-                                                {
-                                                  "filename":"workplace_contravariant.php",
-                                                  "line":21,
-                                                  "char_start":11,
-                                                  "char_end":17
-                                                },
-                                                {
-                                                  "From_witness_decl":{
-                                                    "Hint":[
-                                                      {
-                                                        "filename":"workplace_contravariant.php",
-                                                        "line":12,
-                                                        "char_start":50,
-                                                        "char_end":67
-                                                      }
-                                                    ]
-                                                  }
-                                                }
-                                              ]
-                                            }
-                                          ]
-                                        }
-                                      ]
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
+                          "filename":"workplace_contravariant.php",
+                          "line":7,
+                          "char_start":5,
+                          "char_end":20
                         }
                       ]
                     }
                   ]
-                }
-              ]
-            }
-          ]
-        },
-        "Flow_transitive",
-        {
-          "From_witness_decl":{
-            "Hint":[
+                ]
+              },
+              "Flow_subtype",
               {
-                "filename":"workplace_contravariant.php",
-                "line":12,
-                "char_start":63,
-                "char_end":66
+                "Prj":[
+                  {"Symm":[{"Prj_symm_fn_param":[2,2]}]},
+                  [
+                    {
+                      "Support_dynamic_type":[
+                        {
+                          "filename":"workplace_contravariant.php",
+                          "line":4,
+                          "char_start":19,
+                          "char_end":29
+                        }
+                      ]
+                    },
+                    "Flow_subtype",
+                    {
+                      "Witness":[
+                        {
+                          "filename":"workplace_contravariant.php",
+                          "line":13,
+                          "char_start":5,
+                          "char_end":40
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              },
+              "Flow_prj",
+              {
+                "Witness":[
+                  {
+                    "filename":"workplace_contravariant.php",
+                    "line":13,
+                    "char_start":33,
+                    "char_end":39
+                  }
+                ]
+              },
+              "Flow_local",
+              {
+                "Witness":[
+                  {
+                    "filename":"workplace_contravariant.php",
+                    "line":12,
+                    "char_start":69,
+                    "char_end":75
+                  }
+                ]
+              },
+              "Flow_param_hint",
+              {
+                "Def":[
+                  {
+                    "filename":"workplace_contravariant.php",
+                    "line":21,
+                    "char_start":11,
+                    "char_end":17
+                  },
+                  [
+                    {
+                      "Hint":[
+                        {
+                          "filename":"workplace_contravariant.php",
+                          "line":12,
+                          "char_start":50,
+                          "char_end":67
+                        }
+                      ]
+                    }
+                  ]
+                ]
               }
             ]
-          }
+          ]
         }
       ]
-    }
-  ]
-}
+    ]
+  },
+  "Flow_transitive",
+  {
+    "Hint":[
+      {
+        "filename":"workplace_contravariant.php",
+        "line":12,
+        "char_start":63,
+        "char_end":66
+      }
+    ]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -800,8 +662,8 @@ Path:
 {
   "stats":{"max_depth":3,"length":14,"reversals":2},
   "path_elems":[
-    {
-      "From_witness_decl":{
+    [
+      {
         "Hint":[
           {
             "filename":"workplace_contravariant.php",
@@ -811,10 +673,10 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[
           {
             "filename":"workplace_contravariant.php",
@@ -824,10 +686,10 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[
           {
             "filename":"workplace_contravariant.php",
@@ -837,12 +699,12 @@ Path:
           }
         ]
       }
-    },
+    ],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[1,1]}]}}
     },
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[
           {
             "filename":"workplace_contravariant.php",
@@ -852,10 +714,10 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
-    {
-      "From_witness_decl":{
+    [
+      {
         "Support_dynamic_type":[
           {
             "filename":"workplace_contravariant.php",
@@ -865,7 +727,7 @@ Path:
           }
         ]
       }
-    },
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -873,8 +735,8 @@ Path:
         "out_of":{"Symm":[{"Prj_symm_fn_param":[1,1]}]}
       }
     },
-    {
-      "From_witness_locl":{
+    [
+      {
         "Type_variable_generics":[
           {
             "filename":"workplace_contravariant.php",
@@ -886,12 +748,12 @@ Path:
           "TestServiceBase"
         ]
       }
-    },
+    ],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Asymm":["Sub","Prj_asymm_nullable"]}}
     },
-    {
-      "From_witness_decl":{
+    [
+      {
         "Hint":[
           {
             "filename":"workplace_contravariant.php",
@@ -901,10 +763,10 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_solved"}},
-    {
-      "From_witness_decl":{
+    [
+      {
         "Hint":[
           {
             "filename":"workplace_contravariant.php",
@@ -914,7 +776,7 @@ Path:
           }
         ]
       }
-    },
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -922,28 +784,30 @@ Path:
         "in_to":{"Symm":[{"Prj_symm_ctor":["Ctor_class","\\ISender",1,{"Dir":[{"Co":[]}]}]}]}
       }
     },
-    {
-      "Def":[
-        {
-          "filename":"workplace_contravariant.php",
-          "line":21,
-          "char_start":11,
-          "char_end":17
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"workplace_contravariant.php",
-                "line":7,
-                "char_start":5,
-                "char_end":20
-              }
-            ]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {
+            "filename":"workplace_contravariant.php",
+            "line":21,
+            "char_start":11,
+            "char_end":17
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"workplace_contravariant.php",
+                  "line":7,
+                  "char_start":5,
+                  "char_end":20
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -951,8 +815,8 @@ Path:
         "in_to":{"Symm":[{"Prj_symm_fn_param":[2,2]}]}
       }
     },
-    {
-      "From_witness_decl":{
+    [
+      {
         "Support_dynamic_type":[
           {
             "filename":"workplace_contravariant.php",
@@ -962,10 +826,10 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[
           {
             "filename":"workplace_contravariant.php",
@@ -975,12 +839,12 @@ Path:
           }
         ]
       }
-    },
+    ],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","out_of":{"Symm":[{"Prj_symm_fn_param":[2,2]}]}}
     },
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[
           {
             "filename":"workplace_contravariant.php",
@@ -990,10 +854,10 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[
           {
             "filename":"workplace_contravariant.php",
@@ -1003,30 +867,32 @@ Path:
           }
         ]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
-    {
-      "Def":[
-        {
-          "filename":"workplace_contravariant.php",
-          "line":21,
-          "char_start":11,
-          "char_end":17
-        },
-        {
-          "From_witness_decl":{
-            "Hint":[
-              {
-                "filename":"workplace_contravariant.php",
-                "line":12,
-                "char_start":50,
-                "char_end":67
-              }
-            ]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {
+            "filename":"workplace_contravariant.php",
+            "line":21,
+            "char_start":11,
+            "char_end":17
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"workplace_contravariant.php",
+                  "line":12,
+                  "char_start":50,
+                  "char_end":67
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -1034,8 +900,8 @@ Path:
         "out_of":{"Symm":[{"Prj_symm_ctor":["Ctor_class","\\ISender",1,{"Dir":[{"Co":[]}]}]}]}
       }
     },
-    {
-      "From_witness_decl":{
+    [
+      {
         "Hint":[
           {
             "filename":"workplace_contravariant.php",
@@ -1045,7 +911,7 @@ Path:
           }
         ]
       }
-    }
+    ]
   ]
 }
 

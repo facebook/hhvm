@@ -1940,18 +1940,18 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
 
 and show_t_ : type ph. ph t_ -> string = (fun r -> Format.asprintf "%a" pp_t_ r)
 
-let rec to_json : type a. a t_ -> Hh_json.json =
- fun t ->
+let rec to_json_help : type a. a t_ -> Hh_json.json list -> Hh_json.json list =
+ fun t acc ->
   match t with
-  | No_reason -> Hh_json.(JSON_Object [("No_reason", JSON_Array [])])
-  | Missing_field -> Hh_json.(JSON_Object [("Missing_field", JSON_Array [])])
-  | Invalid -> Hh_json.(JSON_Object [("Invalid", JSON_Array [])])
-  | From_witness_locl witness ->
-    Hh_json.(JSON_Object [("From_witness_locl", witness_locl_to_json witness)])
-  | From_witness_decl witness ->
-    Hh_json.(JSON_Object [("From_witness_decl", witness_decl_to_json witness)])
+  | No_reason -> Hh_json.(JSON_Object [("No_reason", JSON_Array [])]) :: acc
+  | Missing_field ->
+    Hh_json.(JSON_Object [("Missing_field", JSON_Array [])]) :: acc
+  | Invalid -> Hh_json.(JSON_Object [("Invalid", JSON_Array [])]) :: acc
+  | From_witness_locl witness -> witness_locl_to_json witness :: acc
+  | From_witness_decl witness -> witness_decl_to_json witness :: acc
   | Idx (pos, r) ->
     Hh_json.(JSON_Object [("Idx", JSON_Array [pos_to_json pos; to_json r])])
+    :: acc
   | Arith_ret_float (pos, r, arg_pos) ->
     Hh_json.(
       JSON_Object
@@ -1960,6 +1960,7 @@ let rec to_json : type a. a t_ -> Hh_json.json =
             JSON_Array
               [pos_to_json pos; to_json r; arg_position_to_json arg_pos] );
         ])
+    :: acc
   | Arith_ret_num (pos, r, arg_pos) ->
     Hh_json.(
       JSON_Object
@@ -1968,6 +1969,7 @@ let rec to_json : type a. a t_ -> Hh_json.json =
             JSON_Array
               [pos_to_json pos; to_json r; arg_position_to_json arg_pos] );
         ])
+    :: acc
   | Lost_info (str, r, blame) ->
     Hh_json.(
       JSON_Object
@@ -1975,14 +1977,17 @@ let rec to_json : type a. a t_ -> Hh_json.json =
           ( "Lost_info",
             JSON_Array [JSON_String str; to_json r; blame_to_json blame] );
         ])
+    :: acc
   | Format (pos, str, r) ->
     Hh_json.(
       JSON_Object
         [("Format", JSON_Array [pos_to_json pos; JSON_String str; to_json r])])
+    :: acc
   | Instantiate (r1, str, r2) ->
     Hh_json.(
       JSON_Object
         [("Instantiate", JSON_Array [to_json r1; JSON_String str; to_json r2])])
+    :: acc
   | Typeconst (r1, (pos_or_decl, str), lazy_str, r2) ->
     Hh_json.(
       JSON_Object
@@ -2001,6 +2006,7 @@ let rec to_json : type a. a t_ -> Hh_json.json =
                 to_json r2;
               ] );
         ])
+    :: acc
   | Type_access (r, xs) ->
     Hh_json.(
       JSON_Object
@@ -2019,6 +2025,7 @@ let rec to_json : type a. a t_ -> Hh_json.json =
                          ]));
               ] );
         ])
+    :: acc
   | Expr_dep_type (r, pos_or_decl, expr_dep_type_reason) ->
     Hh_json.(
       JSON_Object
@@ -2031,19 +2038,23 @@ let rec to_json : type a. a t_ -> Hh_json.json =
                 expr_dep_type_reason_to_json expr_dep_type_reason;
               ] );
         ])
+    :: acc
   | Lambda_param (pos, r) ->
     Hh_json.(
       JSON_Object [("Lambda_param", JSON_Array [pos_to_json pos; to_json r])])
+    :: acc
   | Contravariant_generic (r, str) ->
     Hh_json.(
       JSON_Object
         [("Contravariant_generic", JSON_Array [to_json r; JSON_String str])])
+    :: acc
   | Invariant_generic (r, str) ->
     Hh_json.(
       JSON_Object
         [("Invariant_generic", JSON_Array [to_json r; JSON_String str])])
+    :: acc
   | Dynamic_coercion r ->
-    Hh_json.(JSON_Object [("Dynamic_coercion", JSON_Array [to_json r])])
+    Hh_json.(JSON_Object [("Dynamic_coercion", JSON_Array [to_json r])]) :: acc
   | Dynamic_partial_enforcement (pos_or_decl, str, r) ->
     Hh_json.(
       JSON_Object
@@ -2052,6 +2063,7 @@ let rec to_json : type a. a t_ -> Hh_json.json =
             JSON_Array
               [Pos_or_decl.json pos_or_decl; JSON_String str; to_json r] );
         ])
+    :: acc
   | Rigid_tvar_escape (pos, str1, str2, r) ->
     Hh_json.(
       JSON_Object
@@ -2061,6 +2073,7 @@ let rec to_json : type a. a t_ -> Hh_json.json =
               [pos_to_json pos; JSON_String str1; JSON_String str2; to_json r]
           );
         ])
+    :: acc
   | Opaque_type_from_module (pos_or_decl, str, r) ->
     Hh_json.(
       JSON_Object
@@ -2069,20 +2082,22 @@ let rec to_json : type a. a t_ -> Hh_json.json =
             JSON_Array
               [Pos_or_decl.json pos_or_decl; JSON_String str; to_json r] );
         ])
+    :: acc
   | Flow (r_from, kind, r_into) ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Flow",
-            JSON_Array [to_json r_from; flow_kind_to_json kind; to_json r_into]
-          );
-        ])
-  | Rev r -> Hh_json.(JSON_Object [("Rev", JSON_Array [to_json r])])
+    to_json_help r_into (flow_kind_to_json kind :: to_json_help r_from acc)
+  | Rev r -> Hh_json.(JSON_Object [("Rev", JSON_Array [to_json r])]) :: acc
   | Def (def, r) ->
     Hh_json.(
       JSON_Object [("Def", JSON_Array [Pos_or_decl.json def; to_json r])])
+    :: acc
   | Prj (prj, r) ->
     Hh_json.(JSON_Object [("Prj", JSON_Array [prj_to_json prj; to_json r])])
+    :: acc
+
+and to_json : type a. a t_ -> Hh_json.json =
+ fun t ->
+  let acc = to_json_help t [] in
+  Hh_json.JSON_Array (List.rev acc)
 
 let to_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->

@@ -123,205 +123,139 @@ which itself flows down into this hint as the required shape field `'a'`
 File "shape_subtyping_6.php", line 3, character 39 - line 3, character 41:
 
 Raw:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Hint":[{"filename":"shape_subtyping_6.php","line":4,"char_start":41,"char_end":44}]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]}]},
+      [
         {
-          "From_witness_decl":{
-            "Hint":[{"filename":"shape_subtyping_6.php","line":4,"char_start":41,"char_end":44}]
-          }
+          "Def":[
+            {"filename":"shape_subtyping_6.php","line":4,"char_start":6,"char_end":23},
+            [
+              {
+                "Hint":[{"filename":"shape_subtyping_6.php","line":12,"char_start":3,"char_end":20}]
+              }
+            ]
+          ]
+        },
+        "Flow_param_hint",
+        {
+          "Witness":[{"filename":"shape_subtyping_6.php","line":12,"char_start":22,"char_end":23}]
+        },
+        "Flow_local",
+        {
+          "Witness":[{"filename":"shape_subtyping_6.php","line":14,"char_start":35,"char_end":36}]
         },
         "Flow_prj",
         {
           "Prj":[
-            {"Symm":[{" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]}]},
-            {
-              "Flow":[
-                {
-                  "Flow":[
+            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+            [
+              {
+                "Witness":[{"filename":"shape_subtyping_6.php","line":14,"char_start":3,"char_end":37}]
+              },
+              "Flow_subtype",
+              {
+                "Rev":[
+                  [
                     {
-                      "Flow":[
-                        {
-                          "Flow":[
-                            {
-                              "Def":[
-                                {"filename":"shape_subtyping_6.php","line":4,"char_start":6,"char_end":23},
-                                {
-                                  "From_witness_decl":{
-                                    "Hint":[{"filename":"shape_subtyping_6.php","line":12,"char_start":3,"char_end":20}]
-                                  }
-                                }
-                              ]
-                            },
-                            "Flow_param_hint",
-                            {
-                              "From_witness_locl":{
-                                "Witness":[{"filename":"shape_subtyping_6.php","line":12,"char_start":22,"char_end":23}]
-                              }
-                            }
-                          ]
-                        },
-                        "Flow_local",
-                        {
-                          "From_witness_locl":{
-                            "Witness":[{"filename":"shape_subtyping_6.php","line":14,"char_start":35,"char_end":36}]
-                          }
-                        }
-                      ]
-                    },
-                    "Flow_prj",
-                    {
-                      "Prj":[
-                        {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-                        {
-                          "Flow":[
-                            {
-                              "From_witness_locl":{
-                                "Witness":[{"filename":"shape_subtyping_6.php","line":14,"char_start":3,"char_end":37}]
-                              }
-                            },
-                            "Flow_subtype",
-                            {
-                              "Rev":[
-                                {
-                                  "From_witness_decl":{
-                                    "Support_dynamic_type":[{"filename":"shape_subtyping_6.php","line":6,"char_start":10,"char_end":40}]
-                                  }
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
+                      "Support_dynamic_type":[{"filename":"shape_subtyping_6.php","line":6,"char_start":10,"char_end":40}]
                     }
                   ]
-                },
-                "Flow_subtype",
-                {
-                  "Def":[
-                    {"filename":"shape_subtyping_6.php","line":3,"char_start":6,"char_end":22},
-                    {
-                      "From_witness_decl":{
-                        "Hint":[{"filename":"shape_subtyping_6.php","line":7,"char_start":3,"char_end":19}]
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
+                ]
+              }
+            ]
+          ]
+        },
+        "Flow_subtype",
+        {
+          "Def":[
+            {"filename":"shape_subtyping_6.php","line":3,"char_start":6,"char_end":22},
+            [
+              {
+                "Hint":[{"filename":"shape_subtyping_6.php","line":7,"char_start":3,"char_end":19}]
+              }
+            ]
           ]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "From_witness_decl":{
-        "Hint":[{"filename":"shape_subtyping_6.php","line":3,"char_start":39,"char_end":41}]
-      }
-    }
-  ]
-}
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Hint":[{"filename":"shape_subtyping_6.php","line":3,"char_start":39,"char_end":41}]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
 
 Normalised:
-{
-  "Flow":[
-    {
-      "Flow":[
+[
+  {
+    "Hint":[{"filename":"shape_subtyping_6.php","line":4,"char_start":41,"char_end":44}]
+  },
+  "Flow_prj",
+  {
+    "Prj":[
+      {"Symm":[{" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]}]},
+      [
         {
-          "From_witness_decl":{
-            "Hint":[{"filename":"shape_subtyping_6.php","line":4,"char_start":41,"char_end":44}]
-          }
+          "Def":[
+            {"filename":"shape_subtyping_6.php","line":4,"char_start":6,"char_end":23},
+            [
+              {
+                "Hint":[{"filename":"shape_subtyping_6.php","line":12,"char_start":3,"char_end":20}]
+              }
+            ]
+          ]
+        },
+        "Flow_param_hint",
+        {
+          "Witness":[{"filename":"shape_subtyping_6.php","line":12,"char_start":22,"char_end":23}]
+        },
+        "Flow_local",
+        {
+          "Witness":[{"filename":"shape_subtyping_6.php","line":14,"char_start":35,"char_end":36}]
         },
         "Flow_prj",
         {
           "Prj":[
-            {"Symm":[{" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]}]},
-            {
-              "Flow":[
-                {
-                  "Flow":[
-                    {
-                      "Flow":[
-                        {
-                          "Flow":[
-                            {
-                              "Def":[
-                                {"filename":"shape_subtyping_6.php","line":4,"char_start":6,"char_end":23},
-                                {
-                                  "From_witness_decl":{
-                                    "Hint":[{"filename":"shape_subtyping_6.php","line":12,"char_start":3,"char_end":20}]
-                                  }
-                                }
-                              ]
-                            },
-                            "Flow_param_hint",
-                            {
-                              "From_witness_locl":{
-                                "Witness":[{"filename":"shape_subtyping_6.php","line":12,"char_start":22,"char_end":23}]
-                              }
-                            }
-                          ]
-                        },
-                        "Flow_local",
-                        {
-                          "From_witness_locl":{
-                            "Witness":[{"filename":"shape_subtyping_6.php","line":14,"char_start":35,"char_end":36}]
-                          }
-                        }
-                      ]
-                    },
-                    "Flow_prj",
-                    {
-                      "Prj":[
-                        {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-                        {
-                          "Flow":[
-                            {
-                              "From_witness_locl":{
-                                "Witness":[{"filename":"shape_subtyping_6.php","line":14,"char_start":3,"char_end":37}]
-                              }
-                            },
-                            "Flow_subtype",
-                            {
-                              "From_witness_decl":{
-                                "Support_dynamic_type":[{"filename":"shape_subtyping_6.php","line":6,"char_start":10,"char_end":40}]
-                              }
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                "Flow_subtype",
-                {
-                  "Def":[
-                    {"filename":"shape_subtyping_6.php","line":3,"char_start":6,"char_end":22},
-                    {
-                      "From_witness_decl":{
-                        "Hint":[{"filename":"shape_subtyping_6.php","line":7,"char_start":3,"char_end":19}]
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
+            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
+            [
+              {
+                "Witness":[{"filename":"shape_subtyping_6.php","line":14,"char_start":3,"char_end":37}]
+              },
+              "Flow_subtype",
+              {
+                "Support_dynamic_type":[{"filename":"shape_subtyping_6.php","line":6,"char_start":10,"char_end":40}]
+              }
+            ]
+          ]
+        },
+        "Flow_subtype",
+        {
+          "Def":[
+            {"filename":"shape_subtyping_6.php","line":3,"char_start":6,"char_end":22},
+            [
+              {
+                "Hint":[{"filename":"shape_subtyping_6.php","line":7,"char_start":3,"char_end":19}]
+              }
+            ]
           ]
         }
       ]
-    },
-    "Flow_subtype_toplevel",
-    {
-      "From_witness_decl":{
-        "Hint":[{"filename":"shape_subtyping_6.php","line":3,"char_start":39,"char_end":41}]
-      }
-    }
-  ]
-}
+    ]
+  },
+  "Flow_subtype_toplevel",
+  {
+    "Hint":[{"filename":"shape_subtyping_6.php","line":3,"char_start":39,"char_end":41}]
+  }
+]
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -330,11 +264,11 @@ Path:
 {
   "stats":{"max_depth":2,"length":7,"reversals":1},
   "path_elems":[
-    {
-      "From_witness_decl":{
+    [
+      {
         "Hint":[{"filename":"shape_subtyping_6.php","line":4,"char_start":41,"char_end":44}]
       }
-    },
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -342,42 +276,44 @@ Path:
         "in_to":{"Symm":[{" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]}]}
       }
     },
-    {
-      "Def":[
-        {"filename":"shape_subtyping_6.php","line":4,"char_start":6,"char_end":23},
-        {
-          "From_witness_decl":{
-            "Hint":[{"filename":"shape_subtyping_6.php","line":12,"char_start":3,"char_end":20}]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {"filename":"shape_subtyping_6.php","line":4,"char_start":6,"char_end":23},
+          [
+            {
+              "Hint":[{"filename":"shape_subtyping_6.php","line":12,"char_start":3,"char_end":20}]
+            }
+          ]
+        ]
+      }
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_param_hint"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"shape_subtyping_6.php","line":12,"char_start":22,"char_end":23}]
       }
-    },
+    ],
     {"Edge":{"dir":"Fwd","kind":"Flow_local"}},
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"shape_subtyping_6.php","line":14,"char_start":35,"char_end":36}]
       }
-    },
+    ],
     {
       "Edge":{"dir":"Fwd","kind":"Flow_prj","in_to":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}}
     },
-    {
-      "From_witness_locl":{
+    [
+      {
         "Witness":[{"filename":"shape_subtyping_6.php","line":14,"char_start":3,"char_end":37}]
       }
-    },
+    ],
     {"Edge":{"dir":"Bwd","kind":"Flow_subtype"}},
-    {
-      "From_witness_decl":{
+    [
+      {
         "Support_dynamic_type":[{"filename":"shape_subtyping_6.php","line":6,"char_start":10,"char_end":40}]
       }
-    },
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -385,16 +321,18 @@ Path:
         "out_of":{"Symm":[{"Prj_symm_fn_param":[0,0]}]}
       }
     },
-    {
-      "Def":[
-        {"filename":"shape_subtyping_6.php","line":3,"char_start":6,"char_end":22},
-        {
-          "From_witness_decl":{
-            "Hint":[{"filename":"shape_subtyping_6.php","line":7,"char_start":3,"char_end":19}]
-          }
-        }
-      ]
-    },
+    [
+      {
+        "Def":[
+          {"filename":"shape_subtyping_6.php","line":3,"char_start":6,"char_end":22},
+          [
+            {
+              "Hint":[{"filename":"shape_subtyping_6.php","line":7,"char_start":3,"char_end":19}]
+            }
+          ]
+        ]
+      }
+    ],
     {
       "Edge":{
         "dir":"Fwd",
@@ -402,11 +340,11 @@ Path:
         "out_of":{"Symm":[{" Prj_symm_shape":["a",{"Optional":[]},{"Required":[]}]}]}
       }
     },
-    {
-      "From_witness_decl":{
+    [
+      {
         "Hint":[{"filename":"shape_subtyping_6.php","line":3,"char_start":39,"char_end":41}]
       }
-    }
+    ]
   ]
 }
 

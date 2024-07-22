@@ -196,7 +196,7 @@ func NewClient(opts ...ClientOption) (Protocol, error) {
 		if err != nil {
 			return nil, err
 		}
-		protocol, err := NewRocketClient(conn)
+		protocol, err := newRocketClient(conn)
 		if err != nil {
 			return nil, err
 		}
@@ -209,7 +209,7 @@ func NewClient(opts ...ClientOption) (Protocol, error) {
 		if err != nil {
 			return nil, err
 		}
-		protocol, err := NewUpgradeToRocketClient(conn)
+		protocol, err := newUpgradeToRocketClient(conn)
 		if err != nil {
 			return nil, err
 		}

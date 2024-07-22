@@ -28,9 +28,9 @@ type upgradeToRocketClient struct {
 	headerProtocol Protocol
 }
 
-// NewUpgradeToRocketClient creates a protocol that upgrades from Header to Rocket client from a socket.
-func NewUpgradeToRocketClient(conn net.Conn) (Protocol, error) {
-	rocket, err := NewRocketClient(conn)
+// newUpgradeToRocketClient creates a protocol that upgrades from Header to Rocket client from a socket.
+func newUpgradeToRocketClient(conn net.Conn) (Protocol, error) {
+	rocket, err := newRocketClient(conn)
 	if err != nil {
 		return nil, err
 	}

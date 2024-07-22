@@ -55,8 +55,8 @@ type rocketClient struct {
 	buf *MemoryBuffer
 }
 
-// NewRocketClient creates a RocketClient
-func NewRocketClient(conn net.Conn) (Protocol, error) {
+// newRocketClient creates a RocketClient
+func newRocketClient(conn net.Conn) (Protocol, error) {
 	p := &rocketClient{
 		protoID:           ProtocolIDCompact,
 		persistentHeaders: make(map[string]string),

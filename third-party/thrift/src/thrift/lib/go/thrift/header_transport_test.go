@@ -176,7 +176,7 @@ func TestHeaderHeaders(t *testing.T) {
 	// 1 for persistent header and 2 more for identity headers
 	assertEq(t, 3, len(trans1.GetPersistentHeaders()))
 
-	headerval, _ := trans1.GetRequestHeader("preferred_cheese")
+	headerval, _ := trans1.getRequestHeaders()["preferred_cheese"]
 	assertEq(t, "cheddar", headerval)
 	headerval, _ = trans1.GetPersistentHeader("preferred_cheese")
 	assertEq(t, "gouda", headerval)
@@ -218,8 +218,8 @@ func TestHeaderHeaders(t *testing.T) {
 }
 
 func peerIdentity(t *headerTransport) string {
-	v, ok := t.GetResponseHeader(IdentityHeader)
-	vers, versok := t.GetResponseHeader(IDVersionHeader)
+	v, ok := t.GetResponseHeaders()[IdentityHeader]
+	vers, versok := t.GetResponseHeaders()[IDVersionHeader]
 	if ok && versok && vers == IDVersion {
 		return v
 	}

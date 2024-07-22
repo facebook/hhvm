@@ -77,7 +77,6 @@ func GetHeaders(ctx context.Context) map[string]string {
 // Deprecated: RequestHeaders will eventually be private.
 type RequestHeaders interface {
 	SetRequestHeader(key, value string)
-	GetRequestHeader(key string) (value string, ok bool)
 	GetRequestHeaders() map[string]string
 }
 

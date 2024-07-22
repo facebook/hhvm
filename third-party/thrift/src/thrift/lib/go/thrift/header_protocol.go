@@ -140,34 +140,13 @@ func (p *headerProtocol) ClearPersistentHeaders() {
 	p.trans.ClearPersistentHeaders()
 }
 
-// GetRequestHeader returns a request header if the key exists, otherwise false
-func (p *headerProtocol) GetRequestHeader(key string) (string, bool) {
-	return p.trans.GetRequestHeader(key)
-}
-
-// Deprecated SetHeader is deprecated, rather use SetRequestHeader
-func (p *headerProtocol) SetHeader(key, value string) {
-	p.trans.SetRequestHeader(key, value)
-}
-
-// Deprecated Header is deprecated, rather use GetRequestHeader
-func (p *headerProtocol) Header(key string) (string, bool) {
-	return p.trans.GetRequestHeader(key)
-}
-
-// Deprecated Headers is deprecated, rather use GetRequestHeaders
-func (p *headerProtocol) Headers() map[string]string {
-	return p.trans.GetRequestHeaders()
-}
-
 // Deprecated: SetRequestHeader is deprecated and will eventually be private.
 func (p *headerProtocol) SetRequestHeader(key, value string) {
 	p.trans.SetRequestHeader(key, value)
 }
 
-// Deprecated: GetRequestHeader is deprecated and will eventually be private.
 func (p *headerProtocol) GetRequestHeaders() map[string]string {
-	return p.trans.GetRequestHeaders()
+	return p.trans.getRequestHeaders()
 }
 
 func (p *headerProtocol) GetResponseHeader(key string) (string, bool) {

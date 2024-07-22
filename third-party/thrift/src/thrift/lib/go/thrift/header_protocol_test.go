@@ -32,7 +32,7 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 	}
 
 	proto1.(RequestHeaders).SetRequestHeader("preferred_cheese", "cheddar")
-	if v, _ := proto1.(RequestHeaders).GetRequestHeader("preferred_cheese"); v != "cheddar" {
+	if v, _ := proto1.(RequestHeaders).GetRequestHeaders()["preferred_cheese"]; v != "cheddar" {
 		t.Fatalf("failed to set header")
 	}
 	if len(proto1.(RequestHeaders).GetRequestHeaders()) != 1 {

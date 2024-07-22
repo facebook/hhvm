@@ -120,20 +120,13 @@ func (t *headerTransport) SetHeader(key, value string) {
 	t.writeInfoHeaders[key] = value
 }
 
-// GetRequestHeader returns a request header if the key exists, otherwise false
-func (t *headerTransport) GetRequestHeader(key string) (string, bool) {
-	v, ok := t.writeInfoHeaders[key]
-	return v, ok
-}
-
 // Deprecated Header is deprecated rather use GetRequestHeader
 func (t *headerTransport) Header(key string) (string, bool) {
 	v, ok := t.writeInfoHeaders[key]
 	return v, ok
 }
 
-// GetRequestHeaders returns all the request headers
-func (t *headerTransport) GetRequestHeaders() map[string]string {
+func (t *headerTransport) getRequestHeaders() map[string]string {
 	res := map[string]string{}
 	for k, v := range t.writeInfoHeaders {
 		res[k] = v

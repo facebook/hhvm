@@ -133,3 +133,17 @@ func TestWithHeadersDoNotOverride(t *testing.T) {
 	output2 := GetHeaders(ctx)
 	assert.Equal(t, want, output2)
 }
+
+func TestSetHeadersDoesOverride(t *testing.T) {
+	ctx := context.Background()
+	input1 := map[string]string{"key1": "value1"}
+	input2 := map[string]string{"key2": "value2"}
+	var err error
+	ctx, err = AddHeader(ctx, "key1", "value1")
+	assert.NoError(t, err)
+	output1 := GetHeaders(ctx)
+	assert.Equal(t, input1, output1)
+	ctx = SetHeaders(ctx, input2)
+	output2 := GetHeaders(ctx)
+	assert.Equal(t, input2, output2)
+}

@@ -59,6 +59,11 @@ func WithHeaders(ctx context.Context, headers map[string]string) context.Context
 	return context.WithValue(ctx, headersKey, headersMap)
 }
 
+// SetHeaders replaces all the current headers.
+func SetHeaders(ctx context.Context, headers map[string]string) context.Context {
+	return context.WithValue(ctx, headersKey, headers)
+}
+
 // GetHeaders gets thrift headers from ctx.
 func GetHeaders(ctx context.Context) map[string]string {
 	// check for headersKey

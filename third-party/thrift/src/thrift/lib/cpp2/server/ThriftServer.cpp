@@ -927,13 +927,6 @@ void ThriftServer::setupThreadManager() {
       if (auto observer = getObserverShared()) {
         observer->resourcePoolsEnabled(explanation);
       }
-
-      XLOG_IF(INFO, infoLoggingEnabled_)
-          << "QPS limit will be enforced by "
-          << (FLAGS_thrift_server_enforces_qps_limit
-                  ? "the thrift server"
-                  : "the concurrency controller");
-
       ensureResourcePools();
 
       // During resource pools roll out we want to track services that get
@@ -1073,11 +1066,7 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
   // This can be called multiple times - only run it to completion once
   // but note below that it can exit early.
   if (runtimeServerActions_.checkComplete) {
-    auto result = !runtimeDisableResourcePoolsSet();
-    XLOG_IF(INFO, infoLoggingEnabled_)
-        << "runtimeResourcePoolsChecks() is already completed and result is "
-        << result;
-    return result;
+    return !runtimeDisableResourcePoolsSet();
   }
   // If this is called too early we can't run our other checks.
   if (!getProcessorFactory()) {
@@ -1169,8 +1158,6 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
         << "runtimeResourcePoolsChecks() returns false because of runtimeDisableResourcePoolsSet()";
     return false;
   }
-  XLOG_IF(INFO, infoLoggingEnabled_)
-      << "Resource pools check complete - allowed";
   return true;
 }
 
@@ -1182,7 +1169,6 @@ void ThriftServer::ensureResourcePools() {
   }
 
   if (!resourcePoolSet().hasResourcePool(ResourcePoolHandle::defaultSync())) {
-    XLOG_IF(INFO, infoLoggingEnabled_) << "Creating a default sync pool";
     // Ensure there is a sync resource pool.
     resourcePoolSet().setResourcePool(
         ResourcePoolHandle::defaultSync(),
@@ -1416,8 +1402,7 @@ void ThriftServer::lockResourcePoolSet() {
 
   if (!resourcePoolSet().empty()) {
     XLOG_IF(INFO, infoLoggingEnabled_)
-        << "Resource pools (" << resourcePoolSet().size()
-        << "): " << resourcePoolSet().describe();
+        << "Resource pools configured: " << resourcePoolSet().size();
 
     auto descriptions = resourcePoolSet().poolsDescriptions();
     if (auto observer = getObserverShared()) {
@@ -1426,16 +1411,8 @@ void ThriftServer::lockResourcePoolSet() {
 
     size_t count{0};
     for (auto description : descriptions) {
-      XLOG_IF(INFO, infoLoggingEnabled_)
-          << fmt::format("Resource pool [{}]: {}", count++, description);
+      VLOG(1) << fmt::format("Resource pool [{}]: {}", count++, description);
     }
-  }
-  if (FLAGS_thrift_server_enforces_qps_limit) {
-    XLOG_IF(INFO, infoLoggingEnabled_)
-        << "QPS limit will be enforced by Thrift Server";
-  } else {
-    XLOG_IF(INFO, infoLoggingEnabled_)
-        << "QPS limit will be enforced by Resource Pool";
   }
 }
 

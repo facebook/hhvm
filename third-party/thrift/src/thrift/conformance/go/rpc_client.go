@@ -55,7 +55,7 @@ func (t *rpcClientConformanceTester) getClient() (*rpc.RPCConformanceServiceClie
 	if err != nil {
 		return nil, err
 	}
-	proto, err := thrift.NewUpgradeToRocketClient(conn)
+	proto, err := thrift.NewClient(thrift.WithConn(conn), thrift.WithUpgradeToRocket())
 	if err != nil {
 		return nil, fmt.Errorf("unable to upgrade to rocket protocol: %w", err)
 	}

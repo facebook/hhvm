@@ -21,7 +21,6 @@ package thrift
 type PersistentHeaders interface {
 	SetPersistentHeader(key, value string)
 	GetPersistentHeader(key string) (string, bool)
-	GetPersistentHeaders() map[string]string
 }
 
 // Compile time interface enforcer

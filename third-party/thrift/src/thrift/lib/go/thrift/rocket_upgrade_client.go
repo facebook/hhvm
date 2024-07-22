@@ -81,20 +81,14 @@ func (p *upgradeToRocketClient) SetPersistentHeader(key, value string) {
 }
 
 func (p *upgradeToRocketClient) GetPersistentHeader(key string) (string, bool) {
-	v, ok := p.GetPersistentHeaders()[key]
-	return v, ok
-}
-
-func (p *upgradeToRocketClient) GetPersistentHeaders() map[string]string {
 	if p.Protocol == nil {
-		headers := p.headerProtocol.GetPersistentHeaders()
-		rocketHeaders := p.rocketProtocol.GetPersistentHeaders()
-		for k, v := range rocketHeaders {
-			headers[k] = v
+		headers, ok := p.headerProtocol.GetPersistentHeader(key)
+		if ok {
+			return headers, ok
 		}
-		return headers
+		return p.rocketProtocol.GetPersistentHeader(key)
 	}
-	return p.Protocol.GetPersistentHeaders()
+	return p.Protocol.GetPersistentHeader(key)
 }
 
 func (p *upgradeToRocketClient) SetRequestHeader(key, value string) {

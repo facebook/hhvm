@@ -96,14 +96,6 @@ func (t *headerTransport) GetPersistentHeader(key string) (string, bool) {
 	return v, ok
 }
 
-func (t *headerTransport) GetPersistentHeaders() map[string]string {
-	res := map[string]string{}
-	for k, v := range t.persistentWriteInfoHeaders {
-		res[k] = v
-	}
-	return res
-}
-
 // SetRequestHeader sets a request header
 func (t *headerTransport) SetRequestHeader(key, value string) {
 	t.writeInfoHeaders[key] = value
@@ -121,15 +113,6 @@ func (t *headerTransport) Header(key string) (string, bool) {
 }
 
 func (t *headerTransport) getRequestHeaders() map[string]string {
-	res := map[string]string{}
-	for k, v := range t.writeInfoHeaders {
-		res[k] = v
-	}
-	return res
-}
-
-// Deprecated Headers is deprecated rather use GetRequestHeaders
-func (t *headerTransport) Headers() map[string]string {
 	res := map[string]string{}
 	for k, v := range t.writeInfoHeaders {
 		res[k] = v

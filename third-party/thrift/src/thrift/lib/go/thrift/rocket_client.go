@@ -364,10 +364,6 @@ func (p *rocketClient) GetPersistentHeader(key string) (string, bool) {
 	return v, ok
 }
 
-func (p *rocketClient) GetPersistentHeaders() map[string]string {
-	return p.persistentHeaders
-}
-
 func (p *rocketClient) SetRequestHeader(key, value string) {
 	if p.reqMetadata == nil {
 		p.reqMetadata = &requestRPCMetadata{}

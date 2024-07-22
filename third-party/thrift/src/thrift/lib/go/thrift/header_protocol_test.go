@@ -43,9 +43,6 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 	if v, _ := proto1.GetPersistentHeader("preferred_cheese"); v != "gouda" {
 		t.Fatalf("failed to set persistent header")
 	}
-	if len(proto1.GetPersistentHeaders()) != 1 {
-		t.Fatalf("wrong number of headers")
-	}
 
 	SetIdentity(proto1, "batman")
 	if gotIdentity, ok := proto1.GetPersistentHeader(IdentityHeader); !ok || gotIdentity != "batman" {

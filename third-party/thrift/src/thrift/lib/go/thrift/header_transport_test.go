@@ -172,9 +172,9 @@ func TestHeaderHeaders(t *testing.T) {
 	trans1.SetRequestHeader("preferred_cheese", "cheddar")
 	trans1.SetPersistentHeader("preferred_cheese", "gouda")
 
-	assertEq(t, 3, len(trans1.Headers()))
+	assertEq(t, 3, len(trans1.getRequestHeaders()))
 	// 1 for persistent header and 2 more for identity headers
-	assertEq(t, 3, len(trans1.GetPersistentHeaders()))
+	assertEq(t, 3, len(trans1.persistentWriteInfoHeaders))
 
 	headerval, _ := trans1.getRequestHeaders()["preferred_cheese"]
 	assertEq(t, "cheddar", headerval)
@@ -191,9 +191,9 @@ func TestHeaderHeaders(t *testing.T) {
 	}
 
 	// Make sure we zero the headers
-	assertEq(t, 0, len(trans1.Headers()))
+	assertEq(t, 0, len(trans1.getRequestHeaders()))
 	// But not the persistent ones
-	assertEq(t, 3, len(trans1.GetPersistentHeaders()))
+	assertEq(t, 3, len(trans1.persistentWriteInfoHeaders))
 
 	err = trans2.ResetProtocol()
 	if err != nil {

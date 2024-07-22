@@ -35,11 +35,10 @@ import (
 // connection are not supported, as the per-connection gofunc reads
 // the request, processes it, and writes the response serially
 type SimpleServer struct {
-	processorContext ProcessorContext
-	listener         net.Listener
-	newProtocol      func(net.Conn) (Protocol, error)
-	quit             chan struct{}
-	log              *log.Logger
+	processor   ProcessorContext
+	listener    net.Listener
+	newProtocol func(net.Conn) (Protocol, error)
+	log         *log.Logger
 	*ServerOptions
 }
 
@@ -49,12 +48,11 @@ func NewSimpleServer(processor ProcessorContext, listener net.Listener, transpor
 		panic(fmt.Sprintf("SimpleServer only supports Header Transport and not %d", transportType))
 	}
 	return &SimpleServer{
-		quit:             make(chan struct{}, 1),
-		processorContext: processor,
-		listener:         listener,
-		newProtocol:      NewHeaderProtocol,
-		log:              log.New(os.Stderr, "", log.LstdFlags),
-		ServerOptions:    simpleServerOptions(options...),
+		processor:     processor,
+		listener:      listener,
+		newProtocol:   NewHeaderProtocol,
+		log:           log.New(os.Stderr, "", log.LstdFlags),
+		ServerOptions: simpleServerOptions(options...),
 	}
 }
 
@@ -66,56 +64,46 @@ func simpleServerOptions(options ...func(*ServerOptions)) *ServerOptions {
 	return opts
 }
 
-// acceptLoopContext takes a context that will be decorated with ConnInfo and passed down to new clients.
-func (p *SimpleServer) acceptLoopContext(ctx context.Context) error {
-	for {
-		client, err := p.listener.Accept()
-		if err != nil {
-			select {
-			case <-p.quit:
-				return nil
-			default:
-			}
-			return err
-		}
-		if client == nil {
-			continue
-		}
-		go func(ctx context.Context, client net.Conn) {
-			ctx = p.addConnInfo(ctx, client)
-			if err := p.processRequests(ctx, client); err != nil {
-				p.log.Println("thrift: error processing request:", err)
-			}
-		}(ctx, client)
-	}
-}
-
-func (p *SimpleServer) addConnInfo(ctx context.Context, conn net.Conn) context.Context {
-	if p.processorContext == nil {
-		return ctx
-	}
-	return WithConnInfo(ctx, conn)
-}
-
 // ServeContext starts listening on the transport and accepting new connections
 // and blocks until cancel is called via context or an error occurs.
 func (p *SimpleServer) ServeContext(ctx context.Context) error {
 	go func() {
 		<-ctx.Done()
-		p.quit <- struct{}{}
 		p.listener.Close()
 	}()
-	err := p.acceptLoopContext(ctx)
+	err := p.acceptLoop(ctx)
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}
 	return err
 }
 
-func (p *SimpleServer) processRequests(ctx context.Context, client net.Conn) error {
-	processor := p.processorContext
+// acceptLoop takes a context that will be decorated with ConnInfo and passed down to new clients.
+func (p *SimpleServer) acceptLoop(ctx context.Context) error {
+	for {
+		conn, err := p.listener.Accept()
+		if err != nil {
+			select {
+			case <-ctx.Done():
+				return nil
+			default:
+				return err
+			}
+		}
+		if conn == nil {
+			continue
+		}
+		go func(ctx context.Context, conn net.Conn) {
+			ctx = WithConnInfo(ctx, conn)
+			if err := p.processRequests(ctx, conn); err != nil {
+				p.log.Println("thrift: error processing request:", err)
+			}
+		}(ctx, conn)
+	}
+}
 
-	protocol, err := p.newProtocol(client)
+func (p *SimpleServer) processRequests(ctx context.Context, conn net.Conn) error {
+	protocol, err := p.newProtocol(conn)
 	if err != nil {
 		return err
 	}
@@ -126,7 +114,7 @@ func (p *SimpleServer) processRequests(ctx context.Context, client net.Conn) err
 		}
 	}()
 	defer protocol.Close()
-	intProcessor := WrapInterceptorContext(p.interceptor, processor)
+	intProcessor := WrapInterceptorContext(p.interceptor, p.processor)
 	for {
 		keepOpen, exc := processContext(ctx, intProcessor, protocol)
 		if exc != nil {

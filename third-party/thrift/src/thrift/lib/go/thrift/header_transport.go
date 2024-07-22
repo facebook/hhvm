@@ -104,12 +104,6 @@ func (t *headerTransport) GetPersistentHeaders() map[string]string {
 	return res
 }
 
-func (t *headerTransport) ClearPersistentHeaders() {
-	if len(t.persistentWriteInfoHeaders) != 0 {
-		t.persistentWriteInfoHeaders = map[string]string{}
-	}
-}
-
 // SetRequestHeader sets a request header
 func (t *headerTransport) SetRequestHeader(key, value string) {
 	t.writeInfoHeaders[key] = value

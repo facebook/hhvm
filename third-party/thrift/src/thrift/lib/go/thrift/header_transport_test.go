@@ -212,9 +212,6 @@ func TestHeaderHeaders(t *testing.T) {
 
 	trans2.readHeader.pHeaders[IDVersionHeader] = "invalid"
 	assertEq(t, "", peerIdentity(trans2))
-
-	trans1.ClearPersistentHeaders()
-	assertEq(t, 0, len(trans1.GetPersistentHeaders()))
 }
 
 func peerIdentity(t *headerTransport) string {

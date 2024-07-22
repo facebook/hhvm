@@ -136,10 +136,6 @@ func (p *headerProtocol) GetPersistentHeaders() map[string]string {
 	return p.trans.GetPersistentHeaders()
 }
 
-func (p *headerProtocol) ClearPersistentHeaders() {
-	p.trans.ClearPersistentHeaders()
-}
-
 // Deprecated: SetRequestHeader is deprecated and will eventually be private.
 func (p *headerProtocol) SetRequestHeader(key, value string) {
 	p.trans.SetRequestHeader(key, value)

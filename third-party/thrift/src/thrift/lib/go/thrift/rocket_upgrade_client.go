@@ -97,15 +97,6 @@ func (p *upgradeToRocketClient) GetPersistentHeaders() map[string]string {
 	return p.Protocol.GetPersistentHeaders()
 }
 
-func (p *upgradeToRocketClient) ClearPersistentHeaders() {
-	if p.Protocol == nil {
-		p.rocketProtocol.ClearPersistentHeaders()
-		p.headerProtocol.ClearPersistentHeaders()
-		return
-	}
-	p.Protocol.ClearPersistentHeaders()
-}
-
 func (p *upgradeToRocketClient) SetRequestHeader(key, value string) {
 	if p.Protocol == nil {
 		p.rocketProtocol.(RequestHeaders).SetRequestHeader(key, value)

@@ -22,7 +22,6 @@ type PersistentHeaders interface {
 	SetPersistentHeader(key, value string)
 	GetPersistentHeader(key string) (string, bool)
 	GetPersistentHeaders() map[string]string
-	ClearPersistentHeaders()
 }
 
 // Compile time interface enforcer

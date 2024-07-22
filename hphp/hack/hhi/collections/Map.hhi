@@ -509,7 +509,7 @@ namespace HH {
      * @guide /hack/generics/constraints
      */
     <<__Overlapping('Tk', 'Tk2')>>
-    public readonly function contains<Tk2>(Tk2 $k)[]: bool;
+    public readonly function contains<Tk2 as arraykey>(Tk2 $k)[]: bool;
 
     /**
      * Determines if the specified key is in the current `Map`.
@@ -524,7 +524,7 @@ namespace HH {
      * @guide /hack/generics/constraints
      */
     <<__Overlapping('Tk', 'Tk2')>>
-    public readonly function containsKey<Tk2>(Tk2 $k)[]: bool;
+    public readonly function containsKey<Tk2 as arraykey>(Tk2 $k)[]: bool;
 
     /**
      * Add a key/value pair to the end of the current `Map`.

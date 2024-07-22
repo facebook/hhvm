@@ -158,7 +158,7 @@ namespace {
    * @guide /hack/collections/interfaces
    */
   <<__Sealed(ConstMapAccess::class, IndexAccess::class, ConstVector::class)>>
-  interface ConstIndexAccess<Tk, +Tv> {
+  interface ConstIndexAccess<Tk as arraykey, +Tv> {
     /**
      * Returns the value at the specified key in the current collection.
      *
@@ -193,8 +193,8 @@ namespace {
      *
      * @guide /hack/generics/constraints
      */
-    <<__Overlapping('Tv', 'Tv2')>>
-    public readonly function containsKey<Tv2>(Tv2 $k)[]: bool;
+    <<__Overlapping('Tk', 'Tk2')>>
+    public readonly function containsKey<Tk2 as arraykey>(Tk2 $k)[]: bool;
   }
 
   /**
@@ -205,7 +205,7 @@ namespace {
    * @guide /hack/collections/interfaces
    */
   <<__Sealed(MapAccess::class, MutableVector::class)>>
-  interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
+  interface IndexAccess<Tk as arraykey, Tv> extends ConstIndexAccess<Tk, Tv> {
     /**
      * Stores a value into the current collection with the specified key,
      * overwriting the previous value associated with the key.

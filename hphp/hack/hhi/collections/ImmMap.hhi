@@ -439,7 +439,7 @@ namespace HH {
      * @guide /hack/generics/constraints
      */
     <<__Overlapping('Tk', 'Tk2')>>
-    public readonly function contains<Tk2>(Tk2 $k)[]: bool;
+    public readonly function contains<Tk2 as arraykey>(Tk2 $k)[]: bool;
 
     /**
      * Determines if the specified key is in the current `ImmMap`.
@@ -454,7 +454,7 @@ namespace HH {
      * @guide /hack/generics/constraints
      */
     <<__Overlapping('Tk', 'Tk2')>>
-    public readonly function containsKey<Tk2>(Tk2 $k)[]: bool;
+    public readonly function containsKey<Tk2 as arraykey>(Tk2 $k)[]: bool;
 
     /**
      * Returns a new `ImmMap` with the keys that are in the current `ImmMap`, but

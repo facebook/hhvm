@@ -67,7 +67,7 @@ type flow_kind =
   | Flow_transitive
   | Flow_fun_return
   | Flow_param_hint
-  | Flow_return_hint
+  | Flow_return_expr
   | Flow_upper_bound
   | Flow_lower_bound
 [@@deriving hash, show]

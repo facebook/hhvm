@@ -7519,7 +7519,7 @@ end = struct
         Typing_env.(
           update_reason env rty ~f:(fun from ->
               Typing_reason.(
-                flow ~from ~into:(witness pos) ~kind:Flow_return_hint)))
+                flow ~from ~into:(witness pos) ~kind:Flow_return_expr)))
       in
       let te =
         let (ty, pos, e) = te in
@@ -7527,7 +7527,7 @@ end = struct
           Typing_env.(
             update_reason env ty ~f:(fun from ->
                 Typing_reason.(
-                  flow ~from ~into:(witness pos) ~kind:Flow_return_hint)))
+                  flow ~from ~into:(witness pos) ~kind:Flow_return_expr)))
         in
         (ty, pos, e)
       in

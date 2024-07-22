@@ -64,7 +64,7 @@ which itself flows into this expression because they are required to be subtypes
 
 File "workplace_invariant.php", line 16, character 5 - line 16, character 22:
 
-which itself flows into this thing (`Rclass_class`) because it is a return hint
+which itself flows into this thing (`Rclass_class`) because the expression is in return position
 
  8 | final class »foo« implements bar<int> {
  9 |   public function get(): int {
@@ -171,7 +171,7 @@ Raw:
                     {
                       "Def":[
                         {
-                          "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+                          "filename":"/tmp/QXJLfH84v/classname.hhi",
                           "line":19,
                           "char_start":11,
                           "char_end":19
@@ -186,7 +186,7 @@ Raw:
                         ]
                       ]
                     },
-                    "Flow_return_hint",
+                    "Flow_return_expr",
                     {
                       "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
                     },
@@ -194,7 +194,7 @@ Raw:
                     {
                       "Def":[
                         {
-                          "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+                          "filename":"/tmp/QXJLfH84v/classname.hhi",
                           "line":19,
                           "char_start":11,
                           "char_end":19
@@ -266,7 +266,7 @@ Normalised:
               {
                 "Def":[
                   {
-                    "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+                    "filename":"/tmp/QXJLfH84v/classname.hhi",
                     "line":19,
                     "char_start":11,
                     "char_end":19
@@ -284,11 +284,11 @@ Normalised:
               {
                 "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
               },
-              "Flow_return_hint",
+              "Flow_return_expr",
               {
                 "Def":[
                   {
-                    "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+                    "filename":"/tmp/QXJLfH84v/classname.hhi",
                     "line":19,
                     "char_start":11,
                     "char_end":19
@@ -403,7 +403,7 @@ Path:
       {
         "Def":[
           {
-            "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+            "filename":"/tmp/QXJLfH84v/classname.hhi",
             "line":19,
             "char_start":11,
             "char_end":19
@@ -424,12 +424,12 @@ Path:
         "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
       }
     ],
-    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_expr"}},
     [
       {
         "Def":[
           {
-            "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+            "filename":"/tmp/QXJLfH84v/classname.hhi",
             "line":19,
             "char_start":11,
             "char_end":19
@@ -565,7 +565,7 @@ which itself flows into this expression because they are required to be subtypes
 
 File "workplace_invariant.php", line 16, character 5 - line 16, character 22:
 
-which itself flows into this thing (`Rclass_class`) because it is a return hint
+which itself flows into this thing (`Rclass_class`) because the expression is in return position
 
  8 | final class »foo« implements bar<int> {
  9 |   public function get(): int {
@@ -666,7 +666,7 @@ Raw:
                     {
                       "Def":[
                         {
-                          "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+                          "filename":"/tmp/QXJLfH84v/classname.hhi",
                           "line":19,
                           "char_start":11,
                           "char_end":19
@@ -681,7 +681,7 @@ Raw:
                         ]
                       ]
                     },
-                    "Flow_return_hint",
+                    "Flow_return_expr",
                     {
                       "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
                     },
@@ -689,7 +689,7 @@ Raw:
                     {
                       "Def":[
                         {
-                          "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+                          "filename":"/tmp/QXJLfH84v/classname.hhi",
                           "line":19,
                           "char_start":11,
                           "char_end":19
@@ -755,7 +755,7 @@ Normalised:
               {
                 "Def":[
                   {
-                    "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+                    "filename":"/tmp/QXJLfH84v/classname.hhi",
                     "line":19,
                     "char_start":11,
                     "char_end":19
@@ -773,11 +773,11 @@ Normalised:
               {
                 "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
               },
-              "Flow_return_hint",
+              "Flow_return_expr",
               {
                 "Def":[
                   {
-                    "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+                    "filename":"/tmp/QXJLfH84v/classname.hhi",
                     "line":19,
                     "char_start":11,
                     "char_end":19
@@ -884,7 +884,7 @@ Path:
       {
         "Def":[
           {
-            "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+            "filename":"/tmp/QXJLfH84v/classname.hhi",
             "line":19,
             "char_start":11,
             "char_end":19
@@ -905,12 +905,12 @@ Path:
         "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
       }
     ],
-    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_expr"}},
     [
       {
         "Def":[
           {
-            "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+            "filename":"/tmp/QXJLfH84v/classname.hhi",
             "line":19,
             "char_start":11,
             "char_end":19
@@ -1046,7 +1046,7 @@ which itself flows up into this thing (`Rclass_class`) as the covariant, 1st typ
 
 File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  15 | function getClass<Tu as num>(): classname<bar<Tu>> {
  16 |     »return foo::class;«
@@ -1129,7 +1129,7 @@ Raw:
               {
                 "Def":[
                   {
-                    "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+                    "filename":"/tmp/QXJLfH84v/classname.hhi",
                     "line":19,
                     "char_start":11,
                     "char_end":19
@@ -1144,7 +1144,7 @@ Raw:
                   ]
                 ]
               },
-              "Flow_return_hint",
+              "Flow_return_expr",
               {
                 "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
               },
@@ -1152,7 +1152,7 @@ Raw:
               {
                 "Def":[
                   {
-                    "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+                    "filename":"/tmp/QXJLfH84v/classname.hhi",
                     "line":19,
                     "char_start":11,
                     "char_end":19
@@ -1247,7 +1247,7 @@ Normalised:
               {
                 "Def":[
                   {
-                    "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+                    "filename":"/tmp/QXJLfH84v/classname.hhi",
                     "line":19,
                     "char_start":11,
                     "char_end":19
@@ -1262,7 +1262,7 @@ Normalised:
                   ]
                 ]
               },
-              "Flow_return_hint",
+              "Flow_return_expr",
               {
                 "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
               },
@@ -1270,7 +1270,7 @@ Normalised:
               {
                 "Def":[
                   {
-                    "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+                    "filename":"/tmp/QXJLfH84v/classname.hhi",
                     "line":19,
                     "char_start":11,
                     "char_end":19
@@ -1378,7 +1378,7 @@ Path:
       {
         "Def":[
           {
-            "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+            "filename":"/tmp/QXJLfH84v/classname.hhi",
             "line":19,
             "char_start":11,
             "char_end":19
@@ -1394,7 +1394,7 @@ Path:
         ]
       }
     ],
-    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_expr"}},
     [
       {
         "Witness":[{"filename":"workplace_invariant.php","line":16,"char_start":5,"char_end":22}]
@@ -1405,7 +1405,7 @@ Path:
       {
         "Def":[
           {
-            "filename":"/tmp/6GpMwC2D1t/classname.hhi",
+            "filename":"/tmp/QXJLfH84v/classname.hhi",
             "line":19,
             "char_start":11,
             "char_end":19

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<18b3599b782fdb0c7db42229dfdfa1db>>
+// @generated SignedSource<<e3fcd186585378e72d97aba80e30c25f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -399,8 +399,8 @@ pub enum FlowKind {
     FlowFunReturn,
     #[rust_to_ocaml(name = "Flow_param_hint")]
     FlowParamHint,
-    #[rust_to_ocaml(name = "Flow_return_hint")]
-    FlowReturnHint,
+    #[rust_to_ocaml(name = "Flow_return_expr")]
+    FlowReturnExpr,
     #[rust_to_ocaml(name = "Flow_upper_bound")]
     FlowUpperBound,
     #[rust_to_ocaml(name = "Flow_lower_bound")]

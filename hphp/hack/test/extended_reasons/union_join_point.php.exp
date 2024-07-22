@@ -89,7 +89,7 @@ which itself flows into this expression because the local variable has this type
 
 File "union_join_point.php", line 12, character 10 - line 12, character 11:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
   8 |   } else{
   9 |     $z = $y;

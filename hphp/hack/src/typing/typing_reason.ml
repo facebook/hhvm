@@ -427,7 +427,7 @@ type flow_kind =
   | Flow_transitive
   | Flow_fun_return
   | Flow_param_hint
-  | Flow_return_hint
+  | Flow_return_expr
   | Flow_upper_bound
   | Flow_lower_bound
 [@@deriving hash, show]
@@ -443,7 +443,7 @@ let flow_kind_to_json = function
   | Flow_transitive -> Hh_json.string_ "Flow_transitive"
   | Flow_fun_return -> Hh_json.string_ "Flow_fun_return"
   | Flow_param_hint -> Hh_json.string_ "Flow_param_hint"
-  | Flow_return_hint -> Hh_json.string_ "Flow_return_hint"
+  | Flow_return_expr -> Hh_json.string_ "Flow_return_expr"
   | Flow_upper_bound -> Hh_json.string_ "Flow_upper_bound"
   | Flow_lower_bound -> Hh_json.string_ "Flow_lower_bound"
 
@@ -459,7 +459,7 @@ let explain_flow_kind_fwd = function
   | Flow_transitive -> "because of transitivity"
   | Flow_fun_return -> "because of the functions return type"
   | Flow_param_hint -> "because it is a parameter hint"
-  | Flow_return_hint -> "because it is a return hint"
+  | Flow_return_expr -> "because the expression is in return position"
   | Flow_upper_bound -> "becuase it is the upper bound"
   | Flow_lower_bound -> "because it is the lower bound"
 
@@ -475,7 +475,7 @@ let explain_flow_kind_bwd = function
   | Flow_transitive -> "because of transitivity"
   | Flow_fun_return -> "because of the functions return type"
   | Flow_param_hint -> "because it is a parameter hint"
-  | Flow_return_hint -> "because it is a return hint"
+  | Flow_return_expr -> "because the expression is in return position"
   | Flow_upper_bound -> "becuase it is the upper bound"
   | Flow_lower_bound -> "because it is the lower bound"
 

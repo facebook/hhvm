@@ -113,7 +113,7 @@ which itself flows into this expression because the local variable has this type
 
 File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  12 |   }
  13 |   »return $z;«
@@ -220,7 +220,7 @@ which itself flows into this expression because the local variable has this type
 
 File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  12 |   }
  13 |   »return $z;«
@@ -340,7 +340,7 @@ which itself flows into this expression because the local variable has this type
 
 File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  12 |   }
  13 |   »return $z;«

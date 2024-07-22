@@ -56,7 +56,7 @@ which itself flows into this expression because the local variable has this type
 
 File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  6 | function union_l((A | B) $ab): C {
  7 |   »return $ab;«
@@ -100,7 +100,7 @@ Raw:
         {
           "Witness":[{"filename":"union_subtyping_l.php","line":7,"char_start":10,"char_end":12}]
         },
-        "Flow_return_hint",
+        "Flow_return_expr",
         {
           "Witness":[{"filename":"union_subtyping_l.php","line":7,"char_start":3,"char_end":13}]
         }
@@ -151,7 +151,7 @@ Normalised:
         {
           "Witness":[{"filename":"union_subtyping_l.php","line":7,"char_start":10,"char_end":12}]
         },
-        "Flow_return_hint",
+        "Flow_return_expr",
         {
           "Witness":[{"filename":"union_subtyping_l.php","line":7,"char_start":3,"char_end":13}]
         }
@@ -210,7 +210,7 @@ Path:
         "Witness":[{"filename":"union_subtyping_l.php","line":7,"char_start":10,"char_end":12}]
       }
     ],
-    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_expr"}},
     [
       {
         "Witness":[{"filename":"union_subtyping_l.php","line":7,"char_start":3,"char_end":13}]
@@ -293,7 +293,7 @@ which itself flows into this expression because the local variable has this type
 
 File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  6 | function union_l((A | B) $ab): C {
  7 |   »return $ab;«
@@ -337,7 +337,7 @@ Raw:
         {
           "Witness":[{"filename":"union_subtyping_l.php","line":7,"char_start":10,"char_end":12}]
         },
-        "Flow_return_hint",
+        "Flow_return_expr",
         {
           "Witness":[{"filename":"union_subtyping_l.php","line":7,"char_start":3,"char_end":13}]
         }
@@ -388,7 +388,7 @@ Normalised:
         {
           "Witness":[{"filename":"union_subtyping_l.php","line":7,"char_start":10,"char_end":12}]
         },
-        "Flow_return_hint",
+        "Flow_return_expr",
         {
           "Witness":[{"filename":"union_subtyping_l.php","line":7,"char_start":3,"char_end":13}]
         }
@@ -447,7 +447,7 @@ Path:
         "Witness":[{"filename":"union_subtyping_l.php","line":7,"char_start":10,"char_end":12}]
       }
     ],
-    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_expr"}},
     [
       {
         "Witness":[{"filename":"union_subtyping_l.php","line":7,"char_start":3,"char_end":13}]

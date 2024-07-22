@@ -72,7 +72,7 @@ which itself flows into this expression because the local variable has this type
 
 File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
@@ -146,7 +146,7 @@ Raw:
       }
     ]
   },
-  "Flow_return_hint",
+  "Flow_return_expr",
   {
     "Witness":[
       {
@@ -241,7 +241,7 @@ Normalised:
       }
     ]
   },
-  "Flow_return_hint",
+  "Flow_return_expr",
   {
     "Witness":[
       {
@@ -348,7 +348,7 @@ Path:
         ]
       }
     ],
-    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_expr"}},
     [
       {
         "Witness":[
@@ -475,7 +475,7 @@ which itself flows into this expression because the local variable has this type
 
 File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
@@ -576,7 +576,7 @@ Raw:
             }
           ]
         },
-        "Flow_return_hint",
+        "Flow_return_expr",
         {
           "Witness":[
             {
@@ -701,7 +701,7 @@ Normalised:
             }
           ]
         },
-        "Flow_return_hint",
+        "Flow_return_expr",
         {
           "Witness":[
             {
@@ -838,7 +838,7 @@ Path:
         ]
       }
     ],
-    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_expr"}},
     [
       {
         "Witness":[
@@ -965,7 +965,7 @@ which itself flows into this expression because the local variable has this type
 
 File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
@@ -1066,7 +1066,7 @@ Raw:
             }
           ]
         },
-        "Flow_return_hint",
+        "Flow_return_expr",
         {
           "Witness":[
             {
@@ -1191,7 +1191,7 @@ Normalised:
             }
           ]
         },
-        "Flow_return_hint",
+        "Flow_return_expr",
         {
           "Witness":[
             {
@@ -1328,7 +1328,7 @@ Path:
         ]
       }
     ],
-    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_expr"}},
     [
       {
         "Witness":[

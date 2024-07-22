@@ -96,7 +96,7 @@ which itself flows into this expression because the local variable has this type
 
 File "refinement_equal.php", line 12, character 10 - line 12, character 11:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  11 |   }
  12 |   »return $z;«
@@ -143,7 +143,7 @@ Raw:
   {
     "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":10,"char_end":11}]
   },
-  "Flow_return_hint",
+  "Flow_return_expr",
   {
     "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":3,"char_end":12}]
   },
@@ -192,7 +192,7 @@ Normalised:
   {
     "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":10,"char_end":11}]
   },
-  "Flow_return_hint",
+  "Flow_return_expr",
   {
     "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":3,"char_end":12}]
   },
@@ -257,7 +257,7 @@ Path:
         "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":10,"char_end":11}]
       }
     ],
-    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_expr"}},
     [
       {
         "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":3,"char_end":12}]

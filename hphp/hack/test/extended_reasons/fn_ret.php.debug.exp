@@ -115,7 +115,7 @@ flows into this expression because they are required to be subtypes
 
 File "fn_ret.php", line 8, character 10 - line 8, character 14:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  7 | function bar(): bool {
  8 |   »return foo();«
@@ -136,7 +136,7 @@ Raw:
   {"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
   "Flow_subtype",
   {"Witness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]},
-  "Flow_return_hint",
+  "Flow_return_expr",
   {"Witness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]},
   "Flow_subtype_toplevel",
   {"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
@@ -150,7 +150,7 @@ Normalised:
   {"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
   "Flow_subtype",
   {"Witness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]},
-  "Flow_return_hint",
+  "Flow_return_expr",
   {"Witness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]},
   "Flow_subtype_toplevel",
   {"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
@@ -168,7 +168,7 @@ Path:
     [
       {"Witness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]}
     ],
-    {"Edge":{"dir":"Fwd","kind":"Flow_return_hint"}},
+    {"Edge":{"dir":"Fwd","kind":"Flow_return_expr"}},
     [{"Witness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]}],
     {"Edge":{"dir":"Fwd","kind":"Flow_subtype_toplevel"}},
     [{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}]

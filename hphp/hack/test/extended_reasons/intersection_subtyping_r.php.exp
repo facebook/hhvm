@@ -48,7 +48,7 @@ which itself flows into this expression because the local variable has this type
 
 File "intersection_subtyping_r.php", line 8, character 10 - line 8, character 11:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  7 | function inter_r(C $c) : (A & I) {
  8 |   »return $c;«

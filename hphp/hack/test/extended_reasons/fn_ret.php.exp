@@ -82,7 +82,7 @@ flows into this expression because they are required to be subtypes
 
 File "fn_ret.php", line 8, character 10 - line 8, character 14:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  7 | function bar(): bool {
  8 |   »return foo();«

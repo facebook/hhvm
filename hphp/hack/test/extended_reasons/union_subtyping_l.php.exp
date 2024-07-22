@@ -56,7 +56,7 @@ which itself flows into this expression because the local variable has this type
 
 File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  6 | function union_l((A | B) $ab): C {
  7 |   »return $ab;«
@@ -130,7 +130,7 @@ which itself flows into this expression because the local variable has this type
 
 File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  6 | function union_l((A | B) $ab): C {
  7 |   »return $ab;«

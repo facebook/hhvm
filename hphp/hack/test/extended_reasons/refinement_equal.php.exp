@@ -96,7 +96,7 @@ which itself flows into this expression because the local variable has this type
 
 File "refinement_equal.php", line 12, character 10 - line 12, character 11:
 
-which itself flows into this expression because it is a return hint
+which itself flows into this expression because the expression is in return position
 
  11 |   }
  12 |   »return $z;«

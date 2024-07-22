@@ -401,25 +401,40 @@ class RPCClientConformanceTest : public testing::Test {
                   }
                 })),
         connectViaServer_(connectViaServer) {
-    auto port = folly::to<std::string>(server_.getPort());
-    if (testCase_.rpc_ref()->serverInstruction()->streamCreditTimeout_ref()) {
-      server_.getThriftServer().setStreamExpireTime(
-          std::chrono::milliseconds{*testCase_.rpc_ref()
-                                         ->serverInstruction()
-                                         ->streamCreditTimeout_ref()
-                                         ->streamExpireTime()});
-    }
-    if (connectViaServer_) {
-      createClient(clientCmd, server_.getAddress().getAddressStr(), port);
-    } else {
-      clientProcess_ = launch_client_process_(
-          std::vector<std::string>{std::string(clientCmd), "--port", port});
+    try {
+      auto port = folly::to<std::string>(server_.getPort());
+      if (testCase_.rpc_ref()->serverInstruction()->streamCreditTimeout_ref()) {
+        server_.getThriftServer().setStreamExpireTime(
+            std::chrono::milliseconds{*testCase_.rpc_ref()
+                                           ->serverInstruction()
+                                           ->streamCreditTimeout_ref()
+                                           ->streamExpireTime()});
+      }
+      if (connectViaServer_) {
+        createClient(clientCmd, server_.getAddress().getAddressStr(), port);
+      } else {
+        clientProcess_ = launch_client_process_(
+            std::vector<std::string>{std::string(clientCmd), "--port", port});
+      }
+    } catch (const std::exception& e) {
+      verifyConformanceResult(
+          testing::AssertionFailure() << "Unexpected Error " << e.what());
     }
   }
 
  protected:
-  void TestBody() override {
-    testing::AssertionResult conforming = runTest();
+  void TestBody() override { verifyConformanceResult(runTest()); }
+
+  void TearDown() override {
+    if (!connectViaServer_) {
+      clientProcess_.sendSignal(SIGINT);
+      clientProcess_.waitOrTerminateOrKill(
+          std::chrono::seconds(10), std::chrono::seconds(10));
+    }
+  }
+
+ private:
+  void verifyConformanceResult(testing::AssertionResult conforming) {
     if (conforming_) {
       EXPECT_TRUE(conforming) << "For more detail see:"
                               << std::endl
@@ -434,51 +449,45 @@ class RPCClientConformanceTest : public testing::Test {
           << "    thrift/conformance/data/nonconforming.txt" << std::endl;
     }
   }
-
-  void TearDown() override {
-    if (!connectViaServer_) {
-      clientProcess_.sendSignal(SIGINT);
-      clientProcess_.waitOrTerminateOrKill(
-          std::chrono::seconds(10), std::chrono::seconds(10));
-    }
-  }
-
- private:
   testing::AssertionResult runTest() {
-    // Wait for client to fetch test case
-    bool getTestReceived =
-        handler_->getTestReceived().wait(std::chrono::seconds(10));
+    try { // Wait for client to fetch test case
+      bool getTestReceived =
+          handler_->getTestReceived().wait(std::chrono::seconds(10));
 
-    // End test if client was unable to fetch test case
-    if (!getTestReceived) {
-      return testing::AssertionFailure() << "client failed to fetch test case";
+      // End test if client was unable to fetch test case
+      if (!getTestReceived) {
+        return testing::AssertionFailure()
+            << "client failed to fetch test case";
+      }
+
+      // Wait for result from client
+      folly::Try<ClientTestResult> actualClientResult =
+          handler_->clientResult().within(std::chrono::seconds(10)).getTry();
+
+      // End test if result was not received
+      if (actualClientResult.hasException()) {
+        return testing::AssertionFailure() << actualClientResult.exception();
+      }
+
+      auto& expectedClientResult = *testCase_.rpc_ref()->clientTestResult();
+      if (!equal(*actualClientResult, expectedClientResult)) {
+        return testing::AssertionFailure()
+            << "\nExpected client result: " << jsonify(expectedClientResult)
+            << "\nActual client result: " << jsonify(*actualClientResult);
+      }
+
+      auto& actualServerResult = handler_->serverResult();
+      auto& expectedServerResult = *testCase_.rpc_ref()->serverTestResult();
+      if (!equal(actualServerResult, expectedServerResult)) {
+        return testing::AssertionFailure()
+            << "\nExpected server result: " << jsonify(expectedServerResult)
+            << "\nActual server result: " << jsonify(actualServerResult);
+      }
+
+      return testing::AssertionSuccess();
+    } catch (const std::exception& e) {
+      return testing::AssertionFailure() << "Unexpected error " << e.what();
     }
-
-    // Wait for result from client
-    folly::Try<ClientTestResult> actualClientResult =
-        handler_->clientResult().within(std::chrono::seconds(10)).getTry();
-
-    // End test if result was not received
-    if (actualClientResult.hasException()) {
-      return testing::AssertionFailure() << actualClientResult.exception();
-    }
-
-    auto& expectedClientResult = *testCase_.rpc_ref()->clientTestResult();
-    if (!equal(*actualClientResult, expectedClientResult)) {
-      return testing::AssertionFailure()
-          << "\nExpected client result: " << jsonify(expectedClientResult)
-          << "\nActual client result: " << jsonify(*actualClientResult);
-    }
-
-    auto& actualServerResult = handler_->serverResult();
-    auto& expectedServerResult = *testCase_.rpc_ref()->serverTestResult();
-    if (!equal(actualServerResult, expectedServerResult)) {
-      return testing::AssertionFailure()
-          << "\nExpected server result: " << jsonify(expectedServerResult)
-          << "\nActual server result: " << jsonify(actualServerResult);
-    }
-
-    return testing::AssertionSuccess();
   }
 
   const TestSuite& suite_;

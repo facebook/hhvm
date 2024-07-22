@@ -479,7 +479,7 @@ Test createStreamCreditTimeoutTest() {
     auto& payload = serverInstruction.streamPayloads()->emplace_back();
     payload.data() = folly::to<std::string>(i);
   }
-  serverInstruction.streamExpireTime() = 10;
+  serverInstruction.streamExpireTime() = 50;
 
   auto& clientTestResult =
       rpcTest.clientTestResult().emplace().streamCreditTimeout_ref().emplace();

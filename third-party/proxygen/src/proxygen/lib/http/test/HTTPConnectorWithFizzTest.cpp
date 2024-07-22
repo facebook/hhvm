@@ -8,7 +8,7 @@
 
 #include <folly/portability/GTest.h>
 
-#include <fizz/protocol/test/Utilities.h>
+#include <fizz/protocol/test/CertUtil.h>
 #include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/test/Mocks.h>
 #include <fizz/server/test/Utils.h>

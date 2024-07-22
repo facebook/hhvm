@@ -8,7 +8,7 @@
 
 #include <proxygen/lib/transport/PersistentQuicPskCache.h>
 
-#include <fizz/protocol/test/Utilities.h>
+#include <fizz/protocol/test/CertUtil.h>
 #include <folly/FileUtil.h>
 #include <folly/portability/GTest.h>
 #include <wangle/client/persistence/test/TestUtil.h>

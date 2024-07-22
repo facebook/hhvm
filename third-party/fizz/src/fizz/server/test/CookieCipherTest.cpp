@@ -11,8 +11,9 @@
 
 #include <fizz/server/CookieCipher.h>
 
+#include <fizz/protocol/test/Matchers.h>
 #include <fizz/protocol/test/Mocks.h>
-#include <fizz/protocol/test/TestMessages.h>
+#include <fizz/protocol/test/TestUtil.h>
 
 using namespace fizz::test;
 

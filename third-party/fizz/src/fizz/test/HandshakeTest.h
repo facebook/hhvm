@@ -21,8 +21,8 @@
 #include <fizz/extensions/tokenbinding/TokenBindingClientExtension.h>
 #include <fizz/extensions/tokenbinding/TokenBindingContext.h>
 #include <fizz/extensions/tokenbinding/TokenBindingServerExtension.h>
+#include <fizz/protocol/test/CertUtil.h>
 #include <fizz/protocol/test/Matchers.h>
-#include <fizz/protocol/test/Utilities.h>
 #include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/CookieTypes.h>
 #include <fizz/server/TicketTypes.h>

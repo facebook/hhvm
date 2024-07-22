@@ -17,7 +17,7 @@
 #include <fizz/protocol/ech/test/TestUtil.h>
 #include <fizz/protocol/test/Mocks.h>
 #include <fizz/protocol/test/ProtocolTest.h>
-#include <fizz/protocol/test/TestMessages.h>
+#include <fizz/protocol/test/TestUtil.h>
 #include <fizz/record/Extensions.h>
 #include <fizz/record/test/Mocks.h>
 #include <fizz/server/ServerProtocol.h>

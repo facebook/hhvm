@@ -14,7 +14,7 @@
 #include <fizz/extensions/exportedauth/ExportedAuthenticator.h>
 #include <fizz/protocol/DefaultFactory.h>
 #include <fizz/protocol/test/Mocks.h>
-#include <fizz/protocol/test/TestMessages.h>
+#include <fizz/protocol/test/TestUtil.h>
 #include <fizz/record/Extensions.h>
 #include <fizz/record/Types.h>
 #include <folly/String.h>

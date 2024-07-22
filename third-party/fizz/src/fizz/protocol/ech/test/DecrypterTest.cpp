@@ -13,7 +13,7 @@
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/protocol/ech/Decrypter.h>
 #include <fizz/protocol/ech/test/TestUtil.h>
-#include <fizz/protocol/test/TestMessages.h>
+#include <fizz/protocol/test/TestUtil.h>
 
 using namespace fizz::test;
 

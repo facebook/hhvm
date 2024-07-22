@@ -9,12 +9,13 @@
 #pragma once
 
 #include <fizz/protocol/Params.h>
-#include <fizz/protocol/test/ProtocolTest.h>
 #include <fizz/record/Extensions.h>
 #include <fizz/record/Types.h>
 
 namespace fizz {
 namespace test {
+
+constexpr ProtocolVersion TestProtocolVersion = ProtocolVersion::tls_1_3;
 
 struct TestMessages {
   template <typename T>

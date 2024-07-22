@@ -19,8 +19,6 @@
 namespace fizz {
 namespace test {
 
-constexpr ProtocolVersion TestProtocolVersion = ProtocolVersion::tls_1_3;
-
 template <typename SM, typename Actions>
 class ProtocolTest : public testing::Test {
  protected:

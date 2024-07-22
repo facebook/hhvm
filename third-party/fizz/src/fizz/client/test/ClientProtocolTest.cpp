@@ -21,7 +21,7 @@
 #include <fizz/protocol/ech/test/TestUtil.h>
 #include <fizz/protocol/test/Matchers.h>
 #include <fizz/protocol/test/ProtocolTest.h>
-#include <fizz/protocol/test/TestMessages.h>
+#include <fizz/protocol/test/TestUtil.h>
 #include <fizz/record/test/Mocks.h>
 
 using namespace fizz::test;

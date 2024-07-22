@@ -17,8 +17,9 @@
 #include <fizz/crypto/hpke/Utils.h>
 #include <fizz/protocol/ech/Encryption.h>
 #include <fizz/protocol/ech/test/TestUtil.h>
+#include <fizz/protocol/test/Matchers.h>
 #include <fizz/protocol/test/Mocks.h>
-#include <fizz/protocol/test/TestMessages.h>
+#include <fizz/protocol/test/TestUtil.h>
 #include <fizz/record/Extensions.h>
 #include <folly/lang/Bits.h>
 

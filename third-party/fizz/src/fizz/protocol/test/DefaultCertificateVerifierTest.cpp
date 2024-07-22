@@ -9,7 +9,7 @@
 #include <folly/portability/GTest.h>
 
 #include <fizz/protocol/DefaultCertificateVerifier.h>
-#include <fizz/protocol/test/Utilities.h>
+#include <fizz/protocol/test/CertUtil.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 
 namespace fizz {

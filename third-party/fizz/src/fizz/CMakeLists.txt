@@ -369,26 +369,11 @@ add_library(fizz_test_support
   crypto/aead/test/TestUtil.cpp
   crypto/test/TestUtil.cpp
   protocol/ech/test/TestUtil.cpp
-  ${FIZZ_TEST_HEADERS}
 )
 
 target_link_libraries(fizz_test_support
   PUBLIC
     fizz
-    ${LIBGMOCK_LIBRARIES}
-    ${GLOG_LIBRARY}
-)
-
-target_compile_definitions(fizz_test_support
-  PUBLIC
-    ${LIBGMOCK_DEFINES}
-)
-
-target_include_directories(fizz_test_support
-  SYSTEM
-  PUBLIC
-    ${LIBGMOCK_INCLUDE_DIR}
-    ${LIBGTEST_INCLUDE_DIRS}
 )
 
 # export fizz headers and targets for unit tests utils

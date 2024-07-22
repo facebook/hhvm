@@ -13,9 +13,10 @@
 #include <fizz/server/CookieTypes.h>
 
 #include <fizz/crypto/test/TestUtil.h>
-#include <fizz/protocol/test/TestMessages.h>
+#include <fizz/protocol/test/TestUtil.h>
 
 using namespace fizz::test;
+using namespace testing;
 
 static constexpr folly::StringPiece secret{
     "c44ed3fb98c179579036d201735f43af20a856470b9c527fe07f01f3a2a0bde9"};

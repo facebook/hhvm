@@ -10,8 +10,8 @@
 
 #include <fizz/compression/ZlibCertificateCompressor.h>
 #include <fizz/compression/ZlibCertificateDecompressor.h>
+#include <fizz/protocol/test/CertUtil.h>
 #include <fizz/protocol/test/Matchers.h>
-#include <fizz/protocol/test/Utilities.h>
 #include <fizz/record/Extensions.h>
 
 using namespace folly;

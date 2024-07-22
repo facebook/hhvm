@@ -538,7 +538,7 @@ uint32_t LazyFoo::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field3", apache::thrift::protocol::T_LIST, 3);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += (__fbthrift_serializedData_.field3).computeChainDataLength();
           goto written_lazy_field_field3;
@@ -553,7 +553,7 @@ uint32_t LazyFoo::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field4", apache::thrift::protocol::T_LIST, 4);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += (*__fbthrift_serializedData_.field4).computeChainDataLength();
           goto written_lazy_field_field4;
@@ -584,7 +584,7 @@ uint32_t LazyFoo::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field3", apache::thrift::protocol::T_LIST, 3);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           goto written_lazy_field_field3;
         }
@@ -598,7 +598,7 @@ uint32_t LazyFoo::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field4", apache::thrift::protocol::T_LIST, 4);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           goto written_lazy_field_field4;
         }
@@ -639,7 +639,7 @@ uint32_t LazyFoo::write(Protocol_* prot_) const {
     indexWriter.recordFieldStart();
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += prot_->writeRaw(__fbthrift_serializedData_.field3);
           goto written_lazy_field_field3;
@@ -659,7 +659,7 @@ uint32_t LazyFoo::write(Protocol_* prot_) const {
     indexWriter.recordFieldStart();
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += prot_->writeRaw(*__fbthrift_serializedData_.field4);
           goto written_lazy_field_field4;
@@ -1149,7 +1149,7 @@ uint32_t OptionalLazyFoo::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field3", apache::thrift::protocol::T_LIST, 3);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += (__fbthrift_serializedData_.field3).computeChainDataLength();
           goto written_lazy_field_field3;
@@ -1164,7 +1164,7 @@ uint32_t OptionalLazyFoo::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field4", apache::thrift::protocol::T_LIST, 4);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += (__fbthrift_serializedData_.field4).computeChainDataLength();
           goto written_lazy_field_field4;
@@ -1195,7 +1195,7 @@ uint32_t OptionalLazyFoo::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field3", apache::thrift::protocol::T_LIST, 3);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           goto written_lazy_field_field3;
         }
@@ -1209,7 +1209,7 @@ uint32_t OptionalLazyFoo::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field4", apache::thrift::protocol::T_LIST, 4);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           goto written_lazy_field_field4;
         }
@@ -1254,7 +1254,7 @@ uint32_t OptionalLazyFoo::write(Protocol_* prot_) const {
     indexWriter.recordFieldStart();
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += prot_->writeRaw(__fbthrift_serializedData_.field3);
           goto written_lazy_field_field3;
@@ -1276,7 +1276,7 @@ uint32_t OptionalLazyFoo::write(Protocol_* prot_) const {
     indexWriter.recordFieldStart();
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += prot_->writeRaw(__fbthrift_serializedData_.field4);
           goto written_lazy_field_field4;
@@ -1520,7 +1520,7 @@ uint32_t OptionalBoxedLazyFoo::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field3", apache::thrift::protocol::T_LIST, 3);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += (__fbthrift_serializedData_.field3).computeChainDataLength();
           goto written_lazy_field_field3;
@@ -1536,7 +1536,7 @@ uint32_t OptionalBoxedLazyFoo::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field4", apache::thrift::protocol::T_LIST, 4);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += (__fbthrift_serializedData_.field4).computeChainDataLength();
           goto written_lazy_field_field4;
@@ -1568,7 +1568,7 @@ uint32_t OptionalBoxedLazyFoo::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field3", apache::thrift::protocol::T_LIST, 3);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           goto written_lazy_field_field3;
         }
@@ -1583,7 +1583,7 @@ uint32_t OptionalBoxedLazyFoo::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field4", apache::thrift::protocol::T_LIST, 4);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           goto written_lazy_field_field4;
         }
@@ -1629,7 +1629,7 @@ uint32_t OptionalBoxedLazyFoo::write(Protocol_* prot_) const {
     indexWriter.recordFieldStart();
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += prot_->writeRaw(__fbthrift_serializedData_.field3);
           goto written_lazy_field_field3;
@@ -1652,7 +1652,7 @@ uint32_t OptionalBoxedLazyFoo::write(Protocol_* prot_) const {
     indexWriter.recordFieldStart();
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += prot_->writeRaw(__fbthrift_serializedData_.field4);
           goto written_lazy_field_field4;
@@ -1934,7 +1934,7 @@ uint32_t LazyCppRef::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field1", apache::thrift::protocol::T_LIST, 1);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field1.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += (__fbthrift_serializedData_.field1).computeChainDataLength();
           goto written_lazy_field_field1;
@@ -1950,7 +1950,7 @@ uint32_t LazyCppRef::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field2", apache::thrift::protocol::T_LIST, 2);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field2.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += (__fbthrift_serializedData_.field2).computeChainDataLength();
           goto written_lazy_field_field2;
@@ -1966,7 +1966,7 @@ uint32_t LazyCppRef::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field3", apache::thrift::protocol::T_LIST, 3);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += (__fbthrift_serializedData_.field3).computeChainDataLength();
           goto written_lazy_field_field3;
@@ -1981,7 +1981,7 @@ uint32_t LazyCppRef::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field4", apache::thrift::protocol::T_LIST, 4);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += (__fbthrift_serializedData_.field4).computeChainDataLength();
           goto written_lazy_field_field4;
@@ -2010,7 +2010,7 @@ uint32_t LazyCppRef::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field1", apache::thrift::protocol::T_LIST, 1);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field1.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           goto written_lazy_field_field1;
         }
@@ -2025,7 +2025,7 @@ uint32_t LazyCppRef::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field2", apache::thrift::protocol::T_LIST, 2);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field2.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           goto written_lazy_field_field2;
         }
@@ -2040,7 +2040,7 @@ uint32_t LazyCppRef::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field3", apache::thrift::protocol::T_LIST, 3);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           goto written_lazy_field_field3;
         }
@@ -2054,7 +2054,7 @@ uint32_t LazyCppRef::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("field4", apache::thrift::protocol::T_LIST, 4);
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           goto written_lazy_field_field4;
         }
@@ -2087,7 +2087,7 @@ uint32_t LazyCppRef::write(Protocol_* prot_) const {
     indexWriter.recordFieldStart();
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field1.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += prot_->writeRaw(__fbthrift_serializedData_.field1);
           goto written_lazy_field_field1;
@@ -2110,7 +2110,7 @@ uint32_t LazyCppRef::write(Protocol_* prot_) const {
     indexWriter.recordFieldStart();
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field2.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += prot_->writeRaw(__fbthrift_serializedData_.field2);
           goto written_lazy_field_field2;
@@ -2133,7 +2133,7 @@ uint32_t LazyCppRef::write(Protocol_* prot_) const {
     indexWriter.recordFieldStart();
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += prot_->writeRaw(__fbthrift_serializedData_.field3);
           goto written_lazy_field_field3;
@@ -2155,7 +2155,7 @@ uint32_t LazyCppRef::write(Protocol_* prot_) const {
     indexWriter.recordFieldStart();
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
         if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
           xfer += prot_->writeRaw(__fbthrift_serializedData_.field4);
           goto written_lazy_field_field4;

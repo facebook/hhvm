@@ -37,7 +37,7 @@ const {{field:cpp_storage_type}}& {{struct:cpp_underlying_name}}::__fbthrift_rea
 }
 
 void {{struct:cpp_underlying_name}}::__fbthrift_read_field_{{field:cpp_name}}_slow() const {
-  auto lock = folly::make_unique_lock(__fbthrift_deserializationMutex_);
+  auto lock = std::unique_lock(__fbthrift_deserializationMutex_);
   if (__fbthrift_isDeserialized_.{{field:cpp_name}} & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) {
     return;
   }

@@ -200,7 +200,7 @@ TerseLazyFoo::TerseLazyFoo(const TerseLazyFoo& srcObj) :
     __fbthrift_field_field4(srcObj.__fbthrift_field_field4),
     __isset(srcObj.__isset) {
   const auto relaxed = std::memory_order_relaxed;
-  auto lock = folly::make_shared_lock(srcObj.__fbthrift_deserializationMutex_);
+  auto lock = std::shared_lock(srcObj.__fbthrift_deserializationMutex_);
   __fbthrift_protocol_ = srcObj.__fbthrift_protocol_;
   {
     const auto isDeserialized = srcObj.__fbthrift_isDeserialized_.field3.load(relaxed);
@@ -301,7 +301,7 @@ const ::std::vector<double>& TerseLazyFoo::__fbthrift_read_field_field3() const 
 }
 
 void TerseLazyFoo::__fbthrift_read_field_field3_slow() const {
-  auto lock = folly::make_unique_lock(__fbthrift_deserializationMutex_);
+  auto lock = std::unique_lock(__fbthrift_deserializationMutex_);
   if (__fbthrift_isDeserialized_.field3 & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) {
     return;
   }
@@ -338,7 +338,7 @@ const ::std::vector<::std::int32_t>& TerseLazyFoo::__fbthrift_read_field_field4(
 }
 
 void TerseLazyFoo::__fbthrift_read_field_field4_slow() const {
-  auto lock = folly::make_unique_lock(__fbthrift_deserializationMutex_);
+  auto lock = std::unique_lock(__fbthrift_deserializationMutex_);
   if (__fbthrift_isDeserialized_.field4 & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) {
     return;
   }
@@ -618,7 +618,7 @@ TerseOptionalLazyFoo::TerseOptionalLazyFoo(const TerseOptionalLazyFoo& srcObj) :
     __fbthrift_field_field4(srcObj.__fbthrift_field_field4),
     __isset(srcObj.__isset) {
   const auto relaxed = std::memory_order_relaxed;
-  auto lock = folly::make_shared_lock(srcObj.__fbthrift_deserializationMutex_);
+  auto lock = std::shared_lock(srcObj.__fbthrift_deserializationMutex_);
   __fbthrift_protocol_ = srcObj.__fbthrift_protocol_;
   {
     const auto isDeserialized = srcObj.__fbthrift_isDeserialized_.field3.load(relaxed);
@@ -719,7 +719,7 @@ const ::std::vector<double>& TerseOptionalLazyFoo::__fbthrift_read_field_field3(
 }
 
 void TerseOptionalLazyFoo::__fbthrift_read_field_field3_slow() const {
-  auto lock = folly::make_unique_lock(__fbthrift_deserializationMutex_);
+  auto lock = std::unique_lock(__fbthrift_deserializationMutex_);
   if (__fbthrift_isDeserialized_.field3 & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) {
     return;
   }
@@ -756,7 +756,7 @@ const ::std::vector<::std::int32_t>& TerseOptionalLazyFoo::__fbthrift_read_field
 }
 
 void TerseOptionalLazyFoo::__fbthrift_read_field_field4_slow() const {
-  auto lock = folly::make_unique_lock(__fbthrift_deserializationMutex_);
+  auto lock = std::unique_lock(__fbthrift_deserializationMutex_);
   if (__fbthrift_isDeserialized_.field4 & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) {
     return;
   }

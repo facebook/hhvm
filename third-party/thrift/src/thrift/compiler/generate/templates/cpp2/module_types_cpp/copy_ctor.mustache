@@ -39,7 +39,7 @@
 }}{{/struct:isset_fields?}} {
 {{#struct:lazy_fields?}}
   const auto relaxed = std::memory_order_relaxed;
-  auto lock = folly::make_shared_lock(srcObj.__fbthrift_deserializationMutex_);
+  auto lock = std::shared_lock(srcObj.__fbthrift_deserializationMutex_);
   __fbthrift_protocol_ = srcObj.__fbthrift_protocol_;
 {{/struct:lazy_fields?}}
 {{#struct:fields}}

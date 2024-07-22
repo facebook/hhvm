@@ -646,7 +646,6 @@ let mark_members_declared_in_depgraph env (c : _ Aast.class_) =
     c_xhp_category = _;
     c_reqs = _;
     c_implements = _;
-    c_where_constraints = _;
     c_consts;
     c_typeconsts;
     c_vars;

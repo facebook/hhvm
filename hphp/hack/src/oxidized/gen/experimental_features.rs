@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<00ae468c85769b08910fd84143ca6a89>>
+// @generated SignedSource<<b045ad5706408666d2bda3c884960ead>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -80,7 +80,6 @@ arena_deserializer::impl_deserialize_in_arena!(FeatureStatus);
 #[repr(u8)]
 pub enum FeatureName {
     UnionIntersectionTypeHints,
-    ClassLevelWhere,
     ExpressionTrees,
     Readonly,
     ModuleReferences,

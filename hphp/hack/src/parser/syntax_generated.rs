@@ -427,7 +427,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_classish_declaration(_: &C, classish_attribute: Self, classish_modifiers: Self, classish_xhp: Self, classish_keyword: Self, classish_name: Self, classish_type_parameters: Self, classish_extends_keyword: Self, classish_extends_list: Self, classish_implements_keyword: Self, classish_implements_list: Self, classish_where_clause: Self, classish_body: Self) -> Self {
+    fn make_classish_declaration(_: &C, classish_attribute: Self, classish_modifiers: Self, classish_xhp: Self, classish_keyword: Self, classish_name: Self, classish_type_parameters: Self, classish_extends_keyword: Self, classish_extends_list: Self, classish_implements_keyword: Self, classish_implements_list: Self, classish_body: Self) -> Self {
         let syntax = SyntaxVariant::ClassishDeclaration(Box::new(ClassishDeclarationChildren {
             classish_attribute,
             classish_modifiers,
@@ -439,7 +439,6 @@ where
             classish_extends_list,
             classish_implements_keyword,
             classish_implements_list,
-            classish_where_clause,
             classish_body,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
@@ -2346,7 +2345,7 @@ where
                 acc
             },
             SyntaxVariant::ClassishDeclaration(x) => {
-                let ClassishDeclarationChildren { classish_attribute, classish_modifiers, classish_xhp, classish_keyword, classish_name, classish_type_parameters, classish_extends_keyword, classish_extends_list, classish_implements_keyword, classish_implements_list, classish_where_clause, classish_body } = *x;
+                let ClassishDeclarationChildren { classish_attribute, classish_modifiers, classish_xhp, classish_keyword, classish_name, classish_type_parameters, classish_extends_keyword, classish_extends_list, classish_implements_keyword, classish_implements_list, classish_body } = *x;
                 let acc = f(classish_attribute, acc);
                 let acc = f(classish_modifiers, acc);
                 let acc = f(classish_xhp, acc);
@@ -2357,7 +2356,6 @@ where
                 let acc = f(classish_extends_list, acc);
                 let acc = f(classish_implements_keyword, acc);
                 let acc = f(classish_implements_list, acc);
-                let acc = f(classish_where_clause, acc);
                 let acc = f(classish_body, acc);
                 acc
             },
@@ -3961,9 +3959,8 @@ where
                  methodish_trait_attribute: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ClassishDeclaration, 12) => SyntaxVariant::ClassishDeclaration(Box::new(ClassishDeclarationChildren {
+             (SyntaxKind::ClassishDeclaration, 11) => SyntaxVariant::ClassishDeclaration(Box::new(ClassishDeclarationChildren {
                  classish_body: ts.pop().unwrap(),
-                 classish_where_clause: ts.pop().unwrap(),
                  classish_implements_list: ts.pop().unwrap(),
                  classish_implements_keyword: ts.pop().unwrap(),
                  classish_extends_list: ts.pop().unwrap(),
@@ -5021,7 +5018,7 @@ where
             SyntaxVariant::WhereConstraint(x) => unsafe { std::slice::from_raw_parts(&x.where_constraint_left_type, 3) },
             SyntaxVariant::MethodishDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.methodish_attribute, 4) },
             SyntaxVariant::MethodishTraitResolution(x) => unsafe { std::slice::from_raw_parts(&x.methodish_trait_attribute, 5) },
-            SyntaxVariant::ClassishDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.classish_attribute, 12) },
+            SyntaxVariant::ClassishDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.classish_attribute, 11) },
             SyntaxVariant::ClassishBody(x) => unsafe { std::slice::from_raw_parts(&x.classish_body_left_brace, 3) },
             SyntaxVariant::TraitUse(x) => unsafe { std::slice::from_raw_parts(&x.trait_use_keyword, 3) },
             SyntaxVariant::RequireClause(x) => unsafe { std::slice::from_raw_parts(&x.require_keyword, 4) },
@@ -5212,7 +5209,7 @@ where
             SyntaxVariant::WhereConstraint(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.where_constraint_left_type, 3) },
             SyntaxVariant::MethodishDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.methodish_attribute, 4) },
             SyntaxVariant::MethodishTraitResolution(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.methodish_trait_attribute, 5) },
-            SyntaxVariant::ClassishDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.classish_attribute, 12) },
+            SyntaxVariant::ClassishDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.classish_attribute, 11) },
             SyntaxVariant::ClassishBody(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.classish_body_left_brace, 3) },
             SyntaxVariant::TraitUse(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.trait_use_keyword, 3) },
             SyntaxVariant::RequireClause(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.require_keyword, 4) },
@@ -5703,7 +5700,6 @@ pub struct ClassishDeclarationChildren<T, V> {
     pub classish_extends_list: Syntax<T, V>,
     pub classish_implements_keyword: Syntax<T, V>,
     pub classish_implements_list: Syntax<T, V>,
-    pub classish_where_clause: Syntax<T, V>,
     pub classish_body: Syntax<T, V>,
 }
 
@@ -7577,7 +7573,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ClassishDeclaration(x) => {
-                get_index(12).and_then(|index| { match index {
+                get_index(11).and_then(|index| { match index {
                         0 => Some(&x.classish_attribute),
                     1 => Some(&x.classish_modifiers),
                     2 => Some(&x.classish_xhp),
@@ -7588,8 +7584,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     7 => Some(&x.classish_extends_list),
                     8 => Some(&x.classish_implements_keyword),
                     9 => Some(&x.classish_implements_list),
-                    10 => Some(&x.classish_where_clause),
-                    11 => Some(&x.classish_body),
+                    10 => Some(&x.classish_body),
                         _ => None,
                     }
                 })

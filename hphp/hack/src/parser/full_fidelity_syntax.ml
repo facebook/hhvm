@@ -1150,7 +1150,6 @@ module WithToken (Token : TokenType) = struct
             classish_extends_list;
             classish_implements_keyword;
             classish_implements_list;
-            classish_where_clause;
             classish_body;
           } ->
         let acc = f acc classish_attribute in
@@ -1163,7 +1162,6 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc classish_extends_list in
         let acc = f acc classish_implements_keyword in
         let acc = f acc classish_implements_list in
-        let acc = f acc classish_where_clause in
         let acc = f acc classish_body in
         acc
       | ClassishBody
@@ -3004,7 +3002,6 @@ module WithToken (Token : TokenType) = struct
             classish_extends_list;
             classish_implements_keyword;
             classish_implements_list;
-            classish_where_clause;
             classish_body;
           } ->
         [
@@ -3018,7 +3015,6 @@ module WithToken (Token : TokenType) = struct
           classish_extends_list;
           classish_implements_keyword;
           classish_implements_list;
-          classish_where_clause;
           classish_body;
         ]
       | ClassishBody
@@ -4779,7 +4775,6 @@ module WithToken (Token : TokenType) = struct
             classish_extends_list;
             classish_implements_keyword;
             classish_implements_list;
-            classish_where_clause;
             classish_body;
           } ->
         [
@@ -4793,7 +4788,6 @@ module WithToken (Token : TokenType) = struct
           "classish_extends_list";
           "classish_implements_keyword";
           "classish_implements_list";
-          "classish_where_clause";
           "classish_body";
         ]
       | ClassishBody
@@ -6688,7 +6682,6 @@ module WithToken (Token : TokenType) = struct
             classish_extends_list;
             classish_implements_keyword;
             classish_implements_list;
-            classish_where_clause;
             classish_body;
           ] ) ->
         ClassishDeclaration
@@ -6703,7 +6696,6 @@ module WithToken (Token : TokenType) = struct
             classish_extends_list;
             classish_implements_keyword;
             classish_implements_list;
-            classish_where_clause;
             classish_body;
           }
       | ( SyntaxKind.ClassishBody,
@@ -8791,7 +8783,6 @@ module WithToken (Token : TokenType) = struct
           classish_extends_list
           classish_implements_keyword
           classish_implements_list
-          classish_where_clause
           classish_body =
         let syntax =
           ClassishDeclaration
@@ -8806,7 +8797,6 @@ module WithToken (Token : TokenType) = struct
               classish_extends_list;
               classish_implements_keyword;
               classish_implements_list;
-              classish_where_clause;
               classish_body;
             }
         in

@@ -182,8 +182,8 @@ where S: SmartConstructors<State = St>,
     fn make_methodish_trait_resolution(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
         compose(SyntaxKind::MethodishTraitResolution, self.s.make_methodish_trait_resolution(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }
-    fn make_classish_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output, arg7 : Self::Output, arg8 : Self::Output, arg9 : Self::Output, arg10 : Self::Output, arg11 : Self::Output) -> Self::Output {
-        compose(SyntaxKind::ClassishDeclaration, self.s.make_classish_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1, arg8.1, arg9.1, arg10.1, arg11.1))
+    fn make_classish_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output, arg7 : Self::Output, arg8 : Self::Output, arg9 : Self::Output, arg10 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::ClassishDeclaration, self.s.make_classish_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1, arg8.1, arg9.1, arg10.1))
     }
     fn make_classish_body(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output) -> Self::Output {
         compose(SyntaxKind::ClassishBody, self.s.make_classish_body(arg0.1, arg1.1, arg2.1))

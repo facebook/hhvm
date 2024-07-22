@@ -294,7 +294,6 @@ fn get_class_impl(class: &ShallowClass<'_>) -> ExtDeclClass {
 
         // Special Params
         tparams: get_typed_params(class.tparams),
-        where_constraints: get_where_contraints(class.where_constraints),
 
         // Implementation
         extends: extract_type_name_vec(class.extends),
@@ -692,6 +691,7 @@ fn extract_type_name_opt(t: Option<&Ty<'_>>) -> String {
 }
 
 fn extract_type_name(t: &Ty<'_>) -> String {
+    #[allow(suspicious_double_ref_op)]
     let converted_ty: ty::decl::Ty<BReason> = (&t).clone().into();
     converted_ty.to_string()
 }

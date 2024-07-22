@@ -38,7 +38,6 @@ use crate::decl::ty::Ty;
 use crate::decl::ty::Typeconst;
 use crate::decl::ty::TypedefType;
 use crate::decl::ty::UserAttribute;
-use crate::decl::ty::WhereConstraint;
 use crate::decl::ty::XhpAttribute;
 use crate::decl::ty::XhpEnumValue;
 use crate::reason::Reason;
@@ -162,7 +161,6 @@ pub struct ShallowClass<R: Reason> {
     pub module: Option<Positioned<ModuleName, R::Pos>>,
     pub name: Positioned<TypeName, R::Pos>,
     pub tparams: Box<[Tparam<R, Ty<R>>]>,
-    pub where_constraints: Box<[WhereConstraint<Ty<R>>]>,
     pub extends: Box<[Ty<R>]>,
     pub uses: Box<[Ty<R>]>,
     pub xhp_attr_uses: Box<[Ty<R>]>,
@@ -188,7 +186,7 @@ pub struct ShallowClass<R: Reason> {
 
 walkable!(ShallowClass<R> as visit_shallow_class => [
     mode, is_final, is_abstract, is_xhp, is_internal, has_xhp_keyword, kind,
-    module, name, tparams, where_constraints, extends, uses, xhp_attr_uses,
+    module, name, tparams, extends, uses, xhp_attr_uses,
     xhp_enum_values, req_extends, req_implements, req_class, implements,
     support_dynamic_type, consts, typeconsts, props, static_props, constructor,
     static_methods, methods, user_attributes, enum_type, docs_url, package_override,

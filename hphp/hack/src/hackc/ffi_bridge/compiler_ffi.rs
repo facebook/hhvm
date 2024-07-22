@@ -285,7 +285,6 @@ mod ffi {
 
         // Special Params
         tparams: Vec<ExtDeclTparam>,
-        where_constraints: Vec<ExtDeclTypeConstraint>,
         xhp_attr_uses: Vec<String>,
 
         // Implementation
@@ -579,6 +578,7 @@ fn compile_from_text(env: &ffi::NativeEnv, source_text: &[u8]) -> Result<Vec<u8>
     let decl_allocator = bumpalo::Bump::new();
 
     let external_decl_provider: Option<Arc<dyn DeclProvider<'_> + '_>> = if env.decl_provider != 0 {
+        #[allow(clippy::arc_with_non_send_sync)]
         Some(Arc::new(ExternalDeclProvider::new(
             env.decl_provider as *const c_void,
             &decl_allocator,
@@ -691,6 +691,7 @@ fn compile_unit_from_text(
 
     let decl_allocator = bumpalo::Bump::new();
     let external_decl_provider: Option<Arc<dyn DeclProvider<'_> + '_>> = if env.decl_provider != 0 {
+        #[allow(clippy::arc_with_non_send_sync)]
         Some(Arc::new(ExternalDeclProvider::new(
             env.decl_provider as *const c_void,
             &decl_allocator,

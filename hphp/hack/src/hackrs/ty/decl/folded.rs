@@ -37,7 +37,6 @@ use crate::decl::EnumType;
 use crate::decl::Tparam;
 use crate::decl::Ty;
 use crate::decl::Typeconst;
-use crate::decl::WhereConstraint;
 use crate::decl::XhpAttribute;
 use crate::decl_error::DeclError;
 use crate::reason::Reason;
@@ -197,7 +196,6 @@ pub struct FoldedClass<R: Reason> {
     pub module: Option<Positioned<ModuleName, R::Pos>>,
     pub is_module_level_trait: bool,
     pub tparams: Box<[Tparam<R, Ty<R>>]>,
-    pub where_constraints: Box<[WhereConstraint<Ty<R>>]>,
     pub substs: IndexMap<TypeName, SubstContext<R>>,
     pub ancestors: IndexMap<TypeName, Ty<R>>,
     pub props: IndexMap<PropName, FoldedElement>,

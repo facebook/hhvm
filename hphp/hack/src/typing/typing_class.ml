@@ -17,7 +17,6 @@ module Env = Typing_env
 module MakeType = Typing_make_type
 module Type = Typing_ops
 module Phase = Typing_phase
-module Subst = Decl_subst
 module EnvFromDef = Typing_env_from_def
 module TUtils = Typing_utils
 module TCO = TypecheckerOptions
@@ -1382,43 +1381,6 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
       Aast.cv_readonly = cv.cv_readonly;
     } )
 
-(** Check the where constraints of the parents of a class *)
-let check_class_parents_where_constraints env pc impl =
-  let check_where_constraints env ((p, _hint), decl_ty) =
-    let ((env, ty_err_opt1), locl_ty) =
-      Phase.localize_no_subst env ~ignore_errors:false decl_ty
-    in
-    Option.iter ty_err_opt1 ~f:(Typing_error_utils.add_typing_error ~env);
-    match get_node (TUtils.get_base_type env locl_ty) with
-    | Tclass (cls, _, tyl) ->
-      (match Env.get_class env (snd cls) with
-      | Decl_entry.Found cls
-        when not (List.is_empty (Cls.where_constraints cls)) ->
-        let tc_tparams = Cls.tparams cls in
-        let ety_env =
-          {
-            (empty_expand_env_with_on_error
-               (Env.unify_error_assert_primary_pos_in_current_decl env))
-            with
-            substs = Subst.make_locl tc_tparams tyl;
-          }
-        in
-        let (env, ty_err_opt2) =
-          Phase.check_where_constraints
-            ~in_class:true
-            ~use_pos:pc
-            ~definition_pos:(Pos_or_decl.of_raw_pos p)
-            ~ety_env
-            env
-            (Cls.where_constraints cls)
-        in
-        Option.iter ty_err_opt2 ~f:(Typing_error_utils.add_typing_error ~env);
-        env
-      | _ -> env)
-    | _ -> env
-  in
-  List.fold impl ~init:env ~f:check_where_constraints
-
 (** Any class that extends a class or implements an interface
     that declares `<<__SupportDynamicType>>` must itself declare
     `<<__SupportDynamicType>>`. This is checked elsewhere. But if any generic
@@ -1625,8 +1587,7 @@ let check_sealed env c =
   let is_enum = is_enum_or_enum_class c.c_kind in
   sealed_subtype (Env.get_ctx env) c ~is_enum ~hard_error ~env
 
-let check_class_where_require_class_constraints env c tc =
-  let (pc, _) = c.c_name in
+let check_class_where_require_class_constraints env c =
   let req_class_constraints =
     List.filter_map c.c_reqs ~f:(fun req ->
         match req with
@@ -1640,21 +1601,9 @@ let check_class_where_require_class_constraints env c tc =
       env
       ~ignore_errors:false
       c.c_tparams
-      (c.c_where_constraints @ req_class_constraints)
+      req_class_constraints
   in
   Option.iter ty_err_opt1 ~f:(Typing_error_utils.add_typing_error ~env);
-  let (env, ty_err_opt2) =
-    Phase.check_where_constraints
-      ~in_class:true
-      ~use_pos:pc
-      ~definition_pos:(Pos_or_decl.of_raw_pos pc)
-      ~ety_env:
-        (empty_expand_env_with_on_error
-           (Env.unify_error_assert_primary_pos_in_current_decl env))
-      env
-      (Cls.where_constraints tc)
-  in
-  Option.iter ty_err_opt2 ~f:(Typing_error_utils.add_typing_error ~env);
   env
 
 type class_parents = {
@@ -1746,21 +1695,16 @@ let check_class_attributes env ~cls =
   (env, (user_attributes, file_attrs))
 
 (** Check type parameter definition, including variance, and add constraints to the environment. *)
-let check_class_type_parameters_add_constraints env c tc =
-  let env = check_class_where_require_class_constraints env c tc in
+let check_class_type_parameters_add_constraints env c =
+  let env = check_class_where_require_class_constraints env c in
   Typing_variance.class_def env c;
   env
 
 (** Check wellformedness of all type hints in the class. *)
 let check_hint_wellformedness_in_class env c parents =
-  let { extends; implements; uses; _ } = parents in
-  let (pc, _) = c.c_name in
   check_parents_are_tapply_add_constructor_deps env c parents;
   List.iter ~f:(Typing_error_utils.add_typing_error ~env)
   @@ Typing_type_wellformedness.class_ env c;
-  let env =
-    check_class_parents_where_constraints env pc (extends @ implements @ uses)
-  in
   env
 
 (** Perform all class wellformedness checks which don't involve the hierarchy:
@@ -1780,7 +1724,7 @@ let class_wellformedness_checks env c tc (parents : class_parents) =
     Env.run_with_no_self env (check_class_attributes ~cls:c)
   in
   NastInitCheck.class_ env c;
-  let env = check_class_type_parameters_add_constraints env c tc in
+  let env = check_class_type_parameters_add_constraints env c in
   let env = check_hint_wellformedness_in_class env c parents in
   check_no_generic_static_property env tc;
   (env, user_attributes, file_attrs)
@@ -1947,7 +1891,6 @@ let class_def_ env c tc =
       Aast.c_xhp_category = c.c_xhp_category;
       Aast.c_reqs = c.c_reqs;
       Aast.c_implements = c.c_implements;
-      Aast.c_where_constraints = c.c_where_constraints;
       Aast.c_consts = typed_consts;
       Aast.c_typeconsts = typed_typeconsts;
       Aast.c_vars = typed_static_vars @ typed_vars;
@@ -2015,7 +1958,7 @@ let make_class_member_standalone_check_env ctx class_ =
   let name = Ast_defs.get_id class_.c_name in
   let open Option in
   Env.get_class env name |> Decl_entry.to_option >>| fun cls ->
-  let env = check_class_type_parameters_add_constraints env class_ cls in
+  let env = check_class_type_parameters_add_constraints env class_ in
   (env, { env; cls; class_ })
 
 let method_def_standalone standalone_env method_name =

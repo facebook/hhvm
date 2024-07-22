@@ -176,8 +176,6 @@ struct
       dc_req_ancestors_extends = dc.dc_req_ancestors_extends;
       dc_req_class_ancestors = List.map dc.dc_req_class_ancestors ~f:requirement;
       dc_tparams = List.map dc.dc_tparams ~f:type_param;
-      dc_where_constraints =
-        List.map dc.dc_where_constraints ~f:where_constraint;
       dc_substs =
         SMap.map
           begin
@@ -239,8 +237,6 @@ struct
       sc_module = sc.sc_module;
       sc_name = positioned_id sc.sc_name;
       sc_tparams = List.map sc.sc_tparams ~f:type_param;
-      sc_where_constraints =
-        List.map sc.sc_where_constraints ~f:where_constraint;
       sc_extends = List.map sc.sc_extends ~f:ty;
       sc_uses = List.map sc.sc_uses ~f:ty;
       sc_xhp_attr_uses = List.map sc.sc_xhp_attr_uses ~f:ty;

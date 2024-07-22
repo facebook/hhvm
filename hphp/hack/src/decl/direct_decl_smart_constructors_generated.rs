@@ -210,8 +210,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_methodish_trait_resolution(self, attribute, function_decl_header, equal, name, semicolon)
     }
 
-    fn make_classish_declaration(&mut self, attribute: Self::Output, modifiers: Self::Output, xhp: Self::Output, keyword: Self::Output, name: Self::Output, type_parameters: Self::Output, extends_keyword: Self::Output, extends_list: Self::Output, implements_keyword: Self::Output, implements_list: Self::Output, where_clause: Self::Output, body: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_classish_declaration(self, attribute, modifiers, xhp, keyword, name, type_parameters, extends_keyword, extends_list, implements_keyword, implements_list, where_clause, body)
+    fn make_classish_declaration(&mut self, attribute: Self::Output, modifiers: Self::Output, xhp: Self::Output, keyword: Self::Output, name: Self::Output, type_parameters: Self::Output, extends_keyword: Self::Output, extends_list: Self::Output, implements_keyword: Self::Output, implements_list: Self::Output, body: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_classish_declaration(self, attribute, modifiers, xhp, keyword, name, type_parameters, extends_keyword, extends_list, implements_keyword, implements_list, body)
     }
 
     fn make_classish_body(&mut self, left_brace: Self::Output, elements: Self::Output, right_brace: Self::Output) -> Self::Output {

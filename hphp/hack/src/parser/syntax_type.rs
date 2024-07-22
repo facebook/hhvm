@@ -56,7 +56,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_where_constraint(ctx: &C, where_constraint_left_type: Self, where_constraint_operator: Self, where_constraint_right_type: Self) -> Self;
     fn make_methodish_declaration(ctx: &C, methodish_attribute: Self, methodish_function_decl_header: Self, methodish_function_body: Self, methodish_semicolon: Self) -> Self;
     fn make_methodish_trait_resolution(ctx: &C, methodish_trait_attribute: Self, methodish_trait_function_decl_header: Self, methodish_trait_equal: Self, methodish_trait_name: Self, methodish_trait_semicolon: Self) -> Self;
-    fn make_classish_declaration(ctx: &C, classish_attribute: Self, classish_modifiers: Self, classish_xhp: Self, classish_keyword: Self, classish_name: Self, classish_type_parameters: Self, classish_extends_keyword: Self, classish_extends_list: Self, classish_implements_keyword: Self, classish_implements_list: Self, classish_where_clause: Self, classish_body: Self) -> Self;
+    fn make_classish_declaration(ctx: &C, classish_attribute: Self, classish_modifiers: Self, classish_xhp: Self, classish_keyword: Self, classish_name: Self, classish_type_parameters: Self, classish_extends_keyword: Self, classish_extends_list: Self, classish_implements_keyword: Self, classish_implements_list: Self, classish_body: Self) -> Self;
     fn make_classish_body(ctx: &C, classish_body_left_brace: Self, classish_body_elements: Self, classish_body_right_brace: Self) -> Self;
     fn make_trait_use(ctx: &C, trait_use_keyword: Self, trait_use_names: Self, trait_use_semicolon: Self) -> Self;
     fn make_require_clause(ctx: &C, require_keyword: Self, require_kind: Self, require_name: Self, require_semicolon: Self) -> Self;

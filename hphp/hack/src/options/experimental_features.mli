@@ -27,7 +27,6 @@ type feature_status =
     one of these construcors written in snake_case. *)
 type feature_name =
   | UnionIntersectionTypeHints
-  | ClassLevelWhere
   | ExpressionTrees
   | Readonly
   | ModuleReferences

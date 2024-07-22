@@ -239,7 +239,6 @@ type shallow_class = {
   sc_module: Ast_defs.id option;
   sc_name: Typing_defs.pos_id;
   sc_tparams: decl_tparam list;
-  sc_where_constraints: decl_where_constraint list;
   sc_extends: decl_ty list;
   sc_uses: decl_ty list;
   sc_xhp_attr_uses: decl_ty list;

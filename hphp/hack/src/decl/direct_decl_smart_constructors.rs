@@ -4285,7 +4285,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         extends: Self::Output,
         _implements_keyword: Self::Output,
         implements: Self::Output,
-        where_clause: Self::Output,
         body: Self::Output,
     ) -> Self::Output {
         let raw_name = match self.expect_name(name) {
@@ -4321,11 +4320,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 Abstraction::Concrete
             }),
         };
-
-        let where_constraints = self.slice(where_clause.iter().filter_map(|&x| match x {
-            Node::WhereConstraint(x) => Some(x),
-            _ => None,
-        }));
 
         let body = match body {
             Node::ClassishBody(body) => body,
@@ -4572,7 +4566,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             internal,
             name: (pos, name),
             tparams,
-            where_constraints,
             extends,
             uses,
             xhp_attr_uses,
@@ -5049,7 +5042,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             internal,
             name: id.into(),
             tparams: &[],
-            where_constraints: &[],
             extends: bumpalo::vec![in self.arena; extends].into_bump_slice(),
             uses: &[],
             xhp_attr_uses: &[],
@@ -5267,7 +5259,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             module: self.module,
             name: name.into(),
             tparams: &[],
-            where_constraints: &[],
             extends,
             uses: &[],
             xhp_attr_uses: &[],

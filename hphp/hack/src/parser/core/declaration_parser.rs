@@ -621,7 +621,6 @@ where
         });
         let (classish_extends, classish_extends_list) = self.parse_extends_opt();
         let (classish_implements, classish_implements_list) = self.parse_classish_implements_opt();
-        let classish_where_clause = self.parse_classish_where_clause_opt();
         let body = self.parse_classish_body();
         self.sc_mut().make_classish_declaration(
             attribute_spec,
@@ -634,18 +633,8 @@ where
             classish_extends_list,
             classish_implements,
             classish_implements_list,
-            classish_where_clause,
             body,
         )
-    }
-
-    fn parse_classish_where_clause_opt(&mut self) -> S::Output {
-        if self.peek_token_kind() == TokenKind::Where {
-            self.parse_where_clause()
-        } else {
-            let pos = self.pos();
-            self.sc_mut().make_missing(pos)
-        }
     }
 
     fn parse_classish_implements_opt(&mut self) -> (S::Output, S::Output) {

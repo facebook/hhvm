@@ -64,21 +64,7 @@ val pos : t -> Pos_or_decl.t
 
 val tparams : t -> decl_tparam list
 
-val where_constraints : t -> decl_where_constraint list
-
-val all_where_constraints_on_this : t -> decl_where_constraint list
-
 val upper_bounds_on_this : t -> decl_ty list
-
-val upper_bounds_on_this_from_constraints : t -> decl_ty list
-
-val has_upper_bounds_on_this_from_constraints : t -> bool
-
-val lower_bounds_on_this : t -> decl_ty list
-
-val lower_bounds_on_this_from_constraints : t -> decl_ty list
-
-val has_lower_bounds_on_this_from_constraints : t -> bool
 
 val construct : t -> class_elt option * consistent_kind
 

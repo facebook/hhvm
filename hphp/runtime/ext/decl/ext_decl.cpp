@@ -514,11 +514,6 @@ Array populateClass(const hackc::ExtDeclClass& kls) {
   maybeSetFirst(info, kls.constructor, s_constructor, populateMethods);
   maybeSet(info, kls.typeconsts, s_typeconsts, populateTypeConstants);
   maybeSet(info, kls.consts, s_consts, populateConstants);
-  maybeSet(
-      info,
-      kls.where_constraints,
-      s_where_constraints,
-      populateTypeConstraints);
   maybeSet(info, kls.tparams, s_tparams, populateTParams);
   maybeSetFirst(info, kls.enum_type, s_enum_type, populateEnumType);
   maybeSet(info, kls.props, s_props, populateProps);

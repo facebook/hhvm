@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a6812e44d7e437b7c771ce9b1195d7e9>>
+// @generated SignedSource<<3edbfa1396e6f817eaa41c11ce62f6ae>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1316,22 +1316,21 @@ impl Transform for Class_ {
                 xhp_attr_uses: ref mut __binding_11,
                 reqs: ref mut __binding_13,
                 implements: ref mut __binding_14,
-                where_constraints: ref mut __binding_15,
-                consts: ref mut __binding_16,
-                typeconsts: ref mut __binding_17,
-                vars: ref mut __binding_18,
-                methods: ref mut __binding_19,
-                xhp_children: ref mut __binding_20,
-                xhp_attrs: ref mut __binding_21,
-                namespace: ref mut __binding_22,
-                user_attributes: ref mut __binding_23,
-                file_attributes: ref mut __binding_24,
-                docs_url: ref mut __binding_25,
-                enum_: ref mut __binding_26,
-                doc_comment: ref mut __binding_27,
-                emit_id: ref mut __binding_28,
-                internal: ref mut __binding_29,
-                module: ref mut __binding_30,
+                consts: ref mut __binding_15,
+                typeconsts: ref mut __binding_16,
+                vars: ref mut __binding_17,
+                methods: ref mut __binding_18,
+                xhp_children: ref mut __binding_19,
+                xhp_attrs: ref mut __binding_20,
+                namespace: ref mut __binding_21,
+                user_attributes: ref mut __binding_22,
+                file_attributes: ref mut __binding_23,
+                docs_url: ref mut __binding_24,
+                enum_: ref mut __binding_25,
+                doc_comment: ref mut __binding_26,
+                emit_id: ref mut __binding_27,
+                internal: ref mut __binding_28,
+                module: ref mut __binding_29,
                 ..
             } => {
                 {
@@ -1419,18 +1418,18 @@ impl Transform for Class_ {
                     }
                 }
                 {
-                    __binding_15.transform(env, &mut pass.clone())
-                }
-                {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_class__consts_top_down(env, __binding_16) {
+                        if let Break(..) = pass.on_fld_class__consts_top_down(env, __binding_15) {
                             return;
                         }
-                        __binding_16.transform(env, &mut pass.clone());
-                        in_pass.on_fld_class__consts_bottom_up(env, __binding_16);
+                        __binding_15.transform(env, &mut pass.clone());
+                        in_pass.on_fld_class__consts_bottom_up(env, __binding_15);
                     }
+                }
+                {
+                    __binding_16.transform(env, &mut pass.clone())
                 }
                 {
                     __binding_17.transform(env, &mut pass.clone())
@@ -1442,35 +1441,35 @@ impl Transform for Class_ {
                     __binding_19.transform(env, &mut pass.clone())
                 }
                 {
-                    __binding_20.transform(env, &mut pass.clone())
-                }
-                {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_class__xhp_attrs_top_down(env, __binding_21)
+                        if let Break(..) = pass.on_fld_class__xhp_attrs_top_down(env, __binding_20)
                         {
                             return;
                         }
-                        __binding_21.transform(env, &mut pass.clone());
-                        in_pass.on_fld_class__xhp_attrs_bottom_up(env, __binding_21);
+                        __binding_20.transform(env, &mut pass.clone());
+                        in_pass.on_fld_class__xhp_attrs_bottom_up(env, __binding_20);
                     }
                 }
                 {
-                    __binding_22.transform(env, &mut pass.clone())
+                    __binding_21.transform(env, &mut pass.clone())
                 }
                 {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
                         if let Break(..) =
-                            pass.on_fld_class__user_attributes_top_down(env, __binding_23)
+                            pass.on_fld_class__user_attributes_top_down(env, __binding_22)
                         {
                             return;
                         }
-                        __binding_23.transform(env, &mut pass.clone());
-                        in_pass.on_fld_class__user_attributes_bottom_up(env, __binding_23);
+                        __binding_22.transform(env, &mut pass.clone());
+                        in_pass.on_fld_class__user_attributes_bottom_up(env, __binding_22);
                     }
+                }
+                {
+                    __binding_23.transform(env, &mut pass.clone())
                 }
                 {
                     __binding_24.transform(env, &mut pass.clone())
@@ -1487,10 +1486,7 @@ impl Transform for Class_ {
                 {
                     __binding_28.transform(env, &mut pass.clone())
                 }
-                {
-                    __binding_29.transform(env, &mut pass.clone())
-                }
-                { __binding_30.transform(env, &mut pass.clone()) }
+                { __binding_29.transform(env, &mut pass.clone()) }
             }
         }
     }

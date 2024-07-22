@@ -250,7 +250,6 @@ module type Syntax_S = sig
         classish_extends_list: t;
         classish_implements_keyword: t;
         classish_implements_list: t;
-        classish_where_clause: t;
         classish_body: t;
       }
     | ClassishBody of {
@@ -1233,7 +1232,7 @@ module type Syntax_S = sig
   val make_methodish_trait_resolution : t -> t -> t -> t -> t -> t
 
   val make_classish_declaration :
-    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_classish_body : t -> t -> t -> t
 

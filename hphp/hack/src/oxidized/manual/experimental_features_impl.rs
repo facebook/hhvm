@@ -18,7 +18,6 @@ impl FeatureName {
     fn get_feature_status_deprecated(&self) -> FeatureStatus {
         match self {
             UnionIntersectionTypeHints => Unstable,
-            ClassLevelWhere => Unstable,
             ExpressionTrees => Unstable,
             Readonly => Preview,
             ModuleReferences => Unstable,

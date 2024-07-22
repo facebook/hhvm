@@ -124,7 +124,6 @@ type decl_class_type = {
   dc_name: string;
   dc_pos: Pos_or_decl.t;
   dc_tparams: decl_tparam list;
-  dc_where_constraints: decl_where_constraint list;
   dc_substs: subst_context SMap.t;
       (** class name to the subst_context that must be applied to that class *)
   dc_consts: class_const SMap.t;

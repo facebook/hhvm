@@ -409,7 +409,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ClassishDeclaration(x) => {
-                get_index(12).and_then(|index| { match index {
+                get_index(11).and_then(|index| { match index {
                         0 => Some(&x.attribute),
                     1 => Some(&x.modifiers),
                     2 => Some(&x.xhp),
@@ -420,8 +420,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     7 => Some(&x.extends_list),
                     8 => Some(&x.implements_keyword),
                     9 => Some(&x.implements_list),
-                    10 => Some(&x.where_clause),
-                    11 => Some(&x.body),
+                    10 => Some(&x.body),
                         _ => None,
                     }
                 })

@@ -401,7 +401,6 @@ let class_ tenv c =
     c_xhp_category = _;
     c_reqs;
     c_implements;
-    c_where_constraints;
     c_consts;
     c_typeconsts;
     c_vars;
@@ -439,7 +438,7 @@ let class_ tenv c =
       tenv
       ~ignore_errors:true
       c_tparams
-      (req_class_constraints @ c_where_constraints)
+      req_class_constraints
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env:tenv) ty_err_opt;
   let env = { env with tenv } in
@@ -452,7 +451,6 @@ let class_ tenv c =
       else
         []);
       tparams env c_tparams;
-      where_constrs env c_where_constraints;
       (* Extends clause must be checked, so that we reject public classes extending internal ones *)
       hints ~in_signature:true env c_extends;
       (* But for interfaces and trait use, we allow internal *)

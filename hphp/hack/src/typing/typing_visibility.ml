@@ -50,13 +50,7 @@ let is_private_visible ~is_static env origin_id self_id =
       if (not is_static) && in_bounds bounds_from_require_class_constraints then
         None
       else
-        let upper = Cls.upper_bounds_on_this_from_constraints cls in
-        let lower = Cls.lower_bounds_on_this_from_constraints cls in
-        (* Otherwise check the where constraints on `this` (experimental) *)
-        if in_bounds upper && in_bounds lower then
-          None
-        else
-          Some "You cannot access this member"
+        Some "You cannot access this member"
     | _ -> Some "You cannot access this member"
 
 let is_protected_visible env origin_id self_id =

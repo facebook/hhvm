@@ -567,7 +567,6 @@ let schema : schema_node list =
           ("extends_list", ZeroOrMore (Aggregate Specifier));
           ("implements_keyword", ZeroOrOne Token);
           ("implements_list", ZeroOrMore (Aggregate Specifier));
-          ("where_clause", ZeroOrOne (Just "WhereClause"));
           ("body", Just "ClassishBody");
         ];
     };

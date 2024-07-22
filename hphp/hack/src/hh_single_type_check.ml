@@ -1494,10 +1494,7 @@ module File_deps = struct
           List.iter class_.c_extends ~f:(name_collector#on_hint ());
           List.iter class_.c_uses ~f:(name_collector#on_hint ());
           List.iter class_.c_implements ~f:(name_collector#on_hint ());
-          List.iter class_.c_reqs ~f:(name_collector#on_class_req ());
-          List.iter
-            class_.c_where_constraints
-            ~f:(name_collector#on_where_constraint_hint ())
+          List.iter class_.c_reqs ~f:(name_collector#on_class_req ())
       end
     in
     (* Downstream we need to treat class names relating to class hierarchies

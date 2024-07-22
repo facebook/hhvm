@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5a87be068f9cd7769d1ebafb7c37b34d>>
+// @generated SignedSource<<494e04fae4f16994462f85167fd268bb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -194,8 +194,6 @@ pub struct ShallowClass<'a> {
     pub name: typing_defs::PosId<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tparams: &'a [&'a Tparam<'a>],
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub where_constraints: &'a [&'a WhereConstraint<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub extends: &'a [&'a Ty<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

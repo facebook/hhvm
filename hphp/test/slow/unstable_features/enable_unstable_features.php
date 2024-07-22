@@ -2,4 +2,4 @@
 
 // When Hack.Lang.AllowUnstableFeatures=true no error is emitted
 
-<<file:__EnableUnstableFeatures('class_level_where')>>
+<<file:__EnableUnstableFeatures('union_intersection_type_hints')>>

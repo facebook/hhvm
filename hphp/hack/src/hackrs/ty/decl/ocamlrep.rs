@@ -57,7 +57,6 @@ impl<R: Reason> ToOcamlRep for FoldedClass<R> {
             module,
             is_module_level_trait,
             tparams,
-            where_constraints,
             substs,
             ancestors,
             props,
@@ -85,7 +84,7 @@ impl<R: Reason> ToOcamlRep for FoldedClass<R> {
         } = self;
         let need_init = self.has_concrete_constructor();
         let abstract_ = self.is_abstract();
-        let mut block = alloc.block_with_size(39);
+        let mut block = alloc.block_with_size(38);
         alloc.set_field(&mut block, 0, alloc.add_copy(need_init));
         alloc.set_field(&mut block, 1, alloc.add_copy(abstract_));
         alloc.set_field(&mut block, 2, alloc.add(is_final));
@@ -100,31 +99,30 @@ impl<R: Reason> ToOcamlRep for FoldedClass<R> {
         alloc.set_field(&mut block, 11, alloc.add(name));
         alloc.set_field(&mut block, 12, alloc.add(pos));
         alloc.set_field(&mut block, 13, alloc.add(tparams));
-        alloc.set_field(&mut block, 14, alloc.add(where_constraints));
-        alloc.set_field(&mut block, 15, alloc.add(substs));
-        alloc.set_field(&mut block, 16, alloc.add(consts));
-        alloc.set_field(&mut block, 17, alloc.add(type_consts));
-        alloc.set_field(&mut block, 18, alloc.add(props));
-        alloc.set_field(&mut block, 19, alloc.add(static_props));
-        alloc.set_field(&mut block, 20, alloc.add(methods));
-        alloc.set_field(&mut block, 21, alloc.add(static_methods));
-        alloc.set_field(&mut block, 22, alloc.add(constructor));
-        alloc.set_field(&mut block, 23, alloc.add(ancestors));
-        alloc.set_field(&mut block, 24, alloc.add(support_dynamic_type));
-        alloc.set_field(&mut block, 25, alloc.add(req_ancestors));
-        alloc.set_field(&mut block, 26, alloc.add(req_ancestors_extends));
-        alloc.set_field(&mut block, 27, alloc.add(req_class_ancestors));
-        alloc.set_field(&mut block, 28, alloc.add(extends));
-        alloc.set_field(&mut block, 29, alloc.add(sealed_whitelist));
-        alloc.set_field(&mut block, 30, alloc.add(xhp_attr_deps));
-        alloc.set_field(&mut block, 31, alloc.add(xhp_enum_values));
-        alloc.set_field(&mut block, 32, alloc.add(xhp_marked_empty));
-        alloc.set_field(&mut block, 33, alloc.add(enum_type));
-        alloc.set_field(&mut block, 34, alloc.add(decl_errors));
-        alloc.set_field(&mut block, 35, alloc.add(docs_url));
-        alloc.set_field(&mut block, 36, alloc.add(allow_multiple_instantiations));
-        alloc.set_field(&mut block, 37, alloc.add(sort_text));
-        alloc.set_field(&mut block, 38, alloc.add(package_override));
+        alloc.set_field(&mut block, 14, alloc.add(substs));
+        alloc.set_field(&mut block, 15, alloc.add(consts));
+        alloc.set_field(&mut block, 16, alloc.add(type_consts));
+        alloc.set_field(&mut block, 17, alloc.add(props));
+        alloc.set_field(&mut block, 18, alloc.add(static_props));
+        alloc.set_field(&mut block, 19, alloc.add(methods));
+        alloc.set_field(&mut block, 20, alloc.add(static_methods));
+        alloc.set_field(&mut block, 21, alloc.add(constructor));
+        alloc.set_field(&mut block, 22, alloc.add(ancestors));
+        alloc.set_field(&mut block, 23, alloc.add(support_dynamic_type));
+        alloc.set_field(&mut block, 24, alloc.add(req_ancestors));
+        alloc.set_field(&mut block, 25, alloc.add(req_ancestors_extends));
+        alloc.set_field(&mut block, 26, alloc.add(req_class_ancestors));
+        alloc.set_field(&mut block, 27, alloc.add(extends));
+        alloc.set_field(&mut block, 28, alloc.add(sealed_whitelist));
+        alloc.set_field(&mut block, 29, alloc.add(xhp_attr_deps));
+        alloc.set_field(&mut block, 30, alloc.add(xhp_enum_values));
+        alloc.set_field(&mut block, 31, alloc.add(xhp_marked_empty));
+        alloc.set_field(&mut block, 32, alloc.add(enum_type));
+        alloc.set_field(&mut block, 33, alloc.add(decl_errors));
+        alloc.set_field(&mut block, 34, alloc.add(docs_url));
+        alloc.set_field(&mut block, 35, alloc.add(allow_multiple_instantiations));
+        alloc.set_field(&mut block, 36, alloc.add(sort_text));
+        alloc.set_field(&mut block, 37, alloc.add(package_override));
         block.build()
     }
 }
@@ -133,7 +131,7 @@ impl<R: Reason> ToOcamlRep for FoldedClass<R> {
 // See comment on impl of ToOcamlRep for FoldedClass.
 impl<R: Reason> FromOcamlRep for FoldedClass<R> {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-        let block = ocamlrep::from::expect_tuple(value, 39)?;
+        let block = ocamlrep::from::expect_tuple(value, 38)?;
         Ok(Self {
             is_final: ocamlrep::from::field(block, 2)?,
             is_const: ocamlrep::from::field(block, 3)?,
@@ -147,31 +145,30 @@ impl<R: Reason> FromOcamlRep for FoldedClass<R> {
             name: ocamlrep::from::field(block, 11)?,
             pos: ocamlrep::from::field(block, 12)?,
             tparams: ocamlrep::from::field(block, 13)?,
-            where_constraints: ocamlrep::from::field(block, 14)?,
-            substs: ocamlrep::from::field(block, 15)?,
-            consts: ocamlrep::from::field(block, 16)?,
-            type_consts: ocamlrep::from::field(block, 17)?,
-            props: ocamlrep::from::field(block, 18)?,
-            static_props: ocamlrep::from::field(block, 19)?,
-            methods: ocamlrep::from::field(block, 20)?,
-            static_methods: ocamlrep::from::field(block, 21)?,
-            constructor: ocamlrep::from::field(block, 22)?,
-            ancestors: ocamlrep::from::field(block, 23)?,
-            support_dynamic_type: ocamlrep::from::field(block, 24)?,
-            req_ancestors: ocamlrep::from::field(block, 25)?,
-            req_ancestors_extends: ocamlrep::from::field(block, 26)?,
-            req_class_ancestors: ocamlrep::from::field(block, 27)?,
-            extends: ocamlrep::from::field(block, 28)?,
-            sealed_whitelist: ocamlrep::from::field(block, 29)?,
-            xhp_attr_deps: ocamlrep::from::field(block, 30)?,
-            xhp_enum_values: ocamlrep::from::field(block, 31)?,
-            xhp_marked_empty: ocamlrep::from::field(block, 32)?,
-            enum_type: ocamlrep::from::field(block, 33)?,
-            decl_errors: ocamlrep::from::field(block, 34)?,
-            docs_url: ocamlrep::from::field(block, 35)?,
-            allow_multiple_instantiations: ocamlrep::from::field(block, 36)?,
-            sort_text: ocamlrep::from::field(block, 37)?,
-            package_override: ocamlrep::from::field(block, 38)?,
+            substs: ocamlrep::from::field(block, 14)?,
+            consts: ocamlrep::from::field(block, 15)?,
+            type_consts: ocamlrep::from::field(block, 16)?,
+            props: ocamlrep::from::field(block, 17)?,
+            static_props: ocamlrep::from::field(block, 18)?,
+            methods: ocamlrep::from::field(block, 19)?,
+            static_methods: ocamlrep::from::field(block, 20)?,
+            constructor: ocamlrep::from::field(block, 21)?,
+            ancestors: ocamlrep::from::field(block, 22)?,
+            support_dynamic_type: ocamlrep::from::field(block, 23)?,
+            req_ancestors: ocamlrep::from::field(block, 24)?,
+            req_ancestors_extends: ocamlrep::from::field(block, 25)?,
+            req_class_ancestors: ocamlrep::from::field(block, 26)?,
+            extends: ocamlrep::from::field(block, 27)?,
+            sealed_whitelist: ocamlrep::from::field(block, 28)?,
+            xhp_attr_deps: ocamlrep::from::field(block, 29)?,
+            xhp_enum_values: ocamlrep::from::field(block, 30)?,
+            xhp_marked_empty: ocamlrep::from::field(block, 31)?,
+            enum_type: ocamlrep::from::field(block, 32)?,
+            decl_errors: ocamlrep::from::field(block, 33)?,
+            docs_url: ocamlrep::from::field(block, 34)?,
+            allow_multiple_instantiations: ocamlrep::from::field(block, 35)?,
+            sort_text: ocamlrep::from::field(block, 36)?,
+            package_override: ocamlrep::from::field(block, 37)?,
         })
     }
 }

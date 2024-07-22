@@ -103,7 +103,6 @@ mod tests {
             xhp_category: None,
             reqs: vec![],
             implements: vec![],
-            where_constraints: vec![],
             consts,
             typeconsts,
             vars: vec![],

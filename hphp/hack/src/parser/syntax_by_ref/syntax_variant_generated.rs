@@ -514,7 +514,6 @@ pub struct ClassishDeclarationChildren<'a, T, V> {
     pub extends_list: Syntax<'a, T, V>,
     pub implements_keyword: Syntax<'a, T, V>,
     pub implements_list: Syntax<'a, T, V>,
-    pub where_clause: Syntax<'a, T, V>,
     pub body: Syntax<'a, T, V>,
 }
 

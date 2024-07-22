@@ -5419,12 +5419,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             DeclareLocalStatement(_) => {
                 self.check_can_use_feature(node, &FeatureName::TypedLocalVariables)
             }
-            ClassishDeclaration(x) => match &x.where_clause.children {
-                WhereClause(_) => {
-                    self.check_can_use_feature(&x.where_clause, &FeatureName::ClassLevelWhere)
-                }
-                _ => {}
-            },
             UpcastExpression(_) => self.check_can_use_feature(node, &FeatureName::UpcastExpression),
             OldAttributeSpecification(x) => {
                 self.old_attr_spec(node, &x.attributes);

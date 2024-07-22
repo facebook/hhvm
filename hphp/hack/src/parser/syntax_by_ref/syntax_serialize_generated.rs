@@ -370,8 +370,8 @@ ss.serialize_field("methodish_trait_name", &self.with(name))?;
 ss.serialize_field("methodish_trait_semicolon", &self.with(semicolon))?;
       ss.end()
 } 
-SyntaxVariant::ClassishDeclaration (ClassishDeclarationChildren{attribute,modifiers,xhp,keyword,name,type_parameters,extends_keyword,extends_list,implements_keyword,implements_list,where_clause,body} ) => {
-      let mut ss = s.serialize_struct("", 13)?;
+SyntaxVariant::ClassishDeclaration (ClassishDeclarationChildren{attribute,modifiers,xhp,keyword,name,type_parameters,extends_keyword,extends_list,implements_keyword,implements_list,body} ) => {
+      let mut ss = s.serialize_struct("", 12)?;
       ss.serialize_field("kind", "classish_declaration")?;
       ss.serialize_field("classish_attribute", &self.with(attribute))?;
 ss.serialize_field("classish_modifiers", &self.with(modifiers))?;
@@ -383,7 +383,6 @@ ss.serialize_field("classish_extends_keyword", &self.with(extends_keyword))?;
 ss.serialize_field("classish_extends_list", &self.with(extends_list))?;
 ss.serialize_field("classish_implements_keyword", &self.with(implements_keyword))?;
 ss.serialize_field("classish_implements_list", &self.with(implements_list))?;
-ss.serialize_field("classish_where_clause", &self.with(where_clause))?;
 ss.serialize_field("classish_body", &self.with(body))?;
       ss.end()
 } 

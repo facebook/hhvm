@@ -623,7 +623,6 @@ fn make_closure(
         xhp_category: None,
         reqs: vec![],
         implements: vec![],
-        where_constraints: vec![],
         consts: vec![],
         typeconsts: vec![],
         vars: cvl.collect(),

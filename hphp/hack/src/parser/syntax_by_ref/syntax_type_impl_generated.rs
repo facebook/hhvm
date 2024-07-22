@@ -433,7 +433,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_classish_declaration(ctx: &C, attribute: Self, modifiers: Self, xhp: Self, keyword: Self, name: Self, type_parameters: Self, extends_keyword: Self, extends_list: Self, implements_keyword: Self, implements_list: Self, where_clause: Self, body: Self) -> Self {
+    fn make_classish_declaration(ctx: &C, attribute: Self, modifiers: Self, xhp: Self, keyword: Self, name: Self, type_parameters: Self, extends_keyword: Self, extends_list: Self, implements_keyword: Self, implements_list: Self, body: Self) -> Self {
         let syntax = SyntaxVariant::ClassishDeclaration(ctx.get_arena().alloc(ClassishDeclarationChildren {
             attribute,
             modifiers,
@@ -445,7 +445,6 @@ where
             extends_list,
             implements_keyword,
             implements_list,
-            where_clause,
             body,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));

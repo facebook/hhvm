@@ -1024,7 +1024,6 @@ let class_def : Typing_env_types.env -> Nast.class_ -> unit =
     c_vars;
     c_methods;
     c_final = _;
-    c_where_constraints = (* TODO *) _;
     c_typeconsts = (* TODO *) _;
     c_kind = _;
     c_span = _;

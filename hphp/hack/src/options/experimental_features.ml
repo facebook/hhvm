@@ -32,7 +32,6 @@ let feature_status_from_string s = SMap.find_opt s feature_status_map
 
 type feature_name =
   | UnionIntersectionTypeHints
-  | ClassLevelWhere
   | ExpressionTrees
   | Readonly
   | ModuleReferences
@@ -70,7 +69,6 @@ let feature_name_map =
     ~f:(fun m (k, v) -> SMap.add k v m)
     [
       ("union_intersection_type_hints", UnionIntersectionTypeHints);
-      ("class_level_where", ClassLevelWhere);
       ("expression_trees", ExpressionTrees);
       ("readonly", Readonly);
       ("module_references", ModuleReferences);
@@ -108,7 +106,6 @@ let feature_name_from_string s = SMap.find_opt s feature_name_map
 let get_feature_status_deprecated name =
   match name with
   | UnionIntersectionTypeHints -> Unstable
-  | ClassLevelWhere -> Unstable
   | ExpressionTrees -> Unstable
   | Readonly -> Preview
   | ModuleReferences -> Unstable

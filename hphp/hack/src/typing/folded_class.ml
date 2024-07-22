@@ -60,12 +60,6 @@ module ApiShallow = struct
     let (c, _) = t in
     c.Decl_defs.dc_tparams
 
-  let where_constraints (decl, t, _ctx) =
-    Decl_counters.count_subdecl decl Decl_counters.Where_constraints
-    @@ fun () ->
-    let (c, _) = t in
-    c.Decl_defs.dc_where_constraints
-
   let enum_type (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Enum_type @@ fun () ->
     let (c, _) = t in
@@ -122,58 +116,6 @@ module ApiShallow = struct
     @@ fun () ->
     let (c, _) = t in
     c.Decl_defs.dc_support_dynamic_type
-
-  let all_where_constraints_on_this t =
-    (* tally is already done by where_constraints *)
-    List.filter
-      ~f:(fun (l, _, r) ->
-        match (get_node l, get_node r) with
-        | (Tthis, _)
-        | (_, Tthis) ->
-          true
-        | _ -> false)
-      (where_constraints t)
-
-  let upper_bounds_on_this_from_constraints t =
-    (* tally is already done by where_constraints *)
-    List.filter_map
-      ~f:(fun (l, c, r) ->
-        match (get_node l, c, get_node r) with
-        | (Tthis, Ast_defs.Constraint_as, _)
-        | (Tthis, Ast_defs.Constraint_eq, _) ->
-          Some r
-        | (_, Ast_defs.Constraint_eq, Tthis)
-        | (_, Ast_defs.Constraint_super, Tthis) ->
-          Some l
-        | _ -> None)
-      (where_constraints t)
-
-  let has_upper_bounds_on_this_from_constraints t =
-    (* tally is already done by upper_bounds_on_this *)
-    not (List.is_empty (upper_bounds_on_this_from_constraints t))
-
-  (* get lower bounds on `this` from the where constraints *)
-  let lower_bounds_on_this_from_constraints t =
-    (* tally is already done by where_constraint *)
-    List.filter_map
-      ~f:(fun (l, c, r) ->
-        match (get_node l, c, get_node r) with
-        | (Tthis, Ast_defs.Constraint_super, _)
-        | (Tthis, Ast_defs.Constraint_eq, _) ->
-          Some r
-        | (_, Ast_defs.Constraint_eq, Tthis)
-        | (_, Ast_defs.Constraint_as, Tthis) ->
-          Some l
-        | _ -> None)
-      (where_constraints t)
-
-  let has_lower_bounds_on_this_from_constraints t =
-    (* tally is already done by lower_bounds_on_this *)
-    not (List.is_empty (lower_bounds_on_this_from_constraints t))
-
-  let lower_bounds_on_this t =
-    (* tally is done inside the following method *)
-    lower_bounds_on_this_from_constraints t
 end
 
 module ApiLazy = struct
@@ -364,7 +306,6 @@ module ApiEager = struct
     (* tally is already done by all_ancestors and upper_bounds *)
     List.map ~f:(fun req -> snd req) (all_ancestor_reqs t)
     |> List.append (List.map ~f:snd (all_ancestor_req_class_requirements t))
-    |> List.append (ApiShallow.upper_bounds_on_this_from_constraints t)
 
   let consts (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Consts @@ fun () ->

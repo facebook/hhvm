@@ -515,34 +515,6 @@ let rec obj_get_concrete_ty
     let lval_mismatch = Error (concrete_ty, ty_nothing) in
     default ~lval_mismatch (Some ty_err)
 
-and get_member_from_constraints
-    args env class_info ((id_pos, _) as id) reason params on_error :
-    internal_result =
-  let ety_env = mk_ety_env class_info params args.this_ty in
-  let upper_bounds = Cls.upper_bounds_on_this class_info in
-  let ((env, upper_ty_errs), upper_bounds) =
-    List.map_env_ty_err_opt
-      env
-      upper_bounds
-      ~f:(fun env up -> Phase.localize ~ety_env env up)
-      ~combine_ty_errs:Typing_error.multiple_opt
-  in
-  let (env, inter_ty) =
-    Inter.intersect_list env (Reason.witness id_pos) upper_bounds
-  in
-  merge_ty_err upper_ty_errs
-  @@ obj_get_inner
-       {
-         args with
-         nullsafe = None;
-         obj_pos = Reason.to_pos reason |> Pos_or_decl.unsafe_to_raw_pos;
-         is_nonnull = true;
-       }
-       env
-       inter_ty
-       id
-       on_error
-
 and obj_get_concrete_class
     args
     env
@@ -631,7 +603,6 @@ and obj_get_concrete_class
           id
           reason
           class_info
-          params
           on_error
       | Some member_info ->
         obj_get_concrete_class_with_member_info
@@ -641,29 +612,25 @@ and obj_get_concrete_class
           id
           self_id
           shadowed
-          reason
           class_name
           class_info
           params
           old_member_info
           member_info
-          on_error
     end
 
 and obj_get_concrete_class_with_member_info
     args
     env
     concrete_ty
-    ((id_pos, id_str) as id)
+    ((id_pos, id_str) as _id)
     self_id
     shadowed
-    reason
     class_name
     class_info
     params
     old_member_info
-    member_info
-    on_error : internal_result =
+    member_info : internal_result =
   let dflt_rval_mismatch =
     Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
   and dflt_lval_mismatch = Ok concrete_ty in
@@ -846,34 +813,6 @@ and obj_get_concrete_class_with_member_info
       (* TODO(T52753871): same as for class_get *)
       (env, member_ty, [], et_enforced, dflt_lval_mismatch)
   in
-
-  let (env, (member_ty, tal)) =
-    if Cls.has_upper_bounds_on_this_from_constraints class_info then
-      let (env, (ty, tal), succeed) =
-        let res =
-          get_member_from_constraints
-            args
-            env
-            class_info
-            id
-            reason
-            params
-            on_error
-        in
-        match res with
-        | (env, None, ty, _, _) -> (env, ty, true)
-        | _ -> (env, (MakeType.mixed Reason.none, []), false)
-      in
-      if succeed then
-        let (env, member_ty) =
-          Inter.intersect env ~r:(Reason.witness id_pos) member_ty ty
-        in
-        (env, (member_ty, tal))
-      else
-        (env, (member_ty, tal))
-    else
-      (env, (member_ty, tal))
-  in
   (* TODO: iterate over the returned error rather than side effecting on
      error evaluation *)
   let eff () =
@@ -919,14 +858,8 @@ and obj_get_concrete_class_with_member_info
   (env, ty_err_opt, (member_ty, tal), lval_mismatch, rval_mismatch)
 
 and obj_get_concrete_class_without_member_info
-    args
-    env
-    concrete_ty
-    ((id_pos, id_str) as id)
-    reason
-    class_info
-    params
-    on_error : internal_result =
+    args env concrete_ty (id_pos, id_str) reason class_info on_error :
+    internal_result =
   let dflt_rval_mismatch =
     Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
   and dflt_lval_mismatch = Ok concrete_ty in
@@ -937,26 +870,7 @@ and obj_get_concrete_class_without_member_info
     let (env, ty) = Env.fresh_type_error env id_pos in
     (env, ty_err_opt, (ty, []), lval_mismatch, rval_mismatch)
   in
-  if Cls.has_upper_bounds_on_this_from_constraints class_info then
-    let res =
-      get_member_from_constraints args env class_info id reason params on_error
-    in
-    match res with
-    | (_, None, _, _, _) -> res
-    | _ ->
-      let err =
-        member_not_found
-          env
-          id_pos
-          ~is_method:args.is_method
-          class_info
-          id_str
-          reason
-          on_error
-      in
-      let ty_nothing = MakeType.nothing Reason.none in
-      default ~lval_mismatch:(Error (concrete_ty, ty_nothing)) (Some err)
-  else if not args.is_method then
+  if not args.is_method then
     let (lval_mismatch, ty_err_opt) =
       if not (SN.Members.is_special_xhp_attribute id_str) then
         let err =

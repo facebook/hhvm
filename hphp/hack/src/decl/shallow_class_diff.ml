@@ -44,7 +44,6 @@ module Parents = struct
       sc_module = _;
       sc_name = _;
       sc_tparams = _;
-      sc_where_constraints = _;
       sc_xhp_enum_values = _;
       sc_xhp_marked_empty = _;
       sc_support_dynamic_type = _;

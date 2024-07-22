@@ -19,7 +19,7 @@ File root|module_enums.php--X.php
        sc_abstract = false; sc_is_xhp = false; sc_internal = true;
        sc_has_xhp_keyword = false; sc_kind = Cenum;
        sc_module = (Some ([3:8-9], "X")); sc_name = ([5:15-16], "\\X");
-       sc_tparams = []; sc_where_constraints = [];
+       sc_tparams = [];
        sc_extends =
        [(Rhint ([5:15-16]),
          (Tapply (([5:15-16], "\\HH\\BuiltinEnum"),

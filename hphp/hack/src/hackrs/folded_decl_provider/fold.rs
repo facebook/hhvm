@@ -969,7 +969,6 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             module: self.child.module.clone(),
             is_module_level_trait,
             tparams,
-            where_constraints: self.child.where_constraints.clone(),
             substs,
             ancestors,
             props,

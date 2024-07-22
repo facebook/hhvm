@@ -43,7 +43,6 @@ type subdecl_kind =
   | IsModuleLevelTrait
   | Pos
   | Tparams
-  | Where_constraints
   | Enum_type
   | Xhp_enum_values
   | Xhp_marked_empty

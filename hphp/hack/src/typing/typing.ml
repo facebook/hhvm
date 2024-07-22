@@ -5835,16 +5835,6 @@ end = struct
         on_error = Some (Typing_error.Reasons_callback.unify_error_at p);
       }
     in
-    let (env, ty_err_opt) =
-      Phase.check_where_constraints
-        ~in_class:true
-        ~use_pos:p
-        ~definition_pos:(Cls.pos class_)
-        ~ety_env
-        env
-        (Cls.where_constraints class_)
-    in
-    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     let cstr = Env.get_construct env class_ in
     match fst cstr with
     | None ->
@@ -11185,9 +11175,6 @@ end = struct
         in
         let get_smember_from_constraints env class_info =
           (* Extract the upper bounds on this from where and require class constraints. *)
-          let upper_bounds_from_where_constraints =
-            Cls.upper_bounds_on_this_from_constraints class_info
-          in
           let upper_bounds_from_require_class_constraints =
             List.map (Cls.all_ancestor_req_class_requirements class_info) ~f:snd
           in
@@ -11195,8 +11182,7 @@ end = struct
             let ((env, ty_err_opt), upper_bounds) =
               List.map_env_ty_err_opt
                 env
-                (upper_bounds_from_where_constraints
-                @ upper_bounds_from_require_class_constraints)
+                upper_bounds_from_require_class_constraints
                 ~f:(fun env up -> Phase.localize ~ety_env env up)
                 ~combine_ty_errs:Typing_error.multiple_opt
             in
@@ -11425,23 +11411,6 @@ end = struct
                   ~f:(Typing_error_utils.add_typing_error ~env)
                   ty_err_opt;
                 (env, member_ty, et_enforced, [])
-            in
-            let (env, member_ty) =
-              if Cls.has_upper_bounds_on_this_from_constraints class_ then
-                let ((env, (member_ty', _), _), succeed) =
-                  Errors.try_
-                    (fun () -> (get_smember_from_constraints env class_, true))
-                    (fun _ ->
-                      (* No eligible functions found in constraints *)
-                      ( (env, (MakeType.mixed Reason.none, []), dflt_rval_err),
-                        false ))
-                in
-                if succeed then
-                  Inter.intersect env ~r:(Reason.witness p) member_ty member_ty'
-                else
-                  (env, member_ty)
-              else
-                (env, member_ty)
             in
             let (env, rval_err) =
               match coerce_from_ty with

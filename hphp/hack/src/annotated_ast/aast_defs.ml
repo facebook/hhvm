@@ -943,7 +943,6 @@ and ('ex, 'en) class_ = {
         *)
   c_reqs: class_req list; [@transform.explicit]
   c_implements: class_hint list; [@transform.explicit]
-  c_where_constraints: where_constraint_hint list;
   c_consts: ('ex, 'en) class_const list; [@transform.explicit]
   c_typeconsts: ('ex, 'en) class_typeconst_def list;
   c_vars: ('ex, 'en) class_var list;

@@ -381,7 +381,6 @@ struct
         classish_extends_list: t;
         classish_implements_keyword: t;
         classish_implements_list: t;
-        classish_where_clause: t;
         classish_body: t;
       }
     | ClassishBody of {

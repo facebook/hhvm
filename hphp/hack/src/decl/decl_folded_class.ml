@@ -993,7 +993,6 @@ and class_decl
       dc_name = snd c.sc_name;
       dc_pos = fst c.sc_name;
       dc_tparams;
-      dc_where_constraints = c.sc_where_constraints;
       dc_substs = inherited.Decl_inherit.ih_substs;
       dc_consts = consts;
       dc_typeconsts = typeconsts;

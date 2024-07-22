@@ -4,7 +4,6 @@
        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
        sc_has_xhp_keyword = false; sc_kind = Cenum; sc_module = None;
        sc_name = ([4:6-7], "\\E"); sc_tparams = [];
-       sc_where_constraints = [];
        sc_extends =
        [(Rhint ([4:6-7]),
          (Tapply (([4:6-7], "\\HH\\BuiltinEnum"),

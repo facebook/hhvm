@@ -27,7 +27,6 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
             module,
             name,
             tparams,
-            where_constraints,
             extends,
             uses,
             xhp_attr_uses,
@@ -82,9 +81,6 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
 
         if !tparams.is_empty() {
             s.field("tparams", tparams);
-        }
-        if !where_constraints.is_empty() {
-            s.field("where_constraints", where_constraints);
         }
         if !extends.is_empty() {
             s.field("extends", extends);
@@ -172,7 +168,6 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             module,
             is_module_level_trait,
             tparams,
-            where_constraints,
             substs,
             ancestors,
             props,
@@ -238,10 +233,6 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         if !tparams.is_empty() {
             s.field("tparams", tparams);
         }
-        if !where_constraints.is_empty() {
-            s.field("where_constraints", where_constraints);
-        }
-
         if !substs.is_empty() {
             s.field("substs", substs);
         }

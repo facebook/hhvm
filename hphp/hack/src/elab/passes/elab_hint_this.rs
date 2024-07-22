@@ -306,7 +306,6 @@ mod tests {
             xhp_category: Default::default(),
             reqs,
             implements: Default::default(),
-            where_constraints: Default::default(),
             consts: Default::default(),
             typeconsts: Default::default(),
             vars: Default::default(),

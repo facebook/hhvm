@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f5a1333601ea435398482bdc545f2eaf>>
+// @generated SignedSource<<7067d9108380da30b212991d958569f7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -206,7 +206,6 @@ pub struct DeclClassType {
     pub name: String,
     pub pos: pos_or_decl::PosOrDecl,
     pub tparams: Vec<Tparam>,
-    pub where_constraints: Vec<WhereConstraint>,
     /// class name to the subst_context that must be applied to that class
     pub substs: s_map::SMap<SubstContext>,
     pub consts: s_map::SMap<ClassConst>,

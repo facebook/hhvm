@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c6e2e711b03844d6b9bf57d04733297d>>
+// @generated SignedSource<<7c9d5041978c1a0ca367241ee6a507af>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1765,7 +1765,6 @@ pub struct Class_<Ex, En> {
     pub reqs: Vec<ClassReq>,
     #[rust_to_ocaml(attr = "transform.explicit")]
     pub implements: Vec<ClassHint>,
-    pub where_constraints: Vec<WhereConstraintHint>,
     #[rust_to_ocaml(attr = "transform.explicit")]
     pub consts: Vec<ClassConst<Ex, En>>,
     pub typeconsts: Vec<ClassTypeconstDef<Ex, En>>,

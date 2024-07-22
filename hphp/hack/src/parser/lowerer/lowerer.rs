@@ -5709,7 +5709,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 _ => false,
             };
             let implements = could_map(&c.implements_list, env, p_hint)?;
-            let where_constraints = p_where_constraint(true, node, &c.where_clause, env)?;
             let namespace = mk_empty_ns_env(env);
             let span = p_pos(node, env);
             let mut class_ = ast::Class_ {
@@ -5728,7 +5727,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 xhp_category: None,
                 reqs: vec![],
                 implements,
-                where_constraints,
                 consts: vec![],
                 typeconsts: vec![],
                 vars: vec![],
@@ -6036,7 +6034,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 tparams: vec![],
                 extends: vec![],
                 implements: vec![],
-                where_constraints: vec![],
                 consts: could_map(&c.enumerators, env, p_enumerator)?,
                 namespace: mk_empty_ns_env(env),
                 span: p_pos(node, env),
@@ -6113,7 +6110,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 tparams: vec![],
                 extends: extends.clone(),
                 implements: vec![],
-                where_constraints: vec![],
                 consts: vec![],
                 namespace: mk_empty_ns_env(env),
                 span: p_pos(node, env),

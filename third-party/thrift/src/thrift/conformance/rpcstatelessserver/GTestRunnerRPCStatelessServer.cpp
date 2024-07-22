@@ -19,21 +19,22 @@
 #include <thrift/conformance/GTestHarness.h>
 #include <thrift/conformance/PluggableFunctions.h>
 #include <thrift/conformance/Utils.h>
-#include <thrift/conformance/if/gen-cpp2/BasicRPCConformanceServiceAsyncClient.h>
+#include <thrift/conformance/if/gen-cpp2/RPCStatelessConformanceServiceAsyncClient.h>
 
 namespace apache::thrift::conformance {
 
 // Specialization for consuming pluggable function.
 template <>
-std::unique_ptr<Client<BasicRPCConformanceService>>
-createClient<Client<BasicRPCConformanceService>>(std::string_view serviceName) {
-  return create_basic_rpc_conformance_service_client_(serviceName);
+std::unique_ptr<Client<RPCStatelessConformanceService>>
+createClient<Client<RPCStatelessConformanceService>>(
+    std::string_view serviceName) {
+  return create_rpc_stateless_conformance_service_client_(serviceName);
 }
 
 // Register the tests with gtest.
 THRIFT_CONFORMANCE_TEST(
     getSuites(),
-    getServers<Client<BasicRPCConformanceService>>(ChannelType::Rocket),
+    getServers<Client<RPCStatelessConformanceService>>(ChannelType::Rocket),
     getNonconforming());
 
 } // namespace apache::thrift::conformance

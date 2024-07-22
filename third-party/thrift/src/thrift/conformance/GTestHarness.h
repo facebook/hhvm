@@ -207,8 +207,8 @@ testing::AssertionResult runPatchTest(
 testing::AssertionResult runRpcTest(
     Client<RPCConformanceService>& client, const RpcTestCase& rpc);
 
-testing::AssertionResult runBasicRpcTest(
-    Client<BasicRPCConformanceService>& client, const RpcTestCase& rpc);
+testing::AssertionResult runStatelessRpcTest(
+    Client<RPCStatelessConformanceService>& client, const RpcTestCase& rpc);
 
 template <typename Client>
 class ConformanceTest : public testing::Test {
@@ -271,8 +271,8 @@ testing::AssertionResult runTestCase(Client& client, const TestCase& testCase) {
       } else if constexpr (std::is_same_v<
                                Client,
                                apache::thrift::Client<
-                                   BasicRPCConformanceService>>) {
-        return runBasicRpcTest(client, *testCase.rpc_ref());
+                                   RPCStatelessConformanceService>>) {
+        return runStatelessRpcTest(client, *testCase.rpc_ref());
       }
       return testing::AssertionFailure() << "Invalid test client.";
     case TestCaseUnion::Type::objectPatch:

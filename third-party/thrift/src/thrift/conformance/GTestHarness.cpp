@@ -126,7 +126,7 @@ RequestResponseBasicClientTestResult runRequestResponseBasic(
 }
 
 ServerTestResult runRequestResponseBasic(
-    Client<BasicRPCConformanceService>& client,
+    Client<RPCStatelessConformanceService>& client,
     const RequestResponseBasicClientInstruction& instruction) {
   ServerTestResult result;
   client.sync_requestResponseBasic(result, *instruction.request());
@@ -148,7 +148,7 @@ runRequestResponseDeclaredException(
 
 RequestResponseDeclaredExceptionClientTestResult
 runRequestResponseDeclaredException(
-    BasicRPCConformanceServiceAsyncClient& client,
+    RPCStatelessConformanceServiceAsyncClient& client,
     const ServerInstruction& serverInstruction) {
   RequestResponseDeclaredExceptionClientTestResult result;
   try {
@@ -174,7 +174,7 @@ runRequestResponseUndeclaredException(
 
 RequestResponseUndeclaredExceptionClientTestResult
 runRequestResponseUndeclaredException(
-    BasicRPCConformanceServiceAsyncClient& client,
+    RPCStatelessConformanceServiceAsyncClient& client,
     const ServerInstruction& serverInstruction) {
   RequestResponseUndeclaredExceptionClientTestResult result;
   try {
@@ -194,7 +194,7 @@ runRequestResponseNoArgVoidResponse(RPCConformanceServiceAsyncClient& client) {
 
 RequestResponseNoArgVoidResponseClientTestResult
 runRequestResponseNoArgVoidResponse(
-    BasicRPCConformanceServiceAsyncClient& client) {
+    RPCStatelessConformanceServiceAsyncClient& client) {
   RequestResponseNoArgVoidResponseClientTestResult result;
   client.sync_requestResponseNoArgVoidResponse();
   return result;
@@ -594,8 +594,8 @@ testing::AssertionResult runRpcTest(
   return testing::AssertionSuccess();
 }
 
-testing::AssertionResult runBasicRpcTest(
-    Client<BasicRPCConformanceService>& client, const RpcTestCase& rpc) {
+testing::AssertionResult runStatelessRpcTest(
+    Client<RPCStatelessConformanceService>& client, const RpcTestCase& rpc) {
   ClientTestResult result;
   ServerTestResult actualServerTestResult;
   const auto& clientInstruction = *rpc.clientInstruction();

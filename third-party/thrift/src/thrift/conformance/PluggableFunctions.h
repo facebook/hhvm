@@ -38,8 +38,8 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
     std::string_view /*serviceName or smc tier*/);
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
-    std::unique_ptr<Client<BasicRPCConformanceService>>,
-    create_basic_rpc_conformance_service_client_,
+    std::unique_ptr<Client<RPCStatelessConformanceService>>,
+    create_rpc_stateless_conformance_service_client_,
     std::string_view /*serviceName or smc tier*/);
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(

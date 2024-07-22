@@ -584,7 +584,7 @@ service RPCConformanceService {
   BasicInteraction basicInteractionFactoryFunction(i32 initialSum);
 }
 
-service BasicRPCConformanceService {
+service RPCStatelessConformanceService {
   // =================== Request-Response ===================
   ServerTestResult requestResponseBasic(1: Request req);
   void requestResponseDeclaredException(

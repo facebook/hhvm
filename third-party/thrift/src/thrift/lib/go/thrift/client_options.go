@@ -156,7 +156,7 @@ func setOptions(proto Protocol, options *clientOptions) error {
 	if err := proto.SetProtocolID(options.protocol); err != nil {
 		return err
 	}
-	SetIdentity(proto, options.identity)
+	setIdentity(proto, options.identity)
 	proto.SetTimeout(options.timeout)
 	return nil
 }

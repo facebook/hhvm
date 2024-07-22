@@ -16,8 +16,8 @@
 
 package thrift
 
-// SetIdentity sets the Header identity field
-func SetIdentity(protocol PersistentHeaders, identity string) {
+// setIdentity sets the Header identity field
+func setIdentity(protocol PersistentHeaders, identity string) {
 	protocol.SetPersistentHeader(IDVersionHeader, IDVersion)
 	protocol.SetPersistentHeader(IdentityHeader, identity)
 }

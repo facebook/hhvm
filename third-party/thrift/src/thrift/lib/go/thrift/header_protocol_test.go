@@ -44,7 +44,7 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 		t.Fatalf("failed to set persistent header")
 	}
 
-	SetIdentity(proto1, "batman")
+	setIdentity(proto1, "batman")
 	if gotIdentity, ok := proto1.GetPersistentHeader(IdentityHeader); !ok || gotIdentity != "batman" {
 		t.Fatalf("failed to set identity")
 	}

@@ -166,7 +166,7 @@ func TestHeaderHeaders(t *testing.T) {
 	assertEq(t, false, ok)
 	assertEq(t, 0, len(trans1.GetResponseHeaders()))
 
-	SetIdentity(trans1, "localhost")
+	setIdentity(trans1, "localhost")
 	trans1.SetRequestHeader("thrift_protocol", "compact")
 	trans1.SetRequestHeader("thrift_transport", "header")
 	trans1.SetRequestHeader("preferred_cheese", "cheddar")
@@ -376,7 +376,7 @@ func BenchmarkHeaderFlush(b *testing.B) {
 		tmb := newMockSocket()
 		trans1 := newHeaderTransport(tmb)
 
-		SetIdentity(trans1, "localhost")
+		setIdentity(trans1, "localhost")
 		trans1.SetRequestHeader("thrift_protocol", "compact")
 		trans1.SetRequestHeader("thrift_transport", "header")
 		trans1.SetRequestHeader("preferred_cheese", "cheddar")

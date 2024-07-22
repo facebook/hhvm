@@ -78,7 +78,7 @@ class module_CONSTANTS implements \IThriftConstants {
    * Original thrift constant:-
    * binary bin
    */
-  const string bin = "a\x00z";
+  const string bin = "a\000z";
 
   /**
    * Original thrift constant:-
@@ -572,30 +572,30 @@ class module_CONSTANTS implements \IThriftConstants {
   <<__Memoize>>
   public static function escaped_strings()[write_props]: \ConstVector<string>{
     return ImmVector {
-      "\x01",
-      "\x1f",
+      "\001",
+      "\037",
       " ",
       "'",
       "\"",
       "\n",
-      "\x0d",
-      "\x09",
+      "\r",
+      "\011",
       "a",
-      "«",
+      "\302\253",
       "j",
-      "¦",
+      "\302\246",
       "ayyy",
-      "«yyy",
+      "\302\253yyy",
       "jyyy",
-      "¦yyy",
+      "\302\246yyy",
       "zzza",
-      "zzz«",
+      "zzz\302\253",
       "zzzj",
-      "zzz¦",
+      "zzz\302\246",
       "zzzayyy",
-      "zzz«yyy",
+      "zzz\302\253yyy",
       "zzzjyyy",
-      "zzz¦yyy",
+      "zzz\302\246yyy",
     };
   }
 

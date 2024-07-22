@@ -1872,32 +1872,7 @@ bool t_hack_generator::is_hack_const_type(const t_type* type) {
 }
 
 std::string t_hack_generator::render_string(const std::string& value) {
-  std::string result;
-  result.reserve(value.size() + 2);
-  result.push_back('"');
-  for (unsigned char c : value) {
-    switch (c) {
-      case '\\':
-        result.append("\\\\");
-        break;
-      case '"':
-        result.append("\\\"");
-        break;
-      case '\n':
-        result.append("\\n");
-        break;
-      default:
-        if (c < 32) {
-          // Escape control characters.
-          result.append(fmt::format("\\x{:02x}", c));
-        } else {
-          result.push_back(c);
-        }
-        break;
-    }
-  }
-  result.push_back('"');
-  return result;
+  return fmt::format("\"{}\"", compiler::get_escaped_string(value));
 }
 
 /**

@@ -17,6 +17,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <unordered_set>
 #include <vector>
 
@@ -26,9 +27,7 @@
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_type.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 /**
  * Split a namespace string using '.' as a token
@@ -49,6 +48,37 @@ bool generate_legacy_api(const t_structured&);
 bool generate_legacy_api(const t_enum&);
 bool generate_legacy_api(const t_service&);
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+inline std::string get_escaped_string(std::string_view str) {
+  std::string escaped;
+  escaped.reserve(str.size());
+  for (unsigned char c : str) {
+    switch (c) {
+      case '\\':
+        escaped.append("\\\\");
+        break;
+      case '"':
+        escaped.append("\\\"");
+        break;
+      case '\r':
+        escaped.append("\\r");
+        break;
+      case '\n':
+        escaped.append("\\n");
+        break;
+      default:
+        if (c < 0x20 || c >= 0x7F) {
+          // Use octal escape sequences because they are the most portable
+          // across languages. Hexadecimal ones have a problem of consuming
+          // all hex digits after \x in C++, e.g. \xcafefe is a single escape
+          // sequence.
+          escaped.append(fmt::format("\\{:03o}", c));
+        } else {
+          escaped.push_back(c);
+        }
+        break;
+    }
+  }
+  return escaped;
+}
+
+} // namespace apache::thrift::compiler

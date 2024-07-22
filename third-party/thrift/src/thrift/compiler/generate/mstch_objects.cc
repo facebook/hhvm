@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 
 #include <fmt/core.h>
@@ -236,38 +237,7 @@ mstch::node mstch_const_value::string_value() {
   if (type_ != cv::CV_STRING) {
     return {};
   }
-
-  const std::string& str = const_value_->get_string();
-  std::string escaped;
-  escaped.reserve(str.size());
-  for (unsigned char c : str) {
-    switch (c) {
-      case '\\':
-        escaped.append("\\\\");
-        break;
-      case '"':
-        escaped.append("\\\"");
-        break;
-      case '\r':
-        escaped.append("\\r");
-        break;
-      case '\n':
-        escaped.append("\\n");
-        break;
-      default:
-        if (c < 0x20 || c >= 0x7F) {
-          // Use octal escape sequences because they are the most portable
-          // across languages. Hexadecimal ones have a problem of consuming
-          // all hex digits after \x in C++, e.g. \xcafefe is a single escape
-          // sequence.
-          escaped.append(fmt::format("\\{:03o}", c));
-        } else {
-          escaped.push_back(c);
-        }
-        break;
-    }
-  }
-  return escaped;
+  return get_escaped_string(const_value_->get_string());
 }
 
 mstch::node mstch_const_value::string_length() {

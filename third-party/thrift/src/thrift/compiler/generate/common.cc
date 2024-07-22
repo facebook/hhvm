@@ -26,9 +26,7 @@
 #include <thrift/compiler/ast/t_set.h>
 #include <thrift/compiler/lib/uri.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 std::vector<std::string> split_namespace(const std::string& s) {
   std::string token = ".";
@@ -92,6 +90,4 @@ bool generate_legacy_api(const t_service& s) {
   return s.program()->inherit_annotation_or_null(s, kNoLegacyUri) == nullptr;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

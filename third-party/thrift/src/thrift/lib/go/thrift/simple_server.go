@@ -25,7 +25,7 @@ import (
 	"runtime/debug"
 )
 
-// SimpleServer is a functional but unoptimized server that is easy to
+// simpleServer is a functional but unoptimized server that is easy to
 // understand.  In its accept loop, it performs an accept on an
 // underlying socket, wraps the socket in the net.Listener, and
 // then spins up a gofunc to process requests.
@@ -34,7 +34,7 @@ import (
 // on the connection.  multiple simultaneous requests over a single
 // connection are not supported, as the per-connection gofunc reads
 // the request, processes it, and writes the response serially
-type SimpleServer struct {
+type simpleServer struct {
 	processor   ProcessorContext
 	listener    net.Listener
 	newProtocol func(net.Conn) (Protocol, error)
@@ -43,11 +43,11 @@ type SimpleServer struct {
 }
 
 // NewSimpleServer creates a new server that only supports Header Transport.
-func NewSimpleServer(processor ProcessorContext, listener net.Listener, transportType TransportID, options ...func(*ServerOptions)) *SimpleServer {
+func NewSimpleServer(processor ProcessorContext, listener net.Listener, transportType TransportID, options ...func(*ServerOptions)) Server {
 	if transportType != TransportIDHeader {
 		panic(fmt.Sprintf("SimpleServer only supports Header Transport and not %d", transportType))
 	}
-	return &SimpleServer{
+	return &simpleServer{
 		processor:     processor,
 		listener:      listener,
 		newProtocol:   NewHeaderProtocol,
@@ -66,7 +66,7 @@ func simpleServerOptions(options ...func(*ServerOptions)) *ServerOptions {
 
 // ServeContext starts listening on the transport and accepting new connections
 // and blocks until cancel is called via context or an error occurs.
-func (p *SimpleServer) ServeContext(ctx context.Context) error {
+func (p *simpleServer) ServeContext(ctx context.Context) error {
 	go func() {
 		<-ctx.Done()
 		p.listener.Close()
@@ -79,7 +79,7 @@ func (p *SimpleServer) ServeContext(ctx context.Context) error {
 }
 
 // acceptLoop takes a context that will be decorated with ConnInfo and passed down to new clients.
-func (p *SimpleServer) acceptLoop(ctx context.Context) error {
+func (p *simpleServer) acceptLoop(ctx context.Context) error {
 	for {
 		conn, err := p.listener.Accept()
 		if err != nil {
@@ -102,7 +102,7 @@ func (p *SimpleServer) acceptLoop(ctx context.Context) error {
 	}
 }
 
-func (p *SimpleServer) processRequests(ctx context.Context, conn net.Conn) error {
+func (p *simpleServer) processRequests(ctx context.Context, conn net.Conn) error {
 	protocol, err := p.newProtocol(conn)
 	if err != nil {
 		return err

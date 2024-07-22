@@ -104,6 +104,8 @@ func (c *SerialChannel) recvMsg(method string, seqID int32, response IResponse) 
 
 // Close closes the client connection
 func (c *SerialChannel) Close() error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	return c.protocol.Close()
 }
 

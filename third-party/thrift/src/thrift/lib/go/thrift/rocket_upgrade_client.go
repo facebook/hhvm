@@ -22,15 +22,15 @@ import (
 	"time"
 )
 
-type upgradeToRocketProtocol struct {
+type upgradeToRocketClient struct {
 	Protocol
 	rocketProtocol Protocol
 	headerProtocol Protocol
 }
 
-// NewUpgradeToRocketProtocol creates a protocol that upgrades from Header to Rocket protocol from a socket.
-func NewUpgradeToRocketProtocol(conn net.Conn) (Protocol, error) {
-	rocket, err := NewRocketProtocol(conn)
+// NewUpgradeToRocketClient creates a protocol that upgrades from Header to Rocket client from a socket.
+func NewUpgradeToRocketClient(conn net.Conn) (Protocol, error) {
+	rocket, err := NewRocketClient(conn)
 	if err != nil {
 		return nil, err
 	}
@@ -38,13 +38,13 @@ func NewUpgradeToRocketProtocol(conn net.Conn) (Protocol, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &upgradeToRocketProtocol{
+	return &upgradeToRocketClient{
 		rocketProtocol: rocket,
 		headerProtocol: header,
 	}, nil
 }
 
-func (p *upgradeToRocketProtocol) SetTimeout(timeout time.Duration) {
+func (p *upgradeToRocketClient) SetTimeout(timeout time.Duration) {
 	if p.Protocol == nil {
 		p.rocketProtocol.SetTimeout(timeout)
 		p.headerProtocol.SetTimeout(timeout)
@@ -56,7 +56,7 @@ func (p *upgradeToRocketProtocol) SetTimeout(timeout time.Duration) {
 // WriteMessageBegin first sends a upgradeToRocket message using the HeaderProtocol.
 // If this succeeds, we switch to the RocketProtocol and write the message using it.
 // If this fails, we send the original message using the HeaderProtocol and continue using the HeaderProtocol.
-func (p *upgradeToRocketProtocol) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
+func (p *upgradeToRocketClient) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
 	if p.Protocol == nil {
 		if err := p.upgradeToRocket(); err != nil {
 			p.Protocol = p.headerProtocol
@@ -67,11 +67,11 @@ func (p *upgradeToRocketProtocol) WriteMessageBegin(name string, typeID MessageT
 	return p.Protocol.WriteMessageBegin(name, typeID, seqid)
 }
 
-func (p *upgradeToRocketProtocol) upgradeToRocket() error {
+func (p *upgradeToRocketClient) upgradeToRocket() error {
 	return upgradeToRocket(context.Background(), p.headerProtocol)
 }
 
-func (p *upgradeToRocketProtocol) SetPersistentHeader(key, value string) {
+func (p *upgradeToRocketClient) SetPersistentHeader(key, value string) {
 	if p.Protocol == nil {
 		p.rocketProtocol.SetPersistentHeader(key, value)
 		p.headerProtocol.SetPersistentHeader(key, value)
@@ -80,12 +80,12 @@ func (p *upgradeToRocketProtocol) SetPersistentHeader(key, value string) {
 	p.Protocol.SetPersistentHeader(key, value)
 }
 
-func (p *upgradeToRocketProtocol) GetPersistentHeader(key string) (string, bool) {
+func (p *upgradeToRocketClient) GetPersistentHeader(key string) (string, bool) {
 	v, ok := p.GetPersistentHeaders()[key]
 	return v, ok
 }
 
-func (p *upgradeToRocketProtocol) GetPersistentHeaders() map[string]string {
+func (p *upgradeToRocketClient) GetPersistentHeaders() map[string]string {
 	if p.Protocol == nil {
 		headers := p.headerProtocol.GetPersistentHeaders()
 		rocketHeaders := p.rocketProtocol.GetPersistentHeaders()
@@ -97,7 +97,7 @@ func (p *upgradeToRocketProtocol) GetPersistentHeaders() map[string]string {
 	return p.Protocol.GetPersistentHeaders()
 }
 
-func (p *upgradeToRocketProtocol) ClearPersistentHeaders() {
+func (p *upgradeToRocketClient) ClearPersistentHeaders() {
 	if p.Protocol == nil {
 		p.rocketProtocol.ClearPersistentHeaders()
 		p.headerProtocol.ClearPersistentHeaders()
@@ -106,7 +106,7 @@ func (p *upgradeToRocketProtocol) ClearPersistentHeaders() {
 	p.Protocol.ClearPersistentHeaders()
 }
 
-func (p *upgradeToRocketProtocol) SetRequestHeader(key, value string) {
+func (p *upgradeToRocketClient) SetRequestHeader(key, value string) {
 	if p.Protocol == nil {
 		p.rocketProtocol.(RequestHeaders).SetRequestHeader(key, value)
 		p.headerProtocol.(RequestHeaders).SetRequestHeader(key, value)
@@ -115,12 +115,12 @@ func (p *upgradeToRocketProtocol) SetRequestHeader(key, value string) {
 	p.Protocol.(RequestHeaders).SetRequestHeader(key, value)
 }
 
-func (p *upgradeToRocketProtocol) GetRequestHeader(key string) (value string, ok bool) {
+func (p *upgradeToRocketClient) GetRequestHeader(key string) (value string, ok bool) {
 	v, ok := p.GetRequestHeaders()[key]
 	return v, ok
 }
 
-func (p *upgradeToRocketProtocol) GetRequestHeaders() map[string]string {
+func (p *upgradeToRocketClient) GetRequestHeaders() map[string]string {
 	if p.Protocol == nil {
 		headers := p.headerProtocol.(RequestHeaders).GetRequestHeaders()
 		rocketHeaders := p.rocketProtocol.(RequestHeaders).GetRequestHeaders()
@@ -132,12 +132,12 @@ func (p *upgradeToRocketProtocol) GetRequestHeaders() map[string]string {
 	return p.Protocol.(RequestHeaders).GetRequestHeaders()
 }
 
-func (p *upgradeToRocketProtocol) GetResponseHeader(key string) (string, bool) {
+func (p *upgradeToRocketClient) GetResponseHeader(key string) (string, bool) {
 	v, ok := p.GetResponseHeaders()[key]
 	return v, ok
 }
 
-func (p *upgradeToRocketProtocol) GetResponseHeaders() map[string]string {
+func (p *upgradeToRocketClient) GetResponseHeaders() map[string]string {
 	if p.Protocol == nil {
 		headers := p.headerProtocol.GetResponseHeaders()
 		rocketHeaders := p.rocketProtocol.GetResponseHeaders()
@@ -149,7 +149,7 @@ func (p *upgradeToRocketProtocol) GetResponseHeaders() map[string]string {
 	return p.Protocol.GetResponseHeaders()
 }
 
-func (p *upgradeToRocketProtocol) SetProtocolID(protoID ProtocolID) error {
+func (p *upgradeToRocketClient) SetProtocolID(protoID ProtocolID) error {
 	if p.Protocol == nil {
 		if err := p.headerProtocol.SetProtocolID(protoID); err != nil {
 			return err
@@ -159,7 +159,7 @@ func (p *upgradeToRocketProtocol) SetProtocolID(protoID ProtocolID) error {
 	return p.Protocol.SetProtocolID(protoID)
 }
 
-func (p *upgradeToRocketProtocol) Close() error {
+func (p *upgradeToRocketClient) Close() error {
 	if p.Protocol == nil {
 		if err := p.headerProtocol.Close(); err != nil {
 			return err

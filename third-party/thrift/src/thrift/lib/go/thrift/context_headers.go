@@ -67,8 +67,8 @@ type RequestHeaders interface {
 
 // Compile time interface enforcer
 var _ RequestHeaders = (*headerProtocol)(nil)
-var _ RequestHeaders = (*rocketProtocol)(nil)
-var _ RequestHeaders = (*upgradeToRocketProtocol)(nil)
+var _ RequestHeaders = (*rocketClient)(nil)
+var _ RequestHeaders = (*upgradeToRocketClient)(nil)
 var _ RequestHeaders = (*httpProtocol)(nil)
 
 // setRequestHeaders sets the Headers in the protocol to send with the request.

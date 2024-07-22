@@ -38,6 +38,6 @@ type Protocol interface {
 
 // Compile time check for interface conformance
 var _ Protocol = (*headerProtocol)(nil)
-var _ Protocol = (*rocketProtocol)(nil)
-var _ Protocol = (*upgradeToRocketProtocol)(nil)
+var _ Protocol = (*rocketClient)(nil)
+var _ Protocol = (*upgradeToRocketClient)(nil)
 var _ Protocol = (*httpProtocol)(nil)

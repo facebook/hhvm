@@ -29,7 +29,7 @@ import (
 	"github.com/rsocket/rsocket-go/payload"
 )
 
-type rocketProtocol struct {
+type rocketClient struct {
 	Format
 
 	conn net.Conn
@@ -55,9 +55,9 @@ type rocketProtocol struct {
 	buf *MemoryBuffer
 }
 
-// NewRocketProtocol creates a RocketProtocol, given a RocketTransport
-func NewRocketProtocol(conn net.Conn) (Protocol, error) {
-	p := &rocketProtocol{
+// NewRocketClient creates a RocketClient
+func NewRocketClient(conn net.Conn) (Protocol, error) {
+	p := &rocketClient{
 		protoID:           ProtocolIDCompact,
 		persistentHeaders: make(map[string]string),
 		buf:               NewMemoryBuffer(),
@@ -75,11 +75,11 @@ type rsocketResult struct {
 	err error
 }
 
-func (p *rocketProtocol) SetTimeout(timeout time.Duration) {
+func (p *rocketClient) SetTimeout(timeout time.Duration) {
 	p.timeout = timeout
 }
 
-func (p *rocketProtocol) resetProtocol() error {
+func (p *rocketClient) resetProtocol() error {
 	p.buf.Reset()
 	switch p.protoID {
 	case ProtocolIDBinary:
@@ -93,12 +93,12 @@ func (p *rocketProtocol) resetProtocol() error {
 	return nil
 }
 
-func (p *rocketProtocol) SetProtocolID(protoID ProtocolID) error {
+func (p *rocketClient) SetProtocolID(protoID ProtocolID) error {
 	p.protoID = protoID
 	return p.resetProtocol()
 }
 
-func (p *rocketProtocol) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
+func (p *rocketClient) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
 	p.buf.Reset()
 	p.seqID = seqid
 
@@ -112,11 +112,11 @@ func (p *rocketProtocol) WriteMessageBegin(name string, typeID MessageType, seqi
 	return nil
 }
 
-func (p *rocketProtocol) WriteMessageEnd() error {
+func (p *rocketClient) WriteMessageEnd() error {
 	return nil
 }
 
-func (p *rocketProtocol) Flush() (err error) {
+func (p *rocketClient) Flush() (err error) {
 	if p.reqMetadata == nil {
 		p.reqMetadata = &requestRPCMetadata{}
 	}
@@ -167,7 +167,7 @@ func (p *rocketProtocol) Flush() (err error) {
 }
 
 // Open opens the internal transport (required for Transport)
-func (p *rocketProtocol) open() error {
+func (p *rocketClient) open() error {
 	if p.client != nil {
 		return nil
 	}
@@ -228,7 +228,7 @@ func (p *rocketProtocol) open() error {
 	return err
 }
 
-func (p *rocketProtocol) readPayload() (resp payload.Payload, err error) {
+func (p *rocketClient) readPayload() (resp payload.Payload, err error) {
 	ctx := p.ctx
 	if p.timeout > 0 {
 		var cancel context.CancelFunc
@@ -243,7 +243,7 @@ func (p *rocketProtocol) readPayload() (resp payload.Payload, err error) {
 	}
 }
 
-func (p *rocketProtocol) ReadMessageBegin() (string, MessageType, int32, error) {
+func (p *rocketClient) ReadMessageBegin() (string, MessageType, int32, error) {
 	name := p.reqMetadata.Name
 	resp, err := p.readPayload()
 	if err != nil {
@@ -346,33 +346,33 @@ func newRocketException(exception *PayloadExceptionMetadataBase) error {
 	return NewTransportExceptionFromError(err)
 }
 
-func (p *rocketProtocol) ReadMessageEnd() error {
+func (p *rocketClient) ReadMessageEnd() error {
 	p.reqMetadata = nil
 	return nil
 }
 
-func (p *rocketProtocol) Skip(fieldType Type) (err error) {
+func (p *rocketClient) Skip(fieldType Type) (err error) {
 	return SkipDefaultDepth(p, fieldType)
 }
 
-func (p *rocketProtocol) SetPersistentHeader(key, value string) {
+func (p *rocketClient) SetPersistentHeader(key, value string) {
 	p.persistentHeaders[key] = value
 }
 
-func (p *rocketProtocol) GetPersistentHeader(key string) (string, bool) {
+func (p *rocketClient) GetPersistentHeader(key string) (string, bool) {
 	v, ok := p.persistentHeaders[key]
 	return v, ok
 }
 
-func (p *rocketProtocol) GetPersistentHeaders() map[string]string {
+func (p *rocketClient) GetPersistentHeaders() map[string]string {
 	return p.persistentHeaders
 }
 
-func (p *rocketProtocol) ClearPersistentHeaders() {
+func (p *rocketClient) ClearPersistentHeaders() {
 	p.persistentHeaders = make(map[string]string)
 }
 
-func (p *rocketProtocol) SetRequestHeader(key, value string) {
+func (p *rocketClient) SetRequestHeader(key, value string) {
 	if p.reqMetadata == nil {
 		p.reqMetadata = &requestRPCMetadata{}
 	}
@@ -382,16 +382,16 @@ func (p *rocketProtocol) SetRequestHeader(key, value string) {
 	p.reqMetadata.Other[key] = value
 }
 
-func (p *rocketProtocol) GetRequestHeader(key string) (value string, ok bool) {
+func (p *rocketClient) GetRequestHeader(key string) (value string, ok bool) {
 	v, ok := p.GetRequestHeaders()[key]
 	return v, ok
 }
 
-func (p *rocketProtocol) GetRequestHeaders() map[string]string {
+func (p *rocketClient) GetRequestHeaders() map[string]string {
 	return p.reqMetadata.Other
 }
 
-func (p *rocketProtocol) GetResponseHeader(key string) (string, bool) {
+func (p *rocketClient) GetResponseHeader(key string) (string, bool) {
 	if p.respMetadata == nil {
 		return "", false
 	}
@@ -399,14 +399,14 @@ func (p *rocketProtocol) GetResponseHeader(key string) (string, bool) {
 	return value, ok
 }
 
-func (p *rocketProtocol) GetResponseHeaders() map[string]string {
+func (p *rocketClient) GetResponseHeaders() map[string]string {
 	if p.respMetadata == nil {
 		return nil
 	}
 	return p.respMetadata.OtherMetadata
 }
 
-func (p *rocketProtocol) Close() error {
+func (p *rocketClient) Close() error {
 	if err := p.conn.Close(); err != nil {
 		return err
 	}

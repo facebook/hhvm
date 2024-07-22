@@ -27,8 +27,8 @@ type PersistentHeaders interface {
 
 // Compile time interface enforcer
 var _ PersistentHeaders = (*headerProtocol)(nil)
-var _ PersistentHeaders = (*rocketProtocol)(nil)
-var _ PersistentHeaders = (*upgradeToRocketProtocol)(nil)
+var _ PersistentHeaders = (*rocketClient)(nil)
+var _ PersistentHeaders = (*upgradeToRocketClient)(nil)
 var _ PersistentHeaders = (*httpProtocol)(nil)
 
 // ResponseHeaderGetter is a temporary measure to allow protocols to expose headers received with the response.
@@ -39,6 +39,6 @@ type ResponseHeaderGetter interface {
 
 // Compile time interface enforcer
 var _ ResponseHeaderGetter = (*headerProtocol)(nil)
-var _ ResponseHeaderGetter = (*rocketProtocol)(nil)
-var _ ResponseHeaderGetter = (*upgradeToRocketProtocol)(nil)
+var _ ResponseHeaderGetter = (*rocketClient)(nil)
+var _ ResponseHeaderGetter = (*upgradeToRocketClient)(nil)
 var _ ResponseHeaderGetter = (*httpProtocol)(nil)

@@ -34,7 +34,7 @@ func TestCloseWithoutSendingMessages(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client socket: %s", err)
 	}
-	proto, err := NewUpgradeToRocketProtocol(clientSocket)
+	proto, err := NewUpgradeToRocketClient(clientSocket)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}

@@ -422,6 +422,9 @@ void inject_schema_const(
       t_primitive_type::t_binary(),
       schematizer::name_schema(ctx.source_mgr(), prog),
       std::make_unique<t_const_value>(std::move(serialized)));
+  // Since schema injection happens after 'match_const_type_with_value' mutator
+  // we need to set the explicitly type to binary here.
+  cnst->value()->set_ttype(t_primitive_type::t_binary());
   cnst->set_uri("");
   cnst->set_src_range(prog.src_range());
   cnst->set_generated();

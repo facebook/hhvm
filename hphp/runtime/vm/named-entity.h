@@ -198,6 +198,10 @@ public:
   using ListType = AtomicLowPtr<T, std::memory_order_acquire,
                                    std::memory_order_release>;
 private:
+  // All classes loaded in any request for a given NamedType (per name).
+  // Classes are chained via m_next pointers, and added at the head of the list.
+  // This is mostly used to search for compatible classes we can reuse when we
+  // load a class in a request for the first time.
   ListType<Class> m_clsList{nullptr};
 };
 

@@ -4867,6 +4867,8 @@ const StaticString s__JitSerdesPriority("__JitSerdesPriority");
 Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
   FTRACE(3, "  Defining cls {} failIsFatal {}\n",
          preClass->name()->data(), failIsFatal);
+
+  // NamedTypes are unique based on name.
   NamedType* const nameList = preClass->namedType();
   Class* top = nameList->clsList();
 
@@ -4900,7 +4902,8 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
     return cls;
   }
 
-  // Get a compatible Class, and add it to the list of defined classes.
+  // Get a compatible Class that was loaded in a previous request, and
+  // add it to the list of defined classes.
   Class* parent = nullptr;
   for (;;) {
     // Search for a compatible extant class.  Searching from most to least
@@ -4927,7 +4930,8 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
       }
       assertx(avail == Class::Avail::False);
     }
-
+    // Did not find a compatible class that had previously been loaded.
+    // Need to create one. First confirm the class's dependencies exist.
     if (!parent && preClass->parent()->size() != 0) {
       parent = Class::get(preClass->parent(), failIsFatal);
       if (parent == nullptr) {
@@ -4939,21 +4943,21 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
       }
     }
 
+    // When loading classes, we iterate over all classes and symbols
+    // in a round. failIsFatal is false while we do this, until we 
+    // finish a round without making any progress. This is because 
+    // loading certain symbosl requires other symbols to be loaded, 
+    // and we currently don't use any dependency information to inform 
+    // the order in which we load symbols.
     if (!failIsFatal) {
       // Check interfaces
       for (auto it = preClass->interfaces().begin();
-                 it != preClass->interfaces().end(); ++it) {
+          it != preClass->interfaces().end(); ++it) {
         if (!Class::get(*it, false)) return nullptr;
       }
       // traits
       for (auto const& traitName : preClass->usedTraits()) {
         if (!Class::get(traitName, false)) return nullptr;
-      }
-      // enum
-      if (preClass->attrs() & AttrEnum) {
-        if (!preClass->enumBaseTy().validForEnumBase()) {
-          return nullptr;
-        }
       }
       // enum and enum class
       if (preClass->attrs() & (AttrEnum|AttrEnumClass)) {
@@ -4974,6 +4978,9 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
     {
       Lock l(g_classesMutex);
 
+      // If another request added to the clsList since we first checked,
+      // we should check if we can use that Class* instead to avoid duplicate
+      // entries in clsList. Continue iterating to reach recently added Class*.
       if (UNLIKELY(top != nameList->clsList())) {
         top = nameList->clsList();
         continue;

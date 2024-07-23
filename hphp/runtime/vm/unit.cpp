@@ -624,6 +624,7 @@ void Unit::mergeImpl() {
   typeAliases.set();
 
   bool failIsFatal = false;
+  // TODO: Improve the order with which we resolve symbols
   do {
     bool madeProgress = defineSymbols(
       m_preClasses, preClasses, Stats::UnitMerge_mergeable_class,
@@ -633,6 +634,12 @@ void Unit::mergeImpl() {
         auto pcName = preClass->name();
         if (PreClassEmitter::IsAnonymousClassName(pcName->slice())) {
           return true;
+        }
+        // If enum base type relies on a type alias we have not resolved
+        // yet, we need to wait until we resolve it.
+        if (!failIsFatal && preClass->attrs() & AttrEnum &&
+          preClass->enumBaseTy().isUnresolved()) {
+          return false;
         }
         assertx(preClass->isPersistent() ==
                 (this->isSystemLib() || RuntimeOption::RepoAuthoritative));

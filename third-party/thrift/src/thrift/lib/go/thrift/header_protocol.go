@@ -31,31 +31,29 @@ type headerProtocol struct {
 
 // NewHeaderProtocol creates a new header protocol.
 func NewHeaderProtocol(conn net.Conn) (Protocol, error) {
-	return newHeaderProtocol(conn)
+	return newHeaderProtocol(conn, ProtocolIDCompact, 0, nil)
 }
 
-func newHeaderProtocol(conn net.Conn) (Protocol, error) {
-	p := &headerProtocol{
-		protoID: ProtocolIDCompact,
-	}
-	p.trans = newHeaderTransport(conn)
+func newHeaderProtocol(conn net.Conn, protoID ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
+	p := &headerProtocol{protoID: protoID}
+	p.trans = newHeaderTransport(conn, protoID)
+	p.trans.conn.readTimeout = timeout
+	p.trans.conn.writeTimeout = timeout
 	if err := p.resetProtocol(); err != nil {
 		return nil, err
+	}
+	for name, value := range persistentHeaders {
+		p.SetPersistentHeader(name, value)
 	}
 	return p, nil
 }
 
-func (p *headerProtocol) SetTimeout(timeout time.Duration) {
-	p.trans.conn.readTimeout = timeout
-	p.trans.conn.writeTimeout = timeout
-}
-
 func (p *headerProtocol) resetProtocol() error {
-	if p.Format != nil && p.protoID == p.trans.ProtocolID() {
+	if p.Format != nil && p.protoID == p.trans.protoID {
 		return nil
 	}
 
-	p.protoID = p.trans.ProtocolID()
+	p.protoID = p.trans.protoID
 	switch p.protoID {
 	case ProtocolIDBinary:
 		// These defaults match cpp implementation
@@ -152,13 +150,6 @@ func (p *headerProtocol) GetResponseHeaders() map[string]string {
 
 func (p *headerProtocol) ProtocolID() ProtocolID {
 	return p.protoID
-}
-
-func (p *headerProtocol) SetProtocolID(protoID ProtocolID) error {
-	if err := p.trans.SetProtocolID(protoID); err != nil {
-		return err
-	}
-	return p.resetProtocol()
 }
 
 // Deprecated: GetFlags() is a deprecated method.

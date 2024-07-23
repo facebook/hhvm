@@ -23,27 +23,24 @@ import (
 )
 
 func TestHeaderProtocolSomePersistentHeaders(t *testing.T) {
-	protocol, err := newHeaderProtocol(newMockSocket())
+	protocol, err := newHeaderProtocol(newMockSocket(), ProtocolIDCompact, 0, map[string]string{"key": "value"})
 	assert.NoError(t, err)
-	protocol.SetPersistentHeader("key", "value")
 	v, ok := protocol.GetPersistentHeader("key")
 	assert.True(t, ok)
 	assert.Equal(t, "value", v)
 }
 
 func TestRocketProtocolSomePersistentHeaders(t *testing.T) {
-	protocol, err := newRocketClient(newMockSocket())
+	protocol, err := newRocketClient(newMockSocket(), ProtocolIDCompact, 0, map[string]string{"key": "value"})
 	assert.NoError(t, err)
-	protocol.SetPersistentHeader("key", "value")
 	v, ok := protocol.GetPersistentHeader("key")
 	assert.True(t, ok)
 	assert.Equal(t, "value", v)
 }
 
 func TestUpgradeToRocketProtocolSomePersistentHeaders(t *testing.T) {
-	protocol, err := newUpgradeToRocketClient(newMockSocket())
+	protocol, err := newUpgradeToRocketClient(newMockSocket(), ProtocolIDCompact, 0, map[string]string{"key": "value"})
 	assert.NoError(t, err)
-	protocol.SetPersistentHeader("key", "value")
 	v, ok := protocol.GetPersistentHeader("key")
 	assert.True(t, ok)
 	assert.Equal(t, "value", v)

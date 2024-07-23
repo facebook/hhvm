@@ -58,7 +58,7 @@ type headerTransport struct {
 }
 
 // newHeaderTransport creates a new transport with defaults.
-func newHeaderTransport(c net.Conn) *headerTransport {
+func newHeaderTransport(c net.Conn, protoID ProtocolID) *headerTransport {
 	conn := &connTimeout{Conn: c}
 	return &headerTransport{
 		conn:      conn,
@@ -70,7 +70,7 @@ func newHeaderTransport(c net.Conn) *headerTransport {
 		writeInfoHeaders:           map[string]string{},
 		persistentWriteInfoHeaders: map[string]string{},
 
-		protoID:         DefaulprotoID,
+		protoID:         protoID,
 		flags:           0,
 		clientType:      DefaultClientType,
 		writeTransforms: []TransformID{},
@@ -138,20 +138,6 @@ func (t *headerTransport) GetResponseHeaders() map[string]string {
 		res[k] = v
 	}
 	return res
-}
-
-func (t *headerTransport) ProtocolID() ProtocolID {
-	return t.protoID
-}
-
-func (t *headerTransport) SetProtocolID(protoID ProtocolID) error {
-	if !(protoID == ProtocolIDBinary || protoID == ProtocolIDCompact) {
-		return NewTransportException(
-			NOT_IMPLEMENTED, fmt.Sprintf("unimplemented proto ID: %s (%#x)", protoID.String(), int64(protoID)),
-		)
-	}
-	t.protoID = protoID
-	return nil
 }
 
 func (t *headerTransport) AddTransform(trans TransformID) error {

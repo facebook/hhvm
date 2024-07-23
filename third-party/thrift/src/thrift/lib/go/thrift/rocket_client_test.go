@@ -94,7 +94,7 @@ func TestRocketClientAgainstRSocketServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to dial: %v", err)
 	}
-	proto, err := newRocketClient(conn)
+	proto, err := newRocketClient(conn, ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}

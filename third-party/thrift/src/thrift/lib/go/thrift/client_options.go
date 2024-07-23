@@ -164,24 +164,6 @@ func newOptions(opts ...ClientOption) (*clientOptions, error) {
 	return res, nil
 }
 
-func setOptions(protocol Protocol, options *clientOptions) error {
-	proto := protocol.(protocolClient)
-	for name, value := range options.persistentHeaders {
-		proto.SetPersistentHeader(name, value)
-	}
-	if err := proto.SetProtocolID(options.protocol); err != nil {
-		return err
-	}
-	proto.SetTimeout(options.timeout)
-	return nil
-}
-
-type protocolClient interface {
-	Protocol
-	SetProtocolID(protoID ProtocolID) error
-	SetTimeout(timeout time.Duration)
-}
-
 // NewClient will return a connected thrift protocol object.
 // Effectively, this is an open thrift connection to a server.
 // A thrift client can use this connection to communicate with a server.
@@ -192,32 +174,11 @@ func NewClient(opts ...ClientOption) (Protocol, error) {
 	}
 	switch options.transport {
 	case TransportIDHeader:
-		proto, err := newHeaderProtocol(options.conn)
-		if err != nil {
-			return nil, err
-		}
-		if err := setOptions(proto, options); err != nil {
-			return nil, err
-		}
-		return proto, nil
+		return newHeaderProtocol(options.conn, options.protocol, options.timeout, options.persistentHeaders)
 	case TransportIDRocket:
-		protocol, err := newRocketClient(options.conn)
-		if err != nil {
-			return nil, err
-		}
-		if err := setOptions(protocol, options); err != nil {
-			return nil, err
-		}
-		return protocol, nil
+		return newRocketClient(options.conn, options.protocol, options.timeout, options.persistentHeaders)
 	case TransportIDUpgradeToRocket:
-		protocol, err := newUpgradeToRocketClient(options.conn)
-		if err != nil {
-			return nil, err
-		}
-		if err := setOptions(protocol, options); err != nil {
-			return nil, err
-		}
-		return protocol, nil
+		return newUpgradeToRocketClient(options.conn, options.protocol, options.timeout, options.persistentHeaders)
 	default:
 		panic("framed and unframed transport are not supported")
 	}

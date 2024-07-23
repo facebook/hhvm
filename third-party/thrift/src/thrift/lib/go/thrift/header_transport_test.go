@@ -24,7 +24,7 @@ import (
 )
 
 func TestHeaderTransport(t *testing.T) {
-	trans := newHeaderTransport(newMockSocket())
+	trans := newHeaderTransport(newMockSocket(), ProtocolIDCompact)
 	TransportTest(t, trans, trans)
 }
 
@@ -104,7 +104,7 @@ func TestHeaderFramedBinary(t *testing.T) {
 	testHeaderToProto(
 		t, FramedDeprecated, tmb,
 		NewBinaryProtocol(newFramedTransport(tmb), true, true),
-		newHeaderTransport(tmb),
+		newHeaderTransport(tmb, ProtocolIDCompact),
 	)
 }
 
@@ -113,53 +113,17 @@ func TestHeaderFramedCompact(t *testing.T) {
 	testHeaderToProto(
 		t, FramedCompact, tmb,
 		NewCompactProtocol(newFramedTransport(tmb)),
-		newHeaderTransport(tmb),
+		newHeaderTransport(tmb, ProtocolIDCompact),
 	)
-}
-
-func TestHeaderProtoID(t *testing.T) {
-	n := 1
-	tmb := newMockSocket()
-	// write transport
-	trans1 := newHeaderTransport(tmb)
-	// read transport
-	trans2 := newHeaderTransport(tmb)
-	targetID := ProtocolIDBinary
-
-	assertEq(t, DefaulprotoID, trans1.ProtocolID())
-
-	err := trans1.SetProtocolID(targetID)
-	if err != nil {
-		t.Fatalf("failed to set binary protocol")
-	}
-
-	assertEq(t, targetID, trans1.ProtocolID())
-
-	_, err = trans1.Write([]byte("ASDF"))
-	if err != nil {
-		t.Fatalf("failed to write frame %d: %s", n, err)
-	}
-	err = trans1.Flush()
-	if err != nil {
-		t.Fatalf("failed to xmit frame %d: %s", n, err)
-	}
-
-	assertEq(t, DefaulprotoID, trans2.ProtocolID())
-	err = trans2.ResetProtocol()
-	if err != nil {
-		t.Fatalf("failed to reset proto for frame %d: %s", n, err)
-	}
-	// Make sure the protocol gets changed after recving the frame
-	assertEq(t, targetID, trans1.ProtocolID())
 }
 
 func TestHeaderHeaders(t *testing.T) {
 	n := 1
 	tmb := newMockSocket()
 	// write transport
-	trans1 := newHeaderTransport(tmb)
+	trans1 := newHeaderTransport(tmb, ProtocolIDCompact)
 	// read transport
-	trans2 := newHeaderTransport(tmb)
+	trans2 := newHeaderTransport(tmb, ProtocolIDCompact)
 
 	// make sure we don't barf reading header with no frame
 	_, ok := trans1.GetResponseHeaders()["something"]
@@ -227,7 +191,7 @@ func peerIdentity(t *headerTransport) string {
 func TestHeaderRWSmall(t *testing.T) {
 	n := 1
 	tmb := newMockSocket()
-	trans := newHeaderTransport(tmb)
+	trans := newHeaderTransport(tmb, ProtocolIDCompact)
 	data := []byte("ASDFASDFASDF")
 
 	_, err := trans.Write(data)
@@ -290,7 +254,7 @@ func TestHeaderRWSmall(t *testing.T) {
 func TestHeaderZlib(t *testing.T) {
 	n := 1
 	tmb := newMockSocket()
-	trans := newHeaderTransport(tmb)
+	trans := newHeaderTransport(tmb, ProtocolIDCompact)
 	data := []byte("ASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDF")
 	uncompressedlen := 30
 
@@ -361,7 +325,7 @@ func testRWOnce(t *testing.T, n int, data []byte, trans *headerTransport) {
 
 func TestHeaderTransportRWMultiple(t *testing.T) {
 	tmb := newMockSocket()
-	trans := newHeaderTransport(tmb)
+	trans := newHeaderTransport(tmb, ProtocolIDCompact)
 
 	// Test Junk Data
 	testRWOnce(t, 1, []byte("ASDF"), trans)
@@ -375,7 +339,7 @@ func BenchmarkHeaderFlush(b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
 		tmb := newMockSocket()
-		trans1 := newHeaderTransport(tmb)
+		trans1 := newHeaderTransport(tmb, ProtocolIDCompact)
 
 		trans1.SetPersistentHeader(IDVersionHeader, IDVersion)
 		trans1.SetPersistentHeader(IdentityHeader, "localhost")

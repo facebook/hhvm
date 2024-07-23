@@ -25,7 +25,7 @@ import (
 func TestHeaderZstd(t *testing.T) {
 	n := 1
 	tmb := newMockSocket()
-	trans := newHeaderTransport(tmb)
+	trans := newHeaderTransport(tmb, ProtocolIDCompact)
 	data := []byte("ASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDF")
 	uncompressedlen := 30
 

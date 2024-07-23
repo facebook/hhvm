@@ -56,31 +56,15 @@ type rocketClient struct {
 }
 
 // newRocketClient creates a RocketClient
-func newRocketClient(conn net.Conn) (Protocol, error) {
+func newRocketClient(conn net.Conn, protoID ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
 	p := &rocketClient{
-		protoID:           ProtocolIDCompact,
-		persistentHeaders: make(map[string]string),
-		buf:               NewMemoryBuffer(),
 		conn:              conn,
+		protoID:           protoID,
+		persistentHeaders: persistentHeaders,
+		buf:               NewMemoryBuffer(),
+		timeout:           timeout,
 		zstd:              false, // zstd adds a performance overhead, so we default to false
 	}
-	if err := p.resetProtocol(); err != nil {
-		return nil, err
-	}
-	return p, nil
-}
-
-type rsocketResult struct {
-	val payload.Payload
-	err error
-}
-
-func (p *rocketClient) SetTimeout(timeout time.Duration) {
-	p.timeout = timeout
-}
-
-func (p *rocketClient) resetProtocol() error {
-	p.buf.Reset()
 	switch p.protoID {
 	case ProtocolIDBinary:
 		// These defaults match cpp implementation
@@ -88,14 +72,14 @@ func (p *rocketClient) resetProtocol() error {
 	case ProtocolIDCompact:
 		p.Format = NewCompactProtocol(p.buf)
 	default:
-		return NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
+		return nil, NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
 	}
-	return nil
+	return p, nil
 }
 
-func (p *rocketClient) SetProtocolID(protoID ProtocolID) error {
-	p.protoID = protoID
-	return p.resetProtocol()
+type rsocketResult struct {
+	val payload.Payload
+	err error
 }
 
 func (p *rocketClient) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {

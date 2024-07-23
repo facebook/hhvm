@@ -101,9 +101,8 @@ cdef extern from "thrift/lib/cpp2/server/ThriftServer.h" \
         uint16_t getPort() nogil
         void setAddress(cfollySocketAddress& addr) nogil
         void setAddress(string ip, uint16_t port) nogil
-        void setInterface(shared_ptr[cServerInterface]) nogil
+        void setInterface(shared_ptr[cAsyncProcessorFactory]) nogil
         void setStatusInterface(shared_ptr[cStatusServerInterface]) nogil
-        void setProcessorFactory(shared_ptr[cAsyncProcessorFactory]) nogil
         void serve() nogil except +
         void stop() nogil except +
         void stopListening() nogil except +

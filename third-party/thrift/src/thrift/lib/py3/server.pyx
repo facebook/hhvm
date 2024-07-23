@@ -143,7 +143,7 @@ cdef class ThriftServer:
         if handler is not None:
             self.server.get().setThreadManagerFromExecutor(get_executor(), b'python_executor')
             if handler._cpp_obj:
-                self.server.get().setProcessorFactory(handler._cpp_obj)
+                self.server.get().setInterface(handler._cpp_obj)
             else:
                 raise RuntimeError(
                     'The handler is not valid, it has no C++ handler. Maybe its not a '
@@ -151,7 +151,7 @@ cdef class ThriftServer:
                 )
         else:
             # This thrift server is only for monitoring/status/control
-            self.server.get().setProcessorFactory(make_shared[EmptyAsyncProcessorFactory]())
+            self.server.get().setInterface(make_shared[EmptyAsyncProcessorFactory]())
         if socket_fd:
             self.server.get().useExistingSocket(int(socket_fd))
         elif path:

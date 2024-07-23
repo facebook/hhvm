@@ -362,10 +362,9 @@ ThriftServer::~ThriftServer() {
   stopWorkers();
 }
 
-void ThriftServer::setProcessorFactory(
-    std::shared_ptr<AsyncProcessorFactory> pFac) {
+void ThriftServer::setInterface(std::shared_ptr<AsyncProcessorFactory> iface) {
   CHECK(configMutable());
-  cpp2Pfac_ = pFac;
+  cpp2Pfac_ = iface;
   applicationServerInterface_ = nullptr;
   for (auto* serviceHandler : cpp2Pfac_->getServiceHandlers()) {
     if (auto serverInterface = dynamic_cast<ServerInterface*>(serviceHandler)) {

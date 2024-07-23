@@ -727,7 +727,8 @@ static ClientHello constructEncryptedClientHello(
     hpke::SetupResult& hpkeSetup,
     const Random& outerRandom,
     Buf fakeSni,
-    const folly::Optional<ClientPresharedKey>& greasePsk) {
+    const folly::Optional<ClientPresharedKey>& greasePsk,
+    const std::vector<ExtensionType>& outerExtensionTypes) {
   DCHECK(e == Event::ClientHello || e == Event::HelloRetryRequest);
 
   // Outer chlo is missing the inner ECH. We also replace any PSK
@@ -758,14 +759,16 @@ static ClientHello constructEncryptedClientHello(
             std::move(chlo),
             chloOuter.clone(),
             hpkeSetup,
-            greasePsk);
+            greasePsk,
+            outerExtensionTypes);
       } else {
         clientECHExtension = encryptClientHelloHRR(
             supportedConfig,
             std::move(chlo),
             chloOuter.clone(),
             hpkeSetup,
-            greasePsk);
+            greasePsk,
+            outerExtensionTypes);
       }
       chloOuter.extensions.push_back(
           encodeExtension(std::move(clientECHExtension)));
@@ -932,7 +935,8 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
         echParams->setupResult,
         random,
         echParams->fakeSni->clone(),
-        greasePsk);
+        greasePsk,
+        context->getECHOuterExtensionTypes());
 
     // Update SNI now
     echSni = std::move(sni);
@@ -1634,7 +1638,8 @@ Actions EventHandler<
         state.echState()->hpkeSetup,
         *state.clientRandom(),
         folly::IOBuf::copyBuffer(*state.sni()),
-        greasePsk);
+        greasePsk,
+        state.context()->getECHOuterExtensionTypes());
 
     // Save client hello inner
     encodedECH = std::move(encodedClientHello);

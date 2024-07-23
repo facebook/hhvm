@@ -504,18 +504,57 @@ size_t calculateECHPadding(
   return padding;
 }
 
+std::vector<Extension> generateAndReplaceOuterExtensions(
+    std::vector<Extension>&& chloInnerExt,
+    const std::vector<ExtensionType>& outerExtensionTypes) {
+  std::vector<ExtensionType> extTypes;
+  for (const auto& ext : chloInnerExt) {
+    if (std::find(
+            outerExtensionTypes.begin(),
+            outerExtensionTypes.end(),
+            ext.extension_type) != outerExtensionTypes.end()) {
+      extTypes.push_back(ext.extension_type);
+    }
+  }
+  if (extTypes.size() == 0) {
+    return std::move(chloInnerExt);
+  }
+
+  OuterExtensions outerExt;
+  outerExt.types = extTypes;
+
+  bool outerExtensionsInserted = false;
+  for (const auto extType : extTypes) {
+    auto it = std::find_if(
+        chloInnerExt.begin(), chloInnerExt.end(), [extType](const auto& ext) {
+          return ext.extension_type == extType;
+        });
+    if (!outerExtensionsInserted) {
+      *it = encodeExtension(outerExt);
+      outerExtensionsInserted = true;
+    } else {
+      chloInnerExt.erase(it);
+    }
+  }
+
+  return std::move(chloInnerExt);
+}
+
 namespace {
 
-void encryptClientHelloShared(
+void encryptClientHelloImpl(
     OuterECHClientHello& echExtension,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
     hpke::SetupResult& setupResult,
     const folly::Optional<ClientPresharedKey>& greasePsk,
-    size_t maxLen) {
+    size_t maxLen,
+    const std::vector<ExtensionType>& outerExtensionTypes) {
   // Remove legacy_session_id and serialize the client hello inner
   auto chloInnerCopy = clientHelloInner.clone();
   chloInnerCopy.legacy_session_id = folly::IOBuf::copyBuffer("");
+  chloInnerCopy.extensions = generateAndReplaceOuterExtensions(
+      std::move(chloInnerCopy.extensions), outerExtensionTypes);
   auto encodedClientHelloInner = encode(chloInnerCopy);
 
   size_t padding = calculateECHPadding(
@@ -562,20 +601,22 @@ OuterECHClientHello encryptClientHelloHRR(
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
     hpke::SetupResult& setupResult,
-    const folly::Optional<ClientPresharedKey>& greasePsk) {
+    const folly::Optional<ClientPresharedKey>& greasePsk,
+    const std::vector<ExtensionType>& outerExtensionTypes) {
   // Create ECH extension with blank config ID and enc for HRR
   OuterECHClientHello echExtension;
   echExtension.cipher_suite = supportedConfig.cipherSuite;
   echExtension.config_id = supportedConfig.configId;
   echExtension.enc = folly::IOBuf::create(0);
 
-  encryptClientHelloShared(
+  encryptClientHelloImpl(
       echExtension,
       clientHelloInner,
       clientHelloOuter,
       setupResult,
       greasePsk,
-      supportedConfig.maxLen);
+      supportedConfig.maxLen,
+      outerExtensionTypes);
 
   return echExtension;
 }
@@ -585,20 +626,22 @@ OuterECHClientHello encryptClientHello(
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
     hpke::SetupResult& setupResult,
-    const folly::Optional<ClientPresharedKey>& greasePsk) {
+    const folly::Optional<ClientPresharedKey>& greasePsk,
+    const std::vector<ExtensionType>& outerExtensionTypes) {
   // Create ECH extension
   OuterECHClientHello echExtension;
   echExtension.cipher_suite = supportedConfig.cipherSuite;
   echExtension.config_id = supportedConfig.configId;
   echExtension.enc = setupResult.enc->clone();
 
-  encryptClientHelloShared(
+  encryptClientHelloImpl(
       echExtension,
       clientHelloInner,
       clientHelloOuter,
       setupResult,
       greasePsk,
-      supportedConfig.maxLen);
+      supportedConfig.maxLen,
+      outerExtensionTypes);
 
   return echExtension;
 }

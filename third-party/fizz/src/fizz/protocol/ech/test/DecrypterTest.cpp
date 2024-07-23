@@ -41,7 +41,7 @@ ClientHello getChloOuterWithExt(std::unique_ptr<KeyExchange> kex) {
   chloOuter.legacy_session_id = folly::IOBuf::create(0);
 
   OuterECHClientHello echExt = encryptClientHello(
-      supportedECHConfig, chloInner, chloOuter, setupResult, folly::none);
+      supportedECHConfig, chloInner, chloOuter, setupResult, folly::none, {});
 
   // Add ECH extension
   chloOuter.extensions.push_back(encodeExtension(echExt));
@@ -75,7 +75,7 @@ ClientHello getChloOuterHRRWithExt(
 
   // Encrypt client hello once to increment counter and get enc value.
   auto initialECH = encryptClientHello(
-      supportedECHConfig, chloInner, chloOuter, setupResult, folly::none);
+      supportedECHConfig, chloInner, chloOuter, setupResult, folly::none, {});
 
   // First, save out the first ECH
   initialOuterChlo = chloOuter.clone();
@@ -86,7 +86,7 @@ ClientHello getChloOuterHRRWithExt(
 
   // Second encryption for HRR
   OuterECHClientHello echExt = encryptClientHelloHRR(
-      supportedECHConfig, chloInner, chloOuter, setupResult, folly::none);
+      supportedECHConfig, chloInner, chloOuter, setupResult, folly::none, {});
 
   // Add ECH extension
   chloOuter.extensions.push_back(encodeExtension(echExt));

@@ -41,6 +41,10 @@ class ClientProtocolTest : public ProtocolTest<ClientTypes, Actions> {
     context_->setSupportedSigSchemes(
         {SignatureScheme::ecdsa_secp256r1_sha256,
          SignatureScheme::rsa_pss_sha256});
+    context_->setECHOuterExtensionTypes(
+        {ExtensionType::supported_groups,
+         ExtensionType::supported_versions,
+         ExtensionType::key_share});
     auto mockFactory = std::make_unique<MockFactory>();
     mockFactory->setDefaults();
     factory_ = mockFactory.get();
@@ -2944,11 +2948,13 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
   // Add the extension to the inner one
   chlo.extensions.push_back(encodeExtension(ech::InnerECHClientHello()));
 
-  // Save this one (the real one), then blank the legacy session id for AAD
-  // construction
+  // Save this one (the real one), then blank the legacy session id and emplace
+  // OuterExtensions for AAD construction
   auto encodedClientHelloInner = encodeHandshake(chlo.clone());
 
   chlo.legacy_session_id = folly::IOBuf::copyBuffer("");
+  chlo.extensions = ech::generateAndReplaceOuterExtensions(
+      std::move(chlo.extensions), context_->getECHOuterExtensionTypes());
   auto encodedClientHelloInnerAad = encode(chlo);
 
   // Add padding
@@ -3213,10 +3219,13 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
   // Add the extension to the inner one
   chlo.extensions.push_back(encodeExtension(ech::InnerECHClientHello()));
 
-  // Save this one (the real one), then blank the legacy session id for AAD
-  // construction
+  // Save this one (the real one), then blank the legacy session id and emplace
+  // OuterExtensions for AAD construction
   auto encodedClientHelloInner = encodeHandshake(chlo.clone());
+
   chlo.legacy_session_id = folly::IOBuf::copyBuffer("");
+  chlo.extensions = ech::generateAndReplaceOuterExtensions(
+      std::move(chlo.extensions), context_->getECHOuterExtensionTypes());
   auto encodedClientHelloInnerAad = encode(chlo);
 
   // Add padding

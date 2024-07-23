@@ -51,16 +51,21 @@ class MockOpenSSLECKeyExchange256 : public openssl::OpenSSLECKeyExchange {
   MOCK_METHOD(void, generateKeyPair, ());
 };
 
+void checkExtensions(
+    const std::vector<Extension>& testExts,
+    const std::vector<Extension>& expectedExts) {
+  EXPECT_EQ(testExts.size(), expectedExts.size());
+  for (size_t extIndex = 0; extIndex < testExts.size(); ++extIndex) {
+    EXPECT_TRUE(folly::IOBufEqualTo()(
+        testExts[extIndex].extension_data,
+        expectedExts[extIndex].extension_data));
+  }
+}
+
 void checkDecodedChlo(ClientHello decodedChlo, ClientHello expectedChlo) {
   EXPECT_TRUE(folly::IOBufEqualTo()(
       decodedChlo.legacy_session_id, expectedChlo.legacy_session_id));
-  EXPECT_EQ(decodedChlo.extensions.size(), expectedChlo.extensions.size());
-  for (size_t extIndex = 0; extIndex < decodedChlo.extensions.size();
-       ++extIndex) {
-    EXPECT_TRUE(folly::IOBufEqualTo()(
-        decodedChlo.extensions[extIndex].extension_data,
-        expectedChlo.extensions[extIndex].extension_data));
-  }
+  checkExtensions(decodedChlo.extensions, expectedChlo.extensions);
   EXPECT_EQ(decodedChlo.random, expectedChlo.random);
   EXPECT_EQ(decodedChlo.cipher_suites, expectedChlo.cipher_suites);
   EXPECT_EQ(
@@ -101,12 +106,14 @@ OuterECHClientHello getTestOuterECHClientHelloWithInner(ClientHello chloInner) {
   auto setupResult = constructSetupResult(supportedConfig);
   chloInner.legacy_session_id = folly::IOBuf::copyBuffer(testLegacySessionId);
 
+  std::vector<ExtensionType> outerExtensionTypes = {ExtensionType::key_share};
   return encryptClientHello(
       supportedConfig,
       std::move(chloInner),
       getClientHelloOuter(),
       setupResult,
-      folly::none);
+      folly::none,
+      outerExtensionTypes);
 }
 
 OuterECHClientHello getTestOuterECHClientHello() {
@@ -227,6 +234,16 @@ TEST(EncryptionTest, TestValidEncryptClientHello) {
   // getTestOuterECHClientHello()
   expectedChlo.legacy_session_id =
       folly::IOBuf::copyBuffer("test legacy session id");
+  // expectedChlo should have OuterExtensions
+  OuterExtensions expectedOuterExt;
+  expectedOuterExt.types = {ExtensionType::key_share};
+  auto it = std::find_if(
+      expectedChlo.extensions.begin(),
+      expectedChlo.extensions.end(),
+      [](const auto& ext) {
+        return ext.extension_type == ExtensionType::key_share;
+      });
+  *it = encodeExtension(expectedOuterExt);
 
   // Create HPKE setup prefix
   std::string tlsEchPrefix = "tls ech";
@@ -987,6 +1004,39 @@ TEST(EncryptionTest, TestGenerateGreasePsk) {
     EXPECT_TRUE(
         folly::IOBufEqualTo()(hrrGreasePsk.binders[i].binder, randomBinder));
   }
+}
+
+TEST(EncryptionTest, TestGenerateAndReplaceOuterExtensions) {
+  // Make some arbitrary extensions
+  Extension supportedVersions = encodeExtension(SupportedVersions());
+  Extension supportedGroups = encodeExtension(SupportedGroups());
+  Extension keyShare = encodeExtension(ClientKeyShare());
+  Extension signatureAlgorithms = encodeExtension(SignatureAlgorithms());
+  Extension certificateAuthorities = encodeExtension(CertificateAuthorities());
+
+  std::vector<Extension> exts;
+  exts.push_back(supportedVersions.clone());
+  exts.push_back(supportedGroups.clone());
+  exts.push_back(keyShare.clone());
+  exts.push_back(signatureAlgorithms.clone());
+  exts.push_back(certificateAuthorities.clone());
+
+  static const std::vector<ExtensionType> outerExtensionTypes = {
+      ExtensionType::signature_algorithms, ExtensionType::supported_groups};
+  OuterExtensions expectedOuterExt;
+  // Types in the constructed OuterExtensions should be in the same order as in
+  // the original extensions list
+  expectedOuterExt.types = {
+      ExtensionType::supported_groups, ExtensionType::signature_algorithms};
+  std::vector<Extension> expectedExts;
+  expectedExts.push_back(supportedVersions.clone());
+  expectedExts.push_back(encodeExtension(expectedOuterExt));
+  expectedExts.push_back(keyShare.clone());
+  expectedExts.push_back(certificateAuthorities.clone());
+
+  auto extsWithOuterExtensions =
+      generateAndReplaceOuterExtensions(std::move(exts), outerExtensionTypes);
+  checkExtensions(extsWithOuterExtensions, expectedExts);
 }
 
 } // namespace test

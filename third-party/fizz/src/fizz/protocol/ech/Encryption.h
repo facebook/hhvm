@@ -82,19 +82,25 @@ void setAcceptConfirmation(
 size_t
 calculateECHPadding(const ClientHello& chlo, size_t encodedSize, size_t maxLen);
 
+std::vector<Extension> generateAndReplaceOuterExtensions(
+    std::vector<Extension>&& chloInnerExt,
+    const std::vector<ExtensionType>& outerExtensionTypes);
+
 OuterECHClientHello encryptClientHelloHRR(
     const SupportedECHConfig& supportedConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
     hpke::SetupResult& setupResult,
-    const folly::Optional<ClientPresharedKey>& greasePsk);
+    const folly::Optional<ClientPresharedKey>& greasePsk,
+    const std::vector<ExtensionType>& outerExtensionTypes);
 
 OuterECHClientHello encryptClientHello(
     const SupportedECHConfig& supportedConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
     hpke::SetupResult& setupResult,
-    const folly::Optional<ClientPresharedKey>& greasePsk);
+    const folly::Optional<ClientPresharedKey>& greasePsk,
+    const std::vector<ExtensionType>& outerExtensionTypes);
 
 ClientHello decryptECHWithContext(
     const ClientHello& clientHelloOuter,

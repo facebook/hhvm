@@ -111,6 +111,19 @@ class FizzClientContext {
   }
 
   /**
+   * Set the extension types to be placed in ECH OuterExtensions. Ordering does
+   * not matter, but vector search is expected to be faster than unordered_set
+   * at small sizes.
+   */
+  void setECHOuterExtensionTypes(std::vector<ExtensionType> types) {
+    echOuterExtensionTypes_ = std::move(types);
+  }
+
+  const auto& getECHOuterExtensionTypes() const {
+    return echOuterExtensionTypes_;
+  }
+
+  /**
    * This is a legacy api, prefer setClientCertManager.
    * Sets the certificate to use if the server requests client authentication.
    * This api is meant to be used when you expect
@@ -358,6 +371,8 @@ class FizzClientContext {
       PskKeyExchangeMode::psk_dhe_ke,
       PskKeyExchangeMode::psk_ke};
   std::vector<std::string> supportedAlpns_;
+  std::vector<ExtensionType> echOuterExtensionTypes_ = {
+      ExtensionType::key_share};
   bool sendEarlyData_{false};
 
   bool compatMode_{false};

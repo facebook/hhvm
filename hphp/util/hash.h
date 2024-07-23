@@ -31,8 +31,8 @@
 #  if (!defined USE_HWCRC)
 #    define USE_HWCRC
 #  endif
-#elif defined __aarch64__ && defined ENABLE_AARCH64_CRC
-#  if (!defined USE_HWCRC)
+#elif defined(__aarch64__) && defined(__ARM_FEATURE_CRC32)
+#  if !defined(USE_HWCRC)
 #    define USE_HWCRC
 #  endif
 #else
@@ -70,7 +70,7 @@ inline size_t hash_int64_fallback(uint64_t key) {
 ALWAYS_INLINE size_t hash_int64(uint64_t k) {
 #if defined(USE_HWCRC) && defined(__SSE4_2__)
   return _mm_crc32_u64(0, k);
-#elif defined(USE_HWCRC) && defined(ENABLE_AARCH64_CRC)
+#elif defined(USE_HWCRC) && defined(__ARM_FEATURE_CRC32)
   size_t res;
   __asm("crc32cx %w0, wzr, %x1\n" : "=r"(res) : "r"(k));
   return res;
@@ -86,7 +86,7 @@ inline size_t hash_int64_pair(uint64_t k1, uint64_t k2) {
   // differently from (k2, k1).
   k1 += k1;
   return _mm_crc32_u64(k1, k2);
-#elif defined(USE_HWCRC) && defined(ENABLE_AARCH64_CRC)
+#elif defined(USE_HWCRC) && defined(__ARM_FEATURE_CRC32)
   size_t res;
   k1 += k1;
   __asm("crc32cx %w0, %w1, %x2\n" : "=r"(res) : "r"(k2), "r"(k1));
@@ -224,7 +224,7 @@ ALWAYS_INLINE void hash128(const void *key, size_t len, uint64_t seed,
 //   i: case-insensitive;
 //   unsafe: safe for strings aligned at 8-byte boundary;
 
-#if defined USE_HWCRC && (defined __SSE4_2__ || defined ENABLE_AARCH64_CRC)
+#if defined USE_HWCRC && (defined(__SSE4_2__) || defined(__ARM_FEATURE_CRC32))
 
 // We will surely use CRC32, these are implemented directly in hash-crc-*.S
 strhash_t hash_string_cs_unsafe(const char *arKey, uint32_t nKeyLength);

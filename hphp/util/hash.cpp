@@ -17,7 +17,8 @@
 
 #include "hphp/util/assertions.h"
 
-#include <folly/CpuId.h>
+#include <folly/CpuId.h>  // @manual
+#include <folly/system/AuxVector.h>  // @manual
 
 #include <random>
 
@@ -25,11 +26,16 @@ namespace HPHP {
 
 bool IsHWHashSupported() {
 #ifdef USE_HWCRC
-#if defined __SSE4_2__
+#if defined(__SSE4_2__) || defined(__ARM_FEATURE_CRC32)
   return true;
-#else
+#elif defined(__x86_64__) || defined(_M_X64)
   static folly::CpuId cpuid;
   return cpuid.sse42();
+#elif defined(__aarch64__)
+  static folly::ElfHwCaps caps;
+  return caps.aarch64_crc32();
+#else
+  return false;
 #endif
 #else
   return false;
@@ -37,7 +43,7 @@ bool IsHWHashSupported() {
 }
 
 #if !defined(USE_HWCRC) || !(defined(__SSE4_2__) || \
-                             defined(ENABLE_AARCH64_CRC))
+                             defined(__ARM_FEATURE_CRC32))
 NEVER_INLINE
 strhash_t hash_string_cs_fallback(const char *arKey, uint32_t nKeyLength) {
 #ifdef USE_HWCRC

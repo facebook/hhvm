@@ -25,8 +25,3 @@
 #if defined(__SSE4_2__) && !defined(NO_HWCRC)
 #define USE_X86_STRING_HELPERS
 #endif
-
-// Under certain conditions, we implement StringData::hash in ARM assembly.
-#if defined(ENABLE_AARCH64_CRC) && !defined(NO_HWCRC)
-#define USE_ARM_STRING_HELPERS
-#endif

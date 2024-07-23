@@ -54,10 +54,8 @@ let get_lazy_level (genv : ServerEnv.genv) : lazy_level =
   let lazy_initialize = genv.local_config.SLC.lazy_init in
   match (ai_mode_on, lazy_parse, lazy_initialize) with
   | (false, _, false) -> Parse
-  | (false, true, true) -> Init
-  | (false, false, true)
-  | (true, _, _) ->
-    Off
+  | (false, _, true) -> Init
+  | (true, _, _) -> Off
 
 let lazy_full_init genv env profiling =
   ( ServerLazyInit.full_init genv env profiling |> post_init genv,

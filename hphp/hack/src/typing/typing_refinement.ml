@@ -32,6 +32,7 @@ let rec split_ty
     (env : env)
     (ty : locl_ty)
     ~(predicate : type_predicate) : TyPartition.t =
+  let (env, ety) = Env.expand_type env ty in
   let predicate_datatype = DataType.of_predicate env predicate in
   let predicate_complement_datatype = DataType.complement predicate_datatype in
   let partition_tuple_by_tuple
@@ -69,7 +70,7 @@ let rec split_ty
          - (only, for now) IsTupleOf -- in this case, the disjointness check
            will not hold if predicate is also IsTupleOf; and so we span
       *)
-      match get_node ty with
+      match get_node ety with
       | Tneg neg -> begin
         match neg with
         (* we'll over-approximate the DataType for IsTupleOf *)
@@ -105,7 +106,7 @@ let rec split_ty
       *)
       match predicate with
       | IsTupleOf predicates -> begin
-        match get_node ty with
+        match get_node ety with
         | Ttuple tyl -> partition_tuple_by_tuple (get_reason ty) tyl predicates
         | _ -> TyPartition.mk_span ty
       end
@@ -129,7 +130,6 @@ let rec split_ty
     let partitions = List.map ~f:(split_ty ~expansions ~predicate env) tys in
     List.fold ~init ~f:TyPartition.meet partitions
   in
-  let (env, ety) = Env.expand_type env ty in
   let partition =
     match get_node ety with
     (* Types we cannot split, that we know will end up being a part of both

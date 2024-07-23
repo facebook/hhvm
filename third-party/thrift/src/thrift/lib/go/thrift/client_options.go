@@ -186,11 +186,7 @@ func NewClient(opts ...ClientOption) (Protocol, error) {
 	}
 	switch options.transport {
 	case TransportIDHeader:
-		trans, err := NewSocket(SocketConn(options.conn))
-		if err != nil {
-			return nil, err
-		}
-		proto, err := newHeaderProtocol(trans)
+		proto, err := newHeaderProtocol(options.conn)
 		if err != nil {
 			return nil, err
 		}
@@ -199,11 +195,7 @@ func NewClient(opts ...ClientOption) (Protocol, error) {
 		}
 		return proto, nil
 	case TransportIDRocket:
-		conn, err := NewSocket(SocketConn(options.conn))
-		if err != nil {
-			return nil, err
-		}
-		protocol, err := newRocketClient(conn)
+		protocol, err := newRocketClient(options.conn)
 		if err != nil {
 			return nil, err
 		}
@@ -212,11 +204,7 @@ func NewClient(opts ...ClientOption) (Protocol, error) {
 		}
 		return protocol, nil
 	case TransportIDUpgradeToRocket:
-		conn, err := NewSocket(SocketConn(options.conn))
-		if err != nil {
-			return nil, err
-		}
-		protocol, err := newUpgradeToRocketClient(conn)
+		protocol, err := newUpgradeToRocketClient(options.conn)
 		if err != nil {
 			return nil, err
 		}

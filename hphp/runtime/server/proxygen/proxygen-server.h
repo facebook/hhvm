@@ -127,16 +127,12 @@ struct HPHPWorkerThread : proxygen::WorkerThread,
   std::atomic<uint32_t> m_pendingTransportsCount;
 };
 
-struct ProxygenServer : Server,
-                        folly::AsyncTimeout,
-                        TakeoverAgent::Callback {
+struct ProxygenServer : Server, folly::AsyncTimeout {
   friend HPHPSessionAcceptor;
   friend HPHPWorkerThread;
   explicit ProxygenServer(const ServerOptions& options);
   ~ProxygenServer() override;
 
-  void addTakeoverListener(TakeoverListener* listener) override;
-  void removeTakeoverListener(TakeoverListener* listener) override;
   void saturateWorkers() override {
     m_dispatcher.saturateWorkers();
   }
@@ -175,13 +171,6 @@ struct ProxygenServer : Server,
   bool canAccept();
 
   void onConnectionsDrained();
-
-  /**
-   * TakeoverAgent::Callback
-   */
-  int onTakeoverRequest(TakeoverAgent::RequestType type) override;
-
-  void takeoverAborted() override;
 
   DispatcherStats getDispatcherStats() override;
 
@@ -296,7 +285,6 @@ struct ProxygenServer : Server,
   std::unique_ptr<wangle::FilePoller> m_filePoller;
 
   JobQueueDispatcher<ProxygenWorker> m_dispatcher;
-  std::unique_ptr<TakeoverAgent> m_takeover_agent;
   std::unique_ptr<wangle::TLSCredProcessor> m_credProcessor;
 };
 

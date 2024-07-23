@@ -732,7 +732,6 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 - bool Server.ForceChunkedEncoding = false, UNKNOWN
 - int64_t Server.MaxPostSize = 100, UNKNOWN, postprocess
 - bool Server.AlwaysPopulateRawPostData = false, UNKNOWN
-- std::string Server.TakeoverFilename = "", UNKNOWN
 - bool Server.ExpiresActive = true, UNKNOWN
 - int Server.ExpiresDefault = 2592000, UNKNOWN, postprocess
 - std::string Server.DefaultCharsetName = "", UNKNOWN

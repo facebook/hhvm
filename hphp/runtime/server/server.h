@@ -24,7 +24,6 @@
 #include <string>
 
 #include "hphp/runtime/server/cli-server.h"
-#include "hphp/runtime/server/takeover-agent.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/health-monitor-types.h"
@@ -206,14 +205,6 @@ public:
   }
 
   /**
-   * Add or remove a TakeoverListener to this server.
-   *
-   * This is a no-op for servers that do not support socket takeover.
-   */
-  virtual void addTakeoverListener(TakeoverListener* /*listener*/) {}
-  virtual void removeTakeoverListener(TakeoverListener* /*listener*/) {}
-
-  /**
    * Add additional worker threads
    */
   virtual void saturateWorkers() = 0;
@@ -359,7 +350,6 @@ struct ServerOptions {
   int m_maxQueue;
   int m_serverFD{-1};
   int m_sslFD{-1};
-  std::string m_takeoverFilename;
   bool m_useFileSocket{false};
   int m_hugeThreads{0};
   unsigned m_hugeStackKb{0};

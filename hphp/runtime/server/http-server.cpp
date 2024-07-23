@@ -170,12 +170,10 @@ HttpServer::HttpServer() {
   options.m_useFileSocket = !Cfg::Server::FileSocket.empty();
   options.m_serverFD = Cfg::Server::PortFd;
   options.m_sslFD = Cfg::Server::SSLPortFd;
-  options.m_takeoverFilename = Cfg::Server::TakeoverFilename;
   options.m_hugeThreads = Cfg::Server::HugeThreadCount;
   options.m_hugeStackKb = Cfg::Server::HugeStackSizeKb;
   options.m_loop_sample_rate = Cfg::Server::LoopSampleRate;
   m_pageServer = serverFactory->createServer(options);
-  m_pageServer->addTakeoverListener(this);
   m_pageServer->addServerEventListener(this);
 
   if (startingThreadCount != Cfg::Server::ThreadCount) {
@@ -305,13 +303,6 @@ void HttpServer::onServerShutdown() {
   }
 }
 
-void HttpServer::takeoverShutdown() {
-  // We want to synchronously shut down our satellite servers to free up ports,
-  // then asynchronously shut down everything else.
-  onServerShutdown();
-  stop();
-}
-
 void HttpServer::serverStopped(HPHP::Server* server) {
   Logger::Info("Page server stopped");
   assertx(server == m_pageServer.get());
@@ -397,7 +388,7 @@ void HttpServer::runOrExitProcess() {
   // If we haven't already, start the admin server.
   // We can't start the admin server early when hotswap is enabled because
   // it might result in killing ourself instead of the old server.
-  if (Cfg::Server::StopOld || !Cfg::Server::TakeoverFilename.empty()) {
+  if (Cfg::Server::StopOld) {
     runAdminServerOrExitProcess();
   }
 
@@ -479,8 +470,7 @@ void HttpServer::runOrExitProcess() {
     if (isJitSerializing() || !RO::RepoAuthoritative) {
       replayExtendedWarmupRequests();
     }
-    // continously running until /stop is received on admin server, or
-    // takeover is requested.
+    // continously running until /stop is received on admin server
     while (!m_stopped) {
       wait();
     }

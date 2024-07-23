@@ -1175,7 +1175,7 @@ static int start_server(const std::string &username) {
   // data from fbagent/dynologd during warmup, which is helpful for debugging.
   // We cannot do this if hotswap is enabled, because it might result in
   // killing ourself instead of the old server!
-  if (!Cfg::Server::StopOld && Cfg::Server::TakeoverFilename.empty()) {
+  if (!Cfg::Server::StopOld) {
     HttpServer::Server->runAdminServerOrExitProcess();
   }
 

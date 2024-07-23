@@ -53,9 +53,6 @@ struct TestServer : TestBase {
   // test inheriting server fd
   virtual bool TestInheritFdServer();
 
-  // test takeover
-  virtual bool TestTakeoverServer();
-
   // test HttpClient class that proxy server uses
   bool TestHttpClient();
 

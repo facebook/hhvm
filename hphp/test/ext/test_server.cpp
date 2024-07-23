@@ -54,11 +54,9 @@ static int s_server_port = 0;
 static int s_admin_port = 0;
 static int s_rpc_port = 0;
 static int inherit_fd = -1;
-static std::unique_ptr<AsyncFunc<TestServer>> s_func;
 static char s_pidfile[PATH_MAX];
 static char s_repoFile[PATH_MAX];
 static char s_logFile[PATH_MAX];
-static char s_filename[PATH_MAX];
 static int k_timeout = 30;
 
 bool TestServer::VerifyServerResponse(const char* input, const char** outputs,
@@ -86,23 +84,6 @@ bool TestServer::VerifyServerResponse(const char* input, const char** outputs,
   func.start();
 
   bool passed = true;
-  if (s_func) {
-    if (!s_func->waitForEnd(k_timeout)) {
-      // Takeover didn't complete in 30s, stop the old server
-      fprintf(stderr, "stopping HHVM\n");
-      AsyncFunc<TestServer> stopFunc(this, &TestServer::KillServer);
-      stopFunc.run();
-      fprintf(stderr, "Waiting for stop\n");
-      stopFunc.waitForEnd();
-      fprintf(stderr, "Waiting for old HHVM\n");
-      s_func->waitForEnd();
-      // Mark this test a failure
-      fprintf(stderr, "Proceeding to test\n");
-      passed = false;
-    }
-    s_func.reset();
-  }
-
   std::string actual;
 
   int url = 0;
@@ -173,9 +154,7 @@ void TestServer::RunServer() {
   auto const rpcConfig = "-vSatellites.rpc.Port=" +
     folly::to<std::string>(s_rpc_port);
   auto const fd = folly::to<std::string>(inherit_fd);
-  auto option = inherit_fd >= 0
-    ? "--port-fd=" + fd
-    : "-vServer.TakeoverFilename=" + std::string(s_filename);
+  auto option = "--port-fd=" + fd;
   auto serverType = std::string("-vServer.Type=") + m_serverType;
   auto pidFile = std::string("-vPidFile=") + s_pidfile;
   auto repoFile = std::string("-vRepo.Path=") + s_repoFile;
@@ -301,7 +280,6 @@ bool TestServer::RunTests(const std::string &which) {
   close(tmpfd);
 
   RUN_TEST(TestInheritFdServer);
-  RUN_TEST(TestTakeoverServer);
   RUN_TEST(TestSanity);
   RUN_TEST(TestServerVariables);
   RUN_TEST(TestInteraction);
@@ -627,38 +605,6 @@ void TestServer::CleanupPreBoundSocket() {
 bool TestServer::TestInheritFdServer() {
   WITH_PREBOUND_SOCKET(VSR("<?hh print 'Hello, World!';",
       "Hello, World!"));
-  return true;
-}
-
-bool TestServer::TestTakeoverServer() {
-  // start a server
-  snprintf(s_filename, MAXPATHLEN, "/tmp/hphp_takeover_XXXXXX");
-  auto const tmpfd = mkstemp(s_filename);
-  close(tmpfd);
-
-  s_func.reset(new AsyncFunc<TestServer>(this, &TestServer::RunServer));
-  s_func->start();
-
-  // Wait for the server to actually start
-  HttpClient http;
-  StringBuffer response;
-  req::vector<String> responseHeaders;
-  auto url = "http://127.0.0.1:" + folly::to<std::string>(s_server_port) +
-    "/status.php";
-  HeaderMap headers;
-  for (int i = 0; i < 10; i++) {
-    int code = http.get(url.c_str(), response, &headers, &responseHeaders);
-    if (code > 0) {
-      break;
-    }
-    sleep(1);
-  }
-
-  // will start a second server, which should takeover
-  VSR("<?hh print 'Hello, World!';",
-      "Hello, World!");
-  unlink(s_filename);
-  s_filename[0] = 0;
   return true;
 }
 

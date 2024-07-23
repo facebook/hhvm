@@ -50,7 +50,7 @@ let post_init genv (env, _t) =
 
 let get_lazy_level (genv : ServerEnv.genv) : lazy_level =
   if Option.is_some (ServerArgs.ai_mode genv.options) then
-    Ai_mode
+    Eager
   else if genv.local_config.SLC.lazy_init then
     Lazy
   else
@@ -119,20 +119,16 @@ let lazy_saved_state_init
         Load_state_failed (user_message, telemetry) )
     | _ -> Exit.exit ~msg:user_message ~telemetry next_step)
 
-let eager_init genv env _lazy_lev profiling =
+let eager_init genv env profiling =
   let init_result =
     Hh_logger.log "Saved-state requested, but overridden by eager init";
     Load_state_declined "Saved-state requested, but overridden by eager init"
   in
-  let env =
-    ServerEagerInit.init genv _lazy_lev env profiling |> post_init genv
-  in
+  let env = ServerEagerInit.init genv env profiling |> post_init genv in
   (env, init_result)
 
-let eager_full_init genv env _lazy_lev profiling =
-  let env =
-    ServerEagerInit.init genv _lazy_lev env profiling |> post_init genv
-  in
+let eager_full_init genv env profiling =
+  let env = ServerEagerInit.init genv env profiling |> post_init genv in
   let init_result = Load_state_declined "No saved-state requested" in
   (env, init_result)
 
@@ -195,9 +191,9 @@ let init
       | Write_symbol_info_with_state load_state_approach ->
         ( lazy_write_symbol_info_init genv env root (Some load_state_approach),
           "lazy_full_initwrite_symbol_info_init with state" ))
-    | _ ->
+    | Eager ->
       (match init_approach with
-      | Full_init -> (eager_full_init genv env lazy_lev, "eager full init")
-      | _ -> (eager_init genv env lazy_lev, "eager_init"))
+      | Full_init -> (eager_full_init genv env, "eager full init")
+      | _ -> (eager_init genv env, "eager_init"))
   in
   CgroupProfiler.step_group init_method_name ~log:true init_method

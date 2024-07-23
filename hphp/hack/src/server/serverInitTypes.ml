@@ -123,7 +123,6 @@ type loaded_info = {
 [@@deriving show]
 
 type lazy_level =
-  | Ai_mode
   | Eager
   | Lazy
 [@@deriving show]

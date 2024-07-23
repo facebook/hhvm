@@ -7,11 +7,8 @@
  *
  *)
 
-open ServerInitTypes
-
 val init :
   ServerEnv.genv ->
-  lazy_level ->
   ServerEnv.env ->
   CgroupProfiler.step_group ->
   ServerEnv.env * float

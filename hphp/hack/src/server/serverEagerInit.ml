@@ -29,7 +29,6 @@
 
 open Hh_prelude
 open ServerEnv
-open ServerInitTypes
 module SLC = ServerLocalConfig
 
 let type_decl
@@ -48,7 +47,6 @@ let type_decl
 
 let init
     (genv : ServerEnv.genv)
-    (lazy_level : lazy_level)
     (env : ServerEnv.env)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
   let init_telemetry =
@@ -87,9 +85,10 @@ let init
   ServerInitCommon.validate_no_errors env.errorl;
   let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
   let (env, t) =
-    match lazy_level with
-    | Ai_mode -> type_decl genv env defs_per_file t
-    | _ -> (env, t)
+    if Option.is_some (ServerArgs.ai_mode genv.options) then
+      type_decl genv env defs_per_file t
+    else
+      (env, t)
   in
   (* Type-checking everything *)
   ServerInitCommon.defer_or_do_type_check

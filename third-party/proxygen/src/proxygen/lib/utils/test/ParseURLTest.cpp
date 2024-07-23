@@ -50,6 +50,22 @@ TEST(ParseURL, HostNoBrackets) {
 
   EXPECT_EQ("", p->host());
   EXPECT_EQ("", p->hostNoBrackets());
+
+  p = ParseURL::parseURL("localhost");
+  EXPECT_EQ("localhost", p->host());
+  EXPECT_EQ("localhost", p->hostNoBrackets());
+
+  p = ParseURL::parseURL("localhost:80");
+  EXPECT_EQ("localhost", p->host());
+  EXPECT_EQ("localhost", p->hostNoBrackets());
+
+  p = ParseURL::parseURL("[::1]:80");
+  EXPECT_EQ("[::1]", p->host());
+  EXPECT_EQ("::1", p->hostNoBrackets());
+
+  p = ParseURL::parseURL("1.2.3.4:80");
+  EXPECT_EQ("1.2.3.4", p->host());
+  EXPECT_EQ("1.2.3.4", p->hostNoBrackets());
 }
 
 TEST(ParseURL, FullyFormedURL) {
@@ -222,13 +238,16 @@ TEST(ParseURL, InvalidURL) {
 
 TEST(ParseURL, IsHostIPAddress) {
   testHostIsIpAddress("http://127.0.0.1:80", true);
+  testHostIsIpAddress("127.0.0.1:80", true);
   testHostIsIpAddress("127.0.0.1", true);
   testHostIsIpAddress("http://[::1]:80", true);
   testHostIsIpAddress("[::1]", true);
+  testHostIsIpAddress("[::1]:80", true);
   testHostIsIpAddress("[::AB]", true);
 
   testHostIsIpAddress("http://localhost:80", false);
   testHostIsIpAddress("http://localhost", false);
+  testHostIsIpAddress("localhost:80", false);
   testHostIsIpAddress("localhost", false);
   testHostIsIpAddress("1.2.3.-1", false);
   testHostIsIpAddress("1.2.3.999", false);

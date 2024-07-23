@@ -157,7 +157,8 @@ func newOptions(opts ...ClientOption) (*clientOptions, error) {
 	return res, nil
 }
 
-func setOptions(proto Protocol, options *clientOptions) error {
+func setOptions(protocol Protocol, options *clientOptions) error {
+	proto := protocol.(protocolClient)
 	for name, value := range options.persistentHeaders {
 		proto.SetPersistentHeader(name, value)
 	}
@@ -167,6 +168,12 @@ func setOptions(proto Protocol, options *clientOptions) error {
 	setIdentity(proto, options.identity)
 	proto.SetTimeout(options.timeout)
 	return nil
+}
+
+type protocolClient interface {
+	Protocol
+	SetProtocolID(protoID ProtocolID) error
+	SetTimeout(timeout time.Duration)
 }
 
 // NewClient will return a connected thrift protocol object.

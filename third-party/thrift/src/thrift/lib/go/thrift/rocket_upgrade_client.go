@@ -46,11 +46,11 @@ func newUpgradeToRocketClient(conn net.Conn) (Protocol, error) {
 
 func (p *upgradeToRocketClient) SetTimeout(timeout time.Duration) {
 	if p.Protocol == nil {
-		p.rocketProtocol.SetTimeout(timeout)
-		p.headerProtocol.SetTimeout(timeout)
+		p.rocketProtocol.(protocolClient).SetTimeout(timeout)
+		p.headerProtocol.(protocolClient).SetTimeout(timeout)
 		return
 	}
-	p.Protocol.SetTimeout(timeout)
+	p.Protocol.(protocolClient).SetTimeout(timeout)
 }
 
 // WriteMessageBegin first sends a upgradeToRocket message using the HeaderProtocol.
@@ -126,12 +126,12 @@ func (p *upgradeToRocketClient) GetResponseHeaders() map[string]string {
 
 func (p *upgradeToRocketClient) SetProtocolID(protoID ProtocolID) error {
 	if p.Protocol == nil {
-		if err := p.headerProtocol.SetProtocolID(protoID); err != nil {
+		if err := p.headerProtocol.(protocolClient).SetProtocolID(protoID); err != nil {
 			return err
 		}
-		return p.rocketProtocol.SetProtocolID(protoID)
+		return p.rocketProtocol.(protocolClient).SetProtocolID(protoID)
 	}
-	return p.Protocol.SetProtocolID(protoID)
+	return p.Protocol.(protocolClient).SetProtocolID(protoID)
 }
 
 func (p *upgradeToRocketClient) Close() error {

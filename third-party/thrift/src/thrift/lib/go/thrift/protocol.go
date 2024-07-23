@@ -16,15 +16,9 @@
 
 package thrift
 
-import (
-	"time"
-)
-
 // Protocol defines the interface that must be implemented by all protocols
 type Protocol interface {
 	Format
-	SetProtocolID(protoID ProtocolID) error
-	SetTimeout(timeout time.Duration)
 
 	// used by SerialChannel and generated thrift Clients
 	Close() error

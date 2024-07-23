@@ -127,17 +127,10 @@ func TestSimpleServerClientSetsDifferentProtocol(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client socket: %s", err)
 	}
-	clientSocket, err := NewSocket(SocketConn(conn))
-	if err != nil {
-		t.Fatalf("could not create client socket: %s", err)
-	}
-	proto, err := newHeaderProtocol(clientSocket)
+	// Sets the client serialization format to a non default.
+	proto, err := NewClient(WithConn(conn), WithProtocolID(ProtocolIDBinary))
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
-	}
-	// Sets the client serialization format to a non default.
-	if err := proto.SetProtocolID(ProtocolIDBinary); err != nil {
-		t.Fatal(err)
 	}
 	client := NewSerialChannel(proto)
 	if err := client.Call(context.Background(), "test", &MyTestStruct{}, &MyTestStruct{}); err != nil {

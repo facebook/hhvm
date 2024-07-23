@@ -27,10 +27,17 @@ type ty_partition = {
   right: dnf_ty;
 }
 
-let rec split_ty ~(expansions : SSet.t) (env : env) (ty : locl_ty) ~predicate =
+let rec split_ty
+    ~(expansions : SSet.t)
+    (env : env)
+    (ty : locl_ty)
+    ~(predicate : type_predicate) : TyPartition.t =
   let predicate_datatype = DataType.of_predicate env predicate in
   let predicate_complement_datatype = DataType.complement predicate_datatype in
-  let partition_tuple_by_tuple ty_reason tuple_tyl sub_predicates =
+  let partition_tuple_by_tuple
+      ty_reason
+      (tuple_tyl : locl_ty list)
+      (sub_predicates : type_predicate list) : TyPartition.t =
     let predicate_ty_pairs = List.zip sub_predicates tuple_tyl in
     begin
       match predicate_ty_pairs with
@@ -45,7 +52,7 @@ let rec split_ty ~(expansions : SSet.t) (env : env) (ty : locl_ty) ~predicate =
         TyPartition.product (Typing_make_type.tuple ty_reason) sub_splits
     end
   in
-  let partition_f env ty_datatype ty =
+  let partition_f (env : env) (ty_datatype : DataType.t) : TyPartition.t =
     if DataType.are_disjoint env ty_datatype predicate_datatype then
       (* We use the DataType as a quick check but for some types the DataType is
          insufficiently precise.
@@ -69,7 +76,15 @@ let rec split_ty ~(expansions : SSet.t) (env : env) (ty : locl_ty) ~predicate =
         | Neg_predicate (IsTupleOf _np_predicates) -> begin
           match predicate with
           | IsTupleOf _predicates -> TyPartition.mk_span ty
-          | _ -> TyPartition.mk_right ty
+          | IsBool
+          | IsInt
+          | IsString
+          | IsArraykey
+          | IsFloat
+          | IsNum
+          | IsResource
+          | IsNull ->
+            TyPartition.mk_right ty
         end
         (* The DataType for these are precise *)
         | Neg_predicate
@@ -130,18 +145,18 @@ let rec split_ty ~(expansions : SSet.t) (env : env) (ty : locl_ty) ~predicate =
         Aast.(
           (Tint | Tnull | Tvoid | Tbool | Tfloat | Tstring | Tresource) as prim)
       ->
-      partition_f env DataType.(of_ty env @@ Primitive prim) ty
-    | Tfun _ -> partition_f env DataType.(of_ty env Function) ty
-    | Tnonnull -> partition_f env DataType.(of_ty env Nonnull) ty
-    | Ttuple _ -> partition_f env DataType.(of_ty env Tuple) ty
-    | Tshape _ -> partition_f env DataType.(of_ty env Shape) ty
-    | Tlabel _ -> partition_f env DataType.(of_ty env Label) ty
+      partition_f env DataType.(of_ty env @@ Primitive prim)
+    | Tfun _ -> partition_f env DataType.(of_ty env Function)
+    | Tnonnull -> partition_f env DataType.(of_ty env Nonnull)
+    | Ttuple _ -> partition_f env DataType.(of_ty env Tuple)
+    | Tshape _ -> partition_f env DataType.(of_ty env Shape)
+    | Tlabel _ -> partition_f env DataType.(of_ty env Label)
     | Tclass ((_, name), _, _) ->
-      partition_f env DataType.(of_ty env @@ Class name) ty
+      partition_f env DataType.(of_ty env @@ Class name)
     | Tneg (Neg_class (_, name)) ->
-      partition_f env DataType.(complement @@ of_ty env @@ Class name) ty
+      partition_f env DataType.(complement @@ of_ty env @@ Class name)
     | Tneg (Neg_predicate pred) ->
-      partition_f env DataType.(complement @@ of_predicate env pred) ty
+      partition_f env DataType.(complement @@ of_predicate env pred)
     | Tprim Aast.Tnoreturn -> TyPartition.mk_bottom
     (* Types we can split into a union of types *)
     | Tunion tyl -> split_union ~expansions tyl

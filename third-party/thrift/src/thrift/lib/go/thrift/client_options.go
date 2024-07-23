@@ -24,12 +24,11 @@ import (
 
 // clientOptions thrift and connectivity options for the thrift client
 type clientOptions struct {
-	protocol          ProtocolID
-	transport         TransportID
-	persistentHeaders map[string]string
-	identity          string
-	timeout           time.Duration
 	conn              net.Conn
+	transport         TransportID
+	protocol          ProtocolID
+	timeout           time.Duration
+	persistentHeaders map[string]string
 }
 
 // ClientOption is a single configuration setting for the thrift client
@@ -78,7 +77,7 @@ func WithPersistentHeader(name, value string) ClientOption {
 // WithIdentity sets the Header identity field
 func WithIdentity(name string) ClientOption {
 	return func(opts *clientOptions) error {
-		opts.identity = name
+		opts.persistentHeaders[IdentityHeader] = name
 		return nil
 	}
 }
@@ -142,12 +141,20 @@ func DialTLS(addr string, timeout time.Duration, tlsConfig *tls.Config) (net.Con
 	return tls.Client(conn, config), nil
 }
 
+func newDefaultPersistentHeaders() map[string]string {
+	// set Identity Headers
+	return map[string]string{
+		IDVersionHeader: IDVersion,
+		IdentityHeader:  "",
+	}
+}
+
 // newOptions creates a new options objects and inits it
 func newOptions(opts ...ClientOption) (*clientOptions, error) {
 	res := &clientOptions{
 		protocol:          ProtocolIDCompact,
 		transport:         TransportIDHeader,
-		persistentHeaders: map[string]string{},
+		persistentHeaders: newDefaultPersistentHeaders(),
 	}
 	for _, opt := range opts {
 		if err := opt(res); err != nil {
@@ -165,7 +172,6 @@ func setOptions(protocol Protocol, options *clientOptions) error {
 	if err := proto.SetProtocolID(options.protocol); err != nil {
 		return err
 	}
-	setIdentity(proto, options.identity)
 	proto.SetTimeout(options.timeout)
 	return nil
 }

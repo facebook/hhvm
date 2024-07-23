@@ -57,7 +57,7 @@ async fn get_client(
 fn init_logging(directives: Vec<Directive>) {
     let fmt = tracing_subscriber::fmt::Layer::default()
         .with_writer(std::io::stderr)
-        .event_format(Glog::default())
+        .event_format(Glog::default().with_timer(tracing_glog::LocalTime::default()))
         .fmt_fields(GlogFields::default());
 
     let filter = directives

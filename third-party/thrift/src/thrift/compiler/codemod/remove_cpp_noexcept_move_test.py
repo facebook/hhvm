@@ -60,7 +60,7 @@ class RemoveCppNoexceptMove(unittest.TestCase):
                 struct Faa {
                     1: i32 faa1;
                     2: string faa2;
-                } (cpp.virtual)
+                } ( cpp.virtual)
 
                 union Fee {
                     1: i32 fee1;

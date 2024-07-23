@@ -100,9 +100,11 @@ class file_manager {
   void remove_namespace(std::string language);
 
  private:
-  // Expands backwards begin_offset and forwards end_offset for all whitespaces.
+  // Expands backwards begin_offset and forwards end_offset for all whitespaces
+  // and trailing commas one_sided = true preserves whitespace after the comma
+  // to prevent overlap.
   void expand_over_whitespaces(
-      size_t& begin_offset, size_t& end_offset) const noexcept;
+      size_t& begin_offset, size_t& end_offset, bool one_sided) const noexcept;
 
   source_manager source_mgr_;
   const t_program* program_;

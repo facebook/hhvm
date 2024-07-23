@@ -79,6 +79,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     8: i32 shared_mutable (cpp.ref_type = "shared_mutable");
                     10: i32 box (thrift.box);
                     11: i32 overwrite (cpp.ref, cpp.ref_type = "shared_const");
+                    12: i32 NOT (cpp.ref = "true", cpp2.ref = "true", rust.box);
                 }
 
                 """
@@ -116,6 +117,8 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     10: i32 box ;
                     @cpp.Ref{type = cpp.RefType.Shared}
                     11: i32 overwrite ;
+                    @cpp.Ref{type = cpp.RefType.Unique}
+                    12: i32 NOT ( rust.box);
                 }
                 """
             ),
@@ -205,7 +208,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 @cpp.EnumType{type = cpp.EnumUnderlyingType.U16}
                 enum U16 {}
                 @cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
-                enum U32 {} (cpp.declare_bitwise_ops)
+                enum U32 {} ( cpp.declare_bitwise_ops)
 
                 @cpp.ProcessInEbThreadUnsafe
                 interaction I {}

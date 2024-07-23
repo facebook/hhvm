@@ -59,7 +59,7 @@ void file_manager::remove(const t_annotation& annotation) {
   size_t begin_offset = to_offset(annotation.second.src_range.begin);
   size_t end_offset = to_offset(annotation.second.src_range.end);
 
-  expand_over_whitespaces(begin_offset, end_offset);
+  expand_over_whitespaces(begin_offset, end_offset, true /* one_sided */);
 
   if (end_offset < old_content_.length() && old_content_[end_offset] == ',') {
     end_offset++;
@@ -76,11 +76,21 @@ void file_manager::remove(const t_annotation& annotation) {
 
 // Also expands over trailing commas.
 void file_manager::expand_over_whitespaces(
-    size_t& begin_offset, size_t& end_offset) const noexcept {
+    size_t& begin_offset, size_t& end_offset, bool one_sided) const noexcept {
   while (begin_offset >= 1 && isspace(old_content_[begin_offset - 1])) {
     begin_offset--;
   }
 
+  while (end_offset < old_content_.length() &&
+         isspace(old_content_[end_offset])) {
+    end_offset++;
+  }
+  if (end_offset < old_content_.length() && old_content_[end_offset] == ',') {
+    end_offset++;
+  }
+  if (one_sided) {
+    return;
+  }
   while (
       end_offset < old_content_.length() &&
       (isspace(old_content_[end_offset]) || old_content_[end_offset] == ',')) {
@@ -116,7 +126,7 @@ void file_manager::remove_all_annotations(const t_node& node) {
         end_offset, to_offset(annotation.second.src_range.end));
   }
 
-  expand_over_whitespaces(begin_offset, end_offset);
+  expand_over_whitespaces(begin_offset, end_offset, false /* one_sided */);
 
   if (begin_offset >= 1 && end_offset < old_content_.length() &&
       old_content_[begin_offset - 1] == '(' &&

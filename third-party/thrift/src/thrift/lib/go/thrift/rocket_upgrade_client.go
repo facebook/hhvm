@@ -34,7 +34,7 @@ func newUpgradeToRocketClient(conn net.Conn) (Protocol, error) {
 	if err != nil {
 		return nil, err
 	}
-	header, err := NewHeaderProtocol(conn)
+	header, err := newHeaderProtocol(conn)
 	if err != nil {
 		return nil, err
 	}

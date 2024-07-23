@@ -46,7 +46,7 @@ func TestSimpleServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client socket: %s", err)
 	}
-	proto, err := NewHeaderProtocol(clientSocket)
+	proto, err := newHeaderProtocol(clientSocket)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
@@ -131,7 +131,7 @@ func TestSimpleServerClientSetsDifferentProtocol(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client socket: %s", err)
 	}
-	proto, err := NewHeaderProtocol(clientSocket)
+	proto, err := newHeaderProtocol(clientSocket)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}

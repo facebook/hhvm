@@ -183,7 +183,7 @@ func NewClient(opts ...ClientOption) (Protocol, error) {
 		if err != nil {
 			return nil, err
 		}
-		proto, err := NewHeaderProtocol(trans)
+		proto, err := newHeaderProtocol(trans)
 		if err != nil {
 			return nil, err
 		}

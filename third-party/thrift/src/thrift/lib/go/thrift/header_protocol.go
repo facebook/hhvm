@@ -29,7 +29,12 @@ type headerProtocol struct {
 	protoID ProtocolID
 }
 
+// NewHeaderProtocol creates a new header protocol.
 func NewHeaderProtocol(conn net.Conn) (Protocol, error) {
+	return newHeaderProtocol(conn)
+}
+
+func newHeaderProtocol(conn net.Conn) (Protocol, error) {
 	p := &headerProtocol{
 		protoID: ProtocolIDCompact,
 	}

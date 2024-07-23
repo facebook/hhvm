@@ -4,6 +4,7 @@ import concurrent.futures
 import itertools
 import os
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from typing import Optional
 
@@ -17,9 +18,14 @@ class Failure:
 
 
 def milner_and_type_check(
-    milner_exe: str, hhstc_exe: str, template_file: str, seed: int
+    milner_exe: str,
+    hhstc_exe: str,
+    out_dir: str,
+    template_file: str,
+    seed: int,
 ) -> Optional[Failure]:
-    temp_file = f"{template_file}.{seed}.out"
+    basename = os.path.basename(template_file)
+    temp_file = os.path.join(out_dir, f"{basename}.{seed}.out")
 
     # Run the generator on the template file and the number
     result = subprocess.run(
@@ -29,7 +35,6 @@ def milner_and_type_check(
 
     if result.returncode != 0:
         contents = open(temp_file).read()
-        os.remove(temp_file)
         return Failure(
             temp_file,
             contents,
@@ -44,7 +49,6 @@ def milner_and_type_check(
     stdout = result.stdout.decode()
     if "No errors" not in stdout:
         contents = open(temp_file).read()
-        os.remove(temp_file)
         return Failure(
             temp_file,
             contents,
@@ -52,11 +56,12 @@ def milner_and_type_check(
             result.stderr,
         )
 
-    os.remove(temp_file)
     return None
 
 
-def verify_well_typed(test_dir: str, milner_exe: str, hhstc_exe: str) -> int:
+def verify_well_typed(
+    test_dir: str, out_dir: str, milner_exe: str, hhstc_exe: str
+) -> int:
     # Find all template files in the test directory
     template_files = [
         os.path.join(test_dir, f)
@@ -76,6 +81,7 @@ def verify_well_typed(test_dir: str, milner_exe: str, hhstc_exe: str) -> int:
                     milner_and_type_check,
                     milner_exe,
                     hhstc_exe,
+                    out_dir,
                     template_file,
                     seed,
                 )
@@ -119,7 +125,14 @@ def main() -> None:
 
     args: argparse.Namespace = parser.parse_args()
 
-    exit(verify_well_typed(args.root, args.milner_exe, args.hhstc_exe))
+    # Temporary directory to store generated programs
+    out_dir = tempfile.TemporaryDirectory()
+    exit_code = verify_well_typed(
+        args.root, out_dir.name, args.milner_exe, args.hhstc_exe
+    )
+    out_dir.cleanup()
+
+    exit(exit_code)
 
 
 if __name__ == "__main__":

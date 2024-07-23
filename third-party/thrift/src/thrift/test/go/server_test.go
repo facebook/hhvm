@@ -69,15 +69,10 @@ func connectTestHeaderServer(
 	if err != nil {
 		return nil, err
 	}
-	socket, err := thrift.NewSocket(thrift.SocketConn(conn))
+	prot, err := thrift.NewClient(thrift.WithConn(conn), thrift.WithTimeout(localConnTimeout))
 	if err != nil {
 		return nil, err
 	}
-	prot, err := thrift.NewHeaderProtocol(socket)
-	if err != nil {
-		return nil, err
-	}
-	prot.SetTimeout(localConnTimeout)
 	return thrifttest.NewThriftTestClient(prot), nil
 }
 

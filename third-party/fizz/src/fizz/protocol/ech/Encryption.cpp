@@ -680,8 +680,8 @@ std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
 }
 
 std::vector<Extension> substituteOuterExtensions(
-    std::vector<Extension>&& innerExt,
-    const std::vector<Extension>& outerExt) {
+    std::vector<Extension>&& chloInnerExt,
+    const std::vector<Extension>& chloOuterExt) {
   std::vector<Extension> expandedInnerExt;
 
   // This will throw if we duplicate an extension (or if we try to put an
@@ -694,7 +694,7 @@ std::vector<Extension> substituteOuterExtensions(
     seenTypes.insert(t);
   };
 
-  for (auto& ext : innerExt) {
+  for (auto& ext : chloInnerExt) {
     dupeCheck(ext.extension_type);
     if (ExtensionType::ech_outer_extensions != ext.extension_type) {
       expandedInnerExt.push_back(std::move(ext));
@@ -709,8 +709,8 @@ std::vector<Extension> substituteOuterExtensions(
       }
 
       // Use the linear approach suggested by the RFC.
-      auto outerIt = outerExt.cbegin();
-      auto outerEnd = outerExt.cend();
+      auto outerIt = chloOuterExt.cbegin();
+      auto outerEnd = chloOuterExt.cend();
       for (const auto extType : outerExtensions.types) {
         // Check types for dupes and ech
         dupeCheck(extType);

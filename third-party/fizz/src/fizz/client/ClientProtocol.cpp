@@ -748,7 +748,6 @@ static ClientHello constructEncryptedClientHello(
   // Substitute in outer random
   chloOuter.random = outerRandom;
 
-  Extension encodedECHExtension;
   // Create the encrypted client hello inner extension.
   switch (supportedConfig.config.version) {
     case (ech::ECHVersion::Draft15): {

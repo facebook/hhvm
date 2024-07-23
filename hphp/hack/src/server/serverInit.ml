@@ -56,7 +56,9 @@ let get_lazy_level (genv : ServerEnv.genv) : lazy_level =
   | (true, false, false) -> Decl
   | (true, true, false) -> Parse
   | (true, true, true) -> Init
-  | _ -> Off
+  | (true, false, true)
+  | (false, _, _) ->
+    Off
 
 let lazy_full_init genv env profiling =
   ( ServerLazyInit.full_init genv env profiling |> post_init genv,
@@ -154,11 +156,7 @@ let lazy_write_symbol_info_init genv env root (load_state : 'a option) profiling
       load_state_approach
       profiling
 
-(* entry point *)
-let init
-    ~(init_approach : init_approach)
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env) : ServerEnv.env * init_result =
+let possibly_set_rust_provider_backend env genv : unit =
   if genv.local_config.ServerLocalConfig.rust_provider_backend then (
     Hh_logger.log "ServerInit: using rust backend";
     let backend =
@@ -167,39 +165,43 @@ let init
         (DeclParserOptions.from_parser_options env.tcopt.GlobalOptions.po)
     in
     Provider_backend.set_rust_backend backend
-  );
+  )
+
+let init
+    ~(init_approach : init_approach)
+    (genv : ServerEnv.genv)
+    (env : ServerEnv.env) : ServerEnv.env * init_result =
+  possibly_set_rust_provider_backend env genv;
   let lazy_lev = get_lazy_level genv in
-  let root = ServerArgs.root genv.options in
+  Hh_logger.log "ServerInit: lazy_lev=%s" (show_lazy_level lazy_lev);
+  Hh_logger.log
+    "ServerInit: init_approach=%s"
+    (show_init_approach init_approach);
   let (init_method, init_method_name) =
-    Hh_logger.log "ServerInit: lazy_lev=%s" (show_lazy_level lazy_lev);
-    Hh_logger.log
-      "ServerInit: init_approach=%s"
-      (show_init_approach init_approach);
-    match (lazy_lev, init_approach) with
-    | (Init, Full_init) -> (lazy_full_init genv env, "lazy_full_init")
-    | (Init, Parse_only_init) ->
-      (lazy_parse_only_init genv env, "lazy_parse_only_init")
-    | (Init, Saved_state_init load_state_approach) ->
-      ( lazy_saved_state_init
-          ~do_indexing:false
-          genv
-          env
-          root
-          load_state_approach,
-        "lazy_saved_state_init" )
-    | (Off, Full_init)
-    | (Decl, Full_init)
-    | (Parse, Full_init) ->
-      (eager_full_init genv env lazy_lev, "eager full init")
-    | (Off, _)
-    | (Decl, _)
-    | (Parse, _) ->
-      (eager_init genv env lazy_lev, "eager_init")
-    | (_, Write_symbol_info) ->
-      ( lazy_write_symbol_info_init genv env root None,
-        "lazy_write_symbol_info_init" )
-    | (_, Write_symbol_info_with_state load_state_approach) ->
-      ( lazy_write_symbol_info_init genv env root (Some load_state_approach),
-        "lazy_write_symbol_info_init with state" )
+    let root = ServerArgs.root genv.options in
+    match lazy_lev with
+    | Init ->
+      (match init_approach with
+      | Full_init -> (lazy_full_init genv env, "lazy_full_init")
+      | Parse_only_init ->
+        (lazy_parse_only_init genv env, "lazy_parse_only_init")
+      | Saved_state_init load_state_approach ->
+        ( lazy_saved_state_init
+            ~do_indexing:false
+            genv
+            env
+            root
+            load_state_approach,
+          "lazy_saved_state_init" )
+      | Write_symbol_info ->
+        ( lazy_write_symbol_info_init genv env root None,
+          "lazy_write_symbol_info_init" )
+      | Write_symbol_info_with_state load_state_approach ->
+        ( lazy_write_symbol_info_init genv env root (Some load_state_approach),
+          "lazy_full_initwrite_symbol_info_init with state" ))
+    | _ ->
+      (match init_approach with
+      | Full_init -> (eager_full_init genv env lazy_lev, "eager full init")
+      | _ -> (eager_init genv env lazy_lev, "eager_init"))
   in
   CgroupProfiler.step_group init_method_name ~log:true init_method

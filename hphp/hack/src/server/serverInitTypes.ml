@@ -30,8 +30,9 @@ type init_approach =
   | Full_init
   | Parse_only_init
   | Saved_state_init of load_state_approach
-  | Write_symbol_info
+  | Write_symbol_info  (** Write symbol info. Used by Glean. *)
   | Write_symbol_info_with_state of load_state_approach
+      (** Write symbol info. Initialize with a saved state. Used by Glean. *)
 [@@deriving show]
 
 (** Docs are in .mli *)

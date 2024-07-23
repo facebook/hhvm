@@ -46,7 +46,6 @@ load_state_natively_v4 = {use_saved_state}
 use_mini_state = {use_saved_state}
 require_mini_state = {use_saved_state}
 lazy_decl = {use_saved_state}
-lazy_parse = {use_saved_state}
 lazy_init2 = {use_saved_state}
 ide_symbolindex_search_provider = LocalIndex
 allow_unstable_features = true

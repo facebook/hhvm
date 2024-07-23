@@ -225,7 +225,6 @@ use_mini_state = true
 use_watchman = true
 watchman_subscribe_v2 = true
 lazy_decl = true
-lazy_parse = true
 lazy_init2 = true
 fetch_remote_old_decls = false
 """

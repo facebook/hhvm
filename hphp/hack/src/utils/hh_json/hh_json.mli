@@ -82,9 +82,9 @@ val get_number_int_exn : json -> int
 
 val get_bool_exn : json -> bool
 
-val opt_string_to_json : string option -> json
+val string_opt : string option -> json
 
-val opt_int_to_json : int option -> json
+val int_opt : int option -> json
 
 val int_ : int -> json
 

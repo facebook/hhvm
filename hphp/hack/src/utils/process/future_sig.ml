@@ -65,7 +65,7 @@ module type S = sig
 
   exception Future_failure of error
 
-  type 'value t [@@deriving eq]
+  type 'value t [@@deriving eq, yojson]
 
   (** Blocking. Returns the value from the underlying process. *)
   val get : ?timeout:int -> 'value t -> ('value, error) result

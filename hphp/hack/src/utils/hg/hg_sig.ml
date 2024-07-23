@@ -2,14 +2,14 @@ module type Types_S = sig
   exception Malformed_result
 
   module Rev : sig
-    type t [@@deriving eq, show]
+    type t [@@deriving eq, show, yojson]
 
     val to_string : t -> string
 
     val of_string : string -> t
   end
 
-  type global_rev = int [@@deriving eq, show]
+  type global_rev = int [@@deriving eq, show, yojson]
 
   type rev =
     | Hg_rev of Rev.t
@@ -26,10 +26,12 @@ module type Types_S = sig
 end
 
 module Types = struct
+  open Ppx_yojson_conv_lib.Yojson_conv.Primitives
+
   exception Malformed_result
 
   module Rev = struct
-    type t = string [@@deriving eq, show]
+    type t = string [@@deriving eq, show, yojson]
 
     let to_string x = x
 
@@ -37,7 +39,7 @@ module Types = struct
   end
 
   (** This is a monotonically increasing revision number. *)
-  type global_rev = int [@@deriving eq, show]
+  type global_rev = int [@@deriving eq, show, yojson]
 
   type rev =
     | Hg_rev of Rev.t
@@ -83,6 +85,9 @@ module type S = sig
    * repo dir. *)
   val current_working_copy_base_rev : string -> global_rev Future.t
 
+  (** The globalrev of a given revision. If that revision is not public,
+  the globalrev of `parents(roots(draft() & ::<rev>))`, and if there are merge conflicts,
+  the globalrev of the mergebase. *)
   val get_closest_global_ancestor : Rev.t -> string -> global_rev Future.t
 
   val files_changed_since_rev :

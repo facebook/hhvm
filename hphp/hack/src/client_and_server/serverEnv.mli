@@ -55,11 +55,25 @@ end
     Distance tracks the number of revisions between X and Y, using globalrev.
     Age tracks the time elapsed between X and Y in seconds, according to hg log data.
 *)
-type saved_state_delta = {
-  distance: int;
-  age: int;
+type saved_state_revs_info = {
+  distance: int option;
+  age: int option;
+  saved_state_rev: Hg.Rev.t;
+  saved_state_globalrev: Hg.global_rev option;
+  saved_state_rev_timestamp: int option;
+  mergebase_rev: Hg.Rev.t option;
+  mergebase_globalrev: Hg.global_rev option;
+  mergebase_rev_timestamp: int option;
 }
-[@@deriving show]
+[@@deriving show, yojson]
+
+module SavedStateRevsInfo : sig
+  type t = saved_state_revs_info
+
+  val default : saved_state_rev:Hg.Rev.t -> t
+
+  val to_telemetry : t -> Telemetry.t
+end
 
 type init_env = {
   approach_name: string;
@@ -78,7 +92,7 @@ type init_env = {
   recheck_id: string option;
   (* Additional data associated with init that we want to log when a first full
    * check completes. *)
-  saved_state_delta: saved_state_delta option;
+  saved_state_revs_info: saved_state_revs_info option;
   naming_table_manifold_path: string option;
       (** The manifold path for remote typechecker workers to download the naming table
           saved state. This value will be None in the case of full init *)

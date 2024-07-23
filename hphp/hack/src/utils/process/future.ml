@@ -448,3 +448,8 @@ module Promise = struct
       Error e
     | (Ok a, Ok b) -> Ok (a, b)
 end
+
+let yojson_of_t (yojson_of_t : 'a -> Yojson.Safe.t) t = yojson_of_t @@ get_exn t
+
+let t_of_yojson (t_of_yojson : Yojson.Safe.t -> 'a) json =
+  t_of_yojson json |> of_value

@@ -42,10 +42,9 @@ module Hg_actual = struct
     in
     FutureProcess.make process ignore
 
-  (** Returns the closest global ancestor in master to the given rev.
-   *
-   * hg log -r 'ancestor(master,rev)' -T '{globalrev}\n'
-   *)
+  (** The globalrev of a given revision. If that revision is not public,
+  the globalrev of `parents(roots(draft() & ::<rev>))`, and if there are merge conflicts,
+  the globalrev of the mergebase. *)
   let get_closest_global_ancestor rev repo : global_rev Future.t =
     let global_rev_query rev =
       exec_hg ["log"; "-r"; rev; "-T"; "{globalrev}\n"; "--cwd"; repo]
@@ -59,6 +58,8 @@ module Hg_actual = struct
     (* Otherwise, we want the closest public commit. It returns empty set when
      * we are on a public commit, hence the need to still do q1 too *)
     let (q2 : global_rev Future.t) =
+      (* `draft() & ::<rev>` are all non-landed commits that are prior or equal to rev,
+         `roots()` selects the oldest of those, and `parents` its parent. *)
       global_rev_process (Printf.sprintf "parents(roots(draft() & ::%s))" rev)
     in
     (* q2 can also fail in case of merge conflicts, in which case let's fall back to

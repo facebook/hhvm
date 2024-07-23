@@ -79,9 +79,9 @@ let lazy_saved_state_init
   in
   (* Saved-state init is the only kind of init that might error... *)
   match result with
-  | Ok ((env, t), ({ saved_state_delta; _ }, _)) ->
+  | Ok ((env, t), ({ saved_state_revs_info; _ }, _)) ->
     let env = post_init genv (env, t) in
-    (env, Load_state_succeeded saved_state_delta)
+    (env, Load_state_succeeded saved_state_revs_info)
   | Error err ->
     let ServerInitTypes.{ message; auto_retry; telemetry } =
       load_state_error_to_verbose_string err

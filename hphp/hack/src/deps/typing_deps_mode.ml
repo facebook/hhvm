@@ -36,7 +36,7 @@ let to_opaque_json (t : t) : Hh_json.json =
     JSON_Object
       [
         ("mode", string_ "InMemoryMode");
-        ("props", JSON_Object [("base", opt_string_to_json (opaque base))]);
+        ("props", JSON_Object [("base", string_opt (opaque base))]);
       ]
   | SaveToDiskMode { graph; new_edges_dir = _; human_readable_dep_map_dir } ->
     JSON_Object
@@ -45,9 +45,9 @@ let to_opaque_json (t : t) : Hh_json.json =
         ( "props",
           JSON_Object
             [
-              ("graph", opt_string_to_json (opaque graph));
+              ("graph", string_opt (opaque graph));
               ( "human_readable_dep_map_dir",
-                opt_string_to_json (opaque human_readable_dep_map_dir) );
+                string_opt (opaque human_readable_dep_map_dir) );
             ] );
       ]
   [@@deriving show]

@@ -358,7 +358,10 @@
   server_config
   server_notifier)
  (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
+  (pps
+   lwt_ppx
+   ppx_deriving.std
+   ppx_yojson_conv)))
 
 (library
  (name client_provider)

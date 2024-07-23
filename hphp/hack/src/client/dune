@@ -38,7 +38,10 @@
   yojson
   version)
  (preprocess
-  (pps lwt_ppx ppx_deriving.std ppx_variants_conv)))
+  (pps
+   lwt_ppx ppx_deriving.std
+   ppx_variants_conv
+   ppx_yojson_conv)))
 
 (library
  (name client_get_definition)

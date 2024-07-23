@@ -36,7 +36,7 @@ module S : sig
   val to_string : t -> string
 end
 
-type t = S.t [@@deriving eq, hash, show, ord, sexp_of]
+type t = S.t [@@deriving eq, hash, show, ord, sexp_of, yojson]
 
 val default : t
 
@@ -76,6 +76,10 @@ module Set : sig
   val pp_large : ?max_items:int -> Format.formatter -> t -> unit
 
   val show_large : ?max_items:int -> t -> string
+
+  val yojson_of_t : t -> Yojson.Safe.t
+
+  val t_of_yojson : Yojson.Safe.t -> t
 end
 
 module Map : sig

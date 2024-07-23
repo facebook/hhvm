@@ -83,7 +83,7 @@ let tracker_state =
     mergebase_queries = Stdlib.Hashtbl.create 200;
   }
 
-let initialize mergebase =
+let initialize (mergebase : Hg.global_rev) =
   Hh_logger.log "ServerRevisionTracker: Initializing mergebase to r%d" mergebase;
   tracker_state.is_enabled <- true;
   tracker_state.current_mergebase <- Some mergebase

@@ -172,6 +172,10 @@ module Set = struct
 
   let show_large ?(max_items = 5) sset =
     Format.asprintf "%a" (pp_large ~max_items) sset
+
+  let yojson_of_t x = make_yojson_of_t yojson_of_t x
+
+  let t_of_yojson x = make_t_of_yojson t_of_yojson x
 end
 
 module Map = struct

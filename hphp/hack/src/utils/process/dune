@@ -25,5 +25,7 @@
  (wrapped false)
  (modules future future_sig futureProcess)
  (preprocess
-  (pps ppx_deriving.std))
+  (pps
+   ppx_deriving.std
+   ppx_yojson_conv))
  (libraries process process_types promise))

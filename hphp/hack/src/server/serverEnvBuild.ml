@@ -77,7 +77,7 @@ let make_env ~init_id ~deps_mode config : ServerEnv.env =
         mergebase_warning_hashes = Warnings_saved_state.empty;
         why_needed_full_check = None;
         recheck_id = None;
-        saved_state_delta = None;
+        saved_state_revs_info = None;
         naming_table_manifold_path = None;
       };
     last_recheck_loop_stats = RecheckLoopStats.empty ~recheck_id:"<none>";

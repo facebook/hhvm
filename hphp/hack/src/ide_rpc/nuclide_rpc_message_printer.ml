@@ -26,7 +26,7 @@ let should_not_happen = JSON_Object [("this_should", JSON_String "not_happen")]
 
 let infer_type_response_to_json (type_string, type_json) =
   Hh_json.JSON_Object
-    ([("type", opt_string_to_json type_string); ("pos", deprecated_pos_field)]
+    ([("type", string_opt type_string); ("pos", deprecated_pos_field)]
     @
     match type_json with
     | Some json -> [("full_type", json_of_string json)]
@@ -41,11 +41,11 @@ let infer_type_error_response_to_json
     (List.filter_map
        ~f:Fn.id
        [
-         Some ("actual_type", opt_string_to_json actual_type_string);
+         Some ("actual_type", string_opt actual_type_string);
          Option.map
            ~f:(fun ty -> ("full_actual_type", json_of_string ty))
            actual_type_json;
-         Some ("expected_type", opt_string_to_json expected_type_string);
+         Some ("expected_type", string_opt expected_type_string);
          Option.map
            ~f:(fun ty -> ("full_expected_type", json_of_string ty))
            expected_type_json;
@@ -81,7 +81,7 @@ let identify_symbol_response_to_json results =
       SymbolDefinition.(
         let pos = Pos.json x.pos in
         let span = Pos.multiline_json x.span in
-        let id = opt_string_to_json x.id in
+        let id = string_opt x.id in
         (pos, span, id))
     | None -> (JSON_Null, JSON_Null, JSON_Null)
   in
@@ -125,7 +125,7 @@ let rec definition_to_json def =
       ([
          ("kind", JSON_String (string_of_kind def.kind));
          ("name", JSON_String def.name);
-         ("id", opt_string_to_json def.id);
+         ("id", string_opt def.id);
          ("position", Pos.json def.pos);
          ("span", Pos.multiline_json def.span);
          ("modifiers", modifiers);

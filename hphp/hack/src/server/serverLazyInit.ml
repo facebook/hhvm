@@ -67,7 +67,7 @@ let run_saved_state_future
     (ctx : Provider_context.t)
     (dependency_table_saved_state_future :
       (Saved_state_loader.load_result, ServerInitTypes.load_state_error) result
-      Future.t) : (loaded_info, load_state_error) result =
+      Future.t) : (ServerInitTypes.loaded_info, load_state_error) result =
   let t = Unix.gettimeofday () in
   match Future.get dependency_table_saved_state_future ~timeout:300 with
   | Error error ->
@@ -88,8 +88,6 @@ let run_saved_state_future
       additional_info;
       changed_files;
       manifold_path;
-      corresponding_rev;
-      mergebase_rev;
       is_cached = _;
     } =
       deptable_result
@@ -106,10 +104,8 @@ let run_saved_state_future
       main_artifacts
     in
     let {
-      Saved_state_loader.Naming_and_dep_table_info.mergebase_global_rev;
-      dirty_files_promise;
-      saved_state_distance;
-      saved_state_age;
+      Saved_state_loader.Naming_and_dep_table_info.dirty_files_promise;
+      saved_state_revs_info;
     } =
       additional_info
     in
@@ -157,28 +153,19 @@ let run_saved_state_future
       let dirty_master_files = dirty_master_files in
       let dirty_local_files = dirty_local_files in
       let naming_table_manifold_path = Some manifold_path in
-      let saved_state_delta =
-        match (saved_state_distance, saved_state_age) with
-        | (_, None)
-        | (None, _) ->
-          None
-        | (Some distance, Some age) -> Some { distance; age }
-      in
       Ok
         {
-          naming_table_fn = Path.to_string naming_sqlite_table_path;
+          ServerInitTypes.naming_table_fn =
+            Path.to_string naming_sqlite_table_path;
           naming_table_fallback_fn = naming_table_fallback_path;
           deptable_fn;
-          corresponding_rev = Hg.Hg_rev corresponding_rev;
-          mergebase_rev = mergebase_global_rev;
-          mergebase = Some mergebase_rev;
           dirty_naming_files;
           dirty_master_files;
           dirty_local_files;
           old_naming_table;
           old_errors;
           old_warnings;
-          saved_state_delta;
+          saved_state_revs_info;
           naming_table_manifold_path;
         })
 
@@ -251,42 +238,53 @@ let download_and_load_state_exn
   run_saved_state_future genv ctx dependency_table_saved_state_future
 
 let calculate_state_distance_and_age_from_hg
-    (root : Path.t) (corresponding_base_revision : Hg.Rev.t) :
-    Hg.Rev.t option * Hg.global_rev option * ServerEnv.saved_state_delta option
-    =
-  let root = Path.to_string root in
+    (root_path : Path.t) (saved_state_rev : Hg.Rev.t) :
+    ServerEnv.saved_state_revs_info =
+  let root_path = Path.to_string root_path in
   let future =
-    Future.continue_with_future (Hg.current_mergebase_hg_rev root)
+    Future.continue_with_future (Hg.current_mergebase_hg_rev root_path)
     @@ fun mergebase_rev ->
     Future.continue_with_future
-      (Hg.get_closest_global_ancestor mergebase_rev root)
-    @@ fun mergebase_global_rev ->
+      (Hg.get_closest_global_ancestor mergebase_rev root_path)
+    @@ fun mergebase_globalrev ->
     Future.continue_with_future
-      (Hg.get_closest_global_ancestor corresponding_base_revision root)
+      (Hg.get_closest_global_ancestor saved_state_rev root_path)
     @@ fun corresponding_base_global_rev ->
     Future.continue_with_future
-      (Hg.get_hg_revision_time (Hg.Hg_rev corresponding_base_revision) root)
-    @@ fun corresponding_time ->
-    Future.continue_with_future
-      (Hg.get_hg_revision_time (Hg.Hg_rev mergebase_rev) root)
+      (Hg.get_hg_revision_time (Hg.Hg_rev mergebase_rev) root_path)
     @@ fun mergebase_time ->
+    Future.continue_with_future
+      (Hg.get_hg_revision_time (Hg.Hg_rev saved_state_rev) root_path)
+    @@ fun corresponding_time ->
     let state_distance =
-      abs (mergebase_global_rev - corresponding_base_global_rev)
+      abs (mergebase_globalrev - corresponding_base_global_rev)
     in
     let state_age = abs (mergebase_time - corresponding_time) in
-    let saved_state_delta = { age = state_age; distance = state_distance } in
-    Future.of_value (mergebase_rev, mergebase_global_rev, saved_state_delta)
+    let saved_state_revs_info =
+      {
+        age = Some state_age;
+        distance = Some state_distance;
+        saved_state_rev;
+        saved_state_globalrev = Some corresponding_base_global_rev;
+        saved_state_rev_timestamp = Some corresponding_time;
+        mergebase_rev = Some mergebase_rev;
+        mergebase_globalrev = Some mergebase_globalrev;
+        mergebase_rev_timestamp = Some mergebase_time;
+      }
+    in
+    Future.of_value saved_state_revs_info
   in
   match Future.get future with
-  | Ok (a, b, c) -> (Some a, Some b, Some c)
+  | Ok x -> x
   | Error e ->
     Hh_logger.log
       "[serverLazyInit]: calculate_state_distance_and_age_from_hg failed: %s"
       (Future.error_to_string e);
-    (None, None, None)
+    ServerEnv.SavedStateRevsInfo.default ~saved_state_rev
 
 let use_precomputed_state_exn
     ~(root : Path.t)
+    (env : ServerEnv.env)
     (genv : ServerEnv.genv)
     (ctx : Provider_context.t)
     (info : ServerArgs.saved_state_target_info)
@@ -342,26 +340,28 @@ let use_precomputed_state_exn
     |> Provider_context.get_tcopt
     |> TypecheckerOptions.log_saved_state_age_and_distance
   in
-  let (mergebase, mergebase_rev, saved_state_delta) =
+  let saved_state_revs_info =
     if log_saved_state_age_and_distance then
       calculate_state_distance_and_age_from_hg root corresponding_base_revision
     else
-      (None, None, None)
+      {
+        (ServerEnv.SavedStateRevsInfo.default
+           ~saved_state_rev:corresponding_base_revision)
+        with
+        mergebase_rev = env.init_env.mergebase;
+      }
   in
   {
     naming_table_fn = naming_table_path;
     naming_table_fallback_fn = naming_table_fallback_path;
     deptable_fn;
-    corresponding_rev = Hg.Hg_rev corresponding_base_revision;
-    mergebase_rev;
-    mergebase;
     dirty_naming_files = naming_changes;
     dirty_master_files = prechecked_changes;
     dirty_local_files = changes;
     old_naming_table;
     old_errors;
     old_warnings;
-    saved_state_delta;
+    saved_state_revs_info;
     naming_table_manifold_path = None;
   }
 
@@ -721,11 +721,6 @@ let calculate_fanout_and_defer_or_do_type_check
                dirty_files_unchanged_decls
                dirty_files_changed_decls)
     in
-    let (state_distance, state_age) =
-      match env.init_env.saved_state_delta with
-      | None -> (None, None)
-      | Some { distance; age } -> (Some distance, Some age)
-    in
     let init_telemetry =
       ServerEnv.Init_telemetry.make
         ServerEnv.Init_telemetry.Init_lazy_dirty
@@ -755,8 +750,12 @@ let calculate_fanout_and_defer_or_do_type_check
         |> Telemetry.int_
              ~key:"to_recheck"
              ~value:(Relative_path.Set.cardinal to_recheck)
-        |> Telemetry.int_opt ~key:"state_distance" ~value:state_distance
-        |> Telemetry.int_opt ~key:"state_age" ~value:state_age)
+        |> Telemetry.object_opt
+             ~key:"saved_state_revs_info"
+             ~value:
+               (Option.map
+                  ~f:ServerEnv.SavedStateRevsInfo.to_telemetry
+                  env.init_env.saved_state_revs_info))
     in
     let result =
       ServerInitCommon.defer_or_do_type_check
@@ -1014,14 +1013,11 @@ let update_naming_table
     dirty_local_files;
     dirty_master_files;
     old_naming_table;
-    mergebase_rev = _;
-    mergebase = _;
     old_errors;
     old_warnings = _;
     deptable_fn = _;
     naming_table_fn = _;
-    corresponding_rev = _;
-    saved_state_delta = _;
+    saved_state_revs_info = _;
     naming_table_manifold_path = _;
   } =
     loaded_info
@@ -1182,14 +1178,11 @@ let post_saved_state_initialization
     dirty_local_files;
     dirty_master_files;
     old_naming_table;
-    mergebase_rev;
-    mergebase;
     old_errors;
     old_warnings;
     deptable_fn;
     naming_table_fn = _;
-    corresponding_rev = _;
-    saved_state_delta;
+    saved_state_revs_info;
     naming_table_manifold_path;
   } =
     loaded_info
@@ -1201,17 +1194,18 @@ let post_saved_state_initialization
       Hh_logger.log
         "Warning: disabling restart on rebase (server was started with precomputed saved-state)"
     end else
-      Option.iter mergebase_rev ~f:ServerRevisionTracker.initialize;
+      Option.iter
+        saved_state_revs_info.ServerEnv.mergebase_globalrev
+        ~f:ServerRevisionTracker.initialize;
   let env =
     {
       env with
       init_env =
         {
           env.init_env with
-          mergebase;
           mergebase_warning_hashes = old_warnings;
           naming_table_manifold_path;
-          saved_state_delta;
+          saved_state_revs_info = Some saved_state_revs_info;
         };
       deps_mode =
         (match ServerArgs.save_64bit genv.options with
@@ -1327,15 +1321,12 @@ let saved_state_init
 
   let ctx = Provider_utils.ctx_from_server_env env in
   let do_ () : (loaded_info, load_state_error) result =
-    let state_result =
-      CgroupProfiler.step_start_end cgroup_steps "load saved state"
-      @@ fun _cgroup_step ->
-      match load_state_approach with
-      | Precomputed info ->
-        Ok (use_precomputed_state_exn ~root genv ctx info cgroup_steps)
-      | Load_state_natively -> download_and_load_state_exn ~genv ~ctx ~root
-    in
-    state_result
+    CgroupProfiler.step_start_end cgroup_steps "load saved state"
+    @@ fun _cgroup_step ->
+    match load_state_approach with
+    | Precomputed info ->
+      Ok (use_precomputed_state_exn ~root env genv ctx info cgroup_steps)
+    | Load_state_natively -> download_and_load_state_exn ~genv ~ctx ~root
   in
   let t = Unix.gettimeofday () in
   let state_result =

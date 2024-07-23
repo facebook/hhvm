@@ -30,7 +30,7 @@ val save_state :
 type init_result =
   (* Loaded a saved saved state of this distance. Note: for older load scripts
    * distance is unknown, thus None. *)
-  | Load_state_succeeded of ServerEnv.saved_state_delta option
+  | Load_state_succeeded of ServerEnv.saved_state_revs_info
   (* Loading error *)
   | Load_state_failed of string * Telemetry.t
   (* This option means we didn't even try to load a saved state *)

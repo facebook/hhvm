@@ -6,6 +6,7 @@
  *
  *)
 
+open Hh_prelude
 open Asserter
 open Hh_json
 open Hh_json.Access
@@ -15,9 +16,9 @@ open Write_symbol_info
 open Hack
 module Fact_acc = Predicate.Fact_acc
 
-let extract_facts_from_obj pred_name = function
+let extract_facts_from_obj (pred_name : string) = function
   | JSON_Object [("predicate", JSON_String p); ("facts", JSON_Array l)]
-    when p = pred_name ->
+    when String.equal p pred_name ->
     Some l
   | _ -> None
 
@@ -78,7 +79,7 @@ let test_add_fact _test_ctxt =
   in
   assert_bool
     "Identical keys for different predicates are separate facts"
-    ((res_id :> int) != (res_id3 :> int));
+    (not @@ Int.equal (res_id :> int) (res_id3 :> int));
   Int_asserter.assert_equals
     1
     (List.length facts_function_declaration)

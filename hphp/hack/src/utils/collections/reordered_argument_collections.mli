@@ -13,8 +13,13 @@ module Reordered_argument_map (S : WrappedMap.S) :
 
 module type Set_S = Reordered_argument_collections_sig.Set_S
 
-module Reordered_argument_set (S : Set.S) :
-  Set_S with type elt = S.elt with type t = S.t
+module Reordered_argument_set (S : Set.S) : sig
+  include Set_S with type elt = S.elt with type t = S.t
+
+  val make_yojson_of_t : (elt -> Yojson.Safe.t) -> t -> Yojson.Safe.t
+
+  val make_t_of_yojson : (Yojson.Safe.t -> elt) -> Yojson.Safe.t -> t
+end
 
 module type SSet_S = Reordered_argument_collections_sig.SSet_S
 

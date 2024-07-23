@@ -167,11 +167,66 @@ end
     Distance tracks the number of revisions between X and Y, using globalrev.
     Age tracks the time elapsed between X and Y in seconds, according to hg log data.
 *)
-type saved_state_delta = {
-  distance: int;
-  age: int;
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
+
+type saved_state_revs_info = {
+  distance: int option;
+  age: int option;
+  saved_state_rev: Hg.Rev.t;
+  saved_state_globalrev: Hg.global_rev option;
+  saved_state_rev_timestamp: int option;
+  mergebase_rev: Hg.Rev.t option;
+  mergebase_globalrev: Hg.global_rev option;
+  mergebase_rev_timestamp: int option;
 }
-[@@deriving show]
+[@@deriving show, yojson]
+
+module SavedStateRevsInfo = struct
+  type t = saved_state_revs_info [@@deriving yojson]
+
+  let default ~saved_state_rev =
+    {
+      distance = None;
+      age = None;
+      saved_state_rev;
+      saved_state_globalrev = None;
+      saved_state_rev_timestamp = None;
+      mergebase_rev = None;
+      mergebase_globalrev = None;
+      mergebase_rev_timestamp = None;
+    }
+
+  let to_telemetry
+      {
+        distance;
+        age;
+        saved_state_rev;
+        saved_state_globalrev;
+        saved_state_rev_timestamp;
+        mergebase_rev;
+        mergebase_globalrev;
+        mergebase_rev_timestamp;
+      } =
+    Telemetry.create ()
+    |> Telemetry.int_opt ~key:"distance" ~value:distance
+    |> Telemetry.int_opt ~key:"age_seconds" ~value:age
+    |> Telemetry.string_
+         ~key:"saved_state_rev"
+         ~value:(Hg.Rev.to_string saved_state_rev)
+    |> Telemetry.int_opt
+         ~key:"saved_state_globalrev"
+         ~value:saved_state_globalrev
+    |> Telemetry.int_opt
+         ~key:"saved_state_rev_timestamp"
+         ~value:saved_state_rev_timestamp
+    |> Telemetry.string_opt
+         ~key:"mergebase_rev"
+         ~value:(Option.map ~f:Hg.Rev.to_string mergebase_rev)
+    |> Telemetry.int_opt ~key:"mergebase_globalrev" ~value:mergebase_globalrev
+    |> Telemetry.int_opt
+         ~key:"mergebase_rev_timestamp"
+         ~value:mergebase_rev_timestamp
+end
 
 type dirty_deps = {
   dirty_local_deps: Typing_deps.DepSet.t;
@@ -214,7 +269,7 @@ type init_env = {
   recheck_id: string option;
   (* Additional data associated with init that we want to log when a first full
    * check completes. *)
-  saved_state_delta: saved_state_delta option;
+  saved_state_revs_info: saved_state_revs_info option;
   naming_table_manifold_path: string option;
       (** The manifold path for remote typechecker workers to download the naming table
           saved state. This value will be None in the case of full init *)

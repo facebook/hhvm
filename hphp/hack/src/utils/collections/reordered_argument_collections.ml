@@ -43,8 +43,13 @@ end
 
 module type Set_S = Reordered_argument_collections_sig.Set_S
 
-module Reordered_argument_set (S : Set.S) :
-  Set_S with type elt = S.elt with type t = S.t = struct
+module Reordered_argument_set (S : Set.S) : sig
+  include Set_S with type elt = S.elt with type t = S.t
+
+  val make_yojson_of_t : (elt -> Yojson.Safe.t) -> t -> Yojson.Safe.t
+
+  val make_t_of_yojson : (Yojson.Safe.t -> elt) -> Yojson.Safe.t -> t
+end = struct
   include S
 
   let add s v = add v s
@@ -81,6 +86,17 @@ module Reordered_argument_set (S : Set.S) :
     | [] -> ()
     | _ -> Format.fprintf fmt " ");
     Format.fprintf fmt "}@]"
+
+  let make_yojson_of_t (yojson_of_t : elt -> Yojson.Safe.t) (t : t) :
+      Yojson.Safe.t =
+    Ppx_yojson_conv_lib.Yojson_conv.Primitives.yojson_of_list
+      yojson_of_t
+      (to_list t)
+
+  let make_t_of_yojson
+      (t_of_yojson : Yojson.Safe.t -> elt) (json : Yojson.Safe.t) : t =
+    Ppx_yojson_conv_lib.Yojson_conv.Primitives.list_of_yojson t_of_yojson json
+    |> of_list
 
   (** Find an element that satisfies some boolean predicate.
       No other guarantees are given (decidability, ordering, ...).  *)

@@ -7,6 +7,7 @@
  *)
 
 open Hh_prelude
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 type env = {
   root: Path.t;
@@ -19,22 +20,15 @@ type env = {
 type 'additional_info replay_info = {
   manifold_path: string;
   changed_files: Saved_state_loader.changed_files;
-  corresponding_rev: Hg.Rev.t;
-  mergebase_rev: Hg.Rev.t;
   is_cached: bool;
   additional_info: 'additional_info;
 }
+[@@deriving yojson]
 
 let changed_files_to_absolute_paths_json
     (changed_files : Saved_state_loader.changed_files) : Hh_json.json =
   changed_files
   |> List.map ~f:Relative_path.to_absolute
-  |> Hh_json_helpers.Jprint.string_array
-
-let changed_files_to_relative_paths_json
-    (changed_files : Saved_state_loader.changed_files) : Hh_json.json =
-  changed_files
-  |> List.map ~f:Relative_path.suffix
   |> Hh_json_helpers.Jprint.string_array
 
 let print_load_error (load_error : Saved_state_loader.LoadError.t) : unit =
@@ -48,64 +42,17 @@ let print_load_error (load_error : Saved_state_loader.LoadError.t) : unit =
   in
   Hh_json.json_to_multiline_output stdout json
 
-let additional_info_of_json (json : Hh_json.json option) :
-    Saved_state_loader.Naming_and_dep_table_info.additional_info =
-  let open Hh_json_helpers in
-  let mergebase_global_rev = Jget.int_opt json "mergebase_global_rev" in
-  let dirty_files = Jget.obj_exn json "dirty_files" in
-  let master_changes =
-    Jget.string_array_exn dirty_files "master_changes"
-    |> List.map ~f:(fun suffix -> Relative_path.from_root ~suffix)
-    |> Relative_path.Set.of_list
-  in
-  let local_changes =
-    Jget.string_array_exn dirty_files "local_changes"
-    |> List.map ~f:(fun suffix -> Relative_path.from_root ~suffix)
-    |> Relative_path.Set.of_list
-  in
-  Saved_state_loader.Naming_and_dep_table_info.
-    {
-      mergebase_global_rev;
-      dirty_files_promise = Future.of_value { master_changes; local_changes };
-      saved_state_distance = None;
-      saved_state_age = None;
-    }
-
-let replay_info_of_json (json : Hh_json.json option) :
-    Saved_state_loader.Naming_and_dep_table_info.additional_info replay_info =
-  let open Hh_json_helpers in
-  let manifold_path = Jget.string_exn json "manifold_path" in
-  let changed_files =
-    Jget.string_array_exn json "changed_files"
-    |> List.map ~f:(fun suffix -> Relative_path.from_root ~suffix)
-  in
-  let corresponding_rev =
-    Jget.string_exn json "corresponding_rev" |> Hg.Rev.of_string
-  in
-  let mergebase_rev =
-    Jget.string_exn json "mergebase_rev" |> Hg.Rev.of_string
-  in
-  let is_cached = Jget.bool_exn json "is_cached" in
-  let additional_info =
-    additional_info_of_json (Jget.obj_opt json "additional_info")
-  in
-  {
-    manifold_path;
-    changed_files;
-    corresponding_rev;
-    mergebase_rev;
-    is_cached;
-    additional_info;
-  }
-
 let get_replay_info (replay_token : string) :
     Saved_state_loader.Naming_and_dep_table_info.additional_info replay_info
     Lwt.t =
   let%lwt replay_info = Clowder_paste.clowder_download replay_token in
   match replay_info with
   | Ok stdout ->
-    let json = Some (Hh_json.json_of_string stdout) in
-    Lwt.return (replay_info_of_json json)
+    let json = Yojson.Safe.from_string stdout in
+    Lwt.return
+      (replay_info_of_yojson
+         Saved_state_loader.Naming_and_dep_table_info.additional_info_of_yojson
+         json)
   | Error message ->
     failwith
       (Printf.sprintf
@@ -113,65 +60,21 @@ let get_replay_info (replay_token : string) :
          replay_token
          message)
 
-let make_replay_token_of_additional_info
-    ~(additional_info :
-       Saved_state_loader.Naming_and_dep_table_info.additional_info) :
-    Hh_json.json =
-  let Saved_state_loader.Naming_and_dep_table_info.
-        {
-          mergebase_global_rev;
-          dirty_files_promise;
-          saved_state_distance = _;
-          saved_state_age = _;
-        } =
-    additional_info
-  in
-  let Saved_state_loader.Naming_and_dep_table_info.
-        { master_changes; local_changes } =
-    Future.get_exn dirty_files_promise
-  in
-  let open Hh_json in
-  JSON_Object
-    [
-      ("mergebase_global_rev", opt_int_to_json mergebase_global_rev);
-      ( "dirty_files",
-        JSON_Object
-          [
-            ( "master_changes",
-              changed_files_to_relative_paths_json
-              @@ Relative_path.Set.elements master_changes );
-            ( "local_changes",
-              changed_files_to_relative_paths_json
-              @@ Relative_path.Set.elements local_changes );
-          ] );
-    ]
-
 let make_replay_token_json
     ~(manifold_path : string)
     ~(changed_files : Saved_state_loader.changed_files)
-    ~(corresponding_rev : Hg.Rev.t)
-    ~(mergebase_rev : Hg.Rev.t)
     ~(is_cached : bool)
     ~(additional_info :
        Saved_state_loader.Naming_and_dep_table_info.additional_info) :
-    Hh_json.json =
-  let open Hh_json in
-  JSON_Object
-    [
-      ("manifold_path", JSON_String manifold_path);
-      ("changed_files", changed_files_to_relative_paths_json changed_files);
-      ("corresponding_rev", JSON_String (Hg.Rev.to_string corresponding_rev));
-      ("mergebase_rev", JSON_String (Hg.Rev.to_string mergebase_rev));
-      ("is_cached", JSON_Bool is_cached);
-      ("additional_info", make_replay_token_of_additional_info ~additional_info);
-    ]
+    Yojson.Safe.t =
+  yojson_of_replay_info
+    Saved_state_loader.Naming_and_dep_table_info.yojson_of_additional_info
+    { manifold_path; changed_files; is_cached; additional_info }
 
 let make_replay_token
     ~(env : env)
     ~(manifold_path : string)
     ~(changed_files : Saved_state_loader.changed_files)
-    ~(corresponding_rev : Hg.Rev.t)
-    ~(mergebase_rev : Hg.Rev.t)
     ~(is_cached : bool)
     ~(additional_info :
        Saved_state_loader.Naming_and_dep_table_info.additional_info) :
@@ -187,14 +90,12 @@ let make_replay_token
       make_replay_token_json
         ~manifold_path
         ~changed_files
-        ~corresponding_rev
-        ~mergebase_rev
         ~is_cached
         ~additional_info
     in
     let%lwt clowder_result =
       Clowder_paste.clowder_upload_and_get_handle
-        (Hh_json.json_to_multiline json)
+        (Yojson.Safe.pretty_to_string json)
     in
     (match clowder_result with
     | Ok handle -> Lwt.return_some handle
@@ -231,14 +132,8 @@ let load_saved_state ~(env : env) ~(local_config : ServerLocalConfig.t) :
     in
     Lwt.return result
   | Some replay_token ->
-    let%lwt {
-          manifold_path;
-          changed_files;
-          corresponding_rev;
-          mergebase_rev;
-          is_cached;
-          additional_info;
-        } =
+    let%lwt ({ manifold_path; changed_files; is_cached; additional_info }
+              : _ replay_info) =
       get_replay_info replay_token
     in
     let download_dir = State_loader_lwt.prepare_download_dir () in
@@ -254,14 +149,12 @@ let load_saved_state ~(env : env) ~(local_config : ServerLocalConfig.t) :
     in
     (match result with
     | Ok (main_artifacts, _telemetry) ->
-      let load_result =
+      let load_result : Saved_state_loader.load_result =
         {
           Saved_state_loader.main_artifacts;
           additional_info;
           changed_files;
           manifold_path;
-          corresponding_rev;
-          mergebase_rev;
           is_cached;
         }
       in
@@ -291,8 +184,6 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
           additional_info;
           changed_files;
           manifold_path;
-          corresponding_rev;
-          mergebase_rev;
           is_cached;
         } ->
     let%lwt replay_token =
@@ -300,8 +191,6 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
         ~env
         ~manifold_path
         ~changed_files
-        ~corresponding_rev
-        ~mergebase_rev
         ~is_cached
         ~additional_info
     in

@@ -633,8 +633,8 @@ testing::AssertionResult runStatelessRpcTest(
     }
     return testing::AssertionSuccess();
 
-  } catch (...) {
-    return testing::AssertionFailure();
+  } catch (const std::exception& e) {
+    return testing::AssertionFailure() << "\nUnexpected Error : " << e.what();
   }
 }
 

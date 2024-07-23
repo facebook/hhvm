@@ -49,9 +49,7 @@ let post_init genv (env, _t) =
   env
 
 let get_lazy_level (genv : ServerEnv.genv) : lazy_level =
-  if Option.is_some (ServerArgs.ai_mode genv.options) then
-    Eager
-  else if genv.local_config.SLC.lazy_init then
+  if genv.local_config.SLC.lazy_init then
     Lazy
   else
     Eager

@@ -29,21 +29,6 @@
 
 open Hh_prelude
 open ServerEnv
-module SLC = ServerLocalConfig
-
-let type_decl
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
-    (defs_per_file : Naming_table.defs_per_file)
-    (t : float) : ServerEnv.env * float =
-  Server_progress.with_message "evaluating type declarations" @@ fun () ->
-  let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
-  let ctx = Provider_utils.ctx_from_server_env env in
-  Decl_service.go ~bucket_size ctx genv.workers defs_per_file;
-  Stats.(stats.init_heap_size <- SharedMem.SMTelemetry.heap_size ());
-  HackEventLogger.type_decl_end t;
-  let t = Hh_logger.log_duration "Type-decl" t in
-  (env, t)
 
 let init
     (genv : ServerEnv.genv)
@@ -84,12 +69,6 @@ let init
   in
   ServerInitCommon.validate_no_errors env.errorl;
   let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
-  let (env, t) =
-    if Option.is_some (ServerArgs.ai_mode genv.options) then
-      type_decl genv env defs_per_file t
-    else
-      (env, t)
-  in
   (* Type-checking everything *)
   ServerInitCommon.defer_or_do_type_check
     genv

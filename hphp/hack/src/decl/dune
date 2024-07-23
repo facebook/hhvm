@@ -266,13 +266,6 @@
   (pps ppx_deriving.std)))
 
 (library
- (name decl_service)
- (modules decl_service)
- (libraries decl procs_procs utils_core)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
  (name decl_redecl_service)
  (modules decl_redecl_service)
  (libraries

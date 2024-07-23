@@ -106,6 +106,10 @@ cdef is_cacheable_non_primitive(ThriftIdlType idl_type):
     return idl_type in (ThriftIdlType.String, ThriftIdlType.Struct)
 
 
+cdef is_container(ThriftIdlType idl_type):
+    return idl_type in (ThriftIdlType.List, ThriftIdlType.Set, ThriftIdlType.Map)
+
+
 class _MutableStructCachedField:
     __slots__ = ('_field_index')
 
@@ -125,25 +129,6 @@ class _MutableStructCachedField:
             (<MutableGeneratedError>obj)._fbthrift_set_field_value(self._field_index, value)
 
         obj._fbthrift_field_cache[self._field_index] = None
-
-
-cdef is_container(ThriftIdlType idl_type):
-    return idl_type in (ThriftIdlType.List, ThriftIdlType.Set, ThriftIdlType.Map)
-
-class _MutableStructContainerField:
-    __slots__ = ('_field_index')
-
-    def __init__(self, field_id):
-        self._field_index = field_id
-
-    def __get__(self, obj, objtype):
-        return (<MutableStruct>obj)._fbthrift_get_cached_field_value(self._field_index)
-
-    def __set__(self, obj, value):
-        raise TypeError(
-                "Thrift container types do not support direct assignment."
-                " However, you can add, remove or update items within the"
-                " container")
 
 
 cdef class MutableStructOrUnion:
@@ -460,16 +445,9 @@ cdef object _mutable_struct_meta_new(cls, cls_name, bases, dct):
             _MutableStructField(field_index),
         )
 
-    # DO_BEFORE(alperyoney,20240515): Implement descriptor for non-primitive
-    # mutable types.
-    # For now, handle non-primitive-types similarly to primitive types and
-    # use the `_MutableStructField` descriptor for all types, except for
-    # `list`. For `list`, use `_MutableStructContainerField` descriptor.
     for field_index, field_name, idl_type, adapter_info in non_primitive_types:
         field_descriptor = _MutableStructField(field_index)
-        if is_container(idl_type):
-            field_descriptor = _MutableStructContainerField(field_index)
-        elif adapter_info is not None or is_cacheable_non_primitive(idl_type):
+        if is_container(idl_type) or adapter_info is not None or is_cacheable_non_primitive(idl_type):
             field_descriptor = _MutableStructCachedField(field_index)
 
         type.__setattr__(

@@ -273,9 +273,9 @@ cdef class MutableMapTypeInfo(TypeInfoBase):
         Validates the `values` and converts them into an internal data representation.
 
         Args:
-            values (iterable): An iterable object. Each key, value pair in the iteration
-            should be of a valid key and valid value type as verified by in `self.key_info`
-            and `self.val_info`.
+            values (Mapping): A mapping object, which must provide the `items()`
+            method. Each key, value pair in the mapping should be of a valid key
+            and valid value type as verified by `self.key_info` and `self.val_info`.
 
         Returns a Python dict with converted values, representing the internal data
         """

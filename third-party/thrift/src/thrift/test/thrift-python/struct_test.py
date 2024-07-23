@@ -680,10 +680,11 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(3, len(s.unqualified_list_i32))
         self.assertEqual([1, 2, 3], s.unqualified_list_i32)
 
-        with self.assertRaisesRegex(
-            TypeError, "Thrift container types do not support direct assignment."
-        ):
-            s.unqualified_list_i32 = [1, 2, 3]
+        # Assigning to a list field
+        s.unqualified_list_i32 = [1, 2, 3, 4, 5]
+        self.assertEqual([1, 2, 3, 4, 5], s.unqualified_list_i32)
+        s.unqualified_list_i32 = [1, 2, 3]
+        self.assertEqual([1, 2, 3], s.unqualified_list_i32)
 
         s.unqualified_list_i32[0] = 2
         self.assertEqual([2, 2, 3], s.unqualified_list_i32)
@@ -751,6 +752,101 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual([11, 12, 13, 14, 15], s.unqualified_list_i32)
         self.assertEqual([11, 12, 13, 14, 15], lst1)
         self.assertEqual([11, 12, 13, 14, 15], lst2)
+
+    def test_assign_for_list(self) -> None:
+        s1 = MutableTestStructAllThriftContainerTypes(unqualified_list_i32=[1, 2, 3])
+
+        # It is possible to assign any value that supports `len()` and iteration
+        s1.unqualified_list_i32 = [1, 2, 3]
+        self.assertEqual([1, 2, 3], s1.unqualified_list_i32)
+        s1.unqualified_list_i32 = {11, 12, 13}
+        self.assertEqual([11, 12, 13], s1.unqualified_list_i32)
+        s1.unqualified_list_i32 = (21, 22, 23)
+        self.assertEqual([21, 22, 23], s1.unqualified_list_i32)
+        s1.unqualified_list_i32 = []
+        self.assertEqual([], s1.unqualified_list_i32)
+
+        s2 = MutableTestStructAllThriftContainerTypes(unqualified_list_i32=[])
+        # my_list and s2.unqualified_list_i32 are different lists
+        my_list = [1, 2, 3]
+        s2.unqualified_list_i32 = my_list
+        self.assertEqual([1, 2, 3], s2.unqualified_list_i32)
+        my_list[0] = 11
+        self.assertEqual(1, s2.unqualified_list_i32[0])
+
+        s3 = MutableTestStructAllThriftContainerTypes(unqualified_list_i32=[1, 2, 3])
+        # Strong exception safety
+        with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
+            s3.unqualified_list_i32 = [11, 12, 13, "Not an Integer"]
+        self.assertEqual([1, 2, 3], s3.unqualified_list_i32)
+
+    def test_assign_for_set(self) -> None:
+        s1 = MutableTestStructAllThriftContainerTypes(
+            unqualified_set_string=["a", "b", "c"]
+        )
+
+        # It is possible to assign any value that supports iteration
+        s1.unqualified_set_string = ["a", "b", "c"]
+        self.assertEqual({"a", "b", "c"}, s1.unqualified_set_string)
+        s1.unqualified_set_string = {"aa", "bb", "cc"}
+        self.assertEqual({"aa", "bb", "cc"}, s1.unqualified_set_string)
+        s1.unqualified_set_string = ("aaa", "bbb", "ccc")
+        self.assertEqual({"aaa", "bbb", "ccc"}, s1.unqualified_set_string)
+
+        # even from iterator, this is not possible for list field because of
+        # `len()` requirement
+        my_iter = iter(["x", "y", "z"])
+        s1.unqualified_set_string = my_iter
+        self.assertEqual({"x", "y", "z"}, s1.unqualified_set_string)
+
+        s2 = MutableTestStructAllThriftContainerTypes(unqualified_set_string=[])
+        # my_set and s2.unqualified_set_string are different sets
+        my_set = {"a", "b", "c"}
+        s2.unqualified_set_string = my_set
+        self.assertEqual({"a", "b", "c"}, s2.unqualified_set_string)
+        my_set.add("d")
+        self.assertEqual(4, len(my_set))
+        self.assertEqual(3, len(s2.unqualified_set_string))
+
+        s3 = MutableTestStructAllThriftContainerTypes(
+            unqualified_set_string=["a", "b", "c"]
+        )
+        # Strong exception safety
+        with self.assertRaisesRegex(TypeError, "Expected type <class 'str'>"):
+            s3.unqualified_set_string = ["aa", "bb", "cc", 999]
+        self.assertEqual({"a", "b", "c"}, s3.unqualified_set_string)
+
+    def test_assign_for_map(self) -> None:
+        s1 = MutableTestStructAllThriftContainerTypes(
+            unqualified_map_string_i32={"a": 1, "b": 2}
+        )
+
+        # It is possible to assign any mapping value that implements `items()`
+        s1.unqualified_map_string_i32 = {"x": 1, "y": 2}
+        self.assertEqual({"x": 1, "y": 2}, s1.unqualified_map_string_i32)
+
+        class MyMapping:
+            def items(self):
+                return (("aa", 11), ("bb", 22))
+
+        s1.unqualified_map_string_i32 = MyMapping()
+        self.assertEqual({"aa": 11, "bb": 22}, s1.unqualified_map_string_i32)
+
+        s2 = MutableTestStructAllThriftContainerTypes(unqualified_map_string_i32={})
+        # my_map and s2.unqualified_map_string_i32 are different maps
+        my_map = {"a": 1, "b": 2}
+        s2.unqualified_map_string_i32 = my_map
+        my_map["c"] = 3
+        self.assertEqual(3, len(my_map))
+        self.assertEqual(2, len(s2.unqualified_map_string_i32))
+
+        s3 = MutableTestStructAllThriftContainerTypes(
+            unqualified_map_string_i32={"a": 1, "b": 2}
+        )
+        # Strong exception safety
+        with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
+            s3.unqualified_map_string_i32 = {"x": 1, "y": "Not an Integer"}
+        self.assertEqual({"a": 1, "b": 2}, s3.unqualified_map_string_i32)
 
     @parameterized.expand(
         [
@@ -861,10 +957,11 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(3, len(s.unqualified_set_string))
         self.assertEqual({"1", "2", "3"}, s.unqualified_set_string)
 
-        with self.assertRaisesRegex(
-            TypeError, "Thrift container types do not support direct assignment."
-        ):
-            s.unqualified_set_string = {"9", "8", "7"}
+        # Assigning to a set field
+        s.unqualified_set_string = {"9", "8", "7"}
+        self.assertEqual({"9", "8", "7"}, s.unqualified_set_string)
+        s.unqualified_set_string = {"1", "2", "3"}
+        self.assertEqual({"1", "2", "3"}, s.unqualified_set_string)
 
         # `__contains__()`
         self.assertIn("1", s.unqualified_set_string)
@@ -1004,10 +1101,11 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(2, len(s.unqualified_map_string_i32))
         self.assertEqual({"a": 1, "b": 2}, s.unqualified_map_string_i32)
 
-        with self.assertRaisesRegex(
-            TypeError, "Thrift container types do not support direct assignment."
-        ):
-            s.unqualified_map_string_i32 = {"a": 1, "b": 2}
+        # Assigning to a map field
+        s.unqualified_map_string_i32 = {"x": 1, "y": 2}
+        self.assertEqual({"x": 1, "y": 2}, s.unqualified_map_string_i32)
+        s.unqualified_map_string_i32 = {"a": 1, "b": 2}
+        self.assertEqual({"a": 1, "b": 2}, s.unqualified_map_string_i32)
 
         map1 = s.unqualified_map_string_i32
         map2 = s.unqualified_map_string_i32

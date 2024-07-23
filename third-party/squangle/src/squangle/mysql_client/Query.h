@@ -401,7 +401,7 @@ class MultiQuery {
     return MultiQuery{multi_query};
   }
 
-  folly::StringPiece renderQuery(MYSQL* conn);
+  std::shared_ptr<folly::fbstring> renderQuery(MYSQL* conn);
 
   const Query& getQuery(size_t index) const {
     CHECK_THROW(index < queries_.size(), std::invalid_argument);
@@ -413,11 +413,11 @@ class MultiQuery {
   }
 
  private:
-  explicit MultiQuery(folly::StringPiece multi_query)
-      : unsafe_multi_query_(multi_query) {}
+  explicit MultiQuery(folly::StringPiece multi_query) {
+    rendered_multi_query_ = std::make_shared<folly::fbstring>(multi_query);
+  }
 
-  folly::StringPiece unsafe_multi_query_;
-  folly::fbstring rendered_multi_query_;
+  std::shared_ptr<folly::fbstring> rendered_multi_query_;
   std::vector<Query> queries_;
 };
 

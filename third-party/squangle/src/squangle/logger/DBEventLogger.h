@@ -133,7 +133,7 @@ struct QueryLoggingData : CommonLoggingData {
       Duration duration,
       std::optional<Duration> timeout,
       int queries,
-      const std::string& queryString,
+      std::shared_ptr<folly::fbstring> queryString,
       int rows,
       uint64_t resultSize = 0,
       bool noIndexUsed = false,
@@ -150,7 +150,7 @@ struct QueryLoggingData : CommonLoggingData {
             maxThreadBlockTime,
             totalThreadBlockTime),
         queries_executed(queries),
-        query(queryString),
+        query(std::move(queryString)),
         rows_received(rows),
         result_size(resultSize),
         no_index_used(noIndexUsed),
@@ -159,7 +159,7 @@ struct QueryLoggingData : CommonLoggingData {
         response_attributes(std::move(responseAttributes)),
         was_slow(wasSlow) {}
   int queries_executed;
-  std::string query;
+  std::shared_ptr<folly::fbstring> query;
   int rows_received;
   uint64_t result_size;
   bool no_index_used;

@@ -666,12 +666,12 @@ folly::fbstring Query::renderInternal(
   return ret;
 }
 
-folly::StringPiece MultiQuery::renderQuery(MYSQL* conn) {
-  if (!unsafe_multi_query_.empty()) {
-    return unsafe_multi_query_;
+std::shared_ptr<folly::fbstring> MultiQuery::renderQuery(MYSQL* conn) {
+  if (!rendered_multi_query_) {
+    rendered_multi_query_ = std::make_shared<folly::fbstring>(
+        Query::renderMultiQuery(conn, queries_));
   }
-  rendered_multi_query_ = Query::renderMultiQuery(conn, queries_);
-  return folly::StringPiece(rendered_multi_query_);
+  return rendered_multi_query_;
 }
 
 } // namespace mysql_client

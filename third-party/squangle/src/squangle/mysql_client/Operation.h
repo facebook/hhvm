@@ -1091,15 +1091,6 @@ class FetchOperation : public Operation {
   ~FetchOperation() override = default;
   void mustSucceed() override;
 
-  // Return the query as it was sent to MySQL (i.e., for a single
-  // query, the query itself, but for multiquery, all queries
-  // combined).
-  folly::fbstring getExecutedQuery() const {
-    CHECK_THROW(
-        state_ != OperationState::Unstarted, db::OperationStateException);
-    return rendered_query_.to<folly::fbstring>();
-  }
-
   // Number of queries that succeed to execute
   int numQueriesExecuted() {
     CHECK_THROW(state_ != OperationState::Pending, db::OperationStateException);
@@ -1282,7 +1273,7 @@ class FetchOperation : public Operation {
   FetchAction active_fetch_action_ = FetchAction::StartQuery;
   FetchAction paused_action_ = FetchAction::StartQuery;
 
-  folly::StringPiece rendered_query_;
+  std::shared_ptr<folly::fbstring> rendered_query_;
 };
 
 // This operation only supports one mode: streaming callback. This is a

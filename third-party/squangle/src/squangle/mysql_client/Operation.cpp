@@ -1206,7 +1206,7 @@ void FetchOperation::socketActionable() {
         ++num_current_query_;
         status = handler.nextResult(mysql);
       } else {
-        status = handler.runQuery(mysql, rendered_query_);
+        status = handler.runQuery(mysql, *rendered_query_);
       }
 
       if (status == MysqlHandler::PENDING) {
@@ -1496,7 +1496,7 @@ void FetchOperation::specializedCompleteOperation() {
         elapsed(),
         timeout_,
         num_queries_executed_,
-        rendered_query_.toString(),
+        rendered_query_,
         rows_received_,
         total_result_size_,
         no_index_used_,
@@ -1520,7 +1520,7 @@ void FetchOperation::specializedCompleteOperation() {
             elapsed(),
             timeout_,
             num_queries_executed_,
-            rendered_query_.toString(),
+            rendered_query_,
             rows_received_,
             total_result_size_,
             no_index_used_,

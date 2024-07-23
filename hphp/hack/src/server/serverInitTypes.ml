@@ -122,10 +122,8 @@ type loaded_info = {
 }
 [@@deriving show]
 
-(* Laziness *)
 type lazy_level =
   | Off
-  | Decl
   | Parse
   | Init
 [@@deriving show]

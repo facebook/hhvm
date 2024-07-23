@@ -53,8 +53,7 @@ let get_lazy_level (genv : ServerEnv.genv) : lazy_level =
   let lazy_parse = genv.local_config.SLC.lazy_parse in
   let lazy_initialize = genv.local_config.SLC.lazy_init in
   match (lazy_decl, lazy_parse, lazy_initialize) with
-  | (true, false, false) -> Decl
-  | (true, true, false) -> Parse
+  | (true, _, false) -> Parse
   | (true, true, true) -> Init
   | (true, false, true)
   | (false, _, _) ->

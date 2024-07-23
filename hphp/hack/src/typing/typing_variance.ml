@@ -531,18 +531,6 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
       get_class_variance tenv (Positioned.unsafe_to_raw_positioned pos_name)
     in
     get_typarams_variance_list empty variancel tyl
-  | Tnewtype (name, tyl, _) ->
-    let variancel =
-      let tparams =
-        match Typing_env.get_typedef tenv name with
-        | Decl_entry.Found { td_tparams; _ } -> td_tparams
-        | Decl_entry.DoesNotExist
-        | Decl_entry.NotYetAvailable ->
-          []
-      in
-      List.map tparams ~f:make_decl_tparam_variance
-    in
-    get_typarams_variance_list empty variancel tyl
   | Tvec_or_dict (ty1, ty2) -> union (get_typarams ty1) (get_typarams ty2)
 
 let get_positive_negative_generics ~tracked ~is_mutable env acc ty =

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f3499329b1126fd3cf40d7f7da9524db>>
+// @generated SignedSource<<011584e412054c034a6462638879cc74>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -684,6 +684,7 @@ pub enum Ty_<'a> {
     /// Name of class, name of type const, remaining names of type consts
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Taccess(&'a TaccessType<'a>),
+    Tvar(isize),
     /// The type of an opaque type or enum. Outside their defining files or
     /// when they represent enums, they are "opaque", which means that they
     /// only unify with themselves. Within a file, uses of newtypes are
@@ -692,15 +693,15 @@ pub enum Ty_<'a> {
     /// However, it is possible to have a constraint that allows us to relax
     /// opaqueness. For example:
     ///
-    ///   newtype MyType as int = ...
+    /// newtype MyType as int = ...
     ///
     /// or
     ///
-    ///   enum MyType: int as int { ... }
+    /// enum MyType: int as int { ... }
     ///
     /// Outside of the file where the type was defined, this translates to:
     ///
-    ///   Tnewtype ((pos, "MyType"), [], Tprim Tint)
+    /// Tnewtype ((pos, "MyType"), [], Tprim Tint)
     ///
     /// which means that MyType is abstract, but is a subtype of int as well.
     /// When the constraint is omitted, the third parameter is set to mixed.
@@ -709,7 +710,6 @@ pub enum Ty_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Tnewtype(&'a (&'a str, &'a [&'a Ty<'a>], &'a Ty<'a>)),
-    Tvar(isize),
     /// This represents a type alias that lacks necessary type arguments. Given
     /// type Foo<T1,T2> = ...
     /// Tunappliedalias "Foo" stands for usages of plain Foo, without supplying

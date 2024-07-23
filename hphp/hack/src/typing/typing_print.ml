@@ -799,10 +799,6 @@ module Full = struct
         ~verbose:verbose_fun
         ft
         (fun_decl_implicit_params ~verbose_fun)
-    | Tnewtype (n, _, ty)
-      when String.equal n SN.Classes.cSupportDyn
-           && not (show_supportdyn_penv penv) ->
-      k ~fuel ty
     | Tapply ((_, n), [ty])
       when String.equal n SN.Classes.cSupportDyn
            && not (show_supportdyn_penv penv) ->
@@ -810,7 +806,6 @@ module Full = struct
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
     | Tapply ((_, s), tyl)
-    | Tnewtype (s, tyl, _)
     | Tgeneric (s, tyl) ->
       let (fuel, tys_doc) = list ~fuel "<" k tyl ">" in
       let generic_doc = to_doc s ^^ tys_doc in

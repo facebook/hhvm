@@ -27,8 +27,6 @@ struct
     ignore (Env.get_class ctx name);
     Env.get_class_or_typedef ctx name |> Decl_entry.to_option
 
-  let get_typedef ctx x = Env.get_typedef ctx x
-
   let get_class ctx x = Env.get_class ctx x |> Decl_entry.to_option
 
   let get_typeconst_type _ cls name =

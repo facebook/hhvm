@@ -2,7 +2,8 @@ open Typing_defs
 open Typing_env_types
 module Env = Typing_env
 
-(** For all type constant T of type variable, make its type equal to `ty`::T *)
+(** [make_all_type_consts_equal env v ty] makes the types of
+  all type constants T of type variable v equal to `ty`::T *)
 val make_all_type_consts_equal :
   env ->
   Tvid.t ->

@@ -186,10 +186,6 @@ and instantiate_ subst x =
         (* TODO(shapes) s_unknown_value should likely be instantiated *)
         s_fields = fdm;
       }
-  | Tnewtype (name, tyl, ty) ->
-    let tyl = List.map tyl ~f:(instantiate subst) in
-    let ty = instantiate subst ty in
-    Tnewtype (name, tyl, ty)
 
 let instantiate_ce subst ({ ce_type = x; _ } as ce) =
   { ce with ce_type = lazy (instantiate subst (Lazy.force x)) }

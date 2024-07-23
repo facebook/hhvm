@@ -338,20 +338,6 @@ and _ ty_ =
   | Tvec_or_dict : 'phase ty * 'phase ty -> 'phase ty_
   (* Name of class, name of type const, remaining names of type consts *)
   | Taccess : 'phase taccess_type -> 'phase ty_
-  (* The type of an opaque type (e.g. a "newtype" outside of the file where it
-   * was defined) or enum. They are "opaque", which means that they only unify with
-   * themselves. However, it is possible to have a constraint that allows us to
-   * relax this. For example:
-   *
-   *   newtype my_type as int = ...
-   *
-   * Outside of the file where the type was defined, this translates to:
-   *
-   *   Tnewtype ((pos, "my_type"), [], Tprim Tint)
-   *
-   * Which means that my_type is abstract, but is subtype of int as well.
-   *)
-  | Tnewtype : string * 'phase ty list * 'phase ty -> 'phase ty_
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
   | Tvar : Tvid.t -> locl_phase ty_
   (* This represents a type alias that lacks necessary type arguments. Given
@@ -362,6 +348,20 @@ and _ ty_ =
    *   type Foo2 = ...
    * that simply doesn't require type arguments.
    *)
+  | Tnewtype : string * locl_phase ty list * locl_phase ty -> locl_phase ty_
+      (** The type of an opaque type (e.g. a "newtype" outside of the file where it
+        was defined) or enum. They are "opaque", which means that they only unify with
+        themselves. However, it is possible to have a constraint that allows us to
+        relax this. For example:
+
+          newtype my_type as int = ...
+
+        Outside of the file where the type was defined, this translates to:
+
+          Tnewtype ((pos, "my_type"), [], Tprim Tint)
+
+        Which means that my_type is abstract, but is subtype of int as well.
+      *)
   | Tunapplied_alias : string -> locl_phase ty_
   (* see dependent_type *)
   | Tdependent : dependent_type * locl_ty -> locl_phase ty_

@@ -405,15 +405,6 @@ let rec this_appears_covariantly ~contra env ty =
   | Tprim _
   | Tgeneric _ ->
     false
-  | Tnewtype (name, tyl, _) ->
-    let tparams =
-      match Env.get_typedef env name with
-      | Decl_entry.Found { td_tparams; _ } -> td_tparams
-      | Decl_entry.DoesNotExist
-      | Decl_entry.NotYetAvailable ->
-        []
-    in
-    this_appears_covariantly_params tparams tyl
 
 (** We know that the receiver is a concrete class, not a generic with
     bounds, or a Tunion. *)

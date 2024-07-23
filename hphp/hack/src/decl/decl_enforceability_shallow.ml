@@ -22,13 +22,14 @@ module Provider :
 
   let get_tcopt = Provider_context.get_tcopt
 
-  let get_typedef = Decl_provider_internals.get_typedef_without_pessimise
-
   let get_class = Decl_provider_internals.get_shallow_class
 
   let get_class_or_typedef ctx x =
     if is_typedef ctx x then
-      match get_typedef ctx x |> Decl_entry.to_option with
+      match
+        Decl_provider_internals.get_typedef_without_pessimise ctx x
+        |> Decl_entry.to_option
+      with
       | None -> None
       | Some td -> Some (Decl_enforceability.TypedefResult td)
     else

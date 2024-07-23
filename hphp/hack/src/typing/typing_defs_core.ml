@@ -358,32 +358,32 @@ and _ ty_ =
       (** Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>" *)
   | Taccess : 'phase taccess_type -> 'phase ty_
       (** Name of class, name of type const, remaining names of type consts *)
-  | Tnewtype : string * 'phase ty list * 'phase ty -> 'phase ty_
-      (** The type of an opaque type or enum. Outside their defining files or
-       * when they represent enums, they are "opaque", which means that they
-       * only unify with themselves. Within a file, uses of newtypes are
-       * expanded to their definitions (unless the newtype is an enum).
-       *
-       * However, it is possible to have a constraint that allows us to relax
-       * opaqueness. For example:
-       *
-       *   newtype MyType as int = ...
-       *
-       * or
-       *
-       *   enum MyType: int as int { ... }
-       *
-       * Outside of the file where the type was defined, this translates to:
-       *
-       *   Tnewtype ((pos, "MyType"), [], Tprim Tint)
-       *
-       * which means that MyType is abstract, but is a subtype of int as well.
-       * When the constraint is omitted, the third parameter is set to mixed.
-       *
-       * The second parameter is the list of type arguments to the type.
-       *)
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
   | Tvar : Tvid.t -> locl_phase ty_
+  | Tnewtype : string * locl_phase ty list * locl_phase ty -> locl_phase ty_
+      (** The type of an opaque type or enum. Outside their defining files or
+        when they represent enums, they are "opaque", which means that they
+        only unify with themselves. Within a file, uses of newtypes are
+        expanded to their definitions (unless the newtype is an enum).
+
+        However, it is possible to have a constraint that allows us to relax
+        opaqueness. For example:
+
+          newtype MyType as int = ...
+
+        or
+
+          enum MyType: int as int { ... }
+
+        Outside of the file where the type was defined, this translates to:
+
+          Tnewtype ((pos, "MyType"), [], Tprim Tint)
+
+        which means that MyType is abstract, but is a subtype of int as well.
+        When the constraint is omitted, the third parameter is set to mixed.
+
+        The second parameter is the list of type arguments to the type.
+       *)
   | Tunapplied_alias : string -> locl_phase ty_
       (** This represents a type alias that lacks necessary type arguments. Given
            type Foo<T1,T2> = ...

@@ -259,13 +259,6 @@
   (pps ppx_deriving.std)))
 
 (library
- (name decl_typedef_expand)
- (modules decl_typedef_expand)
- (libraries decl_subst decl_provider provider_context typing_defs)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
  (name decl_pos_utils)
  (modules decl_pos_utils)
  (libraries decl_defs shallow_decl_defs typing_defs)

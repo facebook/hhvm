@@ -624,56 +624,6 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
               s_unknown_value = shape_kind;
               s_fields = tym;
             } ) )
-  | Tnewtype (name, tyl, ty) ->
-    let td =
-      Decl_provider.get_typedef (Env.get_ctx env) name
-      |> Decl_entry.to_option
-      |> Utils.unsafe_opt
-    in
-    let should_expand =
-      Env.is_typedef_visible
-        env
-        ~expand_visible_newtype:ety_env.expand_visible_newtype
-        ~name
-        td
-    in
-    if should_expand then
-      let decl_pos = Reason.to_pos r in
-      let (ety_env, has_cycle) =
-        Typing_defs.add_type_expansion_check_cycles ety_env (decl_pos, name)
-      in
-      match has_cycle with
-      | Some initial_taccess_pos_opt ->
-        let ty_err_opt =
-          Option.map initial_taccess_pos_opt ~f:(fun initial_taccess_pos ->
-              Typing_error.(
-                primary
-                @@ Primary.Cyclic_typedef
-                     { def_pos = initial_taccess_pos; use_pos = decl_pos }))
-        in
-        let (env, ty) =
-          Env.fresh_type_error env (Pos_or_decl.unsafe_to_raw_pos decl_pos)
-        in
-        ((env, ty_err_opt), ty)
-      | None ->
-        Decl_typedef_expand.expand_typedef
-          ~force_expand:true
-          (Env.get_ctx env)
-          (get_reason dty)
-          name
-          tyl
-        |> localize ~ety_env env
-    else
-      let ((env, e1), ty) = localize ~ety_env env ty in
-      let ((env, e2), tyl) =
-        List.map_env_ty_err_opt
-          env
-          tyl
-          ~f:(localize ~ety_env)
-          ~combine_ty_errs:Typing_error.multiple_opt
-      in
-      let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-      ((env, ty_err_opt), mk (r, Tnewtype (name, tyl, ty)))
 
 (* Localize type arguments for something whose kinds is [kind] *)
 and localize_targs_by_kind

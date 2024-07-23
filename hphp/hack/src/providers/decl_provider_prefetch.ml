@@ -254,9 +254,6 @@ let next_missing_types
         do_ty d goal (acc, visited) ty
       | _ -> do_ty d goal (acc, visited) ty
     end
-    | Tnewtype (_name, tys, ty) ->
-      let (acc, visited) = do_ty d goal (acc, visited) ty in
-      List.fold tys ~init:(acc, visited) ~f:(do_ty d `Ty)
     | Tapply ((_, name), _tys) -> do_type_name d goal name (acc, visited)
     | Taccess _ -> (acc, visited)
   in

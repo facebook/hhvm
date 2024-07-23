@@ -483,28 +483,6 @@ module Simple = struct
       | Decl_entry.NotYetAvailable ->
         ()
     end
-    | Tnewtype (name, tyl, _) ->
-      (match Env.get_typedef env name with
-      | Decl_entry.Found typedef ->
-        Option.iter
-          ~f:(Typing_error_utils.add_typing_error ~env)
-          (Typing_visibility.check_top_level_access
-             ~ignore_package_errors:false
-             ~in_signature
-             ~use_pos
-             ~def_pos:typedef.td_pos
-             env
-             typedef.td_internal
-             (Option.map typedef.td_module ~f:snd)
-             typedef.td_package_override);
-        check_against_tparams
-          ~in_signature
-          typedef.td_pos
-          tyl
-          typedef.td_tparams
-      | Decl_entry.DoesNotExist
-      | Decl_entry.NotYetAvailable ->
-        ())
 
   (** Check that the given type is a well-kinded type whose kind matches the provided one.
   Otherwise, reports errors.

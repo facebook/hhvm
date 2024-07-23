@@ -56,10 +56,6 @@ struct
       let rs = Class_refinement.map ty rs in
       Trefinement (ty root_ty, rs)
     | Tshape s -> Tshape (shape_type s)
-    | Tnewtype (name, tyl, bound) ->
-      let tyl = List.map tyl ~f:ty in
-      let bound = ty bound in
-      Tnewtype (name, tyl, bound)
 
   and ty_opt x = Option.map x ~f:ty
 

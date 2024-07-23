@@ -78,7 +78,7 @@ ExportedAuthenticator::validateAuthenticator(
     Buf authenticatorRequest,
     Buf authenticator) {
   auto cipher = transport.getCipher();
-  auto deriver = openssl::OpenSSLFactory().makeKeyDeriver(*cipher);
+  auto deriver = ::fizz::DefaultFactory().makeKeyDeriver(*cipher);
   auto hashLength = deriver->hashLength();
   Buf handshakeContext;
   Buf finishedMacKey;

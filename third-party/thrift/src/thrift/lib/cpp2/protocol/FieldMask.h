@@ -43,6 +43,14 @@ void clear(const Mask& mask, protocol::Object& t);
 // Throws a runtime exception if the mask and objects are incompatible.
 void copy(const Mask& mask, const protocol::Object& src, protocol::Object& dst);
 
+// Returns a new object that contains only the masked fields.
+inline protocol::Object filter(const Mask& mask, const protocol::Object& src) {
+  // TODO: Migrate to filter and then get rid of copy
+  protocol::Object dst;
+  copy(mask, src, dst);
+  return dst;
+}
+
 // Returns whether field mask is compatible with thrift type tag.
 //
 // If it is a struct, it is incompatible if the mask contains a field that
@@ -83,6 +91,18 @@ void copy(const Mask& mask, const Struct& src, Struct& dst) {
   static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
   detail::throwIfContainsMapMask(mask);
   detail::copy_fields(MaskRef{mask, false}, src, dst);
+}
+
+// Returns a new object that contains only the masked fields.
+// Throws a runtime exception if the mask and objects are incompatible.
+template <typename Struct>
+inline Struct filter(const Mask& mask, const Struct& src) {
+  // TODO: Migrate to filter and then get rid of copy
+  static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
+  detail::throwIfContainsMapMask(mask);
+  auto ret = op::getDefault<Struct>();
+  copy(mask, src, ret);
+  return ret;
 }
 
 // Logical operators that can construct a new mask

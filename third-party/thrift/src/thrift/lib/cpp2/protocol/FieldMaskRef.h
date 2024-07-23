@@ -94,6 +94,21 @@ class MaskRef {
       const folly::F14FastMap<Value, Value>& src,
       folly::F14FastMap<Value, Value>& dst) const;
 
+  protocol::Object filter(const protocol::Object& src) const {
+    // TODO: Migrate to filter and then get rid of copy
+    protocol::Object dst;
+    copy(src, dst);
+    return dst;
+  }
+
+  folly::F14FastMap<Value, Value> filter(
+      const folly::F14FastMap<Value, Value>& src) const {
+    // TODO: Migrate to filter and then get rid of copy
+    folly::F14FastMap<Value, Value> dst;
+    copy(src, dst);
+    return dst;
+  }
+
  private:
   // Gets all fields/ keys that need to be copied from src to dst.
   std::unordered_set<FieldId> getFieldsToCopy(

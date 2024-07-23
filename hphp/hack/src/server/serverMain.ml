@@ -22,39 +22,6 @@ let force_break_recheck_loop_for_test_ref = ref false
 let force_break_recheck_loop_for_test x =
   force_break_recheck_loop_for_test_ref := x
 
-module MainInit : sig
-  val go :
-    genv ->
-    ServerArgs.options ->
-    (unit -> env) ->
-    (* init function to run while we have init lock *)
-    env
-end = struct
-  (* This code is only executed when the options --check is NOT present *)
-  let go genv options init_fun =
-    let root = ServerArgs.root options in
-    let t = Unix.gettimeofday () in
-    let pid = Unix.getpid () in
-    begin
-      match ProcFS.first_cgroup_for_pid pid with
-      | Ok cgroup ->
-        Hh_logger.log "Server Pid: %d" pid;
-        Hh_logger.log "Server cGroup: %s" cgroup
-      | _ -> ()
-    end;
-    Hh_logger.log "Initializing Server (This might take some time)";
-
-    (* note: we only run periodical tasks on the root, not extras *)
-    let env = init_fun () in
-    Hh_logger.log "Server is partially ready";
-    ServerIdle.init genv root;
-    let t' = Unix.gettimeofday () in
-    Hh_logger.log "Took %f seconds." (t' -. t);
-    HackEventLogger.server_is_partially_ready ();
-
-    env
-end
-
 module Program = struct
   let preinit () =
     (* Warning: Global references inited in this function, should
@@ -992,8 +959,10 @@ let program_init genv env =
         { env.init_env with ci_info = Some (Ci_util.begin_get_info ()) };
     }
   in
+
   let (init_approach, approach_name) = resolve_init_approach genv in
   Hh_logger.log "Initing with approach: %s" approach_name;
+
   let (env, init_type, init_error, init_error_telemetry, saved_state_revs_info)
       =
     let (env, init_result) = ServerInit.init ~init_approach genv env in
@@ -1302,6 +1271,25 @@ let run_once options config local_config =
   Hh_logger.log "Running in check mode";
   Program.run_once_and_exit genv env save_state_results
 
+let log_pid_cgroup () =
+  let pid = Unix.getpid () in
+  match ProcFS.first_cgroup_for_pid pid with
+  | Ok cgroup ->
+    Hh_logger.log "Server Pid: %d" pid;
+    Hh_logger.log "Server cGroup: %s" cgroup
+  | _ -> ()
+
+let log_server_ready () =
+  Hh_logger.log "Server is partially ready";
+  HackEventLogger.server_is_partially_ready ()
+
+let time f =
+  let t = Unix.gettimeofday () in
+  let res = f () in
+  let t' = Unix.gettimeofday () in
+  Hh_logger.log "Took %f seconds." (t' -. t);
+  res
+
 (*
  * The server monitor will pass client connections to this process
  * via ic.
@@ -1325,8 +1313,16 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
       ~monitor_pid:(Some monitor_pid)
   in
   let genv = ServerEnvBuild.make_genv options config local_config workers in
+
   HackEventLogger.with_id ~stage:`Init env.init_env.init_id @@ fun () ->
-  let env = MainInit.go genv options (fun () -> program_init genv env) in
+  log_pid_cgroup ();
+  Hh_logger.log "Initializing Server (This might take some time)";
+
+  let env = time @@ fun () -> program_init genv env in
+
+  ServerIdle.init genv (ServerArgs.root options);
+  log_server_ready ();
+
   serve genv env in_fds
 
 type params = {
@@ -1337,6 +1333,21 @@ type params = {
   priority_in_fd: Unix.file_descr;
   force_dormant_start_only_in_fd: Unix.file_descr;
 }
+
+let setup_hhi_root options =
+  match ServerArgs.custom_hhi_path options with
+  | None ->
+    (* Restore hhi files every time the server restarts
+       in case the tmp folder changes *)
+    ignore (Hhi.get_hhi_root ())
+  | Some path ->
+    if Disk.file_exists path && Disk.is_directory path then (
+      Hh_logger.log "Custom hhi directory set to %s." path;
+      Hhi.set_custom_hhi_root (Path.make path)
+    ) else (
+      Hh_logger.log "Custom hhi directory %s not found." path;
+      Exit.exit Exit_status.Input_error
+    )
 
 let daemon_main
     {
@@ -1356,19 +1367,7 @@ let daemon_main
   (* Restore the root directory and other global states from monitor *)
   ServerGlobalState.restore state ~worker_id:0;
 
-  (match ServerArgs.custom_hhi_path options with
-  | None ->
-    (* Restore hhi files every time the server restarts
-       in case the tmp folder changes *)
-    ignore (Hhi.get_hhi_root ())
-  | Some path ->
-    if Disk.file_exists path && Disk.is_directory path then (
-      Hh_logger.log "Custom hhi directory set to %s." path;
-      Hhi.set_custom_hhi_root (Path.make path)
-    ) else (
-      Hh_logger.log "Custom hhi directory %s not found." path;
-      Exit.exit Exit_status.Input_error
-    ));
+  setup_hhi_root options;
 
   ServerUtils.with_exit_on_exception @@ fun () ->
   daemon_main_exn

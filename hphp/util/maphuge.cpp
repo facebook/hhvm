@@ -30,7 +30,7 @@ size_t readTHPSize() {
     fscanf(fp, "%zu", &s_thpPageSize);
     fclose(fp);
     // Page size should be a power of two.
-    always_assert(s_thpPageSize & (s_thpPageSize - 1));
+    always_assert(!(s_thpPageSize & (s_thpPageSize - 1)));
   }
   return s_thpPageSize;
 }

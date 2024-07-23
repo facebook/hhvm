@@ -88,7 +88,7 @@ let init
   let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
   let (env, t) =
     match lazy_level with
-    | Off -> type_decl genv env defs_per_file t
+    | Ai_mode -> type_decl genv env defs_per_file t
     | _ -> (env, t)
   in
   (* Type-checking everything *)

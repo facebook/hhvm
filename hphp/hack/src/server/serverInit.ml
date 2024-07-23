@@ -49,12 +49,12 @@ let post_init genv (env, _t) =
   env
 
 let get_lazy_level (genv : ServerEnv.genv) : lazy_level =
-  let ai_mode_on = Option.is_some (ServerArgs.ai_mode genv.options) in
-  let lazy_initialize = genv.local_config.SLC.lazy_init in
-  match (ai_mode_on, lazy_initialize) with
-  | (false, false) -> Parse
-  | (false, true) -> Init
-  | (true, _) -> Off
+  if Option.is_some (ServerArgs.ai_mode genv.options) then
+    Ai_mode
+  else if genv.local_config.SLC.lazy_init then
+    Lazy
+  else
+    Eager
 
 let lazy_full_init genv env profiling =
   ( ServerLazyInit.full_init genv env profiling |> post_init genv,
@@ -176,7 +176,7 @@ let init
   let (init_method, init_method_name) =
     let root = ServerArgs.root genv.options in
     match lazy_lev with
-    | Init ->
+    | Lazy ->
       (match init_approach with
       | Full_init -> (lazy_full_init genv env, "lazy_full_init")
       | Parse_only_init ->

@@ -1230,6 +1230,20 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
 
   (workers, env)
 
+let possibly_save_naming_table env genv =
+  match ServerArgs.save_naming_filename genv.options with
+  | None -> ()
+  | Some filename ->
+    Disk.mkdir_p (Filename.dirname filename);
+    let save_result = Naming_table.save env.naming_table filename in
+    Hh_logger.log
+      "Inserted symbols into the naming table:\n%s"
+      (Naming_sqlite.show_save_result save_result);
+    if not (List.is_empty save_result.Naming_sqlite.errors) then (
+      Sys_utils.rm_dir_tree filename;
+      failwith "Naming table state had errors - deleting output file!"
+    )
+
 let run_once options config local_config =
   assert (ServerArgs.check_mode options);
   Hh_logger.log "ServerMain.run_once starting";
@@ -1252,21 +1266,7 @@ let run_once options config local_config =
     | None -> (env, None)
     | Some filename -> (env, ServerInit.save_state genv env filename)
   in
-  let _naming_table_rows_changed =
-    match ServerArgs.save_naming_filename genv.options with
-    | None -> None
-    | Some filename ->
-      Disk.mkdir_p (Filename.dirname filename);
-      let save_result = Naming_table.save env.naming_table filename in
-      Hh_logger.log
-        "Inserted symbols into the naming table:\n%s"
-        (Naming_sqlite.show_save_result save_result);
-      if not (List.is_empty save_result.Naming_sqlite.errors) then begin
-        Sys_utils.rm_dir_tree filename;
-        failwith "Naming table state had errors - deleting output file!"
-      end else
-        Some save_result
-  in
+  possibly_save_naming_table env genv;
   (* Finish up by generating the output and the exit code *)
   Hh_logger.log "Running in check mode";
   Program.run_once_and_exit genv env save_state_results

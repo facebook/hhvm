@@ -29,6 +29,7 @@ type load_state_approach =
 type init_approach =
   | Full_init
   | Parse_only_init
+      (** Only does parsing. Used in particular with --save-naming. *)
   | Saved_state_init of load_state_approach
   | Write_symbol_info  (** Write symbol info. Used by Glean. *)
   | Write_symbol_info_with_state of load_state_approach

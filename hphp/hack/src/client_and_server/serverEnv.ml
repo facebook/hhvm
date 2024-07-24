@@ -142,7 +142,6 @@ module Init_telemetry = struct
   type reason =
     | Init_lazy_dirty
     | Init_typecheck_disabled_after_init
-    | Init_eager
     | Init_lazy_full
     | Init_prechecked_fanout
   [@@deriving show { with_path = false }]

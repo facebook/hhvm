@@ -135,7 +135,6 @@
   (modules
     client_command_handler
     serverCommand
-    serverEagerInit
     serverInit
     serverInitCommon
     serverInitMessages

@@ -33,7 +33,6 @@ module Init_telemetry : sig
   type reason =
     | Init_lazy_dirty  (** normal saved-state init *)
     | Init_typecheck_disabled_after_init  (** I don't know what this is for *)
-    | Init_eager  (** full init *)
     | Init_lazy_full  (** failed a saved-state init, and fell back to full *)
     | Init_prechecked_fanout  (** I don't know what this is for *)
 

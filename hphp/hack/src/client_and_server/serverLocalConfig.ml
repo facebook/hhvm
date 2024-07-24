@@ -132,7 +132,6 @@ type t = {
   extend_defs_per_file_bucket_size: int;
   enable_on_nfs: bool;
   enable_fuzzy_search: bool;
-  lazy_init: bool;
   max_purgatory_clients: int;
       (** Monitor: Limit the number of clients that can sit in purgatory waiting
       for a server to be started because we don't want this to grow unbounded. *)
@@ -276,7 +275,6 @@ let default =
     extend_defs_per_file_bucket_size = 2000;
     enable_on_nfs = false;
     enable_fuzzy_search = true;
-    lazy_init = false;
     max_purgatory_clients = 400;
     search_chunk_size = 0;
     io_priority = 7;
@@ -536,13 +534,6 @@ let load_
     bool_if_min_version
       "enable_fuzzy_search"
       ~default:default.enable_fuzzy_search
-      ~current_version
-      config
-  in
-  let lazy_init =
-    bool_if_min_version
-      "lazy_init2"
-      ~default:default.lazy_init
       ~current_version
       config
   in
@@ -1065,7 +1056,6 @@ let load_
     extend_defs_per_file_bucket_size;
     enable_on_nfs;
     enable_fuzzy_search;
-    lazy_init;
     search_chunk_size;
     io_priority;
     cpu_priority;

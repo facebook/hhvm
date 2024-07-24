@@ -42,6 +42,8 @@
 #include <thrift/compiler/generate/t_concat_generator.h>
 #include <thrift/compiler/lib/uri.h>
 
+#include <fmt/ranges.h>
+
 namespace apache::thrift::compiler {
 namespace {
 

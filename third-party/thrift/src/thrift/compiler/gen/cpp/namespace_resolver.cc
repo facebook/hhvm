@@ -16,7 +16,7 @@
 
 #include <thrift/compiler/gen/cpp/namespace_resolver.h>
 
-#include <fmt/format.h>
+#include <fmt/ranges.h>
 
 namespace apache {
 namespace thrift {

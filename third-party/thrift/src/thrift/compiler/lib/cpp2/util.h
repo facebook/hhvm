@@ -37,7 +37,7 @@
 #include <thrift/compiler/gen/cpp/reference_type.h>
 #include <thrift/compiler/lib/uri.h>
 
-#include <fmt/format.h>
+#include <fmt/ranges.h>
 
 namespace apache {
 namespace thrift {

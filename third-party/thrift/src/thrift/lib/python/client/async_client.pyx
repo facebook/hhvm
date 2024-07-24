@@ -32,6 +32,10 @@ from thrift.python.client.request_channel cimport RequestChannel
 from thrift.python.exceptions cimport create_py_exception
 from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 from thrift.python.serializer import serialize_iobuf, deserialize
+from thrift.python.mutable_serializer import (
+    serialize_iobuf as serialize_iobuf_mutable,
+    deserialize as deserialize_mutable,
+)
 from thrift.python.stream cimport ClientBufferedStream
 from thrift.python.common cimport cRpcOptions, RpcOptions
 
@@ -122,11 +126,23 @@ cdef class AsyncClient:
         AsyncClient created_interaction = None,
         string uri_or_name = b"",
         RpcOptions rpc_options = None,
+        is_mutable_types = False,
     ):
         # Required because the python async model means that we can't have an async function that returns a future
         if interaction_position == InteractionMethodPosition.Factory and created_interaction is not None:
             await asyncio.shield(created_interaction._connect_future)
-        return await self._send_request_inner(service_name, function_name, args, response_cls, qualifier, interaction_position, interaction_name, created_interaction, uri_or_name, rpc_options)
+        return await self._send_request_inner(
+                service_name,
+                function_name,
+                args,
+                response_cls,
+                qualifier,
+                interaction_position,
+                interaction_name,
+                created_interaction,
+                uri_or_name,
+                rpc_options,
+                is_mutable_types)
 
     def _send_request_inner(
         AsyncClient self,
@@ -140,9 +156,14 @@ cdef class AsyncClient:
         AsyncClient created_interaction = None,
         string uri_or_name = b"",
         RpcOptions rpc_options = None,
+        is_mutable_types = False,
     ):
         protocol = deref(self._omni_client).getChannelProtocolId()
-        cdef IOBuf args_iobuf = serialize_iobuf(args, protocol=protocol)
+        cdef IOBuf args_iobuf = (
+            serialize_iobuf(args, protocol=protocol)
+            if not is_mutable_types
+            else serialize_iobuf_mutable(args, protocol=protocol)
+        )
 
         loop = asyncio.get_event_loop()
         future = loop.create_future()
@@ -172,7 +193,7 @@ cdef class AsyncClient:
             future.set_result(None)
             return future
         else:
-            userdata = (future, response_cls, protocol, rpc_options)
+            userdata = (future, response_cls, protocol, rpc_options, is_mutable_types)
             rpc_kind = RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE if isinstance(
                 response_cls, tuple) else RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE
             bridgeSemiFutureWith[cOmniClientResponseWithHeaders](
@@ -209,7 +230,7 @@ cdef void _async_client_send_request_callback(
     cFollyTry[cOmniClientResponseWithHeaders]&& result,
     PyObject* userdata,
 ) noexcept:
-    pyfuture, response_cls, protocol, rpc_options = <object> userdata
+    pyfuture, response_cls, protocol, rpc_options, is_mutable_types = <object> userdata
     cdef cOmniClientResponseWithHeaders resp = cmove(result.value())
 
     if resp.buf.hasError():
@@ -234,7 +255,11 @@ cdef void _async_client_send_request_callback(
             stream_cls,
             protocol,
         )
-    py_resp = deserialize(response_cls, response_iobuf, protocol=protocol)
+    py_resp = (
+        deserialize(response_cls, response_iobuf, protocol=protocol)
+        if not is_mutable_types
+        else deserialize_mutable(response_cls, response_iobuf, protocol=protocol)
+    )
     pyfuture.set_result(py_resp if py_stream is None else (py_resp, py_stream))
 
 cdef void _interaction_client_callback(cFollyTry[unique_ptr[cOmniInteractionClient]]&& result,

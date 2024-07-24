@@ -350,7 +350,6 @@ type _ t =
   | IS_SUBTYPE : string -> (string, string) result t
   | TAST_HOLES : file_input * Tast_hole.filter -> TastHolesService.result t
   | TAST_HOLES_BATCH : string list -> TastHolesService.result t
-  | XHP_AUTOCOMPLETE_SNIPPET : string -> string option t
   | IDENTIFY_SYMBOL : string -> string SymbolDefinition.t list t
   | IDENTIFY_FUNCTION :
       string * file_input * int * int
@@ -479,7 +478,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | IS_SUBTYPE _ -> false
   | TAST_HOLES _ -> false
   | TAST_HOLES_BATCH _ -> false
-  | XHP_AUTOCOMPLETE_SNIPPET _ -> true
   | IDENTIFY_FUNCTION _ -> false
   | IDENTIFY_SYMBOL _ -> false
   | METHOD_JUMP_BATCH _ -> false

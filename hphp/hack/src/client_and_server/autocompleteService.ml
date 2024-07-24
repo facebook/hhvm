@@ -255,26 +255,6 @@ let insert_text_for_xhp_req_attrs tag attrs has_children =
   else
     InsertLiterally content
 
-let get_snippet_for_xhp_classname cls ctx env =
-  (* This is used to check if the class exists or not *)
-  let class_ = Decl_provider.get_class ctx cls in
-  match class_ with
-  | Decl_entry.DoesNotExist
-  | Decl_entry.NotYetAvailable ->
-    None
-  | Decl_entry.Found class_ ->
-    if Cls.is_xhp class_ then
-      let cls = Utils.add_ns cls in
-      let attrs = get_class_req_attrs env ctx cls None in
-      let has_children = not (get_class_is_child_empty ctx cls) in
-      Option.some
-        (get_snippet_for_xhp_req_attrs
-           (Utils.strip_both_ns cls)
-           attrs
-           has_children)
-    else
-      None
-
 (* If we're autocompleting a call (function or method), insert a
    template for the arguments as well as function name. *)
 let insert_text_for_fun_call

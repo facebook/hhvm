@@ -677,9 +677,6 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
         " (mode) turn off verbose server log" );
       ("--version", Arg.Set version, " (mode) show version and exit");
       Common_argspecs.watchman_debug_logging watchman_debug_logging;
-      ( "--xhp-autocomplete-snippet",
-        Arg.String (fun x -> set_mode (MODE_XHP_AUTOCOMPLETE_SNIPPET x)),
-        "(mode) Look up for XHP component and return its snippet" );
       (* Please keep these sorted in the alphabetical order *)
     ]
   in

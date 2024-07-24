@@ -136,11 +136,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     (env, result)
   (* TODO: edit this to look for classname *)
-  | XHP_AUTOCOMPLETE_SNIPPET cls ->
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let tast_env = Tast_env.empty ctx in
-    let cls = Utils.add_ns cls in
-    (env, AutocompleteService.get_snippet_for_xhp_classname cls ctx tast_env)
   | IDENTIFY_SYMBOL arg ->
     let module SO = SymbolOccurrence in
     let ctx = Provider_utils.ctx_from_server_env env in

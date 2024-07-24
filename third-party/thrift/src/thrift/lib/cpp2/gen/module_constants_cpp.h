@@ -19,5 +19,5 @@
 #include <folly/Indestructible.h>
 #include <folly/lang/Exception.h>
 
-FOLLY_CLANG_DISABLE_WARNING("-Woverlength-strings")
-FOLLY_CLANG_DISABLE_WARNING("-Wtrigraphs")
+FOLLY_GNU_DISABLE_WARNING("-Woverlength-strings")
+FOLLY_GNU_DISABLE_WARNING("-Wtrigraphs")

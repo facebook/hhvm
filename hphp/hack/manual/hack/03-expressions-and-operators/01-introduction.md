@@ -8,7 +8,7 @@ When combined, operators evaluate according to their associativity. For more inf
 * [Comparison](/hack/expressions-and-operators/comparisons) (`>`, `>=`,`<`,`<=`)
 * [Equality Comparison](/hack/expressions-and-operators/equality) (`==`, `!=`, `===`,`!==`)
 * [Logical Comparison](/hack/expressions-and-operators/logical-operators) (`&&`, `||`, `!`)
-* [Spaceship Comparator](/hack/expressions-and-operators/equality#the-spaceship-operator) (`<=>`)
+* [Spaceship Comparator](/hack/expressions-and-operators/comparisons#the-spaceship-operator) (`<=>`)
 
 ## Arithmetic Operators
 * [Arithmetic](/hack/expressions-and-operators/arithmetic) (`+`, `-`, `*`, `/`, and more)

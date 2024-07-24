@@ -2388,6 +2388,62 @@ std::string ThriftServer::RuntimeServerActions::explain() const {
 /* static */ ThriftServer::ProcessedModuleSet
 ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
   ProcessedModuleSet result;
+#if FOLLY_HAS_COROUTINES
+  class ServiceInterceptorsCollector {
+   public:
+    void addModule(const ModulesSpecification::Info& moduleSpec) {
+      std::vector<std::shared_ptr<ServiceInterceptorBase>> serviceInterceptors =
+          moduleSpec.module->getServiceInterceptors();
+
+      std::vector<ServiceInterceptorInfo> result;
+      for (auto& interceptor : serviceInterceptors) {
+        auto qualifiedName =
+            fmt::format("{}.{}", moduleSpec.name, interceptor->getName());
+        if (seenNames_.find(qualifiedName) != seenNames_.end()) {
+          throw std::logic_error(
+              fmt::format("Duplicate ServiceInterceptor: {}", qualifiedName));
+        }
+        seenNames_.insert(qualifiedName);
+        result.emplace_back(ServiceInterceptorInfo{
+            std::move(qualifiedName), std::move(interceptor)});
+      }
+      interceptorsByModule_.emplace_back(std::move(result));
+    }
+
+    std::vector<ServiceInterceptorInfo> coalesce() && {
+      if constexpr (folly::kIsDebug) {
+        // Our contract guarantees ordering of interceptors within a module, but
+        // not across modules. In debug mode, let's shuffle order across modules
+        // so that tests break if someone is relying on such ordering.
+        // The quality of the RNG is not important here.
+        std::shuffle(
+            interceptorsByModule_.begin(),
+            interceptorsByModule_.end(),
+            folly::Random::DefaultGenerator());
+      }
+
+      std::vector<ServiceInterceptorInfo> result;
+      for (auto& interceptors : interceptorsByModule_) {
+        result.insert(
+            result.end(),
+            std::make_move_iterator(interceptors.begin()),
+            std::make_move_iterator(interceptors.end()));
+      }
+      return result;
+    }
+
+   private:
+    std::vector<std::vector<ServiceInterceptorInfo>> interceptorsByModule_;
+    std::unordered_set<std::string> seenNames_;
+  };
+#else
+  class ServiceInterceptorsCollector {
+   public:
+    void addModule(const ModulesSpecification::Info&) {}
+    std::vector<ServiceInterceptorInfo> coalesce() && { return {}; }
+  };
+#endif // FOLLY_HAS_COROUTINES
+  ServiceInterceptorsCollector serviceInterceptorsCollector;
 
   for (auto& info : specs.infos) {
     std::vector<std::shared_ptr<TProcessorEventHandler>> legacyEventHandlers =
@@ -2404,30 +2460,12 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
         std::make_move_iterator(legacyServerEventHandlers.begin()),
         std::make_move_iterator(legacyServerEventHandlers.end()));
 
-#if FOLLY_HAS_COROUTINES
-    std::vector<std::shared_ptr<ServiceInterceptorBase>> serviceInterceptors =
-        info.module->getServiceInterceptors();
-
-    for (auto& interceptor : serviceInterceptors) {
-      auto qualifiedName =
-          fmt::format("{}.{}", info.name, interceptor->getName());
-      if (std::find_if(
-              result.coalescedServiceInterceptors.begin(),
-              result.coalescedServiceInterceptors.end(),
-              [&](const ServiceInterceptorInfo& serviceInterceptorInfo)
-                  -> bool {
-                return qualifiedName == serviceInterceptorInfo.qualifiedName;
-              }) != result.coalescedServiceInterceptors.end()) {
-        throw std::logic_error(
-            fmt::format("Duplicate ServiceInterceptor: {}", qualifiedName));
-      }
-      result.coalescedServiceInterceptors.emplace_back(ServiceInterceptorInfo{
-          std::move(qualifiedName), std::move(interceptor)});
-    }
-#endif // FOLLY_HAS_COROUTINES
+    serviceInterceptorsCollector.addModule(info);
 
     result.modules.emplace_back(std::move(info));
   }
+  result.coalescedServiceInterceptors =
+      std::move(serviceInterceptorsCollector).coalesce();
 
   return result;
 }

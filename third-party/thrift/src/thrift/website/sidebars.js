@@ -396,6 +396,7 @@ module.exports = {
             },
             items: [],
           },
+          'fb/server/stream-graceful-shutdown',
         ],
       },
       {

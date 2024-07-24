@@ -119,6 +119,42 @@ class MacroAssembler : public Assembler {
                             FlagsUpdate S,
                             AddSubWithCarryOp op);
 
+  // CRC32 macros
+  void Crc32b(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32b(rd, rn, rm);
+  }
+  void Crc32h(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32h(rd, rn, rm);
+  }
+  void Crc32w(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32w(rd, rn, rm);
+  }
+  void Crc32x(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32x(rd, rn, rm);
+  }
+
+  // CRC32C macros
+  void Crc32cb(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32cb(rd, rn, rm);
+  }
+  void Crc32ch(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32ch(rd, rn, rm);
+  }
+  void Crc32cw(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32cw(rd, rn, rm);
+  }
+  void Crc32cx(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32cx(rd, rn, rm);
+  }
+
   // Move macros.
   void Mov(const Register& rd, uint64_t imm);
   void Mov(const Register& rd, const Operand& operand);

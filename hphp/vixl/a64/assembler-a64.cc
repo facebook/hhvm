@@ -837,6 +837,70 @@ void Assembler::DataProcessing3Source(const Register& rd,
 }
 
 
+void Assembler::crc32b(const Register& wd,
+                       const Register& wn,
+                       const Register& wm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && wm.Is32Bits());
+  Emit(SF(wm) | Rm(wm) | CRC32B | Rn(wn) | Rd(wd));
+}
+
+
+void Assembler::crc32h(const Register& wd,
+                       const Register& wn,
+                       const Register& wm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && wm.Is32Bits());
+  Emit(SF(wm) | Rm(wm) | CRC32H | Rn(wn) | Rd(wd));
+}
+
+
+void Assembler::crc32w(const Register& wd,
+                       const Register& wn,
+                       const Register& wm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && wm.Is32Bits());
+  Emit(SF(wm) | Rm(wm) | CRC32W | Rn(wn) | Rd(wd));
+}
+
+
+void Assembler::crc32x(const Register& wd,
+                       const Register& wn,
+                       const Register& xm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && xm.Is64Bits());
+  Emit(SF(xm) | Rm(xm) | CRC32X | Rn(wn) | Rd(wd));
+}
+
+
+void Assembler::crc32cb(const Register& wd,
+                        const Register& wn,
+                        const Register& wm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && wm.Is32Bits());
+  Emit(SF(wm) | Rm(wm) | CRC32CB | Rn(wn) | Rd(wd));
+}
+
+
+void Assembler::crc32ch(const Register& wd,
+                        const Register& wn,
+                        const Register& wm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && wm.Is32Bits());
+  Emit(SF(wm) | Rm(wm) | CRC32CH | Rn(wn) | Rd(wd));
+}
+
+
+void Assembler::crc32cw(const Register& wd,
+                        const Register& wn,
+                        const Register& wm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && wm.Is32Bits());
+  Emit(SF(wm) | Rm(wm) | CRC32CW | Rn(wn) | Rd(wd));
+}
+
+
+void Assembler::crc32cx(const Register& wd,
+                        const Register& wn,
+                        const Register& xm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && xm.Is64Bits());
+  Emit(SF(xm) | Rm(xm) | CRC32CX | Rn(wn) | Rd(wd));
+}
+
+
 void Assembler::mul(const Register& rd,
                     const Register& rn,
                     const Register& rm) {

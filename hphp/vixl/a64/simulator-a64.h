@@ -511,6 +511,13 @@ class Simulator : public DecoderVisitor {
   double FPMax(double a, double b);
   double FPMin(double a, double b);
 
+  static const uint32_t CRC32_POLY = 0x04C11DB7;
+  static const uint32_t CRC32C_POLY = 0x1EDC6F41;
+  uint32_t Poly32Mod2(unsigned n, uint64_t data, uint32_t poly);
+  template <typename T>
+  uint32_t Crc32Checksum(uint32_t acc, T val, uint32_t poly);
+  uint32_t Crc32Checksum(uint32_t acc, uint64_t val, uint32_t poly);
+
   // Pseudo Printf instruction
   void DoPrintf(Instruction* instr);
   // Pseudo HostCall instruction

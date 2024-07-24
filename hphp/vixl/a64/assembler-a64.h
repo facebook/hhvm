@@ -999,6 +999,30 @@ class Assembler {
             StatusFlags nzcv,
             Condition cond);
 
+  // CRC-32 checksum from byte
+  void crc32b(const Register& wd, const Register& wn, const Register& wm);
+
+  // CRC-32 checksum from half-word.
+  void crc32h(const Register& wd, const Register& wn, const Register& wm);
+
+  // CRC-32 checksum from word.
+  void crc32w(const Register& wd, const Register& wn, const Register& wm);
+
+  // CRC-32 checksum from double word.
+  void crc32x(const Register& wd, const Register& wn, const Register& xm);
+
+  // CRC-32 C checksum from byte.
+  void crc32cb(const Register& wd, const Register& wn, const Register& wm);
+
+  // CRC-32 C checksum from half-word.
+  void crc32ch(const Register& wd, const Register& wn, const Register& wm);
+
+  // CRC-32 C checksum from word.
+  void crc32cw(const Register& wd, const Register& wn, const Register& wm);
+
+  // CRC-32C checksum from double word.
+  void crc32cx(const Register& wd, const Register& wn, const Register& xm);
+
   // Multiply.
   void mul(const Register& rd, const Register& rn, const Register& rm);
 

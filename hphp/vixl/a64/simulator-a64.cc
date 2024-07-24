@@ -30,6 +30,20 @@
 #include <folly/Format.h>
 #include <math.h>
 
+namespace {
+template <typename T>
+T ReverseBitsT(T value) {
+  assert((sizeof(value) == 1) || (sizeof(value) == 2) ||
+         (sizeof(value) == 4) || (sizeof(value) == 8));
+  T result = 0;
+  for (unsigned i = 0; i < (sizeof(value) * 8); i++) {
+    result = (result << 1) | (value & 1);
+    value >>= 1;
+  }
+  return result;
+}
+}
+
 namespace vixl {
 
 const Instruction* Simulator::kEndOfSimAddress = nullptr;
@@ -1143,6 +1157,7 @@ uint64_t Simulator::ReverseBytes(uint64_t value, ReverseByteMode mode) {
 void Simulator::VisitDataProcessing2Source(Instruction* instr) {
   Shift shift_op = NO_SHIFT;
   int64_t result = 0;
+  unsigned reg_size = instr->SixtyFourBits() ? kXRegSize : kWRegSize;
   switch (instr->Mask(DataProcessing2SourceMask)) {
     case SDIV_w: result = wreg(instr->Rn()) / wreg(instr->Rm()); break;
     case SDIV_x: result = xreg(instr->Rn()) / xreg(instr->Rm()); break;
@@ -1166,10 +1181,59 @@ void Simulator::VisitDataProcessing2Source(Instruction* instr) {
     case ASRV_x: shift_op = ASR; break;
     case RORV_w:
     case RORV_x: shift_op = ROR; break;
+    case CRC32B: {
+      uint32_t acc = static_cast<uint32_t>(wreg(instr->Rn()));
+      uint8_t val = static_cast<uint8_t>(wreg(instr->Rm()));
+      result = Crc32Checksum(acc, val, CRC32_POLY);
+      break;
+    }
+    case CRC32H: {
+      uint32_t acc = static_cast<uint32_t>(wreg(instr->Rn()));
+      uint16_t val = static_cast<uint16_t>(wreg(instr->Rm()));
+      result = Crc32Checksum(acc, val, CRC32_POLY);
+      break;
+    }
+    case CRC32W: {
+      uint32_t acc = static_cast<uint32_t>(wreg(instr->Rn()));
+      uint32_t val = static_cast<uint32_t>(wreg(instr->Rm()));
+      result = Crc32Checksum(acc, val, CRC32_POLY);
+      break;
+    }
+    case CRC32X: {
+      uint32_t acc = static_cast<uint32_t>(wreg(instr->Rn()));
+      uint64_t val = static_cast<uint64_t>(xreg(instr->Rm()));
+      result = Crc32Checksum(acc, val, CRC32_POLY);
+      reg_size = kWRegSize;
+      break;
+    }
+    case CRC32CB: {
+      uint32_t acc = static_cast<uint32_t>(wreg(instr->Rn()));
+      uint8_t val = static_cast<uint8_t>(wreg(instr->Rm()));
+      result = Crc32Checksum(acc, val, CRC32C_POLY);
+      break;
+    }
+    case CRC32CH: {
+      uint32_t acc = static_cast<uint32_t>(wreg(instr->Rn()));
+      uint16_t val = static_cast<uint16_t>(wreg(instr->Rm()));
+      result = Crc32Checksum(acc, val, CRC32C_POLY);
+      break;
+    }
+    case CRC32CW: {
+      uint32_t acc = static_cast<uint32_t>(wreg(instr->Rn()));
+      uint32_t val = static_cast<uint32_t>(wreg(instr->Rm()));
+      result = Crc32Checksum(acc, val, CRC32C_POLY);
+      break;
+    }
+    case CRC32CX: {
+      uint32_t acc = static_cast<uint32_t>(wreg(instr->Rn()));
+      uint64_t val = static_cast<uint64_t>(xreg(instr->Rm()));
+      result = Crc32Checksum(acc, val, CRC32C_POLY);
+      reg_size = kWRegSize;
+      break;
+    }
     default: not_implemented();
   }
 
-  unsigned reg_size = instr->SixtyFourBits() ? kXRegSize : kWRegSize;
   if (shift_op != NO_SHIFT) {
     // Shift distance encoded in the least-significant five/six bits of the
     // register.
@@ -2019,6 +2083,37 @@ double Simulator::FPMin(double a, double b) {
   } else {
     return (a < b) ? a : b;
   }
+}
+
+
+uint32_t Simulator::Poly32Mod2(unsigned n, uint64_t data, uint32_t poly) {
+  assert((n > 32) && (n <= 64));
+  for (unsigned i = (n - 1); i >= 32; i--) {
+    if (((data >> i) & 1) != 0) {
+      uint64_t polysh32 = (uint64_t)poly << (i - 32);
+      uint64_t mask = (UINT64_C(1) << i) - 1;
+      data = ((data & mask) ^ polysh32);
+    }
+  }
+  return data & 0xffffffff;
+}
+
+
+template <typename T>
+uint32_t Simulator::Crc32Checksum(uint32_t acc, T val, uint32_t poly) {
+  unsigned size = sizeof(val) * 8;  // Number of bits in type T.
+  assert((size == 8) || (size == 16) || (size == 32));
+  uint64_t tempacc = static_cast<uint64_t>(ReverseBitsT(acc)) << size;
+  uint64_t tempval = static_cast<uint64_t>(ReverseBitsT(val)) << 32;
+  return ReverseBitsT(Poly32Mod2(32 + size, tempacc ^ tempval, poly));
+}
+
+
+uint32_t Simulator::Crc32Checksum(uint32_t acc, uint64_t val, uint32_t poly) {
+  // Poly32Mod2 cannot handle inputs with more than 32 bits, so compute
+  // the CRC of each 32-bit word sequentially.
+  acc = Crc32Checksum(acc, (uint32_t)(val & 0xffffffff), poly);
+  return Crc32Checksum(acc, (uint32_t)(val >> 32), poly);
 }
 
 

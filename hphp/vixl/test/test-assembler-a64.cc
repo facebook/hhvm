@@ -277,6 +277,342 @@ TEST(Assembler, mvn) {
 }
 
 
+// We only run CRC32 tests when simulated or when compiled for aarch64
+// with CRC enabled
+#if !defined(__aarch64__) || \
+  (defined(__aarch64__) && defined(__ARM_FEATURE_CRC32))
+TEST(Assembler, crc32b) {
+  SETUP();
+
+  START();
+
+  __ Mov(w0, 0);
+  __ Mov(w1, 0);
+  __ Crc32b(w10, w0, w1);
+
+  __ Mov(w0, 0x1);
+  __ Mov(w1, 0x138);
+  __ Crc32b(w11, w0, w1);
+
+  __ Mov(w0, 0x1);
+  __ Mov(w1, 0x38);
+  __ Crc32b(w12, w0, w1);
+
+  __ Mov(w0, 0);
+  __ Mov(w1, 128);
+  __ Crc32b(w13, w0, w1);
+
+  __ Mov(w0, UINT32_MAX);
+  __ Mov(w1, 255);
+  __ Crc32b(w14, w0, w1);
+
+  __ Mov(w0, 0x00010001);
+  __ Mov(w1, 0x10001000);
+  __ Crc32b(w15, w0, w1);
+
+  END();
+
+  RUN();
+
+  ASSERT_EQUAL_64(0x0, x10);
+  ASSERT_EQUAL_64(0x5f058808, x11);
+  ASSERT_EQUAL_64(0x5f058808, x12);
+  ASSERT_EQUAL_64(0xedb88320, x13);
+  ASSERT_EQUAL_64(0x00ffffff, x14);
+  ASSERT_EQUAL_64(0x77073196, x15);
+
+  TEARDOWN();
+}
+
+
+TEST(Assembler, crc32h) {
+  SETUP();
+
+  START();
+
+  __ Mov(w0, 0);
+  __ Mov(w1, 0);
+  __ Crc32h(w10, w0, w1);
+
+  __ Mov(w0, 0x1);
+  __ Mov(w1, 0x10038);
+  __ Crc32h(w11, w0, w1);
+
+  __ Mov(w0, 0x1);
+  __ Mov(w1, 0x38);
+  __ Crc32h(w12, w0, w1);
+
+  __ Mov(w0, 0);
+   __ Mov(w1, 128);
+   __ Crc32h(w13, w0, w1);
+
+   __ Mov(w0, UINT32_MAX);
+   __ Mov(w1, 255);
+   __ Crc32h(w14, w0, w1);
+
+   __ Mov(w0, 0x00010001);
+   __ Mov(w1, 0x10001000);
+   __ Crc32h(w15, w0, w1);
+
+  END();
+
+  RUN();
+
+  ASSERT_EQUAL_64(0x0, x10);
+  ASSERT_EQUAL_64(0x0e848dba, x11);
+  ASSERT_EQUAL_64(0x0e848dba, x12);
+  ASSERT_EQUAL_64(0x3b83984b, x13);
+  ASSERT_EQUAL_64(0x2d021072, x14);
+  ASSERT_EQUAL_64(0x04ac2124, x15);
+
+  TEARDOWN();
+}
+
+
+TEST(Assembler, crc32w) {
+  SETUP();
+
+  START();
+
+  __ Mov(w0, 0);
+  __ Mov(w1, 0);
+  __ Crc32w(w10, w0, w1);
+
+  __ Mov(w0, 0x1);
+  __ Mov(w1, 0x80000031);
+  __ Crc32w(w11, w0, w1);
+
+  __ Mov(w0, 0);
+  __ Mov(w1, 128);
+  __ Crc32w(w13, w0, w1);
+
+  __ Mov(w0, UINT32_MAX);
+  __ Mov(w1, 255);
+  __ Crc32w(w14, w0, w1);
+
+  __ Mov(w0, 0x00010001);
+  __ Mov(w1, 0x10001000);
+  __ Crc32w(w15, w0, w1);
+
+  END();
+
+  RUN();
+
+  ASSERT_EQUAL_64(0x0, x10);
+  ASSERT_EQUAL_64(0x1d937b81, x11);
+  ASSERT_EQUAL_64(0xed59b63b, x13);
+  ASSERT_EQUAL_64(0x00be2612, x14);
+  ASSERT_EQUAL_64(0xa036e530, x15);
+
+  TEARDOWN();
+}
+
+
+TEST(Assembler, crc32x) {
+  SETUP();
+
+  START();
+
+  __ Mov(w0, 0);
+  __ Mov(x1, 0);
+  __ Crc32x(w10, w0, x1);
+
+  __ Mov(w0, 0x1);
+  __ Mov(x1, UINT64_C(0x0000000800000031));
+  __ Crc32x(w11, w0, x1);
+
+  __ Mov(w0, 0);
+  __ Mov(x1, 128);
+  __ Crc32x(w13, w0, x1);
+
+  __ Mov(w0, UINT32_MAX);
+  __ Mov(x1, 255);
+  __ Crc32x(w14, w0, x1);
+
+  __ Mov(w0, 0x00010001);
+  __ Mov(x1, UINT64_C(0x1000100000000000));
+  __ Crc32x(w15, w0, x1);
+
+  END();
+
+  RUN();
+
+  ASSERT_EQUAL_64(0x0, x10);
+  ASSERT_EQUAL_64(0x40797b92, x11);
+  ASSERT_EQUAL_64(0x533b85da, x13);
+  ASSERT_EQUAL_64(0xbc962670, x14);
+  ASSERT_EQUAL_64(0x0667602f, x15);
+
+  TEARDOWN();
+}
+
+
+TEST(Assembler, crc32cb) {
+  SETUP();
+
+  START();
+
+  __ Mov(w0, 0);
+  __ Mov(w1, 0);
+  __ Crc32cb(w10, w0, w1);
+
+  __ Mov(w0, 0x1);
+  __ Mov(w1, 0x138);
+  __ Crc32cb(w11, w0, w1);
+
+  __ Mov(w0, 0x1);
+  __ Mov(w1, 0x38);
+  __ Crc32cb(w12, w0, w1);
+
+  __ Mov(w0, 0);
+  __ Mov(w1, 128);
+  __ Crc32cb(w13, w0, w1);
+
+  __ Mov(w0, UINT32_MAX);
+  __ Mov(w1, 255);
+  __ Crc32cb(w14, w0, w1);
+
+  __ Mov(w0, 0x00010001);
+  __ Mov(w1, 0x10001000);
+  __ Crc32cb(w15, w0, w1);
+
+  END();
+
+  RUN();
+
+  ASSERT_EQUAL_64(0x0, x10);
+  ASSERT_EQUAL_64(0x4851927d, x11);
+  ASSERT_EQUAL_64(0x4851927d, x12);
+  ASSERT_EQUAL_64(0x82f63b78, x13);
+  ASSERT_EQUAL_64(0x00ffffff, x14);
+  ASSERT_EQUAL_64(0xf26b8203, x15);
+
+  TEARDOWN();
+}
+
+
+TEST(Assembler, crc32ch) {
+  SETUP();
+
+  START();
+
+  __ Mov(w0, 0);
+  __ Mov(w1, 0);
+  __ Crc32ch(w10, w0, w1);
+
+  __ Mov(w0, 0x1);
+  __ Mov(w1, 0x10038);
+  __ Crc32ch(w11, w0, w1);
+
+  __ Mov(w0, 0x1);
+  __ Mov(w1, 0x38);
+  __ Crc32ch(w12, w0, w1);
+
+  __ Mov(w0, 0);
+  __ Mov(w1, 128);
+  __ Crc32ch(w13, w0, w1);
+
+  __ Mov(w0, UINT32_MAX);
+  __ Mov(w1, 255);
+  __ Crc32ch(w14, w0, w1);
+
+  __ Mov(w0, 0x00010001);
+  __ Mov(w1, 0x10001000);
+  __ Crc32ch(w15, w0, w1);
+
+  END();
+
+  RUN();
+
+  ASSERT_EQUAL_64(0x0, x10);
+  ASSERT_EQUAL_64(0xcef8494c, x11);
+  ASSERT_EQUAL_64(0xcef8494c, x12);
+  ASSERT_EQUAL_64(0xfbc3faf9, x13);
+  ASSERT_EQUAL_64(0xad7dacae, x14);
+  ASSERT_EQUAL_64(0x03fc5f19, x15);
+
+  TEARDOWN();
+}
+
+
+TEST(Assembler, crc32cw) {
+  SETUP();
+
+  START();
+
+  __ Mov(w0, 0);
+  __ Mov(w1, 0);
+  __ Crc32cw(w10, w0, w1);
+
+  __ Mov(w0, 0x1);
+  __ Mov(w1, 0x80000031);
+  __ Crc32cw(w11, w0, w1);
+
+  __ Mov(w0, 0);
+  __ Mov(w1, 128);
+  __ Crc32cw(w13, w0, w1);
+
+  __ Mov(w0, UINT32_MAX);
+  __ Mov(w1, 255);
+  __ Crc32cw(w14, w0, w1);
+
+  __ Mov(w0, 0x00010001);
+  __ Mov(w1, 0x10001000);
+  __ Crc32cw(w15, w0, w1);
+
+  END();
+
+  RUN();
+
+  ASSERT_EQUAL_64(0x0, x10);
+  ASSERT_EQUAL_64(0xbcb79ece, x11);
+  ASSERT_EQUAL_64(0x52a0c93f, x13);
+  ASSERT_EQUAL_64(0x9f9b5c7a, x14);
+  ASSERT_EQUAL_64(0xae1b882a, x15);
+
+  TEARDOWN();
+}
+
+
+TEST(Assembler, crc32cx) {
+  SETUP();
+
+  START();
+
+  __ Mov(w0, 0);
+  __ Mov(x1, 0);
+  __ Crc32cx(w10, w0, x1);
+
+  __ Mov(w0, 0x1);
+  __ Mov(x1, UINT64_C(0x0000000800000031));
+  __ Crc32cx(w11, w0, x1);
+
+  __ Mov(w0, 0);
+  __ Mov(x1, 128);
+  __ Crc32cx(w13, w0, x1);
+
+  __ Mov(w0, UINT32_MAX);
+  __ Mov(x1, 255);
+  __ Crc32cx(w14, w0, x1);
+
+  __ Mov(w0, 0x00010001);
+  __ Mov(x1, UINT64_C(0x1000100000000000));
+  __ Crc32cx(w15, w0, x1);
+
+  END();
+
+  RUN();
+
+  ASSERT_EQUAL_64(0x0, x10);
+  ASSERT_EQUAL_64(0x7f320fcb, x11);
+  ASSERT_EQUAL_64(0x34019664, x13);
+  ASSERT_EQUAL_64(0x6cc27dd0, x14);
+  ASSERT_EQUAL_64(0xc6f0acdb, x15);
+
+  TEARDOWN();
+}
+#endif
+
 TEST(Assembler, mov) {
   SETUP();
 

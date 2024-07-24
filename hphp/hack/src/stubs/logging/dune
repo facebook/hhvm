@@ -7,5 +7,6 @@
   hackfmtEventLogger
   typingLogger)
  (libraries
+  hack_event_logger_types
   saved_state_rollouts)
 )

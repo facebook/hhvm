@@ -7,66 +7,11 @@
  *
  *)
 
-module PerFileProfilingConfig = struct
-  type profile_decling =
-    | DeclingOff
-    | DeclingTopCounts
-    | DeclingAllTelemetry of { callstacks: bool }
-
-  type t = {
-    profile_log: bool;
-    profile_type_check_duration_threshold: float;
-    profile_type_check_memory_threshold_mb: int;
-    profile_type_check_twice: bool;
-    profile_decling: profile_decling;
-    profile_owner: string option;
-    profile_desc: string option;
-    profile_slow_threshold: float;
-  }
-
-  let default =
-    {
-      profile_log = false;
-      profile_type_check_duration_threshold = 0.05 (* seconds *);
-      profile_type_check_memory_threshold_mb = 100;
-      profile_type_check_twice = false;
-      profile_decling = DeclingOff;
-      profile_owner = None;
-      profile_desc = None;
-      profile_slow_threshold = 0.;
-    }
-end
+include HackEventLoggerTypes
 
 type serialized_globals = Serialized_globals
 
 let serialize_globals () = Serialized_globals
-
-type rollout_flags = {
-  log_saved_state_age_and_distance: bool;
-  fetch_remote_old_decls: bool;
-  specify_manifold_api_key: bool;
-  populate_member_heaps: bool;
-  shm_use_sharded_hashtbl: bool;
-  shm_cache_size: int;
-  remote_old_decls_no_limit: bool;
-  use_manifold_cython_client: bool;
-  disable_naming_table_fallback_loading: bool;
-  load_state_natively_v4: bool;
-  rust_provider_backend: bool;
-  use_distc: bool;
-  consume_streaming_errors: bool;
-  hh_distc_fanout_threshold: int;
-  rust_elab: bool;
-  ide_load_naming_table_on_disk: bool;
-  ide_naming_table_update_threshold: int;
-  use_compressed_dep_graph: bool;
-  use_old_decls_from_cas: bool;
-  saved_state_rollouts: Saved_state_rollouts.t;
-  zstd_decompress_by_file: bool;
-  lsp_sticky_quarantine: bool;
-  lsp_invalidation: bool;
-  autocomplete_sort_text: bool;
-}
 
 let flush () = ()
 

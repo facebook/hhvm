@@ -69,6 +69,7 @@ bool RocketStreamClientCallback::onFirstResponse(
     folly::EventBase* /* unused */,
     StreamServerCallback* serverCallback) {
   if (UNLIKELY(serverCallbackOrCancelled_ == kCancelledFlag)) {
+    streamMetricCallback_.onStreamCancel(rpcMethodName_);
     serverCallback->onStreamCancel();
     firstResponse.payload.reset();
     connection_.freeStream(streamId_, true);
@@ -137,6 +138,7 @@ bool RocketStreamClientCallback::onStreamNext(StreamPayload&& payload) {
         payload.payload ? payload.payload->computeChainDataLength() : 0);
   }
 
+  streamMetricCallback_.onStreamNext(rpcMethodName_);
   connection_.sendPayload(
       streamId_,
       pack(std::move(payload), connection_.getRawSocket()),
@@ -146,6 +148,7 @@ bool RocketStreamClientCallback::onStreamNext(StreamPayload&& payload) {
 }
 
 void RocketStreamClientCallback::onStreamComplete() {
+  streamMetricCallback_.onStreamComplete(rpcMethodName_);
   connection_.sendPayload(
       streamId_,
       Payload::makeFromData(std::unique_ptr<folly::IOBuf>{}),
@@ -154,6 +157,7 @@ void RocketStreamClientCallback::onStreamComplete() {
 }
 
 void RocketStreamClientCallback::onStreamError(folly::exception_wrapper ew) {
+  streamMetricCallback_.onStreamError(rpcMethodName_);
   ew.handle(
       [this](RocketException& rex) {
         connection_.sendError(
@@ -212,6 +216,7 @@ bool RocketStreamClientCallback::request(uint32_t tokens) {
 
   cancelTimeout();
   tokens_ += tokens;
+  streamMetricCallback_.onStreamRequestN(rpcMethodName_, tokens);
   return serverCallback()->onStreamRequestN(tokens);
 }
 
@@ -236,6 +241,7 @@ void RocketStreamClientCallback::resumeStream() {
 }
 
 void RocketStreamClientCallback::onStreamCancel() {
+  streamMetricCallback_.onStreamCancel(rpcMethodName_);
   serverCallback()->onStreamCancel();
 }
 

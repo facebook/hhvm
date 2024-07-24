@@ -235,8 +235,6 @@ type t = {
       (** Dead UNSAFE_CAST codemod stashes patches through a TAST visitor in shared
          heap. This is only needed in dead UNSAFE_CAST removal mode. This option
          controls whether the heap will be populated or not. *)
-  tco_rust_elab: bool;
-      (** Use the Rust implementation of naming elaboration and NAST checks. *)
   dump_tast_hashes: bool;  (** Dump tast hashes in /tmp/hh_server/tast_hashes *)
   dump_tasts: string list;
       (** List of paths whose TASTs to be dumped in /tmp/hh_server/tasts *)
@@ -358,7 +356,6 @@ val set :
   ?tco_record_fine_grained_dependencies:bool ->
   ?tco_loop_iteration_upper_bound:int option ->
   ?tco_populate_dead_unsafe_cast_heap:bool ->
-  ?tco_rust_elab:bool ->
   ?dump_tast_hashes:bool ->
   ?dump_tasts:string list ->
   ?tco_autocomplete_mode:bool ->

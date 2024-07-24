@@ -916,7 +916,6 @@ let parse_options () =
       ~tco_allow_all_files_for_module_declarations:
         !allow_all_files_for_module_declarations
       ~tco_loop_iteration_upper_bound:!loop_iteration_upper_bound
-      ~tco_rust_elab:false
       GlobalOptions.default
   in
 

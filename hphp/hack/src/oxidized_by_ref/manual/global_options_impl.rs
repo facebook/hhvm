@@ -130,7 +130,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_loop_iteration_upper_bound: None,
     tco_populate_dead_unsafe_cast_heap: false,
     po_disallow_static_constants_in_default_func_args: false,
-    tco_rust_elab: false,
     dump_tast_hashes: false,
     dump_tasts: vec![],
     po_disallow_direct_superglobals_refs: false,

@@ -575,7 +575,6 @@ let load ~silent options : t * ServerLocalConfig.t =
           local_config.ServerLocalConfig.skip_hierarchy_checks
         ~tco_skip_tast_checks:local_config.ServerLocalConfig.skip_tast_checks
         ~tco_saved_state:local_config.ServerLocalConfig.saved_state
-        ~tco_rust_elab:local_config.ServerLocalConfig.rust_elab
         ~tco_log_inference_constraints:
           (ServerArgs.log_inference_constraints options)
         ~tco_global_access_check_enabled:

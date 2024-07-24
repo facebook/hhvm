@@ -165,7 +165,6 @@ type t = {
   tco_record_fine_grained_dependencies: bool;
   tco_loop_iteration_upper_bound: int option;
   tco_populate_dead_unsafe_cast_heap: bool;
-  tco_rust_elab: bool;
   dump_tast_hashes: bool;
   dump_tasts: string list;
   tco_autocomplete_mode: bool;
@@ -272,7 +271,6 @@ let default =
     tco_record_fine_grained_dependencies = false;
     tco_loop_iteration_upper_bound = None;
     tco_populate_dead_unsafe_cast_heap = false;
-    tco_rust_elab = false;
     dump_tast_hashes = false;
     dump_tasts = [];
     tco_autocomplete_mode = false;
@@ -377,7 +375,6 @@ let set
     ?tco_record_fine_grained_dependencies
     ?tco_loop_iteration_upper_bound
     ?tco_populate_dead_unsafe_cast_heap
-    ?tco_rust_elab
     ?dump_tast_hashes
     ?dump_tasts
     ?tco_autocomplete_mode
@@ -629,7 +626,6 @@ let set
       setting
         tco_populate_dead_unsafe_cast_heap
         options.tco_populate_dead_unsafe_cast_heap;
-    tco_rust_elab = setting tco_rust_elab options.tco_rust_elab;
     dump_tast_hashes = setting dump_tast_hashes options.dump_tast_hashes;
     dump_tasts = setting dump_tasts options.dump_tasts;
     tco_autocomplete_mode =

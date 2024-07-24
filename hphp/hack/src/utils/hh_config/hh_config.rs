@@ -404,7 +404,6 @@ impl HhConfig {
             tco_record_fine_grained_dependencies: default.tco_record_fine_grained_dependencies,
             tco_loop_iteration_upper_bound: default.tco_loop_iteration_upper_bound,
             tco_populate_dead_unsafe_cast_heap: default.tco_populate_dead_unsafe_cast_heap,
-            tco_rust_elab: local_config.rust_elab,
             dump_tast_hashes: hh_conf.get_bool_or("dump_tast_hashes", default.dump_tast_hashes)?,
             dump_tasts: match hh_conf.get_str("dump_tasts") {
                 None => default.dump_tasts,

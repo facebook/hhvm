@@ -7,7 +7,7 @@
   collections
   test_injector_config
   unit_test
-  utils_config_file))
+  config_file))
 
 (library
  (name timeout_test)

@@ -324,7 +324,7 @@
   temp_file
   typing_defs
   remote_old_decls_ffi
-  utils_config_file
+  config_file
   utils_core
   utils_www_root)
  (preprocess

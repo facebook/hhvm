@@ -15,7 +15,7 @@
   (pps lwt_ppx)))
 
 (library
- (name utils_config_file)
+ (name config_file)
  (wrapped false)
  (modules
   config_file)

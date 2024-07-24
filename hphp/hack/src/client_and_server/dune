@@ -343,7 +343,7 @@
    parser_options
    procs_bucket
    server_local_config_knobs_stubs
-   utils_config_file
+   config_file
    )
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

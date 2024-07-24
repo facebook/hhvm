@@ -196,7 +196,7 @@
   hackfmt
   linttool
   hackfmt_debug
-  utils_config_file
+  config_file
   utils_ocaml_overrides))
 
 (executable

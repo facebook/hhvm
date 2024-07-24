@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/server/TransportRoutingHandler.h>
+#include <thrift/lib/cpp2/server/metrics/StreamMetricCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/SetupFrameHandler.h>
 
 namespace apache {
@@ -70,6 +71,7 @@ class RocketRoutingHandler : public TransportRoutingHandler {
  private:
   std::atomic<bool> listening_{true};
   std::vector<std::unique_ptr<rocket::SetupFrameHandler>> setupFrameHandlers_;
+  StreamMetricCallback& streamMetricCallback_;
 };
 } // namespace thrift
 } // namespace apache

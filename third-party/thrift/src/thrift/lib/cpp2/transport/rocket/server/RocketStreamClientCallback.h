@@ -35,7 +35,8 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   RocketStreamClientCallback(
       StreamId streamId,
       RocketServerConnection& connection,
-      uint32_t initialRequestN);
+      uint32_t initialRequestN,
+      StreamMetricCallback& streamMetricCallback);
   ~RocketStreamClientCallback() override = default;
 
   bool onFirstResponse(
@@ -90,6 +91,7 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   protocol::PROTOCOL_TYPES protoId_;
   std::unique_ptr<CompressionConfig> compressionConfig_;
   std::string rpcMethodName_{"<unknown_stream_method>"};
+  StreamMetricCallback& streamMetricCallback_;
 
   void scheduleTimeout();
   void cancelTimeout();

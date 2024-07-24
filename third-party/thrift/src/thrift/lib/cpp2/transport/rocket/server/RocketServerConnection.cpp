@@ -64,6 +64,7 @@ RocketServerConnection::RocketServerConnection(
     std::unique_ptr<RocketServerHandler> frameHandler,
     MemoryTracker& ingressMemoryTracker,
     MemoryTracker& egressMemoryTracker,
+    StreamMetricCallback& streamMetricCallback,
     const Config& cfg)
     : evb_(*socket->getEventBase()),
       socket_(std::move(socket)),
@@ -85,6 +86,7 @@ RocketServerConnection::RocketServerConnection(
       socketDrainer_(*this),
       ingressMemoryTracker_(ingressMemoryTracker),
       egressMemoryTracker_(egressMemoryTracker),
+      streamMetricCallback_(streamMetricCallback),
       enableObservers_(THRIFT_FLAG(enable_rocket_connection_observers)),
       observerContainer_(this) {
   CHECK(socket_);
@@ -125,7 +127,7 @@ RocketServerConnection::createStreamClientCallback(
     return nullptr;
   }
   auto cb = std::make_unique<RocketStreamClientCallback>(
-      streamId, connection, initialRequestN);
+      streamId, connection, initialRequestN, streamMetricCallback_);
   auto cbPtr = cb.get();
   it->second = std::move(cb);
   return cbPtr;

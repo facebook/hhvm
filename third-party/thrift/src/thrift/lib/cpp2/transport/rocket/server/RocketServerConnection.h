@@ -42,6 +42,7 @@
 
 #include <thrift/lib/cpp2/async/MessageChannel.h>
 #include <thrift/lib/cpp2/server/MemoryTracker.h>
+#include <thrift/lib/cpp2/server/metrics/StreamMetricCallback.h>
 #include <thrift/lib/cpp2/transport/core/ManagedConnectionIf.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
@@ -92,6 +93,7 @@ class RocketServerConnection final
       std::unique_ptr<RocketServerHandler> frameHandler,
       MemoryTracker& ingressMemoryTracker,
       MemoryTracker& egressMemoryTracker,
+      StreamMetricCallback& streamMetricCallback,
       const Config& cfg = {});
 
   void send(
@@ -551,6 +553,7 @@ class RocketServerConnection final
 
   MemoryTracker& ingressMemoryTracker_;
   MemoryTracker& egressMemoryTracker_;
+  StreamMetricCallback& streamMetricCallback_;
 
   ~RocketServerConnection();
 

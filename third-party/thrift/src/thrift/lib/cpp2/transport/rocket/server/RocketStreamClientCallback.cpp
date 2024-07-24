@@ -57,8 +57,12 @@ class TimeoutCallback : public folly::HHWheelTimer::Callback {
 RocketStreamClientCallback::RocketStreamClientCallback(
     StreamId streamId,
     RocketServerConnection& connection,
-    uint32_t initialRequestN)
-    : streamId_(streamId), connection_(connection), tokens_(initialRequestN) {}
+    uint32_t initialRequestN,
+    StreamMetricCallback& streamMetricCallback)
+    : streamId_(streamId),
+      connection_(connection),
+      tokens_(initialRequestN),
+      streamMetricCallback_(streamMetricCallback) {}
 
 bool RocketStreamClientCallback::onFirstResponse(
     FirstResponsePayload&& firstResponse,

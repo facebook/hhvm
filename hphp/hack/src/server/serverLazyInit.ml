@@ -1290,6 +1290,31 @@ let post_saved_state_initialization
       ~dirty_master_files
       ~dirty_local_files
 
+let check_credentials genv =
+  let t = Unix.gettimeofday () in
+  let attempt_fix = genv.local_config.SLC.attempt_fix_credentials in
+  match Security.check_credentials ~attempt_fix with
+  | Ok success ->
+    HackEventLogger.credentials_check_end
+      (Printf.sprintf "saved_state_init: %s" (Security.show_success success))
+      t
+  | Error error ->
+    let kind = Security.to_error_kind_string error in
+    let message = Security.to_error_message_string error in
+    Hh_logger.log "Error kind: %s\nError message: %s" kind message;
+    HackEventLogger.credentials_check_failure
+      (Printf.sprintf "saved_state_init: [%s]" kind)
+      t
+
+let load_saved_state_exn env genv load_state_approach root cgroup_steps =
+  CgroupProfiler.step_start_end cgroup_steps "load saved state"
+  @@ fun _cgroup_step ->
+  let ctx = Provider_utils.ctx_from_server_env env in
+  match load_state_approach with
+  | Precomputed info ->
+    Ok (use_precomputed_state_exn ~root env genv ctx info cgroup_steps)
+  | Load_state_natively -> download_and_load_state_exn ~genv ~ctx ~root
+
 let saved_state_init
     ~(do_indexing : bool)
     ~(load_state_approach : load_state_approach)
@@ -1300,42 +1325,16 @@ let saved_state_init
     ( (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t),
       load_state_error )
     result =
-  let t = Unix.gettimeofday () in
-  let attempt_fix = genv.local_config.SLC.attempt_fix_credentials in
-  let () =
-    match Security.check_credentials ~attempt_fix with
-    | Ok success ->
-      HackEventLogger.credentials_check_end
-        (Printf.sprintf "saved_state_init: %s" (Security.show_success success))
-        t
-    | Error error ->
-      let kind = Security.to_error_kind_string error in
-      let message = Security.to_error_message_string error in
-      Hh_logger.log "Error kind: %s\nError message: %s" kind message;
-      HackEventLogger.credentials_check_failure
-        (Printf.sprintf "saved_state_init: [%s]" kind)
-        t
-  in
-
+  check_credentials genv;
   Server_progress.write "loading saved state";
-
-  let ctx = Provider_utils.ctx_from_server_env env in
-  let do_ () : (loaded_info, load_state_error) result =
-    CgroupProfiler.step_start_end cgroup_steps "load saved state"
-    @@ fun _cgroup_step ->
-    match load_state_approach with
-    | Precomputed info ->
-      Ok (use_precomputed_state_exn ~root env genv ctx info cgroup_steps)
-    | Load_state_natively -> download_and_load_state_exn ~genv ~ctx ~root
-  in
   let t = Unix.gettimeofday () in
+  let open Result.Monad_infix in
   let state_result =
     try
-      match do_ () with
-      | Error error -> Error error
-      | Ok loaded_info ->
-        let (changed_while_parsing, clock) = get_updates_exn ~genv ~root in
-        Ok (loaded_info, changed_while_parsing, clock)
+      load_saved_state_exn env genv load_state_approach root cgroup_steps
+      >>| fun loaded_info ->
+      let (changed_while_parsing, clock) = get_updates_exn ~genv ~root in
+      (loaded_info, changed_while_parsing, clock)
     with
     | exn ->
       let e = Exception.wrap exn in
@@ -1349,17 +1348,15 @@ let saved_state_init
       | Error _ -> None
       | Ok (i, _, _) -> Some (show_loaded_info i))
     t;
-  match state_result with
-  | Error err -> Error err
-  | Ok (loaded_info, changed_while_parsing, clock) ->
-    Server_progress.write "loading saved state succeeded";
-    Hh_logger.log "Watchclock: %s" (ServerEnv.show_clock clock);
-    let (env, t) =
-      post_saved_state_initialization
-        ~do_indexing
-        ~state_result:(loaded_info, changed_while_parsing, clock)
-        ~env
-        ~genv
-        cgroup_steps
-    in
-    Ok ((env, t), (loaded_info, changed_while_parsing))
+  state_result >>| fun (loaded_info, changed_while_parsing, clock) ->
+  Server_progress.write "loading saved state succeeded";
+  Hh_logger.log "Watchclock: %s" (ServerEnv.show_clock clock);
+  let (env, t) =
+    post_saved_state_initialization
+      ~do_indexing
+      ~state_result:(loaded_info, changed_while_parsing, clock)
+      ~env
+      ~genv
+      cgroup_steps
+  in
+  ((env, t), (loaded_info, changed_while_parsing))

@@ -44,10 +44,10 @@ namespace rocket {
 template <class T>
 void Parser<T>::getReadBuffer(void** bufout, size_t* lenout) {
   switch (mode_) {
-    case (ParserMode::STRATEGY):
+    case (detail::ParserMode::STRATEGY):
       frameLengthParser_->getReadBuffer(bufout, lenout);
       break;
-    case (ParserMode::ALLOCATING):
+    case (detail::ParserMode::ALLOCATING):
       allocatingParser_->getReadBuffer(bufout, lenout);
       break;
   }
@@ -58,10 +58,10 @@ void Parser<T>::readDataAvailable(size_t nbytes) noexcept {
   folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
   try {
     switch (mode_) {
-      case (ParserMode::STRATEGY):
+      case (detail::ParserMode::STRATEGY):
         frameLengthParser_->readDataAvailable(nbytes);
         break;
-      case (ParserMode::ALLOCATING):
+      case (detail::ParserMode::ALLOCATING):
         allocatingParser_->readDataAvailable(nbytes);
         break;
     }
@@ -95,10 +95,10 @@ void Parser<T>::readBufferAvailable(
   folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
   try {
     switch (mode_) {
-      case (ParserMode::STRATEGY):
+      case (detail::ParserMode::STRATEGY):
         frameLengthParser_->readBufferAvailable(std::move(buf));
         break;
-      case (ParserMode::ALLOCATING):
+      case (detail::ParserMode::ALLOCATING):
         // Will throw not implemented runtime exception
         allocatingParser_->readBufferAvailable(std::move(buf));
         break;

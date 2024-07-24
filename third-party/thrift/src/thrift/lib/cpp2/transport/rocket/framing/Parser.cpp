@@ -26,3 +26,22 @@
 // guarantee buffer returned are not chained (meaning continuous). This can
 // provide performance benefits when using cursor-based serialization.
 THRIFT_FLAG_DEFINE_string(rocket_frame_parser, "strategy");
+
+namespace apache::thrift::rocket::detail {
+ParserAllocatorType& getDefaultAllocator() {
+  static folly::Indestructible<ParserAllocatorType> defaultAllocator;
+  return *defaultAllocator;
+}
+
+ParserMode stringToMode(const std::string& modeStr) noexcept {
+  if (modeStr == "strategy") {
+    return ParserMode::STRATEGY;
+  } else if (modeStr == "allocating") {
+    return ParserMode::ALLOCATING;
+  }
+
+  LOG(WARNING) << "Invalid parser mode: '" << modeStr
+               << ", default to ParserMode::STRATEGY";
+  return ParserMode::STRATEGY;
+}
+} // namespace apache::thrift::rocket::detail

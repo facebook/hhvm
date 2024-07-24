@@ -32,7 +32,7 @@
  * Generally speaking, the flow through a function is:
  * a. A header sets up a few constants and decides the next step.
  * b. Leading (unaligned) bytes are processed byte-by-byte.
- * c. Aligned data us processed 8 bytes at a time.
+ * c. Aligned data is processed 8 bytes at a time.
  * d. Trailing bytes (length 7 or less) are processed byte-by-byte.
  * e. The function returns.
  *

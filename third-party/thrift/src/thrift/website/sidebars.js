@@ -472,7 +472,10 @@ module.exports = {
               type: 'doc',
               id: 'fb/troubleshooting/debugging-tools',
             },
-            items: ['fb/troubleshooting/debuggingtools/thriftdbg-info'],
+            items: [
+              'fb/troubleshooting/debuggingtools/thriftdbg-info',
+              'fb/troubleshooting/debuggingtools/thriftdbg-sendRequest',
+            ],
           },
           'fb/troubleshooting/fuzzer',
           {

@@ -260,30 +260,23 @@ let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
 module TyPredicate = struct
   let rec of_ty env ty =
     match get_node ty with
-    | Tprim Aast.Tbool -> Some (env, IsBool)
-    | Tprim Aast.Tint -> Some (env, IsInt)
-    | Tprim Aast.Tstring -> Some (env, IsString)
-    | Tprim Aast.Tarraykey -> Some (env, IsArraykey)
-    | Tprim Aast.Tfloat -> Some (env, IsFloat)
-    | Tprim Aast.Tnum -> Some (env, IsNum)
-    | Tprim Aast.Tresource -> Some (env, IsResource)
-    | Tprim Aast.Tnull -> Some (env, IsNull)
+    | Tprim Aast.Tbool -> Some IsBool
+    | Tprim Aast.Tint -> Some IsInt
+    | Tprim Aast.Tstring -> Some IsString
+    | Tprim Aast.Tarraykey -> Some IsArraykey
+    | Tprim Aast.Tfloat -> Some IsFloat
+    | Tprim Aast.Tnum -> Some IsNum
+    | Tprim Aast.Tresource -> Some IsResource
+    | Tprim Aast.Tnull -> Some IsNull
     | Ttuple tys -> begin
       match
-        List.fold_left
-          tys
-          ~init:(Some (env, []))
-          ~f:(fun acc ty ->
-            match acc with
-            | None -> None
-            | Some (env, predicates) -> begin
-              match of_ty env ty with
-              | Some (env, predicate) -> Some (env, predicate :: predicates)
-              | None -> None
-            end)
+        List.fold_left tys ~init:(Some []) ~f:(fun acc ty ->
+            let open Option.Monad_infix in
+            acc >>= fun predicates ->
+            of_ty env ty >>| fun predicate -> predicate :: predicates)
       with
       | None -> None
-      | Some (env, predicates) -> Some (env, IsTupleOf (List.rev predicates))
+      | Some predicates -> Some (IsTupleOf (List.rev predicates))
     end
     | _ -> None
 

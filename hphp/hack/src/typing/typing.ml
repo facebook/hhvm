@@ -7059,7 +7059,7 @@ end = struct
       | _ -> begin
         match Typing_refinement.TyPredicate.of_ty env hint_ty with
         | None -> default_branch env
-        | Some (env, predicate) ->
+        | Some predicate ->
           branch_for_type_switch
             env
             ~p

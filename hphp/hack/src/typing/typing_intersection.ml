@@ -36,7 +36,7 @@ let negate_type env r ty ~approx =
     | Tprim Aast.Tnull -> MkType.nonnull r
     | Tprim _ -> begin
       match Typing_refinement.TyPredicate.of_ty env ty with
-      | Some (_env, predicate) -> MkType.neg r (Neg_predicate predicate)
+      | Some predicate -> MkType.neg r (Neg_predicate predicate)
       | None -> approximated (* void, noreturn *)
     end
     | Tneg (Neg_predicate predicate) ->

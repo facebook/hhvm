@@ -42,15 +42,22 @@ let default_genv =
     debug_channels = None;
   }
 
-let make_env ~init_id ~deps_mode config : ServerEnv.env =
+let make_env ~init_id ~deps_mode ?errorl ?package_info config : ServerEnv.env =
+  let tcopt = ServerConfig.typechecker_options config in
+  let tcopt =
+    match package_info with
+    | None -> tcopt
+    | Some package_info ->
+      { tcopt with GlobalOptions.tco_package_info = package_info }
+  in
   {
-    tcopt = ServerConfig.typechecker_options config;
+    tcopt;
     popt = ServerConfig.parser_options config;
     gleanopt = ServerConfig.glean_options config;
     swriteopt = ServerConfig.symbol_write_options config;
     naming_table = Naming_table.empty;
     deps_mode;
-    errorl = Errors.empty;
+    errorl = Option.value errorl ~default:Errors.empty;
     failed_naming = Relative_path.Set.empty;
     last_command_time = 0.0;
     last_notifier_check_time = 0.0;

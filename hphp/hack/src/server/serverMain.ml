@@ -23,7 +23,7 @@ let force_break_recheck_loop_for_test x =
   force_break_recheck_loop_for_test_ref := x
 
 module Program = struct
-  let preinit () =
+  let set_signals () =
     (* Warning: Global references inited in this function, should
          be 'restored' in the workers, because they are not 'forked'
          anymore. See `ServerWorker.{save/restore}_state`. *)
@@ -38,7 +38,12 @@ module Program = struct
            Exit.exit
              ~msg:
                "Hh_server received a stop signal. This can happen from a large rebase/update"
-             Exit_status.Server_shutting_down_due_to_sigusr2))
+             Exit_status.Server_shutting_down_due_to_sigusr2));
+    (* this is to transform SIGPIPE in an exception. A SIGPIPE can happen when
+     * someone C-c the client.
+     *)
+    Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
+    ()
 
   let run_once_and_exit
       genv
@@ -1052,14 +1057,8 @@ let num_workers options local_config =
       nbr_procs
     )
 
-let setup_server ~informant_managed ~monitor_pid options config local_config =
-  let num_workers = num_workers options local_config in
-  let handle =
-    SharedMem.init ~num_workers (ServerConfig.sharedmem_config config)
-  in
-  let init_id = Random_id.short_string () in
-  let pid = Unix.getpid () in
-
+(** Setup files for IPC. These are used to transmit status messages and errors. *)
+let setup_ipc root =
   (* There are three files which are used for IPC.
      1. server_finale_file - we unlink it now upon startup,
         and upon clean exit we'll write finale-date to it.
@@ -1069,7 +1068,8 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         and upon clean exit we'll write "shutting down" to it.
      In both case of clean exit and abrupt exit there'll be leftover files.
      We'll rely upon tmpclean to eventually clean them up. *)
-  Server_progress.set_root (ServerArgs.root options);
+  let pid = Unix.getpid () in
+  Server_progress.set_root root;
   let server_finale_file = ServerFiles.server_finale_file pid in
   let server_receipt_to_monitor_file =
     ServerFiles.server_receipt_to_monitor_file pid
@@ -1078,7 +1078,6 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   | _ -> ());
   (try Unix.unlink server_receipt_to_monitor_file with
   | _ -> ());
-  Server_progress.write "starting up";
   Exit.add_hook_upon_clean_exit (fun finale_data ->
       begin
         try Unix.unlink server_receipt_to_monitor_file with
@@ -1097,76 +1096,72 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         try Server_progress.write "shutting down" with
         | _ -> ()
       end;
-      ());
+      ())
 
-  Hh_logger.log "Version: %s" Hh_version.version;
-  Hh_logger.log "Hostname: %s" (Unix.gethostname ());
-  let root = ServerArgs.root options in
+let configure_gc () =
+  Stdlib.Gc.set
+    {
+      (Stdlib.Gc.get ()) with
+      Stdlib.Gc.max_overhead =
+        (* The OCaml default is 500, but we care about minimizing the memory
+           overhead *)
+        200;
+    }
 
-  let deps_mode =
-    match ServerArgs.save_64bit options with
-    | Some new_edges_dir ->
-      let human_readable_dep_map_dir =
-        ServerArgs.save_human_readable_64bit_dep_map options
-      in
-      Typing_deps_mode.SaveToDiskMode
-        { graph = None; new_edges_dir; human_readable_dep_map_dir }
-    | None -> Typing_deps_mode.InMemoryMode None
-  in
-
-  (* The OCaml default is 500, but we care about minimizing the memory
-   * overhead *)
-  let gc_control = Stdlib.Gc.get () in
-  Stdlib.Gc.set { gc_control with Stdlib.Gc.max_overhead = 200 };
-  let { ServerLocalConfig.cpu_priority; io_priority; enable_on_nfs; _ } =
+let initialize_logging
+    ~informant_managed
+    ~is_worker
+    ~num_workers
+    ~init_id
+    options
+    config
     local_config
-  in
+    ~root : unit =
+  Hh_logger.Level.set_min_level local_config.ServerLocalConfig.min_log_level;
+  Hh_logger.Level.set_categories local_config.ServerLocalConfig.log_categories;
+
   let hhconfig_version =
     config |> ServerConfig.version |> Config_file.version_to_string_opt
   in
-  List.iter (ServerConfig.ignored_paths config) ~f:FilesToIgnore.ignore_path;
-  let logging_init init_id ~is_worker =
-    Hh_logger.Level.set_min_level local_config.ServerLocalConfig.min_log_level;
-    Hh_logger.Level.set_categories local_config.ServerLocalConfig.log_categories;
+  if not (Sys_utils.enable_telemetry ()) then
+    EventLogger.init_fake ()
+  else if is_worker then
+    HackEventLogger.init_worker
+      ~root
+      ~hhconfig_version
+      ~init_id
+      ~custom_columns:(ServerArgs.custom_telemetry_data options)
+      ~rollout_flags:(ServerLocalConfig.to_rollout_flags local_config)
+      ~rollout_group:local_config.ServerLocalConfig.rollout_group
+      ~time:(Unix.gettimeofday ())
+      ~per_file_profiling:local_config.ServerLocalConfig.per_file_profiling
+  else
+    HackEventLogger.init
+      ~root
+      ~hhconfig_version
+      ~init_id
+      ~custom_columns:(ServerArgs.custom_telemetry_data options)
+      ~informant_managed
+      ~rollout_flags:(ServerLocalConfig.to_rollout_flags local_config)
+      ~rollout_group:local_config.ServerLocalConfig.rollout_group
+      ~time:(Unix.gettimeofday ())
+      ~max_workers:num_workers
+      ~per_file_profiling:local_config.ServerLocalConfig.per_file_profiling
 
-    if not (Sys_utils.enable_telemetry ()) then
-      EventLogger.init_fake ()
-    else if is_worker then
-      HackEventLogger.init_worker
-        ~root
-        ~hhconfig_version
-        ~init_id
-        ~custom_columns:(ServerArgs.custom_telemetry_data options)
-        ~rollout_flags:(ServerLocalConfig.to_rollout_flags local_config)
-        ~rollout_group:local_config.ServerLocalConfig.rollout_group
-        ~time:(Unix.gettimeofday ())
-        ~per_file_profiling:local_config.ServerLocalConfig.per_file_profiling
-    else
-      HackEventLogger.init
-        ~root
-        ~hhconfig_version
-        ~init_id
-        ~custom_columns:(ServerArgs.custom_telemetry_data options)
-        ~informant_managed
-        ~rollout_flags:(ServerLocalConfig.to_rollout_flags local_config)
-        ~rollout_group:local_config.ServerLocalConfig.rollout_group
-        ~time:(Unix.gettimeofday ())
-        ~max_workers:num_workers
-        ~per_file_profiling:local_config.ServerLocalConfig.per_file_profiling
-  in
-  logging_init init_id ~is_worker:false;
-  HackEventLogger.init_start
-    ~experiments_config_meta:
-      local_config.ServerLocalConfig.experiments_config_meta
-    (Memory_stats.get_host_hw_telemetry ());
+let check_nfs ~root options local_config =
   let root_s = Path.to_string root in
   let check_mode = ServerArgs.check_mode options in
-  if (not check_mode) && Sys_utils.is_nfs root_s && not enable_on_nfs then (
+  if
+    (not check_mode)
+    && Sys_utils.is_nfs root_s
+    && not local_config.ServerLocalConfig.enable_on_nfs
+  then (
     Hh_logger.log "Refusing to run on %s: root is on NFS!" root_s;
     HackEventLogger.nfs_root ();
     Exit.exit Exit_status.Nfs_root
-  );
+  )
 
+let warn_on_non_opt_build options config =
   if
     ServerConfig.warn_on_non_opt_build config && not Build_id.is_build_optimized
   then begin
@@ -1190,42 +1185,129 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
       in
       Hh_logger.log "%s" msg;
       Exit.exit ~msg Exit_status.Server_non_opt_build_mode
-  end;
+  end
 
-  Program.preinit ();
-  Sys_utils.set_priorities ~cpu_priority ~io_priority;
+let get_deps_mode options =
+  match ServerArgs.save_64bit options with
+  | Some new_edges_dir ->
+    let human_readable_dep_map_dir =
+      ServerArgs.save_human_readable_64bit_dep_map options
+    in
+    Typing_deps_mode.SaveToDiskMode
+      { graph = None; new_edges_dir; human_readable_dep_map_dir }
+  | None -> Typing_deps_mode.InMemoryMode None
 
-  (* this is to transform SIGPIPE in an exception. A SIGPIPE can happen when
-   * someone C-c the client.
-   *)
-  Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
-  PidLog.init (ServerFiles.pids_file root);
-  Option.iter monitor_pid ~f:(fun monitor_pid ->
-      PidLog.log ~reason:"monitor" monitor_pid);
-  PidLog.log ~reason:"main" (Unix.getpid ());
-
+let make_workers
+    ~num_workers
+    ~informant_managed
+    ~init_id
+    ~root
+    shmem_handle
+    options
+    config
+    local_config : MultiWorker.worker list =
   (* Make a sub-init_id because we use it to name temporary files for piping to
      scuba logging processes. *)
   let worker_logging_init () =
-    logging_init (init_id ^ "." ^ Random_id.short_string ()) ~is_worker:true
+    initialize_logging
+      ~num_workers
+      ~informant_managed
+      ~init_id:(init_id ^ "." ^ Random_id.short_string ())
+      ~is_worker:true
+      ~root
+      options
+      config
+      local_config
   in
   let gc_control = ServerConfig.gc_control config in
+  ServerWorker.make
+    ~longlived_workers:local_config.ServerLocalConfig.longlived_workers
+    ~nbr_procs:num_workers
+    gc_control
+    shmem_handle
+    ~logging_init:worker_logging_init
+
+let log_pids root ~monitor_pid =
+  PidLog.init (ServerFiles.pids_file root);
+  Option.iter monitor_pid ~f:(fun monitor_pid ->
+      PidLog.log ~reason:"monitor" monitor_pid);
+  PidLog.log ~reason:"main" (Unix.getpid ())
+
+(** Does a bunch of operations to get the server up and running, among other things:
+  - Initialize shared memory
+  - Create a unique init ID
+  - Creates a bunch of files for IPC, e.g. for errors and status transmission.
+  - Configure GC
+  - initialize logging
+  - initialize workers
+  - load and parse package config *)
+let setup_server
+    ~(informant_managed : bool)
+    ~(monitor_pid : int option)
+    (options : ServerArgs.options)
+    (config : ServerConfig.t)
+    (local_config : ServerLocalConfig.t) : MultiWorker.worker list * env =
+  let num_workers = num_workers options local_config in
+  let shmem_handle =
+    SharedMem.init ~num_workers (ServerConfig.sharedmem_config config)
+  in
+  let init_id = Random_id.short_string () in
+  let root = ServerArgs.root options in
+
+  setup_ipc root;
+
+  Server_progress.write "starting up";
+  Hh_logger.log "Version: %s" Hh_version.version;
+  Hh_logger.log "Hostname: %s" (Unix.gethostname ());
+
+  configure_gc ();
+
+  List.iter (ServerConfig.ignored_paths config) ~f:FilesToIgnore.ignore_path;
+
+  initialize_logging
+    ~is_worker:false
+    ~init_id
+    ~informant_managed
+    ~num_workers
+    ~root
+    options
+    config
+    local_config;
+
+  HackEventLogger.init_start
+    ~experiments_config_meta:
+      local_config.ServerLocalConfig.experiments_config_meta
+    (Memory_stats.get_host_hw_telemetry ());
+
+  check_nfs ~root options local_config;
+  warn_on_non_opt_build options config;
+
+  Program.set_signals ();
+
+  let { ServerLocalConfig.cpu_priority; io_priority; _ } = local_config in
+  Sys_utils.set_priorities ~cpu_priority ~io_priority;
+
+  log_pids root ~monitor_pid;
+
   let workers =
-    ServerWorker.make
-      ~longlived_workers:local_config.ServerLocalConfig.longlived_workers
-      ~nbr_procs:num_workers
-      gc_control
-      handle
-      ~logging_init:worker_logging_init
+    make_workers
+      ~num_workers
+      ~informant_managed
+      ~init_id
+      ~root
+      shmem_handle
+      options
+      config
+      local_config
   in
-  let env = ServerEnvBuild.make_env config ~init_id ~deps_mode in
-  (* Load and parse PACKAGES.toml if it exists at the root. *)
-  let (errors, package_info) = PackageConfig.load_and_parse () in
-  let tcopt =
-    { env.ServerEnv.tcopt with GlobalOptions.tco_package_info = package_info }
-  in
+  let (errorl, package_info) = PackageConfig.load_and_parse () in
   let env =
-    ServerEnv.{ env with tcopt; errorl = Errors.merge env.errorl errors }
+    ServerEnvBuild.make_env
+      config
+      ~init_id
+      ~errorl
+      ~package_info
+      ~deps_mode:(get_deps_mode options)
   in
 
   (workers, env)

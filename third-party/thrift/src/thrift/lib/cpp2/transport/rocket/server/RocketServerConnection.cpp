@@ -54,6 +54,7 @@
 
 THRIFT_FLAG_DEFINE_bool(enable_rocket_connection_observers, false);
 THRIFT_FLAG_DEFINE_bool(enable_stream_graceful_shutdown, true);
+THRIFT_FLAG_DEFINE_bool(thrift_enable_stream_counters, true);
 
 namespace apache {
 namespace thrift {
@@ -117,6 +118,14 @@ RocketServerConnection::RocketServerConnection(
   }
 }
 
+namespace {
+StreamMetricCallback& getNoopStreamMetricCallback() {
+  static folly::Indestructible<NoopStreamMetricCallback>
+      kNoopStreamMetricCallback;
+  return *kNoopStreamMetricCallback;
+}
+} // namespace
+
 RocketStreamClientCallback* FOLLY_NULLABLE
 RocketServerConnection::createStreamClientCallback(
     StreamId streamId,
@@ -127,7 +136,12 @@ RocketServerConnection::createStreamClientCallback(
     return nullptr;
   }
   auto cb = std::make_unique<RocketStreamClientCallback>(
-      streamId, connection, initialRequestN, streamMetricCallback_);
+      streamId,
+      connection,
+      initialRequestN,
+      THRIFT_FLAG(thrift_enable_stream_counters)
+          ? streamMetricCallback_
+          : getNoopStreamMetricCallback());
   auto cbPtr = cb.get();
   it->second = std::move(cb);
   return cbPtr;

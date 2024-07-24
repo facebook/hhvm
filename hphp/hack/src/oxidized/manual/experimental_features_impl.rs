@@ -51,20 +51,20 @@ impl FeatureName {
     }
 
     pub fn parse_experimental_feature(
-        (name, status): &(String, String),
-    ) -> Result<(FeatureName, FeatureStatus), anyhow::Error> {
-        let n = FeatureName::from_str(name).map_err(|_| ExperimentalFeatureError {
+        (name, status): (String, String),
+    ) -> Result<(String, FeatureStatus), anyhow::Error> {
+        let n = FeatureName::from_str(&name).map_err(|_| ExperimentalFeatureError {
             kind: "name".to_string(),
             bad_name: name.to_string(),
         })?;
-        let s = FeatureStatus::from_str(status).map_err(|_| ExperimentalFeatureError {
+        let s = FeatureStatus::from_str(&status).map_err(|_| ExperimentalFeatureError {
             kind: "status".to_string(),
             bad_name: status.to_string(),
         })?;
         let hard_coded_status = n.get_feature_status_deprecated();
         // For now, force the config to be consistent with the hard coded status.
         if s == hard_coded_status {
-            Ok((n, s))
+            Ok((name, s))
         } else {
             Err(anyhow::Error::new(ExperimentalFeatureError {
                 kind: "mismatch".to_string(),
@@ -81,8 +81,7 @@ impl FeatureName {
             self.get_feature_status_deprecated()
         } else {
             po.experimental_features
-                .iter()
-                .find_map(|(name, status)| if name == self { Some(status) } else { None })
+                .get(&self.to_string())
                 .unwrap_or_else(|| get_unspecified_feature(po))
                 .clone()
         }

@@ -513,17 +513,10 @@ fn parse_json<'de, T: serde::de::Deserialize<'de>>(value: &'de str) -> Result<T>
 
 fn parse_experimental_features(
     s: &str,
-) -> Result<
-    Vec<(
-        experimental_features::FeatureName,
-        experimental_features::FeatureStatus,
-    )>,
-> {
-    let features: Vec<_> = parse_json::<BTreeMap<String, String>>(s)?
-        .into_iter()
-        .collect();
+) -> Result<BTreeMap<String, experimental_features::FeatureStatus>> {
+    let features = parse_json::<BTreeMap<String, String>>(s)?;
     features
-        .iter()
+        .into_iter()
         .map(experimental_features::FeatureName::parse_experimental_feature)
         .collect()
 }

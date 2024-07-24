@@ -146,7 +146,7 @@ let parse_experimental_feature (name_string, status_json) =
     let hard_coded_status = get_feature_status_deprecated name in
     (* For now, force the config to be consistent with the hard coded status. *)
     if equal_feature_status status hard_coded_status then
-      (name, status)
+      (name_string, status)
     else
       failwith
         (Format.sprintf

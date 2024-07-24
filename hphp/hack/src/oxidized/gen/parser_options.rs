@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4f10cace1829e4a535feb2f94d62d526>>
+// @generated SignedSource<<859c8e89a2357522f1d940445c54f767>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -68,10 +68,7 @@ pub struct ParserOptions {
     pub disable_hh_ignore_error: isize,
     pub allowed_decl_fixme_codes: i_set::ISet,
     pub use_legacy_experimental_feature_config: bool,
-    pub experimental_features: Vec<(
-        experimental_features::FeatureName,
-        experimental_features::FeatureStatus,
-    )>,
+    pub experimental_features: s_map::SMap<experimental_features::FeatureStatus>,
     pub consider_unspecified_experimental_features_released: bool,
 }
 
@@ -112,9 +109,6 @@ pub struct FfiT(
     pub bool,
     pub bool,
     pub bool,
-    pub  Vec<(
-        experimental_features::FeatureName,
-        experimental_features::FeatureStatus,
-    )>,
+    pub s_map::SMap<experimental_features::FeatureStatus>,
     pub bool,
 );

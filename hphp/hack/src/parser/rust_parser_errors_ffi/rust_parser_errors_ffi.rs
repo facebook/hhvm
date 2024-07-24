@@ -53,11 +53,11 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
         bool::from_ocaml(*ocaml_opts.add(17)).unwrap();
     let po_disallow_direct_superglobals_refs = bool::from_ocaml(*ocaml_opts.add(18)).unwrap();
     let use_legacy_experimental_feature_config = bool::from_ocaml(*ocaml_opts.add(19)).unwrap();
-    let po_experimental_features = Vec::<(
-        experimental_features::FeatureName,
-        experimental_features::FeatureStatus,
-    )>::from_ocaml(*ocaml_opts.add(20))
-    .unwrap();
+    let po_experimental_features =
+        oxidized::s_map::SMap::<experimental_features::FeatureStatus>::from_ocaml(
+            *ocaml_opts.add(20),
+        )
+        .unwrap();
     let consider_unspecified_experimental_features_released =
         bool::from_ocaml(*ocaml_opts.add(21)).unwrap();
 

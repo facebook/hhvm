@@ -129,7 +129,8 @@ let config_experimental_stx_features config =
     ~f:(fun str ->
       let json = Hh_json.json_of_string ~strict:true str in
       let pairs = Hh_json.get_object_exn json in
-      List.map ~f:Experimental_features.parse_experimental_feature pairs)
+      SMap.of_list
+        (List.map pairs ~f:Experimental_features.parse_experimental_feature))
 
 let process_migration_flags sl =
   match sl with

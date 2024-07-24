@@ -41,7 +41,7 @@ impl Default for ParserOptions {
             disable_hh_ignore_error: 0,
             allowed_decl_fixme_codes: i_set::ISet::new(),
             use_legacy_experimental_feature_config: true,
-            experimental_features: vec![],
+            experimental_features: std::collections::BTreeMap::default(),
             consider_unspecified_experimental_features_released: true,
         }
     }

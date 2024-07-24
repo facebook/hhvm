@@ -41,9 +41,7 @@ type t = {
   disable_hh_ignore_error: int;
   allowed_decl_fixme_codes: ISet.t;
   use_legacy_experimental_feature_config: bool;
-  experimental_features:
-    (Experimental_features.feature_name * Experimental_features.feature_status)
-    list;
+  experimental_features: Experimental_features.feature_status SMap.t;
   consider_unspecified_experimental_features_released: bool;
 }
 [@@deriving show, eq]
@@ -82,7 +80,7 @@ let default =
     disable_hh_ignore_error = 0;
     allowed_decl_fixme_codes = ISet.empty;
     use_legacy_experimental_feature_config = true;
-    experimental_features = [];
+    experimental_features = SMap.empty;
     consider_unspecified_experimental_features_released = true;
   }
 
@@ -108,8 +106,7 @@ type ffi_t =
   * bool
   * bool
   * bool
-  * (Experimental_features.feature_name * Experimental_features.feature_status)
-    list
+  * Experimental_features.feature_status SMap.t
   * bool
 
 let to_rust_ffi_t po =

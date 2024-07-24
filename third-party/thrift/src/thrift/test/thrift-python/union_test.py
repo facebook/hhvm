@@ -78,7 +78,10 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
 
         # DO_BEFORE(aristidis,20240731): Fix the case below: we should never use an
         # unbound local variables.
-        with self.assertRaisesRegex(UnboundLocalError, "field_enum"):
+        with self.assertRaisesRegex(
+            UnboundLocalError,
+            "local variable 'field_enum' referenced before assignment",
+        ):
             TestUnionImmutable(int_field=None)
 
         # DO_BEFORE(aristidis,20240730): Determine if this should indeed throw, and if
@@ -87,6 +90,31 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
             TypeError, "union may only take one keyword argument"
         ):
             TestUnionImmutable(string_field=None, int_field=None)
+
+        # DO_BEFORE(aristidis,20240731): Fix the case below: we should never use an
+        # unbound local variables.
+        with self.assertRaisesRegex(
+            UnboundLocalError,
+            "local variable 'field_enum' referenced before assignment",
+        ):
+            TestUnionImmutable(field_does_not_exist=None)
+
+        # Initialization with multiple keywords arguments, only one of which is not None
+        # (and has a valid name and type).
+        self.assertEqual(
+            TestUnionImmutable(string_field=None, int_field=42),
+            TestUnionImmutable(int_field=42),
+        )
+
+        self.assertEqual(
+            TestUnionImmutable(string_field="hello", field_does_not_exist=None),
+            TestUnionImmutable(string_field="hello"),
+        )
+
+        self.assertEqual(
+            TestUnionImmutable(field_does_not_exist=None, string_field="hello"),
+            TestUnionImmutable(string_field="hello"),
+        )
 
     def test_class_field_enum(self) -> None:
         # The "Type" class attribute is an enumeration type
@@ -395,6 +423,39 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
             TestUnionMutable.FbThriftUnionFieldEnum.FBTHRIFT_UNION_EMPTY,
         )
         self.assertIsNone(u4.fbthrift_current_value)
+
+        u5 = TestUnionMutable(field_does_not_exist=None)
+        self.assertIs(
+            u5.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.FBTHRIFT_UNION_EMPTY,
+        )
+        self.assertIsNone(u5.fbthrift_current_value)
+
+        # Initialization with multiple keywords arguments, only one of which is not None
+        # (and has a valid name and type).
+        u6 = TestUnionMutable(string_field=None, int_field=42)
+        self.assertIs(
+            u6.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.int_field,
+        )
+        self.assertEqual(u6.fbthrift_current_value, 42)
+        self.assertEqual(u6.int_field, 42)
+
+        u7 = TestUnionMutable(string_field="hello", field_does_not_exist=None)
+        self.assertIs(
+            u7.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.string_field,
+        )
+        self.assertEqual(u7.fbthrift_current_value, "hello")
+        self.assertEqual(u7.string_field, "hello")
+
+        u8 = TestUnionMutable(field_does_not_exist=None, string_field="hello")
+        self.assertIs(
+            u8.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.string_field,
+        )
+        self.assertEqual(u8.fbthrift_current_value, "hello")
+        self.assertEqual(u8.string_field, "hello")
 
     def test_class_field_enum(self) -> None:
         # NOTE: in the immutable version, this attribute is using the

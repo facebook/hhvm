@@ -397,6 +397,7 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 - int Jit.Threads = 4, UNKNOWN
 - int Jit.WorkerThreads, UNKNOWN
 - int Jit.WorkerThreadsForSerdes = 0, UNKNOWN
+- int Jit.MaxUnitLoaderThreads = 16, UNKNOWN
 - int Jit.WorkerArenas, UNKNOWN
 - bool Jit.ParallelDeserialize = true, UNKNOWN
 - int Jit.LdimmqSpan = 8, UNKNOWN

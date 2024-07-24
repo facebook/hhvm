@@ -269,7 +269,8 @@ void read_units_preload(ProfDataDeserializer& ser) {
                          RuntimeOption::ServerExecutionMode());
   if (Cfg::Jit::DesUnitPreload) {
     auto const threads =
-      std::max(Cfg::Jit::WorkerThreadsForSerdes, 1);
+      std::max(1, std::min(Cfg::Jit::WorkerThreadsForSerdes,
+                           Cfg::Jit::MaxUnitLoaderThreads));
     s_preload_dispatcher = new UnitPreloadDispatcher(
         threads, threads, 0, false, nullptr
     );

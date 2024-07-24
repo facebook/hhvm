@@ -21,7 +21,6 @@ import java.net.SocketAddress;
 import java.util.Iterator;
 import java.util.Map;
 
-@Deprecated
 public interface ConnectionContext {
   /**
    * Gets the remote address of the client that made the request

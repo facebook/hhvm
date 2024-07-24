@@ -30,7 +30,6 @@ public interface RequestContext {
   @Deprecated
   ConnectionContext getConnectionContext();
 
-  @Deprecated
   void setContextData(String key, Object val);
 
   Object getContextData(String key);

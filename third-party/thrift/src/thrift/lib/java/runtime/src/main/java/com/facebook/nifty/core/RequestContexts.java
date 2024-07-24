@@ -16,7 +16,6 @@
 
 package com.facebook.nifty.core;
 
-@Deprecated
 public class RequestContexts {
   private static ThreadLocal<RequestContext> threadLocalContext = new ThreadLocal<>();
 

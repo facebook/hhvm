@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Deprecated
 public class NiftyConnectionContext implements ConnectionContext {
   private SocketAddress remoteAddress;
   private SslSession sslSession;

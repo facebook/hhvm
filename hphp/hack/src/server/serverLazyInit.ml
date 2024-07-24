@@ -434,7 +434,6 @@ let remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table
  * of saved state modes. *)
 let use_prechecked_files (genv : ServerEnv.genv) : bool =
   ServerPrecheckedFiles.should_use genv.options genv.local_config
-  && Option.is_none (ServerArgs.ai_mode genv.options)
   && (not (ServerArgs.check_mode genv.options))
   && Option.is_none (ServerArgs.save_filename genv.options)
 

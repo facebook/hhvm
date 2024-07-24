@@ -30,7 +30,8 @@ import (
 )
 
 type rocketClient struct {
-	Format
+	Encoder
+	Decoder
 
 	conn net.Conn
 
@@ -52,7 +53,8 @@ type rocketClient struct {
 
 	persistentHeaders map[string]string
 
-	buf *MemoryBuffer
+	rbuf *MemoryBuffer
+	wbuf *MemoryBuffer
 }
 
 // newRocketClient creates a RocketClient
@@ -61,16 +63,18 @@ func newRocketClient(conn net.Conn, protoID ProtocolID, timeout time.Duration, p
 		conn:              conn,
 		protoID:           protoID,
 		persistentHeaders: persistentHeaders,
-		buf:               NewMemoryBuffer(),
+		rbuf:              NewMemoryBuffer(),
+		wbuf:              NewMemoryBuffer(),
 		timeout:           timeout,
 		zstd:              false, // zstd adds a performance overhead, so we default to false
 	}
 	switch p.protoID {
 	case ProtocolIDBinary:
-		// These defaults match cpp implementation
-		p.Format = NewBinaryProtocol(p.buf, false, true)
+		p.Decoder = newBinaryDecoder(p.rbuf)
+		p.Encoder = newBinaryEncoder(p.wbuf)
 	case ProtocolIDCompact:
-		p.Format = NewCompactProtocol(p.buf)
+		p.Decoder = newCompactDecoder(p.rbuf)
+		p.Encoder = newCompactEncoder(p.wbuf)
 	default:
 		return nil, NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
 	}
@@ -83,7 +87,7 @@ type rsocketResult struct {
 }
 
 func (p *rocketClient) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
-	p.buf.Reset()
+	p.wbuf.Reset()
 	p.seqID = seqid
 
 	if p.reqMetadata == nil {
@@ -115,7 +119,7 @@ func (p *rocketClient) Flush() (err error) {
 		return err
 	}
 	// serializer in the protocol field was writing to the transport's memory buffer.
-	dataBytes := p.buf.Bytes()
+	dataBytes := p.wbuf.Bytes()
 	if p.reqMetadata.Zstd {
 		dataBytes, err = compressZstd(dataBytes)
 		if err != nil {
@@ -261,8 +265,8 @@ func (p *rocketClient) ReadMessageBegin() (string, MessageType, int32, error) {
 			return name, EXCEPTION, p.seqID, err
 		}
 	}
-	p.buf.Buffer = bytes.NewBuffer(dataBytes)
-	p.buf.size = len(dataBytes)
+	p.rbuf.Buffer = bytes.NewBuffer(dataBytes)
+	p.rbuf.size = len(dataBytes)
 	return name, REPLY, p.seqID, err
 }
 

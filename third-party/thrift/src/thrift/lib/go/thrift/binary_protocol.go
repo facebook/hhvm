@@ -47,6 +47,16 @@ func NewBinaryProtocol(t io.ReadWriteCloser, strictRead, strictWrite bool) Forma
 	return p
 }
 
+func newBinaryEncoder(writer io.Writer) Encoder {
+	// This default for binaryEncoder's strictWrite matches cpp implementation
+	return &binaryEncoder{writer: writer, strictWrite: true}
+}
+
+func newBinaryDecoder(reader io.Reader) Decoder {
+	// This default for binaryEncoder's strictRead matches cpp implementation
+	return &binaryDecoder{reader: reader, strictRead: false}
+}
+
 /**
  * Writing Methods
  */

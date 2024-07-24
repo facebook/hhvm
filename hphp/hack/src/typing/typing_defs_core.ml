@@ -230,7 +230,19 @@ type 'ty fun_type = {
 }
 [@@deriving eq, hash, show { with_path = false }]
 
-type type_predicate =
+type shape_field_predicate = {
+  (* T196048813 *)
+  (* sfp_optional: bool; *)
+  sfp_predicate: type_predicate;
+}
+
+and shape_predicate = {
+  (* T196048813 *)
+  (* sp_allows_unknown_fields: bool; *)
+  sp_fields: shape_field_predicate TShapeMap.t;
+}
+
+and type_predicate =
   | IsBool
   | IsInt
   | IsString
@@ -240,6 +252,7 @@ type type_predicate =
   | IsResource
   | IsNull
   | IsTupleOf of type_predicate list
+  | IsShapeOf of shape_predicate
 [@@deriving eq, ord, hash, show { with_path = false }]
 
 type neg_type =

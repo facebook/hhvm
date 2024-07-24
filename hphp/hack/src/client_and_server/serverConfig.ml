@@ -382,6 +382,8 @@ let load_config config options =
       (bool_opt "disallow_toplevel_requires" config)
     ?tco_const_attribute:(bool_opt "const_attribute" config)
     ?tco_check_attribute_locations:(bool_opt "check_attribute_locations" config)
+    ?tco_type_refinement_partition_shapes:
+      (bool_opt "type_refinement_partition_shapes" config)
     ?glean_reponame:(string_opt "glean_reponame" config)
     ?symbol_write_index_inherited_members:
       (bool_opt "symbol_write_index_inherited_members" config)

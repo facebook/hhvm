@@ -74,6 +74,7 @@ impl Default for GlobalOptions {
             tco_custom_error_config: CustomErrorConfig::default(),
             tco_const_attribute: false,
             tco_check_attribute_locations: true,
+            tco_type_refinement_partition_shapes: false,
             tco_error_php_lambdas: false,
             tco_disallow_discarded_nullable_awaitables: false,
             glean_reponame: String::new(), // "www.autocomplete" in ocaml

@@ -1173,6 +1173,32 @@ module Full = struct
         let texts = List.map predicates ~f:predicate_doc in
         Concat
           ([text "("] @ List.intersperse texts ~sep:(text ", ") @ [text ")"])
+      | IsShapeOf { sp_fields } ->
+        let texts =
+          List.map
+            (TShapeMap.elements sp_fields)
+            ~f:(fun (key, { sfp_predicate }) ->
+              let key_delim =
+                match key with
+                | Typing_defs.TSFlit_str _ -> text "'"
+                | _ -> Nothing
+              in
+              Concat
+                [
+                  key_delim;
+                  text_strip_ns @@ Typing_defs.TShapeField.name key;
+                  key_delim;
+                  Space;
+                  text "=>";
+                  Space;
+                  predicate_doc sfp_predicate;
+                ])
+        in
+        Concat
+          ([text "shape("]
+          @ List.intersperse texts ~sep:(text ", ")
+          @ [text ")"])
+      (* TODO: T196048813 optional, open, fuel? *)
     in
     let doc =
       Concat
@@ -1544,6 +1570,28 @@ module ErrorString = struct
         | IsTupleOf predicates ->
           let strings = List.map predicates ~f:str in
           "(" ^ String.concat ~sep:", " strings ^ ")"
+        | IsShapeOf { sp_fields } ->
+          let texts =
+            List.map
+              (TShapeMap.elements sp_fields)
+              ~f:(fun (key, { sfp_predicate }) ->
+                let key_delim =
+                  match key with
+                  | Typing_defs.TSFlit_str _ -> "'"
+                  | _ -> ""
+                in
+                String.concat
+                  ~sep:""
+                  [
+                    key_delim;
+                    Typing_defs.TShapeField.name key;
+                    key_delim;
+                    " => ";
+                    str sfp_predicate;
+                  ])
+          in
+          "shape(" ^ String.concat texts ~sep:", " ^ ")"
+        (* TODO: T196048813, dedupe?, optional, open, fuel? *)
       in
       (fuel, "is not " ^ str predicate)
 
@@ -1666,15 +1714,15 @@ module Json = struct
     let name x = [("name", JSON_String x)] in
     let optional x = [("optional", JSON_Bool x)] in
     let is_array x = [("is_array", JSON_Bool x)] in
+    let shape_field_name_to_json shape_field =
+      (* TODO: need to update userland tooling? *)
+      match shape_field with
+      | Typing_defs.TSFlit_int (_, s) -> Hh_json.JSON_Number s
+      | Typing_defs.TSFlit_str (_, s) -> Hh_json.JSON_String s
+      | Typing_defs.TSFclass_const ((_, s1), (_, s2)) ->
+        Hh_json.JSON_Array [Hh_json.JSON_String s1; Hh_json.JSON_String s2]
+    in
     let make_field (k, v) =
-      let shape_field_name_to_json shape_field =
-        (* TODO: need to update userland tooling? *)
-        match shape_field with
-        | Typing_defs.TSFlit_int (_, s) -> Hh_json.JSON_Number s
-        | Typing_defs.TSFlit_str (_, s) -> Hh_json.JSON_String s
-        | Typing_defs.TSFclass_const ((_, s1), (_, s2)) ->
-          Hh_json.JSON_Array [Hh_json.JSON_String s1; Hh_json.JSON_String s2]
-      in
       obj
       @@ [("name", shape_field_name_to_json k)]
       @ optional v.sft_optional
@@ -1741,6 +1789,19 @@ module Json = struct
             List.map predicates ~f:(fun p -> obj @@ predicate_json p)
           in
           name "istuple" @ [("args", JSON_Array predicates_json)]
+        | IsShapeOf { sp_fields } ->
+          name "isshape"
+          @ [
+              ( "fields",
+                JSON_Array
+                  (List.map
+                     ~f:(fun (field, { sfp_predicate }) ->
+                       obj
+                       @@ [("name", shape_field_name_to_json field)]
+                       @ predicate_json sfp_predicate)
+                     (TShapeMap.bindings sp_fields)) );
+            ]
+        (* TODO: T196048813 optional, open, fuel? *)
       in
       obj @@ kind p "negation" @ predicate_json predicate
     | (p, Tclass ((_, cid), e, tys)) ->

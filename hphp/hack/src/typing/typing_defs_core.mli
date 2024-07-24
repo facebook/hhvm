@@ -164,6 +164,18 @@ type enforcement =
   | Enforced  (** The consumer enforces the type at runtime *)
 [@@deriving eq, show, ord]
 
+type shape_field_predicate = {
+  (* T196048813 *)
+  (* sfp_optional: bool; *)
+  sfp_predicate: type_predicate;
+}
+
+and shape_predicate = {
+  (* T196048813 *)
+  (* sp_allows_unknown_fields: bool; *)
+  sp_fields: shape_field_predicate TShapeMap.t;
+}
+
 (** Represents the predicate of a type switch, i.e. in the expression
       ```
       if ($x is Bool) { ... } else { ... }
@@ -171,7 +183,7 @@ type enforcement =
 
     The predicate would be `is Bool`
   *)
-type type_predicate =
+and type_predicate =
   | IsBool
   | IsInt
   | IsString
@@ -181,6 +193,7 @@ type type_predicate =
   | IsResource
   | IsNull
   | IsTupleOf of type_predicate list
+  | IsShapeOf of shape_predicate
 [@@deriving eq, ord, hash, show]
 
 (** Negation types represent the type of values that fail an `is` test

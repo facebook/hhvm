@@ -53,6 +53,76 @@ let rec split_ty
         TyPartition.product (Typing_make_type.tuple ty_reason) sub_splits
     end
   in
+  let partition_shape_by_shape
+      ty_reason
+      { s_origin = _; s_unknown_value; s_fields = field_ty_map }
+      { sp_fields = field_predicate_map } =
+    let has_class_const_field map =
+      TShapeMap.exists
+        (fun field _val ->
+          match field with
+          | TSFclass_const _ -> true
+          | TSFlit_int _
+          | TSFlit_str _ ->
+            false)
+        map
+    in
+    if
+      has_class_const_field field_ty_map
+      || has_class_const_field field_predicate_map
+    then
+      (* class const field names are unsound, so fall back to span *)
+      TyPartition.mk_span ty
+    else if
+      (* Ignore (span) open shape, optional fields for now (T196048813) *)
+
+      (* We're going to remove this test later (T196048813) so don't worry so
+         much about this being too specific of a check *)
+      (not (Typing_defs.is_nothing s_unknown_value))
+      || TShapeMap.exists
+           (fun _field { sft_optional; sft_ty = _ } -> sft_optional)
+           field_ty_map
+    then
+      TyPartition.mk_span ty
+    else
+      let field_ty_pairs =
+        List.sort
+          (TShapeMap.elements field_ty_map)
+          ~compare:(fun (f1, _) (f2, _) -> TShapeField.compare f1 f2)
+      in
+      let field_predicate_pairs =
+        List.sort
+          (TShapeMap.elements field_predicate_map)
+          ~compare:(fun (f1, _) (f2, _) -> TShapeField.compare f1 f2)
+      in
+      if
+        not
+        @@ List.equal
+             TShapeField.equal
+             (List.map field_ty_pairs ~f:fst)
+             (List.map field_predicate_pairs ~f:fst)
+      then
+        TyPartition.mk_right ty (* mismatched fields *)
+      else
+        (* Calculate the splits for each field *)
+        let field_split_pairs =
+          List.map
+            (List.zip_exn field_ty_pairs field_predicate_pairs)
+            ~f:(fun
+                 ( (field, { sft_optional = _; sft_ty }),
+                   (_field, { sfp_predicate }) )
+               ->
+              (field, split_ty ~expansions env sft_ty ~predicate:sfp_predicate))
+        in
+        let (fields, splits) = List.unzip field_split_pairs in
+        let mk_shape tys =
+          Typing_make_type.shape ty_reason (Typing_make_type.nothing ty_reason)
+          @@ TShapeMap.of_list
+          @@ List.zip_exn fields
+          @@ List.map tys ~f:(fun ty -> { sft_optional = false; sft_ty = ty })
+        in
+        TyPartition.product mk_shape splits
+  in
   let partition_f (env : env) (ty_datatype : DataType.t) : TyPartition.t =
     if DataType.are_disjoint env ty_datatype predicate_datatype then
       (* We use the DataType as a quick check but for some types the DataType is
@@ -67,13 +137,15 @@ let rec split_ty
          the negated predicate's datatype (before negation) is an
          overapproximation. This is true for the following negated predicates:
 
-         - (only, for now) IsTupleOf -- in this case, the disjointness check
+         - IsTupleOf -- in this case, the disjointness check
            will not hold if predicate is also IsTupleOf; and so we span
+         - IsShapeOf -- in this case, the disjointness check
+           will not hold if predicate is also IsShapeOf; and so we span
       *)
       match get_node ety with
       | Tneg neg -> begin
         match neg with
-        (* we'll over-approximate the DataType for IsTupleOf *)
+        (* we'll over-approximate the DataType for IsTupleOf, IsShapeOf *)
         | Neg_predicate (IsTupleOf _np_predicates) -> begin
           match predicate with
           | IsTupleOf _predicates -> TyPartition.mk_span ty
@@ -84,7 +156,22 @@ let rec split_ty
           | IsFloat
           | IsNum
           | IsResource
-          | IsNull ->
+          | IsNull
+          | IsShapeOf _ ->
+            TyPartition.mk_right ty
+        end
+        | Neg_predicate (IsShapeOf _) -> begin
+          match predicate with
+          | IsShapeOf _ -> TyPartition.mk_span ty
+          | IsBool
+          | IsInt
+          | IsString
+          | IsArraykey
+          | IsFloat
+          | IsNum
+          | IsResource
+          | IsNull
+          | IsTupleOf _ ->
             TyPartition.mk_right ty
         end
         (* The DataType for these are precise *)
@@ -101,13 +188,21 @@ let rec split_ty
       (* Similar to above, here, predicate_complement_datatype may be an
          underapproximation if predicate is:
 
-         - (only, for now) IsTupleOf -- in this case, if ty is a Ttuple, we can
+         - IsTupleOf -- in this case, if ty is a Ttuple, we can
+           do a deeper split
+         - IsShapeOf -- in this case, if ty is a Tshape, we can
            do a deeper split
       *)
       match predicate with
       | IsTupleOf predicates -> begin
         match get_node ety with
         | Ttuple tyl -> partition_tuple_by_tuple (get_reason ty) tyl predicates
+        | _ -> TyPartition.mk_span ty
+      end
+      | IsShapeOf shape_predicate -> begin
+        match get_node ety with
+        | Tshape shape_type ->
+          partition_shape_by_shape (get_reason ty) shape_type shape_predicate
         | _ -> TyPartition.mk_span ty
       end
       | IsBool
@@ -278,6 +373,35 @@ module TyPredicate = struct
       | None -> None
       | Some predicates -> Some (IsTupleOf (List.rev predicates))
     end
+    | Tshape { s_origin = _; s_unknown_value; s_fields } ->
+      if
+        not
+        @@ TypecheckerOptions.type_refinement_partition_shapes env.genv.tcopt
+      then
+        None
+      else if
+        (* this type comes from localizing a hint so a closed shape should have
+           the canonical form of the nothing type *)
+        Typing_defs.is_nothing s_unknown_value
+      then begin
+        match
+          TShapeMap.fold
+            (fun key s_field acc ->
+              if s_field.sft_optional then
+                (* Skip shapes with optional fields for now T196048813 *)
+                None
+              else
+                let open Option.Monad_infix in
+                acc >>= fun sf_predicates ->
+                of_ty env s_field.sft_ty >>| fun sfp_predicate ->
+                (key, { sfp_predicate }) :: sf_predicates)
+            s_fields
+            (Some [])
+        with
+        | None -> None
+        | Some elts -> Some (IsShapeOf { sp_fields = TShapeMap.of_list elts })
+      end else
+        None
     | _ -> None
 
   let rec to_ty reason predicate =
@@ -292,4 +416,12 @@ module TyPredicate = struct
     | IsNull -> Typing_make_type.null reason
     | IsTupleOf predicates ->
       Typing_make_type.tuple reason (List.map predicates ~f:(to_ty reason))
+    | IsShapeOf { sp_fields } ->
+      let map =
+        TShapeMap.map
+          (fun { sfp_predicate } ->
+            { sft_optional = false; sft_ty = to_ty reason sfp_predicate })
+          sp_fields
+      in
+      Typing_make_type.shape reason (Typing_make_type.nothing reason) map
 end

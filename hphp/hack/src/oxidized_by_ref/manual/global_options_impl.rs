@@ -71,6 +71,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     po_abstract_static_props: false,
     po_parser_errors_only: false,
     tco_check_attribute_locations: true,
+    tco_type_refinement_partition_shapes: false,
     po_disallow_func_ptrs_in_constants: false,
     tco_error_php_lambdas: false,
     tco_disallow_discarded_nullable_awaitables: false,

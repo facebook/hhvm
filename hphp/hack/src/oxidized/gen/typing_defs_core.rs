@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6f52294fdcdffbd2ea194fcd892a3131>>
+// @generated SignedSource<<d3cd14ec7d72cb89622cc7b32a926bc5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -493,6 +493,48 @@ pub struct FunType {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
+pub struct ShapeFieldPredicate {
+    pub sfp_predicate: TypePredicate,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct ShapePredicate {
+    pub sp_fields: t_shape_map::TShapeMap<ShapeFieldPredicate>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
 #[repr(C, u8)]
 pub enum TypePredicate {
@@ -505,6 +547,7 @@ pub enum TypePredicate {
     IsResource,
     IsNull,
     IsTupleOf(Vec<TypePredicate>),
+    IsShapeOf(ShapePredicate),
 }
 
 #[derive(

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<011584e412054c034a6462638879cc74>>
+// @generated SignedSource<<313730c3ef3445180ccdc8b3bc6a2031>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -454,6 +454,53 @@ arena_deserializer::impl_deserialize_in_arena!(FunType<'arena>);
 
 #[derive(
     Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct ShapeFieldPredicate<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub sfp_predicate: TypePredicate<'a>,
+}
+impl<'a> TrivialDrop for ShapeFieldPredicate<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ShapeFieldPredicate<'arena>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct ShapePredicate<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub sp_fields: t_shape_map::TShapeMap<'a, &'a ShapeFieldPredicate<'a>>,
+}
+impl<'a> TrivialDrop for ShapePredicate<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ShapePredicate<'arena>);
+
+#[derive(
+    Clone,
     Copy,
     Debug,
     Deserialize,
@@ -468,6 +515,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
 #[repr(C, u8)]
 pub enum TypePredicate<'a> {
@@ -481,6 +529,8 @@ pub enum TypePredicate<'a> {
     IsNull,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     IsTupleOf(&'a [TypePredicate<'a>]),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    IsShapeOf(&'a ShapePredicate<'a>),
 }
 impl<'a> TrivialDrop for TypePredicate<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TypePredicate<'arena>);

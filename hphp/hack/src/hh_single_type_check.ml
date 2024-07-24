@@ -252,6 +252,7 @@ let parse_options () =
   let const_static_props = ref false in
   let disable_legacy_attribute_syntax = ref false in
   let const_attribute = ref false in
+  let type_refinement_partition_shapes = ref false in
   let const_default_func_args = ref false in
   let const_default_lambda_args = ref false in
   let disallow_silence = ref false in
@@ -888,6 +889,7 @@ let parse_options () =
       ~po_disallow_toplevel_requires:(not !allow_toplevel_requires)
       ~tco_const_attribute:!const_attribute
       ~tco_check_attribute_locations:true
+      ~tco_type_refinement_partition_shapes:!type_refinement_partition_shapes
       ~tco_error_php_lambdas:!error_php_lambdas
       ~tco_disallow_discarded_nullable_awaitables:
         !disallow_discarded_nullable_awaitables

@@ -1,0 +1,7 @@
+File "span_class_const_shape_types.php", line 12, characters 5-15:
+  (shape(HasConst::A => int) & not shape(HasConst::A => int))
+File "span_class_const_shape_types.php", line 21, characters 5-15:
+  (shape(HasConst::A => int) & not shape('a' => int))
+File "span_class_const_shape_types.php", line 30, characters 5-15:
+  (shape('a' => int) & not shape(HasConst::A => int))
+No errors

@@ -37,34 +37,56 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         # Disable maximum printed diff length.
         self.maxDiff = None
 
-    def test_creation_and_read(self) -> None:
+    def test_creation(self) -> None:
+        # Without any arguments, creates empty union (with value None).
         u = TestUnionImmutable()
         self.assertIs(u.type, TestUnionImmutable.Type.EMPTY)
         self.assertIsNone(u.value)
 
+        # Specifying exactly one keyword argument whose name corresponds to that of a
+        # field for this Union, and a non-None value whose type is valid for that field,
+        # should create a new instance with that field (and value) set.
         u2 = TestUnionImmutable(string_field="Hello, world!")
         self.assertIs(u2.type, TestUnionImmutable.Type.string_field)
         self.assertEqual(u2.value, "Hello, world!")
         self.assertEqual(u2.string_field, "Hello, world!")
+        # Trying to access any other field should raise an error.
         with self.assertRaisesRegex(
             AttributeError, "Union contains a value of type string_field, not int_field"
         ):
             u2.int_field
 
+        # Attempts to initialize an instance with a keyword argument whose name does
+        # not match that of a field should raise an error.
         with self.assertRaisesRegex(
             TypeError, "got an unexpected keyword argument 'field_does_not_exist'"
         ):
             TestUnionImmutable(field_does_not_exist=123)
 
+        # Attempts to initialize an instance with more than one (valid, non-None)
+        # keyword arguments raise an Error.
         with self.assertRaisesRegex(
             TypeError, "union may only take one keyword argument"
         ):
             TestUnionImmutable(string_field="hello", int_field=42)
 
+        # Attempts to initialize an instance with an invalid type raise an error.
         with self.assertRaisesRegex(
             TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
         ):
             TestUnionImmutable(int_field="hello!")
+
+        # DO_BEFORE(aristidis,20240731): Fix the case below: we should never use an
+        # unbound local variables.
+        with self.assertRaisesRegex(UnboundLocalError, "field_enum"):
+            TestUnionImmutable(int_field=None)
+
+        # DO_BEFORE(aristidis,20240730): Determine if this should indeed throw, and if
+        # so improve message to be more relevant.
+        with self.assertRaisesRegex(
+            TypeError, "union may only take one keyword argument"
+        ):
+            TestUnionImmutable(string_field=None, int_field=None)
 
     def test_class_field_enum(self) -> None:
         # The "Type" class attribute is an enumeration type
@@ -299,7 +321,8 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         # Disable maximum printed diff length.
         self.maxDiff = None
 
-    def test_creation_and_read(self) -> None:
+    def test_creation(self) -> None:
+        # Without any arguments, creates empty union (with value None).
         u = TestUnionMutable()
         self.assertIs(
             u.fbthrift_current_field,
@@ -307,6 +330,9 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         )
         self.assertIsNone(u.fbthrift_current_value)
 
+        # Specifying exactly one keyword argument whose name corresponds to that of a
+        # field for this Union, and a non-None value whose type is valid for that field,
+        # should create a new instance with that field (and value) set.
         u2 = TestUnionMutable(string_field="Hello, world!")
         self.assertIs(
             u2.fbthrift_current_field,
@@ -314,6 +340,7 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         )
         self.assertEqual(u2.fbthrift_current_value, "Hello, world!")
         self.assertEqual(u2.string_field, "Hello, world!")
+        # Trying to access any other field should raise an error.
         with self.assertRaisesRegex(
             AttributeError,
             (
@@ -323,6 +350,8 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         ):
             u2.int_field
 
+        # Attempts to initialize an instance with a keyword argument whose name does
+        # not match that of a field should raise an error.
         with self.assertRaisesRegex(
             RuntimeError,
             (
@@ -332,6 +361,8 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         ):
             TestUnionMutable(field_does_not_exist=123)
 
+        # Attempts to initialize an instance with more than one (valid, non-None)
+        # keyword arguments raise an Error.
         with self.assertRaisesRegex(
             RuntimeError,
             (
@@ -342,10 +373,28 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         ):
             TestUnionMutable(string_field="hello", int_field=42)
 
+        # Attempts to initialize an instance with an invalid type raise an error.
         with self.assertRaisesRegex(
             TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
         ):
             TestUnionMutable(int_field="hello!")
+
+        # DO_BEFORE(aristidis,20240810): Replace u3 and u4 below with simple equality
+        # checks with empty TestUnionMutable() when equality operator is implemented for
+        # mutable unions.
+        u3 = TestUnionMutable(int_field=None)
+        self.assertIs(
+            u3.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.FBTHRIFT_UNION_EMPTY,
+        )
+        self.assertIsNone(u3.fbthrift_current_value)
+
+        u4 = TestUnionMutable(string_field=None, int_field=None)
+        self.assertIs(
+            u4.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.FBTHRIFT_UNION_EMPTY,
+        )
+        self.assertIsNone(u4.fbthrift_current_value)
 
     def test_class_field_enum(self) -> None:
         # NOTE: in the immutable version, this attribute is using the

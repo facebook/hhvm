@@ -161,10 +161,7 @@ let defer_or_do_type_check
     (t : float)
     ~(telemetry_label : string)
     ~(cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  (* No type checking in AI mode *)
-  if Option.is_some (ServerArgs.ai_mode genv.options) then
-    (env, t)
-  else if
+  if
     ServerArgs.check_mode genv.options
     || Option.is_some (ServerArgs.save_filename genv.options)
   then (

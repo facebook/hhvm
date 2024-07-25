@@ -424,12 +424,8 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         )
         self.assertIsNone(u4.fbthrift_current_value)
 
-        u5 = TestUnionMutable(field_does_not_exist=None)
-        self.assertIs(
-            u5.fbthrift_current_field,
-            TestUnionMutable.FbThriftUnionFieldEnum.FBTHRIFT_UNION_EMPTY,
-        )
-        self.assertIsNone(u5.fbthrift_current_value)
+        with self.assertRaises(TypeError):
+            TestUnionMutable(field_does_not_exist=None)
 
         # Initialization with multiple keywords arguments, only one of which is not None
         # (and has a valid name and type).
@@ -441,21 +437,11 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         self.assertEqual(u6.fbthrift_current_value, 42)
         self.assertEqual(u6.int_field, 42)
 
-        u7 = TestUnionMutable(string_field="hello", field_does_not_exist=None)
-        self.assertIs(
-            u7.fbthrift_current_field,
-            TestUnionMutable.FbThriftUnionFieldEnum.string_field,
-        )
-        self.assertEqual(u7.fbthrift_current_value, "hello")
-        self.assertEqual(u7.string_field, "hello")
+        with self.assertRaises(TypeError):
+            TestUnionMutable(string_field="hello", field_does_not_exist=None)
 
-        u8 = TestUnionMutable(field_does_not_exist=None, string_field="hello")
-        self.assertIs(
-            u8.fbthrift_current_field,
-            TestUnionMutable.FbThriftUnionFieldEnum.string_field,
-        )
-        self.assertEqual(u8.fbthrift_current_value, "hello")
-        self.assertEqual(u8.string_field, "hello")
+        with self.assertRaises(TypeError):
+            TestUnionMutable(field_does_not_exist=None, string_field="hello")
 
     def test_class_field_enum(self) -> None:
         # NOTE: in the immutable version, this attribute is using the

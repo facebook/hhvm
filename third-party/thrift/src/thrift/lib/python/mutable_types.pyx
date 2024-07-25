@@ -570,36 +570,39 @@ cdef tuple _validate_union_init_kwargs(object mutable_union_class, dict kwargs):
     Raises: Exception if the given keyword arguments are invalid.
     """
 
-    current_field_name = None
+    current_field_enum = None
     current_field_value = None
-    for field_name, field_value in kwargs.items():
-        if field_value is None:
-            continue
 
-        if current_field_name is not None:
+    fields_enum_type = mutable_union_class.FbThriftUnionFieldEnum
+    for field_name, field_value in kwargs.items():
+        if current_field_enum is not None:
             raise TypeError(
                 f"Cannot initialize Thrift union ({mutable_union_class.__name__}) with "
                 f"more than one keyword argument (got non-None value for {field_name}, "
-                f"but already had one for {current_field_name})."
+                f"but already had one for {current_field_enum.name})."
             )
 
-        current_field_name = field_name
-        current_field_value = field_value
+        # Check that the field name is valid, regardless of whether it has a value.
+        try:
+            field_enum = fields_enum_type[field_name]
+        except KeyError as e:
+            raise TypeError(
+                f"Cannot initialize Thrift union ({mutable_union_class.__name__}): "
+                f"unknown field ({field_name})."
+            ) from e
+        else:
+            if field_value is None:
+                continue
 
-    fields_enum_type = mutable_union_class.FbThriftUnionFieldEnum
-    if current_field_name is None:
+            current_field_enum = field_enum
+            current_field_value = field_value
+
+    if current_field_enum is None:
         assert current_field_value is None
         return (fields_enum_type.FBTHRIFT_UNION_EMPTY, None)
-
-    try:
-        field_enum = fields_enum_type[current_field_name]
-    except KeyError as e:
-        raise TypeError(
-            f"Cannot initialize Thrift union ({mutable_union_class.__name__}): unknown "
-            f"field ({current_field_name})."
-        ) from e
     else:
-        return (field_enum, current_field_value)
+        assert current_field_value is not None
+        return (current_field_enum, current_field_value)
 
 
 cdef class MutableUnion(MutableStructOrUnion):
@@ -607,6 +610,12 @@ cdef class MutableUnion(MutableStructOrUnion):
         self._fbthrift_data = createUnionTuple()
 
     def __init__(self, **kwargs):
+        # Special case: short-circuit logic below for the (very) common case where no
+        # arguments are given (i.e., the new instance is empty), for performance.
+        if not kwargs:
+            self._fbthrift_update_current_field_attributes()
+            return
+
         field_enum, field_python_value = _validate_union_init_kwargs(
             type(self), kwargs
         )

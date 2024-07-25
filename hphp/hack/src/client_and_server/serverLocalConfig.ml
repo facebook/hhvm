@@ -819,18 +819,21 @@ let load_
       config
   in
   let profile_decling =
-    match string_ "profile_decling" ~default:"off" config with
-    | "off" -> HackEventLogger.PerFileProfilingConfig.DeclingOff
-    | "top_counts" -> HackEventLogger.PerFileProfilingConfig.DeclingTopCounts
-    | "all_telemetry" ->
-      HackEventLogger.PerFileProfilingConfig.DeclingAllTelemetry
-        { callstacks = false }
-    | "all_telemetry_callstacks" ->
-      HackEventLogger.PerFileProfilingConfig.DeclingAllTelemetry
-        { callstacks = true }
-    | _ ->
-      failwith
-        "profile_decling: off | top_counts | all_telemetry | all_telemetry_callstacks"
+    match string_opt "profile_decling" config with
+    | None ->
+      default.per_file_profiling
+        .HackEventLogger.PerFileProfilingConfig.profile_decling
+    | Some value_s ->
+      (match
+         HackEventLogger.PerFileProfilingConfig.ProfileDecling.of_config_value
+           value_s
+       with
+      | Some x -> x
+      | None ->
+        failwith
+        @@ Printf.sprintf
+             "Unrecognized value %s for profile_decling. Allowed values ar 'off', 'top_counts', 'all_telemetry', 'all_telemetry_callstacks'"
+             value_s)
   in
   let profile_owner = string_opt "profile_owner" config in
   let profile_desc = string_opt "profile_desc" config in

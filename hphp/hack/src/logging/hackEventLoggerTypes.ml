@@ -14,6 +14,40 @@ module PerFileProfilingConfig = struct
     | DeclingTopCounts
     | DeclingAllTelemetry of { callstacks: bool }
 
+  module ProfileDecling = struct
+    type t = profile_decling
+
+    let of_config_value (s : string) : t option =
+      match s with
+      | "off" -> Some DeclingOff
+      | "top_counts" -> Some DeclingTopCounts
+      | "all_telemetry" -> Some (DeclingAllTelemetry { callstacks = false })
+      | "all_telemetry_callstacks" ->
+        Some (DeclingAllTelemetry { callstacks = true })
+      | _ -> None
+
+    let to_config_value (t : t) : string =
+      match t with
+      | DeclingOff -> "off"
+      | DeclingTopCounts -> "top_counts"
+      | DeclingAllTelemetry { callstacks } ->
+        Printf.sprintf
+          "all_telemetry%s"
+          (if callstacks then
+            "_callstacks"
+          else
+            "")
+
+    let of_int (i : int) : t =
+      match i with
+      | 0 -> DeclingOff
+      | 1 -> DeclingTopCounts
+      | 2 -> DeclingAllTelemetry { callstacks = false }
+      | _ -> DeclingAllTelemetry { callstacks = true }
+
+    let config_value_of_int (i : int) : string = i |> of_int |> to_config_value
+  end
+
   type t = {
     profile_log: bool;
     profile_type_check_duration_threshold: float;

@@ -46,6 +46,9 @@ val reset : unit -> t
 (** restores global mutable state to what it was before you called 'reset' *)
 val restore_state : t -> unit
 
+(** This does two things:
+  * Increment the counter for the category by one
+  * time the function and add the duration to the total duration for the category. *)
 val count : Category.t -> (unit -> 'a) -> 'a
 
 val get_counters : unit -> Telemetry.t

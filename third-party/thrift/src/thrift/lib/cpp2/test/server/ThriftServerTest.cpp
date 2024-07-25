@@ -831,6 +831,74 @@ TEST(ThriftServer, SocketWriteTimeout) {
   }
 }
 
+class ResourcePoolsFlagsTest : public testing::Test,
+                               public ::testing::WithParamInterface<bool> {
+ public:
+  auto expected() {
+    return std::make_tuple(expectedResourcePoolsEnabled_, expectedExplanation_);
+  }
+
+  void SetUp() override {
+    auto gFlag = FLAGS_thrift_experimental_use_resource_pools;
+    auto thriftFlag = GetParam();
+    THRIFT_FLAG_SET_MOCK(experimental_use_resource_pools, thriftFlag);
+    expectedResourcePoolsEnabled_ = thriftFlag || gFlag;
+
+    // Tests provide visibility into expected behavior.
+    // To make it obvious what the explanation looks like for various
+    // combinations of the thrift flag and gflag, this code explicitly
+    // enumerates the various cases and the complete text of the explanation.
+    if (thriftFlag && !gFlag) {
+      expectedExplanation_ =
+          "thrift flag: true, enable gflag: false, disable gflag: false";
+    } else if (!thriftFlag && gFlag) {
+      expectedExplanation_ =
+          "thrift flag: false, enable gflag: true, disable gflag: false";
+    } else if (thriftFlag && gFlag) {
+      expectedExplanation_ =
+          "thrift flag: true, enable gflag: true, disable gflag: false";
+    } else {
+      expectedExplanation_ =
+          "runtime: thriftFlagNotSet, , thrift flag: false, enable gflag: false, disable gflag: false";
+    }
+  }
+
+ private:
+  bool expectedResourcePoolsEnabled_;
+  std::string expectedExplanation_;
+};
+
+TEST_P(ResourcePoolsFlagsTest, ResourcePoolsFlags) {
+  auto handler = std::make_shared<TestInterface>();
+  class TestObserver : public apache::thrift::server::TServerObserver {
+   public:
+    explicit TestObserver(std::string& explanation)
+        : explanation_(explanation) {}
+    void resourcePoolsEnabled(std::string explanation) override {
+      explanation_ = std::move(explanation);
+    }
+    void resourcePoolsDisabled(std::string explanation) override {
+      explanation_ = std::move(explanation);
+    }
+
+    std::string& explanation_;
+  };
+
+  std::string actualExplanation;
+  auto observer = std::make_shared<TestObserver>(actualExplanation);
+  ScopedServerInterfaceThread runner(
+      handler, "::1", 0, [&](auto& thriftServer) {
+        thriftServer.setObserver(observer);
+      });
+
+  auto actual = std::make_tuple(
+      runner.getThriftServer().resourcePoolEnabled(), actualExplanation);
+  EXPECT_EQ(actual, expected());
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ThriftServer, ResourcePoolsFlagsTest, testing::Values(true, false));
+
 namespace long_shutdown {
 namespace {
 

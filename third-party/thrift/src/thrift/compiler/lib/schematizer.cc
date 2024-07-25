@@ -18,6 +18,7 @@
 #include <string_view>
 #include <utility>
 #include <fmt/core.h>
+#include <openssl/evp.h>
 #include <openssl/md5.h>
 #include <openssl/sha.h>
 #include <thrift/compiler/ast/t_const.h>
@@ -761,7 +762,7 @@ std::string_view schematizer::program_checksum(const t_program& program) {
   // @lint-ignore CLANGTIDY facebook-hte-CArray
   unsigned char hash[MD5_DIGEST_LENGTH];
   auto val = sm_.get_file(program.path())->text;
-  MD5(reinterpret_cast<const unsigned char*>(val.data()), val.size(), hash);
+  EVP_Digest(val.data(), val.size(), hash, nullptr, EVP_md5(), nullptr);
   return (
       program_checksums_[&program] =
           std::string(reinterpret_cast<const char*>(hash), sizeof(hash)));

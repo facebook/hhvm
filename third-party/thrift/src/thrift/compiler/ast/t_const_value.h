@@ -315,6 +315,7 @@ class t_const_value {
       case CV_IDENTIFIER:
         return "identifier";
     }
+    abort();
   }
 
   void check_kind(t_const_value_kind expected) const {

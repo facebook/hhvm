@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
 enum ErrorCode {
   UNKNOWN = 0,
   INVALID_VALUE = 1,
@@ -22,8 +24,9 @@ enum ErrorCode {
 
 exception InternalError {
   1: ErrorCode code;
+  @thrift.ExceptionMessage
   2: string message;
-} (message = "message")
+}
 
 exception RetryableError {
   1: ErrorCode code;

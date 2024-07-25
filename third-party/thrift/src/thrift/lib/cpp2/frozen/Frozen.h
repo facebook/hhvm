@@ -39,7 +39,7 @@
 #include <folly/container/F14Map-fwd.h>
 #include <folly/container/F14Set-fwd.h>
 #include <folly/container/heap_vector_types.h>
-#include <folly/experimental/Bits.h>
+#include <folly/lang/BitsClass.h>
 #include <folly/hash/Hash.h>
 #include <folly/lang/Bits.h>
 #include <folly/sorted_vector_types.h>

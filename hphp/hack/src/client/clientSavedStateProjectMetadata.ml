@@ -40,6 +40,7 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
     watchman_debug_logging = _;
     allow_non_opt_build = _;
     desc = _;
+    is_interactive = _;
   } =
     env
   in

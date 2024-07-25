@@ -543,6 +543,7 @@ let env =
       allow_non_opt_build = true;
       desc = "testing";
       preexisting_warnings = false;
+      is_interactive = false;
     }
 
 let test_check_success () : bool Lwt.t =

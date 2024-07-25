@@ -40,17 +40,13 @@ let is_stale_msg liveness =
       ^ " watchman being unresponsive)\n")
   | Live_status -> None
 
-let go status output_json from error_format max_errors =
+let go status error_format ~is_interactive ~output_json ~max_errors =
   let { Server_status.liveness; error_list; dropped_count; last_recheck_stats }
       =
     status
   in
   let stale_msg = is_stale_msg liveness in
-  if
-    output_json
-    || (not (String.equal from "" || String.equal from "[sh]"))
-    || List.is_empty error_list
-  then
+  if output_json || (not is_interactive) || List.is_empty error_list then
     ServerError.print_error_list
       stdout
       ~stale_msg

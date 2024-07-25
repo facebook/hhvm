@@ -771,6 +771,8 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
 
   if String.equal !from "emacs" then
     Printf.fprintf stdout "-*- mode: compilation -*-\n%!";
+
+  let is_interactive = List.mem [""; "[sh]"] ~equal:String.equal !from in
   {
     autostart = !autostart;
     config = !config;
@@ -779,10 +781,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     error_format = !error_format;
     force_dormant_start = !force_dormant_start;
     from = !from;
-    show_spinner =
-      Option.value
-        ~default:(String.is_empty !from || String.equal !from "[sh]")
-        !show_spinner;
+    show_spinner = Option.value ~default:is_interactive !show_spinner;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     ignore_hh_version = !ignore_hh_version;
     saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
@@ -809,6 +808,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     watchman_debug_logging = !watchman_debug_logging;
     allow_non_opt_build = !allow_non_opt_build;
     desc = !desc;
+    is_interactive;
   }
 
 let parse_start_env command ~from_default =

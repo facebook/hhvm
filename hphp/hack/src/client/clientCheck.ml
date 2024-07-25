@@ -128,6 +128,7 @@ let connect ?(use_priority_pipe = false) args : ClientConnect.conn Lwt.t =
     sort_results = _;
     stdin_name = _;
     desc = _;
+    is_interactive = _;
   } =
     args
   in
@@ -688,10 +689,10 @@ let main_internal
       let exit_status =
         ClientCheckStatus.go
           status
-          args.output_json
-          args.from
           args.error_format
-          args.max_errors
+          ~output_json:args.output_json
+          ~max_errors:args.max_errors
+          ~is_interactive:args.is_interactive
       in
       let telemetry =
         telemetry
@@ -746,10 +747,10 @@ let main_internal
     let exit_status =
       ClientCheckStatus.go
         status
-        args.output_json
-        args.from
         args.error_format
-        args.max_errors
+        ~is_interactive:args.is_interactive
+        ~output_json:args.output_json
+        ~max_errors:args.max_errors
     in
     Lwt.return (exit_status, telemetry)
   | MODE_SEARCH query ->

@@ -103,6 +103,9 @@ type client_check_env = {
   allow_non_opt_build: bool;
       (** desc is a human-readable string description, to appear in "hh_server busy [desc]" *)
   desc: string;
+  is_interactive: bool;
+      (** Determined based on the --from option. Affects UI behaviour in a
+      number of places, e.g., error formatting and spinners. *)
 }
 
 let string_to_rename_mode = function

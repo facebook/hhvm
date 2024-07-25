@@ -1,7 +1,8 @@
 (library
  (name global_options)
  (wrapped false)
- (modules globalOptions)
+ (modules
+  globalOptions)
  (libraries
   collections
   custom_error_types

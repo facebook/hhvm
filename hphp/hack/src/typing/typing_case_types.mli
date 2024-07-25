@@ -39,7 +39,8 @@ val check_overlapping :
   Typing_error.Primary.CaseType.t option
 
 (**
-  Given the variants of a case type (encoded as a locl_ty) and another locl_ty [intersecting_ty]
+  [filter_variants_using_datatype env reason variants intersecting_ty]:
+  Given the [variants] of a case type and another locl_ty [intersecting_ty],
   produce a new locl_ty containing only the types in the variant that map to an intersecting
   data type. For example:
     Given
@@ -57,8 +58,9 @@ val filter_variants_using_datatype :
   env -> Typing_reason.t -> locl_ty list -> locl_ty -> env * locl_ty
 
 (**
-   Look up case type via [name]. If the case type exist returns the list of
-   variant types. If the case type doesn't exist, returns [None].
+   [get_variant_tys env name ty_args] looks up a case type by [name] in the decls.
+   If the case type exists, it returns the list of
+   variant types. If the case type doesn't exist, it returns [None].
 *)
 val get_variant_tys : env -> string -> locl_ty list -> env * locl_ty list option
 
@@ -78,7 +80,7 @@ module AtomicDataTypes : sig
 
   val of_ty : env -> atomic_ty -> t
 
-  val of_predicate : env -> type_predicate -> t
+  val of_predicate : env -> Typing_defs_core.type_predicate -> t
 
   (** Computes the complement for the set of values contained in [t] *)
   val complement : t -> t

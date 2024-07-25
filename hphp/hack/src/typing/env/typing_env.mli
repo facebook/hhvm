@@ -100,6 +100,7 @@ val get_type : env -> Reason.t -> Tvid.t -> env * locl_ty
 
 val expand_var : env -> Reason.t -> Tvid.t -> env * locl_ty
 
+(** If the provided type is a type variable, expand it. *)
 val expand_type : env -> locl_ty -> env * locl_ty
 
 val expand_internal_type : env -> internal_type -> env * internal_type

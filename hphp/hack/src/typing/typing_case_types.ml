@@ -16,7 +16,7 @@ module SN = Naming_special_names
 let strip_ns id =
   id |> Utils.strip_ns |> Hh_autoimport.strip_HH_namespace_if_autoimport
 
-(* Modelled after data types in HHVM. See hphp/runtime/base/datatype.h *)
+(** Modelled after data types in HHVM. See hphp/runtime/base/datatype.h *)
 module Tag = struct
   type ctx = env
 
@@ -122,11 +122,13 @@ module Tag = struct
   let all_tags = NullData :: all_nonnull_tags
 end
 
-(** Tracks the reason why a particular tag is assumed to be apart of the
+(** Tracks the reason why a particular tag is assumed to be a part of the
     data type of a type. Tracking is optional, depending on if an origin
     type is provided or not.
 *)
 module DataTypeReason = struct
+  (** More information about where a particular tag comes from.
+    For example, for tag DictData, subreasons might be Shapes or NoSubreason *)
   type subreason =
     | NoSubreason
     | Shapes
@@ -152,13 +154,15 @@ module DataTypeReason = struct
 
   type 'phase trail = {
     origin: 'phase ty;
+        (** Type used to derive the tag that this DataTypeReason.t is attached to. *)
     instances: (trail_kind * Reason.t) list;
     expansions: Type_expansions.t;
   }
 
   type 'phase t = subreason * 'phase trail
 
-  let append ~trail ~reason kind =
+  let append ~(trail : 'ph trail) ~(reason : Reason.t) (kind : trail_kind) :
+      ('ph trail, _) result =
     let (expansions, cycle) =
       match kind with
       | VariantOfCaseType name
@@ -251,8 +255,8 @@ module DataTypeReason = struct
 
   let make subreason trail : 'phase t = (subreason, trail)
 
-  let make_trail origin expansions : 'phase trail =
-    { origin; instances = []; expansions }
+  let make_trail origin : 'phase trail =
+    { origin; instances = []; expansions = Type_expansions.empty }
 end
 
 module DataType = struct
@@ -277,7 +281,17 @@ module DataType = struct
       Update [Tag.all_tags] if additional tags are added to [Tag.t] *)
   let mixed ~reason = Set.of_list ~reason Tag.all_tags
 
-  let cycle_handler ~f ~default ~env ~trail =
+  (** Check [trail] for a cycle. If [trail] is an [Error], then
+    a cycle has been detected and this will produce an error and return
+    the result of [default]. If not, it will just call [f env trail] *)
+  let cycle_handler
+      ~(env : env)
+      ~(f : env -> 'ph DataTypeReason.trail -> 'ph t)
+      ~(default : reason:'ph DataTypeReason.t -> 'ph t)
+      ~(trail :
+         ( 'ph DataTypeReason.trail,
+           Reason.t * 'ph DataTypeReason.trail * Pos.t option )
+         result) : _ t =
     let report_cycle_error reason = function
       | Some def_pos ->
         Typing_error_utils.add_typing_error
@@ -328,7 +342,7 @@ module DataType = struct
   let shape_to_datatypes ~trail : 'phase t =
     Set.singleton ~reason:DataTypeReason.(make Shapes trail) Tag.DictData
 
-  let label_to_datatypes ~trail : 'phase t =
+  let label_to_datatypes ~trail : _ t =
     Set.singleton ~reason:DataTypeReason.(make NoSubreason trail) Tag.LabelData
 
   module Class = struct
@@ -516,7 +530,6 @@ module DataType = struct
     | IsShapeOf _ -> Set.singleton ~reason DictData
 
   let rec fromTy ~trail (env : env) (ty : locl_ty) : 'phase t =
-    let open Tag in
     let (env, ty) = Env.expand_type env ty in
     let reason = DataTypeReason.(make NoSubreason trail) in
     let cycle_handler ty =
@@ -530,7 +543,9 @@ module DataType = struct
     | Toption ty ->
       Set.union
         (fromTy ~trail env ty)
-        (Set.singleton ~reason:DataTypeReason.(make Nullable trail) NullData)
+        (Set.singleton
+           ~reason:DataTypeReason.(make Nullable trail)
+           Tag.NullData)
     (* For now say it has the same tags as `nonnull`.
      * We should be able to be more precise, but need to
      * validate what are all the data types that are valid callables *)
@@ -545,9 +560,11 @@ module DataType = struct
       in
       let sets =
         List.map
-          ~f:(fun ty ->
-            let trail = DataTypeReason.generic ~trail (get_reason ty) name in
-            cycle_handler ~env ~trail ty)
+          ~f:(fun upper_bound_ty ->
+            let trail =
+              DataTypeReason.generic ~trail (get_reason upper_bound_ty) name
+            in
+            cycle_handler ~env ~trail upper_bound_ty)
           upper_bounds
       in
       let result_opt = List.reduce ~f:Set.inter sets in
@@ -559,7 +576,7 @@ module DataType = struct
       let sets = List.map ~f:(fun ty -> fromTy ~trail env ty) tyl in
       let result_opt = List.reduce ~f:Set.inter sets in
       Option.value_or_thunk result_opt ~default:(fun () -> mixed ~reason)
-    | Tvec_or_dict _ -> Set.of_list ~reason [VecData; DictData]
+    | Tvec_or_dict _ -> Set.of_list ~reason [Tag.VecData; Tag.DictData]
     | Taccess (root_ty, id) ->
       let ety_env = empty_expand_env in
       let ((env, _), ty) =
@@ -648,11 +665,11 @@ module DataType = struct
     let ((env, _), ty) =
       Typing_utils.localize_no_subst env ~ignore_errors:true decl_ty
     in
-    let trail = DataTypeReason.make_trail decl_ty Type_expansions.empty in
+    let trail = DataTypeReason.make_trail decl_ty in
     fromTy ~trail env ty
 
   let fromTy env ty =
-    let trail = DataTypeReason.make_trail ty Type_expansions.empty in
+    let trail = DataTypeReason.make_trail ty in
     fromTy ~trail env ty
 end
 
@@ -755,7 +772,7 @@ let filter_variants_using_datatype env reason variants intersecting_ty =
 (**
  * Look up case type via [name]. If the case type exist returns the list of
  * variant types. If the case type doesn't exist, returns [None].
-*)
+ *)
 let get_variant_tys env name ty_args :
     Typing_env_types.env * locl_ty list option =
   match Env.get_typedef env name with
@@ -795,10 +812,7 @@ module AtomicDataTypes = struct
     | Label
     | Class of string
 
-  let trail =
-    DataTypeReason.make_trail
-      (Typing_make_type.bool Reason.none)
-      Type_expansions.empty
+  let trail = DataTypeReason.make_trail (Typing_make_type.bool Reason.none)
 
   let function_ = DataType.fun_to_datatypes ~trail
 

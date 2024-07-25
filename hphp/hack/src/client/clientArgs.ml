@@ -128,7 +128,7 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
   let config = ref [] in
   let custom_telemetry_data = ref [] in
   let custom_hhi_path = ref None in
-  let error_format = ref Errors.Highlighted in
+  let error_format = ref None in
   let force_dormant_start = ref false in
   let from = ref from_default in
   let show_spinner = ref None in
@@ -294,11 +294,11 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
         Arg.String
           (fun s ->
             match s with
-            | "raw" -> error_format := Errors.Raw
-            | "plain" -> error_format := Errors.Plain
-            | "context" -> error_format := Errors.Context
-            | "highlighted" -> error_format := Errors.Highlighted
-            | "extended" -> error_format := Errors.Extended
+            | "raw" -> error_format := Some Errors.Raw
+            | "plain" -> error_format := Some Errors.Plain
+            | "context" -> error_format := Some Errors.Context
+            | "highlighted" -> error_format := Some Errors.Highlighted
+            | "extended" -> error_format := Some Errors.Extended
             | _ -> print_string "Warning: unrecognized error format.\n"),
         "<raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
       );

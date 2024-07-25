@@ -28,10 +28,11 @@ let get_save_state_result_json
     Hh_json.JSON_Object (get_save_state_result_props_json save_state_result) )
 
 let get_error_list_json
-    (error_format : Errors.format)
+    (error_format : Errors.format option)
     (error_list : Errors.finalized_error list)
     ~(save_state_result : SaveStateServiceTypes.save_state_result option)
     ~(recheck_stats : Telemetry.t option) =
+  let error_format = Errors.format_or_default error_format in
   (* for extended reasons, we produce a human-readable format. *)
   let human_formatter =
     Errors.(
@@ -78,7 +79,7 @@ let get_error_list_json
 
 let print_error_list_json
     (oc : Out_channel.t)
-    (error_format : Errors.format)
+    (error_format : Errors.format option)
     (error_list : Errors.finalized_error list)
     (save_state_result : SaveStateServiceTypes.save_state_result option)
     (recheck_stats : Telemetry.t option) =
@@ -96,7 +97,7 @@ let print_error_list
     (oc : Out_channel.t)
     ~(stale_msg : string option)
     ~(output_json : bool)
-    ~(error_format : Errors.format)
+    ~(error_format : Errors.format option)
     ~(error_list : Errors.finalized_error list)
     ~(save_state_result : SaveStateServiceTypes.save_state_result option)
     ~(recheck_stats : Telemetry.t option) =

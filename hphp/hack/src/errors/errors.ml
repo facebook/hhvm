@@ -491,6 +491,10 @@ let combining_sort (xs : 'a list) ~(f : 'a -> string) : _ list =
   let (grouped, keys) = build_map xs String.Map.empty [] in
   List.concat_map (List.rev keys) ~f:(fun fn -> Map.find_exn grouped fn)
 
+let format_or_default = function
+  | Some error_format -> error_format
+  | None -> Highlighted
+
 (* E.g. "10 errors found." *)
 let format_summary format ~displayed_count ~dropped_count ~max_errors :
     string option =

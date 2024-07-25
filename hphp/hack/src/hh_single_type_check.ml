@@ -76,7 +76,7 @@ type options = {
   files: string list;
   extra_builtins: string list;
   mode: mode;
-  error_format: Errors.format;
+  error_format: Errors.format option;
   no_builtins: bool;
   max_errors: int option;
   tcopt: GlobalOptions.t;
@@ -226,7 +226,7 @@ let parse_options () =
     | _ -> raise (Arg.Bad "only a single mode should be specified")
   in
   let config_overrides = ref [] in
-  let error_format = ref Errors.Highlighted in
+  let error_format = ref None in
   let forbid_nullable_cast = ref false in
   let deregister_attributes = ref None in
   let auto_namespace_map = ref None in
@@ -374,11 +374,11 @@ let parse_options () =
         Arg.String
           (fun s ->
             match s with
-            | "raw" -> error_format := Errors.Raw
-            | "context" -> error_format := Errors.Context
-            | "highlighted" -> error_format := Errors.Highlighted
-            | "plain" -> error_format := Errors.Plain
-            | "extended" -> error_format := Errors.Extended
+            | "raw" -> error_format := Some Errors.Raw
+            | "context" -> error_format := Some Errors.Context
+            | "highlighted" -> error_format := Some Errors.Highlighted
+            | "plain" -> error_format := Some Errors.Plain
+            | "extended" -> error_format := Some Errors.Extended
             | _ -> print_string "Warning: unrecognized error format.\n"),
         "<raw|context|highlighted|plain|flow> Error formatting style; (default: highlighted)"
       );
@@ -2546,6 +2546,7 @@ let decl_and_run_mode
     parse_name_and_decl ctx to_decl
   in
   let errors = Errors.merge package_config_errors naming_and_parsing_errors in
+  let error_format = Errors.format_or_default error_format in
   handle_mode
     mode
     files

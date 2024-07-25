@@ -76,7 +76,7 @@ type client_check_env = {
   config: (string * string) list;
   custom_hhi_path: string option;
   custom_telemetry_data: (string * string) list;
-  error_format: Errors.format;
+  error_format: Errors.format option;
   force_dormant_start: bool;
   from: string;
   show_spinner: bool;

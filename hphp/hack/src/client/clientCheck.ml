@@ -776,7 +776,8 @@ let main_internal
         let%lwt (results, telemetry) =
           rpc args @@ ServerCommandTypes.LINT fnl
         in
-        ClientLint.go results args.output_json args.error_format;
+        let error_format = Errors.format_or_default args.error_format in
+        ClientLint.go results args.output_json error_format;
         Lwt.return (Exit_status.No_error, telemetry)
     end
   | MODE_SERVER_RAGE ->
@@ -805,14 +806,16 @@ let main_internal
         @@ ServerCommandTypes.LINT_STDIN
              { ServerCommandTypes.filename; contents }
       in
-      ClientLint.go results args.output_json args.error_format;
+      let error_format = Errors.format_or_default args.error_format in
+      ClientLint.go results args.output_json error_format;
       Lwt.return (Exit_status.No_error, telemetry)
   end
   | MODE_LINT_ALL code ->
     let%lwt (results, telemetry) =
       rpc args @@ ServerCommandTypes.LINT_ALL code
     in
-    ClientLint.go results args.output_json args.error_format;
+    let error_format = Errors.format_or_default args.error_format in
+    ClientLint.go results args.output_json error_format;
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_STATS ->
     let%lwt (stats, telemetry) = rpc args @@ ServerCommandTypes.STATS in

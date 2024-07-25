@@ -87,6 +87,10 @@ val combining_sort : 'a list -> f:('a -> string) -> 'a list
 
 val to_string : finalized_error -> string
 
+(** Takes an error format option and gives back the error format that was passed
+or the default formatter. *)
+val format_or_default : format option -> format
+
 (** Prints a summary indicating things like how many errors were
   found, how many are displayed and how many were dropped. *)
 val format_summary :

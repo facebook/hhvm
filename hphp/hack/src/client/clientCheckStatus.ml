@@ -56,6 +56,7 @@ let go status error_format ~is_interactive ~output_json ~max_errors =
       ~save_state_result:None
       ~recheck_stats:last_recheck_stats
   else begin
+    let error_format = Errors.format_or_default error_format in
     List.iter error_list ~f:(print_error ~error_format);
     Option.iter
       (Errors.format_summary
@@ -155,6 +156,7 @@ let go_streaming_on_fd
       (* We'll clear the spinner, print errs to stdout, flush stdout, and restore the spinner *)
       progress_callback None;
       let found_new = ref 0 in
+      let error_format = Errors.format_or_default error_format in
       begin
         try
           Relative_path.Map.iter errors ~f:(fun _path errors_in_file ->
@@ -196,6 +198,7 @@ let go_streaming_on_fd
     match end_sentinel with
     | Server_progress.Complete telemetry ->
       (* complete either because the server completed, or we truncated early *)
+      let error_format = Errors.format_or_default error_format in
       Option.iter
         (Errors.format_summary
            error_format

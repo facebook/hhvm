@@ -243,21 +243,6 @@ external set_allow_removes : bool -> unit = "hh_set_allow_removes"
 external set_allow_hashtable_writes_by_current_process : bool -> unit
   = "hh_set_allow_hashtable_writes_by_current_process"
 
-module RawAccess = struct
-  (* Allocated in C only. *)
-  type serialized = private bytes
-
-  external mem_raw : string -> bool = "hh_mem"
-
-  external get_raw : string -> serialized option = "hh_get_raw"
-
-  external add_raw : string -> serialized -> unit = "hh_add_raw"
-
-  external deserialize_raw : serialized -> 'a = "hh_deserialize_raw"
-
-  external serialize_raw : 'a -> serialized = "hh_serialize_raw"
-end
-
 module SMTelemetry = struct
   (*****************************************************************************)
   (* Each cache can write telemetry about its current occupancy.

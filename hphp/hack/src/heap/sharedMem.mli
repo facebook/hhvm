@@ -94,23 +94,6 @@ val set_allow_removes : bool -> unit
 (** Allow or disallow shared memory writes for the current process. *)
 val set_allow_hashtable_writes_by_current_process : bool -> unit
 
-(** Directly access the shared memory table.
-
-    This can be used to provide proxying across the network *)
-module RawAccess : sig
-  type serialized = private bytes
-
-  val mem_raw : string -> bool
-
-  val get_raw : string -> serialized option
-
-  val add_raw : string -> serialized -> unit
-
-  val deserialize_raw : serialized -> 'a
-
-  val serialize_raw : 'a -> serialized
-end
-
 (** Some telemetry utilities *)
 module SMTelemetry : sig
   (** Get some shared-memory telemetry. Even works when shared memory hasn't

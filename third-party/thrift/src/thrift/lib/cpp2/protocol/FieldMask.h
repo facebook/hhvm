@@ -234,6 +234,9 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   void copy(const Struct& src, Struct& dst) const {
     protocol::copy(data_, src, dst);
   }
+  Struct filter(const Struct& src) const {
+    return protocol::filter(data_, src);
+  }
 };
 
 template <typename Struct>

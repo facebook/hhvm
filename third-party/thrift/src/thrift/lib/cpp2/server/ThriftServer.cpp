@@ -171,7 +171,7 @@ folly::Synchronized<std::vector<ThriftServer::IOObserverFactory>>
     ioObserverFactories{};
 
 /**
- * Multiplexes the user-service (set via setProcessorFactory) with the
+ * Multiplexes the user-service (set via setInterface) with the
  * monitoring interface (set via setMonitoringInterface).
  */
 std::unique_ptr<AsyncProcessorFactory> createDecoratedProcessorFactory(

@@ -6,7 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/backend/openssl/OpenSSLFactory.h>
+#include <fizz/protocol/MultiBackendFactory.h>
 
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
@@ -24,9 +24,8 @@
 #endif
 
 namespace fizz {
-namespace openssl {
 
-std::unique_ptr<KeyExchange> OpenSSLFactory::makeKeyExchange(
+std::unique_ptr<KeyExchange> MultiBackendFactory::makeKeyExchange(
     NamedGroup group,
     KeyExchangeMode mode) const {
   (void)mode;
@@ -70,16 +69,16 @@ std::unique_ptr<KeyExchange> OpenSSLFactory::makeKeyExchange(
   }
 }
 
-std::unique_ptr<Aead> OpenSSLFactory::makeAead(CipherSuite cipher) const {
+std::unique_ptr<Aead> MultiBackendFactory::makeAead(CipherSuite cipher) const {
   switch (cipher) {
     case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
-      return OpenSSLEVPCipher::makeCipher<fizz::ChaCha20Poly1305>();
+      return openssl::OpenSSLEVPCipher::makeCipher<fizz::ChaCha20Poly1305>();
     case CipherSuite::TLS_AES_128_GCM_SHA256:
-      return OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
+      return openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
     case CipherSuite::TLS_AES_256_GCM_SHA384:
-      return OpenSSLEVPCipher::makeCipher<fizz::AESGCM256>();
+      return openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM256>();
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
-      return OpenSSLEVPCipher::makeCipher<fizz::AESOCB128>();
+      return openssl::OpenSSLEVPCipher::makeCipher<fizz::AESOCB128>();
 #if FIZZ_BUILD_AEGIS
     case CipherSuite::TLS_AEGIS_256_SHA512:
       return AEGIS::make256();
@@ -98,14 +97,14 @@ inline std::unique_ptr<KeyDerivation> makeKeyDerivationPtr(
   return std::unique_ptr<KeyDerivationImpl>(new KeyDerivationImpl(
       labelPrefix,
       Hash::HashLen,
-      &Hasher<Hash>::hash,
-      &Hasher<Hash>::hmac,
-      HkdfImpl(Hash::HashLen, &Hasher<Hash>::hmac),
+      &openssl::Hasher<Hash>::hash,
+      &openssl::Hasher<Hash>::hmac,
+      HkdfImpl(Hash::HashLen, &openssl::Hasher<Hash>::hmac),
       Hash::BlankHash));
 }
 } // namespace detail
 
-std::unique_ptr<KeyDerivation> OpenSSLFactory::makeKeyDeriver(
+std::unique_ptr<KeyDerivation> MultiBackendFactory::makeKeyDeriver(
     CipherSuite cipher) const {
   switch (cipher) {
     case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
@@ -122,7 +121,7 @@ std::unique_ptr<KeyDerivation> OpenSSLFactory::makeKeyDeriver(
   }
 }
 
-std::unique_ptr<HandshakeContext> OpenSSLFactory::makeHandshakeContext(
+std::unique_ptr<HandshakeContext> MultiBackendFactory::makeHandshakeContext(
     CipherSuite cipher) const {
   switch (cipher) {
     case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
@@ -140,11 +139,10 @@ std::unique_ptr<HandshakeContext> OpenSSLFactory::makeHandshakeContext(
   }
 }
 
-std::unique_ptr<PeerCert> OpenSSLFactory::makePeerCert(
+std::unique_ptr<PeerCert> MultiBackendFactory::makePeerCert(
     CertificateEntry certEntry,
     bool /*leaf*/) const {
-  return CertUtils::makePeerCert(std::move(certEntry.cert_data));
+  return openssl::CertUtils::makePeerCert(std::move(certEntry.cert_data));
 }
 
-} // namespace openssl
 } // namespace fizz

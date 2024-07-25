@@ -23,9 +23,12 @@
 
 namespace fizz {
 class PeerCert;
-namespace openssl {
 
-class OpenSSLFactory : public Factory {
+/**
+ * A fizz::Factory implementation composed of primitives from
+ * multiple backends.
+ */
+class MultiBackendFactory : public Factory {
  public:
   [[nodiscard]] std::unique_ptr<KeyExchange> makeKeyExchange(
       NamedGroup group,
@@ -44,5 +47,4 @@ class OpenSSLFactory : public Factory {
       CertificateEntry certEntry,
       bool /*leaf*/) const override;
 };
-} // namespace openssl
 } // namespace fizz

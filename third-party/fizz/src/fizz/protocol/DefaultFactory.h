@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <fizz/backend/openssl/OpenSSLFactory.h>
+#include <fizz/protocol/MultiBackendFactory.h>
 
 namespace fizz {
 
@@ -19,6 +19,6 @@ namespace fizz {
  * Factory instance that can be used by various internal components of Fizz
  * to get the "default compile time configured" Factory.
  */
-using DefaultFactory = ::fizz::openssl::OpenSSLFactory;
+using DefaultFactory = ::fizz::MultiBackendFactory;
 
 } // namespace fizz

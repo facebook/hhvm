@@ -6,18 +6,19 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/backend/openssl/OpenSSLFactory.h>
+#include <fizz/protocol/MultiBackendFactory.h>
 #include <fizz/test/HandshakeTest.h>
 
 namespace fizz {
 namespace test {
 
-class OpenSSLFactoryHandshakeTest : public HandshakeTest,
-                                    public WithParamInterface<NamedGroup> {};
+class MultiBackendFactoryHandshakeTest : public HandshakeTest,
+                                         public WithParamInterface<NamedGroup> {
+};
 
-TEST_P(OpenSSLFactoryHandshakeTest, openssl_factory_handshake_test) {
+TEST_P(MultiBackendFactoryHandshakeTest, multibackendfactory_handshake_test) {
   auto namedGroup = GetParam();
-  auto factory = std::make_shared<openssl::OpenSSLFactory>();
+  auto factory = std::make_shared<MultiBackendFactory>();
   clientContext_->setFactory(factory);
   serverContext_->setFactory(factory);
   clientContext_->setSupportedGroups({namedGroup});
@@ -32,8 +33,8 @@ TEST_P(OpenSSLFactoryHandshakeTest, openssl_factory_handshake_test) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    OpenSSLFactoryHandshakeTests,
-    OpenSSLFactoryHandshakeTest,
+    MultiBackendFactoryHandshakeTests,
+    MultiBackendFactoryHandshakeTest,
     Values(
         NamedGroup::secp256r1,
         NamedGroup::secp384r1,
@@ -51,8 +52,10 @@ INSTANTIATE_TEST_SUITE_P(
         NamedGroup::secp384r1_kyber768
 #endif
         ),
-    [](const testing::TestParamInfo<OpenSSLFactoryHandshakeTest::ParamType>&
-           info) { return toString(info.param); });
+    [](const testing::TestParamInfo<
+        MultiBackendFactoryHandshakeTest::ParamType>& info) {
+      return toString(info.param);
+    });
 
 } // namespace test
 } // namespace fizz

@@ -46,7 +46,11 @@ let go status error_format ~is_interactive ~output_json ~max_errors =
     status
   in
   let stale_msg = is_stale_msg liveness in
-  if output_json || (not is_interactive) || List.is_empty error_list then
+  if
+    output_json
+    || (Option.is_none error_format && not is_interactive)
+    || List.is_empty error_list
+  then
     ServerError.print_error_list
       stdout
       ~stale_msg

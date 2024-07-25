@@ -318,14 +318,14 @@ struct IntTag {};
 //    template<
 //      class A0 = IntTag<0>,
 //      class A1 = IntTag<1>,
-//      ...,
+//      ...
 //      class AN = IntTag<N>>
 //    struct MultiWayLookup {
-//      template <class> static const int value = 0;
-//      template <> static const int value<A0> = 0 + 1;
-//      template <> static const int value<A1> = 1 + 1;
-//      ...;
-//      template <> static const int value<AN> = N + 1;
+//      template <class> struct value : std::integral_constant<int, 0> {};
+//      template <> struct value<A0> : std::integral_constant<int, 0 + 1> {};
+//      template <> struct value<A1> : std::integral_constant<int, 1 + 1> {};
+//      ...
+//      template <> struct value<AN> : std::integral_constant<int, N + 1> {};
 //    }
 //
 // So that MultiWayLookup<Args...>::value<T> returns Ordinal of T in [Args...]
@@ -333,11 +333,11 @@ struct IntTag {};
 template <BOOST_PP_REPEAT(FBTHRIFT_LOOKUP_SIZE, FBTHRIFT_PARAMS_WITH_DEFAULT, )>
 struct MultiWayLookup {
   template <class>
-  static const int value = 0;
+  struct value : std::integral_constant<int, 0> {};
 
 #define FBTHRIFT_DEFINE_VALUE_SPECIALIZATION(Z, NUM, TEXT) \
   template <>                                              \
-  static const int value<A##NUM> = NUM + 1;
+  struct value<A##NUM> : std::integral_constant<int, NUM + 1> {};
 
   BOOST_PP_REPEAT(FBTHRIFT_LOOKUP_SIZE, FBTHRIFT_DEFINE_VALUE_SPECIALIZATION, )
 
@@ -385,13 +385,15 @@ struct FoundOrdinalOrCheckTheRest<0, Args...>
 // If size of (Args...) < FBTHRIFT_LOOKUP_SIZE: just do a multiway lookup
 template <class T, class... Args>
 struct FindOrdinalInUniqueTypesImpl
-    : field_ordinal<MultiWayLookup<Args...>::template value<T>> {};
+    : field_ordinal<static_cast<int>(
+          typename MultiWayLookup<Args...>::template value<T>())> {};
 
 // If size of (Args...) > FBTHRIFT_LOOKUP_SIZE: used batched multiway lookup
 template <class T, FBTHRIFT_PARAMS_WITH_CLASS, class... Args>
 struct FindOrdinalInUniqueTypesImpl<T, FBTHRIFT_PARAMS, Args...>
     : FoundOrdinalOrCheckTheRest<
-          MultiWayLookup<FBTHRIFT_PARAMS>::template value<T>,
+          static_cast<int>(
+              typename MultiWayLookup<FBTHRIFT_PARAMS>::template value<T>()),
           T,
           Args...> {};
 

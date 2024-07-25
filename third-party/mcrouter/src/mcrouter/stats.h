@@ -77,6 +77,7 @@ enum stat_group_t {
   suspect_server_stats = 0x40000,
   external_stats = 0x80000,
   unknown_stats = 0x10000000,
+  visitor_stats = 0x20000000,
 };
 
 /** defines a statistic: name, type, and data */

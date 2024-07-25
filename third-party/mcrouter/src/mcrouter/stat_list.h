@@ -414,3 +414,7 @@ EXTERNAL_STAT(prefix_acl_concurrent_refresh_fail)
 EXTERNAL_STAT(prefix_acl_refresh_success)
 EXTERNAL_STAT(prefix_acl_refresh_timeout)
 EXTERNAL_STAT(prefix_acl_refresh_error)
+
+#define GROUP visitor_stats
+STUI(rim_report_failed, 0, 1)
+#undef GROUP

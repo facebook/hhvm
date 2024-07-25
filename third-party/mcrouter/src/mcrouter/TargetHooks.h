@@ -16,6 +16,13 @@ namespace memcache {
 namespace mcrouter {
 
 /**
+ * If linked, initializes and reports utilization to RIM.
+ */
+FOLLY_ATTR_WEAK bool gRIMReport(
+    const std::vector<std::string>& tenancyHierarchyPath,
+    const std::unordered_map<std::string, uint64_t>& resourceUsageMap);
+
+/**
  * SR factory init hook
  */
 FOLLY_ATTR_WEAK std::shared_ptr<void> gSRInitHook(

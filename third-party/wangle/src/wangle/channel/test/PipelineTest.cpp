@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <barrier>
+#include <boost/thread/barrier.hpp>
 
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
@@ -373,10 +373,10 @@ TEST(Pipeline, Concurrent) {
   NiceMock<MockHandlerAdapter<int, int>> handler1, handler2;
   auto pipeline = Pipeline<int, int>::create();
   (*pipeline).addBack(&handler1).addBack(&handler2).finalize();
-  std::barrier b{2};
+  boost::barrier b{2};
   auto spam = [&] {
     for (int i = 0; i < 100000; i++) {
-      b.arrive_and_wait();
+      b.count_down_and_wait();
       pipeline->read(i);
     }
   };

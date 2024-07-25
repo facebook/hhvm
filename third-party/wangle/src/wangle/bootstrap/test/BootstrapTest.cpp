@@ -22,6 +22,7 @@
 
 #include <folly/experimental/TestUtil.h>
 #include <folly/portability/GTest.h>
+#include <folly/synchronization/Latch.h>
 #include <glog/logging.h>
 
 using namespace wangle;
@@ -167,7 +168,7 @@ TEST(Bootstrap, ServerAcceptGroupTest) {
   SocketAddress address;
   server.getSockets()[0]->getAddress(&address);
 
-  std::latch barrier(2);
+  folly::Latch barrier(2);
   auto thread = std::thread([&]() {
     TestClient client;
     client.pipelineFactory(std::make_shared<TestClientPipelineFactory>());

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <latch>
+#include <folly/synchronization/Latch.h>
 
 #include "Mocks.h"
 
@@ -182,7 +182,7 @@ TEST_F(AcceptRoutingHandlerTest, ParseRoutingDataSuccess) {
           }));
 
   // Downstream pipeline is created, and its handler receives events
-  std::latch barrier(2);
+  folly::Latch barrier(2);
   EXPECT_CALL(*downstreamHandler_, transportActive(_));
   EXPECT_CALL(*downstreamHandler_, read(_, _))
       .WillOnce(Invoke([&](MockBytesToBytesHandler::Context* /*ctx*/,
@@ -208,7 +208,7 @@ TEST_F(AcceptRoutingHandlerTest, ParseRoutingDataSuccess) {
 
 TEST_F(AcceptRoutingHandlerTest, SocketErrorInRoutingPipeline) {
   // Server receives data, and parses routing data
-  std::latch barrierConnect(2);
+  folly::Latch barrierConnect(2);
   EXPECT_CALL(*routingDataHandler_, transportActive(_));
   EXPECT_CALL(*routingDataHandler_, parseRoutingData(_, _))
       .WillOnce(
@@ -224,7 +224,7 @@ TEST_F(AcceptRoutingHandlerTest, SocketErrorInRoutingPipeline) {
 
   // Socket exception after routing pipeline had been created
   barrierConnect.arrive_and_wait();
-  std::latch barrierException(2);
+  folly::Latch barrierException(2);
   std::move(futureClientPipeline)
       .thenValue([](DefaultPipeline* clientPipeline) {
         clientPipeline->getTransport()->getEventBase()->runInEventBaseThread(
@@ -259,7 +259,7 @@ TEST_F(AcceptRoutingHandlerTest, OnNewConnectionWithBadSocket) {
   delete downstreamHandler_;
 
   // Send client request that triggers server processing
-  std::latch barrierConnect(2);
+  folly::Latch barrierConnect(2);
   EXPECT_CALL(*routingDataHandler_, transportActive(_))
       .WillOnce(Invoke([&](MockBytesToBytesHandler::Context* /*ctx*/) {
         barrierConnect.arrive_and_wait();
@@ -269,7 +269,7 @@ TEST_F(AcceptRoutingHandlerTest, OnNewConnectionWithBadSocket) {
   futureClientPipeline.wait();
 
   // Expect an exception on the routing data handler
-  std::latch barrierException(2);
+  folly::Latch barrierException(2);
   EXPECT_CALL(*routingDataHandler_, readException(_, _))
       .WillOnce(Invoke([&](MockBytesToBytesHandler::Context* /*ctx*/,
                            folly::exception_wrapper /*ex*/) {

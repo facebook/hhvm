@@ -17,8 +17,9 @@ mock_mc_server_CPPFLAGS = -I$(top_srcdir)/..
 mock_mc_server_LDADD = \
 	$(top_builddir)/lib/libmcrouter.a \
 	-lthriftcpp2 \
+	-lserverdbginfo \
 	-ltransport \
-  -lthriftanyrep \
+	-lthriftanyrep \
 	-lthrifttype \
 	-lthrifttyperep \
 	-lthriftprotocol \
@@ -26,6 +27,7 @@ mock_mc_server_LDADD = \
 	-lthriftmetadata \
 	-lasync \
 	-lconcurrency \
+	-lruntime \
 	-lthrift-core \
 	-lfmt \
 	-lfizz \

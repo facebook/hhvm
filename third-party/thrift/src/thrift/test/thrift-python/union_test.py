@@ -59,14 +59,23 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         # Attempts to initialize an instance with a keyword argument whose name does
         # not match that of a field should raise an error.
         with self.assertRaisesRegex(
-            TypeError, "got an unexpected keyword argument 'field_does_not_exist'"
+            TypeError,
+            (
+                r"Cannot initialize Thrift union \(TestUnion\): unknown field "
+                r"\(field_does_not_exist\)."
+            ),
         ):
             TestUnionImmutable(field_does_not_exist=123)
 
         # Attempts to initialize an instance with more than one (valid, non-None)
         # keyword arguments raise an Error.
         with self.assertRaisesRegex(
-            TypeError, "union may only take one keyword argument"
+            TypeError,
+            (
+                r"Cannot initialize Thrift union \(TestUnion\) with more than one "
+                r"keyword argument \(got non-None value for int_field, but already "
+                r"had one for string_field\)."
+            ),
         ):
             TestUnionImmutable(string_field="hello", int_field=42)
 
@@ -76,26 +85,17 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         ):
             TestUnionImmutable(int_field="hello!")
 
-        # DO_BEFORE(aristidis,20240731): Fix the case below: we should never use an
-        # unbound local variables.
-        with self.assertRaisesRegex(
-            UnboundLocalError,
-            "local variable 'field_enum' referenced before assignment",
-        ):
-            TestUnionImmutable(int_field=None)
+        self.assertEqual(TestUnionImmutable(int_field=None), TestUnionImmutable())
+        self.assertEqual(
+            TestUnionImmutable(string_field=None, int_field=None), TestUnionImmutable()
+        )
 
-        # DO_BEFORE(aristidis,20240730): Determine if this should indeed throw, and if
-        # so improve message to be more relevant.
         with self.assertRaisesRegex(
-            TypeError, "union may only take one keyword argument"
-        ):
-            TestUnionImmutable(string_field=None, int_field=None)
-
-        # DO_BEFORE(aristidis,20240731): Fix the case below: we should never use an
-        # unbound local variables.
-        with self.assertRaisesRegex(
-            UnboundLocalError,
-            "local variable 'field_enum' referenced before assignment",
+            TypeError,
+            (
+                r"Cannot initialize Thrift union \(TestUnion\): unknown field "
+                r"\(field_does_not_exist\)."
+            ),
         ):
             TestUnionImmutable(field_does_not_exist=None)
 
@@ -106,15 +106,24 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
             TestUnionImmutable(int_field=42),
         )
 
-        self.assertEqual(
-            TestUnionImmutable(string_field="hello", field_does_not_exist=None),
-            TestUnionImmutable(string_field="hello"),
-        )
+        with self.assertRaisesRegex(
+            TypeError,
+            (
+                r"Cannot initialize Thrift union \(TestUnion\) with more than one "
+                r"keyword argument \(got non-None value for field_does_not_exist, "
+                r"but already had one for string_field\)."
+            ),
+        ):
+            TestUnionImmutable(string_field="hello", field_does_not_exist=None)
 
-        self.assertEqual(
-            TestUnionImmutable(field_does_not_exist=None, string_field="hello"),
-            TestUnionImmutable(string_field="hello"),
-        )
+        with self.assertRaisesRegex(
+            TypeError,
+            (
+                r"Cannot initialize Thrift union \(TestUnion\): unknown field "
+                r"\(field_does_not_exist\)."
+            ),
+        ):
+            TestUnionImmutable(field_does_not_exist=None, string_field="hello")
 
     def test_class_field_enum(self) -> None:
         # The "Type" class attribute is an enumeration type

@@ -1210,6 +1210,59 @@ def _unpickle_union(klass, bytes data):
     (<Union>inst)._deserialize(iobuf, Protocol.COMPACT)
     return inst
 
+cdef tuple _validate_union_init_kwargs(
+    object union_class, object fields_enum_type, dict kwargs
+):
+    """
+    Validates the given Thrift union initialization keyword arguments and returns the
+    data needed to set the corresponding field (if any).
+
+    Returns: tuple[field_enum, field_value], where:
+        `field_enum` corresponds to the field being initialized, and must be one of the
+        values in the `field_enum_type` enumeration type. If no field is
+        being initialized (i.e., the Thrift union is empty), the member of that
+        enumeration type with value 0, corresponding to an "empty union", is returned.
+
+        `field_value` holds the value specified for the corresponding field, in "python
+        value" format (as opposed to "internal data", see `TypeInfoBase`). If no field
+        is specified (see `field_enum` above), then this value is `None`.
+
+    Raises: TypeError if the given keyword arguments are invalid.
+    """
+
+    current_field_enum = None
+    current_field_value = None
+
+    for field_name, field_value in kwargs.items():
+        if current_field_enum is not None:
+            raise TypeError(
+                f"Cannot initialize Thrift union ({union_class.__name__}) with more "
+                f"than one keyword argument (got non-None value for {field_name}, but "
+                f"already had one for {current_field_enum.name})."
+            )
+
+        # Check that the field name is valid, regardless of whether it has a value.
+        try:
+            field_enum = fields_enum_type[field_name]
+        except KeyError as e:
+            raise TypeError(
+                f"Cannot initialize Thrift union ({union_class.__name__}): unknown "
+                f"field ({field_name})."
+            ) from e
+        else:
+            if field_value is None:
+                continue
+
+            current_field_enum = field_enum
+            current_field_value = field_value
+
+    if current_field_enum is None:
+        assert current_field_value is None
+        return (fields_enum_type(0), None)
+    else:
+        assert current_field_value is not None
+        return (current_field_enum, current_field_value)
+
 cdef class Union(StructOrUnion):
     """
     Base class for all generated (immutable) thrift-python unions.
@@ -1232,28 +1285,20 @@ cdef class Union(StructOrUnion):
         self._fbthrift_data = createUnionTuple()
 
     def __init__(self, **kwargs):
-        if not kwargs:
+        self_type = type(self)
+        field_enum, field_python_value = _validate_union_init_kwargs(
+            self_type, self_type.Type, kwargs
+        )
+        cdef int field_id = field_enum.value
+
+        # If no field is specified, exit early.
+        if field_id == 0:
             self._fbthrift_update_current_field_attributes()
             return
-        # recommend calling with 1 kwarg.
-        # ok to call with one not None kwarg and extra None kwargs.
-        if len(kwargs) != 1 and sum(val is not None for val in kwargs.values()) != 1:
-            raise TypeError("__init__() of a union may only take one keyword argument")
 
-        fields_enum_type = type(self).Type
-        for name, value in kwargs.items():
-            if value is None:
-                continue
-            try:
-                field_enum = fields_enum_type[name]
-            except KeyError:
-                raise TypeError(
-                    f"__init__() got an unexpected keyword argument '{name}'"
-                )
-            break
         self._fbthrift_set_union_value(
-            field_enum.value,
-            self._fbthrift_to_internal_data(field_enum.value, value),
+            field_id,
+            self._fbthrift_to_internal_data(field_id, field_python_value),
         )
 
     @classmethod

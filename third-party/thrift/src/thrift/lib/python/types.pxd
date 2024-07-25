@@ -216,6 +216,10 @@ cdef class Struct(StructOrUnion):
     cdef _fbthrift_fully_populate_cache(Struct self)
     cdef _initStructTupleWithValues(Struct self, object kwargs) except *
 
+cdef tuple _validate_union_init_kwargs(
+    object union_class, object fields_enum_type, dict kwargs
+)
+
 cdef class Union(StructOrUnion):
     cdef readonly object type
     cdef readonly object value

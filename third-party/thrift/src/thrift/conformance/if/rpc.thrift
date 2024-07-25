@@ -592,4 +592,33 @@ service RPCStatelessConformanceService {
   ) throws (1: UserException e);
   void requestResponseUndeclaredException(1: ServerInstruction serverInstr);
   void requestResponseNoArgVoidResponse();
+
+  // =================== Stream ===================
+  stream<Response> streamBasic(1: ServerInstruction serverInstr);
+  Response, stream<Response> streamInitialResponse(
+    1: ServerInstruction serverInstr,
+  );
+  stream<Response throws (1: UserException e)> streamDeclaredException(
+    1: ServerInstruction serverInstr,
+  );
+  stream<Response> streamUndeclaredException(1: ServerInstruction serverInstr);
+  stream<Response> streamInitialDeclaredException(
+    1: ServerInstruction serverInstr,
+  ) throws (1: UserException e);
+  stream<Response> streamInitialUndeclaredException(
+    1: ServerInstruction serverInstr,
+  );
+
+  // =================== Sink ===================
+  sink<Request, Response> sinkBasic(1: ServerInstruction serverInstr);
+  sink<Request, Response> sinkChunkTimeout(1: ServerInstruction serverInstr);
+  Response, sink<Request, Response> sinkInitialResponse(
+    1: ServerInstruction serverInstr,
+  );
+  sink<Request throws (1: UserException e), Response> sinkDeclaredException(
+    1: ServerInstruction serverInstr,
+  );
+  sink<Request, Response> sinkUndeclaredException(
+    1: ServerInstruction serverInstr,
+  );
 }

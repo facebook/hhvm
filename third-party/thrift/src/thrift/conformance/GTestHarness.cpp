@@ -623,6 +623,80 @@ testing::AssertionResult runStatelessRpcTest(
         result.requestResponseNoArgVoidResponse_ref() =
             runRequestResponseNoArgVoidResponse(client);
         break;
+      case ClientInstruction::Type::streamBasic: {
+        auto instruction = *clientInstruction.streamBasic_ref();
+        result.streamBasic_ref() =
+            runStreamBasic(client, instruction, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::streamInitialResponse: {
+        auto instruction = *clientInstruction.streamInitialResponse_ref();
+        result.streamInitialResponse_ref() =
+            runStreamInitialResponse(client, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::streamDeclaredException: {
+        auto instruction = *clientInstruction.streamDeclaredException_ref();
+        result.streamDeclaredException_ref() =
+            runStreamDeclaredException(client, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::streamUndeclaredException: {
+        auto instruction = *clientInstruction.streamUndeclaredException_ref();
+        result.streamUndeclaredException_ref() =
+            runStreamUndeclaredException(client, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::streamInitialDeclaredException: {
+        auto instruction =
+            *clientInstruction.streamInitialDeclaredException_ref();
+        result.streamInitialDeclaredException_ref() =
+            runStreamInitialDeclaredException(client, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::streamInitialUndeclaredException: {
+        auto instruction =
+            *clientInstruction.streamInitialUndeclaredException_ref();
+        result.streamInitialUndeclaredException_ref() =
+            runStreamInitialUndeclaredException(client, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::sinkBasic: {
+        auto instruction = *clientInstruction.sinkBasic_ref();
+        result.sinkBasic_ref() =
+            runSinkBasic(client, instruction, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::sinkChunkTimeout: {
+        auto instruction = *clientInstruction.sinkChunkTimeout_ref();
+        result.sinkChunkTimeout_ref() =
+            runSinkChunkTimeout(client, instruction, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::sinkInitialResponse: {
+        auto instruction = *clientInstruction.sinkInitialResponse_ref();
+        result.sinkInitialResponse_ref() =
+            runSinkInitialResponse(client, instruction, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::sinkDeclaredException: {
+        auto instruction = *clientInstruction.sinkDeclaredException_ref();
+        result.sinkDeclaredException_ref() =
+            runSinkDeclaredException(client, instruction, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::sinkUndeclaredException: {
+        auto instruction = *clientInstruction.sinkUndeclaredException_ref();
+        result.sinkUndeclaredException_ref() =
+            runSinkUndeclaredException(client, instruction, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::interactionConstructor:
+      case ClientInstruction::Type::interactionFactoryFunction:
+      case ClientInstruction::Type::interactionPersistsState:
+      case ClientInstruction::Type::interactionTermination:
+        return testing::AssertionFailure()
+            << "Interaction Tests are not supported in Stateless RPC";
       default:
         throw std::runtime_error("Invalid TestCase Type.");
     }

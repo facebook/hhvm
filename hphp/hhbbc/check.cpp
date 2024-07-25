@@ -110,7 +110,7 @@ void checkExnTreeBasic(const php::Func& f,
 
 bool DEBUG_ONLY checkExnTree(const php::Func& f) {
   boost::dynamic_bitset<> seenIds;
-  ExnNodeId idx{0};
+  DEBUG_ONLY ExnNodeId idx{0};
   for (auto& n : f.exnNodes) {
     if (n.parent == NoExnNodeId && n.idx != NoExnNodeId) {
       assertx(n.idx == idx);

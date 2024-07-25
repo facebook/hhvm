@@ -384,7 +384,7 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
   auto totalVisits = std::vector<uint32_t>(ctx.func.blocks().size());
 
   // For debugging, count how many times basic blocks get interpreted.
-  auto interp_counter = uint32_t{0};
+  DEBUG_ONLY auto interp_counter = uint32_t{0};
 
   hphp_fast_map<BlockId, BlockUpdateInfo> blockUpdates;
 

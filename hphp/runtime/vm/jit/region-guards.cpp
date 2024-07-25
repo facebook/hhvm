@@ -127,7 +127,7 @@ bool relaxIsProfitable(const jit::hash_map<Type,int64_t>& typeWeights,
   assertx(guardType <= TCell);
   auto relaxedType = relaxType(guardType, guardCategory);
 
-  int64_t totalWgt   = 0; // sum of all the block weights
+  DEBUG_ONLY int64_t totalWgt   = 0; // sum of all the block weights
   int64_t relaxWgt   = 0; // total weight if we relax guardType w/ guardCategory
   int64_t noRelaxWgt = 0; // total weight if we don't relax guardType at all
   for (auto& typeWgt : typeWeights) {

@@ -31,7 +31,7 @@ void ArrayKeyTypes::toJitType(jit::Type& type) const {
 }
 
 bool ArrayKeyTypes::checkInvariants(const VanillaDict* ad) const {
-  uint8_t true_bits = 0;
+  DEBUG_ONLY uint8_t true_bits = 0;
   VanillaDictElm* elm = ad->data();
   for (auto const end = elm + ad->iterLimit(); elm < end; elm++) {
     true_bits |= [&]{

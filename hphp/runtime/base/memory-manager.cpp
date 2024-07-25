@@ -577,7 +577,7 @@ void MemoryManager::checkHeap(const char* phase) {
 
   // check the free lists
   free_blocks.prepare();
-  size_t num_free_blocks = 0;
+  DEBUG_ONLY size_t num_free_blocks = 0;
   for (auto& list : m_freelists) {
     for (auto n = list.head; n; n = n->next) {
       ++num_free_blocks;

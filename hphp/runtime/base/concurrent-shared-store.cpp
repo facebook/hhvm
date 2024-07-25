@@ -464,8 +464,8 @@ void ConcurrentTableSharedStore::purgeExpired() {
     return;                             // someone beat us
   }
   ExpirationPair tmp;
-  int i = 0;
-  int j = 0;
+  DEBUG_ONLY int i = 0;
+  DEBUG_ONLY int j = 0;
   while (m_expQueue.try_pop(tmp)) {
     if (tmp.second > now) {
       m_expQueue.push(tmp);

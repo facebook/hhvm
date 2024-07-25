@@ -731,7 +731,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
     u->m_rats.emplace_back(a);
   }
 
-  size_t ix = 0;
+  DEBUG_ONLY size_t ix = 0;
   for (auto& fe : m_fes) {
     auto const func = fe->create(*u, nullptr);
     assertx(ix == fe->id());

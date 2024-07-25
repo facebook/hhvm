@@ -943,7 +943,7 @@ void Package::resolveDecls(
   std::vector<FileData>& fileDatas,
   size_t attempts
 ) {
-  bool discovered = false;
+  DEBUG_ONLY bool discovered = false;
   for (size_t i = 0, n = parseMetas.size(); i < n; i++) {
     auto& decls = std::get<2>(fileDatas[i]);
     auto origSize = decls.size();

@@ -64,7 +64,7 @@ void relocateTranslation(
   if (ai && unit) printUnit(kRelocationLevel, *unit, " before relocation ", ai);
 
   RelocationInfo rel;
-  size_t asm_count{0};
+  DEBUG_ONLY size_t asm_count{0};
 
   asm_count += relocate(rel, main_in,
                         main.base(), main.frontier(), main,

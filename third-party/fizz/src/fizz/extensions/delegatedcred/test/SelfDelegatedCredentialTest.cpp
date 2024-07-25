@@ -58,7 +58,6 @@ class SelfDelegatedCredentialTest : public Test {
             getKey(), getCertVec());
   }
 
-#if FIZZ_OPENSSL_HAS_ED25519
   folly::ssl::EvpPkeyUniquePtr generateEd25519PrivKey() {
     EVP_PKEY* pkey = nullptr;
     EVP_PKEY_CTX* pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, nullptr);
@@ -67,7 +66,6 @@ class SelfDelegatedCredentialTest : public Test {
     EVP_PKEY_CTX_free(pctx);
     return folly::ssl::EvpPkeyUniquePtr(pkey);
   }
-#endif
 
   folly::ssl::EvpPkeyUniquePtr generateDelegatedPrivkey() {
     folly::ssl::EvpPkeyUniquePtr pk(EVP_PKEY_new());
@@ -222,7 +220,6 @@ TEST_F(SelfDelegatedCredentialTest, TestConstruction) {
           getCertVec(), std::move(dcKey), std::move(credential));
 }
 
-#if FIZZ_OPENSSL_HAS_ED25519
 TEST_F(SelfDelegatedCredentialTest, TestEd25519DCConstruction) {
   auto dcKey = generateEd25519PrivKey();
   auto credential = makeCredential(dcKey);
@@ -230,7 +227,6 @@ TEST_F(SelfDelegatedCredentialTest, TestEd25519DCConstruction) {
       std::make_unique<SelfDelegatedCredentialImpl<openssl::KeyType::ED25519>>(
           getCertVec(), std::move(dcKey), std::move(credential));
 }
-#endif
 
 TEST_F(SelfDelegatedCredentialTest, TestConstructionFailureBadSignature) {
   auto dcKey = generateDelegatedPrivkey();

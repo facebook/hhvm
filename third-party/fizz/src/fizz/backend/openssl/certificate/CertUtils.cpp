@@ -146,13 +146,10 @@ std::unique_ptr<PeerCert> CertUtils::makePeerCert(
       default:
         break;
     }
-  }
-#if FIZZ_OPENSSL_HAS_ED25519
-  else if (pkeyID == EVP_PKEY_ED25519) {
+  } else if (pkeyID == EVP_PKEY_ED25519) {
     return std::make_unique<OpenSSLPeerCertImpl<KeyType::ED25519>>(
         std::move(cert));
   }
-#endif
   throw std::runtime_error("unknown peer cert type");
 }
 
@@ -231,12 +228,9 @@ KeyType CertUtils::getKeyType(const folly::ssl::EvpPkeyUniquePtr& key) {
       case NID_secp521r1:
         return KeyType::P521;
     }
-  }
-#if FIZZ_OPENSSL_HAS_ED25519
-  else if (pkeyID == EVP_PKEY_ED25519) {
+  } else if (pkeyID == EVP_PKEY_ED25519) {
     return KeyType::ED25519;
   }
-#endif
 
   throw std::runtime_error("unknown key type");
 }

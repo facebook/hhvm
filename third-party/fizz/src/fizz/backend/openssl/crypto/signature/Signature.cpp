@@ -83,7 +83,6 @@ void ecVerify(
   }
 }
 
-#if FIZZ_OPENSSL_HAS_ED25519
 std::unique_ptr<folly::IOBuf> edSign(
     folly::ByteRange data,
     const folly::ssl::EvpPkeyUniquePtr& pkey) {
@@ -142,7 +141,6 @@ void edVerify(
     throw std::runtime_error("Signature verification failed");
   }
 }
-#endif
 
 std::unique_ptr<folly::IOBuf> rsaPssSign(
     folly::ByteRange data,

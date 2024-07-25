@@ -90,7 +90,6 @@ void Validator::verify(
       throw std::runtime_error(folly::to<std::string>(
           "Verification failed: ", openssl::detail::getOpenSSLError()));
     }
-#if FIZZ_OPENSSL_HAS_ED25519
   } else if (keyParams == TokenBindingKeyParameters::ed25519_experimental) {
     // Read the first byte from `key`, which denotes the size of the key
     Cursor keyReader(key.get());
@@ -122,7 +121,6 @@ void Validator::verify(
       throw std::runtime_error(folly::to<std::string>(
           "Verification failed: ", openssl::detail::getOpenSSLError()));
     }
-#endif
   } else {
     // rsa_pss and rsa_pkcs
     throw std::runtime_error(

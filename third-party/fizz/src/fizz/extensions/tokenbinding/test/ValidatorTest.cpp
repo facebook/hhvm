@@ -52,14 +52,12 @@ class ValidatorTest : public Test {
         tokenBinding.signature = getBuf(chrome_session_signature);
         return tokenBinding;
       }
-#if FIZZ_OPENSSL_HAS_ED25519
       case TokenBindingKeyParameters::ed25519_experimental: {
         id.key = getBuf(ed25519_session_key);
         tokenBinding.tokenbindingid = std::move(id);
         tokenBinding.signature = getBuf(ed25519_session_signature);
         return tokenBinding;
       }
-#endif
       default: // rsa_pss and rsa_pkcs
         throw std::runtime_error("not implemented");
     }
@@ -141,7 +139,6 @@ TEST_F(ValidatorTest, TestSentParameterNotSupported) {
                    .has_value());
 }
 
-#if FIZZ_OPENSSL_HAS_ED25519
 // The tests below are mostly Ed25519 variants of the tests above
 TEST_F(ValidatorTest, TestValidEd25519Signature) {
   auto binding =
@@ -204,7 +201,7 @@ TEST_F(ValidatorTest, TestTruncatedEd25519Signature) {
                    TokenBindingKeyParameters::ed25519_experimental)
                    .has_value());
 }
-#endif
+
 } // namespace test
 } // namespace extensions
 } // namespace fizz

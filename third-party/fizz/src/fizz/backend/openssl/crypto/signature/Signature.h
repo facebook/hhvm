@@ -50,20 +50,6 @@ class OpenSSLSignature {
   folly::ssl::EvpPkeyUniquePtr pkey_;
 };
 
-#if !FIZZ_OPENSSL_HAS_ED25519
-template <>
-class OpenSSLSignature<KeyType::ED25519> {
- public:
-  [[noreturn]] void setKey(folly::ssl::EvpPkeyUniquePtr);
-
-  template <SignatureScheme Scheme>
-  [[noreturn]] std::unique_ptr<folly::IOBuf> sign(folly::ByteRange) const;
-
-  template <SignatureScheme Scheme>
-  [[noreturn]] void verify(folly::ByteRange, folly::ByteRange) const;
-};
-#endif
-
 } // namespace openssl
 } // namespace fizz
 

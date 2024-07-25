@@ -25,7 +25,6 @@ namespace fizz {
 namespace openssl {
 namespace testing {
 
-#if FIZZ_OPENSSL_HAS_ED25519
 TEST_P(EdDSATest, TestSignature) {
   auto privateKey = fizz::test::getPrivateKey(GetParam().privateKey);
   auto message = unhexlify(GetParam().hexMessage);
@@ -123,7 +122,6 @@ INSTANTIATE_TEST_SUITE_P(
         ED25519_FIXTURE(3),
         ED25519_FIXTURE(4),
         ED25519_FIXTURE(5)));
-#endif
 
 std::string modifyMessage(const std::string& input) {
   if (input.size() == 0) {

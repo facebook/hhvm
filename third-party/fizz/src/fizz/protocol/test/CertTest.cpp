@@ -82,12 +82,10 @@ ssl::X509UniquePtr getCert<RSATest>() {
   return fizz::test::getCert(kRSACertificate);
 }
 
-#if FIZZ_OPENSSL_HAS_ED25519
 template <>
 ssl::X509UniquePtr getCert<Ed25519Test>() {
   return fizz::test::getCert(kEd25519Certificate);
 }
-#endif
 
 template <typename T>
 static ssl::EvpPkeyUniquePtr getKey();
@@ -112,12 +110,10 @@ ssl::EvpPkeyUniquePtr getKey<RSATest>() {
   return getPrivateKey(kRSAKey);
 }
 
-#if FIZZ_OPENSSL_HAS_ED25519
 template <>
 ssl::EvpPkeyUniquePtr getKey<Ed25519Test>() {
   return getPrivateKey(kEd25519Key);
 }
-#endif
 
 template <typename T>
 class CertTestTyped : public Test {
@@ -127,10 +123,8 @@ class CertTestTyped : public Test {
   }
 };
 
-using KeyTypes = Types<
-#if FIZZ_OPENSSL_HAS_ED25519
+using KeyTypes = Types< //
     Ed25519Test,
-#endif
     P256Test,
     P384Test,
     P521Test,

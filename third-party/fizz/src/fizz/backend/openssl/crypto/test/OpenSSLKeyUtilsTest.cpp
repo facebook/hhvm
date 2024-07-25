@@ -41,7 +41,6 @@ TEST(ValidateECKey, WrongCurve) {
       detail::validateECKey(key, NID_X9_62_prime239v3), std::runtime_error);
 }
 
-#if FIZZ_OPENSSL_HAS_ED25519
 TEST(ValidateEdKey, GoodPrivateKey) {
   auto key = getPrivateKey(kEd25519Key);
   detail::validateEdKey(key, NID_ED25519);
@@ -61,7 +60,7 @@ TEST(ValidateEdKey, WrongCurve) {
   auto key = getPrivateKey(kEd448Key);
   EXPECT_THROW(detail::validateEdKey(key, NID_ED25519), std::runtime_error);
 }
-#endif
+
 } // namespace test
 } // namespace openssl
 } // namespace fizz

@@ -381,7 +381,7 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         # Attempts to initialize an instance with a keyword argument whose name does
         # not match that of a field should raise an error.
         with self.assertRaisesRegex(
-            RuntimeError,
+            TypeError,
             (
                 r"Cannot initialize Thrift union \(TestUnion\): unknown field "
                 r"\(field_does_not_exist\)."
@@ -392,7 +392,7 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         # Attempts to initialize an instance with more than one (valid, non-None)
         # keyword arguments raise an Error.
         with self.assertRaisesRegex(
-            RuntimeError,
+            TypeError,
             (
                 r"Cannot initialize Thrift union \(TestUnion\) with more than one "
                 r"keyword argument \(got non-None value for int_field, but already "

@@ -577,7 +577,7 @@ cdef tuple _validate_union_init_kwargs(object mutable_union_class, dict kwargs):
             continue
 
         if current_field_name is not None:
-            raise RuntimeError(
+            raise TypeError(
                 f"Cannot initialize Thrift union ({mutable_union_class.__name__}) with "
                 f"more than one keyword argument (got non-None value for {field_name}, "
                 f"but already had one for {current_field_name})."
@@ -594,7 +594,7 @@ cdef tuple _validate_union_init_kwargs(object mutable_union_class, dict kwargs):
     try:
         field_enum = fields_enum_type[current_field_name]
     except KeyError as e:
-        raise RuntimeError(
+        raise TypeError(
             f"Cannot initialize Thrift union ({mutable_union_class.__name__}): unknown "
             f"field ({current_field_name})."
         ) from e

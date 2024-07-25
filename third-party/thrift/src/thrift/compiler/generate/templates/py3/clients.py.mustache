@@ -32,5 +32,7 @@ container types, so we'll need to define factories for them based on what they
 want to include.
 
 }}
+{{#program:auto_migrate?}}
 {{> common/auto_generated_py}}
 from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_clients import *
+{{/program:auto_migrate?}}

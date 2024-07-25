@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
 
 {{> types/cimport_std }}
@@ -63,3 +64,4 @@ cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
 
 {{/struct:union?}}
 {{/program:filtered_structs}}
+{{/program:auto_migrate?}}

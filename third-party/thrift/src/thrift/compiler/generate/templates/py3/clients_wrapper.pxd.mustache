@@ -19,6 +19,7 @@
 Pxd file to expose the interface defined in ClientsWrapper.h to CythonClients.pyx classes.
 
 }}
+{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
 
 from cpython.ref cimport PyObject
@@ -140,3 +141,4 @@ cdef extern from "{{program:includePrefix}}gen-py3/{{program:name}}/clients_wrap
 
   {{/service:supportedInteractions}}
 {{/program:services}}
+{{/program:auto_migrate?}}

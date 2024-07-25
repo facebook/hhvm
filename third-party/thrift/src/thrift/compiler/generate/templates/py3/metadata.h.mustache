@@ -14,7 +14,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{> common/auto_generated_c}}
+}}
+{{^program:auto_migrate?}}
+{{> common/auto_generated_c}}
 
 #pragma once
 
@@ -28,3 +30,4 @@
 {{#program:cppNamespaces}}
 } // namespace {{value}}
 {{/program:cppNamespaces}}
+{{/program:auto_migrate?}}

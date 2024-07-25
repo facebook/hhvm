@@ -14,8 +14,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{> common/auto_generated_py}}
+}}
+{{^program:auto_migrate?}}
+{{> common/auto_generated_py}}
 
 from apache.thrift.metadata.types import ThriftMetadata
 
 def getThriftModuleMetadata() -> ThriftMetadata: ...
+{{/program:auto_migrate?}}

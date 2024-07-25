@@ -19,6 +19,7 @@
 This template should always mirror types.pyx but for mypy typing
 
 }}
+{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
 
 import folly.iobuf as _fbthrift_iobuf
@@ -203,3 +204,4 @@ class ResponseAndServerStream__{{> stream/response_class_name_suffix}}(thrift.py
 
 {{/function:return_type}}{{/program:response_and_stream_functions}}
 {{/program:has_stream?}}
+{{/program:auto_migrate?}}

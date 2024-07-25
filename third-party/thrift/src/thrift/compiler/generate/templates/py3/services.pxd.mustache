@@ -25,6 +25,7 @@ This is a top-level file that gets imported by the CythonServices.pyx file. That
 file exposes Python wrappers of the services to the end user.
 
 }}
+{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
 
 from thrift.py3.server cimport ServiceInterface
@@ -50,3 +51,4 @@ cdef class {{service:name}}Interface({{#service:extends}}{{#service:externalProg
     pass
 
 {{/program:services}}
+{{/program:auto_migrate?}}

@@ -25,6 +25,7 @@ This is a top-level file that gets imported by the CythonClients.pyx file. That
 file exposes Python wrappers of the services client to the end user.
 
 }}
+{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
 cimport thrift.py3.client
 
@@ -47,3 +48,4 @@ cdef class {{service:parent_service_name}}_{{service:name}}(thrift.py3.client.Cl
 
 {{/service:supportedInteractions}}
 {{/program:services}}
+{{/program:auto_migrate?}}

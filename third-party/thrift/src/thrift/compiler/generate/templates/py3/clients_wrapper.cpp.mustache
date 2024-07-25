@@ -21,6 +21,7 @@ interface. Each client method adds a callback to run in the C++ EventBase IO
 thread that will pass data to the cython callback.
 
 }}
+{{^program:auto_migrate?}}
 {{> common/auto_generated_c}}
 
 #include <{{program:includePrefix}}gen-py3/{{program:name}}/clients_wrapper.h>
@@ -71,3 +72,4 @@ folly::Future<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:
 {{/program:services}}{{!
 }}{{#program:cppNamespaces}}} // namespace {{value}}
 {{/program:cppNamespaces}}
+{{/program:auto_migrate?}}

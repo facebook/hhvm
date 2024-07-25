@@ -14,7 +14,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{> common/auto_generated_py}}
+}}
+{{^program:auto_migrate?}}
+{{> common/auto_generated_py}}
 
 from libcpp.memory cimport shared_ptr, make_shared
 from libcpp.utility cimport move as cmove
@@ -30,3 +32,4 @@ def getThriftModuleMetadata():
     cdef shared_ptr[cThriftMetadata] metadata
     metadata = make_shared[cThriftMetadata](cGetThriftModuleMetadata())
     return ThriftMetadata._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(metadata))
+{{/program:auto_migrate?}}

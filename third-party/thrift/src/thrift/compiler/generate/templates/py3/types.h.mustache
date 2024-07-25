@@ -19,6 +19,7 @@
 C++ header to store py3 specific Enum and Union type enum data
 
 }}
+{{^program:auto_migrate?}}
 {{> common/auto_generated_c}}
 
 #pragma once
@@ -105,3 +106,4 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 {{/program:filtered_structs}}
 } // namespace py3
 } // namespace thrift
+{{/program:auto_migrate?}}

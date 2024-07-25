@@ -19,6 +19,7 @@
 This template should always mirror clients.pyx but for mypy typing
 
 }}
+{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
 
 import folly.iobuf as _fbthrift_iobuf
@@ -94,3 +95,4 @@ class {{service:parent_service_name}}_{{service:name}}({{#service:extends}}{{#se
 {{/service:supportedFunctions}}
 {{/service:supportedInteractions}}
 {{/program:services}}
+{{/program:auto_migrate?}}

@@ -19,6 +19,7 @@
 Header file for ClientsWrapper.cpp for cython to import in CythonClients.pxd.
 
 }}
+{{^program:auto_migrate?}}
 {{> common/auto_generated_c}}
 
 #pragma once
@@ -94,3 +95,4 @@ class {{service:name}}ClientWrapper : {{!
 }}{{#program:cppNamespaces}}
 } // namespace {{value}}
 {{/program:cppNamespaces}}
+{{/program:auto_migrate?}}

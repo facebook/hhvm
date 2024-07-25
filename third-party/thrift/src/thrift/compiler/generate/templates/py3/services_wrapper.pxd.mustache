@@ -19,6 +19,7 @@
 Pxd file to expose the interface defined in ServicesWrapper.h to the pyx files.
 
 }}
+{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
 
 from cpython.ref cimport PyObject
@@ -37,3 +38,4 @@ cdef extern from "{{program:includePrefix}}gen-py3/{{program:name}}/services_wra
 {{^program:services}}
     pass
 {{/program:services}}
+{{/program:auto_migrate?}}

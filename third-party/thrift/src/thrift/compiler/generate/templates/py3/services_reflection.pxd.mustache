@@ -19,6 +19,7 @@
 Reflection functions for clients and services
 
 }}
+{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
 
 {{#program:services}}
@@ -30,3 +31,4 @@ cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:na
       }}{{service:cpp_name}}SvIf":
         pass
 {{/program:services}}
+{{/program:auto_migrate?}}

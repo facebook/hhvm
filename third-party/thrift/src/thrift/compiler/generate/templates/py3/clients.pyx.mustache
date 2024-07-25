@@ -22,6 +22,7 @@ The generated file is pretty big, but the bulk of the generation is done inside
 the clients/callback partial.
 
 }}
+{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
 from libc.stdint cimport (
     int8_t as cint8_t,
@@ -258,3 +259,4 @@ cdef class {{service:parent_service_name}}_{{service:name}}({{#service:extends}}
 {{/service:supportedFunctions}}
 {{/service:supportedInteractions}}
 {{/program:services}}
+{{/program:auto_migrate?}}

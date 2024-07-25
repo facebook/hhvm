@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
 cimport cython as __cython
 from cython.operator cimport dereference as deref
@@ -123,3 +124,4 @@ cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
 
 {{/struct:union?}}
 {{/program:filtered_structs}}
+{{/program:auto_migrate?}}

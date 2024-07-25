@@ -1359,15 +1359,10 @@ void t_mstch_py3_generator::generate_file(
 void t_mstch_py3_generator::generate_types() {
   std::vector<std::string> autoMigrateFilesWithTypeContext{
       "types.py",
-      // without auto_migrate, .pxd contains just bindings of cpp thrift types
-      "types.pxd",
   };
 
   std::vector<std::string> autoMigrateFilesNoTypeContext{
-      "builders.py",
-      "containers_FBTHRIFT_ONLY_DO_NOT_USE.py",
       "metadata.py",
-      "types_reflection.py",
   };
 
   std::vector<std::string> converterFiles{
@@ -1410,26 +1405,23 @@ void t_mstch_py3_generator::generate_types() {
   }
   // - if auto_migrate is present, generate types.pxd, and types.py
   // - else, just generate normal cython files
-  if (has_option("auto_migrate")) {
-    for (const auto& file : autoMigrateFilesWithTypeContext) {
-      generate_file(file, TypesFile::IsTypesFile, generateRootPath_);
-    }
-    for (const auto& file : autoMigrateFilesNoTypeContext) {
-      generate_file(file, TypesFile::NotTypesFile, generateRootPath_);
-    }
-  } else {
-    for (const auto& file : cythonFilesWithTypeContext) {
-      generate_file(file, TypesFile::IsTypesFile, generateRootPath_);
-    }
-    for (const auto& file : cppFilesWithTypeContext) {
-      generate_file(file, TypesFile::IsTypesFile);
-    }
-    for (const auto& file : cythonFilesNoTypeContext) {
-      generate_file(file, TypesFile::NotTypesFile, generateRootPath_);
-    }
-    for (const auto& file : cppFilesWithNoTypeContext) {
-      generate_file(file, TypesFile::NotTypesFile);
-    }
+  for (const auto& file : autoMigrateFilesWithTypeContext) {
+    generate_file(file, TypesFile::IsTypesFile, generateRootPath_);
+  }
+  for (const auto& file : autoMigrateFilesNoTypeContext) {
+    generate_file(file, TypesFile::NotTypesFile, generateRootPath_);
+  }
+  for (const auto& file : cythonFilesWithTypeContext) {
+    generate_file(file, TypesFile::IsTypesFile, generateRootPath_);
+  }
+  for (const auto& file : cppFilesWithTypeContext) {
+    generate_file(file, TypesFile::IsTypesFile);
+  }
+  for (const auto& file : cythonFilesNoTypeContext) {
+    generate_file(file, TypesFile::NotTypesFile, generateRootPath_);
+  }
+  for (const auto& file : cppFilesWithNoTypeContext) {
+    generate_file(file, TypesFile::NotTypesFile);
   }
 }
 
@@ -1445,7 +1437,6 @@ void t_mstch_py3_generator::generate_services() {
   std::vector<std::string> pythonFiles{
       "clients.py",
       "services.py",
-      "services_reflection.py",
   };
 
   std::vector<std::string> normalCythonFiles{
@@ -1476,20 +1467,17 @@ void t_mstch_py3_generator::generate_services() {
   // - if auto_migrate is present, generate py3_clients and clients.px
   // - if auto_migrate isn't present, just generate all the normal files
 
-  if (has_option("auto_migrate")) {
-    for (const auto& file : pythonFiles) {
-      generate_file(file, TypesFile::NotTypesFile, generateRootPath_);
-    }
-  } else {
-    for (const auto& file : normalCythonFiles) {
-      generate_file(file, TypesFile::NotTypesFile, generateRootPath_);
-    }
-    for (const auto& file : cppFiles) {
-      generate_file(file, TypesFile::NotTypesFile);
-    }
-    for (const auto& file : cythonFiles) {
-      generate_file(file, TypesFile::NotTypesFile, generateRootPath_);
-    }
+  for (const auto& file : pythonFiles) {
+    generate_file(file, TypesFile::NotTypesFile, generateRootPath_);
+  }
+  for (const auto& file : normalCythonFiles) {
+    generate_file(file, TypesFile::NotTypesFile, generateRootPath_);
+  }
+  for (const auto& file : cppFiles) {
+    generate_file(file, TypesFile::NotTypesFile);
+  }
+  for (const auto& file : cythonFiles) {
+    generate_file(file, TypesFile::NotTypesFile, generateRootPath_);
   }
 }
 

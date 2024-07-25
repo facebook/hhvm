@@ -25,6 +25,7 @@ that pass the python object and a promise return code into the functions
 defined in ServicesCallbacks, along with appropriate arguments.
 
 }}
+{{^program:auto_migrate?}}
 {{> common/auto_generated_c}}
 
 #include <{{program:includePrefix}}gen-py3/{{program:name}}/services_wrapper.h>
@@ -108,3 +109,4 @@ folly::SemiFuture<folly::Unit> {{service:name}}Wrapper::semifuture_{{function:cp
 }}{{#program:cppNamespaces}}
 } // namespace {{value}}
 {{/program:cppNamespaces}}
+{{/program:auto_migrate?}}

@@ -63,14 +63,11 @@ class KeyDerivation {
 class KeyDerivationImpl : public KeyDerivation {
  public:
   KeyDerivationImpl(
-      const std::string& labelPrefix,
       size_t hashLength,
       HashFunc hashFunc,
       HmacFunc hmacFunc,
       HkdfImpl hkdf,
       folly::ByteRange blankHash);
-
-  ~KeyDerivationImpl() override = default;
 
   size_t hashLength() const override {
     return hashLength_;
@@ -113,11 +110,10 @@ class KeyDerivationImpl : public KeyDerivation {
 
   std::unique_ptr<KeyDerivation> clone() const override {
     return std::unique_ptr<KeyDerivation>(new KeyDerivationImpl(
-        labelPrefix_, hashLength_, hashFunc_, hmacFunc_, hkdf_, blankHash_));
+        hashLength_, hashFunc_, hmacFunc_, hkdf_, blankHash_));
   }
 
  private:
-  std::string labelPrefix_;
   size_t hashLength_;
   HashFunc hashFunc_;
   HmacFunc hmacFunc_;

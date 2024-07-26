@@ -437,7 +437,7 @@ T decode(folly::io::Cursor& cursor);
 template <typename T>
 std::string enumToHex(T enumValue);
 
-Buf encodeHkdfLabel(HkdfLabel&& label, const std::string& hkdfLabelPrefix);
+Buf encodeHkdfLabel(HkdfLabel&& label, folly::StringPiece hkdfLabelPrefix);
 } // namespace fizz
 
 #ifdef FOLLY_MOBILE

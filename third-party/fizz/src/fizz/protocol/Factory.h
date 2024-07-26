@@ -109,10 +109,5 @@ class Factory {
    * Should not be overridden *unless* for testing.
    */
   virtual std::shared_ptr<Cert> makeIdentityOnlyCert(std::string ident) const;
-
-  /**
-   * Should not be overridden *unless* for testing.
-   */
-  virtual std::string getHkdfPrefix() const;
 };
 } // namespace fizz

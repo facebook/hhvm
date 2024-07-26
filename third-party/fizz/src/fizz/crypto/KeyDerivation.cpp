@@ -11,14 +11,12 @@
 namespace fizz {
 
 KeyDerivationImpl::KeyDerivationImpl(
-    const std::string& labelPrefix,
     size_t hashLength,
     HashFunc hashFunc,
     HmacFunc hmacFunc,
     HkdfImpl hkdf,
     folly::ByteRange blankHash)
-    : labelPrefix_(labelPrefix),
-      hashLength_(hashLength),
+    : hashLength_(hashLength),
       hashFunc_(hashFunc),
       hmacFunc_(hmacFunc),
       hkdf_(hkdf),
@@ -32,7 +30,7 @@ Buf KeyDerivationImpl::expandLabel(
   HkdfLabel hkdfLabel = {
       length, std::string(label.begin(), label.end()), std::move(hashValue)};
   return hkdf_.expand(
-      secret, *encodeHkdfLabel(std::move(hkdfLabel), labelPrefix_), length);
+      secret, *encodeHkdfLabel(std::move(hkdfLabel), kHkdfLabelPrefix), length);
 }
 
 Buf KeyDerivationImpl::hkdfExpand(

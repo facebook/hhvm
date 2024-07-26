@@ -48,7 +48,7 @@ class HandshakeContext {
 template <typename Hash>
 class HandshakeContextImpl : public HandshakeContext {
  public:
-  HandshakeContextImpl(const std::string& hkdfLabelPrefix);
+  HandshakeContextImpl();
 
   void appendToTranscript(const Buf& data) override;
 
@@ -61,14 +61,13 @@ class HandshakeContextImpl : public HandshakeContext {
   }
 
   virtual std::unique_ptr<HandshakeContext> clone() const override {
-    auto newCtx = std::make_unique<HandshakeContextImpl>(hkdfLabelPrefix_);
+    auto newCtx = std::make_unique<HandshakeContextImpl>();
     newCtx->hashState_ = hashState_;
     return newCtx;
   }
 
  private:
   fizz::openssl::Hasher<Hash> hashState_;
-  std::string hkdfLabelPrefix_;
 };
 } // namespace fizz
 

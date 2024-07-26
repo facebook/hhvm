@@ -49,9 +49,4 @@ std::unique_ptr<folly::IOBuf> Factory::makeRandomBytes(size_t count) const {
 std::shared_ptr<Cert> Factory::makeIdentityOnlyCert(std::string ident) const {
   return std::make_shared<IdentityCert>(std::move(ident));
 }
-
-std::string Factory::getHkdfPrefix() const {
-  return kHkdfLabelPrefix.str();
-}
-
 } // namespace fizz

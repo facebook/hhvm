@@ -11,9 +11,7 @@
 namespace fizz {
 
 template <typename Hash>
-HandshakeContextImpl<Hash>::HandshakeContextImpl(
-    const std::string& hkdfLabelPrefix)
-    : hkdfLabelPrefix_(hkdfLabelPrefix) {
+HandshakeContextImpl<Hash>::HandshakeContextImpl() {
   hashState_.hash_init();
 }
 
@@ -38,7 +36,6 @@ Buf HandshakeContextImpl<Hash>::getFinishedData(
   auto context = getHandshakeContext();
   auto finishedKey =
       KeyDerivationImpl(
-          hkdfLabelPrefix_,
           Hash::HashLen,
           &openssl::Hasher<Hash>::hash,
           &openssl::Hasher<Hash>::hmac,

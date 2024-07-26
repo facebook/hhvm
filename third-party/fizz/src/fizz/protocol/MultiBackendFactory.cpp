@@ -92,10 +92,8 @@ std::unique_ptr<Aead> MultiBackendFactory::makeAead(CipherSuite cipher) const {
 
 namespace detail {
 template <typename Hash>
-inline std::unique_ptr<KeyDerivation> makeKeyDerivationPtr(
-    const std::string& labelPrefix) {
+inline std::unique_ptr<KeyDerivation> makeKeyDerivationPtr() {
   return std::unique_ptr<KeyDerivationImpl>(new KeyDerivationImpl(
-      labelPrefix,
       Hash::HashLen,
       &openssl::Hasher<Hash>::hash,
       &openssl::Hasher<Hash>::hmac,
@@ -111,11 +109,11 @@ std::unique_ptr<KeyDerivation> MultiBackendFactory::makeKeyDeriver(
     case CipherSuite::TLS_AES_128_GCM_SHA256:
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
     case CipherSuite::TLS_AEGIS_128L_SHA256:
-      return detail::makeKeyDerivationPtr<Sha256>(getHkdfPrefix());
+      return detail::makeKeyDerivationPtr<Sha256>();
     case CipherSuite::TLS_AES_256_GCM_SHA384:
-      return detail::makeKeyDerivationPtr<Sha384>(getHkdfPrefix());
+      return detail::makeKeyDerivationPtr<Sha384>();
     case CipherSuite::TLS_AEGIS_256_SHA512:
-      return detail::makeKeyDerivationPtr<Sha512>(getHkdfPrefix());
+      return detail::makeKeyDerivationPtr<Sha512>();
     default:
       throw std::runtime_error("ks: not implemented");
   }
@@ -128,12 +126,10 @@ std::unique_ptr<HandshakeContext> MultiBackendFactory::makeHandshakeContext(
     case CipherSuite::TLS_AES_128_GCM_SHA256:
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
     case CipherSuite::TLS_AEGIS_128L_SHA256:
-      return std::make_unique<HandshakeContextImpl<fizz::Sha256>>(
-          getHkdfPrefix());
+      return std::make_unique<HandshakeContextImpl<fizz::Sha256>>();
     case CipherSuite::TLS_AES_256_GCM_SHA384:
     case CipherSuite::TLS_AEGIS_256_SHA512:
-      return std::make_unique<HandshakeContextImpl<fizz::Sha384>>(
-          getHkdfPrefix());
+      return std::make_unique<HandshakeContextImpl<fizz::Sha384>>();
     default:
       throw std::runtime_error("hs: not implemented");
   }

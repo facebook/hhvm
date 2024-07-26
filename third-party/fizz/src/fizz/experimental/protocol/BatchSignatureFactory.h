@@ -103,10 +103,6 @@ class BatchSignatureFactory : public Factory {
     return original_->makeIdentityOnlyCert(std::move(ident));
   }
 
-  std::string getHkdfPrefix() const override {
-    return original_->getHkdfPrefix();
-  }
-
  private:
   std::shared_ptr<Factory> original_;
 };

@@ -118,34 +118,14 @@ void apache::thrift::Client<::cpp2::C>::f(apache::thrift::RpcOptions& rpcOptions
 }
 
 void apache::thrift::Client<::cpp2::C>::fImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
-  switch (apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolWriter writer;
-      apache::thrift::SerializedRequest request = fbthrift_serialize_f(&writer, rpcOptions, *header, contextStack);
-      if (stealRpcOptions) {
-        fbthrift_send_f(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-      } else {
-        fbthrift_send_f(std::move(request), rpcOptions, std::move(header), std::move(callback));
-      }
-      break;
+  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
+    apache::thrift::SerializedRequest request = fbthrift_serialize_f(&writer, rpcOptions, *header, contextStack);
+    if (stealRpcOptions) {
+      fbthrift_send_f(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+    } else {
+      fbthrift_send_f(std::move(request), rpcOptions, std::move(header), std::move(callback));
     }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolWriter writer;
-      apache::thrift::SerializedRequest request = fbthrift_serialize_f(&writer, rpcOptions, *header, contextStack);
-      if (stealRpcOptions) {
-        fbthrift_send_f(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-      } else {
-        fbthrift_send_f(std::move(request), rpcOptions, std::move(header), std::move(callback));
-      }
-      break;
-    }
-    default:
-    {
-      apache::thrift::detail::ac::throw_app_exn("Could not find Protocol");
-    }
-  }
+  });
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::C>::fCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -313,34 +293,14 @@ void apache::thrift::Client<::cpp2::C>::numbers(apache::thrift::RpcOptions& rpcO
 }
 
 void apache::thrift::Client<::cpp2::C>::numbersImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, bool stealRpcOptions) {
-  switch (apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolWriter writer;
-      apache::thrift::SerializedRequest request = fbthrift_serialize_numbers(&writer, rpcOptions, *header, contextStack);
-      if (stealRpcOptions) {
-        fbthrift_send_numbers(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-      } else {
-        fbthrift_send_numbers(std::move(request), rpcOptions, std::move(header), std::move(callback));
-      }
-      break;
+  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
+    apache::thrift::SerializedRequest request = fbthrift_serialize_numbers(&writer, rpcOptions, *header, contextStack);
+    if (stealRpcOptions) {
+      fbthrift_send_numbers(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+    } else {
+      fbthrift_send_numbers(std::move(request), rpcOptions, std::move(header), std::move(callback));
     }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolWriter writer;
-      apache::thrift::SerializedRequest request = fbthrift_serialize_numbers(&writer, rpcOptions, *header, contextStack);
-      if (stealRpcOptions) {
-        fbthrift_send_numbers(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-      } else {
-        fbthrift_send_numbers(std::move(request), rpcOptions, std::move(header), std::move(callback));
-      }
-      break;
-    }
-    default:
-    {
-      apache::thrift::detail::ac::throw_app_exn("Could not find Protocol");
-    }
-  }
+  });
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::C>::numbersCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -490,34 +450,14 @@ void apache::thrift::Client<::cpp2::C>::thing(apache::thrift::RpcOptions& rpcOpt
 }
 
 void apache::thrift::Client<::cpp2::C>::thingImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c, bool stealRpcOptions) {
-  switch (apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolWriter writer;
-      apache::thrift::SerializedRequest request = fbthrift_serialize_thing(&writer, rpcOptions, *header, contextStack, p_a, p_b, p_c);
-      if (stealRpcOptions) {
-        fbthrift_send_thing(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-      } else {
-        fbthrift_send_thing(std::move(request), rpcOptions, std::move(header), std::move(callback));
-      }
-      break;
+  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
+    apache::thrift::SerializedRequest request = fbthrift_serialize_thing(&writer, rpcOptions, *header, contextStack, p_a, p_b, p_c);
+    if (stealRpcOptions) {
+      fbthrift_send_thing(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+    } else {
+      fbthrift_send_thing(std::move(request), rpcOptions, std::move(header), std::move(callback));
     }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolWriter writer;
-      apache::thrift::SerializedRequest request = fbthrift_serialize_thing(&writer, rpcOptions, *header, contextStack, p_a, p_b, p_c);
-      if (stealRpcOptions) {
-        fbthrift_send_thing(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-      } else {
-        fbthrift_send_thing(std::move(request), rpcOptions, std::move(header), std::move(callback));
-      }
-      break;
-    }
-    default:
-    {
-      apache::thrift::detail::ac::throw_app_exn("Could not find Protocol");
-    }
-  }
+  });
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::C>::thingCtx(apache::thrift::RpcOptions* rpcOptions) {

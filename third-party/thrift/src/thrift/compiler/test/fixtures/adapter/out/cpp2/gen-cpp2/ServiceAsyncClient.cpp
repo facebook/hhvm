@@ -57,34 +57,14 @@ void apache::thrift::Client<::facebook::thrift::test::Service>::func(apache::thr
 }
 
 void apache::thrift::Client<::facebook::thrift::test::Service>::funcImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3, bool stealRpcOptions) {
-  switch (apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolWriter writer;
-      apache::thrift::SerializedRequest request = fbthrift_serialize_func(&writer, rpcOptions, *header, contextStack, p_arg1, p_arg2, p_arg3);
-      if (stealRpcOptions) {
-        fbthrift_send_func(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-      } else {
-        fbthrift_send_func(std::move(request), rpcOptions, std::move(header), std::move(callback));
-      }
-      break;
+  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
+    apache::thrift::SerializedRequest request = fbthrift_serialize_func(&writer, rpcOptions, *header, contextStack, p_arg1, p_arg2, p_arg3);
+    if (stealRpcOptions) {
+      fbthrift_send_func(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+    } else {
+      fbthrift_send_func(std::move(request), rpcOptions, std::move(header), std::move(callback));
     }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolWriter writer;
-      apache::thrift::SerializedRequest request = fbthrift_serialize_func(&writer, rpcOptions, *header, contextStack, p_arg1, p_arg2, p_arg3);
-      if (stealRpcOptions) {
-        fbthrift_send_func(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-      } else {
-        fbthrift_send_func(std::move(request), rpcOptions, std::move(header), std::move(callback));
-      }
-      break;
-    }
-    default:
-    {
-      apache::thrift::detail::ac::throw_app_exn("Could not find Protocol");
-    }
-  }
+  });
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::facebook::thrift::test::Service>::funcCtx(apache::thrift::RpcOptions* rpcOptions) {

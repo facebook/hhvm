@@ -689,6 +689,25 @@ folly::exception_wrapper recv_wrapped(
 }
 
 [[noreturn]] void throw_app_exn(const char* msg);
+
+template <typename Func>
+decltype(auto) withProtocolWriter(
+    std::underlying_type_t<apache::thrift::protocol::PROTOCOL_TYPES>
+        protocolType,
+    Func&& func) {
+  switch (protocolType) {
+    case apache::thrift::protocol::T_BINARY_PROTOCOL: {
+      apache::thrift::BinaryProtocolWriter writer;
+      return std::forward<Func>(func)(writer);
+    }
+    case apache::thrift::protocol::T_COMPACT_PROTOCOL: {
+      apache::thrift::CompactProtocolWriter writer;
+      return std::forward<Func>(func)(writer);
+    }
+    default:
+      throw_app_exn("Could not find Protocol");
+  }
+}
 } // namespace ac
 } // namespace detail
 

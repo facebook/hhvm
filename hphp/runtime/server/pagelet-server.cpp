@@ -400,12 +400,7 @@ IMPLEMENT_RESOURCE_ALLOCATION(PageletTask)
 
 static JobQueueDispatcher<PageletWorker> *s_dispatcher;
 static Mutex s_dispatchMutex;
-static ServiceData::CounterCallback s_counters(
-  [](std::map<std::string, int64_t>& counters) {
-    counters["pagelet_inflight_requests"] = PageletServer::GetActiveWorker();
-    counters["pagelet_queued_requests"] = PageletServer::GetQueuedJobs();
-  }
-);
+static ServiceData::CounterCallback* s_counters;
 
 bool PageletServer::Enabled() {
   return s_dispatcher;
@@ -430,6 +425,14 @@ void PageletServer::Restart() {
     }
     s_dispatcher->start();
     BootStats::mark("pagelet server started");
+    s_counters = new ServiceData::CounterCallback(
+        [](std::map<std::string, int64_t>& counters) {
+          counters["pagelet_inflight_requests"] =
+            PageletServer::GetActiveWorker();
+          counters["pagelet_queued_requests"] =
+            PageletServer::GetQueuedJobs();
+        }
+    );
   }
 }
 
@@ -438,6 +441,8 @@ void PageletServer::Stop() {
     auto monitor = getSingleton<HostHealthMonitor>();
     monitor->unsubscribe(s_dispatcher);
     s_dispatcher->stop();
+    delete s_counters;
+    s_counters = nullptr;
     Lock l(s_dispatchMutex);
     delete s_dispatcher;
     s_dispatcher = nullptr;

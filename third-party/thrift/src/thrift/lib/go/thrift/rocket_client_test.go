@@ -32,7 +32,7 @@ func TestRocketClientAgainstRSocketServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	server := newRocketServer(&testProcessor{}, listener)
+	server := NewSimpleServer(&testProcessor{}, listener, TransportIDRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
 	}()

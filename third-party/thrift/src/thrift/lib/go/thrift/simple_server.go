@@ -23,10 +23,14 @@ import (
 
 // NewSimpleServer creates a new server that only supports Header Transport.
 func NewSimpleServer(processor ProcessorContext, listener net.Listener, transportType TransportID, options ...func(*ServerOptions)) Server {
-	if transportType != TransportIDHeader {
-		panic(fmt.Sprintf("SimpleServer only supports Header Transport and not %d", transportType))
-	}
 	serverOptions := simpleServerOptions(options...)
 	processor = WrapInterceptorContext(serverOptions.interceptor, processor)
-	return newHeaderServer(processor, listener)
+	switch transportType {
+	case TransportIDHeader:
+		return newHeaderServer(processor, listener)
+	case TransportIDRocket:
+		return newRocketServer(processor, listener)
+	default:
+		panic(fmt.Sprintf("SimpleServer only supports Header Transport and not %d", transportType))
+	}
 }

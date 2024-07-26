@@ -16,7 +16,8 @@ folly::Future<folly::Unit>
 ReturnServiceClientWrapper::noReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_noReturn, channel_);
@@ -30,14 +31,15 @@ ReturnServiceClientWrapper::noReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<bool>
 ReturnServiceClientWrapper::boolReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<bool> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<bool>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<bool>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_boolReturn, channel_);
@@ -51,14 +53,15 @@ ReturnServiceClientWrapper::boolReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<int16_t>
 ReturnServiceClientWrapper::i16Return(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<int16_t> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<int16_t>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<int16_t>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_i16Return, channel_);
@@ -72,14 +75,15 @@ ReturnServiceClientWrapper::i16Return(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<int32_t>
 ReturnServiceClientWrapper::i32Return(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<int32_t> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<int32_t>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<int32_t>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_i32Return, channel_);
@@ -93,14 +97,15 @@ ReturnServiceClientWrapper::i32Return(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<int64_t>
 ReturnServiceClientWrapper::i64Return(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<int64_t> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<int64_t>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<int64_t>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_i64Return, channel_);
@@ -114,14 +119,15 @@ ReturnServiceClientWrapper::i64Return(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<float>
 ReturnServiceClientWrapper::floatReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<float> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<float>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<float>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_floatReturn, channel_);
@@ -135,14 +141,15 @@ ReturnServiceClientWrapper::floatReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<double>
 ReturnServiceClientWrapper::doubleReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<double> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<double>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<double>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_doubleReturn, channel_);
@@ -156,14 +163,15 @@ ReturnServiceClientWrapper::doubleReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::string>
 ReturnServiceClientWrapper::stringReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::string> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::string>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_stringReturn, channel_);
@@ -177,14 +185,15 @@ ReturnServiceClientWrapper::stringReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::string>
 ReturnServiceClientWrapper::binaryReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::string> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::string>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_binaryReturn, channel_);
@@ -198,14 +207,15 @@ ReturnServiceClientWrapper::binaryReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::map<std::string,int64_t>>
 ReturnServiceClientWrapper::mapReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::map<std::string,int64_t>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::map<std::string,int64_t>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::map<std::string,int64_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_mapReturn, channel_);
@@ -219,14 +229,15 @@ ReturnServiceClientWrapper::mapReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<int32_t>
 ReturnServiceClientWrapper::simpleTypedefReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<int32_t> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<int32_t>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<int32_t>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_simpleTypedefReturn, channel_);
@@ -240,14 +251,15 @@ ReturnServiceClientWrapper::simpleTypedefReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::vector<std::map<::some::valid::ns::Empty,::some::valid::ns::MyStruct>>>
 ReturnServiceClientWrapper::complexTypedefReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::vector<std::map<::some::valid::ns::Empty,::some::valid::ns::MyStruct>>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::vector<std::map<::some::valid::ns::Empty,::some::valid::ns::MyStruct>>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::vector<std::map<::some::valid::ns::Empty,::some::valid::ns::MyStruct>>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_complexTypedefReturn, channel_);
@@ -261,14 +273,15 @@ ReturnServiceClientWrapper::complexTypedefReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::vector<std::vector<std::vector<std::map<::some::valid::ns::Empty,::some::valid::ns::MyStruct>>>>>
 ReturnServiceClientWrapper::list_mostComplexTypedefReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::vector<std::vector<std::vector<std::map<::some::valid::ns::Empty,::some::valid::ns::MyStruct>>>>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::vector<std::vector<std::vector<std::map<::some::valid::ns::Empty,::some::valid::ns::MyStruct>>>>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::vector<std::vector<std::vector<std::map<::some::valid::ns::Empty,::some::valid::ns::MyStruct>>>>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_list_mostComplexTypedefReturn, channel_);
@@ -282,14 +295,15 @@ ReturnServiceClientWrapper::list_mostComplexTypedefReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<::some::valid::ns::MyEnumA>
 ReturnServiceClientWrapper::enumReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<::some::valid::ns::MyEnumA> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::some::valid::ns::MyEnumA>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<::some::valid::ns::MyEnumA>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_enumReturn, channel_);
@@ -303,14 +317,15 @@ ReturnServiceClientWrapper::enumReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::vector<::some::valid::ns::MyEnumA>>
 ReturnServiceClientWrapper::list_EnumReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::vector<::some::valid::ns::MyEnumA>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::vector<::some::valid::ns::MyEnumA>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::vector<::some::valid::ns::MyEnumA>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_list_EnumReturn, channel_);
@@ -324,14 +339,15 @@ ReturnServiceClientWrapper::list_EnumReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<::some::valid::ns::MyStruct>
 ReturnServiceClientWrapper::structReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<::some::valid::ns::MyStruct> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::some::valid::ns::MyStruct>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<::some::valid::ns::MyStruct>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_structReturn, channel_);
@@ -345,14 +361,15 @@ ReturnServiceClientWrapper::structReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::set<::some::valid::ns::MyStruct>>
 ReturnServiceClientWrapper::set_StructReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::set<::some::valid::ns::MyStruct>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::set<::some::valid::ns::MyStruct>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::set<::some::valid::ns::MyStruct>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_set_StructReturn, channel_);
@@ -366,14 +383,15 @@ ReturnServiceClientWrapper::set_StructReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<::some::valid::ns::ComplexUnion>
 ReturnServiceClientWrapper::unionReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<::some::valid::ns::ComplexUnion> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::some::valid::ns::ComplexUnion>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<::some::valid::ns::ComplexUnion>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_unionReturn, channel_);
@@ -387,14 +405,15 @@ ReturnServiceClientWrapper::unionReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::vector<::some::valid::ns::ComplexUnion>>
 ReturnServiceClientWrapper::list_UnionReturn(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::vector<::some::valid::ns::ComplexUnion>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::vector<::some::valid::ns::ComplexUnion>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::vector<::some::valid::ns::ComplexUnion>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_list_UnionReturn, channel_);
@@ -408,7 +427,7 @@ ReturnServiceClientWrapper::list_UnionReturn(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::IOBuf>
@@ -416,7 +435,8 @@ ReturnServiceClientWrapper::readDataEb(
     apache::thrift::RpcOptions& rpcOptions,
     int64_t arg_size) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<folly::IOBuf> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::IOBuf>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::IOBuf>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_readDataEb, channel_);
@@ -431,7 +451,7 @@ ReturnServiceClientWrapper::readDataEb(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::unique_ptr<folly::IOBuf>>
@@ -439,7 +459,8 @@ ReturnServiceClientWrapper::readData(
     apache::thrift::RpcOptions& rpcOptions,
     int64_t arg_size) {
   auto* client = static_cast<::some::valid::ns::ReturnServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::unique_ptr<folly::IOBuf>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::unique_ptr<folly::IOBuf>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::unique_ptr<folly::IOBuf>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_readData, channel_);
@@ -454,7 +475,7 @@ ReturnServiceClientWrapper::readData(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -462,7 +483,8 @@ ParamServiceClientWrapper::void_ret_i16_param(
     apache::thrift::RpcOptions& rpcOptions,
     int16_t arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_void_ret_i16_param, channel_);
@@ -477,7 +499,7 @@ ParamServiceClientWrapper::void_ret_i16_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -486,7 +508,8 @@ ParamServiceClientWrapper::void_ret_byte_i16_param(
     int8_t arg_param1,
     int16_t arg_param2) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_void_ret_byte_i16_param, channel_);
@@ -502,7 +525,7 @@ ParamServiceClientWrapper::void_ret_byte_i16_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -510,7 +533,8 @@ ParamServiceClientWrapper::void_ret_map_param(
     apache::thrift::RpcOptions& rpcOptions,
     std::map<std::string,int64_t> arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_void_ret_map_param, channel_);
@@ -525,7 +549,7 @@ ParamServiceClientWrapper::void_ret_map_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -534,7 +558,8 @@ ParamServiceClientWrapper::void_ret_map_setlist_param(
     std::map<std::string,int64_t> arg_param1,
     std::set<std::vector<std::string>> arg_param2) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_void_ret_map_setlist_param, channel_);
@@ -550,7 +575,7 @@ ParamServiceClientWrapper::void_ret_map_setlist_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -558,7 +583,8 @@ ParamServiceClientWrapper::void_ret_map_typedef_param(
     apache::thrift::RpcOptions& rpcOptions,
     int32_t arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_void_ret_map_typedef_param, channel_);
@@ -573,7 +599,7 @@ ParamServiceClientWrapper::void_ret_map_typedef_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -581,7 +607,8 @@ ParamServiceClientWrapper::void_ret_enum_param(
     apache::thrift::RpcOptions& rpcOptions,
     ::some::valid::ns::MyEnumA arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_void_ret_enum_param, channel_);
@@ -596,7 +623,7 @@ ParamServiceClientWrapper::void_ret_enum_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -604,7 +631,8 @@ ParamServiceClientWrapper::void_ret_struct_param(
     apache::thrift::RpcOptions& rpcOptions,
     ::some::valid::ns::MyStruct arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_void_ret_struct_param, channel_);
@@ -619,7 +647,7 @@ ParamServiceClientWrapper::void_ret_struct_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -627,7 +655,8 @@ ParamServiceClientWrapper::void_ret_listunion_param(
     apache::thrift::RpcOptions& rpcOptions,
     std::vector<::some::valid::ns::ComplexUnion> arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_void_ret_listunion_param, channel_);
@@ -642,7 +671,7 @@ ParamServiceClientWrapper::void_ret_listunion_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<bool>
@@ -651,7 +680,8 @@ ParamServiceClientWrapper::bool_ret_i32_i64_param(
     int32_t arg_param1,
     int64_t arg_param2) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<bool> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<bool>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<bool>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_bool_ret_i32_i64_param, channel_);
@@ -667,7 +697,7 @@ ParamServiceClientWrapper::bool_ret_i32_i64_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<bool>
@@ -675,7 +705,8 @@ ParamServiceClientWrapper::bool_ret_map_param(
     apache::thrift::RpcOptions& rpcOptions,
     std::map<std::string,int64_t> arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<bool> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<bool>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<bool>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_bool_ret_map_param, channel_);
@@ -690,7 +721,7 @@ ParamServiceClientWrapper::bool_ret_map_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<bool>
@@ -698,7 +729,8 @@ ParamServiceClientWrapper::bool_ret_union_param(
     apache::thrift::RpcOptions& rpcOptions,
     ::some::valid::ns::ComplexUnion arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<bool> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<bool>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<bool>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_bool_ret_union_param, channel_);
@@ -713,7 +745,7 @@ ParamServiceClientWrapper::bool_ret_union_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<int64_t>
@@ -722,7 +754,8 @@ ParamServiceClientWrapper::i64_ret_float_double_param(
     float arg_param1,
     double arg_param2) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<int64_t> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<int64_t>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<int64_t>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_i64_ret_float_double_param, channel_);
@@ -738,7 +771,7 @@ ParamServiceClientWrapper::i64_ret_float_double_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<int64_t>
@@ -747,7 +780,8 @@ ParamServiceClientWrapper::i64_ret_string_typedef_param(
     std::string arg_param1,
     std::set<std::vector<std::vector<std::map<::some::valid::ns::Empty,::some::valid::ns::MyStruct>>>> arg_param2) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<int64_t> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<int64_t>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<int64_t>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_i64_ret_string_typedef_param, channel_);
@@ -763,7 +797,7 @@ ParamServiceClientWrapper::i64_ret_string_typedef_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<int64_t>
@@ -775,7 +809,8 @@ ParamServiceClientWrapper::i64_ret_i32_i32_i32_i32_i32_param(
     int32_t arg_param4,
     int32_t arg_param5) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<int64_t> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<int64_t>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<int64_t>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_i64_ret_i32_i32_i32_i32_i32_param, channel_);
@@ -794,7 +829,7 @@ ParamServiceClientWrapper::i64_ret_i32_i32_i32_i32_i32_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<double>
@@ -802,7 +837,8 @@ ParamServiceClientWrapper::double_ret_setstruct_param(
     apache::thrift::RpcOptions& rpcOptions,
     std::set<::some::valid::ns::MyStruct> arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<double> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<double>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<double>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_double_ret_setstruct_param, channel_);
@@ -817,7 +853,7 @@ ParamServiceClientWrapper::double_ret_setstruct_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::string>
@@ -825,7 +861,8 @@ ParamServiceClientWrapper::string_ret_string_param(
     apache::thrift::RpcOptions& rpcOptions,
     std::string arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::string> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::string>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_string_ret_string_param, channel_);
@@ -840,7 +877,7 @@ ParamServiceClientWrapper::string_ret_string_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::string>
@@ -848,7 +885,8 @@ ParamServiceClientWrapper::binary_ret_binary_param(
     apache::thrift::RpcOptions& rpcOptions,
     std::string arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::string> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::string>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_binary_ret_binary_param, channel_);
@@ -863,7 +901,7 @@ ParamServiceClientWrapper::binary_ret_binary_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::map<std::string,int64_t>>
@@ -871,7 +909,8 @@ ParamServiceClientWrapper::map_ret_bool_param(
     apache::thrift::RpcOptions& rpcOptions,
     bool arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::map<std::string,int64_t>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::map<std::string,int64_t>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::map<std::string,int64_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_map_ret_bool_param, channel_);
@@ -886,7 +925,7 @@ ParamServiceClientWrapper::map_ret_bool_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::vector<bool>>
@@ -895,7 +934,8 @@ ParamServiceClientWrapper::list_ret_map_setlist_param(
     std::map<int32_t,std::vector<std::string>> arg_param1,
     std::vector<std::string> arg_param2) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::vector<bool>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::vector<bool>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::vector<bool>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_list_ret_map_setlist_param, channel_);
@@ -911,7 +951,7 @@ ParamServiceClientWrapper::list_ret_map_setlist_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::map<std::set<std::vector<int32_t>>,std::map<std::vector<std::set<std::string>>,std::string>>>
@@ -919,7 +959,8 @@ ParamServiceClientWrapper::mapsetlistmapliststring_ret_listlistlist_param(
     apache::thrift::RpcOptions& rpcOptions,
     std::vector<std::vector<std::vector<std::vector<int32_t>>>> arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::map<std::set<std::vector<int32_t>>,std::map<std::vector<std::set<std::string>>,std::string>>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::map<std::set<std::vector<int32_t>>,std::map<std::vector<std::set<std::string>>,std::string>>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::map<std::set<std::vector<int32_t>>,std::map<std::vector<std::set<std::string>>,std::string>>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_mapsetlistmapliststring_ret_listlistlist_param, channel_);
@@ -934,7 +975,7 @@ ParamServiceClientWrapper::mapsetlistmapliststring_ret_listlistlist_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<int32_t>
@@ -942,7 +983,8 @@ ParamServiceClientWrapper::typedef_ret_i32_param(
     apache::thrift::RpcOptions& rpcOptions,
     int32_t arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<int32_t> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<int32_t>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<int32_t>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_typedef_ret_i32_param, channel_);
@@ -957,7 +999,7 @@ ParamServiceClientWrapper::typedef_ret_i32_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::vector<int32_t>>
@@ -965,7 +1007,8 @@ ParamServiceClientWrapper::listtypedef_ret_typedef_param(
     apache::thrift::RpcOptions& rpcOptions,
     std::vector<std::map<::some::valid::ns::Empty,::some::valid::ns::MyStruct>> arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::vector<int32_t>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::vector<int32_t>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::vector<int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_listtypedef_ret_typedef_param, channel_);
@@ -980,7 +1023,7 @@ ParamServiceClientWrapper::listtypedef_ret_typedef_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<::some::valid::ns::MyEnumA>
@@ -988,7 +1031,8 @@ ParamServiceClientWrapper::enum_ret_double_param(
     apache::thrift::RpcOptions& rpcOptions,
     double arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<::some::valid::ns::MyEnumA> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::some::valid::ns::MyEnumA>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<::some::valid::ns::MyEnumA>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_enum_ret_double_param, channel_);
@@ -1003,7 +1047,7 @@ ParamServiceClientWrapper::enum_ret_double_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<::some::valid::ns::MyEnumA>
@@ -1012,7 +1056,8 @@ ParamServiceClientWrapper::enum_ret_double_enum_param(
     double arg_param1,
     ::some::valid::ns::MyEnumA arg_param2) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<::some::valid::ns::MyEnumA> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::some::valid::ns::MyEnumA>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<::some::valid::ns::MyEnumA>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_enum_ret_double_enum_param, channel_);
@@ -1028,7 +1073,7 @@ ParamServiceClientWrapper::enum_ret_double_enum_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::vector<::some::valid::ns::MyEnumA>>
@@ -1036,7 +1081,8 @@ ParamServiceClientWrapper::listenum_ret_map_param(
     apache::thrift::RpcOptions& rpcOptions,
     std::map<std::string,int64_t> arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::vector<::some::valid::ns::MyEnumA>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::vector<::some::valid::ns::MyEnumA>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::vector<::some::valid::ns::MyEnumA>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_listenum_ret_map_param, channel_);
@@ -1051,7 +1097,7 @@ ParamServiceClientWrapper::listenum_ret_map_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<::some::valid::ns::MyStruct>
@@ -1059,7 +1105,8 @@ ParamServiceClientWrapper::struct_ret_i16_param(
     apache::thrift::RpcOptions& rpcOptions,
     int16_t arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<::some::valid::ns::MyStruct> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::some::valid::ns::MyStruct>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<::some::valid::ns::MyStruct>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_struct_ret_i16_param, channel_);
@@ -1074,7 +1121,7 @@ ParamServiceClientWrapper::struct_ret_i16_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::set<::some::valid::ns::MyStruct>>
@@ -1082,7 +1129,8 @@ ParamServiceClientWrapper::setstruct_ret_set_param(
     apache::thrift::RpcOptions& rpcOptions,
     std::set<std::string> arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::set<::some::valid::ns::MyStruct>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::set<::some::valid::ns::MyStruct>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::set<::some::valid::ns::MyStruct>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_setstruct_ret_set_param, channel_);
@@ -1097,7 +1145,7 @@ ParamServiceClientWrapper::setstruct_ret_set_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<::some::valid::ns::ComplexUnion>
@@ -1106,7 +1154,8 @@ ParamServiceClientWrapper::union_ret_i32_i32_param(
     int32_t arg_param1,
     int32_t arg_param2) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<::some::valid::ns::ComplexUnion> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::some::valid::ns::ComplexUnion>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<::some::valid::ns::ComplexUnion>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_union_ret_i32_i32_param, channel_);
@@ -1122,7 +1171,7 @@ ParamServiceClientWrapper::union_ret_i32_i32_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::vector<::some::valid::ns::ComplexUnion>>
@@ -1130,7 +1179,8 @@ ParamServiceClientWrapper::listunion_string_param(
     apache::thrift::RpcOptions& rpcOptions,
     std::string arg_param1) {
   auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::vector<::some::valid::ns::ComplexUnion>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::vector<::some::valid::ns::ComplexUnion>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::vector<::some::valid::ns::ComplexUnion>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_listunion_string_param, channel_);
@@ -1145,7 +1195,7 @@ ParamServiceClientWrapper::listunion_string_param(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 } // namespace some

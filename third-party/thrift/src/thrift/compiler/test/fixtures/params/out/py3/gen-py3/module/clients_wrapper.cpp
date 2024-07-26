@@ -15,7 +15,8 @@ NestedContainersClientWrapper::mapList(
     apache::thrift::RpcOptions& rpcOptions,
     std::map<int32_t,std::vector<int32_t>> arg_foo) {
   auto* client = static_cast<::cpp2::NestedContainersAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_mapList, channel_);
@@ -30,7 +31,7 @@ NestedContainersClientWrapper::mapList(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -38,7 +39,8 @@ NestedContainersClientWrapper::mapSet(
     apache::thrift::RpcOptions& rpcOptions,
     std::map<int32_t,std::set<int32_t>> arg_foo) {
   auto* client = static_cast<::cpp2::NestedContainersAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_mapSet, channel_);
@@ -53,7 +55,7 @@ NestedContainersClientWrapper::mapSet(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -61,7 +63,8 @@ NestedContainersClientWrapper::listMap(
     apache::thrift::RpcOptions& rpcOptions,
     std::vector<std::map<int32_t,int32_t>> arg_foo) {
   auto* client = static_cast<::cpp2::NestedContainersAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_listMap, channel_);
@@ -76,7 +79,7 @@ NestedContainersClientWrapper::listMap(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -84,7 +87,8 @@ NestedContainersClientWrapper::listSet(
     apache::thrift::RpcOptions& rpcOptions,
     std::vector<std::set<int32_t>> arg_foo) {
   auto* client = static_cast<::cpp2::NestedContainersAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_listSet, channel_);
@@ -99,7 +103,7 @@ NestedContainersClientWrapper::listSet(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -107,7 +111,8 @@ NestedContainersClientWrapper::turtles(
     apache::thrift::RpcOptions& rpcOptions,
     std::vector<std::vector<std::map<int32_t,std::map<int32_t,std::set<int32_t>>>>> arg_foo) {
   auto* client = static_cast<::cpp2::NestedContainersAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_turtles, channel_);
@@ -122,7 +127,7 @@ NestedContainersClientWrapper::turtles(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 } // namespace cpp2

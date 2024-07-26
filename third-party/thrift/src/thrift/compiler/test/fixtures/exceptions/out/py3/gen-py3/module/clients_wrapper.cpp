@@ -14,7 +14,8 @@ folly::Future<folly::Unit>
 RaiserClientWrapper::doBland(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::cpp2::RaiserAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_doBland, channel_);
@@ -28,14 +29,15 @@ RaiserClientWrapper::doBland(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
 RaiserClientWrapper::doRaise(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::cpp2::RaiserAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_doRaise, channel_);
@@ -49,14 +51,15 @@ RaiserClientWrapper::doRaise(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::string>
 RaiserClientWrapper::get200(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::cpp2::RaiserAsyncClient*>(async_client_.get());
-  folly::Promise<std::string> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::string>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_get200, channel_);
@@ -70,14 +73,15 @@ RaiserClientWrapper::get200(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::string>
 RaiserClientWrapper::get500(
     apache::thrift::RpcOptions& rpcOptions) {
   auto* client = static_cast<::cpp2::RaiserAsyncClient*>(async_client_.get());
-  folly::Promise<std::string> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::string>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_get500, channel_);
@@ -91,7 +95,7 @@ RaiserClientWrapper::get500(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 } // namespace cpp2

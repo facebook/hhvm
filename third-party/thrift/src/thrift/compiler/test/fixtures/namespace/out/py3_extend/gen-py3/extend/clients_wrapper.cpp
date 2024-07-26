@@ -15,7 +15,8 @@ ExtendTestServiceClientWrapper::check(
     apache::thrift::RpcOptions& rpcOptions,
     ::cpp2::HsFoo arg_struct1) {
   auto* client = static_cast<::cpp2::ExtendTestServiceAsyncClient*>(async_client_.get());
-  folly::Promise<bool> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<bool>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<bool>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_check, channel_);
@@ -30,7 +31,7 @@ ExtendTestServiceClientWrapper::check(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 } // namespace cpp2

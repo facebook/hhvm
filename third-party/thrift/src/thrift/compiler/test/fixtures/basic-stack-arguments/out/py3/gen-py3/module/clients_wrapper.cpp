@@ -15,7 +15,8 @@ MyServiceClientWrapper::hasDataById(
     apache::thrift::RpcOptions& rpcOptions,
     int64_t arg_id) {
   auto* client = static_cast<::cpp2::MyServiceAsyncClient*>(async_client_.get());
-  folly::Promise<bool> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<bool>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<bool>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_hasDataById, channel_);
@@ -30,7 +31,7 @@ MyServiceClientWrapper::hasDataById(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::string>
@@ -38,7 +39,8 @@ MyServiceClientWrapper::getDataById(
     apache::thrift::RpcOptions& rpcOptions,
     int64_t arg_id) {
   auto* client = static_cast<::cpp2::MyServiceAsyncClient*>(async_client_.get());
-  folly::Promise<std::string> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::string>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_getDataById, channel_);
@@ -53,7 +55,7 @@ MyServiceClientWrapper::getDataById(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -62,7 +64,8 @@ MyServiceClientWrapper::putDataById(
     int64_t arg_id,
     std::string arg_data) {
   auto* client = static_cast<::cpp2::MyServiceAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_putDataById, channel_);
@@ -78,7 +81,7 @@ MyServiceClientWrapper::putDataById(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -87,7 +90,8 @@ MyServiceClientWrapper::lobDataById(
     int64_t arg_id,
     std::string arg_data) {
   auto* client = static_cast<::cpp2::MyServiceAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::apache::thrift::OneWayFutureCallback>(
     std::move(_promise), channel_);
@@ -103,7 +107,7 @@ MyServiceClientWrapper::lobDataById(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<bool>
@@ -111,7 +115,8 @@ MyServiceFastClientWrapper::hasDataById(
     apache::thrift::RpcOptions& rpcOptions,
     int64_t arg_id) {
   auto* client = static_cast<::cpp2::MyServiceFastAsyncClient*>(async_client_.get());
-  folly::Promise<bool> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<bool>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<bool>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_hasDataById, channel_);
@@ -126,7 +131,7 @@ MyServiceFastClientWrapper::hasDataById(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::string>
@@ -134,7 +139,8 @@ MyServiceFastClientWrapper::getDataById(
     apache::thrift::RpcOptions& rpcOptions,
     int64_t arg_id) {
   auto* client = static_cast<::cpp2::MyServiceFastAsyncClient*>(async_client_.get());
-  folly::Promise<std::string> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::string>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_getDataById, channel_);
@@ -149,7 +155,7 @@ MyServiceFastClientWrapper::getDataById(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -158,7 +164,8 @@ MyServiceFastClientWrapper::putDataById(
     int64_t arg_id,
     std::string arg_data) {
   auto* client = static_cast<::cpp2::MyServiceFastAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_putDataById, channel_);
@@ -174,7 +181,7 @@ MyServiceFastClientWrapper::putDataById(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -183,7 +190,8 @@ MyServiceFastClientWrapper::lobDataById(
     int64_t arg_id,
     std::string arg_data) {
   auto* client = static_cast<::cpp2::MyServiceFastAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::apache::thrift::OneWayFutureCallback>(
     std::move(_promise), channel_);
@@ -199,7 +207,7 @@ MyServiceFastClientWrapper::lobDataById(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::string>
@@ -207,7 +215,8 @@ DbMixedStackArgumentsClientWrapper::getDataByKey0(
     apache::thrift::RpcOptions& rpcOptions,
     std::string arg_key) {
   auto* client = static_cast<::cpp2::DbMixedStackArgumentsAsyncClient*>(async_client_.get());
-  folly::Promise<std::string> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::string>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_getDataByKey0, channel_);
@@ -222,7 +231,7 @@ DbMixedStackArgumentsClientWrapper::getDataByKey0(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<std::string>
@@ -230,7 +239,8 @@ DbMixedStackArgumentsClientWrapper::getDataByKey1(
     apache::thrift::RpcOptions& rpcOptions,
     std::string arg_key) {
   auto* client = static_cast<::cpp2::DbMixedStackArgumentsAsyncClient*>(async_client_.get());
-  folly::Promise<std::string> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::string>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_getDataByKey1, channel_);
@@ -245,7 +255,7 @@ DbMixedStackArgumentsClientWrapper::getDataByKey1(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 } // namespace cpp2

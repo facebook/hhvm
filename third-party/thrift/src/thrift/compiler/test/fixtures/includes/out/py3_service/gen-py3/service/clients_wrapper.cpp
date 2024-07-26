@@ -16,7 +16,8 @@ MyServiceClientWrapper::query(
     ::cpp2::MyStruct arg_s,
     ::cpp2::Included arg_i) {
   auto* client = static_cast<::cpp2::MyServiceAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_query, channel_);
@@ -32,7 +33,7 @@ MyServiceClientWrapper::query(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit>
@@ -41,7 +42,8 @@ MyServiceClientWrapper::has_arg_docs(
     ::cpp2::MyStruct arg_s,
     ::cpp2::Included arg_i) {
   auto* client = static_cast<::cpp2::MyServiceAsyncClient*>(async_client_.get());
-  folly::Promise<folly::Unit> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_has_arg_docs, channel_);
@@ -57,7 +59,7 @@ MyServiceClientWrapper::has_arg_docs(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 } // namespace cpp2

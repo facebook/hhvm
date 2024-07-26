@@ -15,7 +15,8 @@ TestServiceClientWrapper::init(
     apache::thrift::RpcOptions& rpcOptions,
     int64_t arg_int1) {
   auto* client = static_cast<::cpp2::TestServiceAsyncClient*>(async_client_.get());
-  folly::Promise<int64_t> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<int64_t>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<int64_t>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_init, channel_);
@@ -30,7 +31,7 @@ TestServiceClientWrapper::init(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 } // namespace cpp2

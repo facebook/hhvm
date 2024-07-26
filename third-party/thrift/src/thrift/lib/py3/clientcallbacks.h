@@ -18,21 +18,21 @@
 #include <thrift/lib/cpp2/async/FutureRequest.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 
-namespace thrift {
-namespace py3 {
+namespace thrift::py3 {
+
 template <typename Result>
 class FutureCallback : public apache::thrift::FutureCallbackBase<Result> {
  private:
-  typedef folly::exception_wrapper (*Processor)(
-      Result&, apache::thrift::ClientReceiveState&);
-  Processor processor_;
+  using Helper = typename apache::thrift::FutureCallbackBase<Result>::Helper;
+  using Processor = typename Helper::CallbackProcessorType;
+  Processor& processor_;
   apache::thrift::RpcOptions& options_;
 
  public:
   FutureCallback(
-      folly::Promise<Result>&& promise,
+      folly::Promise<typename Helper::PromiseResult>&& promise,
       apache::thrift::RpcOptions& options,
-      Processor processor,
+      Processor& processor,
       std::shared_ptr<apache::thrift::RequestChannel> channel = nullptr)
       : apache::thrift::FutureCallbackBase<Result>(
             std::move(promise), std::move(channel)),
@@ -44,61 +44,23 @@ class FutureCallback : public apache::thrift::FutureCallbackBase<Result> {
     CHECK(state.hasResponseBuffer());
 
     Result result;
-    auto ew = processor_(result, state);
+    folly::exception_wrapper ew;
+    Helper::invokeCallbackProcessor(processor_, ew, result, state);
 
     if (state.header() && !state.header()->getHeaders().empty()) {
       options_.setReadHeaders(state.header()->releaseHeaders());
     }
 
     if (ew) {
-      this->promise_.setException(ew);
+      this->promise_.setValue(
+          Helper::makeError(std::move(ew), std::move(state)));
     } else {
-      this->promise_.setValue(std::move(result));
+      this->promise_.setValue(
+          Helper::makeResult(std::move(result), std::move(state)));
     }
   }
 
   bool isInlineSafe() const override { return true; }
 };
 
-template <>
-class FutureCallback<folly::Unit>
-    : public apache::thrift::FutureCallbackBase<folly::Unit> {
- private:
-  typedef folly::exception_wrapper (*Processor)(
-      apache::thrift::ClientReceiveState&);
-  Processor processor_;
-  apache::thrift::RpcOptions& options_;
-
- public:
-  FutureCallback(
-      folly::Promise<folly::Unit>&& promise,
-      apache::thrift::RpcOptions& options,
-      Processor processor,
-      std::shared_ptr<apache::thrift::RequestChannel> channel = nullptr)
-      : apache::thrift::FutureCallbackBase<folly::Unit>(
-            std::move(promise), std::move(channel)),
-        processor_(processor),
-        options_(options) {}
-
-  void replyReceived(apache::thrift::ClientReceiveState&& state) override {
-    CHECK(!state.isException());
-    CHECK(state.hasResponseBuffer());
-
-    auto ew = processor_(state);
-
-    if (state.header() && !state.header()->getHeaders().empty()) {
-      options_.setReadHeaders(state.header()->releaseHeaders());
-    }
-
-    if (ew) {
-      promise_.setException(ew);
-    } else {
-      promise_.setValue();
-    }
-  }
-
-  bool isInlineSafe() const override { return true; }
-};
-
-} // namespace py3
-} // namespace thrift
+} // namespace thrift::py3

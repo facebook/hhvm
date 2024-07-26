@@ -15,7 +15,8 @@
   limitations under the License.
 
 }}
-folly::Promise<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}> _promise;
+using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}>;
+folly::Promise<CallbackHelper::PromiseResult> _promise;
 auto _future = _promise.getFuture();
 {{^function:oneway?}}
 auto callback = std::make_unique<::thrift::py3::FutureCallback<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}>>(
@@ -37,4 +38,4 @@ try {
     std::current_exception()
   ));
 }
-return _future;
+return std::move(_future).thenValue(CallbackHelper::extractResult);

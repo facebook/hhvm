@@ -16,7 +16,8 @@ PubSubStreamingServiceClientWrapper::returnstream(
     int32_t arg_i32_from,
     int32_t arg_i32_to) {
   auto* client = static_cast<::cpp2::PubSubStreamingServiceAsyncClient*>(async_client_.get());
-  folly::Promise<apache::thrift::ClientBufferedStream<int32_t>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<apache::thrift::ClientBufferedStream<int32_t>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ClientBufferedStream<int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_returnstream, channel_);
@@ -32,7 +33,7 @@ PubSubStreamingServiceClientWrapper::returnstream(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<apache::thrift::ClientBufferedStream<int32_t>>
@@ -40,7 +41,8 @@ PubSubStreamingServiceClientWrapper::streamthrows(
     apache::thrift::RpcOptions& rpcOptions,
     int32_t arg_foo) {
   auto* client = static_cast<::cpp2::PubSubStreamingServiceAsyncClient*>(async_client_.get());
-  folly::Promise<apache::thrift::ClientBufferedStream<int32_t>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<apache::thrift::ClientBufferedStream<int32_t>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ClientBufferedStream<int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_streamthrows, channel_);
@@ -55,7 +57,7 @@ PubSubStreamingServiceClientWrapper::streamthrows(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<apache::thrift::ClientBufferedStream<int32_t>>
@@ -63,7 +65,8 @@ PubSubStreamingServiceClientWrapper::servicethrows(
     apache::thrift::RpcOptions& rpcOptions,
     int32_t arg_foo) {
   auto* client = static_cast<::cpp2::PubSubStreamingServiceAsyncClient*>(async_client_.get());
-  folly::Promise<apache::thrift::ClientBufferedStream<int32_t>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<apache::thrift::ClientBufferedStream<int32_t>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ClientBufferedStream<int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_servicethrows, channel_);
@@ -78,7 +81,7 @@ PubSubStreamingServiceClientWrapper::servicethrows(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<apache::thrift::ClientBufferedStream<int32_t>>
@@ -86,7 +89,8 @@ PubSubStreamingServiceClientWrapper::servicethrows2(
     apache::thrift::RpcOptions& rpcOptions,
     int32_t arg_foo) {
   auto* client = static_cast<::cpp2::PubSubStreamingServiceAsyncClient*>(async_client_.get());
-  folly::Promise<apache::thrift::ClientBufferedStream<int32_t>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<apache::thrift::ClientBufferedStream<int32_t>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ClientBufferedStream<int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_servicethrows2, channel_);
@@ -101,7 +105,7 @@ PubSubStreamingServiceClientWrapper::servicethrows2(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<apache::thrift::ClientBufferedStream<int32_t>>
@@ -109,7 +113,8 @@ PubSubStreamingServiceClientWrapper::boththrows(
     apache::thrift::RpcOptions& rpcOptions,
     int32_t arg_foo) {
   auto* client = static_cast<::cpp2::PubSubStreamingServiceAsyncClient*>(async_client_.get());
-  folly::Promise<apache::thrift::ClientBufferedStream<int32_t>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<apache::thrift::ClientBufferedStream<int32_t>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ClientBufferedStream<int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_boththrows, channel_);
@@ -124,7 +129,7 @@ PubSubStreamingServiceClientWrapper::boththrows(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>
@@ -132,7 +137,8 @@ PubSubStreamingServiceClientWrapper::responseandstreamstreamthrows(
     apache::thrift::RpcOptions& rpcOptions,
     int32_t arg_foo) {
   auto* client = static_cast<::cpp2::PubSubStreamingServiceAsyncClient*>(async_client_.get());
-  folly::Promise<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_responseandstreamstreamthrows, channel_);
@@ -147,7 +153,7 @@ PubSubStreamingServiceClientWrapper::responseandstreamstreamthrows(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>
@@ -155,7 +161,8 @@ PubSubStreamingServiceClientWrapper::responseandstreamservicethrows(
     apache::thrift::RpcOptions& rpcOptions,
     int32_t arg_foo) {
   auto* client = static_cast<::cpp2::PubSubStreamingServiceAsyncClient*>(async_client_.get());
-  folly::Promise<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_responseandstreamservicethrows, channel_);
@@ -170,7 +177,7 @@ PubSubStreamingServiceClientWrapper::responseandstreamservicethrows(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>
@@ -178,7 +185,8 @@ PubSubStreamingServiceClientWrapper::responseandstreamboththrows(
     apache::thrift::RpcOptions& rpcOptions,
     int32_t arg_foo) {
   auto* client = static_cast<::cpp2::PubSubStreamingServiceAsyncClient*>(async_client_.get());
-  folly::Promise<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_responseandstreamboththrows, channel_);
@@ -193,7 +201,7 @@ PubSubStreamingServiceClientWrapper::responseandstreamboththrows(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::Future<apache::thrift::ClientBufferedStream<int32_t>>
@@ -202,7 +210,8 @@ PubSubStreamingServiceClientWrapper::returnstreamFast(
     int32_t arg_i32_from,
     int32_t arg_i32_to) {
   auto* client = static_cast<::cpp2::PubSubStreamingServiceAsyncClient*>(async_client_.get());
-  folly::Promise<apache::thrift::ClientBufferedStream<int32_t>> _promise;
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<apache::thrift::ClientBufferedStream<int32_t>>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ClientBufferedStream<int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_returnstreamFast, channel_);
@@ -218,7 +227,7 @@ PubSubStreamingServiceClientWrapper::returnstreamFast(
       std::current_exception()
     ));
   }
-  return _future;
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
 } // namespace cpp2

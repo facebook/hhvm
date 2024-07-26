@@ -81,10 +81,10 @@ void apache::thrift::Client<::cpp2::DbMixedStackArguments>::getDataByKey0(std::u
 void apache::thrift::Client<::cpp2::DbMixedStackArguments>::getDataByKey0(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key) {
   auto [ctx, header] = getDataByKey0Ctx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  getDataByKey0Impl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_key);
+  fbthrift_serialize_and_send_getDataByKey0(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_key);
 }
 
-void apache::thrift::Client<::cpp2::DbMixedStackArguments>::getDataByKey0Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key, bool stealRpcOptions) {
+void apache::thrift::Client<::cpp2::DbMixedStackArguments>::fbthrift_serialize_and_send_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_getDataByKey0(&writer, rpcOptions, *header, contextStack, p_key);
     if (stealRpcOptions) {
@@ -134,7 +134,7 @@ void apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_getDataByKey0(a
   callback.waitUntilDone(
     evb,
     [&] {
-      getDataByKey0Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_key);
+      fbthrift_serialize_and_send_getDataByKey0(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_key);
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {
@@ -168,7 +168,7 @@ apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_complete_getDataByKe
   callback.waitUntilDone(
     evb,
     [&] {
-      getDataByKey0Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_key, true);
+      fbthrift_serialize_and_send_getDataByKey0(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_key, true);
     });
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
@@ -302,10 +302,10 @@ void apache::thrift::Client<::cpp2::DbMixedStackArguments>::getDataByKey1(std::u
 void apache::thrift::Client<::cpp2::DbMixedStackArguments>::getDataByKey1(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key) {
   auto [ctx, header] = getDataByKey1Ctx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  getDataByKey1Impl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_key);
+  fbthrift_serialize_and_send_getDataByKey1(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_key);
 }
 
-void apache::thrift::Client<::cpp2::DbMixedStackArguments>::getDataByKey1Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key, bool stealRpcOptions) {
+void apache::thrift::Client<::cpp2::DbMixedStackArguments>::fbthrift_serialize_and_send_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_getDataByKey1(&writer, rpcOptions, *header, contextStack, p_key);
     if (stealRpcOptions) {
@@ -355,7 +355,7 @@ void apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_getDataByKey1(a
   callback.waitUntilDone(
     evb,
     [&] {
-      getDataByKey1Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_key);
+      fbthrift_serialize_and_send_getDataByKey1(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_key);
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {
@@ -389,7 +389,7 @@ apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_complete_getDataByKe
   callback.waitUntilDone(
     evb,
     [&] {
-      getDataByKey1Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_key, true);
+      fbthrift_serialize_and_send_getDataByKey1(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_key, true);
     });
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));

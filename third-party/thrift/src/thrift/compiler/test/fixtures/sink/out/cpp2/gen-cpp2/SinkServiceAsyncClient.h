@@ -34,7 +34,7 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
 
 
  protected:
-  void methodImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_method(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
   /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "method"} */
@@ -60,7 +60,7 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  protected:
-  void methodAndReponseImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_methodAndReponse(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
   /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodAndReponse"} */
@@ -86,7 +86,7 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodAndReponseCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  protected:
-  void methodThrowImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_methodThrow(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
   /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodThrow"} */
@@ -112,7 +112,7 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodThrowCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  protected:
-  void methodSinkThrowImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_methodSinkThrow(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
   /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodSinkThrow"} */
@@ -138,7 +138,7 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodSinkThrowCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  protected:
-  void methodFinalThrowImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_methodFinalThrow(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
   /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFinalThrow"} */
@@ -164,7 +164,7 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodFinalThrowCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  protected:
-  void methodBothThrowImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_methodBothThrow(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
   /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodBothThrow"} */
@@ -190,7 +190,7 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodBothThrowCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  protected:
-  void methodFastImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_methodFast(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
   /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFast"} */

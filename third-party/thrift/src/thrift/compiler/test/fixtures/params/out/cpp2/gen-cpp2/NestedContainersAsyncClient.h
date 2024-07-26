@@ -36,7 +36,7 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "mapList"} */
   virtual void mapList(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& p_foo);
  protected:
-  void mapListImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& p_foo, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_mapList(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& p_foo, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "mapList"} */
@@ -98,9 +98,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      mapListImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_mapList(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
-      mapListImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_mapList(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -157,7 +157,7 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "mapSet"} */
   virtual void mapSet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& p_foo);
  protected:
-  void mapSetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& p_foo, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_mapSet(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& p_foo, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "mapSet"} */
@@ -219,9 +219,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      mapSetImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_mapSet(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
-      mapSetImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_mapSet(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -278,7 +278,7 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "listMap"} */
   virtual void listMap(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& p_foo);
  protected:
-  void listMapImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& p_foo, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_listMap(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& p_foo, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "listMap"} */
@@ -340,9 +340,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      listMapImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_listMap(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
-      listMapImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_listMap(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -399,7 +399,7 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "listSet"} */
   virtual void listSet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::set<::std::int32_t>>& p_foo);
  protected:
-  void listSetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::set<::std::int32_t>>& p_foo, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_listSet(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::set<::std::int32_t>>& p_foo, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "listSet"} */
@@ -461,9 +461,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      listSetImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_listSet(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
-      listSetImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_listSet(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -520,7 +520,7 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "turtles"} */
   virtual void turtles(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>& p_foo);
  protected:
-  void turtlesImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>& p_foo, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_turtles(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>& p_foo, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "turtles"} */
@@ -582,9 +582,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      turtlesImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_turtles(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
-      turtlesImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_turtles(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

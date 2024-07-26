@@ -38,7 +38,7 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   virtual void query(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
  protected:
-  void queryImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_query(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
@@ -100,9 +100,9 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      queryImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_s, p_i);
+      fbthrift_serialize_and_send_query(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_s, p_i);
     } else {
-      queryImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_s, p_i);
+      fbthrift_serialize_and_send_query(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_s, p_i);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -159,7 +159,7 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   virtual void has_arg_docs(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
  protected:
-  void has_arg_docsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_has_arg_docs(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
@@ -221,9 +221,9 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      has_arg_docsImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_s, p_i);
+      fbthrift_serialize_and_send_has_arg_docs(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_s, p_i);
     } else {
-      has_arg_docsImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_s, p_i);
+      fbthrift_serialize_and_send_has_arg_docs(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_s, p_i);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

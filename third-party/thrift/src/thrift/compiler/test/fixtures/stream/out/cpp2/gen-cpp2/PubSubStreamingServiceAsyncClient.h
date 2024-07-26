@@ -37,7 +37,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "returnstream"} */
   virtual void returnstream(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
  protected:
-  void returnstreamImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_returnstream(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "returnstream"} */
@@ -95,9 +95,9 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      returnstreamImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_i32_from, p_i32_to);
+      fbthrift_serialize_and_send_returnstream(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_i32_from, p_i32_to);
     } else {
-      returnstreamImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_i32_from, p_i32_to);
+      fbthrift_serialize_and_send_returnstream(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_i32_from, p_i32_to);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -154,7 +154,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "streamthrows"} */
   virtual void streamthrows(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
  protected:
-  void streamthrowsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_streamthrows(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "streamthrows"} */
@@ -212,9 +212,9 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      streamthrowsImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_streamthrows(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
-      streamthrowsImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_streamthrows(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -271,7 +271,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "servicethrows"} */
   virtual void servicethrows(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
  protected:
-  void servicethrowsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_servicethrows(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "servicethrows"} */
@@ -329,9 +329,9 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      servicethrowsImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_servicethrows(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
-      servicethrowsImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_servicethrows(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -388,7 +388,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "servicethrows2"} */
   virtual void servicethrows2(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
  protected:
-  void servicethrows2Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_servicethrows2(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "servicethrows2"} */
@@ -446,9 +446,9 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      servicethrows2Impl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_servicethrows2(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
-      servicethrows2Impl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_servicethrows2(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -505,7 +505,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "boththrows"} */
   virtual void boththrows(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
  protected:
-  void boththrowsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_boththrows(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "boththrows"} */
@@ -563,9 +563,9 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      boththrowsImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_boththrows(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
-      boththrowsImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_boththrows(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -622,7 +622,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamstreamthrows"} */
   virtual void responseandstreamstreamthrows(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
  protected:
-  void responseandstreamstreamthrowsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_responseandstreamstreamthrows(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamstreamthrows"} */
@@ -680,9 +680,9 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      responseandstreamstreamthrowsImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_responseandstreamstreamthrows(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
-      responseandstreamstreamthrowsImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_responseandstreamstreamthrows(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -739,7 +739,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamservicethrows"} */
   virtual void responseandstreamservicethrows(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
  protected:
-  void responseandstreamservicethrowsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_responseandstreamservicethrows(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamservicethrows"} */
@@ -797,9 +797,9 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      responseandstreamservicethrowsImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_responseandstreamservicethrows(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
-      responseandstreamservicethrowsImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_responseandstreamservicethrows(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -856,7 +856,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamboththrows"} */
   virtual void responseandstreamboththrows(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
  protected:
-  void responseandstreamboththrowsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_responseandstreamboththrows(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamboththrows"} */
@@ -914,9 +914,9 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      responseandstreamboththrowsImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_responseandstreamboththrows(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     } else {
-      responseandstreamboththrowsImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+      fbthrift_serialize_and_send_responseandstreamboththrows(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -973,7 +973,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "returnstreamFast"} */
   virtual void returnstreamFast(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
  protected:
-  void returnstreamFastImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_returnstreamFast(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "returnstreamFast"} */
@@ -1031,9 +1031,9 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      returnstreamFastImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_i32_from, p_i32_to);
+      fbthrift_serialize_and_send_returnstreamFast(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_i32_from, p_i32_to);
     } else {
-      returnstreamFastImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_i32_from, p_i32_to);
+      fbthrift_serialize_and_send_returnstreamFast(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_i32_from, p_i32_to);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

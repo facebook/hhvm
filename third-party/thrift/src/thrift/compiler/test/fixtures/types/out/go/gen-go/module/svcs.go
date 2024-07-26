@@ -805,11 +805,8 @@ func (p *SomeServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *SomeServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
-    if processor, ok := p.processorMap[key]; ok {
-        return processor, nil
-    }
-    return nil, nil
+func (p *SomeServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+    return p.processorMap[key]
 }
 
 func (p *SomeServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {

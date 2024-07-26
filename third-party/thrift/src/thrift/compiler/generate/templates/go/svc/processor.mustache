@@ -73,11 +73,8 @@ func (p *{{service:go_name}}Processor) AddToFunctionServiceMap(key, service stri
 }
 
 func (p *{{service:go_name}}Processor) GetProcessorFunctionContext{{!
-  }}(key string) (processor thrift.ProcessorFunctionContext, err error) {
-    if processor, ok := p.processorMap[key]; ok {
-        return processor, nil
-    }
-    return nil, nil
+  }}(key string) (processor thrift.ProcessorFunctionContext) {
+    return p.processorMap[key]
 }
 
 func (p *{{service:go_name}}Processor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {

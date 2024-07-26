@@ -31,13 +31,10 @@ type ProcessorContext interface {
 	// a non-nil GetProcessorFunctionContext when the function can be successfully
 	// found.
 	//
-	// If an error is returned, it will be wrapped in an application level
-	// thrift exception and returned.
-	//
-	// If ProcessorFunctionContext and error are both nil, a generic error will be
+	// If ProcessorFunctionContext is nil, a generic error will be
 	// sent which explains that no processor function exists with the specified
 	// name on this server.
-	GetProcessorFunctionContext(name string) (ProcessorFunctionContext, error)
+	GetProcessorFunctionContext(name string) ProcessorFunctionContext
 }
 
 // ProcessorFunctionContext is the interface that must be implemented in
@@ -76,13 +73,9 @@ func processContext(ctx context.Context, processor ProcessorContext, prot Protoc
 		// error should be sent, connection should stay open if successful
 	}
 	if err == nil {
-		pf, e2 := processor.GetProcessorFunctionContext(name)
+		pf := processor.GetProcessorFunctionContext(name)
 		if pf == nil {
-			if e2 == nil {
-				err = NewApplicationException(UNKNOWN_METHOD, fmt.Sprintf("no such function: %q", name))
-			} else {
-				err = NewApplicationException(UNKNOWN_METHOD, e2.Error())
-			}
+			err = NewApplicationException(UNKNOWN_METHOD, fmt.Sprintf("no such function: %q", name))
 		} else {
 			pfunc = pf
 		}

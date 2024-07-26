@@ -64,8 +64,11 @@ func TestSimpleServer(t *testing.T) {
 type testProcessor struct {
 }
 
-func (t *testProcessor) GetProcessorFunctionContext(name string) (ProcessorFunctionContext, error) {
-	return &testProcessorFunction{}, nil
+func (t *testProcessor) GetProcessorFunctionContext(name string) ProcessorFunctionContext {
+	if name == "test" {
+		return &testProcessorFunction{}
+	}
+	return nil
 }
 
 type testProcessorFunction struct{}

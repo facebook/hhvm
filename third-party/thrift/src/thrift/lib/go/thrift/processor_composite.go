@@ -49,9 +49,9 @@ func (p *compositeProcessor) Include(processorMap map[string]ProcessorFunctionCo
 }
 
 // GetProcessorFunctionContext multiplexes redirects to the appropriate Processor
-func (p *compositeProcessor) GetProcessorFunctionContext(name string) (ProcessorFunctionContext, error) {
+func (p *compositeProcessor) GetProcessorFunctionContext(name string) ProcessorFunctionContext {
 	tfunc, _ := p.serviceProcessorMap[name]
-	return tfunc, nil
+	return tfunc
 }
 
 // ProcessorMap returns the map that maps method names to Processors

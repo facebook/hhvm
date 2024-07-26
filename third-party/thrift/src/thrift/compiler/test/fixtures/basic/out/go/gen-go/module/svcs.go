@@ -282,11 +282,8 @@ func (p *FooServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *FooServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
-    if processor, ok := p.processorMap[key]; ok {
-        return processor, nil
-    }
-    return nil, nil
+func (p *FooServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+    return p.processorMap[key]
 }
 
 func (p *FooServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
@@ -743,11 +740,8 @@ func (p *FB303ServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *FB303ServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
-    if processor, ok := p.processorMap[key]; ok {
-        return processor, nil
-    }
-    return nil, nil
+func (p *FB303ServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+    return p.processorMap[key]
 }
 
 func (p *FB303ServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
@@ -3434,11 +3428,8 @@ func (p *MyServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *MyServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
-    if processor, ok := p.processorMap[key]; ok {
-        return processor, nil
-    }
-    return nil, nil
+func (p *MyServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+    return p.processorMap[key]
 }
 
 func (p *MyServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
@@ -4646,11 +4637,8 @@ func (p *DbMixedStackArgumentsProcessor) AddToFunctionServiceMap(key, service st
     p.functionServiceMap[key] = service
 }
 
-func (p *DbMixedStackArgumentsProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
-    if processor, ok := p.processorMap[key]; ok {
-        return processor, nil
-    }
-    return nil, nil
+func (p *DbMixedStackArgumentsProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+    return p.processorMap[key]
 }
 
 func (p *DbMixedStackArgumentsProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {

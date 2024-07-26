@@ -45,19 +45,16 @@ func WrapInterceptorContext(interceptor Interceptor, p ProcessorContext) Process
 	}
 }
 
-func (p *interceptorProcessorContext) GetProcessorFunctionContext(name string) (ProcessorFunctionContext, error) {
-	pf, err := p.ProcessorContext.GetProcessorFunctionContext(name)
-	if err != nil {
-		return nil, err
-	}
+func (p *interceptorProcessorContext) GetProcessorFunctionContext(name string) ProcessorFunctionContext {
+	pf := p.ProcessorContext.GetProcessorFunctionContext(name)
 	if pf == nil {
-		return nil, nil // see ProcessContext, this semantic means 'no such function'.
+		return nil // see ProcessContext, this semantic means 'no such function'.
 	}
 	return &interceptorProcessorFunctionContext{
 		interceptor:              p.interceptor,
 		methodName:               name,
 		ProcessorFunctionContext: pf,
-	}, nil
+	}
 }
 
 type interceptorProcessorFunctionContext struct {

@@ -1977,11 +1977,8 @@ func (p *MyServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *MyServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
-    if processor, ok := p.processorMap[key]; ok {
-        return processor, nil
-    }
-    return nil, nil
+func (p *MyServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+    return p.processorMap[key]
 }
 
 func (p *MyServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
@@ -2802,11 +2799,8 @@ func (p *MyServicePrioParentProcessor) AddToFunctionServiceMap(key, service stri
     p.functionServiceMap[key] = service
 }
 
-func (p *MyServicePrioParentProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
-    if processor, ok := p.processorMap[key]; ok {
-        return processor, nil
-    }
-    return nil, nil
+func (p *MyServicePrioParentProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+    return p.processorMap[key]
 }
 
 func (p *MyServicePrioParentProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
@@ -3568,11 +3562,8 @@ func (p *BadServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *BadServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
-    if processor, ok := p.processorMap[key]; ok {
-        return processor, nil
-    }
-    return nil, nil
+func (p *BadServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+    return p.processorMap[key]
 }
 
 func (p *BadServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
@@ -4257,11 +4248,8 @@ func (p *FooBarBazServiceProcessor) AddToFunctionServiceMap(key, service string)
     p.functionServiceMap[key] = service
 }
 
-func (p *FooBarBazServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
-    if processor, ok := p.processorMap[key]; ok {
-        return processor, nil
-    }
-    return nil, nil
+func (p *FooBarBazServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+    return p.processorMap[key]
 }
 
 func (p *FooBarBazServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {

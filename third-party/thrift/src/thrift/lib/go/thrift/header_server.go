@@ -18,14 +18,13 @@ package thrift
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
 	"os"
 	"runtime/debug"
 )
 
-// simpleServer is a functional but unoptimized server that is easy to
+// headerServer is a functional but unoptimized server that is easy to
 // understand.  In its accept loop, it performs an accept on an
 // underlying socket, wraps the socket in the net.Listener, and
 // then spins up a gofunc to process requests.
@@ -34,20 +33,15 @@ import (
 // on the connection.  multiple simultaneous requests over a single
 // connection are not supported, as the per-connection gofunc reads
 // the request, processes it, and writes the response serially
-type simpleServer struct {
+type headerServer struct {
 	processor ProcessorContext
 	listener  net.Listener
 	log       *log.Logger
 }
 
-// NewSimpleServer creates a new server that only supports Header Transport.
-func NewSimpleServer(processor ProcessorContext, listener net.Listener, transportType TransportID, options ...func(*ServerOptions)) Server {
-	if transportType != TransportIDHeader {
-		panic(fmt.Sprintf("SimpleServer only supports Header Transport and not %d", transportType))
-	}
-	serverOptions := simpleServerOptions(options...)
-	processor = WrapInterceptorContext(serverOptions.interceptor, processor)
-	return &simpleServer{
+// newHeaderServer creates a new server that only supports Header Transport.
+func newHeaderServer(processor ProcessorContext, listener net.Listener) Server {
+	return &headerServer{
 		processor: processor,
 		listener:  listener,
 		log:       log.New(os.Stderr, "", log.LstdFlags),
@@ -56,7 +50,7 @@ func NewSimpleServer(processor ProcessorContext, listener net.Listener, transpor
 
 // ServeContext starts listening on the transport and accepting new connections
 // and blocks until cancel is called via context or an error occurs.
-func (p *simpleServer) ServeContext(ctx context.Context) error {
+func (p *headerServer) ServeContext(ctx context.Context) error {
 	go func() {
 		<-ctx.Done()
 		p.listener.Close()
@@ -69,7 +63,7 @@ func (p *simpleServer) ServeContext(ctx context.Context) error {
 }
 
 // acceptLoop takes a context that will be decorated with ConnInfo and passed down to new clients.
-func (p *simpleServer) acceptLoop(ctx context.Context) error {
+func (p *headerServer) acceptLoop(ctx context.Context) error {
 	for {
 		conn, err := p.listener.Accept()
 		if err != nil {
@@ -92,7 +86,7 @@ func (p *simpleServer) acceptLoop(ctx context.Context) error {
 	}
 }
 
-func (p *simpleServer) processRequests(ctx context.Context, conn net.Conn) error {
+func (p *headerServer) processRequests(ctx context.Context, conn net.Conn) error {
 	protocol, err := NewHeaderProtocol(conn)
 	if err != nil {
 		return err

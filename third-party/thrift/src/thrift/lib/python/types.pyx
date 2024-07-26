@@ -1234,7 +1234,7 @@ cdef tuple _validate_union_init_kwargs(
     current_field_value = None
 
     for field_name, field_value in kwargs.items():
-        if current_field_enum is not None:
+        if current_field_enum is not None and field_value is not None:
             raise TypeError(
                 f"Cannot initialize Thrift union ({union_class.__name__}) with more "
                 f"than one keyword argument (got non-None value for {field_name}, but "

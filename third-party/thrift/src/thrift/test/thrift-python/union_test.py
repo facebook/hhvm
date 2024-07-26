@@ -109,9 +109,8 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError,
             (
-                r"Cannot initialize Thrift union \(TestUnion\) with more than one "
-                r"keyword argument \(got non-None value for field_does_not_exist, "
-                r"but already had one for string_field\)."
+                r"Cannot initialize Thrift union \(TestUnion\): unknown field "
+                r"\(field_does_not_exist\)."
             ),
         ):
             TestUnionImmutable(string_field="hello", field_does_not_exist=None)

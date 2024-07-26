@@ -62,14 +62,10 @@ func errorType(err error) string {
 // and fully process a message. It understands the thrift protocol.
 // A framework could be written outside of the thrift library but would need to
 // duplicate this logic.
-func processContext(ctx context.Context, processor ProcessorContext, prot Protocol) (keepOpen bool, ext Exception) {
+func processContext(ctx context.Context, processor ProcessorContext, prot Protocol) (ext Exception) {
 	name, messageType, seqID, rerr := prot.ReadMessageBegin()
 	if rerr != nil {
-		if err, ok := rerr.(TransportException); ok && err.TypeID() == END_OF_FILE {
-			// connection terminated because client closed connection
-			return false, nil
-		}
-		return false, rerr
+		return rerr
 	}
 	ctx = WithHeaders(ctx, prot.GetResponseHeaders())
 	var err ApplicationException
@@ -96,17 +92,17 @@ func processContext(ctx context.Context, processor ProcessorContext, prot Protoc
 	// rest of the invalid message but keep the connection open.
 	if err != nil {
 		if e2 := prot.Skip(STRUCT); e2 != nil {
-			return false, e2
+			return e2
 		} else if e2 := prot.ReadMessageEnd(); e2 != nil {
-			return false, e2
+			return e2
 		}
 		// for ONEWAY, we have no way to report that the processing failed.
 		if messageType != ONEWAY {
 			if e2 := sendException(prot, name, seqID, err); e2 != nil {
-				return false, e2
+				return e2
 			}
 		}
-		return true, nil
+		return nil
 	}
 
 	if pfunc == nil {
@@ -116,7 +112,7 @@ func processContext(ctx context.Context, processor ProcessorContext, prot Protoc
 	argStruct, e2 := pfunc.Read(prot)
 	if e2 != nil {
 		// close connection on read failure
-		return false, e2
+		return e2
 	}
 	var result WritableStruct
 	result, err = pfunc.RunContext(ctx, argStruct)
@@ -144,7 +140,7 @@ func processContext(ctx context.Context, processor ProcessorContext, prot Protoc
 		if result != nil {
 			if e2 := pfunc.Write(seqID, result, prot); e2 != nil {
 				// close connection on write failure
-				return false, err
+				return err
 			}
 		}
 	}
@@ -152,5 +148,5 @@ func processContext(ctx context.Context, processor ProcessorContext, prot Protoc
 	// keep the connection open and ignore errors
 	// if type was CALL, error has already been serialized to client
 	// if type was ONEWAY, no exception is to be thrown
-	return true, nil
+	return nil
 }

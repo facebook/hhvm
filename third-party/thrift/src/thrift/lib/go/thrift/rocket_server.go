@@ -72,7 +72,7 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 				return mono.Error(err)
 			}
 			protocol := newBufProtocol(msg.Data(), reqMetadata.GetName(), typeID, reqMetadata.GetOtherMetadata())
-			if _, err := processContext(ctx, s.proc, protocol); err != nil {
+			if err := processContext(ctx, s.proc, protocol); err != nil {
 				return mono.Error(err)
 			}
 			respMetadata := NewResponseRpcMetadata()

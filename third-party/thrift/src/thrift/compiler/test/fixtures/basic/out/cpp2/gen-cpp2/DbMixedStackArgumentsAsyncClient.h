@@ -154,8 +154,8 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_getDataByKey0(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_key);
-  template <typename Protocol_, typename RpcOptions>
-  void getDataByKey0T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key);
+  template <typename RpcOptions>
+  void fbthrift_send_getDataByKey0(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> getDataByKey0Ctx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
@@ -277,8 +277,8 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_getDataByKey1(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_key);
-  template <typename Protocol_, typename RpcOptions>
-  void getDataByKey1T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key);
+  template <typename RpcOptions>
+  void fbthrift_send_getDataByKey1(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> getDataByKey1Ctx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };

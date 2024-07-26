@@ -148,8 +148,8 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_doBland(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
-  template <typename Protocol_, typename RpcOptions>
-  void doBlandT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
+  template <typename RpcOptions>
+  void fbthrift_send_doBland(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> doBlandCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "doRaise"} */
@@ -269,8 +269,8 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_doRaise(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
-  template <typename Protocol_, typename RpcOptions>
-  void doRaiseT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
+  template <typename RpcOptions>
+  void fbthrift_send_doRaise(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> doRaiseCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get200"} */
@@ -392,8 +392,8 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_get200(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
-  template <typename Protocol_, typename RpcOptions>
-  void get200T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
+  template <typename RpcOptions>
+  void fbthrift_send_get200(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get200Ctx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get500"} */
@@ -515,8 +515,8 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_get500(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
-  template <typename Protocol_, typename RpcOptions>
-  void get500T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
+  template <typename RpcOptions>
+  void fbthrift_send_get500(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get500Ctx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };

@@ -150,8 +150,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_void_ret_i16_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int16_t p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void void_ret_i16_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_void_ret_i16_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
@@ -271,8 +271,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_void_ret_byte_i16_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int8_t p_param1, ::std::int16_t p_param2);
-  template <typename Protocol_, typename RpcOptions>
-  void void_ret_byte_i16_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int8_t p_param1, ::std::int16_t p_param2);
+  template <typename RpcOptions>
+  void fbthrift_send_void_ret_byte_i16_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_byte_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
@@ -392,8 +392,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_void_ret_map_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::std::int64_t>& p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void void_ret_map_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_void_ret_map_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
@@ -513,8 +513,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_void_ret_map_setlist_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
-  template <typename Protocol_, typename RpcOptions>
-  void void_ret_map_setlist_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
+  template <typename RpcOptions>
+  void fbthrift_send_void_ret_map_setlist_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_map_setlist_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
@@ -634,8 +634,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_void_ret_map_typedef_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::some::valid::ns::simpleTypeDef p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void void_ret_map_typedef_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::some::valid::ns::simpleTypeDef p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_void_ret_map_typedef_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_map_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
@@ -755,8 +755,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_void_ret_enum_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::some::valid::ns::MyEnumA p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void void_ret_enum_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::some::valid::ns::MyEnumA p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_void_ret_enum_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_enum_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
@@ -876,8 +876,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_void_ret_struct_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::some::valid::ns::MyStruct& p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void void_ret_struct_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::some::valid::ns::MyStruct& p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_void_ret_struct_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_struct_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
@@ -997,8 +997,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_void_ret_listunion_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void void_ret_listunion_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_void_ret_listunion_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_listunion_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
@@ -1120,8 +1120,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_bool_ret_i32_i64_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_param1, ::std::int64_t p_param2);
-  template <typename Protocol_, typename RpcOptions>
-  void bool_ret_i32_i64_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1, ::std::int64_t p_param2);
+  template <typename RpcOptions>
+  void fbthrift_send_bool_ret_i32_i64_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bool_ret_i32_i64_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
@@ -1243,8 +1243,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_bool_ret_map_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::std::int64_t>& p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void bool_ret_map_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_bool_ret_map_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bool_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
@@ -1366,8 +1366,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_bool_ret_union_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::some::valid::ns::ComplexUnion& p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void bool_ret_union_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::some::valid::ns::ComplexUnion& p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_bool_ret_union_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bool_ret_union_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
@@ -1489,8 +1489,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_i64_ret_float_double_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, float p_param1, double p_param2);
-  template <typename Protocol_, typename RpcOptions>
-  void i64_ret_float_double_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, float p_param1, double p_param2);
+  template <typename RpcOptions>
+  void fbthrift_send_i64_ret_float_double_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> i64_ret_float_double_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
@@ -1612,8 +1612,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_i64_ret_string_typedef_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
-  template <typename Protocol_, typename RpcOptions>
-  void i64_ret_string_typedef_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
+  template <typename RpcOptions>
+  void fbthrift_send_i64_ret_string_typedef_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> i64_ret_string_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
@@ -1735,8 +1735,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_i64_ret_i32_i32_i32_i32_i32_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
-  template <typename Protocol_, typename RpcOptions>
-  void i64_ret_i32_i32_i32_i32_i32_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
+  template <typename RpcOptions>
+  void fbthrift_send_i64_ret_i32_i32_i32_i32_i32_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> i64_ret_i32_i32_i32_i32_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
@@ -1858,8 +1858,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_double_ret_setstruct_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::set<::some::valid::ns::MyStruct>& p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void double_ret_setstruct_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::some::valid::ns::MyStruct>& p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_double_ret_setstruct_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> double_ret_setstruct_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
@@ -1981,8 +1981,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_string_ret_string_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void string_ret_string_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_string_ret_string_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> string_ret_string_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
@@ -2104,8 +2104,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_binary_ret_binary_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void binary_ret_binary_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_binary_ret_binary_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> binary_ret_binary_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
@@ -2227,8 +2227,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_map_ret_bool_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, bool p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void map_ret_bool_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_map_ret_bool_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> map_ret_bool_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
@@ -2350,8 +2350,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_list_ret_map_setlist_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
-  template <typename Protocol_, typename RpcOptions>
-  void list_ret_map_setlist_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
+  template <typename RpcOptions>
+  void fbthrift_send_list_ret_map_setlist_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> list_ret_map_setlist_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
@@ -2473,8 +2473,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_mapsetlistmapliststring_ret_listlistlist_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void mapsetlistmapliststring_ret_listlistlist_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> mapsetlistmapliststring_ret_listlistlist_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
@@ -2596,8 +2596,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_typedef_ret_i32_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void typedef_ret_i32_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_typedef_ret_i32_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> typedef_ret_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
@@ -2719,8 +2719,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_listtypedef_ret_typedef_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::some::valid::ns::complexStructTypeDef& p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void listtypedef_ret_typedef_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::some::valid::ns::complexStructTypeDef& p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_listtypedef_ret_typedef_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> listtypedef_ret_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
@@ -2842,8 +2842,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_enum_ret_double_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, double p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void enum_ret_double_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, double p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_enum_ret_double_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> enum_ret_double_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
@@ -2965,8 +2965,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_enum_ret_double_enum_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, double p_param1, ::some::valid::ns::MyEnumA p_param2);
-  template <typename Protocol_, typename RpcOptions>
-  void enum_ret_double_enum_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, double p_param1, ::some::valid::ns::MyEnumA p_param2);
+  template <typename RpcOptions>
+  void fbthrift_send_enum_ret_double_enum_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> enum_ret_double_enum_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
@@ -3088,8 +3088,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_listenum_ret_map_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::std::int64_t>& p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void listenum_ret_map_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_listenum_ret_map_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> listenum_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
@@ -3211,8 +3211,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_struct_ret_i16_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int16_t p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void struct_ret_i16_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_struct_ret_i16_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> struct_ret_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
@@ -3334,8 +3334,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_setstruct_ret_set_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::set<::std::string>& p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void setstruct_ret_set_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::string>& p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_setstruct_ret_set_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> setstruct_ret_set_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
@@ -3457,8 +3457,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_union_ret_i32_i32_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_param1, ::std::int32_t p_param2);
-  template <typename Protocol_, typename RpcOptions>
-  void union_ret_i32_i32_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1, ::std::int32_t p_param2);
+  template <typename RpcOptions>
+  void fbthrift_send_union_ret_i32_i32_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> union_ret_i32_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
@@ -3580,8 +3580,8 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_listunion_string_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_param1);
-  template <typename Protocol_, typename RpcOptions>
-  void listunion_string_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_param1);
+  template <typename RpcOptions>
+  void fbthrift_send_listunion_string_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> listunion_string_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };

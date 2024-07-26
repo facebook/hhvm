@@ -37,20 +37,22 @@ void {{ > service_common/client_class_name}}::{{function:cpp_name}}Impl(apache::
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolWriter writer;
+      apache::thrift::SerializedRequest request = fbthrift_serialize_{{function:cpp_name}}(&writer, rpcOptions, *header, contextStack{{function:comma}}{{ > service_common/param_list}});
       if (stealRpcOptions) {
-        {{function:cpp_name}}T(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
+        fbthrift_send_{{function:cpp_name}}(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}});
       } else {
-        {{function:cpp_name}}T(&writer, rpcOptions, std::move(header), contextStack, std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
+        fbthrift_send_{{function:cpp_name}}(std::move(request), rpcOptions, std::move(header), std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}});
       }
       break;
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolWriter writer;
+      apache::thrift::SerializedRequest request = fbthrift_serialize_{{function:cpp_name}}(&writer, rpcOptions, *header, contextStack{{function:comma}}{{ > service_common/param_list}});
       if (stealRpcOptions) {
-        {{function:cpp_name}}T(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
+        fbthrift_send_{{function:cpp_name}}(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}});
       } else {
-        {{function:cpp_name}}T(&writer, rpcOptions, std::move(header), contextStack, std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
+        fbthrift_send_{{function:cpp_name}}(std::move(request), rpcOptions, std::move(header), std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}});
       }
       break;
     }

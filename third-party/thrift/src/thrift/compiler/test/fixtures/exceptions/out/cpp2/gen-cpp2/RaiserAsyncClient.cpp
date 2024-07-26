@@ -35,17 +35,15 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Raiser>::fbthri
       channel_->getChecksumSamplingRate());
 }
 
-template <typename Protocol_, typename RpcOptions>
-void apache::thrift::Client<::cpp2::Raiser>::doBlandT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
+template <typename RpcOptions>
+void apache::thrift::Client<::cpp2::Raiser>::fbthrift_send_doBland(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "doBland",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "Raiser");
-  apache::thrift::SerializedRequest serializedRequest = fbthrift_serialize_doBland<Protocol_>(
-    prot, rpcOptions, *header, contextStack);
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(std::move(serializedRequest), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 template <typename Protocol_>
@@ -64,17 +62,15 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Raiser>::fbthri
       channel_->getChecksumSamplingRate());
 }
 
-template <typename Protocol_, typename RpcOptions>
-void apache::thrift::Client<::cpp2::Raiser>::doRaiseT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
+template <typename RpcOptions>
+void apache::thrift::Client<::cpp2::Raiser>::fbthrift_send_doRaise(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "doRaise",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "Raiser");
-  apache::thrift::SerializedRequest serializedRequest = fbthrift_serialize_doRaise<Protocol_>(
-    prot, rpcOptions, *header, contextStack);
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(std::move(serializedRequest), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 template <typename Protocol_>
@@ -93,17 +89,15 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Raiser>::fbthri
       channel_->getChecksumSamplingRate());
 }
 
-template <typename Protocol_, typename RpcOptions>
-void apache::thrift::Client<::cpp2::Raiser>::get200T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
+template <typename RpcOptions>
+void apache::thrift::Client<::cpp2::Raiser>::fbthrift_send_get200(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "get200",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "Raiser");
-  apache::thrift::SerializedRequest serializedRequest = fbthrift_serialize_get200<Protocol_>(
-    prot, rpcOptions, *header, contextStack);
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(std::move(serializedRequest), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 template <typename Protocol_>
@@ -122,17 +116,15 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Raiser>::fbthri
       channel_->getChecksumSamplingRate());
 }
 
-template <typename Protocol_, typename RpcOptions>
-void apache::thrift::Client<::cpp2::Raiser>::get500T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
+template <typename RpcOptions>
+void apache::thrift::Client<::cpp2::Raiser>::fbthrift_send_get500(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "get500",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "Raiser");
-  apache::thrift::SerializedRequest serializedRequest = fbthrift_serialize_get500<Protocol_>(
-    prot, rpcOptions, *header, contextStack);
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(std::move(serializedRequest), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 
@@ -153,20 +145,22 @@ void apache::thrift::Client<::cpp2::Raiser>::doBlandImpl(apache::thrift::RpcOpti
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolWriter writer;
+      apache::thrift::SerializedRequest request = fbthrift_serialize_doBland(&writer, rpcOptions, *header, contextStack);
       if (stealRpcOptions) {
-        doBlandT(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback));
+        fbthrift_send_doBland(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
       } else {
-        doBlandT(&writer, rpcOptions, std::move(header), contextStack, std::move(callback));
+        fbthrift_send_doBland(std::move(request), rpcOptions, std::move(header), std::move(callback));
       }
       break;
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolWriter writer;
+      apache::thrift::SerializedRequest request = fbthrift_serialize_doBland(&writer, rpcOptions, *header, contextStack);
       if (stealRpcOptions) {
-        doBlandT(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback));
+        fbthrift_send_doBland(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
       } else {
-        doBlandT(&writer, rpcOptions, std::move(header), contextStack, std::move(callback));
+        fbthrift_send_doBland(std::move(request), rpcOptions, std::move(header), std::move(callback));
       }
       break;
     }
@@ -345,20 +339,22 @@ void apache::thrift::Client<::cpp2::Raiser>::doRaiseImpl(apache::thrift::RpcOpti
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolWriter writer;
+      apache::thrift::SerializedRequest request = fbthrift_serialize_doRaise(&writer, rpcOptions, *header, contextStack);
       if (stealRpcOptions) {
-        doRaiseT(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback));
+        fbthrift_send_doRaise(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
       } else {
-        doRaiseT(&writer, rpcOptions, std::move(header), contextStack, std::move(callback));
+        fbthrift_send_doRaise(std::move(request), rpcOptions, std::move(header), std::move(callback));
       }
       break;
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolWriter writer;
+      apache::thrift::SerializedRequest request = fbthrift_serialize_doRaise(&writer, rpcOptions, *header, contextStack);
       if (stealRpcOptions) {
-        doRaiseT(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback));
+        fbthrift_send_doRaise(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
       } else {
-        doRaiseT(&writer, rpcOptions, std::move(header), contextStack, std::move(callback));
+        fbthrift_send_doRaise(std::move(request), rpcOptions, std::move(header), std::move(callback));
       }
       break;
     }
@@ -537,20 +533,22 @@ void apache::thrift::Client<::cpp2::Raiser>::get200Impl(apache::thrift::RpcOptio
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolWriter writer;
+      apache::thrift::SerializedRequest request = fbthrift_serialize_get200(&writer, rpcOptions, *header, contextStack);
       if (stealRpcOptions) {
-        get200T(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback));
+        fbthrift_send_get200(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
       } else {
-        get200T(&writer, rpcOptions, std::move(header), contextStack, std::move(callback));
+        fbthrift_send_get200(std::move(request), rpcOptions, std::move(header), std::move(callback));
       }
       break;
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolWriter writer;
+      apache::thrift::SerializedRequest request = fbthrift_serialize_get200(&writer, rpcOptions, *header, contextStack);
       if (stealRpcOptions) {
-        get200T(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback));
+        fbthrift_send_get200(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
       } else {
-        get200T(&writer, rpcOptions, std::move(header), contextStack, std::move(callback));
+        fbthrift_send_get200(std::move(request), rpcOptions, std::move(header), std::move(callback));
       }
       break;
     }
@@ -729,20 +727,22 @@ void apache::thrift::Client<::cpp2::Raiser>::get500Impl(apache::thrift::RpcOptio
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolWriter writer;
+      apache::thrift::SerializedRequest request = fbthrift_serialize_get500(&writer, rpcOptions, *header, contextStack);
       if (stealRpcOptions) {
-        get500T(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback));
+        fbthrift_send_get500(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
       } else {
-        get500T(&writer, rpcOptions, std::move(header), contextStack, std::move(callback));
+        fbthrift_send_get500(std::move(request), rpcOptions, std::move(header), std::move(callback));
       }
       break;
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolWriter writer;
+      apache::thrift::SerializedRequest request = fbthrift_serialize_get500(&writer, rpcOptions, *header, contextStack);
       if (stealRpcOptions) {
-        get500T(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback));
+        fbthrift_send_get500(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
       } else {
-        get500T(&writer, rpcOptions, std::move(header), contextStack, std::move(callback));
+        fbthrift_send_get500(std::move(request), rpcOptions, std::move(header), std::move(callback));
       }
       break;
     }

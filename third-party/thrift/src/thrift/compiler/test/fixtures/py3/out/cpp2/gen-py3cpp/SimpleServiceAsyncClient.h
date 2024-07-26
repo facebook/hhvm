@@ -150,8 +150,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_get_five(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
-  template <typename Protocol_, typename RpcOptions>
-  void get_fiveT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
+  template <typename RpcOptions>
+  void fbthrift_send_get_five(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_fiveCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
@@ -273,8 +273,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_add_five(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_num);
-  template <typename Protocol_, typename RpcOptions>
-  void add_fiveT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_num);
+  template <typename RpcOptions>
+  void fbthrift_send_add_five(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> add_fiveCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
@@ -394,8 +394,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_do_nothing(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
-  template <typename Protocol_, typename RpcOptions>
-  void do_nothingT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
+  template <typename RpcOptions>
+  void fbthrift_send_do_nothing(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> do_nothingCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
@@ -517,8 +517,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_concat(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_first, const ::std::string& p_second);
-  template <typename Protocol_, typename RpcOptions>
-  void concatT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_first, const ::std::string& p_second);
+  template <typename RpcOptions>
+  void fbthrift_send_concat(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> concatCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
@@ -640,8 +640,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_get_value(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::py3::simple::SimpleStruct& p_simple_struct);
-  template <typename Protocol_, typename RpcOptions>
-  void get_valueT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::SimpleStruct& p_simple_struct);
+  template <typename RpcOptions>
+  void fbthrift_send_get_value(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_valueCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
@@ -763,8 +763,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_negate(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, bool p_input);
-  template <typename Protocol_, typename RpcOptions>
-  void negateT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool p_input);
+  template <typename RpcOptions>
+  void fbthrift_send_negate(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> negateCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
@@ -886,8 +886,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_tiny(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int8_t p_input);
-  template <typename Protocol_, typename RpcOptions>
-  void tinyT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int8_t p_input);
+  template <typename RpcOptions>
+  void fbthrift_send_tiny(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> tinyCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
@@ -1009,8 +1009,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_small(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int16_t p_input);
-  template <typename Protocol_, typename RpcOptions>
-  void smallT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_input);
+  template <typename RpcOptions>
+  void fbthrift_send_small(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> smallCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
@@ -1132,8 +1132,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_big(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_input);
-  template <typename Protocol_, typename RpcOptions>
-  void bigT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_input);
+  template <typename RpcOptions>
+  void fbthrift_send_big(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bigCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
@@ -1255,8 +1255,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_two(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, double p_input);
-  template <typename Protocol_, typename RpcOptions>
-  void twoT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, double p_input);
+  template <typename RpcOptions>
+  void fbthrift_send_two(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> twoCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
@@ -1376,8 +1376,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_expected_exception(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
-  template <typename Protocol_, typename RpcOptions>
-  void expected_exceptionT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
+  template <typename RpcOptions>
+  void fbthrift_send_expected_exception(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> expected_exceptionCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
@@ -1499,8 +1499,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_unexpected_exception(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
-  template <typename Protocol_, typename RpcOptions>
-  void unexpected_exceptionT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
+  template <typename RpcOptions>
+  void fbthrift_send_unexpected_exception(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> unexpected_exceptionCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
@@ -1622,8 +1622,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_sum_i16_list(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::int16_t>& p_numbers);
-  template <typename Protocol_, typename RpcOptions>
-  void sum_i16_listT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int16_t>& p_numbers);
+  template <typename RpcOptions>
+  void fbthrift_send_sum_i16_list(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_i16_listCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
@@ -1745,8 +1745,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_sum_i32_list(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::int32_t>& p_numbers);
-  template <typename Protocol_, typename RpcOptions>
-  void sum_i32_listT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int32_t>& p_numbers);
+  template <typename RpcOptions>
+  void fbthrift_send_sum_i32_list(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_i32_listCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
@@ -1868,8 +1868,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_sum_i64_list(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::int64_t>& p_numbers);
-  template <typename Protocol_, typename RpcOptions>
-  void sum_i64_listT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int64_t>& p_numbers);
+  template <typename RpcOptions>
+  void fbthrift_send_sum_i64_list(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_i64_listCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
@@ -1991,8 +1991,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_concat_many(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::string>& p_words);
-  template <typename Protocol_, typename RpcOptions>
-  void concat_manyT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words);
+  template <typename RpcOptions>
+  void fbthrift_send_concat_many(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> concat_manyCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
@@ -2114,8 +2114,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_count_structs(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
-  template <typename Protocol_, typename RpcOptions>
-  void count_structsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
+  template <typename RpcOptions>
+  void fbthrift_send_count_structs(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> count_structsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
@@ -2237,8 +2237,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_sum_set(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::set<::std::int32_t>& p_numbers);
-  template <typename Protocol_, typename RpcOptions>
-  void sum_setT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::int32_t>& p_numbers);
+  template <typename RpcOptions>
+  void fbthrift_send_sum_set(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_setCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
@@ -2360,8 +2360,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_contains_word(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
-  template <typename Protocol_, typename RpcOptions>
-  void contains_wordT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
+  template <typename RpcOptions>
+  void fbthrift_send_contains_word(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> contains_wordCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
@@ -2483,8 +2483,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_get_map_value(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
-  template <typename Protocol_, typename RpcOptions>
-  void get_map_valueT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
+  template <typename RpcOptions>
+  void fbthrift_send_get_map_value(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_map_valueCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
@@ -2606,8 +2606,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_map_length(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
-  template <typename Protocol_, typename RpcOptions>
-  void map_lengthT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
+  template <typename RpcOptions>
+  void fbthrift_send_map_length(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> map_lengthCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
@@ -2729,8 +2729,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_sum_map_values(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::std::int16_t>& p_items);
-  template <typename Protocol_, typename RpcOptions>
-  void sum_map_valuesT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int16_t>& p_items);
+  template <typename RpcOptions>
+  void fbthrift_send_sum_map_values(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_map_valuesCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
@@ -2852,8 +2852,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_complex_sum_i32(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::py3::simple::ComplexStruct& p_counter);
-  template <typename Protocol_, typename RpcOptions>
-  void complex_sum_i32T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::ComplexStruct& p_counter);
+  template <typename RpcOptions>
+  void fbthrift_send_complex_sum_i32(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> complex_sum_i32Ctx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
@@ -2975,8 +2975,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_repeat_name(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::py3::simple::ComplexStruct& p_counter);
-  template <typename Protocol_, typename RpcOptions>
-  void repeat_nameT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::ComplexStruct& p_counter);
+  template <typename RpcOptions>
+  void fbthrift_send_repeat_name(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> repeat_nameCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
@@ -3098,8 +3098,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_get_struct(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
-  template <typename Protocol_, typename RpcOptions>
-  void get_structT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
+  template <typename RpcOptions>
+  void fbthrift_send_get_struct(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_structCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
@@ -3221,8 +3221,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_fib(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int16_t p_n);
-  template <typename Protocol_, typename RpcOptions>
-  void fibT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_n);
+  template <typename RpcOptions>
+  void fbthrift_send_fib(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> fibCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
@@ -3344,8 +3344,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_unique_words(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::string>& p_words);
-  template <typename Protocol_, typename RpcOptions>
-  void unique_wordsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words);
+  template <typename RpcOptions>
+  void fbthrift_send_unique_words(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> unique_wordsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
@@ -3467,8 +3467,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_words_count(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::string>& p_words);
-  template <typename Protocol_, typename RpcOptions>
-  void words_countT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words);
+  template <typename RpcOptions>
+  void fbthrift_send_words_count(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> words_countCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
@@ -3590,8 +3590,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_set_enum(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::py3::simple::AnEnum p_in_enum);
-  template <typename Protocol_, typename RpcOptions>
-  void set_enumT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::py3::simple::AnEnum p_in_enum);
+  template <typename RpcOptions>
+  void fbthrift_send_set_enum(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> set_enumCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
@@ -3713,8 +3713,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_list_of_lists(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
-  template <typename Protocol_, typename RpcOptions>
-  void list_of_listsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
+  template <typename RpcOptions>
+  void fbthrift_send_list_of_lists(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> list_of_listsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
@@ -3836,8 +3836,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_word_character_frequency(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_sentence);
-  template <typename Protocol_, typename RpcOptions>
-  void word_character_frequencyT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_sentence);
+  template <typename RpcOptions>
+  void fbthrift_send_word_character_frequency(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> word_character_frequencyCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
@@ -3959,8 +3959,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_list_of_sets(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_some_words);
-  template <typename Protocol_, typename RpcOptions>
-  void list_of_setsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_some_words);
+  template <typename RpcOptions>
+  void fbthrift_send_list_of_sets(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> list_of_setsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
@@ -4082,8 +4082,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_nested_map_argument(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
-  template <typename Protocol_, typename RpcOptions>
-  void nested_map_argumentT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
+  template <typename RpcOptions>
+  void fbthrift_send_nested_map_argument(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> nested_map_argumentCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
@@ -4205,8 +4205,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_make_sentence(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
-  template <typename Protocol_, typename RpcOptions>
-  void make_sentenceT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
+  template <typename RpcOptions>
+  void fbthrift_send_make_sentence(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> make_sentenceCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
@@ -4328,8 +4328,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_get_union(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
-  template <typename Protocol_, typename RpcOptions>
-  void get_unionT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
+  template <typename RpcOptions>
+  void fbthrift_send_get_union(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_unionCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
@@ -4451,8 +4451,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_get_keys(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
-  template <typename Protocol_, typename RpcOptions>
-  void get_keysT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
+  template <typename RpcOptions>
+  void fbthrift_send_get_keys(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_keysCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
@@ -4574,8 +4574,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_lookup_double(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_key);
-  template <typename Protocol_, typename RpcOptions>
-  void lookup_doubleT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_key);
+  template <typename RpcOptions>
+  void fbthrift_send_lookup_double(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> lookup_doubleCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
@@ -4697,8 +4697,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_retrieve_binary(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_something);
-  template <typename Protocol_, typename RpcOptions>
-  void retrieve_binaryT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_something);
+  template <typename RpcOptions>
+  void fbthrift_send_retrieve_binary(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> retrieve_binaryCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
@@ -4820,8 +4820,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_contain_binary(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::string>& p_binaries);
-  template <typename Protocol_, typename RpcOptions>
-  void contain_binaryT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_binaries);
+  template <typename RpcOptions>
+  void fbthrift_send_contain_binary(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> contain_binaryCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
@@ -4943,8 +4943,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_contain_enum(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
-  template <typename Protocol_, typename RpcOptions>
-  void contain_enumT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
+  template <typename RpcOptions>
+  void fbthrift_send_contain_enum(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> contain_enumCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
@@ -5066,8 +5066,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_get_binary_union_struct(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::py3::simple::BinaryUnion& p_u);
-  template <typename Protocol_, typename RpcOptions>
-  void get_binary_union_structT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::BinaryUnion& p_u);
+  template <typename RpcOptions>
+  void fbthrift_send_get_binary_union_struct(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_binary_union_structCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
@@ -5189,8 +5189,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_get_struct_hidden(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
-  template <typename Protocol_, typename RpcOptions>
-  void get_struct_hiddenT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
+  template <typename RpcOptions>
+  void fbthrift_send_get_struct_hidden(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_struct_hiddenCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };

@@ -406,7 +406,7 @@ void RequestChannel::sendRequestAsync(
   }
 }
 
-template <RpcKind Kind, class Protocol, typename RpcOptions>
+template <RpcKind Kind, typename RpcOptions>
 void clientSendT(
     apache::thrift::SerializedRequest&& serializedRequest,
     RpcOptions&& rpcOptions,

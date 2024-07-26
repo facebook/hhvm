@@ -155,8 +155,8 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_bounce_map(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::apache::thrift::fixtures::types::SomeMap& p_m);
-  template <typename Protocol_, typename RpcOptions>
-  void bounce_mapT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::apache::thrift::fixtures::types::SomeMap& p_m);
+  template <typename RpcOptions>
+  void fbthrift_send_bounce_map(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bounce_mapCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "service": "SomeService", "function": "binary_keyed_map"} */
@@ -278,8 +278,8 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
  private:
   template <typename Protocol_>
   apache::thrift::SerializedRequest fbthrift_serialize_binary_keyed_map(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::int64_t>& p_r);
-  template <typename Protocol_, typename RpcOptions>
-  void binary_keyed_mapT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int64_t>& p_r);
+  template <typename RpcOptions>
+  void fbthrift_send_binary_keyed_map(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> binary_keyed_mapCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };

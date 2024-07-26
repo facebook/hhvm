@@ -41,8 +41,8 @@ apache::thrift::SerializedRequest {{ > service_common/client_class_name}}::fbthr
       channel_->getChecksumSamplingRate());
 }
 
-template <typename Protocol_, typename RpcOptions>
-void {{ > service_common/client_class_name}}::{{function:cpp_name}}T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, {{ > types/callback_type}} callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/function_param_list_client}}) {
+template <typename RpcOptions>
+void {{ > service_common/client_class_name}}::fbthrift_send_{{function:cpp_name}}(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, {{ > types/callback_type}} callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}) {
   {{#function:in_or_creates_interaction?}}
   apache::thrift::RpcOptions rpcOpts(std::forward<RpcOptions>(rpcOptions));
   setInteraction({{#function:creates_interaction?}}handle, {{/function:creates_interaction?}}rpcOpts);
@@ -57,9 +57,7 @@ void {{ > service_common/client_class_name}}::{{function:cpp_name}}T(Protocol_* 
                 "{{function:created_interaction}}"{{/function:creates_interaction?}}{{#service:interaction?}},
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "{{service:name}}"{{/service:interaction?}});
-  apache::thrift::SerializedRequest serializedRequest = fbthrift_serialize_{{function:cpp_name}}<Protocol_>(
-    prot, rpcOptions, *header, contextStack{{function:comma}}{{ > service_common/param_list}});
-  apache::thrift::clientSendT<{{ > types/function_kind}}, Protocol_>(std::move(serializedRequest), {{!
+  apache::thrift::clientSendT<{{ > types/function_kind}}>(std::move(request), {{!
     }}{{#function:in_or_creates_interaction?}}std::move(rpcOpts){{/function:in_or_creates_interaction?}}{{!
     }}{{^function:in_or_creates_interaction?}}std::forward<RpcOptions>(rpcOptions){{/function:in_or_creates_interaction?}}{{!
     }}, std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));

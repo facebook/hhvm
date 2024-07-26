@@ -360,9 +360,6 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
 void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups) {
   return ARCH_SWITCH_CALL(adjustCodeForRelocation, rel, fixups);
 }
-void findFixups(TCA start, TCA end, CGMeta& fixups) {
-  return ARCH_SWITCH_CALL(findFixups, start, end, fixups);
-}
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,
                 TCA start, TCA end,

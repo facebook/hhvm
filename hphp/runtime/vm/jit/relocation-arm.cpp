@@ -1426,23 +1426,6 @@ void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& meta) {
   }
 }
 
-void findFixups(TCA start, TCA end, CGMeta& meta) {
-  for (auto instr = Instruction::Cast(start);
-       instr < Instruction::Cast(end);
-       instr = instr->NextInstruction()) {
-    // If instruction is a call
-    if ((instr->Mask(UnconditionalBranchMask) == BL) ||
-        (instr->Mask(UnconditionalBranchToRegisterMask) == BLR)) {
-      if (auto fixup = FixupMap::findFixup(start)) {
-        meta.fixups.emplace_back(start, *fixup);
-      }
-      if (auto ct = getCatchTrace(start)) {
-        meta.catches.emplace_back(start, *ct);
-      }
-    }
-  }
-}
-
 /*
  * Relocate code in the range start, end into dest, and record
  * information about what was done to rel.

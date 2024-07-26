@@ -105,6 +105,10 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
             TestUnionImmutable(string_field=None, int_field=42),
             TestUnionImmutable(int_field=42),
         )
+        self.assertEqual(
+            TestUnionImmutable(int_field=42, string_field=None),
+            TestUnionImmutable(int_field=42),
+        )
 
         with self.assertRaisesRegex(
             TypeError,
@@ -444,6 +448,14 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         )
         self.assertEqual(u6.fbthrift_current_value, 42)
         self.assertEqual(u6.int_field, 42)
+
+        u7 = TestUnionMutable(int_field=42, string_field=None)
+        self.assertIs(
+            u7.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.int_field,
+        )
+        self.assertEqual(u7.fbthrift_current_value, 42)
+        self.assertEqual(u7.int_field, 42)
 
         with self.assertRaises(TypeError):
             TestUnionMutable(string_field="hello", field_does_not_exist=None)

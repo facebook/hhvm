@@ -18,7 +18,7 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
-#include <thrift/lib/cpp2/async/ClientInterceptorBase.h>
+#include <thrift/lib/cpp2/async/ClientInterceptor.h>
 #include <thrift/lib/cpp2/async/HTTPClientChannel.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
@@ -119,7 +119,8 @@ makeInterceptorsList(InterceptorPtrs&&... interceptors) {
   return list;
 }
 
-struct NamedClientInterceptor : public ClientInterceptorBase {
+template <class RequestState>
+struct NamedClientInterceptor : public ClientInterceptor<RequestState> {
   explicit NamedClientInterceptor(std::string name) : name_(std::move(name)) {}
 
   std::string getName() const override { return name_; }
@@ -128,17 +129,22 @@ struct NamedClientInterceptor : public ClientInterceptorBase {
   std::string name_;
 };
 
-class ClientInterceptorCountingCalls : public NamedClientInterceptor {
+class ClientInterceptorCountWithRequestState
+    : public NamedClientInterceptor<int> {
  public:
+  using RequestState = int;
+
   using NamedClientInterceptor::NamedClientInterceptor;
 
-  folly::coro::Task<void> internal_onRequest(RequestInfo) override {
+  folly::coro::Task<std::optional<RequestState>> onRequest(
+      RequestInfo) override {
     onRequestCount++;
-    co_return;
+    co_return 1;
   }
 
-  folly::coro::Task<void> internal_onResponse(ResponseInfo) override {
-    onResponseCount++;
+  folly::coro::Task<void> onResponse(
+      RequestState* requestState, ResponseInfo) override {
+    onResponseCount += *requestState;
     co_return;
   }
 
@@ -147,26 +153,29 @@ class ClientInterceptorCountingCalls : public NamedClientInterceptor {
 };
 
 class ClientInterceptorThatThrowsOnRequest
-    : public ClientInterceptorCountingCalls {
+    : public ClientInterceptorCountWithRequestState {
  public:
-  using ClientInterceptorCountingCalls::ClientInterceptorCountingCalls;
+  using ClientInterceptorCountWithRequestState::
+      ClientInterceptorCountWithRequestState;
 
-  folly::coro::Task<void> internal_onRequest(RequestInfo requestInfo) override {
-    co_await ClientInterceptorCountingCalls::internal_onRequest(
+  folly::coro::Task<std::optional<RequestState>> onRequest(
+      RequestInfo requestInfo) override {
+    co_await ClientInterceptorCountWithRequestState::onRequest(
         std::move(requestInfo));
     throw std::runtime_error("Oh no!");
   }
 };
 
 class ClientInterceptorThatThrowsOnResponse
-    : public ClientInterceptorCountingCalls {
+    : public ClientInterceptorCountWithRequestState {
  public:
-  using ClientInterceptorCountingCalls::ClientInterceptorCountingCalls;
+  using ClientInterceptorCountWithRequestState::
+      ClientInterceptorCountWithRequestState;
 
-  folly::coro::Task<void> internal_onResponse(
-      ResponseInfo responseInfo) override {
-    co_await ClientInterceptorCountingCalls::internal_onResponse(
-        std::move(responseInfo));
+  folly::coro::Task<void> onResponse(
+      RequestState* requestState, ResponseInfo responseInfo) override {
+    co_await ClientInterceptorCountWithRequestState::onResponse(
+        requestState, std::move(responseInfo));
     throw std::runtime_error("Oh no!");
   }
 };
@@ -175,7 +184,7 @@ class ClientInterceptorThatThrowsOnResponse
 
 CO_TEST_P(ClientInterceptorTestP, BasicCoro) {
   auto interceptor =
-      std::make_shared<ClientInterceptorCountingCalls>("Interceptor1");
+      std::make_shared<ClientInterceptorCountWithRequestState>("Interceptor1");
   auto client = makeClient(makeInterceptorsList(interceptor));
 
   co_await client->co_echo("foo");
@@ -191,7 +200,7 @@ CO_TEST_P(ClientInterceptorTestP, CoroOnRequestException) {
   auto interceptor1 =
       std::make_shared<ClientInterceptorThatThrowsOnRequest>("Interceptor1");
   auto interceptor2 =
-      std::make_shared<ClientInterceptorCountingCalls>("Interceptor2");
+      std::make_shared<ClientInterceptorCountWithRequestState>("Interceptor2");
   auto interceptor3 =
       std::make_shared<ClientInterceptorThatThrowsOnRequest>("Interceptor3");
   auto client = makeClient(
@@ -225,7 +234,7 @@ CO_TEST_P(ClientInterceptorTestP, CoroOnResponseException) {
   auto interceptor1 =
       std::make_shared<ClientInterceptorThatThrowsOnResponse>("Interceptor1");
   auto interceptor2 =
-      std::make_shared<ClientInterceptorCountingCalls>("Interceptor2");
+      std::make_shared<ClientInterceptorCountWithRequestState>("Interceptor2");
   auto interceptor3 =
       std::make_shared<ClientInterceptorThatThrowsOnResponse>("Interceptor3");
   auto client = makeClient(

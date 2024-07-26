@@ -329,8 +329,10 @@ folly::coro::Task<void> ContextStack::processClientInterceptorsOnRequest() {
   DCHECK(shouldProcessClientInterceptors());
 
   std::vector<ClientInterceptorException::SingleExceptionInfo> exceptions;
-  for (const auto& clientInterceptor : *clientInterceptors_) {
-    ClientInterceptorBase::RequestInfo requestInfo;
+  for (std::size_t i = 0; i < clientInterceptors_->size(); ++i) {
+    const auto& clientInterceptor = (*clientInterceptors_)[i];
+    ClientInterceptorBase::RequestInfo requestInfo{
+        getStorageForClientInterceptorOnRequestByIndex(i)};
     try {
       co_await clientInterceptor->internal_onRequest(std::move(requestInfo));
     } catch (...) {
@@ -351,8 +353,10 @@ folly::coro::Task<void> ContextStack::processClientInterceptorsOnResponse() {
   DCHECK(shouldProcessClientInterceptors());
 
   std::vector<ClientInterceptorException::SingleExceptionInfo> exceptions;
-  for (const auto& clientInterceptor : *clientInterceptors_) {
-    ClientInterceptorBase::ResponseInfo responseInfo;
+  for (std::size_t i = 0; i < clientInterceptors_->size(); ++i) {
+    const auto& clientInterceptor = (*clientInterceptors_)[i];
+    ClientInterceptorBase::ResponseInfo responseInfo{
+        getStorageForClientInterceptorOnRequestByIndex(i)};
     try {
       co_await clientInterceptor->internal_onResponse(std::move(responseInfo));
     } catch (...) {
@@ -372,6 +376,14 @@ folly::coro::Task<void> ContextStack::processClientInterceptorsOnResponse() {
 
 void*& ContextStack::contextAt(size_t i) {
   return serviceContexts_[i];
+}
+
+detail::ClientInterceptorOnRequestStorage*
+ContextStack::getStorageForClientInterceptorOnRequestByIndex(
+    std::size_t index) {
+  DCHECK(clientInterceptors_);
+  DCHECK_LT(index, clientInterceptors_->size());
+  return &clientInterceptorsStorage_[index];
 }
 
 namespace detail {

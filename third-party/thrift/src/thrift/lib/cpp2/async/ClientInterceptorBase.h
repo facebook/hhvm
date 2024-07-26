@@ -36,10 +36,14 @@ class ClientInterceptorBase {
 
   virtual std::string getName() const = 0;
 
-  struct RequestInfo {};
+  struct RequestInfo {
+    detail::ClientInterceptorOnRequestStorage* storage = nullptr;
+  };
   virtual folly::coro::Task<void> internal_onRequest(RequestInfo) = 0;
 
-  struct ResponseInfo {};
+  struct ResponseInfo {
+    detail::ClientInterceptorOnRequestStorage* storage = nullptr;
+  };
   virtual folly::coro::Task<void> internal_onResponse(ResponseInfo) = 0;
 };
 

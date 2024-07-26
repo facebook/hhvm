@@ -152,6 +152,9 @@ class ContextStack {
           detail::ClientInterceptorOnRequestStorage> clientInterceptorsStorage);
 
   void*& contextAt(size_t i);
+
+  detail::ClientInterceptorOnRequestStorage*
+  getStorageForClientInterceptorOnRequestByIndex(std::size_t index);
 };
 
 } // namespace apache::thrift

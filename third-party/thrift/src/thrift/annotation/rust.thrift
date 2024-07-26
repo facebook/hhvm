@@ -57,7 +57,7 @@ struct RequestContext {
 
 @scope.Field
 struct Arc {
-// # `rust.Box`
+// # `rust.Arc`
 //
 // Indicates that a field's value should be shared.
 }

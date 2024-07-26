@@ -196,7 +196,7 @@ class AsyncMysqlClient : public MysqlClientBase {
   bool runInThread(folly::Cob&& fn, bool wait = false) override;
 
   db::SquangleLoggingData makeSquangleLoggingData(
-      const ConnectionKey* connKey,
+      const ConnectionKey& connKey,
       const db::ConnectionContextBase* connContext) override;
 
   void activeConnectionAdded(const ConnectionKey* key) override {

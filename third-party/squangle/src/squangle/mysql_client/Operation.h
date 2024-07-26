@@ -862,8 +862,8 @@ class ConnectOperation : public Operation {
     return conn_key_;
   }
   const ConnectionOptions& getConnectionOptions() const;
-  const ConnectionKey* getKey() const {
-    return &conn_key_;
+  const ConnectionKey& getKey() const {
+    return conn_key_;
   }
 
   ConnectOperation* setSSLOptionsProviderBase(

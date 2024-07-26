@@ -147,11 +147,9 @@ AsyncMysqlClient::~AsyncMysqlClient() {
 }
 
 db::SquangleLoggingData AsyncMysqlClient::makeSquangleLoggingData(
-    const ConnectionKey* connKey,
+    const ConnectionKey& connKey,
     const db::ConnectionContextBase* connContext) {
-  db::SquangleLoggingData ret(connKey, connContext);
-  ret.clientPerfStats = collectPerfStats();
-  return ret;
+  return db::SquangleLoggingData(connKey, connContext, collectPerfStats());
 }
 
 void AsyncMysqlClient::cleanupCompletedOperations() {
@@ -288,7 +286,7 @@ AsyncConnection::~AsyncConnection() {
 
     auto connHolder = stealMysqlConnectionHolder(true);
     auto conn = std::make_unique<AsyncConnection>(
-        client(), *getKey(), std::move(connHolder));
+        client(), getKey(), std::move(connHolder));
     conn->needToCloneConnection_ = false;
     conn->setConnectionOptions(getConnectionOptions());
     conn->setConnectionDyingCallback(std::move(conn_dying_callback_));

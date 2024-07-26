@@ -36,7 +36,7 @@ class SyncMysqlClient : public MysqlClientBase {
   }
 
   db::SquangleLoggingData makeSquangleLoggingData(
-      const ConnectionKey* connKey,
+      const ConnectionKey& connKey,
       const db::ConnectionContextBase* connContext) override {
     return db::SquangleLoggingData(connKey, connContext);
   }

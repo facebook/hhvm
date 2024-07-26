@@ -93,14 +93,32 @@ class EnumHelper {
 
 typedef std::chrono::duration<uint64_t, std::micro> Duration;
 
-struct SquangleLoggingData {
+class SquangleLoggingData {
+ public:
   SquangleLoggingData(
-      const common::mysql_client::ConnectionKey* conn_key,
-      const ConnectionContextBase* conn_context)
-      : connKey(conn_key), connContext(conn_context) {}
-  const common::mysql_client::ConnectionKey* connKey;
-  const ConnectionContextBase* connContext;
-  db::ClientPerfStats clientPerfStats;
+      const common::mysql_client::ConnectionKey& conn_key,
+      const ConnectionContextBase* conn_context,
+      db::ClientPerfStats clientPerfStats = db::ClientPerfStats())
+      : connKey_(conn_key),
+        connContext_(conn_context),
+        clientPerfStats_(clientPerfStats) {}
+
+  [[nodiscard]] const common::mysql_client::ConnectionKey& getConnKey() const {
+    return connKey_;
+  }
+
+  [[nodiscard]] const ConnectionContextBase* getConnContext() const {
+    return connContext_;
+  }
+
+  [[nodiscard]] const db::ClientPerfStats& getClientPerfStats() const {
+    return clientPerfStats_;
+  }
+
+ private:
+  const common::mysql_client::ConnectionKey& connKey_;
+  const ConnectionContextBase* connContext_;
+  db::ClientPerfStats clientPerfStats_;
 };
 
 struct CommonLoggingData {

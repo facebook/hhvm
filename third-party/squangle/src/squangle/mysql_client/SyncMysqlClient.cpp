@@ -43,7 +43,7 @@ SyncConnection::~SyncConnection() {
 
     auto connHolder = stealMysqlConnectionHolder(true);
     auto conn = std::make_unique<SyncConnection>(
-        client(), *getKey(), std::move(connHolder));
+        client(), getKey(), std::move(connHolder));
     conn->needToCloneConnection_ = false;
     conn->setConnectionOptions(getConnectionOptions());
     conn->setConnectionDyingCallback(std::move(conn_dying_callback_));

@@ -28,7 +28,7 @@ void handleConnectionCompletion(
     promise.setValue(ConnectResult(
         std::move(conn),
         op.result(),
-        *op.getKey(),
+        op.getKey(),
         op.elapsed(),
         op.attemptsMade()));
   } else {
@@ -37,7 +37,7 @@ void handleConnectionCompletion(
         op.result(),
         op.mysql_errno(),
         op.mysql_error(),
-        *conn->getKey(),
+        conn->getKey(),
         op.elapsed()));
   }
 }
@@ -60,7 +60,8 @@ void handleQueryCompletion(
     QueryCallbackReason reason,
     folly::Promise<std::pair<ResultType, AsyncPostQueryCallback>>& promise) {
   auto conn = op.releaseConnection();
-  auto conn_key = *conn->getKey();
+  // Make a copy of the connection key here because we move `conn` below.
+  auto conn_key = conn->getKey();
   if (reason == QueryCallbackReason::Success) {
     ResultType result(
         std::move(query_result),

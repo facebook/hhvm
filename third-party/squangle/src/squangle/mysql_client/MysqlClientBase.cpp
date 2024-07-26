@@ -71,7 +71,7 @@ void MysqlClientBase::logConnectionSuccess(
     const db::ConnectionContextBase* connection_context) {
   if (db_logger_) {
     db_logger_->logConnectionSuccess(
-        logging_data, makeSquangleLoggingData(&conn_key, connection_context));
+        logging_data, makeSquangleLoggingData(conn_key, connection_context));
   }
 }
 
@@ -90,7 +90,7 @@ void MysqlClientBase::logConnectionFailure(
         reason,
         mysqlErrno,
         error,
-        makeSquangleLoggingData(&conn_key, connection_context));
+        makeSquangleLoggingData(conn_key, connection_context));
   }
 }
 

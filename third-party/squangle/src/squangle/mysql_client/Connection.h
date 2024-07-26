@@ -310,20 +310,20 @@ class Connection {
   }
 
   const std::string& host() const {
-    return conn_key_.host();
+    return getKey().host();
   }
   int port() const {
-    return conn_key_.port();
+    return getKey().port();
   }
   const std::string& user() const {
-    return conn_key_.user();
+    return getKey().user();
   }
   const std::string& database() const {
-    return conn_key_.db_name();
+    return getKey().db_name();
   }
 
   const std::string& password() const {
-    return conn_key_.password();
+    return getKey().password();
   }
 
   MysqlClientBase* client() const {
@@ -362,8 +362,8 @@ class Connection {
     return std::move(mysql_connection_);
   }
 
-  const ConnectionKey* getKey() const {
-    return &conn_key_;
+  const ConnectionKey& getKey() const {
+    return conn_key_;
   }
 
   void setReusable(bool reusable) {
@@ -479,7 +479,7 @@ class Connection {
       std::unique_ptr<MysqlConnectionHolder> mysql_connection) {
     CHECK_THROW(mysql_connection_ == nullptr, db::InvalidConnectionException);
     CHECK_THROW(
-        conn_key_ == *mysql_connection->getKey(),
+        getKey() == *mysql_connection->getKey(),
         db::InvalidConnectionException);
     mysql_connection_ = std::move(mysql_connection);
   }
@@ -595,7 +595,7 @@ class Connection {
 
   std::unique_ptr<MysqlConnectionHolder> mysql_connection_;
 
-  const ConnectionKey conn_key_;
+  ConnectionKey conn_key_;
   ConnectionOptions conn_options_;
 
   bool killOnQueryTimeout_ = false;

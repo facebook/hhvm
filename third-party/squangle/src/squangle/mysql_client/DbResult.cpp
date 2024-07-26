@@ -291,7 +291,7 @@ void MultiQueryStreamHandler::streamCallback(
         op->result(),
         op->mysql_errno(),
         op->mysql_error(),
-        *op->connection()->getKey(),
+        op->connection()->getKey(),
         op->elapsed());
     state_ = State::OperationFailed;
   }

@@ -295,17 +295,16 @@ DbQueryResult Connection::internalQuery(
         op->result(),
         op->mysql_errno(),
         op->mysql_error(),
-        *getKey(),
+        getKey(),
         op->elapsed());
   }
-  auto conn_key = *op->connection()->getKey();
   DbQueryResult result(
       std::move(op->stealQueryResult()),
       op->numQueriesExecuted(),
       op->resultSize(),
       nullptr,
       op->result(),
-      conn_key,
+      op->connection()->getKey(),
       op->elapsed());
   if (op->callbacks_.post_query_callback_) {
     // If we have a callback set, wrap (and then unwrap) the result to/from the
@@ -413,18 +412,17 @@ DbMultiQueryResult Connection::internalMultiQuery(
         op->result(),
         op->mysql_errno(),
         op->mysql_error(),
-        *getKey(),
+        getKey(),
         op->elapsed());
   }
 
-  auto conn_key = *op->connection()->getKey();
   DbMultiQueryResult result(
       std::move(op->stealQueryResults()),
       op->numQueriesExecuted(),
       op->resultSize(),
       nullptr,
       op->result(),
-      std::move(conn_key),
+      op->connection()->getKey(),
       op->elapsed());
   if (op->callbacks_.post_query_callback_) {
     // If we have a callback set, wrap (and then unwrap) the result to/from the

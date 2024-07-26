@@ -837,7 +837,7 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
             timeout_,
             getMaxThreadBlockTime(),
             getTotalThreadBlockTime()),
-        *conn()->getKey(),
+        conn()->getKey(),
         context);
   } else {
     db::FailureReason reason = db::FailureReason::DATABASE_ERROR;
@@ -854,7 +854,7 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
             getMaxThreadBlockTime(),
             getTotalThreadBlockTime()),
         reason,
-        *conn()->getKey(),
+        conn()->getKey(),
         mysql_errno(),
         mysql_error(),
         context);
@@ -1572,7 +1572,7 @@ void FetchOperation::killRunningQuery() {
   auto host = conn()->host();
   auto port = conn()->port();
   auto conn_op = client()
-                     ->beginConnection(*conn()->getKey())
+                     ->beginConnection(conn()->getKey())
                      ->setConnectionOptions(conn()->getConnectionOptions());
   conn_op->setCallback([thread_id, host, port](ConnectOperation& conn_op) {
     if (conn_op.ok()) {
@@ -2003,7 +2003,7 @@ std::unique_ptr<Connection> blockingConnectHelper(
         conn_op->result(),
         conn_op->mysql_errno(),
         conn_op->mysql_error(),
-        *conn_op->getKey(),
+        conn_op->getKey(),
         conn_op->elapsed());
   }
 

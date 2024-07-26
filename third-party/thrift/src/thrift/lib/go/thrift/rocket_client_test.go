@@ -28,6 +28,67 @@ import (
 	"github.com/rsocket/rsocket-go/rx/mono"
 )
 
+type rocketServer struct {
+	proc     ProcessorContext
+	listener net.Listener
+}
+
+func newRocketServer(proc ProcessorContext, listener net.Listener) Server {
+	return &rocketServer{
+		proc:     proc,
+		listener: listener,
+	}
+}
+
+func (s *rocketServer) ServeContext(ctx context.Context) error {
+	transporter := func(context.Context) (transport.ServerTransport, error) {
+		return transport.NewTCPServerTransport(func(context.Context) (net.Listener, error) {
+			return s.listener, nil
+		}), nil
+	}
+	r := rsocket.Receive().Acceptor(s.acceptor).Transport(transporter)
+	return r.Serve(ctx)
+}
+
+func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {
+	return rsocket.NewAbstractSocket(
+		rsocket.RequestResponse(func(msg payload.Payload) mono.Mono {
+			reqMetadataBytes, ok := msg.Metadata()
+			if !ok {
+				return mono.Error(fmt.Errorf("expected metadata"))
+			}
+			reqMetadata := &RequestRpcMetadata{}
+			if err := deserializeCompact(reqMetadataBytes, reqMetadata); err != nil {
+				return mono.Error(err)
+			}
+			if reqMetadata.GetProtocol() != ProtocolId_COMPACT {
+				return mono.Error(fmt.Errorf("currently only supporting COMPACT protocol and not %v", reqMetadata.GetProtocol()))
+			}
+			compressed := reqMetadata.Compression != nil && *reqMetadata.Compression == CompressionAlgorithm_ZSTD
+			if compressed {
+				return mono.Error(fmt.Errorf("currently only supporting uncompressed COMPACT protocol"))
+			}
+			typeID, err := rpcKindToMessageType(reqMetadata.GetKind())
+			if err != nil {
+				return mono.Error(err)
+			}
+			protocol := newBufProtocol(msg.Data(), reqMetadata.GetName(), typeID, reqMetadata.GetOtherMetadata())
+			if _, err := processContext(ctx, s.proc, protocol); err != nil {
+				return mono.Error(err)
+			}
+			respMetadata := NewResponseRpcMetadata()
+			respMetadata.OtherMetadata = protocol.reqHeaders
+			respMetadataBytes, err := serializeCompact(respMetadata)
+			if err != nil {
+				return mono.Error(err)
+			}
+			respDataBytes := protocol.wbuf.Buffer.Bytes()
+			response := payload.New(respDataBytes, respMetadataBytes)
+			return mono.Just(response)
+		}),
+	), nil
+}
+
 type bufProtocol struct {
 	Decoder
 	Encoder
@@ -93,57 +154,6 @@ func (b *bufProtocol) GetPersistentHeader(key string) (string, bool) {
 	panic("not implemented: only used for testing, so did not implement.")
 }
 
-// rocketBouncer bounces back any message received from the client.
-func rocketBouncer(ctx context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {
-	return rsocket.NewAbstractSocket(
-		rsocket.RequestResponse(func(msg payload.Payload) mono.Mono {
-			reqMetadataBytes, ok := msg.Metadata()
-			if !ok {
-				return mono.Error(fmt.Errorf("expected metadata"))
-			}
-			reqMetadata := &RequestRpcMetadata{}
-			if err := deserializeCompact(reqMetadataBytes, reqMetadata); err != nil {
-				return mono.Error(err)
-			}
-			if reqMetadata.GetProtocol() != ProtocolId_COMPACT {
-				return mono.Error(fmt.Errorf("currently only supporting COMPACT protocol and not %v", reqMetadata.GetProtocol()))
-			}
-			compressed := reqMetadata.Compression != nil && *reqMetadata.Compression == CompressionAlgorithm_ZSTD
-			if compressed {
-				return mono.Error(fmt.Errorf("currently only supporting uncompressed COMPACT protocol"))
-			}
-			typeID, err := rpcKindToMessageType(reqMetadata.GetKind())
-			if err != nil {
-				return mono.Error(err)
-			}
-			protocol := newBufProtocol(msg.Data(), reqMetadata.GetName(), typeID, reqMetadata.GetOtherMetadata())
-			proc := &testProcessor{}
-			if _, err := processContext(ctx, proc, protocol); err != nil {
-				return mono.Error(err)
-			}
-			respMetadata := NewResponseRpcMetadata()
-			respMetadata.OtherMetadata = protocol.reqHeaders
-			respMetadataBytes, err := serializeCompact(respMetadata)
-			if err != nil {
-				return mono.Error(err)
-			}
-			respDataBytes := protocol.wbuf.Buffer.Bytes()
-			response := payload.New(respDataBytes, respMetadataBytes)
-			return mono.Just(response)
-		}),
-	), nil
-}
-
-func rocketServe(ctx context.Context, listener net.Listener) error {
-	transporter := func(context.Context) (transport.ServerTransport, error) {
-		return transport.NewTCPServerTransport(func(context.Context) (net.Listener, error) {
-			return listener, nil
-		}), nil
-	}
-	r := rsocket.Receive().Acceptor(rocketBouncer).Transport(transporter)
-	return r.Serve(ctx)
-}
-
 // This tests the rocket client against a rsocket server that is not integrated into the thrift library.
 func TestRocketClientAgainstRSocketServer(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -154,8 +164,9 @@ func TestRocketClientAgainstRSocketServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
+	server := newRocketServer(&testProcessor{}, listener)
 	go func() {
-		errChan <- rocketServe(ctx, listener)
+		errChan <- server.ServeContext(ctx)
 	}()
 	addr := listener.Addr()
 	conn, err := net.Dial(addr.Network(), addr.String())

@@ -152,6 +152,8 @@ class Client<::test::namespace_from_package::module::TestService> : public apach
   /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package/src/module.thrift", "service": "TestService", "function": "init"} */
   virtual folly::exception_wrapper recv_instance_wrapped_init(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_init(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_int1);
   template <typename Protocol_, typename RpcOptions>
   void initT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_int1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> initCtx(apache::thrift::RpcOptions* rpcOptions);

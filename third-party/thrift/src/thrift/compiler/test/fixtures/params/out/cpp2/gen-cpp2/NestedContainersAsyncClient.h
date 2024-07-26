@@ -146,6 +146,8 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "mapList"} */
   virtual folly::exception_wrapper recv_instance_wrapped_mapList(::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_mapList(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& p_foo);
   template <typename Protocol_, typename RpcOptions>
   void mapListT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& p_foo);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> mapListCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -265,6 +267,8 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "mapSet"} */
   virtual folly::exception_wrapper recv_instance_wrapped_mapSet(::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_mapSet(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& p_foo);
   template <typename Protocol_, typename RpcOptions>
   void mapSetT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& p_foo);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> mapSetCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -384,6 +388,8 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "listMap"} */
   virtual folly::exception_wrapper recv_instance_wrapped_listMap(::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_listMap(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& p_foo);
   template <typename Protocol_, typename RpcOptions>
   void listMapT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& p_foo);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> listMapCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -503,6 +509,8 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "listSet"} */
   virtual folly::exception_wrapper recv_instance_wrapped_listSet(::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_listSet(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::set<::std::int32_t>>& p_foo);
   template <typename Protocol_, typename RpcOptions>
   void listSetT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::set<::std::int32_t>>& p_foo);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> listSetCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -622,6 +630,8 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "turtles"} */
   virtual folly::exception_wrapper recv_instance_wrapped_turtles(::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_turtles(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>& p_foo);
   template <typename Protocol_, typename RpcOptions>
   void turtlesT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>& p_foo);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> turtlesCtx(apache::thrift::RpcOptions* rpcOptions);

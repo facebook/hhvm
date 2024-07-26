@@ -13,27 +13,32 @@ namespace cpp2 {
 typedef apache::thrift::ThriftPresult<false> GoodService_bar_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>> GoodService_bar_presult;
 } // namespace cpp2
-template <typename Protocol_, typename RpcOptions>
-void apache::thrift::Client<::cpp2::GoodService>::barT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
-
+template <typename Protocol_>
+apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::GoodService>::fbthrift_serialize_bar(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
   ::cpp2::GoodService_bar_pargs args;
   const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   const auto writer = [&](Protocol_* p) { args.write(p); };
+  return apache::thrift::preprocessSendT<Protocol_>(
+      prot,
+      rpcOptions,
+      contextStack,
+      header,
+      "bar",
+      writer,
+      sizer,
+      channel_->getChecksumSamplingRate());
+}
+
+template <typename Protocol_, typename RpcOptions>
+void apache::thrift::Client<::cpp2::GoodService>::barT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "bar",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "BadService");
-  apache::thrift::SerializedRequest serializedRequest = apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      *header,
-      methodMetadata->methodName,
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
+  apache::thrift::SerializedRequest serializedRequest = fbthrift_serialize_bar<Protocol_>(
+    prot, rpcOptions, *header, contextStack);
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(std::move(serializedRequest), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
@@ -242,14 +247,26 @@ namespace cpp2 {
 typedef apache::thrift::ThriftPresult<false> GoodService_BadInteraction_foo_pargs;
 typedef apache::thrift::ThriftPresult<true> GoodService_BadInteraction_foo_presult;
 } // namespace cpp2
+template <typename Protocol_>
+apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::GoodService>::BadInteraction::fbthrift_serialize_foo(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
+  ::cpp2::GoodService_BadInteraction_foo_pargs args;
+  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
+  const auto writer = [&](Protocol_* p) { args.write(p); };
+  return apache::thrift::preprocessSendT<Protocol_>(
+      prot,
+      rpcOptions,
+      contextStack,
+      header,
+      "BadInteraction.foo",
+      writer,
+      sizer,
+      channel_->getChecksumSamplingRate());
+}
+
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::cpp2::GoodService>::BadInteraction::fooT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
   apache::thrift::RpcOptions rpcOpts(std::forward<RpcOptions>(rpcOptions));
   setInteraction(rpcOpts);
-
-  ::cpp2::GoodService_BadInteraction_foo_pargs args;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
@@ -258,15 +275,8 @@ void apache::thrift::Client<::cpp2::GoodService>::BadInteraction::fooT(Protocol_
                 "BadService",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "BadInteraction");
-  apache::thrift::SerializedRequest serializedRequest = apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      *header,
-      methodMetadata->methodName,
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
+  apache::thrift::SerializedRequest serializedRequest = fbthrift_serialize_foo<Protocol_>(
+    prot, rpcOptions, *header, contextStack);
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(std::move(serializedRequest), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 

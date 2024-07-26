@@ -152,6 +152,8 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "count"} */
   virtual folly::exception_wrapper recv_instance_wrapped_count(::facebook::thrift::test::CountingStruct& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_count(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename Protocol_, typename RpcOptions>
   void countT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> countCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -273,6 +275,8 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
   virtual folly::exception_wrapper recv_instance_wrapped_adaptedTypes(::facebook::thrift::test::HeapAllocated& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_adaptedTypes(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::facebook::thrift::test::HeapAllocated& p_arg);
   template <typename Protocol_, typename RpcOptions>
   void adaptedTypesT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::facebook::thrift::test::HeapAllocated& p_arg);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> adaptedTypesCtx(apache::thrift::RpcOptions* rpcOptions);

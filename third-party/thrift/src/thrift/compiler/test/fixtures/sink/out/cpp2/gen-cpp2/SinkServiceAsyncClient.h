@@ -53,6 +53,8 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "method"} */
   virtual folly::exception_wrapper recv_instance_wrapped_method(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_method(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename Protocol_, typename RpcOptions>
   void methodT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -77,6 +79,8 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodAndReponse"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodAndReponse(apache::thrift::ResponseAndClientSink<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_methodAndReponse(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename Protocol_, typename RpcOptions>
   void methodAndReponseT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodAndReponseCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -101,6 +105,8 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodThrow"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodThrow(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_methodThrow(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename Protocol_, typename RpcOptions>
   void methodThrowT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodThrowCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -125,6 +131,8 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodSinkThrow"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodSinkThrow(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_methodSinkThrow(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename Protocol_, typename RpcOptions>
   void methodSinkThrowT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodSinkThrowCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -149,6 +157,8 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFinalThrow"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodFinalThrow(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_methodFinalThrow(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename Protocol_, typename RpcOptions>
   void methodFinalThrowT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodFinalThrowCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -173,6 +183,8 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodBothThrow"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodBothThrow(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_methodBothThrow(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename Protocol_, typename RpcOptions>
   void methodBothThrowT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodBothThrowCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -197,6 +209,8 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFast"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodFast(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_methodFast(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename Protocol_, typename RpcOptions>
   void methodFastT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodFastCtx(apache::thrift::RpcOptions* rpcOptions);

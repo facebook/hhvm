@@ -15,13 +15,8 @@
   limitations under the License.
 
 }}{{#service:functions}}{{#function:return_type}}{{^function:starts_interaction?}}
-template <typename Protocol_, typename RpcOptions>
-void {{ > service_common/client_class_name}}::{{function:cpp_name}}T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, {{ > types/callback_type}} callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/function_param_list_client}}) {
-  {{#function:in_or_creates_interaction?}}
-  apache::thrift::RpcOptions rpcOpts(std::forward<RpcOptions>(rpcOptions));
-  setInteraction({{#function:creates_interaction?}}handle, {{/function:creates_interaction?}}rpcOpts);
-  {{/function:in_or_creates_interaction?}}
-
+template <typename Protocol_>
+apache::thrift::SerializedRequest {{ > service_common/client_class_name}}::fbthrift_serialize_{{function:cpp_name}}(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack{{function:comma}}{{ > service_common/function_param_list_client}}) {
   {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_pargs args;
 {{#function:args}}{{#field:type}}
 {{^type:resolves_to_complex_return?}}
@@ -35,6 +30,23 @@ void {{ > service_common/client_class_name}}::{{function:cpp_name}}T(Protocol_* 
 }}
   const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   const auto writer = [&](Protocol_* p) { args.write(p); };
+  return apache::thrift::preprocessSendT<Protocol_>(
+      prot,
+      rpcOptions,
+      contextStack,
+      header,
+      "{{ > common/function_name}}",
+      writer,
+      sizer,
+      channel_->getChecksumSamplingRate());
+}
+
+template <typename Protocol_, typename RpcOptions>
+void {{ > service_common/client_class_name}}::{{function:cpp_name}}T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, {{ > types/callback_type}} callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/function_param_list_client}}) {
+  {{#function:in_or_creates_interaction?}}
+  apache::thrift::RpcOptions rpcOpts(std::forward<RpcOptions>(rpcOptions));
+  setInteraction({{#function:creates_interaction?}}handle, {{/function:creates_interaction?}}rpcOpts);
+  {{/function:in_or_creates_interaction?}}
 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
@@ -45,15 +57,8 @@ void {{ > service_common/client_class_name}}::{{function:cpp_name}}T(Protocol_* 
                 "{{function:created_interaction}}"{{/function:creates_interaction?}}{{#service:interaction?}},
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "{{service:name}}"{{/service:interaction?}});
-  apache::thrift::SerializedRequest serializedRequest = apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      *header,
-      methodMetadata->methodName,
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
+  apache::thrift::SerializedRequest serializedRequest = fbthrift_serialize_{{function:cpp_name}}<Protocol_>(
+    prot, rpcOptions, *header, contextStack{{function:comma}}{{ > service_common/param_list}});
   apache::thrift::clientSendT<{{ > types/function_kind}}, Protocol_>(std::move(serializedRequest), {{!
     }}{{#function:in_or_creates_interaction?}}std::move(rpcOpts){{/function:in_or_creates_interaction?}}{{!
     }}{{^function:in_or_creates_interaction?}}std::forward<RpcOptions>(rpcOptions){{/function:in_or_creates_interaction?}}{{!

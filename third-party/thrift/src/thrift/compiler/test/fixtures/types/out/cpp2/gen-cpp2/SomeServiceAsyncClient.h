@@ -153,6 +153,8 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
   /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "service": "SomeService", "function": "bounce_map"} */
   virtual folly::exception_wrapper recv_instance_wrapped_bounce_map(::apache::thrift::fixtures::types::SomeMap& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_bounce_map(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::apache::thrift::fixtures::types::SomeMap& p_m);
   template <typename Protocol_, typename RpcOptions>
   void bounce_mapT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::apache::thrift::fixtures::types::SomeMap& p_m);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bounce_mapCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -274,6 +276,8 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
   /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "service": "SomeService", "function": "binary_keyed_map"} */
   virtual folly::exception_wrapper recv_instance_wrapped_binary_keyed_map(::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_binary_keyed_map(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::int64_t>& p_r);
   template <typename Protocol_, typename RpcOptions>
   void binary_keyed_mapT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int64_t>& p_r);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> binary_keyed_mapCtx(apache::thrift::RpcOptions* rpcOptions);

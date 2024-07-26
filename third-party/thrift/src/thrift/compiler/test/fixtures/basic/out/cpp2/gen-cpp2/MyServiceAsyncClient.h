@@ -150,6 +150,8 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "MyService", "function": "ping"} */
   virtual folly::exception_wrapper recv_instance_wrapped_ping(::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_ping(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename Protocol_, typename RpcOptions>
   void pingT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> pingCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -271,6 +273,8 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "MyService", "function": "getRandomData"} */
   virtual folly::exception_wrapper recv_instance_wrapped_getRandomData(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_getRandomData(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename Protocol_, typename RpcOptions>
   void getRandomDataT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> getRandomDataCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -390,6 +394,8 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "MyService", "function": "sink"} */
   virtual folly::exception_wrapper recv_instance_wrapped_sink(::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_sink(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_sink);
   template <typename Protocol_, typename RpcOptions>
   void sinkT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_sink);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sinkCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -509,6 +515,8 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "MyService", "function": "putDataById"} */
   virtual folly::exception_wrapper recv_instance_wrapped_putDataById(::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_putDataById(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_id, const ::std::string& p_data);
   template <typename Protocol_, typename RpcOptions>
   void putDataByIdT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, const ::std::string& p_data);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> putDataByIdCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -630,6 +638,8 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "MyService", "function": "hasDataById"} */
   virtual folly::exception_wrapper recv_instance_wrapped_hasDataById(bool& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_hasDataById(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_id);
   template <typename Protocol_, typename RpcOptions>
   void hasDataByIdT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> hasDataByIdCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -751,6 +761,8 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "MyService", "function": "getDataById"} */
   virtual folly::exception_wrapper recv_instance_wrapped_getDataById(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_getDataById(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_id);
   template <typename Protocol_, typename RpcOptions>
   void getDataByIdT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> getDataByIdCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -870,6 +882,8 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "MyService", "function": "deleteDataById"} */
   virtual folly::exception_wrapper recv_instance_wrapped_deleteDataById(::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_deleteDataById(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_id);
   template <typename Protocol_, typename RpcOptions>
   void deleteDataByIdT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> deleteDataByIdCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -961,6 +975,8 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
 
 
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_lobDataById(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_id, const ::std::string& p_data);
   template <typename Protocol_, typename RpcOptions>
   void lobDataByIdT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, const ::std::string& p_data);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> lobDataByIdCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -1082,6 +1098,8 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "MyService", "function": "invalid_return_for_hack"} */
   virtual folly::exception_wrapper recv_instance_wrapped_invalid_return_for_hack(::std::set<float>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_invalid_return_for_hack(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename Protocol_, typename RpcOptions>
   void invalid_return_for_hackT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> invalid_return_for_hackCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -1201,6 +1219,8 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "MyService", "function": "rpc_skipped_codegen"} */
   virtual folly::exception_wrapper recv_instance_wrapped_rpc_skipped_codegen(::apache::thrift::ClientReceiveState& state);
  private:
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_rpc_skipped_codegen(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename Protocol_, typename RpcOptions>
   void rpc_skipped_codegenT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> rpc_skipped_codegenCtx(apache::thrift::RpcOptions* rpcOptions);

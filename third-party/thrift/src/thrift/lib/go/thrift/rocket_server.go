@@ -41,9 +41,7 @@ func newRocketServer(proc ProcessorContext, listener net.Listener) Server {
 
 func (s *rocketServer) ServeContext(ctx context.Context) error {
 	transporter := func(context.Context) (transport.ServerTransport, error) {
-		return transport.NewTCPServerTransport(func(context.Context) (net.Listener, error) {
-			return s.listener, nil
-		}), nil
+		return newRocketServerTransport(s.listener), nil
 	}
 	r := rsocket.Receive().Acceptor(s.acceptor).Transport(transporter)
 	return r.Serve(ctx)

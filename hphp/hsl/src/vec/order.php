@@ -77,6 +77,11 @@ function shuffle<Tv>(
  * optional comparator function isn't provided, the values will be sorted in
  * ascending order.
  *
+ * When specified, a comparator should exhibit the same behavior as the `<=>`
+ * operator: a negative value when the left operand compares less than the
+ * right operand, 0 when the operands compare equal, and a positive value when
+ * the left operand compares greater than the right operand.
+ *
  * To sort by some computable property of each value, see `Vec\sort_by()`.
  *
  * Time complexity: O((n log n) * c), where c is the complexity of the
@@ -101,6 +106,11 @@ function sort<Tv>(
  * Traversable, which is computed by the given function. If the optional
  * comparator function isn't provided, the values will be sorted in ascending
  * order of scalar key.
+ *
+ * When specified, a comparator should exhibit the same behavior as the `<=>`
+ * operator: a negative value when the left operand compares less than the
+ * right operand, 0 when the operands compare equal, and a positive value when
+ * the left operand compares greater than the right operand.
  *
  * To sort by the values of the Traversable, see `Vec\sort()`.
  *

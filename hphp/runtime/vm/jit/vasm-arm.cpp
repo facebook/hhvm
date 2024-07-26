@@ -75,6 +75,7 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-block-counters.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-internal.h"
 #include "hphp/runtime/vm/jit/vasm-lower.h"
@@ -342,6 +343,7 @@ struct Vgen {
   void emit(const decl& i) { a->Sub(W(i.d), W(i.s), 1, UF(i.fl)); }
   void emit(const decq& i) { a->Sub(X(i.d), X(i.s), 1, UF(i.fl)); }
   void emit(const decqmlock& i);
+  void emit(const decqmlocknosf& i);
   void emit(const divint& i) { a->Sdiv(X(i.d), X(i.s0), X(i.s1)); }
   void emit(const divsd& i) { a->Fdiv(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const imul& i);
@@ -970,6 +972,27 @@ void Vgen::emit(const decqmlock& i) {
   a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 }
 
+void Vgen::emit(const decqmlocknosf& i) {
+  auto adr = M(i.m);
+  /* Use VIXL's macroassembler scratch regs. */
+  a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);
+  if (Cfg::Jit::ArmLse) {
+    a->Mov(rVixlScratch0, -1);
+    a->ldaddal(rVixlScratch0, rVixlScratch0, adr);
+    a->Sub(rAsm, rVixlScratch0, 1, LeaveFlags);
+  } else {
+    vixl::Label again;
+    a->bind(&again);
+    a->ldxr(rAsm, adr);
+    a->Sub(rAsm, rAsm, 1, LeaveFlags);
+    a->stxr(rVixlScratch0, rAsm, adr);
+    recordAddressImmediate();
+    a->Cbnz(rVixlScratch0, &again);
+  }
+  /* Restore VIXL's scratch regs. */
+  a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);
+}
+
 void Vgen::emit(const jcc& i) {
   if (i.targets[1] != i.targets[0]) {
     if (next == i.targets[1]) {
@@ -1522,6 +1545,7 @@ void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
 }
 
 Y(decqmlock, m)
+Y(decqmlocknosf, m)
 Y(lea, s)
 Y(load, s)
 Y(loadb, s)
@@ -2003,6 +2027,8 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
     removeDeadCode(unit);
     if (regalloc) {
       splitCriticalEdges(unit);
+
+      VasmBlockCounters::profileGuidedUpdate(unit);
 
       if (RuntimeOption::EvalUseGraphColor &&
           unit.context &&

@@ -64,3 +64,17 @@ class TestPythonAnnotations(unittest.TestCase):
             struct.second
 
         self.assertEqual(0, struct.renamed_second)
+
+    def test_python_Name_on_exception_message(self) -> None:
+        """
+        exception ExceptionWithMessage {
+            @thrift.ExceptionMessage
+            @python.Name{name = "message"}
+            1: string msg;
+        }
+        """
+        with self.assertRaisesRegex(
+            immutable_test_types.ExceptionWithMessage,
+            "Oh Noes!!!",
+        ):
+            raise immutable_test_types.ExceptionWithMessage(message="Oh Noes!!!")

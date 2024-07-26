@@ -742,7 +742,7 @@ class python_mstch_struct : public mstch_struct {
   mstch::node exception_message() {
     const auto* message_field =
         dynamic_cast<const t_exception&>(*struct_).get_message_field();
-    return message_field ? message_field->name() : "";
+    return message_field ? py3::get_py3_name(*message_field) : "";
   }
 
   mstch::node adapter() {

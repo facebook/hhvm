@@ -45,14 +45,14 @@ class Fiery(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
 
 class Serious(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     class __fbthrift_IsSet:
-        sonnet: bool
+        not_sonnet: bool
         pass
 
-    sonnet: Final[_typing.Optional[str]] = ...
+    not_sonnet: Final[_typing.Optional[str]] = ...
 
     def __init__(
         self, *,
-        sonnet: _typing.Optional[str]=None
+        not_sonnet: _typing.Optional[str]=None
     ) -> None: ...
 
     def __hash__(self) -> int: ...

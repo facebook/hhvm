@@ -60,7 +60,7 @@ StructMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
   module_Serious.is_union() = false;
   static const auto* const
   module_Serious_fields = new std::array<EncodedThriftField, 1>{ {
-    { 1, "sonnet", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct_ref(), }},  }};
+    { 1, "sonnet", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct_ref(), *cvStruct("python.Name", { {"name", cvString("not_sonnet") } }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_Serious_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -204,7 +204,7 @@ void ExceptionMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
   module_Serious.name() = "module.Serious";
   static const auto* const
   module_Serious_fields = new std::array<EncodedThriftField, 1>{ {
-    { 1, "sonnet", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct_ref(), }},  }};
+    { 1, "sonnet", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct_ref(), *cvStruct("python.Name", { {"name", cvString("not_sonnet") } }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_Serious_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;

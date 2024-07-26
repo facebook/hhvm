@@ -81,7 +81,7 @@ cdef extern from "thrift/compiler/test/fixtures/exceptions/gen-cpp2/module_types
         bint operator>(cSerious&)
         bint operator<=(cSerious&)
         bint operator>=(cSerious&)
-        __optional_field_ref[string] sonnet_ref "sonnet_ref" ()
+        __optional_field_ref[string] not_sonnet_ref "sonnet_ref" ()
 
 
     cdef cppclass cComplexFieldNames "::cpp2::ComplexFieldNames"(cTException):
@@ -162,7 +162,7 @@ cdef class Fiery(thrift.py3.exceptions.GeneratedError):
 cdef class Serious(thrift.py3.exceptions.GeneratedError):
     cdef shared_ptr[cSerious] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Serious_FieldsSetter _fields_setter
-    cdef inline object sonnet_impl(self)
+    cdef inline object not_sonnet_impl(self)
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSerious])

@@ -72,7 +72,7 @@ class Serious(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "sonnet",  # name
-            "sonnet",  # python name (from @python.Name annotation)
+            "not_sonnet",  # python name (from @python.Name annotation)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -94,7 +94,7 @@ class Serious(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
 
     def __str__(self):
-        field = self.sonnet
+        field = self.not_sonnet
         if field is None:
             return str(field)
         return field

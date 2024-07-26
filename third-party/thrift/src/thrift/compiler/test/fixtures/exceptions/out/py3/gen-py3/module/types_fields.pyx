@@ -59,7 +59,7 @@ cdef class __Serious_FieldsSetter(__StructFieldsSetter):
     cdef __Serious_FieldsSetter _fbthrift_create(_module_types.cSerious* struct_cpp_obj):
         cdef __Serious_FieldsSetter __fbthrift_inst = __Serious_FieldsSetter.__new__(__Serious_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
-        __fbthrift_inst._setters[__cstring_view(<const char*>"sonnet")] = __Serious_FieldsSetter._set_field_0
+        __fbthrift_inst._setters[__cstring_view(<const char*>"not_sonnet")] = __Serious_FieldsSetter._set_field_0
         return __fbthrift_inst
 
     cdef void set_field(__Serious_FieldsSetter self, const char* name, object value) except *:
@@ -70,13 +70,13 @@ cdef class __Serious_FieldsSetter(__StructFieldsSetter):
         deref(found).second(self, value)
 
     cdef void _set_field_0(self, _fbthrift_value) except *:
-        # for field sonnet
+        # for field not_sonnet
         if _fbthrift_value is None:
             __reset_field[_module_types.cSerious](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
-            raise TypeError(f'sonnet is not a { str !r}.')
-        deref(self._struct_cpp_obj).sonnet_ref().assign(cmove(bytes_to_string(_fbthrift_value.encode('utf-8'))))
+            raise TypeError(f'not_sonnet is not a { str !r}.')
+        deref(self._struct_cpp_obj).not_sonnet_ref().assign(cmove(bytes_to_string(_fbthrift_value.encode('utf-8'))))
 
 
 @__cython.auto_pickle(False)

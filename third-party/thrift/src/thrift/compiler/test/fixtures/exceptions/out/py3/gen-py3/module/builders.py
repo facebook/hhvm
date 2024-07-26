@@ -28,10 +28,10 @@ class Serious_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__Serious
 
     def __init__(self):
-        self.sonnet: _typing.Optional[str] = None
+        self.not_sonnet: _typing.Optional[str] = None
 
     def __iter__(self):
-        yield "sonnet", self.sonnet
+        yield "not_sonnet", self.not_sonnet
 
 _fbthrift_struct_type__ComplexFieldNames = _module_types.ComplexFieldNames
 class ComplexFieldNames_Builder(thrift.py3.builder.StructBuilder):

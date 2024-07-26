@@ -113,6 +113,7 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
     ::cpp2::Serious>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
+      {"sonnet", "not_sonnet"},
     }
   };
   return *map;

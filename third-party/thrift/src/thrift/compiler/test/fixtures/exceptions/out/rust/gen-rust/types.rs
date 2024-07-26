@@ -426,6 +426,20 @@ impl ::fbthrift::metadata::ThriftAnnotations for Serious {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<python__types::Name>() {
+                    let mut tmp = ::std::option::Option::Some(python__types::Name {
+                        name: "not_sonnet".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <python__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
             },
             _ => {}
         }

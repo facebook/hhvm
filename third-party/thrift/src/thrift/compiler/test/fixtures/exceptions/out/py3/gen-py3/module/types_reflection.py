@@ -56,7 +56,7 @@ def get_reflection__Serious() -> __StructSpec:
         __FieldSpec._fbthrift_create(
             id=1,
             name="sonnet",
-            py_name="sonnet",
+            py_name="not_sonnet",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,

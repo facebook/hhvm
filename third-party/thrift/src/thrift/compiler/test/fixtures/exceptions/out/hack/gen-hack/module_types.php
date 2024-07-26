@@ -181,6 +181,11 @@ class Serious extends \TException implements \IThriftSyncStruct, \IThriftExcepti
               shape(
               )
             ),
+            '\facebook\thrift\annotation\python\Name' => \facebook\thrift\annotation\python\Name::fromShape(
+              shape(
+                "name" => "not_sonnet",
+              )
+            ),
           ],
           'type' => dict[],
         ),

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/python.thrift"
 
 package "thrift.com/python/test"
@@ -25,4 +26,10 @@ struct Struct {
   1: i32 first;
   @python.Name{name = "renamed_second"}
   2: i32 second;
+}
+
+exception ExceptionWithMessage {
+  @thrift.ExceptionMessage
+  @python.Name{name = "message"}
+  1: string msg;
 }

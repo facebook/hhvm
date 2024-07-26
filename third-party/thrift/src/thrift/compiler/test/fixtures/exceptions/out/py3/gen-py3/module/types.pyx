@@ -192,7 +192,7 @@ cdef class Serious(thrift.py3.exceptions.GeneratedError):
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("Serious", {
-          "sonnet": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).sonnet_ref().has_value(),
+          "not_sonnet": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).not_sonnet_ref().has_value(),
         })
 
     @staticmethod
@@ -202,15 +202,15 @@ cdef class Serious(thrift.py3.exceptions.GeneratedError):
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
         return __fbthrift_inst
 
-    cdef inline sonnet_impl(self):
-        if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).sonnet_ref().has_value():
+    cdef inline not_sonnet_impl(self):
+        if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).not_sonnet_ref().has_value():
             return None
 
-        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).sonnet_ref().value_unchecked()).decode('UTF-8')
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).not_sonnet_ref().value_unchecked()).decode('UTF-8')
 
     @property
-    def sonnet(self):
-        return self.sonnet_impl()
+    def not_sonnet(self):
+        return self.not_sonnet_impl()
 
 
     def __hash__(Serious self):
@@ -220,7 +220,7 @@ cdef class Serious(thrift.py3.exceptions.GeneratedError):
         return super().__repr__()
 
     def __str__(Serious self):
-        field = self.sonnet
+        field = self.not_sonnet
         if field is None:
             return str(field)
         return field

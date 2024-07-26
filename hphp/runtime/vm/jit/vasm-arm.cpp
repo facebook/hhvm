@@ -1169,7 +1169,7 @@ void Vgen::emit(const srem& i) {
 void Vgen::emit(const trap& i) {
   env.meta.trapReasons.emplace_back(a->frontier(), i.reason);
   if (i.fix.isValid()) {
-    env.meta.fixups.emplace_back(a->frontier(), i.fix);
+    env.meta.trapFixups.emplace_back(a->frontier(), i.fix);
     env.record_inline_stack(a->frontier());
   }
   a->Brk(1);

@@ -16,8 +16,7 @@
 
 package thrift
 
-// PersistentHeaders is an interface that allows a transport to send headers as part of every request.
-// This interface is implemented by some protocols, including HeaderProtocol, RocketProtocol and UpgradeToRocketProtocol.
+// Deprecated: please WithPersistent header instead of SetPersistentHeader and stop using GetPersistentHeader.
 type PersistentHeaders interface {
 	SetPersistentHeader(key, value string)
 	GetPersistentHeader(key string) (string, bool)

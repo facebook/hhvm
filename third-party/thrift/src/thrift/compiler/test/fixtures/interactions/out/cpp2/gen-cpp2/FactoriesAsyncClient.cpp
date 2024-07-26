@@ -174,12 +174,22 @@ void apache::thrift::Client<::cpp2::Factories>::sync_foo(apache::thrift::RpcOpti
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = fooCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       fooImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -360,12 +370,22 @@ apache::thrift::Client<::cpp2::Factories>::MyInteraction apache::thrift::Client<
   auto ctxAndHeader = interactCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   MyInteraction handle(channel_, "MyInteraction");
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       interactImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), handle, p_arg);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -524,12 +544,22 @@ std::pair<apache::thrift::Client<::cpp2::Factories>::MyInteractionFast, ::std::i
   auto ctxAndHeader = interactFastCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   MyInteractionFast handle(channel_, "MyInteractionFast");
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       interactFastImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), handle);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -696,12 +726,22 @@ std::pair<apache::thrift::Client<::cpp2::Factories>::SerialInteraction, apache::
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
   SerialInteraction handle(channel_, "SerialInteraction");
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       serializeImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), handle);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -957,12 +997,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = frobnicateCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       frobnicateImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -1102,12 +1152,22 @@ void apache::thrift::Client<::cpp2::Factories>::MyInteraction::sync_ping(apache:
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = pingCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       pingImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -1206,12 +1266,22 @@ apache::thrift::ClientBufferedStream<bool> apache::thrift::Client<::cpp2::Factor
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       truthifyImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -1564,12 +1634,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = frobnicateCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       frobnicateImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -1709,12 +1789,22 @@ void apache::thrift::Client<::cpp2::Factories>::MyInteractionFast::sync_ping(apa
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = pingCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       pingImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -1813,12 +1903,22 @@ apache::thrift::ClientBufferedStream<bool> apache::thrift::Client<::cpp2::Factor
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       truthifyImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -2102,12 +2202,22 @@ void apache::thrift::Client<::cpp2::Factories>::SerialInteraction::sync_frobnica
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = frobnicateCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       frobnicateImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }

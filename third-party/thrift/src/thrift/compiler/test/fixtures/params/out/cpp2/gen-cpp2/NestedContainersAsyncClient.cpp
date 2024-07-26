@@ -180,12 +180,22 @@ void apache::thrift::Client<::cpp2::NestedContainers>::sync_mapList(apache::thri
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = mapListCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       mapListImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_foo);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -369,12 +379,22 @@ void apache::thrift::Client<::cpp2::NestedContainers>::sync_mapSet(apache::thrif
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = mapSetCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       mapSetImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_foo);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -558,12 +578,22 @@ void apache::thrift::Client<::cpp2::NestedContainers>::sync_listMap(apache::thri
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = listMapCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       listMapImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_foo);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -747,12 +777,22 @@ void apache::thrift::Client<::cpp2::NestedContainers>::sync_listSet(apache::thri
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = listSetCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       listSetImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_foo);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -936,12 +976,22 @@ void apache::thrift::Client<::cpp2::NestedContainers>::sync_turtles(apache::thri
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = turtlesCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       turtlesImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_foo);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }

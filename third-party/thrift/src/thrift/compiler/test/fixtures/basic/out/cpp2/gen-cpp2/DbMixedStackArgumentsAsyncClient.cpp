@@ -126,12 +126,22 @@ void apache::thrift::Client<::test::fixtures::basic::DbMixedStackArguments>::syn
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = getDataByKey0Ctx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       getDataByKey0Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_key);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -315,12 +325,22 @@ void apache::thrift::Client<::test::fixtures::basic::DbMixedStackArguments>::syn
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = getDataByKey1Ctx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       getDataByKey1Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_key);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }

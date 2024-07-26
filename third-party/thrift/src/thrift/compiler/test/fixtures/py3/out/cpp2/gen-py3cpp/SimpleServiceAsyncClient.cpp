@@ -844,12 +844,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = get_fiveCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       get_fiveImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -1035,12 +1045,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = add_fiveCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       add_fiveImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_num);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -1226,12 +1246,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_do_nothing(apach
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = do_nothingCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       do_nothingImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -1415,12 +1445,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_concat(apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = concatCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       concatImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_first, p_second);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -1604,12 +1644,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = get_valueCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       get_valueImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_simple_struct);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -1795,12 +1845,22 @@ bool apache::thrift::Client<::py3::simple::SimpleService>::sync_negate(apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = negateCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       negateImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_input);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -1986,12 +2046,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = tinyCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       tinyImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_input);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -2177,12 +2247,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = smallCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       smallImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_input);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -2368,12 +2448,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = bigCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       bigImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_input);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -2559,12 +2649,22 @@ double apache::thrift::Client<::py3::simple::SimpleService>::sync_two(apache::th
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = twoCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       twoImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_input);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -2750,12 +2850,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_expected_excepti
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = expected_exceptionCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       expected_exceptionImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -2939,12 +3049,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = unexpected_exceptionCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       unexpected_exceptionImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -3130,12 +3250,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = sum_i16_listCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       sum_i16_listImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_numbers);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -3321,12 +3451,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = sum_i32_listCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       sum_i32_listImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_numbers);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -3512,12 +3652,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = sum_i64_listCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       sum_i64_listImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_numbers);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -3703,12 +3853,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_concat_many(apac
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = concat_manyCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       concat_manyImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_words);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -3892,12 +4052,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = count_structsCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       count_structsImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_items);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -4083,12 +4253,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = sum_setCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       sum_setImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_numbers);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -4274,12 +4454,22 @@ bool apache::thrift::Client<::py3::simple::SimpleService>::sync_contains_word(ap
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = contains_wordCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       contains_wordImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_words, p_word);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -4465,12 +4655,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_get_map_value(ap
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = get_map_valueCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       get_map_valueImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_words, p_key);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -4654,12 +4854,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = map_lengthCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       map_lengthImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_items);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -4845,12 +5055,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = sum_map_valuesCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       sum_map_valuesImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_items);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -5036,12 +5256,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = complex_sum_i32Ctx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       complex_sum_i32Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_counter);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -5227,12 +5457,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_repeat_name(apac
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = repeat_nameCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       repeat_nameImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_counter);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -5416,12 +5656,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_get_struct(apach
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = get_structCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       get_structImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -5605,12 +5855,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_fib(apache::thri
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = fibCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       fibImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_n);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -5794,12 +6054,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_unique_words(apa
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = unique_wordsCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       unique_wordsImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_words);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -5983,12 +6253,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_words_count(apac
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = words_countCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       words_countImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_words);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -6172,12 +6452,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = set_enumCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       set_enumImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_in_enum);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -6363,12 +6653,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_list_of_lists(ap
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = list_of_listsCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       list_of_listsImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_num_lists, p_num_items);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -6552,12 +6852,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_word_character_f
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = word_character_frequencyCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       word_character_frequencyImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_sentence);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -6741,12 +7051,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_list_of_sets(apa
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = list_of_setsCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       list_of_setsImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_some_words);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -6930,12 +7250,22 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = nested_map_argumentCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       nested_map_argumentImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_struct_map);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -7121,12 +7451,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_make_sentence(ap
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = make_sentenceCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       make_sentenceImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_word_chars);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -7310,12 +7650,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_get_union(apache
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = get_unionCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       get_unionImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_sets);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -7499,12 +7849,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_get_keys(apache:
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = get_keysCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       get_keysImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_string_map);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -7688,12 +8048,22 @@ double apache::thrift::Client<::py3::simple::SimpleService>::sync_lookup_double(
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = lookup_doubleCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       lookup_doubleImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_key);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -7879,12 +8249,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_retrieve_binary(
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = retrieve_binaryCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       retrieve_binaryImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_something);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -8068,12 +8448,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_contain_binary(a
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = contain_binaryCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       contain_binaryImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_binaries);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -8257,12 +8647,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_contain_enum(apa
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = contain_enumCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       contain_enumImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_the_enum);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -8446,12 +8846,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_get_binary_union
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = get_binary_union_structCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       get_binary_union_structImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_u);
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -8635,12 +9045,22 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sync_get_struct_hidde
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = get_struct_hiddenCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       get_struct_hiddenImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }

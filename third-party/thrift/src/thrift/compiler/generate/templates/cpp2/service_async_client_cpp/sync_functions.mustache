@@ -54,12 +54,22 @@ void {{ > service_common/client_class_name}}::sync_{{function:cpp_name}}(apache:
 {{#function:creates_interaction?}}
   {{function:created_interaction}} handle(channel_, "{{function:created_interaction}}");
 {{/function:creates_interaction?}}
+#if FOLLY_HAS_COROUTINES
+  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+  }
+#endif
   callback.waitUntilDone(
     evb,
     [&] {
       {{function:cpp_name}}Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
     });
-
+#if FOLLY_HAS_COROUTINES
+  if (shouldProcessClientInterceptors) {
+    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+  }
+#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }

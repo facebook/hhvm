@@ -45,6 +45,8 @@ std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
       std::move(h2Options), server.getThriftProcessor(), server);
 }
 
+enum class ClientCallbackKind { CORO, SYNC };
+
 struct TestHandler
     : apache::thrift::ServiceHandler<test::ClientInterceptorTest> {
   folly::coro::Task<void> co_noop() override { co_return; }
@@ -58,9 +60,58 @@ struct TestHandler
   }
 };
 
-class ClientInterceptorTestP : public ::testing::TestWithParam<TransportType> {
+class ClientInterface {
  public:
-  TransportType transportType() const { return GetParam(); }
+  explicit ClientInterface(
+      std::unique_ptr<apache::thrift::Client<test::ClientInterceptorTest>>
+          client)
+      : client_(std::move(client)) {}
+
+  virtual ~ClientInterface() = default;
+
+  virtual folly::coro::Task<std::string> echo(std::string str) = 0;
+  virtual folly::coro::Task<void> noop() = 0;
+
+ protected:
+  std::unique_ptr<apache::thrift::Client<test::ClientInterceptorTest>> client_;
+};
+
+class CoroClientInterface : public ClientInterface {
+ public:
+  using ClientInterface::ClientInterface;
+
+  folly::coro::Task<std::string> echo(std::string str) override {
+    co_return co_await client_->co_echo(std::move(str));
+  }
+  folly::coro::Task<void> noop() override {
+    co_await client_->co_noop();
+    co_return;
+  }
+};
+
+class SyncClientInterface : public ClientInterface {
+ public:
+  using ClientInterface::ClientInterface;
+
+  folly::coro::Task<std::string> echo(std::string str) override {
+    std::string ret;
+    client_->sync_echo(ret, std::move(str));
+    co_return ret;
+  }
+  folly::coro::Task<void> noop() override {
+    client_->sync_noop();
+    co_return;
+  }
+};
+
+class ClientInterceptorTestP
+    : public ::testing::TestWithParam<
+          std::tuple<TransportType, ClientCallbackKind>> {
+ public:
+  TransportType transportType() const { return std::get<0>(GetParam()); }
+  ClientCallbackKind clientCallbackType() const {
+    return std::get<1>(GetParam());
+  }
 
  private:
   void SetUp() override {
@@ -101,12 +152,20 @@ class ClientInterceptorTestP : public ::testing::TestWithParam<TransportType> {
   }
 
  public:
-  template <typename ServiceTag = test::ClientInterceptorTest>
-  std::unique_ptr<apache::thrift::Client<ServiceTag>> makeClient(
+  std::unique_ptr<ClientInterface> makeClient(
       std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>
           interceptors) {
-    return std::make_unique<apache::thrift::Client<ServiceTag>>(
-        makeChannel(), std::move(interceptors));
+    auto client =
+        std::make_unique<apache::thrift::Client<test::ClientInterceptorTest>>(
+            makeChannel(), std::move(interceptors));
+    switch (clientCallbackType()) {
+      case ClientCallbackKind::CORO:
+        return std::make_unique<CoroClientInterface>(std::move(client));
+      case ClientCallbackKind::SYNC:
+        return std::make_unique<SyncClientInterface>(std::move(client));
+      default:
+        throw std::logic_error{"Unknown client callback type!"};
+    }
   }
 };
 
@@ -182,21 +241,21 @@ class ClientInterceptorThatThrowsOnResponse
 
 } // namespace
 
-CO_TEST_P(ClientInterceptorTestP, BasicCoro) {
+CO_TEST_P(ClientInterceptorTestP, Basic) {
   auto interceptor =
       std::make_shared<ClientInterceptorCountWithRequestState>("Interceptor1");
   auto client = makeClient(makeInterceptorsList(interceptor));
 
-  co_await client->co_echo("foo");
+  co_await client->echo("foo");
   EXPECT_EQ(interceptor->onRequestCount, 1);
   EXPECT_EQ(interceptor->onResponseCount, 1);
 
-  co_await client->co_noop();
+  co_await client->noop();
   EXPECT_EQ(interceptor->onRequestCount, 2);
   EXPECT_EQ(interceptor->onResponseCount, 2);
 }
 
-CO_TEST_P(ClientInterceptorTestP, CoroOnRequestException) {
+CO_TEST_P(ClientInterceptorTestP, OnRequestException) {
   auto interceptor1 =
       std::make_shared<ClientInterceptorThatThrowsOnRequest>("Interceptor1");
   auto interceptor2 =
@@ -209,7 +268,7 @@ CO_TEST_P(ClientInterceptorTestP, CoroOnRequestException) {
   EXPECT_THROW(
       {
         try {
-          co_await client->co_noop();
+          co_await client->noop();
         } catch (const ClientInterceptorException& ex) {
           EXPECT_EQ(ex.causes().size(), 2);
           EXPECT_EQ(ex.causes()[0].sourceInterceptorName, "Interceptor1");
@@ -230,7 +289,7 @@ CO_TEST_P(ClientInterceptorTestP, CoroOnRequestException) {
   EXPECT_EQ(interceptor3->onResponseCount, 0);
 }
 
-CO_TEST_P(ClientInterceptorTestP, CoroOnResponseException) {
+CO_TEST_P(ClientInterceptorTestP, OnResponseException) {
   auto interceptor1 =
       std::make_shared<ClientInterceptorThatThrowsOnResponse>("Interceptor1");
   auto interceptor2 =
@@ -243,7 +302,7 @@ CO_TEST_P(ClientInterceptorTestP, CoroOnResponseException) {
   EXPECT_THROW(
       {
         try {
-          co_await client->co_noop();
+          co_await client->noop();
         } catch (const ClientInterceptorException& ex) {
           EXPECT_EQ(ex.causes().size(), 2);
           EXPECT_EQ(ex.causes()[0].sourceInterceptorName, "Interceptor1");
@@ -267,5 +326,7 @@ CO_TEST_P(ClientInterceptorTestP, CoroOnResponseException) {
 INSTANTIATE_TEST_SUITE_P(
     ClientInterceptorTestP,
     ClientInterceptorTestP,
-    ::testing::Values(
-        TransportType::HEADER, TransportType::ROCKET, TransportType::HTTP2));
+    Combine(
+        Values(
+            TransportType::HEADER, TransportType::ROCKET, TransportType::HTTP2),
+        Values(ClientCallbackKind::CORO, ClientCallbackKind::SYNC)));

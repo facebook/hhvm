@@ -31,19 +31,23 @@ import (
 type bufProtocol struct {
 	Decoder
 	Encoder
-	wbuf   *MemoryBuffer
-	name   string
-	typeID MessageType
+	wbuf        *MemoryBuffer
+	name        string
+	typeID      MessageType
+	reqHeaders  map[string]string
+	respHeaders map[string]string
 }
 
-func newBufProtocol(data []byte, name string, typeID MessageType) *bufProtocol {
+func newBufProtocol(data []byte, name string, typeID MessageType, respHeaders map[string]string) *bufProtocol {
 	wbuf := NewMemoryBuffer()
 	return &bufProtocol{
-		Decoder: newCompactDecoder(NewMemoryBufferWithData(data)),
-		Encoder: newCompactEncoder(wbuf),
-		wbuf:    wbuf,
-		name:    name,
-		typeID:  typeID,
+		Decoder:     newCompactDecoder(NewMemoryBufferWithData(data)),
+		Encoder:     newCompactEncoder(wbuf),
+		wbuf:        wbuf,
+		name:        name,
+		typeID:      typeID,
+		respHeaders: respHeaders,
+		reqHeaders:  map[string]string{},
 	}
 }
 
@@ -67,24 +71,26 @@ func (b *bufProtocol) Close() error {
 	return nil
 }
 
-func (b *bufProtocol) SetPersistentHeader(key, value string) {
-	return
-}
-
-func (b *bufProtocol) GetPersistentHeader(key string) (string, bool) {
-	return "", false
-}
-
 func (b *bufProtocol) GetResponseHeaders() map[string]string {
-	return nil
+	return b.respHeaders
 }
 
 func (b *bufProtocol) SetRequestHeader(key, value string) {
-	return
+	b.reqHeaders[key] = value
 }
 
 func (b *bufProtocol) GetRequestHeaders() map[string]string {
-	return nil
+	return b.reqHeaders
+}
+
+// Deprecated: should use WithPersistentHeader, so do not implement.
+func (b *bufProtocol) SetPersistentHeader(key, value string) {
+	panic("not implemented: deprecated, so did not implement.")
+}
+
+// Deprecated: only used for testing, so do not implement.
+func (b *bufProtocol) GetPersistentHeader(key string) (string, bool) {
+	panic("not implemented: only used for testing, so did not implement.")
 }
 
 // rocketBouncer bounces back any message received from the client.
@@ -110,12 +116,13 @@ func rocketBouncer(ctx context.Context, setup payload.SetupPayload, sendingSocke
 			if err != nil {
 				return mono.Error(err)
 			}
-			protocol := newBufProtocol(msg.Data(), reqMetadata.GetName(), typeID)
+			protocol := newBufProtocol(msg.Data(), reqMetadata.GetName(), typeID, reqMetadata.GetOtherMetadata())
 			proc := &testProcessor{}
 			if _, err := processContext(ctx, proc, protocol); err != nil {
 				return mono.Error(err)
 			}
 			respMetadata := NewResponseRpcMetadata()
+			respMetadata.OtherMetadata = protocol.reqHeaders
 			respMetadataBytes, err := serializeCompact(respMetadata)
 			if err != nil {
 				return mono.Error(err)

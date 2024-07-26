@@ -35,10 +35,9 @@ import (
 // connection are not supported, as the per-connection gofunc reads
 // the request, processes it, and writes the response serially
 type simpleServer struct {
-	processor   ProcessorContext
-	listener    net.Listener
-	newProtocol func(net.Conn) (Protocol, error)
-	log         *log.Logger
+	processor ProcessorContext
+	listener  net.Listener
+	log       *log.Logger
 }
 
 // NewSimpleServer creates a new server that only supports Header Transport.
@@ -49,10 +48,9 @@ func NewSimpleServer(processor ProcessorContext, listener net.Listener, transpor
 	serverOptions := simpleServerOptions(options...)
 	processor = WrapInterceptorContext(serverOptions.interceptor, processor)
 	return &simpleServer{
-		processor:   processor,
-		listener:    listener,
-		newProtocol: NewHeaderProtocol,
-		log:         log.New(os.Stderr, "", log.LstdFlags),
+		processor: processor,
+		listener:  listener,
+		log:       log.New(os.Stderr, "", log.LstdFlags),
 	}
 }
 
@@ -95,7 +93,7 @@ func (p *simpleServer) acceptLoop(ctx context.Context) error {
 }
 
 func (p *simpleServer) processRequests(ctx context.Context, conn net.Conn) error {
-	protocol, err := p.newProtocol(conn)
+	protocol, err := NewHeaderProtocol(conn)
 	if err != nil {
 		return err
 	}

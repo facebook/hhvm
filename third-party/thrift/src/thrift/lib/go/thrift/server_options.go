@@ -16,12 +16,12 @@
 
 package thrift
 
-// ServerOptions is options needed to run a thrift server
+// Deprecated: use WrapInterceptorContext
 type ServerOptions struct {
 	interceptor Interceptor
 }
 
-// WithInterceptor sets the interceptor for the server
+// Deprecated: use WrapInterceptorContext
 func WithInterceptor(interceptor Interceptor) func(*ServerOptions) {
 	return func(server *ServerOptions) {
 		server.interceptor = interceptor
@@ -30,4 +30,12 @@ func WithInterceptor(interceptor Interceptor) func(*ServerOptions) {
 
 func defaultServerOptions() *ServerOptions {
 	return &ServerOptions{}
+}
+
+func simpleServerOptions(options ...func(*ServerOptions)) *ServerOptions {
+	opts := defaultServerOptions()
+	for _, option := range options {
+		option(opts)
+	}
+	return opts
 }

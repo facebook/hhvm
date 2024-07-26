@@ -39,7 +39,6 @@ type simpleServer struct {
 	listener    net.Listener
 	newProtocol func(net.Conn) (Protocol, error)
 	log         *log.Logger
-	*ServerOptions
 }
 
 // NewSimpleServer creates a new server that only supports Header Transport.
@@ -47,21 +46,14 @@ func NewSimpleServer(processor ProcessorContext, listener net.Listener, transpor
 	if transportType != TransportIDHeader {
 		panic(fmt.Sprintf("SimpleServer only supports Header Transport and not %d", transportType))
 	}
+	serverOptions := simpleServerOptions(options...)
+	processor = WrapInterceptorContext(serverOptions.interceptor, processor)
 	return &simpleServer{
-		processor:     processor,
-		listener:      listener,
-		newProtocol:   NewHeaderProtocol,
-		log:           log.New(os.Stderr, "", log.LstdFlags),
-		ServerOptions: simpleServerOptions(options...),
+		processor:   processor,
+		listener:    listener,
+		newProtocol: NewHeaderProtocol,
+		log:         log.New(os.Stderr, "", log.LstdFlags),
 	}
-}
-
-func simpleServerOptions(options ...func(*ServerOptions)) *ServerOptions {
-	opts := defaultServerOptions()
-	for _, option := range options {
-		option(opts)
-	}
-	return opts
 }
 
 // ServeContext starts listening on the transport and accepting new connections
@@ -114,9 +106,8 @@ func (p *simpleServer) processRequests(ctx context.Context, conn net.Conn) error
 		}
 	}()
 	defer protocol.Close()
-	intProcessor := WrapInterceptorContext(p.interceptor, p.processor)
 	for {
-		keepOpen, exc := processContext(ctx, intProcessor, protocol)
+		keepOpen, exc := processContext(ctx, p.processor, protocol)
 		if exc != nil {
 			protocol.Flush()
 			return exc

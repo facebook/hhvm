@@ -103,7 +103,7 @@ func (p *testProcessorFunction) Write(seqID int32, result WritableStruct, oprot 
 }
 
 func (p *testProcessorFunction) RunContext(ctx context.Context, reqStruct Struct) (WritableStruct, ApplicationException) {
-	return &MyTestStruct{}, nil
+	return reqStruct, nil
 }
 
 // This tests that S425600 does not happen again.

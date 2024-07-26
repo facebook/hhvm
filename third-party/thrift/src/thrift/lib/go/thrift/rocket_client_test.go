@@ -28,8 +28,67 @@ import (
 	"github.com/rsocket/rsocket-go/rx/mono"
 )
 
+type bufProtocol struct {
+	Decoder
+	Encoder
+	wbuf   *MemoryBuffer
+	name   string
+	typeID MessageType
+}
+
+func newBufProtocol(data []byte, name string, typeID MessageType) *bufProtocol {
+	wbuf := NewMemoryBuffer()
+	return &bufProtocol{
+		Decoder: newCompactDecoder(NewMemoryBufferWithData(data)),
+		Encoder: newCompactEncoder(wbuf),
+		wbuf:    wbuf,
+		name:    name,
+		typeID:  typeID,
+	}
+}
+
+func (b *bufProtocol) ReadMessageBegin() (string, MessageType, int32, error) {
+	return b.name, b.typeID, 0, nil
+}
+
+func (b *bufProtocol) ReadMessageEnd() error {
+	return nil
+}
+
+func (b *bufProtocol) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
+	return nil
+}
+
+func (b *bufProtocol) WriteMessageEnd() error {
+	return nil
+}
+
+func (b *bufProtocol) Close() error {
+	return nil
+}
+
+func (b *bufProtocol) SetPersistentHeader(key, value string) {
+	return
+}
+
+func (b *bufProtocol) GetPersistentHeader(key string) (string, bool) {
+	return "", false
+}
+
+func (b *bufProtocol) GetResponseHeaders() map[string]string {
+	return nil
+}
+
+func (b *bufProtocol) SetRequestHeader(key, value string) {
+	return
+}
+
+func (b *bufProtocol) GetRequestHeaders() map[string]string {
+	return nil
+}
+
 // rocketBouncer bounces back any message received from the client.
-func rocketBouncer(_ context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {
+func rocketBouncer(ctx context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {
 	return rsocket.NewAbstractSocket(
 		rsocket.RequestResponse(func(msg payload.Payload) mono.Mono {
 			reqMetadataBytes, ok := msg.Metadata()
@@ -47,8 +106,13 @@ func rocketBouncer(_ context.Context, setup payload.SetupPayload, sendingSocket 
 			if compressed {
 				return mono.Error(fmt.Errorf("currently only supporting uncompressed COMPACT protocol"))
 			}
-			reqMessage := &MyTestStruct{}
-			if err := deserializeCompact(msg.Data(), reqMessage); err != nil {
+			typeID, err := rpcKindToMessageType(reqMetadata.GetKind())
+			if err != nil {
+				return mono.Error(err)
+			}
+			protocol := newBufProtocol(msg.Data(), reqMetadata.GetName(), typeID)
+			proc := &testProcessor{}
+			if _, err := processContext(ctx, proc, protocol); err != nil {
 				return mono.Error(err)
 			}
 			respMetadata := NewResponseRpcMetadata()
@@ -56,10 +120,7 @@ func rocketBouncer(_ context.Context, setup payload.SetupPayload, sendingSocket 
 			if err != nil {
 				return mono.Error(err)
 			}
-			respDataBytes, err := serializeCompact(reqMessage)
-			if err != nil {
-				return mono.Error(err)
-			}
+			respDataBytes := protocol.wbuf.Buffer.Bytes()
 			response := payload.New(respDataBytes, respMetadataBytes)
 			return mono.Just(response)
 		}),
@@ -104,7 +165,7 @@ func TestRocketClientAgainstRSocketServer(t *testing.T) {
 	}
 	resp := &MyTestStruct{}
 	if err := client.Call(context.Background(), "test", req, resp); err != nil {
-		t.Fatalf("could not send message: %s", err)
+		t.Fatalf("could complete call: %v", err)
 	}
 	if resp.St != "hello" {
 		t.Fatalf("expected response to be %s, got %s", "hello", resp.St)

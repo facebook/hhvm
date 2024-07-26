@@ -86,38 +86,21 @@ class MaskRef {
   // Throws a runtime exception if the mask and object are incompatible.
   void clear(folly::F14FastMap<Value, Value>& map) const;
 
-  // Copies masked fields from one object to another (schemaless).
-  // If the masked field doesn't exist in src, the field in dst will be removed.
+  /**
+   * The API copy(protocol::Object, protocol::Object) is not provided here as
+   * it can produce invalid outputs for union masks
+   *
+   * i.e. it's not possible to tell whether a given protocol::Object instance
+   * is a struct or union - making it difficult to apply copy semantics
+   */
+
+  // Returns a new object that contains only the masked fields.
   // Throws a runtime exception if the mask and objects are incompatible.
-  void copy(const protocol::Object& src, protocol::Object& dst) const;
-  void copy(
-      const folly::F14FastMap<Value, Value>& src,
-      folly::F14FastMap<Value, Value>& dst) const;
-
-  protocol::Object filter(const protocol::Object& src) const {
-    // TODO: Migrate to filter and then get rid of copy
-    protocol::Object dst;
-    copy(src, dst);
-    return dst;
-  }
-
+  protocol::Object filter(const protocol::Object& src) const;
   folly::F14FastMap<Value, Value> filter(
-      const folly::F14FastMap<Value, Value>& src) const {
-    // TODO: Migrate to filter and then get rid of copy
-    folly::F14FastMap<Value, Value> dst;
-    copy(src, dst);
-    return dst;
-  }
+      const folly::F14FastMap<Value, Value>& src) const;
 
  private:
-  // Gets all fields/ keys that need to be copied from src to dst.
-  std::unordered_set<FieldId> getFieldsToCopy(
-      const protocol::Object& src, const protocol::Object& dst) const;
-
-  std::set<std::reference_wrapper<const Value>, std::less<Value>> getKeysToCopy(
-      const folly::F14FastMap<Value, Value>& src,
-      const folly::F14FastMap<Value, Value>& dst) const;
-
   void throwIfNotFieldMask() const;
   void throwIfNotMapMask() const;
   void throwIfNotIntegerMapMask() const;

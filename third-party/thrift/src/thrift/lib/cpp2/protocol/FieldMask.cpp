@@ -67,9 +67,8 @@ void clear(const Mask& mask, protocol::Object& obj) {
   (MaskRef{mask, false}).clear(obj);
 }
 
-void copy(
-    const Mask& mask, const protocol::Object& src, protocol::Object& dst) {
-  (MaskRef{mask, false}).copy(src, dst);
+protocol::Object filter(const Mask& mask, const protocol::Object& src) {
+  return (MaskRef{mask, false}).filter(src);
 }
 
 namespace {

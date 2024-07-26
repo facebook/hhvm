@@ -38,18 +38,19 @@ Mask reverseMask(Mask mask);
 // Throws a runtime exception if the mask and object are incompatible.
 void clear(const Mask& mask, protocol::Object& t);
 
-// Copies masked fields from one object to another (schemaless).
-// If the masked field doesn't exist in src, the field in dst will be removed.
-// Throws a runtime exception if the mask and objects are incompatible.
-void copy(const Mask& mask, const protocol::Object& src, protocol::Object& dst);
-
 // Returns a new object that contains only the masked fields.
-inline protocol::Object filter(const Mask& mask, const protocol::Object& src) {
-  // TODO: Migrate to filter and then get rid of copy
-  protocol::Object dst;
-  copy(mask, src, dst);
-  return dst;
-}
+// Throws a runtime exception if the mask and objects are incompatible.
+// Note: Masked structured (struct/union) fields will be pruned (i.e left unset)
+// if no masked unstructued child fields exist in src.
+protocol::Object filter(const Mask& mask, const protocol::Object& src);
+
+/**
+ * The API copy(protocol::Object, protocol::Object) is not provided here as
+ * it can produce invalid outputs for union masks
+ *
+ * i.e. it's not possible to tell whether a given protocol::Object instance
+ * is a struct or union - making it difficult to apply copy semantics
+ */
 
 // Returns whether field mask is compatible with thrift type tag.
 //
@@ -83,26 +84,19 @@ void clear(const Mask& mask, Struct& t) {
   return detail::clear_fields(MaskRef{mask, false}, t);
 }
 
-// Copys masked fields from one thrift struct to another.
-// If the masked field doesn't exist in src, the field in dst will be removed.
-// Throws a runtime exception if the mask and objects are incompatible.
-template <typename Struct>
-void copy(const Mask& mask, const Struct& src, Struct& dst) {
-  static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
-  detail::throwIfContainsMapMask(mask);
-  detail::copy_fields(MaskRef{mask, false}, src, dst);
-}
-
 // Returns a new object that contains only the masked fields.
 // Throws a runtime exception if the mask and objects are incompatible.
+// Note: Masked structured (struct/union) fields will be pruned (i.e left unset
+// for optional fields, or set to default for unqualified fields) if no masked
+// unstructued child fields exist in src.
 template <typename Struct>
 inline Struct filter(const Mask& mask, const Struct& src) {
-  // TODO: Migrate to filter and then get rid of copy
   static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
   detail::throwIfContainsMapMask(mask);
-  auto ret = op::getDefault<Struct>();
-  copy(mask, src, ret);
-  return ret;
+  Struct filtered;
+  MaskRef mref{mask, false};
+  detail::filter_fields(mref, src, filtered);
+  return filtered;
 }
 
 // Logical operators that can construct a new mask
@@ -231,9 +225,6 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   // Mask APIs
   void ensure(Struct& obj) const { protocol::ensure(data_, obj); }
   void clear(Struct& obj) const { protocol::clear(data_, obj); }
-  void copy(const Struct& src, Struct& dst) const {
-    protocol::copy(data_, src, dst);
-  }
   Struct filter(const Struct& src) const {
     return protocol::filter(data_, src);
   }

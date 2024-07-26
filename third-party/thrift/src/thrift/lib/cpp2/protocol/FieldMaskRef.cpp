@@ -69,65 +69,44 @@ void clear_impl(MaskRef ref, T& obj, Id id, Value& value) {
 }
 
 // call copy based on the type of the value.
-void copy(MaskRef ref, const Value& src, Value& dst) {
-  if (src.is_object() && dst.is_object()) {
-    ref.copy(src.as_object(), dst.as_object());
-    return;
+protocol::Value filter(MaskRef ref, const Value& src) {
+  protocol::Value ret;
+  if (src.is_object()) {
+    ret.emplace_object(ref.filter(src.as_object()));
+  } else if (src.is_map()) {
+    ret.emplace_map(ref.filter(src.as_map()));
+  } else {
+    folly::throw_exception<std::runtime_error>(
+        "The mask and object are incompatible.");
   }
-  if (src.is_map() && dst.is_map()) {
-    ref.copy(src.as_map(), dst.as_map());
-    return;
-  }
-  folly::throw_exception<std::runtime_error>(
-      "The mask and object are incompatible.");
+  return ret;
 }
 
 template <typename T, typename Id>
-void copy_impl(MaskRef ref, const T& src, T& dst, Id id) {
+void filter_impl(MaskRef ref, const T& src, T& ret, Id id) {
   // Id doesn't exist in field mask, skip.
   if (ref.isNoneMask()) {
     return;
   }
-  bool srcContainsId = containsId(src, id);
-  bool dstContainsId = containsId(dst, id);
-
-  // Id that we want to copy.
+  // If field is not in src, skip.
+  if (!containsId(src, id)) {
+    return;
+  }
   if (ref.isAllMask()) {
-    if (srcContainsId) {
-      dst[id] = src.at(id);
-    } else {
-      dst.erase(id);
-    }
+    ret[id] = src.at(id);
     return;
   }
-  if (!srcContainsId && !dstContainsId) { // skip
-    return;
-  }
-  // Field doesn't exist in src, so just clear dst with the mask.
-  if (!srcContainsId) {
-    clear(ref, dst.at(id));
-    return;
-  }
-  // Field exists in both src and dst, so call copy recursively.
-  if (dstContainsId) {
-    copy(ref, src.at(id), dst.at(id));
-    return;
-  }
-  // Field only exists in src. Need to construct object/ map only if there's
-  // a field to add.
   if (src.at(id).is_object()) {
-    Object newObject;
-    ref.copy(src.at(id).as_object(), newObject);
-    if (!newObject.empty()) {
-      dst[id].ensure_object() = std::move(newObject);
+    auto recurse = ref.filter(src.at(id).as_object());
+    if (!recurse.empty()) {
+      ret[id].emplace_object(std::move(recurse));
     }
     return;
   }
   if (src.at(id).is_map()) {
-    folly::F14FastMap<Value, Value> newMap;
-    ref.copy(src.at(id).as_map(), newMap);
-    if (!newMap.empty()) {
-      dst[id].ensure_map() = std::move(newMap);
+    auto recurse = ref.filter(src.at(id).as_map());
+    if (!recurse.empty()) {
+      ret[id].emplace_map(std::move(recurse));
     }
     return;
   }
@@ -280,81 +259,42 @@ void MaskRef::clear(folly::F14FastMap<Value, Value>& map) const {
   }
 }
 
-void MaskRef::copy(const protocol::Object& src, protocol::Object& dst) const {
+protocol::Object MaskRef::filter(const protocol::Object& src) const {
   throwIfNotFieldMask();
-  // Get all field ids that are possibly masked.
-  for (FieldId fieldId : getFieldsToCopy(src, dst)) {
-    MaskRef ref = get(fieldId);
-    copy_impl(ref, src, dst, fieldId);
+  protocol::Object ret;
+  for (auto& [fieldId, _] : src) {
+    MaskRef ref = get(FieldId{fieldId});
+    filter_impl(ref, src, ret, FieldId{fieldId});
   }
+  return ret;
 }
 
-void MaskRef::copy(
-    const folly::F14FastMap<Value, Value>& src,
-    folly::F14FastMap<Value, Value>& dst) const {
+folly::F14FastMap<Value, Value> MaskRef::filter(
+    const folly::F14FastMap<Value, Value>& src) const {
   throwIfNotMapMask();
-  // Get all map keys that are possibly masked.
-  auto keys = getKeysToCopy(src, dst);
+  folly::F14FastMap<Value, Value> ret;
 
-  if (keys.empty()) {
-    return;
-  }
-
-  if (detail::getArrayKeyFromValue(*keys.begin()) ==
-      detail::ArrayKey::Integer) {
-    for (Value key : keys) {
-      MaskRef ref = get(detail::getMapIdFromValue(key));
-      copy_impl(ref, src, dst, key);
-    }
-  } else {
-    for (Value key : keys) {
-      MaskRef ref = get(detail::getStringFromValue(key));
-      copy_impl(ref, src, dst, key);
-    }
-  }
-}
-
-std::unordered_set<FieldId> MaskRef::getFieldsToCopy(
-    const protocol::Object& src, const protocol::Object& dst) const {
-  std::unordered_set<FieldId> fieldIds;
-  if (isExclusive()) {
-    // With exclusive mask, copies fields in either src or dst.
-    fieldIds.reserve(src.size() + dst.size());
-    for (auto& [id, _] : src) {
-      fieldIds.insert(FieldId{id});
-    }
-    for (auto& [id, _] : dst) {
-      fieldIds.insert(FieldId{id});
-    }
-    return fieldIds;
-  }
-
-  // With inclusive mask, just copies fields in the mask.
-  const FieldIdToMask& map =
-      is_exclusion ? mask.excludes_ref().value() : mask.includes_ref().value();
-  fieldIds.reserve(map.size());
-  for (auto& [fieldId, _] : map) {
-    if (src.contains(FieldId{fieldId}) || dst.contains(FieldId{fieldId})) {
-      fieldIds.insert(FieldId{fieldId});
-    }
-  }
-  return fieldIds;
-}
-
-std::set<std::reference_wrapper<const Value>, std::less<Value>>
-MaskRef::getKeysToCopy(
-    const folly::F14FastMap<Value, Value>& src,
-    const folly::F14FastMap<Value, Value>& dst) const {
-  // cannot use unordered_set as Value doesn't have hash function.
-  // TODO: check if all keys have the same type
   std::set<std::reference_wrapper<const Value>, std::less<Value>> keys;
   for (const auto& [id, _] : src) {
     keys.insert(id);
   }
-  for (const auto& [id, _] : dst) {
-    keys.insert(id);
+  if (keys.empty()) {
+    return ret;
   }
-  return keys;
+
+  if (detail::getArrayKeyFromValue(*keys.begin()) ==
+      detail::ArrayKey::Integer) {
+    for (const Value& key : keys) {
+      MaskRef ref = get(detail::getMapIdFromValue(key));
+      filter_impl(ref, src, ret, key);
+    }
+  } else {
+    for (Value key : keys) {
+      MaskRef ref = get(detail::getStringFromValue(key));
+      filter_impl(ref, src, ret, key);
+    }
+  }
+  return ret;
 }
 
 } // namespace apache::thrift::protocol

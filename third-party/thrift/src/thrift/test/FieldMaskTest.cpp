@@ -34,6 +34,24 @@ bool literallyEqual(MaskRef actual, MaskRef expected) {
       actual.is_exclusion == expected.is_exclusion;
 }
 
+void assertSmartPointerStructIsEmpty(SmartPointerStruct& obj) {
+  EXPECT_FALSE(bool(obj.unique_ref()));
+  EXPECT_FALSE(bool(obj.shared_ref()));
+  EXPECT_FALSE(bool(obj.boxed_ref()));
+}
+
+void assertPointerHasAllValues(auto&& ptr) {
+  ASSERT_TRUE(bool(ptr));
+  EXPECT_EQ(ptr->field_1(), 0);
+  EXPECT_EQ(ptr->field_2(), 0);
+}
+
+void assertSmartPointerStructHasAllValues(SmartPointerStruct& obj) {
+  assertPointerHasAllValues(obj.unique_ref());
+  assertPointerHasAllValues(obj.shared_ref());
+  assertPointerHasAllValues(obj.boxed_ref());
+}
+
 TEST(FieldMaskTest, ExampleFieldMask) {
   // includes{7: excludes{},
   //          9: includes{5: excludes{},
@@ -840,251 +858,138 @@ TEST(FieldMaskTest, SchemalessClearExceptionMap) {
   }
 }
 
-// Calls copy on the mask, src, and dst.
-// Then checks the read-write consistency of the copy.
-void testCopy(
-    const Mask& mask, const protocol::Object& src, protocol::Object& dst) {
-  protocol::copy(mask, src, dst);
-  // copy(dst, src) should be no-op.
-  protocol::Object result;
-  result = src;
-  protocol::copy(mask, dst, result);
-  EXPECT_EQ(result, src);
+// Test that:
+// 1. filter(mask, filter(mask, src)) == filter(mask, src)
+// 2. filter(mask, asObject(src)) == asObject(filter(mask, src))
+// returns filter(mask, src)
+template <typename T>
+T testFilter(const Mask& mask, const T& src) {
+  auto filtered = protocol::filter(mask, src);
+  auto filteredObj = protocol::filter(mask, protocol::asObject(src));
+
+  EXPECT_EQ(
+      filtered, protocol::fromObjectStruct<type::infer_tag<T>>(filteredObj));
+  return filtered;
 }
 
-TEST(FieldMaskTest, SchemalessCopySimpleIncludes) {
-  protocol::Object fooObject, barObject, bazObject;
-  // foo{1: 10}
-  // bar{1: "30", 2: 20}
-  // baz = bar
-  fooObject[FieldId{1}].ensure_i32() = 10;
-  barObject[FieldId{2}].ensure_string() = "30";
-  barObject[FieldId{2}].ensure_i32() = 20;
-  bazObject = barObject;
+TEST(FieldMaskTest, FilterSimple) {
+  {
+    Foo src;
+    MaskBuilder<Foo> m(noneMask());
+    auto filtered = testFilter(m.toThrift(), src);
+    EXPECT_EQ(src, filtered);
+  }
+  {
+    Foo src;
+    src.field1() = 1;
+    src.field2() = 2;
 
-  Mask m;
-  // includes{1: exludes{}}
-  auto& includes = m.includes_ref().emplace();
-  includes[1] = allMask();
-  testCopy(m, fooObject, barObject);
-  // bar becomes bar{1: 10, 2: 20}
-  ASSERT_TRUE(barObject.contains(FieldId{1}));
-  EXPECT_EQ(barObject.at(FieldId{1}).as_i32(), 10);
-  ASSERT_TRUE(barObject.contains(FieldId{2}));
-  EXPECT_EQ(barObject.at(FieldId{2}).as_i32(), 20);
+    MaskBuilder<Foo> m(allMask());
+    auto filtered = testFilter(m.toThrift(), src);
+    EXPECT_EQ(src, filtered);
+  }
+  {
+    Foo src;
+    src.field1() = 1;
+    src.field2() = 2;
+    protocol::Object fooObj(protocol::asObject(folly::copy(src)));
 
-  testCopy(allMask(), fooObject, bazObject);
-  // baz becomes baz{1: 10}
-  ASSERT_TRUE(bazObject.contains(FieldId{1}));
-  EXPECT_EQ(bazObject.at(FieldId{1}).as_i32(), 10);
-  ASSERT_FALSE(bazObject.contains(FieldId{2}));
+    MaskBuilder<Foo> m(noneMask());
+    m.includes<ident::field1>();
 
-  // includes{1: exludes{}, 2: excludes{}, 3: excludes{}}
-  includes[2] = allMask();
-  includes[3] = allMask(); // no-op
-  testCopy(m, barObject, bazObject);
-  // baz becomes baz{1: 10, 2: 20}
-  ASSERT_TRUE(bazObject.contains(FieldId{1}));
-  EXPECT_EQ(bazObject.at(FieldId{1}).as_i32(), 10);
-  ASSERT_TRUE(bazObject.contains(FieldId{2}));
-  EXPECT_EQ(bazObject.at(FieldId{2}).as_i32(), 20);
-  ASSERT_FALSE(bazObject.contains(FieldId{3}));
+    auto filtered = testFilter(m.toThrift(), src);
+    EXPECT_EQ(filtered.field1(), 1);
+    EXPECT_EQ(filtered.field2(), 0);
+  }
+  {
+    // nested struct
+    Bar src;
+    auto& foo = src.foo_ref().ensure();
+    foo.field1_ref() = 1;
+    foo.field2_ref() = 2;
+
+    MaskBuilder<Bar> m(noneMask());
+    m.includes<ident::foo, ident::field1>();
+
+    auto filtered = testFilter(m.toThrift(), src);
+    EXPECT_EQ(filtered.foo_ref()->field1_ref(), 1);
+    EXPECT_EQ(filtered.foo_ref()->field2_ref(), 0);
+  }
+  {
+    // nested struct + optional field
+    Bar2 src, filtered;
+    src.field_3_ref().emplace().field_1_ref() = 1;
+
+    MaskBuilder<Bar2> m(noneMask());
+    m.includes<ident::field_3, ident::field_1>();
+    filtered = testFilter(m.toThrift(), src);
+    EXPECT_EQ(filtered.field_3_ref().value().field_1_ref().value(), 1);
+
+    m.reset_and_includes<ident::field_3, ident::field_2>();
+    filtered = testFilter(m.toThrift(), src);
+    // No sub field filtered, so field_3 should be null
+    EXPECT_FALSE(filtered.field_3_ref().has_value());
+  }
 }
 
-TEST(FieldMaskTest, SchemalessCopySimpleExcludes) {
-  protocol::Object fooObject, barObject;
-  // foo{1: 10, 3: 40}
-  // bar{1: "30", 2: 20}
-  fooObject[FieldId{1}].ensure_i32() = 10;
-  fooObject[FieldId{3}].ensure_i32() = 40;
-  barObject[FieldId{1}].ensure_string() = "30";
-  barObject[FieldId{2}].ensure_i32() = 20;
+TEST(FieldMaskTest, FilterException) {
+  {
+    protocol::Object fooObject, barObject, bazObject;
+    // bar{1: foo{2: 20}, 2: "40"}
+    fooObject[FieldId{2}].ensure_i32() = 20;
+    barObject[FieldId{1}].ensure_object() = fooObject;
+    barObject[FieldId{2}].ensure_string() = "40";
+    // baz{2: {3: 40}}
+    bazObject[FieldId{2}].ensure_object()[FieldId{3}].ensure_i32() = 40;
 
-  Mask m;
-  // excludes{1: exludes{}}
-  m.excludes_ref().emplace()[1] = allMask();
-  testCopy(m, fooObject, barObject);
-  // bar becomes bar{1: "30", 3: 40}
-  ASSERT_TRUE(barObject.contains(FieldId{1}));
-  EXPECT_EQ(barObject.at(FieldId{1}).as_string(), "30");
-  ASSERT_TRUE(barObject.contains(FieldId{3}));
-  EXPECT_EQ(barObject.at(FieldId{3}).as_i32(), 40);
-  ASSERT_FALSE(barObject.contains(FieldId{2}));
+    Mask m1; // bar[2] is not an object but has an object mask.
+    m1.includes_ref().emplace()[2].includes_ref().emplace()[3] = allMask();
+    EXPECT_THROW(protocol::filter(m1, barObject), std::runtime_error);
+    // baz[2] is an object, but since bar[2] is not, it still throws an error.
+    EXPECT_THROW(protocol::filter(m1, barObject), std::runtime_error);
+  }
+  {
+    Bar2 src;
+    Mask m1; // m1 = includes{2: includes{4: includes{}}}
+    auto& includes = m1.includes_ref().emplace();
+    includes[2].includes_ref().emplace()[4] = noneMask();
+    EXPECT_THROW(protocol::filter(m1, src), std::runtime_error);
+
+    Mask m2; // m2 = includes{1: includes{2: includes{5: excludes{}}}}
+    auto& includes2 = m2.includes_ref().emplace();
+    includes2[1].includes_ref().emplace()[2].excludes_ref().emplace()[5] =
+        allMask();
+    includes2[2] = allMask();
+    EXPECT_THROW(protocol::filter(m2, src), std::runtime_error);
+  }
 }
 
-TEST(FieldMaskTest, SchemalessCopyNestedRecursive) {
-  protocol::Object fooObject, barObject;
-  // bar{1: foo{1: 10,
-  //            2: 20},
-  //     2: "40"}
-  fooObject[FieldId{1}].ensure_i32() = 10;
-  fooObject[FieldId{2}].ensure_i32() = 20;
-  barObject[FieldId{1}].ensure_object() = fooObject;
-  barObject[FieldId{2}].ensure_string() = "40";
-
-  protocol::Object dst = barObject;
-  protocol::Object& nestedObject = dst[FieldId{1}].objectValue_ref().value();
-  nestedObject[FieldId{1}].ensure_object() = fooObject;
-  nestedObject[FieldId{2}].ensure_i32() = 30;
-  // dst{1: {1: {1: 10,
-  //             2: 20},
-  //         2: 30},
-  //     2: "40"}
-
-  Mask m;
-  // excludes{1: exludes{1: excludes{}}}
-  m.excludes_ref().emplace()[1].excludes_ref().emplace()[1] = allMask();
-  testCopy(m, barObject, dst);
-  // dst becomes
-  // dst{1: {1: 10
-  //         2: 30},
-  //     2: "40"}
-  ASSERT_TRUE(dst.contains(FieldId{1}));
-  protocol::Object& nested = dst.at(FieldId{1}).as_object();
-  ASSERT_TRUE(nested.contains(FieldId{1}));
-  EXPECT_EQ(nested.at(FieldId{1}).as_i32(), 10);
-  ASSERT_TRUE(nested.contains(FieldId{2}));
-  EXPECT_EQ(nested.at(FieldId{2}).as_i32(), 30);
-  ASSERT_TRUE(dst.contains(FieldId{2}));
-  EXPECT_EQ(dst.at(FieldId{2}).as_string(), "40");
-}
-
-TEST(FieldMaskTest, SchemalessCopyNestedAddField) {
-  protocol::Object fooObject, barObject;
-  // bar{1: foo{1: 10,
-  //            2: 20},
-  //     2: "40"}
-  fooObject[FieldId{1}].ensure_i32() = 10;
-  fooObject[FieldId{2}].ensure_i32() = 20;
-  barObject[FieldId{1}].ensure_object() = fooObject;
-  barObject[FieldId{2}].ensure_string() = "40";
-
-  Mask m1;
-  // includes{1: includes{2: excludes{}},
-  //          2: excludes{}}
-  auto& includes = m1.includes_ref().emplace();
-  includes[1].includes_ref().emplace()[2] = allMask();
-  includes[2] = allMask();
-
-  protocol::Object dst1;
-  testCopy(m1, barObject, dst1);
-  // dst1 becomes dst1{1: {2: 20}, 2: "40"}
-  ASSERT_TRUE(dst1.contains(FieldId{1}));
-  protocol::Object& nested = dst1.at(FieldId{1}).as_object();
-  ASSERT_TRUE(nested.contains(FieldId{2}));
-  EXPECT_EQ(nested.at(FieldId{2}).as_i32(), 20);
-  ASSERT_FALSE(nested.contains(FieldId{1}));
-  ASSERT_TRUE(dst1.contains(FieldId{2}));
-  EXPECT_EQ(dst1.at(FieldId{2}).as_string(), "40");
-
-  Mask m2;
-  // excludes{1: includes{1: excludes{}, 2: excludes{}, 3: includes{}},
-  //          2: includes{}}
-  auto& excludes = m2.excludes_ref().emplace();
-  auto& nestedIncludes = excludes[1].includes_ref().emplace();
-  nestedIncludes[1] = allMask();
-  nestedIncludes[2] = allMask();
-  nestedIncludes[3] = allMask();
-  excludes[2] = noneMask();
-
-  protocol::Object dst2;
-  testCopy(m2, barObject, dst2);
-  // dst2 becomes dst2{2: "40"} (doesn't create nested object).
-  ASSERT_FALSE(dst2.contains(FieldId{1}));
-  ASSERT_TRUE(dst2.contains(FieldId{2}));
-  EXPECT_EQ(dst2.at(FieldId{2}).as_string(), "40");
-}
-
-TEST(FieldMaskTest, SchemalessCopyNestedRemoveField) {
-  protocol::Object fooObject, barObject;
-  // bar{1: foo{1: 10,
-  //            2: 20},
-  //     2: "40"}
-  fooObject[FieldId{1}].ensure_i32() = 10;
-  fooObject[FieldId{2}].ensure_i32() = 20;
-  barObject[FieldId{1}].ensure_object() = fooObject;
-  barObject[FieldId{2}].ensure_string() = "40";
-
-  Mask m;
-  // includes{1: includes{2: excludes{}},
-  //          2: excludes{}}
-  auto& includes = m.includes_ref().emplace();
-  includes[1].includes_ref().emplace()[2] = allMask();
-  includes[2] = allMask();
-
-  protocol::Object src;
-  testCopy(m, src, barObject);
-  // bar becomes bar{1: foo{1: 10}} (doesn't delete foo object).
-  ASSERT_TRUE(barObject.contains(FieldId{1}));
-  protocol::Object& nested = barObject.at(FieldId{1}).as_object();
-  ASSERT_TRUE(nested.contains(FieldId{1}));
-  EXPECT_EQ(nested.at(FieldId{1}).as_i32(), 10);
-  ASSERT_FALSE(nested.contains(FieldId{2}));
-  ASSERT_FALSE(barObject.contains(FieldId{2}));
-}
-
-TEST(FieldMaskTest, SchemalessCopyException) {
-  protocol::Object fooObject, barObject, bazObject;
-  // bar{1: foo{2: 20}, 2: "40"}
-  fooObject[FieldId{2}].ensure_i32() = 20;
-  barObject[FieldId{1}].ensure_object() = fooObject;
-  barObject[FieldId{2}].ensure_string() = "40";
-  // baz{2: {3: 40}}
-  bazObject[FieldId{2}].ensure_object()[FieldId{3}].ensure_i32() = 40;
-
-  Mask m1; // bar[2] is not an object but has an object mask.
-  m1.includes_ref().emplace()[2].includes_ref().emplace()[3] = allMask();
-  protocol::Object copy = barObject;
-  EXPECT_THROW(protocol::copy(m1, copy, barObject), std::runtime_error);
-  protocol::Object empty;
-  EXPECT_THROW(protocol::copy(m1, barObject, empty), std::runtime_error);
-  EXPECT_THROW(protocol::copy(m1, empty, barObject), std::runtime_error);
-  // baz[2] is an object, but since bar[2] is not, it still throws an error.
-  EXPECT_THROW(protocol::copy(m1, barObject, bazObject), std::runtime_error);
-  EXPECT_THROW(protocol::copy(m1, bazObject, barObject), std::runtime_error);
-}
-
-TEST(FieldMaskTest, SchemalessCopySimpleMap) {
-  protocol::Object src, dst, expected;
+TEST(FieldMaskTest, SchemalessFilterSimpleMap) {
+  protocol::Object src, expected;
   // src{1: map{1: "1",
   //            2: "2"}}
   src[FieldId{1}] = asValueStruct<type::map<type::i64_t, type::string_t>>(
       {{1, "1"}, {2, "2"}});
-  // dst{1: map{1: "3",
-  //            2: "4"}}
-  dst[FieldId{1}] = asValueStruct<type::map<type::i64_t, type::string_t>>(
-      {{1, "3"}, {2, "4"}});
-  // expected{1: map{1: "1",
-  //                 2: "4"}}
-  expected[FieldId{1}] = asValueStruct<type::map<type::i64_t, type::string_t>>(
-      {{1, "1"}, {2, "4"}});
+  // expected{1: map{1: "1"}
+  expected[FieldId{1}] =
+      asValueStruct<type::map<type::i64_t, type::string_t>>({{1, "1"}});
 
   Mask mask;
   mask.includes_ref().emplace()[1].includes_map_ref().emplace()[1] = allMask();
-  testCopy(mask, src, dst);
-  EXPECT_EQ(dst, expected);
+  EXPECT_EQ(protocol::filter(mask, src), expected);
 }
 
-TEST(FieldMaskTest, SchemalessCopySimpleStringMap) {
+TEST(FieldMaskTest, SchemalessFilterSimpleStringMap) {
   protocol::Object src, dst, expected;
-  // src{1: map{"1": "1",
-  //            "2": "2"}}
+  // src{1: map{"1": "1", "2": "2"}}
   {
     std::map<std::string, std::string> map = {{"1", "1"}, {"2", "2"}};
     src[FieldId{1}] =
         asValueStruct<type::map<type::string_t, type::string_t>>(map);
   }
-  // dst{1: map{"1": "3",
-  //            "2": "4"}}
+  // expected{1: map{"1": "1"}}
   {
-    std::map<std::string, std::string> map = {{"1", "3"}, {"2", "4"}};
-    dst[FieldId{1}] =
-        asValueStruct<type::map<type::string_t, type::string_t>>(map);
-  }
-  // expected{1: map{"1": "1",
-  //                 "2": "4"}}
-  {
-    std::map<std::string, std::string> map = {{"1", "1"}, {"2", "4"}};
+    std::map<std::string, std::string> map = {{"1", "1"}};
     expected[FieldId{1}] =
         asValueStruct<type::map<type::string_t, type::string_t>>(map);
   }
@@ -1092,48 +997,34 @@ TEST(FieldMaskTest, SchemalessCopySimpleStringMap) {
   Mask mask;
   mask.includes_ref().emplace()[1].includes_string_map_ref().emplace()["1"] =
       allMask();
-  testCopy(mask, src, dst);
-  EXPECT_EQ(dst, expected);
+  EXPECT_EQ(protocol::filter(mask, src), expected);
 }
 
-TEST(FieldMaskTest, SchemalessCopyNestedMap) {
-  protocol::Object src, dst, expected;
+TEST(FieldMaskTest, SchemalessFilterNestedMap) {
+  protocol::Object src, expected;
   // src{1: map{1: map{1: "1",
   //                   2: "2"},
   //            2: map{3: "3"}}}
   src[FieldId{1}] = asValueStruct<
       type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(
       {{1, {{1, "1"}, {2, "2"}}}, {2, {{3, "3"}}}});
-  // dst{1: map{1: map{1: "5",
-  //                   2: "6",
-  //                   3: "7"}}}
-  dst[FieldId{1}] = asValueStruct<
-      type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(
-      {{1, {{1, "5"}, {2, "6"}, {3, "7"}}}});
-  // expected{1: map{1: map{1: "1",
-  //                        2: "6"}},
-  //                 2: map{3: "3"}}}
   expected[FieldId{1}] = asValueStruct<
       type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(
-      {{1, {{1, "5"}, {2, "2"}}}, {2, {{3, "3"}}}});
+      {{1, {{2, "2"}}}, {2, {{3, "3"}}}});
 
   Mask mask;
   // includes{1: includes_map{1: excludes_map{1: allMask()},
-  //                          2: allMask(),
-  //                          5: excludes_map{5: allMask()}}}
+  //                          2: allMask()}}
   auto& nestedIncludes =
       mask.includes_ref().emplace()[1].includes_map_ref().emplace();
   nestedIncludes[1].excludes_map_ref().emplace()[1] = allMask();
   nestedIncludes[2] = allMask();
-  nestedIncludes[5].excludes_map_ref().emplace()[5] =
-      allMask(); // The object doesn't have this field.
-  // this copies src[1][1][2], src[1][1][3], and src[1][2]
-  testCopy(mask, src, dst);
-  EXPECT_EQ(dst, expected);
+  // this copies src[1][1][2] and src[1][2]
+  EXPECT_EQ(protocol::filter(mask, src), expected);
 }
 
-TEST(FieldMaskTest, SchemalessCopyNestedStringMap) {
-  protocol::Object src, dst, expected;
+TEST(FieldMaskTest, SchemalessFilterNestedStringMap) {
+  protocol::Object src, expected;
   // src{1: map{"1": map{"1": "1",
   //                     "2": "2"},
   //            "2": map{"3": "3"}}}
@@ -1141,16 +1032,6 @@ TEST(FieldMaskTest, SchemalessCopyNestedStringMap) {
     std::map<std::string, std::map<std::string, std::string>> map = {
         {"1", {{"1", "1"}, {"2", "2"}}}, {"2", {{"3", "3"}}}};
     src[FieldId{1}] = asValueStruct<
-        type::map<type::string_t, type::map<type::string_t, type::string_t>>>(
-        map);
-  }
-  // dst{1: map{"1": map{"1": "5",
-  //                     "2": "6",
-  //                     "3": "7"}}}
-  {
-    std::map<std::string, std::map<std::string, std::string>> map = {
-        {"1", {{"1", "5"}, {"2", "6"}, {"3", "7"}}}};
-    dst[FieldId{1}] = asValueStruct<
         type::map<type::string_t, type::map<type::string_t, type::string_t>>>(
         map);
   }
@@ -1159,7 +1040,7 @@ TEST(FieldMaskTest, SchemalessCopyNestedStringMap) {
   //                 "2": map{"3": "3"}}}
   {
     std::map<std::string, std::map<std::string, std::string>> map = {
-        {"1", {{"1", "5"}, {"2", "2"}}}, {"2", {{"3", "3"}}}};
+        {"1", {{"2", "2"}}}, {"2", {{"3", "3"}}}};
     expected[FieldId{1}] = asValueStruct<
         type::map<type::string_t, type::map<type::string_t, type::string_t>>>(
         map);
@@ -1167,154 +1048,64 @@ TEST(FieldMaskTest, SchemalessCopyNestedStringMap) {
 
   Mask mask;
   // includes{1: includes_string_map{"1": excludes_string_map{"1": allMask()},
-  //                                 "2": allMask(),
-  //                                 "5": excludes_string_map{"5": allMask()}}}
+  //                                 "2": allMask()}}
   auto& nestedIncludes =
       mask.includes_ref().emplace()[1].includes_string_map_ref().emplace();
   nestedIncludes["1"].excludes_string_map_ref().emplace()["1"] = allMask();
   nestedIncludes["2"] = allMask();
-  nestedIncludes["5"].excludes_string_map_ref().emplace()["5"] =
-      allMask(); // The object doesn't have this field.
-  // this copies src[1][1][2], src[1][1][3], and src[1][2]
-  testCopy(mask, src, dst);
-  EXPECT_EQ(dst, expected);
+  EXPECT_EQ(protocol::filter(mask, src), expected);
 }
 
-TEST(FieldMaskTest, SchemalessCopyMapAddRemoveKey) {
-  protocol::Object src;
-  // src{1: map{1: map{1: "1",
-  //                   2: "2"},
-  //            2: map{3: "3"}}}
-  src[FieldId{1}] = asValueStruct<
-      type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(
-      {{1, {{1, "1"}, {2, "2"}}}, {2, {{3, "3"}}}});
-  {
-    Mask mask;
-    mask.includes_ref()
-        .emplace()[1]
-        .includes_map_ref()
-        .emplace()[1]
-        .includes_map_ref()
-        .emplace()[1] = allMask();
-
-    protocol::Object dst, expected;
-    expected[FieldId{1}] = asValueStruct<
-        type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(
-        {{1, {{1, "1"}}}});
-
-    // This creates a new map at dst[1]
-    testCopy(mask, src, dst);
-    EXPECT_EQ(dst, expected);
-  }
-  {
-    Mask mask;
-    mask.includes_ref()
-        .emplace()[1]
-        .includes_map_ref()
-        .emplace()[1]
-        .includes_map_ref()
-        .emplace()[3] = allMask();
-
-    protocol::Object dst, expected;
-
-    // This doesn't create a new map at dst[1]
-    testCopy(mask, src, dst);
-    EXPECT_EQ(dst, expected);
-  }
-}
-
-TEST(FieldMaskTest, SchemalessCopyStringMapAddRemoveKey) {
-  protocol::Object src;
-  // src{1: map{"1": map{"1": "1",
-  //                     "2": "2"},
-  //            "2": map{"3": "3"}}}
-  {
-    std::map<std::string, std::map<std::string, std::string>> map = {
-        {"1", {{"1", "1"}, {"2", "2"}}}, {"2", {{"3", "3"}}}};
-    src[FieldId{1}] = asValueStruct<
-        type::map<type::string_t, type::map<type::string_t, type::string_t>>>(
-        map);
-  }
-  {
-    Mask mask;
-    mask.includes_ref()
-        .emplace()[1]
-        .includes_string_map_ref()
-        .emplace()["1"]
-        .includes_string_map_ref()
-        .emplace()["1"] = allMask();
-
-    protocol::Object dst, expected;
-    std::map<std::string, std::map<std::string, std::string>> map = {
-        {"1", {{"1", "1"}}}};
-    expected[FieldId{1}] = asValueStruct<
-        type::map<type::string_t, type::map<type::string_t, type::string_t>>>(
-        map);
-
-    // This creates a new map at dst[1]
-    testCopy(mask, src, dst);
-    EXPECT_EQ(dst, expected);
-  }
-  {
-    Mask mask;
-    mask.includes_ref()
-        .emplace()[1]
-        .includes_string_map_ref()
-        .emplace()["1"]
-        .includes_string_map_ref()
-        .emplace()["3"] = allMask();
-
-    protocol::Object dst, expected;
-
-    // This doesn't create a new map at dst[1]
-    testCopy(mask, src, dst);
-    EXPECT_EQ(dst, expected);
-  }
-}
-
-TEST(FieldMaskTest, SchemalessCopyExceptionMap) {
+TEST(FieldMaskTest, SchemalessFilterExceptionMap) {
   protocol::Object barObject, bazObject;
   // bar{1: map{2: 20}, 2: "40"}
   barObject[FieldId{1}] =
       asValueStruct<type::map<type::byte_t, type::i32_t>>({{2, 20}});
   barObject[FieldId{2}].ensure_string() = "40";
-  // baz{2: map{3: 40}}
-  bazObject[FieldId{2}] =
-      asValueStruct<type::map<type::byte_t, type::i32_t>>({{3, 40}});
 
   Mask m1; // bar[2] is not a map but has an integer map mask.
   m1.includes_ref().emplace()[2].includes_map_ref().emplace()[3] = allMask();
-  protocol::Object copy = barObject;
-  EXPECT_THROW(protocol::copy(m1, copy, barObject), std::runtime_error);
-  protocol::Object empty;
-  EXPECT_THROW(protocol::copy(m1, barObject, empty), std::runtime_error);
-  EXPECT_THROW(protocol::copy(m1, empty, barObject), std::runtime_error);
-  // baz[2] is a map, but since bar[2] is not, it still throws an error.
-  EXPECT_THROW(protocol::copy(m1, barObject, bazObject), std::runtime_error);
-  EXPECT_THROW(protocol::copy(m1, bazObject, barObject), std::runtime_error);
+  EXPECT_THROW(protocol::filter(m1, barObject), std::runtime_error);
 }
 
-TEST(FieldMaskTest, SchemalessCopyExceptionStringMap) {
-  protocol::Object barObject, bazObject;
+TEST(FieldMaskTest, SchemalessFilterExceptionStringMap) {
+  protocol::Object barObject;
   // bar{1: map{"2": 20}, 2: "40"}
   barObject[FieldId{1}] =
       asValueStruct<type::map<type::string_t, type::i32_t>>({{"2", 20}});
   barObject[FieldId{2}].ensure_string() = "40";
-  // baz{2: map{"3": 40}}
-  bazObject[FieldId{2}] =
-      asValueStruct<type::map<type::string_t, type::i32_t>>({{"3", 40}});
 
   Mask m1; // bar[2] is not a map but has a string map mask.
   m1.includes_ref().emplace()[2].includes_string_map_ref().emplace()["3"] =
       allMask();
-  protocol::Object copy = barObject;
-  EXPECT_THROW(protocol::copy(m1, copy, barObject), std::runtime_error);
-  protocol::Object empty;
-  EXPECT_THROW(protocol::copy(m1, barObject, empty), std::runtime_error);
-  EXPECT_THROW(protocol::copy(m1, empty, barObject), std::runtime_error);
-  // baz[2] is a map, but since bar[2] is not, it still throws an error.
-  EXPECT_THROW(protocol::copy(m1, barObject, bazObject), std::runtime_error);
-  EXPECT_THROW(protocol::copy(m1, bazObject, barObject), std::runtime_error);
+  EXPECT_THROW(protocol::filter(m1, barObject), std::runtime_error);
+}
+
+TEST(FieldMaskTest, FilterTerseWrite) {
+  // Makes sure filter doesn't use has_value() for all fields.
+  TerseWrite src;
+  src.field() = 4;
+  src.foo()->field1() = 5;
+  auto dst = protocol::filter(allMask(), src);
+  EXPECT_EQ(dst, src);
+}
+
+TEST(FieldMaskTest, FilterSmartPointer) {
+  // test with allMask and noneMask
+  SmartPointerStruct full, dst, empty;
+  protocol::ensure(allMask(), full);
+
+  dst = protocol::filter(allMask(), empty);
+  assertSmartPointerStructIsEmpty(dst);
+
+  dst = protocol::filter(noneMask(), full);
+  assertSmartPointerStructIsEmpty(dst);
+
+  dst = protocol::filter(allMask(), full);
+  assertSmartPointerStructHasAllValues(dst);
+
+  dst = protocol::filter(allMask(), empty);
+  assertSmartPointerStructIsEmpty(dst);
 }
 
 TEST(FieldMaskTest, IsCompatibleWithSimple) {
@@ -1557,24 +1348,6 @@ TEST(FieldMaskTest, Ensure) {
     ASSERT_TRUE(bar.field_4().has_value());
     EXPECT_EQ(bar.field_4(), "");
   }
-}
-
-void assertSmartPointerStructIsEmpty(SmartPointerStruct& obj) {
-  EXPECT_FALSE(bool(obj.unique_ref()));
-  EXPECT_FALSE(bool(obj.shared_ref()));
-  EXPECT_FALSE(bool(obj.boxed_ref()));
-}
-
-void assertPointerHasAllValues(auto&& ptr) {
-  ASSERT_TRUE(bool(ptr));
-  EXPECT_EQ(ptr->field_1(), 0);
-  EXPECT_EQ(ptr->field_2(), 0);
-}
-
-void assertSmartPointerStructHasAllValues(SmartPointerStruct& obj) {
-  assertPointerHasAllValues(obj.unique_ref());
-  assertPointerHasAllValues(obj.shared_ref());
-  assertPointerHasAllValues(obj.boxed_ref());
 }
 
 TEST(FieldMaskTest, EnsureSmartPointer) {
@@ -1827,206 +1600,6 @@ TEST(FieldMaskTest, SchemafulClearException) {
       allMask();
   includes2[2] = allMask();
   EXPECT_THROW(protocol::clear(m2, bar), std::runtime_error);
-}
-
-TEST(FieldMaskTest, SchemafulCopy) {
-  Bar2 src, empty;
-  // src = {1: {1: 10, 2: 20}, 2: "40"}
-  src.field_3().ensure().field_1() = 10;
-  src.field_3()->field_2() = 20;
-  src.field_4() = "40";
-
-  Mask mask;
-  // includes{1: includes{2: excludes{}},
-  //          2: excludes{}}
-  auto& includes = mask.includes_ref().emplace();
-  includes[1].includes_ref().emplace()[2] = allMask();
-  includes[2] = allMask();
-
-  // copy empty
-  {
-    Bar2 dst;
-    copy(mask, empty, dst);
-    EXPECT_EQ(dst, empty);
-  }
-
-  // test copy field to dst
-  {
-    Bar2 dst;
-    dst.field_3().ensure().field_1() = 30;
-    dst.field_3()->field_2() = 40;
-    copy(mask, src, dst);
-    ASSERT_TRUE(dst.field_3().has_value());
-    ASSERT_TRUE(dst.field_3()->field_1().has_value());
-    EXPECT_EQ(dst.field_3()->field_1().value(), 30);
-    ASSERT_TRUE(dst.field_3()->field_2().has_value());
-    EXPECT_EQ(dst.field_3()->field_2().value(), 20);
-    ASSERT_TRUE(dst.field_4().has_value());
-    EXPECT_EQ(dst.field_4(), "40");
-  }
-
-  // test add field to dst
-  {
-    Bar2 dst;
-    copy(mask, src, dst);
-    ASSERT_TRUE(dst.field_3().has_value());
-    ASSERT_FALSE(dst.field_3()->field_1().has_value());
-    ASSERT_TRUE(dst.field_3()->field_2().has_value());
-    EXPECT_EQ(dst.field_3()->field_2().value(), 20);
-    EXPECT_EQ(dst.field_4(), "40");
-  }
-
-  // test remove field from src
-  {
-    Bar2 dst;
-    copy(mask, empty, src);
-    // src = {1: {1: 10}, 2: "40"}
-    ASSERT_TRUE(src.field_3().has_value());
-    ASSERT_TRUE(src.field_3()->field_1().has_value());
-    EXPECT_EQ(src.field_3()->field_1().value(), 10);
-    ASSERT_FALSE(src.field_3()->field_2().has_value());
-    EXPECT_EQ(src.field_4(), "");
-
-    src.field_4() = "40";
-    copy(mask, src, dst); // this does not create a new object.
-    ASSERT_FALSE(dst.field_3().has_value());
-    ASSERT_TRUE(dst.field_4().has_value());
-    EXPECT_EQ(dst.field_4().value(), "40");
-
-    copy(allMask(), empty, src);
-    ASSERT_FALSE(src.field_3().has_value());
-    EXPECT_EQ(src.field_4(), "");
-  }
-}
-TEST(FieldMaskTest, SchemafulCopyExcludes) {
-  // test excludes mask
-  // mask2 = excludes{1: includes{1: excludes{}}}
-  Mask mask;
-  auto& excludes = mask.excludes_ref().emplace();
-  excludes[1].includes_ref().emplace()[1] = allMask();
-  Bar src, dst;
-  src.foo().emplace().field1() = 1;
-  src.foo()->field2() = 2;
-  protocol::copy(mask, src, dst);
-  ASSERT_FALSE(dst.foo()->field1().has_value());
-  ASSERT_TRUE(dst.foo()->field2().has_value());
-  EXPECT_EQ(dst.foo()->field2(), 2);
-  ASSERT_FALSE(dst.foos().has_value());
-}
-
-TEST(FieldMaskTest, SchemafulCopyTerseWrite) {
-  // Makes sure copy doesn't use has_value() for all fields.
-  TerseWrite src, dst;
-  src.field() = 4;
-  src.foo()->field1() = 5;
-  protocol::copy(allMask(), src, dst);
-  EXPECT_EQ(dst, src);
-
-  Mask m;
-  m.includes_ref().emplace()[2].includes_ref().emplace()[1] = allMask();
-  protocol::copy(m, src, dst);
-  EXPECT_EQ(dst, src);
-}
-
-TEST(FieldMaskTest, SchemafulCopySmartPointer) {
-  // test with allMask and noneMask
-  {
-    SmartPointerStruct full, dst, empty;
-    protocol::ensure(allMask(), full);
-
-    protocol::copy(allMask(), empty, dst);
-    assertSmartPointerStructIsEmpty(dst);
-
-    protocol::copy(noneMask(), full, dst);
-    assertSmartPointerStructIsEmpty(dst);
-
-    protocol::copy(allMask(), full, dst);
-    assertSmartPointerStructHasAllValues(dst);
-    protocol::copy(allMask(), full, dst);
-    assertSmartPointerStructHasAllValues(dst);
-
-    protocol::copy(noneMask(), empty, dst);
-    assertSmartPointerStructHasAllValues(dst);
-    protocol::copy(allMask(), empty, dst);
-    assertSmartPointerStructIsEmpty(dst);
-  }
-
-  // Test copy works with struct that has a shared const pointer field.
-  {
-    SharedConstPointerStruct src, dst;
-    MaskBuilder<SharedConstPointerStruct> builder(noneMask());
-    builder.includes<ident::unique>();
-    builder.ensure(src);
-    builder.copy(src, dst);
-    assertPointerHasAllValues(dst.unique_ref());
-
-    // Cannot copy to a field inside the shared const field.
-    builder.includes<ident::shared_const, ident::field_1>();
-    src.shared_const_ref() = std::make_shared<Foo2>(Foo2{});
-    dst.shared_const_ref() = std::make_shared<Foo2>(Foo2{});
-    EXPECT_THROW(builder.copy(src, dst), std::runtime_error);
-  }
-}
-
-TEST(FieldMaskTest, SchemafulCopySmartPointerAddField) {
-  SmartPointerStruct src, dst;
-  // src contains unique field except for unique.field_1 and box field.
-  MaskBuilder<SmartPointerStruct> setup(allMask());
-  setup.excludes<ident::unique, ident::field_1>();
-  setup.excludes<ident::shared>();
-  protocol::ensure(setup.toThrift(), src);
-  {
-    MaskBuilder<SmartPointerStruct> builder(noneMask());
-    builder.includes<ident::unique, ident::field_1>();
-    protocol::copy(builder.toThrift(), src, dst); // doesn't create object
-    assertSmartPointerStructIsEmpty(dst);
-  }
-  {
-    MaskBuilder<SmartPointerStruct> builder2(noneMask());
-    builder2.includes<ident::boxed, ident::field_1>();
-    protocol::copy(builder2.toThrift(), src, dst); // creates object
-    EXPECT_FALSE(bool(dst.unique_ref()));
-    EXPECT_FALSE(bool(dst.shared_ref()));
-    ASSERT_TRUE(bool(dst.boxed_ref()));
-    EXPECT_EQ(dst.boxed_ref()->field_1(), 0);
-    EXPECT_FALSE(dst.boxed_ref()->field_2().has_value());
-  }
-}
-
-TEST(FieldMaskTest, SchemafulCopySmartPointerRemoveField) {
-  SmartPointerStruct src, dst;
-  // dst contains unique field except for unique.field_1 and box field.
-  MaskBuilder<SmartPointerStruct> setup(allMask());
-  setup.excludes<ident::unique, ident::field_1>();
-  setup.excludes<ident::shared>();
-  protocol::ensure(setup.toThrift(), dst);
-
-  MaskBuilder<SmartPointerStruct> builder(noneMask());
-  builder.includes<ident::unique, ident::field_2>();
-  builder.includes<ident::boxed, ident::field_1>();
-  protocol::copy(builder.toThrift(), src, dst);
-  ASSERT_TRUE(bool(dst.unique_ref()));
-  EXPECT_FALSE(dst.unique_ref()->field_1().has_value());
-  EXPECT_FALSE(dst.unique_ref()->field_2().has_value());
-  EXPECT_FALSE(bool(dst.shared_ref()));
-  ASSERT_TRUE(bool(dst.boxed_ref()));
-  EXPECT_FALSE(dst.boxed_ref()->field_1().has_value());
-  EXPECT_EQ(dst.boxed_ref()->field_2(), 0);
-}
-
-TEST(FieldMaskTest, SchemafulCopyException) {
-  Bar2 src, dst;
-  Mask m1; // m1 = includes{2: includes{4: includes{}}}
-  auto& includes = m1.includes_ref().emplace();
-  includes[2].includes_ref().emplace()[4] = noneMask();
-  EXPECT_THROW(protocol::copy(m1, src, dst), std::runtime_error);
-
-  Mask m2; // m2 = includes{1: includes{2: includes{5: excludes{}}}}
-  auto& includes2 = m2.includes_ref().emplace();
-  includes2[1].includes_ref().emplace()[2].excludes_ref().emplace()[5] =
-      allMask();
-  includes2[2] = allMask();
-  EXPECT_THROW(protocol::copy(m2, src, dst), std::runtime_error);
 }
 
 void testLogicalOperations(Mask A, Mask B) {
@@ -3229,18 +2802,16 @@ TEST(FieldMaskTest, MaskBuilderMaskAPIs) {
   Mask expectedMask = reverseMask(builder.toThrift());
   EXPECT_EQ(builder.invert().toThrift(), expectedMask);
   // Mask includes bar.field_3().field_2().
-  // test ensure, clear, and copy
+  // test ensure, clear, and filter
   Bar2 expected, cleared;
   expected.field_3().emplace().field_2() = 0;
   cleared.field_3().emplace();
   builder.ensure(src);
   EXPECT_EQ(src, expected);
-  builder.copy(src, dst);
+  dst = builder.filter(src);
   EXPECT_EQ(dst, expected);
   builder.clear(src);
   EXPECT_EQ(src, cleared);
-  builder.copy(src, dst);
-  EXPECT_EQ(dst, cleared);
 }
 
 TEST(FieldMaskTest, MaskBuilderMaskNotCompatible) {

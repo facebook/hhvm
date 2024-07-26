@@ -243,75 +243,44 @@ void clear_fields(MaskRef ref, Struct& t) {
   }
 }
 
-// Copies the masked fields from src thrift struct to dst.
-// Returns true if it copied a field from src to dst.
-template <typename SrcStruct, typename DstStruct>
-bool copy_fields(MaskRef ref, SrcStruct& src, DstStruct& dst) {
-  static_assert(std::is_same_v<
-                folly::remove_cvref_t<SrcStruct>,
-                folly::remove_cvref_t<DstStruct>>);
-  if (!validate_mask<DstStruct>(ref)) {
+// Writes masked fields from src (as specified by ref) into ret (ret must be
+// empty). Returns true if any masked field was written into ret.
+template <typename Struct>
+bool filter_fields(MaskRef ref, const Struct& src, Struct& ret) {
+  if (!validate_mask<Struct>(ref)) {
     folly::throw_exception<std::runtime_error>(
         "The mask and struct are incompatible.");
   }
-  if constexpr (!std::is_const_v<std::remove_reference_t<DstStruct>>) {
-    bool copied = false;
-    op::for_each_ordinal<DstStruct>([&](auto ord) {
-      using Ord = decltype(ord);
-      MaskRef next = ref.get(op::get_field_id<DstStruct, Ord>());
-      // Id doesn't exist in field mask, skip.
-      if (next.isNoneMask()) {
-        return;
+  bool retained = false;
+  op::for_each_ordinal<Struct>([&](auto ord) {
+    using Ord = decltype(ord);
+    MaskRef next = ref.get(op::get_field_id<Struct, Ord>());
+    // Id doesn't exist in field mask, skip.
+    if (next.isNoneMask()) {
+      return;
+    }
+    using FieldType = op::get_native_type<Struct, Ord>;
+    auto&& src_ref = op::get<Ord>(src);
+    auto&& ret_ref = op::get<Ord>(ret);
+    bool srcHasValue = bool(op::getValueOrNull(src_ref));
+    if (!srcHasValue) { // skip
+      errorIfNotCompatible<op::get_type_tag<Struct, Ord>>(next.mask);
+    } else if (next.isAllMask()) {
+      op::copy(src_ref, ret_ref);
+      retained = true;
+    } else if constexpr (is_thrift_struct_v<FieldType>) {
+      FieldType nested;
+      // If no masked fields are retained, leave this field unset (will leave
+      // optional fields unset)
+      if (filter_fields(next, *src_ref, nested)) {
+        moveObject(ret_ref, std::move(nested));
+        retained = true;
       }
-      using FieldTag = op::get_field_tag<DstStruct, Ord>;
-      using FieldType = op::get_native_type<DstStruct, Ord>;
-      auto&& src_ref = op::get<Ord>(src);
-      auto&& dst_ref = op::get<Ord>(dst);
-      bool srcHasValue = bool(op::getValueOrNull(src_ref));
-      bool dstHasValue = bool(op::getValueOrNull(dst_ref));
-      if (!srcHasValue && !dstHasValue) { // skip
-        errorIfNotCompatible<op::get_type_tag<DstStruct, Ord>>(next.mask);
-        return;
-      }
-      // Id that we want to copy.
-      if (next.isAllMask()) {
-        if (srcHasValue) {
-          op::copy(src_ref, dst_ref);
-          copied = true;
-        } else {
-          op::clear_field<FieldTag>(dst_ref, dst);
-        }
-        return;
-      }
-      if constexpr (is_thrift_struct_v<FieldType>) {
-        // Field doesn't exist in src, so just clear dst with the mask.
-        if (!srcHasValue) {
-          clear_fields(next, *op::getValueOrNull(dst_ref));
-          return;
-        }
-        // Field exists in both src and dst, so call copy recursively.
-        if (dstHasValue) {
-          copied |= copy_fields(
-              next, *op::getValueOrNull(src_ref), *op::getValueOrNull(dst_ref));
-          return;
-        }
-        // Field only exists in src. Need to construct object only if there's
-        // a field to add.
-        FieldType newObject;
-        bool constructObject =
-            copy_fields(next, *op::getValueOrNull(src_ref), newObject);
-        if (constructObject) {
-          moveObject(dst_ref, std::move(newObject));
-          copied = true;
-        }
-        return;
-      }
+    } else {
       folly::throw_exception<std::runtime_error>(
           "The mask and struct are incompatible.");
-    });
-    return copied;
-  } else {
-    folly::throw_exception<std::runtime_error>("Cannot copy to a const field");
-  }
+    }
+  });
+  return retained;
 }
 } // namespace apache::thrift::protocol::detail

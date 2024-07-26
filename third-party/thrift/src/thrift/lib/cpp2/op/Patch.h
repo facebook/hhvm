@@ -75,6 +75,9 @@ struct PatchType<type::binary_t> {
 template <class T>
 struct SafePatchType {};
 
+template <class T>
+struct SafePatchValueType {};
+
 } // namespace detail
 
 /// The safe patch represenations for the base thrift types.
@@ -85,6 +88,10 @@ struct SafePatchType {};
 template <typename T>
 using safe_patch_type =
     typename detail::SafePatchType<type::infer_tag<T>>::type;
+
+/// The value type for the safe patch.
+template <typename T>
+using safe_patch_value_type = typename detail::SafePatchValueType<T>::type;
 
 /// The patch represenations for the base thrift types.
 ///

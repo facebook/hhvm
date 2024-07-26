@@ -131,14 +131,7 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodA(std:
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodA(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = methodACtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   methodAImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
@@ -330,14 +323,7 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodB(std:
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodB(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z) {
   auto [ctx, header] = methodBCtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   methodBImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_x, p_y, p_z);
 }
 
@@ -529,14 +515,7 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodC(std:
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodC(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = methodCCtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   methodCImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
@@ -730,14 +709,7 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodD(std:
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodD(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k) {
   auto [ctx, header] = methodDCtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   methodDImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_i, p_j, p_k);
 }
 
@@ -931,14 +903,7 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodE(std:
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodE(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = methodECtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   methodEImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
@@ -1130,14 +1095,7 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodF(std:
 
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodF(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n) {
   auto [ctx, header] = methodFCtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   methodFImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_l, p_m, p_n);
 }
 

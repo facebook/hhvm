@@ -46,14 +46,7 @@ void apache::thrift::Client<::cpp2::Perform>::foo(std::unique_ptr<apache::thrift
 
 void apache::thrift::Client<::cpp2::Perform>::foo(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = fooCtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   fooImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
@@ -336,14 +329,7 @@ void apache::thrift::Client<::cpp2::Perform>::MyInteraction::encodeT(Protocol_* 
 
 void apache::thrift::Client<::cpp2::Perform>::MyInteraction::frobnicate(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = frobnicateCtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   frobnicateImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
@@ -491,15 +477,7 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::Perform>::MyInteraction:
 
 void apache::thrift::Client<::cpp2::Perform>::MyInteraction::ping(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = pingCtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.oneWay = true;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<true /* kIsOneWay */>(std::move(callback), std::move(ctx));
   pingImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
@@ -601,17 +579,9 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Perform>::MyIntera
 
 void apache::thrift::Client<::cpp2::Perform>::MyInteraction::truthify(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = truthifyCtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::createStreamClientCallback(
-    apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)),
-    rpcOptions.getBufferOptions());
-  truthifyImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
+  auto streamCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallback), rpcOptions.getBufferOptions());
+  truthifyImpl(rpcOptions, std::move(header), contextStack, std::move(streamCallback));
 }
 
 void apache::thrift::Client<::cpp2::Perform>::MyInteraction::truthifyImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, bool stealRpcOptions) {
@@ -973,14 +943,7 @@ void apache::thrift::Client<::cpp2::Perform>::MyInteractionFast::encodeT(Protoco
 
 void apache::thrift::Client<::cpp2::Perform>::MyInteractionFast::frobnicate(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = frobnicateCtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   frobnicateImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
@@ -1128,15 +1091,7 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::Perform>::MyInteractionF
 
 void apache::thrift::Client<::cpp2::Perform>::MyInteractionFast::ping(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = pingCtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.oneWay = true;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<true /* kIsOneWay */>(std::move(callback), std::move(ctx));
   pingImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
@@ -1238,17 +1193,9 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Perform>::MyIntera
 
 void apache::thrift::Client<::cpp2::Perform>::MyInteractionFast::truthify(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = truthifyCtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::createStreamClientCallback(
-    apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)),
-    rpcOptions.getBufferOptions());
-  truthifyImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
+  auto streamCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallback), rpcOptions.getBufferOptions());
+  truthifyImpl(rpcOptions, std::move(header), contextStack, std::move(streamCallback));
 }
 
 void apache::thrift::Client<::cpp2::Perform>::MyInteractionFast::truthifyImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, bool stealRpcOptions) {
@@ -1541,14 +1488,7 @@ void apache::thrift::Client<::cpp2::Perform>::SerialInteraction::frobnicateT(Pro
 
 void apache::thrift::Client<::cpp2::Perform>::SerialInteraction::frobnicate(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = frobnicateCtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   frobnicateImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 

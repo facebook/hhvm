@@ -56,14 +56,7 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::bou
 
 void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::bounce_map(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::apache::thrift::fixtures::types::SomeMap& p_m) {
   auto [ctx, header] = bounce_mapCtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   bounce_mapImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_m);
 }
 
@@ -255,14 +248,7 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::bin
 
 void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int64_t>& p_r) {
   auto [ctx, header] = binary_keyed_mapCtx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   binary_keyed_mapImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_r);
 }
 

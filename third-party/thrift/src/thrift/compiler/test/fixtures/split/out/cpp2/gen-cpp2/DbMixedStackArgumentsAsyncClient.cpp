@@ -56,14 +56,7 @@ void apache::thrift::Client<::cpp2::DbMixedStackArguments>::getDataByKey0(std::u
 
 void apache::thrift::Client<::cpp2::DbMixedStackArguments>::getDataByKey0(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key) {
   auto [ctx, header] = getDataByKey0Ctx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   getDataByKey0Impl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_key);
 }
 
@@ -255,14 +248,7 @@ void apache::thrift::Client<::cpp2::DbMixedStackArguments>::getDataByKey1(std::u
 
 void apache::thrift::Client<::cpp2::DbMixedStackArguments>::getDataByKey1(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key) {
   auto [ctx, header] = getDataByKey1Ctx(&rpcOptions);
-  apache::thrift::RequestCallback::Context callbackContext;
-  callbackContext.protocolId =
-      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* contextStack = ctx.get();
-  if (callback) {
-    callbackContext.ctx = std::move(ctx);
-  }
-  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
   getDataByKey1Impl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_key);
 }
 

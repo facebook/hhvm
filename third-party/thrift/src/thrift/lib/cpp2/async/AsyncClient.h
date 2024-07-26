@@ -75,6 +75,23 @@ class GeneratedAsyncClient : public TClientBase {
   static void setInteraction(
       const InteractionHandle& handle, RpcOptions& rpcOptions);
 
+  template <bool IsOneWay>
+  std::pair<RequestClientCallback::Ptr, ContextStack*>
+  prepareRequestClientCallback(
+      std::unique_ptr<RequestCallback> callback,
+      ContextStack::UniquePtr contextStack) {
+    RequestCallback::Context callbackContext;
+    callbackContext.oneWay = IsOneWay;
+    callbackContext.protocolId = this->getChannel()->getProtocolId();
+    auto* ctx = contextStack.get();
+    if (callback) {
+      callbackContext.ctx = std::move(contextStack);
+    }
+    auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(
+        std::move(callback), std::move(callbackContext));
+    return std::make_pair(std::move(wrappedCallback), ctx);
+  }
+
   std::shared_ptr<RequestChannel> channel_;
   std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>
       interceptors_;

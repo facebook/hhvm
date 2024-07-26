@@ -23,11 +23,8 @@
 #include <queue>
 #include <stdexcept>
 
-#include <openssl/opensslv.h>
-#include <openssl/sha.h>
-#if OPENSSL_VERSION_NUMBER >= 0x030000000 // v3.0.0
 #include <openssl/evp.h>
-#endif
+#include <openssl/sha.h>
 
 #include <fmt/core.h>
 
@@ -608,14 +605,7 @@ std::string get_gen_type_class_with_indirection(t_type const& type) {
 
 std::string sha256_hex(std::string const& in) {
   std::uint8_t mid[SHA256_DIGEST_LENGTH];
-#if OPENSSL_VERSION_NUMBER >= 0x030000000 // v3.0.0
   EVP_Digest(in.data(), in.size(), mid, nullptr, EVP_sha256(), nullptr);
-#else
-  SHA256_CTX hasher;
-  SHA256_Init(&hasher);
-  SHA256_Update(&hasher, in.data(), in.size());
-  SHA256_Final(mid, &hasher);
-#endif
 
   constexpr auto alpha = "0123456789abcdef";
 

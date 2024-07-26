@@ -16,23 +16,22 @@
 #include <proxygen/facebook/lib/statistics/HostResources.h>
 #include <proxygen/lib/stats/ResourceData.h>
 
-using namespace proxygen;
-
 /**
  * Test Resources implementation that allows us to control what resource data is
  * returned to ResourceStats
  */
-class MockResources : public Resources {
+class MockResources : public proxygen::Resources {
  public:
-  MOCK_METHOD(ResourceData, getCurrentData, ());
+  MOCK_METHOD(proxygen::ResourceData, getCurrentData, ());
 
-  void expectNextCallsToReturnValue(const ResourceData& data, uint64_t times) {
+  void expectNextCallsToReturnValue(const proxygen::ResourceData& data,
+                                    uint64_t times) {
     EXPECT_CALL(*this, getCurrentData())
         .Times(times)
         .WillRepeatedly(testing::Return(data));
   }
 
-  void expectAllCallsToReturnValue(const ResourceData& data) {
+  void expectAllCallsToReturnValue(const proxygen::ResourceData& data) {
     EXPECT_CALL(*this, getCurrentData()).WillRepeatedly(testing::Return(data));
   }
 
@@ -48,9 +47,9 @@ class MockResources : public Resources {
 
   // Helper method to get a ResourceData instance formed using the built-in
   // test params.
-  static ResourceData getTestResourceData(
+  static proxygen::ResourceData getTestResourceData(
       const GetTestResourceDataParams& params) {
-    ResourceData data;
+    proxygen::ResourceData data;
 
     data.setCpuStats(
         params.cpuUtilRatio,

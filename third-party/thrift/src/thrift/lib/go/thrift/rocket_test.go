@@ -22,8 +22,8 @@ import (
 	"testing"
 )
 
-// This tests the rocket client against a rsocket server that is not integrated into the thrift library.
-func TestRocketClientAgainstRSocketServer(t *testing.T) {
+// This tests the rocket client against a rocket server.
+func TestRocket(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	errChan := make(chan error)
@@ -51,7 +51,7 @@ func TestRocketClientAgainstRSocketServer(t *testing.T) {
 	}
 	resp := &MyTestStruct{}
 	if err := client.Call(context.Background(), "test", req, resp); err != nil {
-		t.Fatalf("could complete call: %v", err)
+		t.Fatalf("could not complete call: %v", err)
 	}
 	if resp.St != "hello" {
 		t.Fatalf("expected response to be %s, got %s", "hello", resp.St)

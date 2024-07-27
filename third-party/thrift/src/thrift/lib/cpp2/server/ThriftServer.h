@@ -448,13 +448,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   }
 
   /**
-   * DEPRECATED! Use setInterface instead.
-   */
-  void setProcessorFactory(std::shared_ptr<AsyncProcessorFactory> pFac) {
-    setInterface(std::move(pFac));
-  }
-
-  /**
    * Sets the main server interface that exposes user-defined methods.
    */
   void setInterface(std::shared_ptr<AsyncProcessorFactory> iface);

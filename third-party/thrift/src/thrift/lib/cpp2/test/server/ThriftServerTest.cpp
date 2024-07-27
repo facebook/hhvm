@@ -874,11 +874,11 @@ TEST_P(ResourcePoolsFlagsTest, ResourcePoolsFlags) {
    public:
     explicit TestObserver(std::string& explanation)
         : explanation_(explanation) {}
-    void resourcePoolsEnabled(std::string explanation) override {
-      explanation_ = std::move(explanation);
+    void resourcePoolsEnabled(const std::string& explanation) override {
+      explanation_ = explanation;
     }
-    void resourcePoolsDisabled(std::string explanation) override {
-      explanation_ = std::move(explanation);
+    void resourcePoolsDisabled(const std::string& explanation) override {
+      explanation_ = explanation;
     }
 
     std::string& explanation_;

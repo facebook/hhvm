@@ -19,8 +19,8 @@
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
 
+#include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
-#include <thrift/lib/cpp/async/TAsyncSSLSocket.h>
 
 #include "mcrouter/lib/network/McSSLUtil.h"
 
@@ -221,9 +221,7 @@ class AsyncTlsToPlaintextSocket final : public folly::AsyncTransportWrapper {
   explicit AsyncTlsToPlaintextSocket(
       folly::AsyncTransportWrapper::UniquePtr impl)
       : impl_(std::move(impl)), evb_(*impl_->getEventBase()) {
-    DCHECK(
-        dynamic_cast<apache::thrift::async::TAsyncSSLSocket*>(impl_.get()) !=
-        nullptr);
+    DCHECK(dynamic_cast<folly::AsyncSSLSocket*>(impl_.get()) != nullptr);
   }
 
   void flushWrites();

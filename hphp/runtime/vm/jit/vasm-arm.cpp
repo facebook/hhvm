@@ -437,6 +437,7 @@ struct Vgen {
   void emit(const xorl& i);
   void emit(const xorq& i);
   void emit(const xorqi& i);
+  void emit(const crc32q& i) { a->Crc32cx(W(i.d), W(i.s1), X(i.s0)); }
 
   // arm intrinsics
   void emit(const prefetch& /*i*/) { /* ignored */ }

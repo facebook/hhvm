@@ -275,8 +275,9 @@ void cgCallNative(Vout& v, IRLS& env, const IRInstruction* inst) {
 Vreg emitHashInt64(IRLS& env, const IRInstruction* inst, Vreg arr) {
   auto& v = vmain(env);
   auto const hash = v.makeReg();
-  if (arch() == Arch::X64) {
-#if defined(USE_HWCRC) && defined(__SSE4_2__)
+  if (arch() == Arch::X64 || arch() == Arch::ARM) {
+#if defined(USE_HWCRC) && (defined(__SSE4_2__) || \
+    (defined(__aarch64__) && defined(__ARM_FEATURE_CRC32)))
     v << crc32q{arr, v.cns(0), hash};
     return hash;
 #endif

@@ -144,7 +144,21 @@ fn class_var_of_xhp_attr(xhp_attr: XhpAttr, env: &Env) -> ClassVar {
 
     // Finally, map our optional hint and the optional position from `cv`s
     // `xhp_hint`
-    // If both are present wrap the hint in an `Hlike` using the position
+    // If both are present wrap the hint in an `Hlike` using the position;
+    // raise an error if like hints aren't enabled
+    if !env.like_type_hints_enabled() {
+        if let Some((pos, Hint(_, hint_))) = cv
+            .xhp_attr
+            .as_ref()
+            .and_then(|xai| xai.like.as_ref())
+            .zip(hint_opt.as_ref())
+        {
+            if matches!(hint_ as &Hint_, Hint_::Hlike(_)) {
+                env.emit_error(ExperimentalFeature::LikeType(pos.clone()))
+            }
+        }
+    }
+
     cv.type_ = TypeHint(type_hint_pos, hint_opt);
     cv
 }

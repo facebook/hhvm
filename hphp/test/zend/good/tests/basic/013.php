@@ -4,7 +4,7 @@ function main() :mixed{
 $post = \HH\global_get('_POST');
 parse_str("a[]=1", inout $post);
 \HH\global_set('_POST', $post);
-$_REQUEST = array_merge($_REQUEST, $_POST);
+\HH\global_set('_REQUEST', array_merge(\HH\global_get('_REQUEST'), \HH\global_get('_POST')));
 
-var_dump($_POST['a']);
+var_dump(\HH\global_get('_POST')['a']);
 }

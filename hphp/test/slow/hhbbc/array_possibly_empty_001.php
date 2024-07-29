@@ -3,7 +3,7 @@
 
 class someclass {
   static public function yo() :mixed{
-    return $_ENV['hey'] ?? false;
+    return \HH\global_get('_ENV')['hey'] ?? false;
   }
 }
 

@@ -7,7 +7,7 @@ function test_auth_digest_entrypoint() :mixed{
     //user => password
     $users = dict['admin' => 'mypass'];
 
-    if (!($_SERVER['PHP_AUTH_DIGEST'] ?? false)) {
+    if (!(\HH\global_get('_SERVER')['PHP_AUTH_DIGEST'] ?? false)) {
         header('HTTP/1 . 1 401 Unauthorized');
         header('WWW-Authenticate: Digest realm="' . $realm .
             '",qop="auth",nonce="' . uniqid() . '",opaque="' .
@@ -18,14 +18,14 @@ function test_auth_digest_entrypoint() :mixed{
 
 
     // analyze the PHP_AUTH_DIGEST variable
-    if (!($data = http_digest_parse($_SERVER['PHP_AUTH_DIGEST'])) ||
+    if (!($data = http_digest_parse(\HH\global_get('_SERVER')['PHP_AUTH_DIGEST'])) ||
         !isset($users[$data['username']]))
         exit('Wrong Credentials!');
 
 
     // generate the valid response
     $A1 = md5($data['username'] . ':' . $realm . ':' . $users[$data['username']]);
-    $A2 = md5($_SERVER['REQUEST_METHOD'] . ':' . $data['uri']);
+    $A2 = md5(\HH\global_get('_SERVER')['REQUEST_METHOD'] . ':' . $data['uri']);
     $valid_response = md5($A1 . ':' . $data['nonce'] . ':' . $data['nc'] . ':' .
                         $data['cnonce'] . ':' . $data['qop'] . ':' . $A2);
 

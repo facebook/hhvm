@@ -4,6 +4,6 @@ function testing($source) :mixed{
 }
 <<__EntryPoint>>
 function main(): void {
-  testing($_GET);
+  testing(\HH\global_get('_GET'));
   echo "ok\n";
 }

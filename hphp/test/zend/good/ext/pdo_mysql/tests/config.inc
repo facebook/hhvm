@@ -33,12 +33,12 @@ define('PDO_MYSQL_TEST_CHARSET', (false !== getenv('PDO_MYSQL_TEST_CHARSET')) ? 
 if (!function_exists('sys_get_temp_dir')) {
 	function sys_get_temp_dir() {
 
-		if ($_ENV['TMP'] ?? false)
-			return realpath( $_ENV['TMP'] );
-		if ($_ENV['TMPDIR'] ?? false)
-			return realpath( $_ENV['TMPDIR'] );
-		if ($_ENV['TEMP'] ?? false)
-			return realpath( $_ENV['TEMP'] );
+		if (\HH\global_get('_ENV')['TMP'] ?? false)
+			return realpath( \HH\global_get('_ENV')['TMP'] );
+		if (\HH\global_get('_ENV')['TMPDIR'] ?? false)
+			return realpath( \HH\global_get('_ENV')['TMPDIR'] );
+		if (\HH\global_get('_ENV')['TEMP'] ?? false)
+			return realpath( \HH\global_get('_ENV')['TEMP'] );
 
 		$temp_file = tempnam(md5(uniqid(rand(), TRUE)), '');
 		if ($temp_file) {

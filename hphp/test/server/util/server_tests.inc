@@ -149,7 +149,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
   $includePathConfig = ' -vServer.IncludeSearchPaths.0='.$root;
   $adminPortConfig = $adminPort ? ' -vAdminServer.Port='.$adminPort : '';
   $debugPortConfig = $debugPort ? ' -vEval.Debugger.Port='.$debugPort : '';
-  $useJit = array_key_exists('HHVM_JIT', $_ENV) && $_ENV['HHVM_JIT'] == 1;
+  $useJit = array_key_exists('HHVM_JIT', \HH\global_get('_ENV')) && \HH\global_get('_ENV')['HHVM_JIT'] == 1;
   $jitConfig = ' -vEval.Jit='.($useJit ? "true" : "false");
   // To emulate sandbox setup, let Sandbox.Home be '$home'
   // and user name be 'debugger', so that the server can find the

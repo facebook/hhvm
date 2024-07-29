@@ -3,7 +3,7 @@
 
 function updateEnv() {
 	if (getenv('PDOTEST_DSN') === false) {
-		$conf = PDOTest::get_config(dirname($_SERVER['PHP_SELF']).'/common.phpt');
+		$conf = PDOTest::get_config(dirname(\HH\global_get('_SERVER')['PHP_SELF']).'/common.phpt');
 		foreach($conf['ENV'] as $n=>$v) putenv("$n=$v");
 	}
 }

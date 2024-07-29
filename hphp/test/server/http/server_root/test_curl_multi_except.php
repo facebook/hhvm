@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main_test_curl_multi_except() :mixed{
-  $port = $_ENV['SERVERPORT'];
+  $port = \HH\global_get('_ENV')['SERVERPORT'];
   $host = php_uname('n');
   $url = "http://$host:$port/hello.php";
 

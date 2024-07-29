@@ -6,8 +6,8 @@ function foo() :mixed{
 
 <<__EntryPoint>>
 function main_test_code_coverage() :mixed{
-  if (isset($_GET['enable_code_coverage'])) {
-    echo "Code coverage: ".$_GET['enable_code_coverage']."\n";
+  if (isset(\HH\global_get('_GET')['enable_code_coverage'])) {
+    echo "Code coverage: ".\HH\global_get('_GET')['enable_code_coverage']."\n";
   }
 
   try {

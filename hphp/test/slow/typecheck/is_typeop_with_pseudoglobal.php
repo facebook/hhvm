@@ -1,8 +1,8 @@
 <?hh
 
 function foo() :mixed{
-  var_dump(is_array($_GET));
-  var_dump($_GET);
+  var_dump(is_array(\HH\global_get('_GET')));
+  var_dump(\HH\global_get('_GET'));
 }
 
 

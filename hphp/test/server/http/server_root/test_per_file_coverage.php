@@ -11,8 +11,8 @@ function main_test_per_file_coverage() :mixed{
 
   require_once('test_per_file_coverage.inc');
 
-  if (isset($_GET['enable_per_file_coverage'])) {
-    echo "Per file coverage: ".$_GET['enable_per_file_coverage']."\n";
+  if (isset(\HH\global_get('_GET')['enable_per_file_coverage'])) {
+    echo "Per file coverage: ".\HH\global_get('_GET')['enable_per_file_coverage']."\n";
   }
 
   try {

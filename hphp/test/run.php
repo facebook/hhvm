@@ -4025,7 +4025,7 @@ function start_servers(
     $prelude = <<<'EOT'
 <?hh
 <<__EntryPoint>> function UNIQUE_NAME_I_DONT_EXIST_IN_ANY_TEST(): void {
-  putenv("TMPDIR=BASEDIR{$_SERVER['SCRIPT_NAME']}/temp");
+  putenv("TMPDIR=BASEDIR".\HH\global_get('_SERVER')['SCRIPT_NAME']."/temp");
   putenv("HPHP_TEST_SOCKETDIR=$socket_dir");
 }
 EOT;
@@ -4107,7 +4107,7 @@ function runner_precheck(): void {
   $server = HH\global_get('_SERVER');
   $env = HH\global_get('_ENV');
   if (!((bool)$server ?? false) || !((bool)$env ?? false)) {
-    error("\$_SERVER/\$_ENV variables not available");
+    error("\\HH\global_get('_SERVER')/\\HH\global_get('_ENV') variables not available");
   }
 }
 

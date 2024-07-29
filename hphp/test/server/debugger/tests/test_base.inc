@@ -30,7 +30,7 @@ function startDebuggerClient($debugPort, $input_path, inout $pipes) {
      2 => vec["pipe", "w"],
   ];
 
-  $env = $_ENV;
+  $env = \HH\global_get('_ENV');
   $env["TERM"] = "dumb";
 
   tlog('Starting debugger client with command: '.$cmd);

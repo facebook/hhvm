@@ -34,15 +34,15 @@ $cwd = getcwd();
 $file_path = __FILE__;
 $relative_file_path = str_replace($cwd, '', $file_path);
 
-$is_pagelet = ((bool)$_GET ?? false) && ($_GET['pagelet'] == 'true');
+$is_pagelet = ((bool)\HH\global_get('_GET') ?? false) && (\HH\global_get('_GET')['pagelet'] == 'true');
 
 if (!$is_pagelet) {
   // And now a good one that will work
   setlocale(LC_TIME, 'fr_FR');
   setlocale(LC_NUMERIC, 'fr_FR');
 } else {
-  if ($_GET['locale'] ?? false) {
-    setlocale(LC_TIME, $_GET['locale']);
+  if (\HH\global_get('_GET')['locale'] ?? false) {
+    setlocale(LC_TIME, \HH\global_get('_GET')['locale']);
   }
 }
 

@@ -307,19 +307,19 @@ bool TestServer::TestSanity() {
 }
 
 bool TestServer::TestServerVariables() {
-  VSR("<?hh var_dump($_POST, $_GET);",
+  VSR("<?hh var_dump(\\HH\\global_get('_POST'), \\HH\\global_get('_GET'));",
       "array(0) {\n}\narray(0) {\n}\n");
 
-  VSR("<?hh print $_SERVER['REQUEST_URI'];",
+  VSR("<?hh print \\HH\\global_get('_SERVER')['REQUEST_URI'];",
       "/string");
 
   VSGET("<?hh "
-        "var_dump($_SERVER['PATH_INFO']);"
-        "var_dump(clean($_SERVER['PATH_TRANSLATED']));"
-        "var_dump($_SERVER['SCRIPT_NAME']);"
-        "var_dump($_SERVER['REQUEST_URI']);"
-        "var_dump(clean($_SERVER['SCRIPT_FILENAME']));"
-        "var_dump($_SERVER['QUERY_STRING']);"
+        "var_dump(\\HH\\global_get('_SERVER')['PATH_INFO']);"
+        "var_dump(clean(\\HH\\global_get('_SERVER')['PATH_TRANSLATED']));"
+        "var_dump(\\HH\\global_get('_SERVER')['SCRIPT_NAME']);"
+        "var_dump(\\HH\\global_get('_SERVER')['REQUEST_URI']);"
+        "var_dump(clean(\\HH\\global_get('_SERVER')['SCRIPT_FILENAME']));"
+        "var_dump(\\HH\\global_get('_SERVER')['QUERY_STRING']);"
         "function clean($x) { return str_replace(getcwd(),'',$x); }",
 
         "string(13) \"/path/subpath\"\n"
@@ -332,13 +332,13 @@ bool TestServer::TestServerVariables() {
         "string/path/subpath?a=1&b=2");
 
   VSGET("<?hh "
-        "var_dump($_SERVER['PATH_INFO']);"
-        "var_dump(clean($_SERVER['PATH_TRANSLATED']));"
-        "var_dump($_SERVER['SCRIPT_NAME']);"
-        "var_dump($_SERVER['REQUEST_URI']);"
-        "var_dump(clean($_SERVER['SCRIPT_FILENAME']));"
-        "var_dump($_SERVER['QUERY_STRING']);"
-        "var_dump(isset($_ENV['HPHP_RPC']));"
+        "var_dump(\\HH\\global_get('_SERVER')['PATH_INFO']);"
+        "var_dump(clean(\\HH\\global_get('_SERVER')['PATH_TRANSLATED']));"
+        "var_dump(\\HH\\global_get('_SERVER')['SCRIPT_NAME']);"
+        "var_dump(\\HH\\global_get('_SERVER')['REQUEST_URI']);"
+        "var_dump(clean(\\HH\\global_get('_SERVER')['SCRIPT_FILENAME']));"
+        "var_dump(\\HH\\global_get('_SERVER')['QUERY_STRING']);"
+        "var_dump(isset(\\HH\\global_get('_ENV')['HPHP_RPC']));"
         "function clean($x) { return str_replace(getcwd(),'',$x); }",
 
         "NULL\n"
@@ -365,16 +365,16 @@ bool TestServer::TestInteraction() {
 }
 
 bool TestServer::TestGet() {
-  VSGET("<?hh var_dump($_GET['name']);",
+  VSGET("<?hh var_dump(\\HH\\global_get('_GET')['name']);",
         "string(0) \"\"\n", "string?name");
 
-  VSGET("<?hh var_dump($_GET['name'], $_GET['id']);",
+  VSGET("<?hh var_dump(\\HH\\global_get('_GET')['name'], \\HH\\global_get('_GET')['id']);",
         "string(0) \"\"\nstring(1) \"1\"\n", "string?name&id=1");
 
-  VSGET("<?hh print $_GET['name'];",
+  VSGET("<?hh print \\HH\\global_get('_GET')['name'];",
         "value", "string?name=value");
 
-  VSGET("<?hh var_dump($_GET['names']);",
+  VSGET("<?hh var_dump(\\HH\\global_get('_GET')['names']);",
         "array(2) {\n"
         "  [1]=>\n"
         "  string(3) \"foo\"\n"
@@ -383,7 +383,7 @@ bool TestServer::TestGet() {
         "}\n",
         "string?names[1]=foo&names[2]=bar");
 
-  VSGET("<?hh var_dump($_GET['names']);",
+  VSGET("<?hh var_dump(\\HH\\global_get('_GET')['names']);",
         "array(2) {\n"
         "  [0]=>\n"
         "  string(3) \"foo\"\n"
@@ -392,7 +392,7 @@ bool TestServer::TestGet() {
         "}\n",
         "string?names[]=foo&names[]=bar");
 
-  VSGET("<?hh print $_REQUEST['name'];",
+  VSGET("<?hh print \\HH\\global_get('_REQUEST')['name'];",
         "value", "string?name=value");
 
   return true;
@@ -401,10 +401,10 @@ bool TestServer::TestGet() {
 bool TestServer::TestPost() {
   const char *params = "name=value";
 
-  VSPOST("<?hh print $_POST['name'];",
+  VSPOST("<?hh print \\HH\\global_get('_POST')['name'];",
          "value", "string", params);
 
-  VSPOST("<?hh print $_REQUEST['name'];",
+  VSPOST("<?hh print \\HH\\global_get('_REQUEST')['name'];",
          "value", "string", params);
 
   VSPOST("<?hh print $HTTP_RAW_POST_DATA;",
@@ -416,17 +416,17 @@ bool TestServer::TestPost() {
 bool TestServer::TestExpectContinue() {
   const char *params = "name=value";
 
-  VSRX("<?hh print $_POST['name'];",
+  VSRX("<?hh print \\HH\\global_get('_POST')['name'];",
        "value", "string", "POST", "Expect: 100-continue", params);
 
   return true;
 }
 
 bool TestServer::TestCookie() {
-  VSRX("<?hh print $_COOKIE['name'];",
+  VSRX("<?hh print \\HH\\global_get('_COOKIE')['name'];",
        "value", "string", "GET", "Cookie: name=value;", nullptr);
 
-  VSRX("<?hh print $_COOKIE['name2'];",
+  VSRX("<?hh print \\HH\\global_get('_COOKIE')['name2'];",
        "value2", "string", "GET", "Cookie: n=v;name2=value2;n3=v3", nullptr);
 
   return true;
@@ -772,7 +772,7 @@ bool TestServer::TestRPCServer() {
          s_rpc_port);
 
   VSGETP("<?hh\n"
-         "var_dump(isset($_ENV['HPHP_RPC']));\n",
+         "var_dump(isset(\\HH\\global_get('_ENV')['HPHP_RPC']));\n",
          "bool(true)\n"
          "bool(true)\n",
          "?include=string&output=1&auth=test",
@@ -783,7 +783,7 @@ bool TestServer::TestRPCServer() {
 
 bool TestServer::TestXboxServer() {
   VSGET("<?hh\n"
-        "if (array_key_exists('main', $_GET)) {\n"
+        "if (array_key_exists('main', \\HH\\global_get('_GET'))) {\n"
         "  $t = xbox_task_start('1');\n"
         "  xbox_task_result($t, 0, $r);\n"
         "  var_dump($r);\n"
@@ -825,10 +825,10 @@ bool TestServer::TestXboxServer() {
 
 bool TestServer::TestPageletServer() {
   VSGET("<?hh\n"
-        "if (array_key_exists('pagelet', $_GET)) {\n"
+        "if (array_key_exists('pagelet', \\HH\\global_get('_GET'))) {\n"
         "  echo 'Hello from the pagelet!';\n"
         "} else {\n"
-        "  $h = array('Host: ' . $_SERVER['HTTP_HOST']);\n"
+        "  $h = array('Host: ' . \\HH\\global_get('_SERVER')['HTTP_HOST']);\n"
         "  $t = pagelet_server_task_start('/string?pagelet=1', $h, '');\n"
         "  echo 'First! ';\n"
         "  $r = pagelet_server_task_result($t, $h, $c);\n"
@@ -839,10 +839,10 @@ bool TestServer::TestPageletServer() {
 
   // POST vs GET
   VSGET("<?hh\n"
-        "if (array_key_exists('pagelet', $_GET)) {\n"
-        "  echo $_SERVER['REQUEST_METHOD'];\n"
+        "if (array_key_exists('pagelet', \\HH\\global_get('_GET'))) {\n"
+        "  echo \\HH\\global_get('_SERVER')['REQUEST_METHOD'];\n"
         "} else {\n"
-        "  $h = array('Host: ' . $_SERVER['HTTP_HOST']);\n"
+        "  $h = array('Host: ' . \\HH\\global_get('_SERVER')['HTTP_HOST']);\n"
         "  $t = pagelet_server_task_start('/string?pagelet=1', $h, '');\n"
         "  echo 'First! ';\n"
         "  $r = pagelet_server_task_result($t, $h, $c);\n"
@@ -852,7 +852,7 @@ bool TestServer::TestPageletServer() {
         "string");
 
   VSGET("<?hh\n"
-        "if ($_SERVER['THREAD_TYPE'] == 'Pagelet Thread') {\n"
+        "if (\\HH\\global_get('_SERVER')['THREAD_TYPE'] == 'Pagelet Thread') {\n"
         "  echo 'hello';\n"
         "  pagelet_server_flush();\n"
         "  ob_start();\n"
@@ -860,7 +860,7 @@ bool TestServer::TestPageletServer() {
         "  pagelet_server_flush();\n"
         "  echo 'what';\n"
         "} else {\n"
-        "  $h = array('Host: ' . $_SERVER['HTTP_HOST']);\n"
+        "  $h = array('Host: ' . \\HH\\global_get('_SERVER')['HTTP_HOST']);\n"
         "  $t = pagelet_server_task_start('/string', $h, '');\n"
         "  for ($i = 0; ; $i++) {\n"
         "    while (($s = pagelet_server_task_status($t)) == \n"

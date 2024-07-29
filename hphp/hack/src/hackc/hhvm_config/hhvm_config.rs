@@ -68,11 +68,5 @@ pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {
         "Hack.Lang.EnableXHPClassModifier",
     )?;
 
-    // Only hdf option in use
-    init(
-        &mut flags.disallow_direct_superglobals_refs,
-        "Hack.Lang.DisallowDirectSuperglobalsRefs",
-    )?;
-
     Ok(flags)
 }

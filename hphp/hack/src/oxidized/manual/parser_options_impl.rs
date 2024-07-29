@@ -16,7 +16,6 @@ impl Default for ParserOptions {
             disallow_func_ptrs_in_constants: false,
             enable_xhp_class_modifier: false,
             disable_xhp_element_mangling: false,
-            disallow_direct_superglobals_refs: false,
             allow_unstable_features: false, // true in /etc/hh.conf
             hhvm_compat_mode: false,
             hhi_mode: false,

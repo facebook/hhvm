@@ -49,21 +49,6 @@ function mop_basec_querym_pc(): int {
   return ret_c()->foo;
 }
 
-// TEST-CHECK-BAL: define $root.mop_basegc_querym_ec
-// CHECK: define $root.mop_basegc_querym_ec($this: *void) : .notnull *HackInt {
-// CHECK: #b0:
-// CHECK:   n0 = $root.ret_int(null)
-// CHECK:   n1 = $builtins.hack_get_superglobal($builtins.hack_string("_SERVER"))
-// CHECK:   n2 = $builtins.hack_array_get(n1, n0)
-// CHECK:   n3 = $builtins.hhbc_is_type_int(n2)
-// CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
-// CHECK:   ret n2
-// CHECK: }
-function mop_basegc_querym_ec(): int {
-  /* HH_FIXME[2050] Hack doesn't know about $_SERVER */
-  return $_SERVER[ret_int()];
-}
-
 // TEST-CHECK-BAL: define $root.mop_basel_querym_ei
 // CHECK: define $root.mop_basel_querym_ei($this: *void, $a: .notnull *HackVec) : .notnull *HackInt {
 // CHECK: #b0:

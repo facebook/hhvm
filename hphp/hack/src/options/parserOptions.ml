@@ -15,7 +15,6 @@ type t = {
   disallow_func_ptrs_in_constants: bool;
   enable_xhp_class_modifier: bool;
   disable_xhp_element_mangling: bool;
-  disallow_direct_superglobals_refs: bool;
   allow_unstable_features: bool;
   (* These options are set in hack config, but use the defaults in (from parser_options_impl.rs) hhvm*)
   hhvm_compat_mode: bool;
@@ -55,7 +54,6 @@ let default =
     disallow_func_ptrs_in_constants = false;
     enable_xhp_class_modifier = false;
     disable_xhp_element_mangling = false;
-    disallow_direct_superglobals_refs = false;
     allow_unstable_features = false;
     hhvm_compat_mode = false;
     hhi_mode = false;
@@ -105,7 +103,6 @@ type ffi_t =
   * bool
   * bool
   * bool
-  * bool
   * Experimental_features.feature_status SMap.t
   * bool
 
@@ -128,7 +125,6 @@ let to_rust_ffi_t po =
     po.interpret_soft_types_as_like_types,
     po.is_systemlib,
     po.disallow_static_constants_in_default_func_args,
-    po.disallow_direct_superglobals_refs,
     po.use_legacy_experimental_feature_config,
     po.experimental_features,
     po.consider_unspecified_experimental_features_released )

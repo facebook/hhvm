@@ -2528,9 +2528,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 if name == sn::superglobals::GLOBALS {
                     self.errors
                         .push(make_error_from_node(node, errors::globals_disallowed))
-                } else if self.env.parser_options.disallow_direct_superglobals_refs
-                    && sn::superglobals::is_superglobal(name)
-                {
+                } else if sn::superglobals::is_superglobal(name) {
                     self.errors.push(make_error_from_node(
                         node,
                         errors::superglobal_disallowed(name),

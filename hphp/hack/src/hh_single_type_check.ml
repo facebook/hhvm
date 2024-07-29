@@ -832,8 +832,6 @@ let parse_options () =
         disable_lval_as_an_expression = default.disable_lval_as_an_expression;
         disallow_static_constants_in_default_func_args =
           default.disallow_static_constants_in_default_func_args;
-        disallow_direct_superglobals_refs =
-          default.disallow_direct_superglobals_refs;
         stack_size = default.stack_size;
         unwrap_concurrent = default.unwrap_concurrent;
         parser_errors_only = default.parser_errors_only;

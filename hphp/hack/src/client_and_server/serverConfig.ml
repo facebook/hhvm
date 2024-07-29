@@ -329,9 +329,6 @@ let load_config config options =
         disallow_static_constants_in_default_func_args =
           bool_opt "disallow_static_constants_in_default_func_args" config
           >?? po_opt.disallow_static_constants_in_default_func_args;
-        disallow_direct_superglobals_refs =
-          bool_opt "disallow_direct_superglobals_refs" config
-          >?? po_opt.disallow_direct_superglobals_refs;
         auto_namespace_map =
           prepare_auto_namespace_map config >?? po_opt.auto_namespace_map;
         everything_sdt =

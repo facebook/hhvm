@@ -23,8 +23,6 @@ type t = {
       (** Flag to disable the old stype xhp element mangling. `<something/>` would otherwise be resolved as `xhp_something`
          The new style `xhp class something {}` does not do this style of mangling, thus we need a way to disable it on the
          'lookup side'. *)
-  disallow_direct_superglobals_refs: bool;
-      (** block accessing superglobals via their variable names *)
   allow_unstable_features: bool;
       (** Allows enabling unstable features via the __EnableUnstableFeatures attribute *)
   (* These options are set in hh config, but use the defaults in (from parser_options_impl.rs) hhvm *)
@@ -82,7 +80,6 @@ val default : t
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
-  * bool
   * bool
   * bool
   * bool

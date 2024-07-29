@@ -284,10 +284,6 @@ impl HhConfig {
             disallow_static_constants_in_default_func_args: default
                 .disallow_static_constants_in_default_func_args,
             unwrap_concurrent: default.unwrap_concurrent,
-            disallow_direct_superglobals_refs: hhconfig.get_bool_or(
-                "disallow_direct_superglobals_refs",
-                default.disallow_direct_superglobals_refs,
-            )?,
             stack_size: default.stack_size,
             use_legacy_experimental_feature_config: false,
             experimental_features: hhconfig

@@ -402,6 +402,59 @@ CO_TEST_P(ServiceInterceptorTestP, NonTrivialRequestState) {
   EXPECT_EQ(counts.destruct, 2);
 }
 
+CO_TEST_P(ServiceInterceptorTestP, IterationOrder) {
+  int seq = 0;
+
+  class ServiceInterceptorRecordingExecutionSequence
+      : public NamedServiceInterceptor<folly::Unit> {
+   public:
+    using RequestState = folly::Unit;
+
+    explicit ServiceInterceptorRecordingExecutionSequence(
+        std::string name, int& seq)
+        : NamedServiceInterceptor(std::move(name)), seq_(seq) {}
+
+    folly::coro::Task<std::optional<RequestState>> onRequest(
+        folly::Unit*, RequestInfo) override {
+      onRequestSeq = ++seq_;
+      co_return std::nullopt;
+    }
+
+    folly::coro::Task<void> onResponse(
+        RequestState*, folly::Unit*, ResponseInfo) override {
+      onResponseSeq = ++seq_;
+      co_return;
+    }
+
+    int onRequestSeq = 0;
+    int onResponseSeq = 0;
+
+   private:
+    int& seq_;
+  };
+
+  auto interceptor1 =
+      std::make_shared<ServiceInterceptorRecordingExecutionSequence>(
+          "Interceptor1", seq);
+  auto interceptor2 =
+      std::make_shared<ServiceInterceptorRecordingExecutionSequence>(
+          "Interceptor2", seq);
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(
+            InterceptorList{interceptor1, interceptor2}));
+      });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  co_await client->co_noop();
+
+  EXPECT_EQ(interceptor1->onRequestSeq, 1);
+  EXPECT_EQ(interceptor2->onRequestSeq, 2);
+  EXPECT_EQ(interceptor2->onResponseSeq, 3);
+  EXPECT_EQ(interceptor1->onResponseSeq, 4);
+}
+
 TEST_P(ServiceInterceptorTestP, OnStartServing) {
   struct ServiceInterceptorCountOnStartServing
       : public NamedServiceInterceptor<folly::Unit> {

@@ -1298,6 +1298,41 @@ TEST(FieldMaskTest, IsCompatibleWithOtherTypes) {
   EXPECT_FALSE(protocol::is_compatible_with<type::list<type::string_t>>(mask));
 }
 
+TEST(FieldMaskTest, IsCompatibleWithUnion) {
+  using UnionTag = type::union_t<RecursiveUnion>;
+  EXPECT_TRUE(protocol::is_compatible_with<RecursiveUnion>(allMask()));
+  EXPECT_TRUE(protocol::is_compatible_with<RecursiveUnion>(noneMask()));
+
+  Mask m;
+  auto& includes = m.includes_ref().emplace();
+  includes[1] = allMask();
+  EXPECT_TRUE(protocol::is_compatible_with<UnionTag>(m));
+  includes[2] = noneMask();
+  EXPECT_TRUE(protocol::is_compatible_with<UnionTag>(m));
+
+  Mask invalid(m);
+  (*invalid.includes_ref())[100] = allMask(); // doesn't exist
+  EXPECT_FALSE(protocol::is_compatible_with<UnionTag>(invalid));
+
+  Mask nested(m);
+  (*nested.includes_ref())[4] = m;
+  EXPECT_TRUE(protocol::is_compatible_with<UnionTag>(m));
+
+  {
+    Mask invalidNested(nested);
+    (*(*invalidNested.includes_ref())[4].includes_ref())[4] = invalid;
+    EXPECT_FALSE(protocol::is_compatible_with<UnionTag>(invalidNested));
+  }
+
+  Mask mapMask;
+  auto& mapIncludes = mapMask.includes_string_map_ref().emplace();
+  mapIncludes["1"] = Mask(m);
+  mapIncludes["2"] = Mask(m);
+
+  (*nested.includes_ref())[5] = mapMask;
+  EXPECT_TRUE(protocol::is_compatible_with<UnionTag>(m));
+}
+
 TEST(FieldMaskTest, Ensure) {
   Mask mask;
   // mask = includes{1: includes{2: excludes{}},

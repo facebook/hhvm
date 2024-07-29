@@ -32,13 +32,13 @@
 namespace apache::thrift::protocol::detail {
 // Validates the mask with the given Struct. Ensures that mask doesn't contain
 // fields not in the Struct.
-template <typename Struct>
+template <typename T>
 bool validate_mask(MaskRef ref) {
   // Get the field ids in the thrift struct type.
   std::unordered_set<FieldId> ids;
-  ids.reserve(op::size_v<Struct>);
-  op::for_each_ordinal<Struct>(
-      [&](auto ord) { ids.insert(op::get_field_id<Struct, decltype(ord)>()); });
+  ids.reserve(op::size_v<T>);
+  op::for_each_ordinal<T>(
+      [&](auto ord) { ids.insert(op::get_field_id<T, decltype(ord)>()); });
   const FieldIdToMask& map = ref.mask.includes_ref()
       ? ref.mask.includes_ref().value()
       : ref.mask.excludes_ref().value();
@@ -58,14 +58,13 @@ template <typename Tag>
 bool is_compatible_with_impl(Tag, const Mask&) {
   return false;
 }
-
 template <typename T>
-bool is_compatible_with_impl(type::struct_t<T>, const Mask& mask) {
+bool is_compatible_with_structured(const Mask& mask) {
   MaskRef ref{mask};
   if (!validate_mask<T>(ref)) {
     return false;
   }
-  // Validates each field in the struct.
+  // Validates each field in the struct/union
   bool isValid = true;
   op::for_each_ordinal<T>([&](auto ord) {
     if (!isValid) { // short circuit
@@ -76,10 +75,20 @@ bool is_compatible_with_impl(type::struct_t<T>, const Mask& mask) {
     if (next.isAllMask() || next.isNoneMask()) {
       return;
     }
-    // Recursively check if the mask is compatible for struct and map fields.
+    // Recurse
     isValid &= is_compatible_with<op::get_type_tag<T, Ord>>(next.mask);
   });
   return isValid;
+}
+
+template <typename T>
+bool is_compatible_with_impl(type::struct_t<T>, const Mask& mask) {
+  return is_compatible_with_structured<T>(mask);
+}
+
+template <typename T>
+bool is_compatible_with_impl(type::union_t<T>, const Mask& mask) {
+  return is_compatible_with_structured<T>(mask);
 }
 
 template <typename Key, typename Value>

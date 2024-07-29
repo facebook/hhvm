@@ -43,6 +43,16 @@ struct Baz {
   1: Foo foo;
 }
 
+union RecursiveUnion {
+  1: Foo foo;
+  2: Bar bar;
+  3: Baz baz;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: RecursiveUnion recurse;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  5: map<string, RecursiveUnion> recurseMap;
+}
+
 struct HasMap {
   1: map<i64, Foo> foos;
   2: Foo foo;

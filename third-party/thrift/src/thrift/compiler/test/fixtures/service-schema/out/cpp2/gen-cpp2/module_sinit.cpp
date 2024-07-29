@@ -20,15 +20,17 @@ extern ::std::string_view _fbthrift_schema_3bd6b8a55f23bc3b();
 }
 
 namespace {
+void doRegister() {
 
-struct StaticInit {
-  StaticInit() {
+  ::apache::thrift::BaseSchemaRegistry::registerSchema("_fbthrift_schema_3bd6b8a55f23bc3b", module_constants::_fbthrift_schema_3bd6b8a55f23bc3b(), "thrift/compiler/test/fixtures/service-schema/src/module.thrift");
+}
+}
 
-    ::apache::thrift::BaseSchemaRegistry::registerSchema("_fbthrift_schema_3bd6b8a55f23bc3b", module_constants::_fbthrift_schema_3bd6b8a55f23bc3b(), "thrift/compiler/test/fixtures/service-schema/src/module.thrift");
-  }
+
+struct StaticInit_abc123 {
+  StaticInit_abc123() { doRegister(); }
 };
 
-StaticInit staticInit;
-
-}
 } // namespace cpp2
+::cpp2::StaticInit_abc123 _fbthrift_sinit_abc123;
+

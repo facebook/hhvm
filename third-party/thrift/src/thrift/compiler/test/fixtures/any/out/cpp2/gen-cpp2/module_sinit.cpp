@@ -19,17 +19,20 @@ void __fbthrift_static_init_MyException();
 
 
 namespace {
+void doRegister() {
+  __fbthrift_static_init_MyStruct();
+  __fbthrift_static_init_MyUnion();
+  __fbthrift_static_init_MyException();
 
+}
+}
+
+
+namespace{
 struct StaticInit {
-  StaticInit() {
-    __fbthrift_static_init_MyStruct();
-    __fbthrift_static_init_MyUnion();
-    __fbthrift_static_init_MyException();
-
-  }
+  StaticInit() { doRegister(); }
 };
 
 StaticInit staticInit;
-
 }
 } // namespace facebook::thrift::compiler::test::fixtures::any

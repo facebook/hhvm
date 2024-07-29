@@ -1,4 +1,4 @@
-cpp2: thrift2ast-mstch_cpp2 src/module.thrift
+cpp2: thrift2ast-mstch_cpp2:sinit_suffix=abc123 src/module.thrift
 java: thrift2ast-mstch_java src/module.thrift
 python: thrift2ast-mstch_python src/module.thrift
 python_capi: thrift2ast-mstch_python_capi src/module.thrift

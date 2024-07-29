@@ -275,7 +275,7 @@ let rec intersect env ~r ty1 ty2 =
               (env, MkType.int r)
             | ((neg_reason, Tneg (Neg_predicate predicate)), ty)
             | (ty, (neg_reason, Tneg (Neg_predicate predicate))) ->
-              let partition =
+              let (env, partition) =
                 Typing_refinement.partition_ty env (mk ty) predicate
               in
               if List.is_empty partition.Typing_refinement.span then

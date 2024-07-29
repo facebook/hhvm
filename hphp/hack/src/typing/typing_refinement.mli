@@ -53,7 +53,7 @@ val partition_ty :
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   Typing_defs.type_predicate ->
-  ty_partition
+  Typing_env_types.env * ty_partition
 
 module TyPredicate : sig
   val of_ty :

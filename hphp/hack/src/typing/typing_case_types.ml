@@ -286,12 +286,12 @@ module DataType = struct
     the result of [default]. If not, it will just call [f env trail] *)
   let cycle_handler
       ~(env : env)
-      ~(f : env -> 'ph DataTypeReason.trail -> 'ph t)
-      ~(default : reason:'ph DataTypeReason.t -> 'ph t)
+      ~(f : env -> 'ph DataTypeReason.trail -> 'res)
+      ~(default : reason:'ph DataTypeReason.t -> 'res)
       ~(trail :
          ( 'ph DataTypeReason.trail,
            Reason.t * 'ph DataTypeReason.trail * Pos.t option )
-         result) : _ t =
+         result) : 'res =
     let report_cycle_error reason = function
       | Some def_pos ->
         Typing_error_utils.add_typing_error
@@ -364,7 +364,8 @@ module DataType = struct
      by doing a subtype test against the interface type. If the type
      corresponding to a tag is a subtype then it will be included in the list.
     *)
-    let special_interface_to_datatypes env interface =
+    let special_interface_to_datatypes env (interface : string) :
+        env * Tag.t list =
       let open Tag in
       let open Typing_make_type in
       let r = Typing_reason.none in
@@ -408,22 +409,27 @@ module DataType = struct
             name
             ()
       in
-      List.fold
-        tag_to_type
-        ~init:[]
-        ~f:
-          begin
-            fun acc (tag, tag_ty) ->
-              if Typing_utils.can_sub_type env tag_ty interface_ty then
-                tag :: acc
-              else
-                acc
-          end
+      let tags =
+        List.fold
+          tag_to_type
+          ~init:[]
+          ~f:
+            begin
+              fun acc (tag, tag_ty) ->
+                if Typing_utils.can_sub_type env tag_ty interface_ty then
+                  tag :: acc
+                else
+                  acc
+            end
+      in
+      (env, tags)
 
     let special_interface_cache : Tag.t list String.Table.t =
       String.Table.create ()
 
-    let rec to_datatypes ~trail (env : env) cls : 'phase t =
+    let rec to_datatypes
+        ~(trail : 'phase DataTypeReason.trail) (env : env) (cls : string) :
+        'phase t =
       let open Tag in
       let cycle_handler f = cycle_handler ~env ~f in
       let reason = DataTypeReason.(make NoSubreason trail) in
@@ -437,70 +443,77 @@ module DataType = struct
       | cls when String.equal cls SN.Collections.cAnyArray ->
         Set.of_list ~reason [DictData; KeysetData; VecData]
       | name ->
-        (match Env.get_class env name with
-        | Decl_entry.Found cls -> begin
-          let open Ast_defs in
-          match Cls.kind cls with
-          | Cclass _ when Cls.final cls ->
-            Set.singleton ~reason @@ InstanceOf { name; kind = FinalClass }
-          | Cclass _ ->
-            Set.singleton ~reason @@ InstanceOf { name; kind = Class }
-          | Ctrait
-          | Cinterface -> begin
-            let default ~reason =
-              if is_c_trait (Cls.kind cls) then
-                Set.singleton ~reason ObjectData
-              else
-                Set.singleton ~reason @@ InstanceOf { name; kind = Interface }
-            in
-            match Cls.sealed_whitelist cls with
-            | None ->
-              let reqs = Cls.all_ancestor_reqs cls in
-              if List.is_empty reqs then
-                default ~reason
-              else
-                List.fold
-                  ~init:(Set.singleton ~reason ObjectData)
-                  ~f:(fun acc (_, required_ty) ->
-                    match Typing_utils.try_unwrap_class_type required_ty with
-                    | None -> acc
-                    | Some (r, (_p, req_cls), _paraml) ->
-                      let trail =
-                        DataTypeReason.requirement
-                          ~trail
-                          (Reason.localize r)
-                          name
-                      in
-                      cycle_handler ~trail ~default @@ fun env trail ->
-                      Set.inter acc @@ to_datatypes ~trail env req_cls)
-                  reqs
-            | Some whitelist ->
-              let trail =
-                DataTypeReason.sealed_interface
-                  ~trail
-                  (Reason.witness_from_decl (Cls.pos cls))
-                  name
-              in
-              SSet.fold
-                (fun whitelist_cls acc ->
-                  cycle_handler ~trail ~default @@ fun env trail ->
-                  Set.union acc @@ to_datatypes ~trail env whitelist_cls)
-                whitelist
-                Set.empty
-          end
-          | Cenum
-          | Cenum_class _ ->
-            Set.singleton ~reason ObjectData
-        end
-        | Decl_entry.DoesNotExist
-        | Decl_entry.NotYetAvailable ->
-          Set.singleton ~reason ObjectData)
+        Env.get_class env name
+        |> Decl_entry.map_or
+             ~default:(Set.singleton ~reason ObjectData)
+             ~f:(fun cls ->
+               let open Ast_defs in
+               match Cls.kind cls with
+               | Cclass _ when Cls.final cls ->
+                 Set.singleton ~reason @@ InstanceOf { name; kind = FinalClass }
+               | Cclass _ ->
+                 Set.singleton ~reason @@ InstanceOf { name; kind = Class }
+               | Ctrait
+               | Cinterface -> begin
+                 let default ~reason =
+                   if is_c_trait (Cls.kind cls) then
+                     Set.singleton ~reason ObjectData
+                   else
+                     Set.singleton ~reason
+                     @@ InstanceOf { name; kind = Interface }
+                 in
+                 match Cls.sealed_whitelist cls with
+                 | None ->
+                   let reqs = Cls.all_ancestor_reqs cls in
+                   if List.is_empty reqs then
+                     default ~reason
+                   else
+                     List.fold
+                       ~init:(Set.singleton ~reason ObjectData)
+                       ~f:(fun acc (_, required_ty) ->
+                         match
+                           Typing_utils.try_unwrap_class_type required_ty
+                         with
+                         | None -> acc
+                         | Some (r, (_p, req_cls), _paraml) ->
+                           let trail =
+                             DataTypeReason.requirement
+                               ~trail
+                               (Reason.localize r)
+                               name
+                           in
+                           cycle_handler ~trail ~default @@ fun env trail ->
+                           Set.inter acc @@ to_datatypes ~trail env req_cls)
+                       reqs
+                 | Some whitelist ->
+                   let trail =
+                     DataTypeReason.sealed_interface
+                       ~trail
+                       (Reason.witness_from_decl (Cls.pos cls))
+                       name
+                   in
+                   SSet.fold
+                     (fun whitelist_cls acc ->
+                       cycle_handler ~trail ~default @@ fun env trail ->
+                       Set.union acc @@ to_datatypes ~trail env whitelist_cls)
+                     whitelist
+                     Set.empty
+               end
+               | Cenum
+               | Cenum_class _ ->
+                 Set.singleton ~reason ObjectData)
 
-    let to_datatypes ~trail (env : env) cls : 'phase t =
+    let to_datatypes ~trail (env : env) (cls : string) : env * 'phase t =
       if SSet.mem cls special_interfaces then
-        let tags =
-          Hashtbl.find_or_add special_interface_cache cls ~default:(fun () ->
-              special_interface_to_datatypes env cls)
+        let (env, tags) =
+          match Hashtbl.find special_interface_cache cls with
+          | Some tags -> (env, tags)
+          | None ->
+            let (env, tags) = special_interface_to_datatypes env cls in
+            let (_ : [ `Duplicate | `Ok ]) =
+              Hashtbl.add special_interface_cache ~key:cls ~data:tags
+            in
+            (env, tags)
         in
         let set1 =
           Set.of_list
@@ -508,9 +521,9 @@ module DataType = struct
             tags
         in
         let set2 = to_datatypes ~trail env cls in
-        Set.union set1 set2
+        (env, Set.union set1 set2)
       else
-        to_datatypes ~trail env cls
+        (env, to_datatypes ~trail env cls)
   end
 
   let fromPredicate ~trail (_env : env) (predicate : type_predicate) : 'phase t
@@ -529,38 +542,45 @@ module DataType = struct
     | IsTupleOf _ -> Set.singleton ~reason VecData
     | IsShapeOf _ -> Set.singleton ~reason DictData
 
-  let rec fromTy ~trail (env : env) (ty : locl_ty) : 'phase t =
+  let rec fromTy ~trail (env : env) (ty : locl_ty) : env * 'phase t =
     let (env, ty) = Env.expand_type env ty in
     let reason = DataTypeReason.(make NoSubreason trail) in
     let cycle_handler ty =
-      cycle_handler ~default:mixed ~f:(fun env trail -> fromTy ~trail env ty)
+      cycle_handler
+        ~default:(fun ~reason -> (env, mixed ~reason))
+        ~f:(fun env trail -> fromTy ~trail env ty)
     in
     match get_node ty with
-    | Tprim prim -> prim_to_datatypes ~trail prim
-    | Tnonnull -> nonnull_to_datatypes ~trail
-    | Tdynamic -> mixed ~reason
-    | Tany _ -> mixed ~reason
+    | Tprim prim -> (env, prim_to_datatypes ~trail prim)
+    | Tnonnull -> (env, nonnull_to_datatypes ~trail)
+    | Tdynamic -> (env, mixed ~reason)
+    | Tany _ -> (env, mixed ~reason)
     | Toption ty ->
-      Set.union
-        (fromTy ~trail env ty)
-        (Set.singleton
-           ~reason:DataTypeReason.(make Nullable trail)
-           Tag.NullData)
+      let (env, data_types) = fromTy ~trail env ty in
+      let data_types =
+        Set.union
+          data_types
+          (Set.singleton
+             ~reason:DataTypeReason.(make Nullable trail)
+             Tag.NullData)
+      in
+      (env, data_types)
     (* For now say it has the same tags as `nonnull`.
      * We should be able to be more precise, but need to
      * validate what are all the data types that are valid callables *)
-    | Tfun _ -> fun_to_datatypes ~trail
-    | Ttuple _ -> tuple_to_datatypes ~trail
-    | Tshape _ -> shape_to_datatypes ~trail
-    | Tlabel _ -> label_to_datatypes ~trail
-    | Tvar _ -> mixed ~reason
+    | Tfun _ -> (env, fun_to_datatypes ~trail)
+    | Ttuple _ -> (env, tuple_to_datatypes ~trail)
+    | Tshape _ -> (env, shape_to_datatypes ~trail)
+    | Tlabel _ -> (env, label_to_datatypes ~trail)
+    | Tvar _ -> (env, mixed ~reason)
     | Tgeneric (name, tyl) ->
       let upper_bounds =
         Env.get_upper_bounds env name tyl |> Typing_set.elements
       in
-      let sets =
-        List.map
-          ~f:(fun upper_bound_ty ->
+      let (env, sets) =
+        List.fold_map
+          ~init:env
+          ~f:(fun env upper_bound_ty ->
             let trail =
               DataTypeReason.generic ~trail (get_reason upper_bound_ty) name
             in
@@ -568,15 +588,25 @@ module DataType = struct
           upper_bounds
       in
       let result_opt = List.reduce ~f:Set.inter sets in
-      Option.value_or_thunk result_opt ~default:(fun () -> mixed ~reason)
+      let res =
+        Option.value_or_thunk result_opt ~default:(fun () -> mixed ~reason)
+      in
+      (env, res)
     | Tunion tyl ->
-      List.fold tyl ~init:Set.empty ~f:(fun acc ty ->
-          Set.union acc @@ fromTy ~trail env ty)
+      List.fold tyl ~init:(env, Set.empty) ~f:(fun (env, acc) ty ->
+          let (env, dty) = fromTy ~trail env ty in
+          let dty = Set.union acc dty in
+          (env, dty))
     | Tintersection tyl ->
-      let sets = List.map ~f:(fun ty -> fromTy ~trail env ty) tyl in
+      let (env, sets) =
+        List.fold_map ~init:env ~f:(fun env ty -> fromTy ~trail env ty) tyl
+      in
       let result_opt = List.reduce ~f:Set.inter sets in
-      Option.value_or_thunk result_opt ~default:(fun () -> mixed ~reason)
-    | Tvec_or_dict _ -> Set.of_list ~reason [Tag.VecData; Tag.DictData]
+      let res =
+        Option.value_or_thunk result_opt ~default:(fun () -> mixed ~reason)
+      in
+      (env, res)
+    | Tvec_or_dict _ -> (env, Set.of_list ~reason [Tag.VecData; Tag.DictData])
     | Taccess (root_ty, id) ->
       let ety_env = empty_expand_env in
       let ((env, _), ty) =
@@ -597,48 +627,51 @@ module DataType = struct
       fromTy ~trail env as_ty
     | Tnewtype (name, _, _)
       when String.equal name Naming_special_names.Classes.cEnumClassLabel ->
-      label_to_datatypes ~trail
-    | Tnewtype (name, tyl, as_ty) -> begin
+      (env, label_to_datatypes ~trail)
+    | Tnewtype (name, ty_args, as_ty) -> begin
+      (* A Tnewtype is either an opaque alias (defined with keyword `newtype`)
+       * or a case type.
+       * For opaque type aliases, we look at the upper bound, but for case types,
+       * we expand. *)
       match Env.get_typedef env name with
-      (* When determining the datatype associated with a type we should
-       * expand the case type instead of looking at the upper bound.
-       * If we do not expand, then we will over approximate the datatype.
-       * Consider:
-       *
-       *  case type Type1 = bool | int;
-       *  case type Type2 = Type1 | string;
-       *
-       * If we do not expand we will reject the definition of `Type2`
-       * because we will believe the datatype for `Type1` contains `string`.
-       * By expanding we can allow this definition. *)
       | Decl_entry.Found
           { td_type = variants; td_vis = Aast.CaseType; td_tparams; _ } ->
-        (* The this_ty does not need to be set because case types cannot
-         * appear within classes thus cannot us the this type.
-         * If we ever change that this could needs to be changed *)
-        let localize =
+        (* Here we should expand the case type instead of looking at the upper bound.
+         * If we do not expand, then we will over approximate the datatype.
+         * Consider:
+         *
+         *  case type Type1 = bool | int;
+         *  case type Type2 = Type1 | string;
+         *
+         * If we do not expand we will reject the definition of `Type2`
+         * because we will believe the datatype for `Type1` contains `string`.
+         * By expanding we can allow this definition. *)
+        let localize env ty =
           Typing_utils.localize
             ~ety_env:
+              (* The this_ty does not need to be set because case types cannot
+               * appear within classes thus cannot use the this type.
+               * If we ever change that this could need to be changed *)
               {
                 empty_expand_env with
-                substs =
-                  (if List.is_empty tyl then
-                    SMap.empty
-                  else
-                    Decl_subst.make_locl td_tparams tyl);
+                substs = Decl_subst.make_locl td_tparams ty_args;
               }
+            env
+            ty
         in
         let tyl =
           match get_node variants with
           | Tunion tyl -> tyl
           | _ -> [variants]
         in
-        List.fold tyl ~init:Set.empty ~f:(fun acc variant ->
+        List.fold tyl ~init:(env, Set.empty) ~f:(fun (env, acc) variant ->
             let ((env, _ty_err_opt), variant) = localize env variant in
             let trail =
               DataTypeReason.case_type ~trail (get_reason variant) name
             in
-            Set.union acc @@ cycle_handler ~env ~trail variant)
+            let (env, dty) = cycle_handler ~env ~trail variant in
+            let data_types = Set.union acc dty in
+            (env, data_types))
       | _ ->
         let trail_f =
           if Env.is_enum env name || Env.is_enum_class env name then
@@ -653,12 +686,12 @@ module DataType = struct
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | Tclass ((_, cls), _, _) -> Class.to_datatypes ~trail env cls
     | Tneg n ->
-      let right =
+      let (env, right) =
         match n with
         | Neg_class (_, cls) -> Class.to_datatypes ~trail env cls
-        | Neg_predicate predicate -> fromPredicate ~trail env predicate
+        | Neg_predicate predicate -> (env, fromPredicate ~trail env predicate)
       in
-      Set.diff (mixed ~reason) right
+      (env, Set.diff (mixed ~reason) right)
 
   let fromHint env hint =
     let decl_ty = Decl_hint.hint env.decl_env hint in
@@ -668,7 +701,7 @@ module DataType = struct
     let trail = DataTypeReason.make_trail decl_ty in
     fromTy ~trail env ty
 
-  let fromTy env ty =
+  let fromTy env ty : env * locl_phase t =
     let trail = DataTypeReason.make_trail ty in
     fromTy ~trail env ty
 end
@@ -759,13 +792,16 @@ let check_overlapping env ~pos ~name data_type1 data_type2 =
  * the type level, they do intersect when considering only the runtime data types.
  *)
 let filter_variants_using_datatype env reason variants intersecting_ty =
-  let tags = DataType.fromTy env intersecting_ty in
+  let (env, tags) = DataType.fromTy env intersecting_ty in
+  let (env, vtags) = List.fold_map variants ~init:env ~f:DataType.fromTy in
   let tyl =
-    List.filter
-      ~f:(fun ty ->
-        let variant_tags = DataType.fromTy env ty in
-        not @@ DataType.Set.are_disjoint env variant_tags tags)
-      variants
+    List.filter_map
+      ~f:(fun (variant, variant_tags) ->
+        if DataType.Set.are_disjoint env variant_tags tags then
+          None
+        else
+          Some variant)
+      (List.zip_exn variants vtags)
   in
   Typing_utils.union_list env reason tyl
 
@@ -826,16 +862,16 @@ module AtomicDataTypes = struct
 
   let label = DataType.label_to_datatypes ~trail
 
-  let of_ty env = function
-    | Primitive prim -> DataType.prim_to_datatypes ~trail prim
-    | Function -> function_
-    | Nonnull -> nonnull
-    | Tuple -> tuple
-    | Shape -> shape
-    | Label -> label
+  let of_ty env : atomic_ty -> env * _ DataType.t = function
+    | Primitive prim -> (env, DataType.prim_to_datatypes ~trail prim)
+    | Function -> (env, function_)
+    | Nonnull -> (env, nonnull)
+    | Tuple -> (env, tuple)
+    | Shape -> (env, shape)
+    | Label -> (env, label)
     | Class name -> DataType.Class.to_datatypes ~trail env name
 
-  let of_predicate env = function
+  let of_predicate env : type_predicate -> env * _ DataType.t = function
     | IsBool -> of_ty env (Primitive Aast.Tbool)
     | IsInt -> of_ty env (Primitive Aast.Tint)
     | IsString -> of_ty env (Primitive Aast.Tstring)

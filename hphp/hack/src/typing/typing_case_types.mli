@@ -21,7 +21,7 @@ type runtime_data_type
   Maps a type hint to its associated runtime data type. This is intended to
   be used to only as part of checking if a case type is well-formed.
 *)
-val data_type_from_hint : env -> Aast.hint -> runtime_data_type
+val data_type_from_hint : env -> Aast.hint -> env * runtime_data_type
 
 (**
   Checks if two different runtime data types can possibly overlap. Two
@@ -78,9 +78,9 @@ module AtomicDataTypes : sig
     | Label
     | Class of string
 
-  val of_ty : env -> atomic_ty -> t
+  val of_ty : env -> atomic_ty -> env * t
 
-  val of_predicate : env -> Typing_defs_core.type_predicate -> t
+  val of_predicate : env -> Typing_defs_core.type_predicate -> env * t
 
   (** Computes the complement for the set of values contained in [t] *)
   val complement : t -> t

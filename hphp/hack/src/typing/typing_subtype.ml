@@ -4717,7 +4717,9 @@ end = struct
            if span is not nothing, it isn't known to be disjoint from P.
            This also avoids the need to do special handling of dynamic
            in the union case above to avoid dynamic & P *)
-        let partition = Typing_refinement.partition_ty env ty_sub predicate in
+        let (env, partition) =
+          Typing_refinement.partition_ty env ty_sub predicate
+        in
         let simplify_subtype tyl ty_super env =
           Subtype.(
             simplify
@@ -6548,7 +6550,9 @@ end = struct
           &&& simplify_union_l ty_subs
       end
     | _ ->
-      let partition = Typing_refinement.partition_ty env ty_sub predicate in
+      let (env, partition) =
+        Typing_refinement.partition_ty env ty_sub predicate
+      in
       Typing_log.(
         let from_list kind tyll =
           List.map tyll ~f:(fun tyl ->

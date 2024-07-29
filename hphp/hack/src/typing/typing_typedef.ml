@@ -92,12 +92,10 @@ let casetype_def env typedef =
         pairwise_check acc rest
       | [] -> acc
     in
-    let errs =
-      hints
-      |> List.map ~f:(Typing_case_types.data_type_from_hint env)
-      |> pairwise_check []
+    let (env, errs) =
+      hints |> List.fold_map ~init:env ~f:Typing_case_types.data_type_from_hint
     in
-    let err = Typing_error.multiple_opt errs in
+    let err = errs |> pairwise_check [] |> Typing_error.multiple_opt in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err;
     env
   | _ -> env

@@ -623,6 +623,11 @@ void Disassembler::VisitDataProcessing2Source(Instruction* instr) {
     FORMAT(ASRV, "asr");
     FORMAT(RORV, "ror");
     #undef FORMAT
+    case CRC32CX: {
+      mnemonic = "crc32cx";
+      form = "'Wd, 'Wn, 'Xm";
+      break;
+    }
     default: form = "(DataProcessing2Source)";
   }
   Format(instr, mnemonic, form);

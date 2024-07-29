@@ -278,21 +278,6 @@ let maybe_pessimise_type env ty =
   else
     (env, ty)
 
-let pessimised_tup_assign p env arg_ty =
-  let env = Env.open_tyvars env p in
-  let (env, ty) = Env.fresh_type env p in
-  let (env, pess_ty) = pessimise_type env ty in
-  let env = Env.set_tyvar_variance env pess_ty in
-  (* There can't be an error since the type variable is fresh *)
-  let cb = Typing_error.Reasons_callback.unify_error_at p in
-  let (env, ty_err_opt) = SubType.sub_type env arg_ty pess_ty (Some cb) in
-  (* Enforce the invariant - this call should never give us an error *)
-  if Option.is_some ty_err_opt then
-    Errors.internal_error p "Subtype of fresh type variable";
-  let (env, ty_err_opt) = Typing_solver.close_tyvars_and_solve env in
-  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-  (env, ty)
-
 (** Typing of array-get like expressions; [ty1] is the type of the expression
   into which we are indexing (the 'collection'), [e2] is the index expression
   and [ty2] is the type of that expression.

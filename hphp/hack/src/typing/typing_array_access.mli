@@ -19,12 +19,6 @@ val pessimise_type :
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty
 
-val pessimised_tup_assign :
-  pos ->
-  Typing_env_types.env ->
-  Typing_defs.locl_ty ->
-  Typing_env_types.env * Typing_defs.locl_ty
-
 (** Typing of array-get like expressions; [ty1] is the type of the expression
   into which we are indexing (the 'collection'), [e2] is the index expression
   and [ty2] is the type of that expression.

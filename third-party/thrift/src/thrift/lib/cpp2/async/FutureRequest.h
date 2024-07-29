@@ -42,13 +42,6 @@ class FutureCallbackHelper {
     std::move(result).error().first.throw_exception();
   }
 
-  static ClientReceiveState&& extractClientReceiveState(PromiseResult& result) {
-    if (result.hasValue()) {
-      return std::move(std::move(result).value().second);
-    }
-    return std::move(result).error().second;
-  }
-
   using CallbackProcessorType = std::conditional_t<
       std::is_same_v<Result, folly::Unit>,
       folly::exception_wrapper(ClientReceiveState&),

@@ -294,49 +294,9 @@ folly::Future<folly::Unit> apache::thrift::Client<::test_cpp2::cpp_reflection::s
   using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
   folly::Promise<CallbackHelper::PromiseResult> promise;
   auto future = promise.getFuture();
-  auto ctxAndHeader = method1Ctx(&rpcOptions);
-  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
-    std::make_unique<apache::thrift::FutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_method1, channel_),
-    std::move(ctxAndHeader.first));
-  auto header = std::move(ctxAndHeader.second);
-  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
-  auto* contextStack = wrappedCallbackAndContextStack.second;
-  const auto serializeAndPrepareSend = [&] {
-    apache::thrift::SerializedRequest request = apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-      return fbthrift_serialize_method1(&writer, rpcOptions, *header, contextStack);
-    });
-    return [this, request = std::move(request), header = std::move(header), wrappedCallback = std::move(wrappedCallback)](apache::thrift::RpcOptions& rpcOptions) mutable {
-      fbthrift_send_method1(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-    };
-  };
-#if FOLLY_HAS_COROUTINES
-  const bool shouldProcessClientInterceptors = contextStack && contextStack->shouldProcessClientInterceptors();
-  if (!shouldProcessClientInterceptors) {
-    serializeAndPrepareSend()(rpcOptions);
-    return std::move(future).thenValue(CallbackHelper::extractResult);
-  }
-  return contextStack->processClientInterceptorsOnRequest()
-      .semi()
-      .defer([future = std::move(future), rpcOptions, send = serializeAndPrepareSend()](folly::Try<void> onRequestResult) mutable {
-        onRequestResult.throwUnlessValue();
-        send(rpcOptions);
-        return std::move(future);
-      })
-      .deferValue([](CallbackHelper::PromiseResult&& result) {
-        apache::thrift::ClientReceiveState clientReceiveState = CallbackHelper::extractClientReceiveState(result);
-        auto* contextStack = clientReceiveState.ctx();
-        return contextStack->processClientInterceptorsOnResponse()
-          .semi()
-          .defer([result = std::move(result), keepAlive = std::move(clientReceiveState)](folly::Try<void> onResponseRequest) mutable {
-            onResponseRequest.throwUnlessValue();
-            return CallbackHelper::extractResult(std::move(result));
-          });
-      })
-      .toUnsafeFuture();
-#else
-  serializeAndPrepareSend()(rpcOptions);
+  auto callback = std::make_unique<apache::thrift::FutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_method1, channel_);
+  method1(rpcOptions, std::move(callback));
   return std::move(future).thenValue(CallbackHelper::extractResult);
-#endif // FOLLY_HAS_COROUTINES
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::semifuture_method1(apache::thrift::RpcOptions& rpcOptions) {
@@ -510,49 +470,9 @@ folly::Future<folly::Unit> apache::thrift::Client<::test_cpp2::cpp_reflection::s
   using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
   folly::Promise<CallbackHelper::PromiseResult> promise;
   auto future = promise.getFuture();
-  auto ctxAndHeader = method2Ctx(&rpcOptions);
-  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
-    std::make_unique<apache::thrift::FutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_method2, channel_),
-    std::move(ctxAndHeader.first));
-  auto header = std::move(ctxAndHeader.second);
-  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
-  auto* contextStack = wrappedCallbackAndContextStack.second;
-  const auto serializeAndPrepareSend = [&] {
-    apache::thrift::SerializedRequest request = apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-      return fbthrift_serialize_method2(&writer, rpcOptions, *header, contextStack, p_x, p_y, p_z);
-    });
-    return [this, request = std::move(request), header = std::move(header), wrappedCallback = std::move(wrappedCallback)](apache::thrift::RpcOptions& rpcOptions) mutable {
-      fbthrift_send_method2(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-    };
-  };
-#if FOLLY_HAS_COROUTINES
-  const bool shouldProcessClientInterceptors = contextStack && contextStack->shouldProcessClientInterceptors();
-  if (!shouldProcessClientInterceptors) {
-    serializeAndPrepareSend()(rpcOptions);
-    return std::move(future).thenValue(CallbackHelper::extractResult);
-  }
-  return contextStack->processClientInterceptorsOnRequest()
-      .semi()
-      .defer([future = std::move(future), rpcOptions, send = serializeAndPrepareSend()](folly::Try<void> onRequestResult) mutable {
-        onRequestResult.throwUnlessValue();
-        send(rpcOptions);
-        return std::move(future);
-      })
-      .deferValue([](CallbackHelper::PromiseResult&& result) {
-        apache::thrift::ClientReceiveState clientReceiveState = CallbackHelper::extractClientReceiveState(result);
-        auto* contextStack = clientReceiveState.ctx();
-        return contextStack->processClientInterceptorsOnResponse()
-          .semi()
-          .defer([result = std::move(result), keepAlive = std::move(clientReceiveState)](folly::Try<void> onResponseRequest) mutable {
-            onResponseRequest.throwUnlessValue();
-            return CallbackHelper::extractResult(std::move(result));
-          });
-      })
-      .toUnsafeFuture();
-#else
-  serializeAndPrepareSend()(rpcOptions);
+  auto callback = std::make_unique<apache::thrift::FutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_method2, channel_);
+  method2(rpcOptions, std::move(callback), p_x, p_y, p_z);
   return std::move(future).thenValue(CallbackHelper::extractResult);
-#endif // FOLLY_HAS_COROUTINES
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::semifuture_method2(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z) {
@@ -726,49 +646,9 @@ folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection
   using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::std::int32_t>;
   folly::Promise<CallbackHelper::PromiseResult> promise;
   auto future = promise.getFuture();
-  auto ctxAndHeader = method3Ctx(&rpcOptions);
-  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
-    std::make_unique<apache::thrift::FutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_method3, channel_),
-    std::move(ctxAndHeader.first));
-  auto header = std::move(ctxAndHeader.second);
-  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
-  auto* contextStack = wrappedCallbackAndContextStack.second;
-  const auto serializeAndPrepareSend = [&] {
-    apache::thrift::SerializedRequest request = apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-      return fbthrift_serialize_method3(&writer, rpcOptions, *header, contextStack);
-    });
-    return [this, request = std::move(request), header = std::move(header), wrappedCallback = std::move(wrappedCallback)](apache::thrift::RpcOptions& rpcOptions) mutable {
-      fbthrift_send_method3(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-    };
-  };
-#if FOLLY_HAS_COROUTINES
-  const bool shouldProcessClientInterceptors = contextStack && contextStack->shouldProcessClientInterceptors();
-  if (!shouldProcessClientInterceptors) {
-    serializeAndPrepareSend()(rpcOptions);
-    return std::move(future).thenValue(CallbackHelper::extractResult);
-  }
-  return contextStack->processClientInterceptorsOnRequest()
-      .semi()
-      .defer([future = std::move(future), rpcOptions, send = serializeAndPrepareSend()](folly::Try<void> onRequestResult) mutable {
-        onRequestResult.throwUnlessValue();
-        send(rpcOptions);
-        return std::move(future);
-      })
-      .deferValue([](CallbackHelper::PromiseResult&& result) {
-        apache::thrift::ClientReceiveState clientReceiveState = CallbackHelper::extractClientReceiveState(result);
-        auto* contextStack = clientReceiveState.ctx();
-        return contextStack->processClientInterceptorsOnResponse()
-          .semi()
-          .defer([result = std::move(result), keepAlive = std::move(clientReceiveState)](folly::Try<void> onResponseRequest) mutable {
-            onResponseRequest.throwUnlessValue();
-            return CallbackHelper::extractResult(std::move(result));
-          });
-      })
-      .toUnsafeFuture();
-#else
-  serializeAndPrepareSend()(rpcOptions);
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_method3, channel_);
+  method3(rpcOptions, std::move(callback));
   return std::move(future).thenValue(CallbackHelper::extractResult);
-#endif // FOLLY_HAS_COROUTINES
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::semifuture_method3(apache::thrift::RpcOptions& rpcOptions) {
@@ -944,49 +824,9 @@ folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection
   using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::std::int32_t>;
   folly::Promise<CallbackHelper::PromiseResult> promise;
   auto future = promise.getFuture();
-  auto ctxAndHeader = method4Ctx(&rpcOptions);
-  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
-    std::make_unique<apache::thrift::FutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_method4, channel_),
-    std::move(ctxAndHeader.first));
-  auto header = std::move(ctxAndHeader.second);
-  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
-  auto* contextStack = wrappedCallbackAndContextStack.second;
-  const auto serializeAndPrepareSend = [&] {
-    apache::thrift::SerializedRequest request = apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-      return fbthrift_serialize_method4(&writer, rpcOptions, *header, contextStack, p_i, p_j, p_k);
-    });
-    return [this, request = std::move(request), header = std::move(header), wrappedCallback = std::move(wrappedCallback)](apache::thrift::RpcOptions& rpcOptions) mutable {
-      fbthrift_send_method4(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-    };
-  };
-#if FOLLY_HAS_COROUTINES
-  const bool shouldProcessClientInterceptors = contextStack && contextStack->shouldProcessClientInterceptors();
-  if (!shouldProcessClientInterceptors) {
-    serializeAndPrepareSend()(rpcOptions);
-    return std::move(future).thenValue(CallbackHelper::extractResult);
-  }
-  return contextStack->processClientInterceptorsOnRequest()
-      .semi()
-      .defer([future = std::move(future), rpcOptions, send = serializeAndPrepareSend()](folly::Try<void> onRequestResult) mutable {
-        onRequestResult.throwUnlessValue();
-        send(rpcOptions);
-        return std::move(future);
-      })
-      .deferValue([](CallbackHelper::PromiseResult&& result) {
-        apache::thrift::ClientReceiveState clientReceiveState = CallbackHelper::extractClientReceiveState(result);
-        auto* contextStack = clientReceiveState.ctx();
-        return contextStack->processClientInterceptorsOnResponse()
-          .semi()
-          .defer([result = std::move(result), keepAlive = std::move(clientReceiveState)](folly::Try<void> onResponseRequest) mutable {
-            onResponseRequest.throwUnlessValue();
-            return CallbackHelper::extractResult(std::move(result));
-          });
-      })
-      .toUnsafeFuture();
-#else
-  serializeAndPrepareSend()(rpcOptions);
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_method4, channel_);
+  method4(rpcOptions, std::move(callback), p_i, p_j, p_k);
   return std::move(future).thenValue(CallbackHelper::extractResult);
-#endif // FOLLY_HAS_COROUTINES
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::semifuture_method4(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k) {
@@ -1162,49 +1002,9 @@ folly::Future<::test_cpp2::cpp_reflection::struct2> apache::thrift::Client<::tes
   using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::test_cpp2::cpp_reflection::struct2>;
   folly::Promise<CallbackHelper::PromiseResult> promise;
   auto future = promise.getFuture();
-  auto ctxAndHeader = method5Ctx(&rpcOptions);
-  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
-    std::make_unique<apache::thrift::FutureCallback<::test_cpp2::cpp_reflection::struct2>>(std::move(promise), recv_wrapped_method5, channel_),
-    std::move(ctxAndHeader.first));
-  auto header = std::move(ctxAndHeader.second);
-  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
-  auto* contextStack = wrappedCallbackAndContextStack.second;
-  const auto serializeAndPrepareSend = [&] {
-    apache::thrift::SerializedRequest request = apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-      return fbthrift_serialize_method5(&writer, rpcOptions, *header, contextStack);
-    });
-    return [this, request = std::move(request), header = std::move(header), wrappedCallback = std::move(wrappedCallback)](apache::thrift::RpcOptions& rpcOptions) mutable {
-      fbthrift_send_method5(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-    };
-  };
-#if FOLLY_HAS_COROUTINES
-  const bool shouldProcessClientInterceptors = contextStack && contextStack->shouldProcessClientInterceptors();
-  if (!shouldProcessClientInterceptors) {
-    serializeAndPrepareSend()(rpcOptions);
-    return std::move(future).thenValue(CallbackHelper::extractResult);
-  }
-  return contextStack->processClientInterceptorsOnRequest()
-      .semi()
-      .defer([future = std::move(future), rpcOptions, send = serializeAndPrepareSend()](folly::Try<void> onRequestResult) mutable {
-        onRequestResult.throwUnlessValue();
-        send(rpcOptions);
-        return std::move(future);
-      })
-      .deferValue([](CallbackHelper::PromiseResult&& result) {
-        apache::thrift::ClientReceiveState clientReceiveState = CallbackHelper::extractClientReceiveState(result);
-        auto* contextStack = clientReceiveState.ctx();
-        return contextStack->processClientInterceptorsOnResponse()
-          .semi()
-          .defer([result = std::move(result), keepAlive = std::move(clientReceiveState)](folly::Try<void> onResponseRequest) mutable {
-            onResponseRequest.throwUnlessValue();
-            return CallbackHelper::extractResult(std::move(result));
-          });
-      })
-      .toUnsafeFuture();
-#else
-  serializeAndPrepareSend()(rpcOptions);
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::test_cpp2::cpp_reflection::struct2>>(std::move(promise), recv_wrapped_method5, channel_);
+  method5(rpcOptions, std::move(callback));
   return std::move(future).thenValue(CallbackHelper::extractResult);
-#endif // FOLLY_HAS_COROUTINES
 }
 
 folly::SemiFuture<::test_cpp2::cpp_reflection::struct2> apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::semifuture_method5(apache::thrift::RpcOptions& rpcOptions) {
@@ -1378,49 +1178,9 @@ folly::Future<::test_cpp2::cpp_reflection::struct2> apache::thrift::Client<::tes
   using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::test_cpp2::cpp_reflection::struct2>;
   folly::Promise<CallbackHelper::PromiseResult> promise;
   auto future = promise.getFuture();
-  auto ctxAndHeader = method6Ctx(&rpcOptions);
-  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
-    std::make_unique<apache::thrift::FutureCallback<::test_cpp2::cpp_reflection::struct2>>(std::move(promise), recv_wrapped_method6, channel_),
-    std::move(ctxAndHeader.first));
-  auto header = std::move(ctxAndHeader.second);
-  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
-  auto* contextStack = wrappedCallbackAndContextStack.second;
-  const auto serializeAndPrepareSend = [&] {
-    apache::thrift::SerializedRequest request = apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-      return fbthrift_serialize_method6(&writer, rpcOptions, *header, contextStack, p_l, p_m, p_n);
-    });
-    return [this, request = std::move(request), header = std::move(header), wrappedCallback = std::move(wrappedCallback)](apache::thrift::RpcOptions& rpcOptions) mutable {
-      fbthrift_send_method6(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-    };
-  };
-#if FOLLY_HAS_COROUTINES
-  const bool shouldProcessClientInterceptors = contextStack && contextStack->shouldProcessClientInterceptors();
-  if (!shouldProcessClientInterceptors) {
-    serializeAndPrepareSend()(rpcOptions);
-    return std::move(future).thenValue(CallbackHelper::extractResult);
-  }
-  return contextStack->processClientInterceptorsOnRequest()
-      .semi()
-      .defer([future = std::move(future), rpcOptions, send = serializeAndPrepareSend()](folly::Try<void> onRequestResult) mutable {
-        onRequestResult.throwUnlessValue();
-        send(rpcOptions);
-        return std::move(future);
-      })
-      .deferValue([](CallbackHelper::PromiseResult&& result) {
-        apache::thrift::ClientReceiveState clientReceiveState = CallbackHelper::extractClientReceiveState(result);
-        auto* contextStack = clientReceiveState.ctx();
-        return contextStack->processClientInterceptorsOnResponse()
-          .semi()
-          .defer([result = std::move(result), keepAlive = std::move(clientReceiveState)](folly::Try<void> onResponseRequest) mutable {
-            onResponseRequest.throwUnlessValue();
-            return CallbackHelper::extractResult(std::move(result));
-          });
-      })
-      .toUnsafeFuture();
-#else
-  serializeAndPrepareSend()(rpcOptions);
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::test_cpp2::cpp_reflection::struct2>>(std::move(promise), recv_wrapped_method6, channel_);
+  method6(rpcOptions, std::move(callback), p_l, p_m, p_n);
   return std::move(future).thenValue(CallbackHelper::extractResult);
-#endif // FOLLY_HAS_COROUTINES
 }
 
 folly::SemiFuture<::test_cpp2::cpp_reflection::struct2> apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::semifuture_method6(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n) {

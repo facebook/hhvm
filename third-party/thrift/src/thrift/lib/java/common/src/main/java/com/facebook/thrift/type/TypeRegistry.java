@@ -106,11 +106,11 @@ public final class TypeRegistry {
                     }
                   }
                 } catch (Exception e) {
-                  LOGGER.warn("Can not load class: " + c.getName(), e);
+                  LOGGER.warn("Cannot load class: " + c.getName(), e);
                 }
               });
     } catch (Exception e) {
-      throw new RuntimeException("Can not read classes", e);
+      throw new RuntimeException("Cannot read classes", e);
     }
   }
 

@@ -244,7 +244,7 @@ void apache::thrift::Client<::cpp2::SinkService>::fbthrift_send_methodFast(apach
 
 
 
-void apache::thrift::Client<::cpp2::SinkService>::fbthrift_serialize_and_send_method(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
+void apache::thrift::Client<::cpp2::SinkService>::methodImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_method(&writer, rpcOptions, *header, contextStack);
     if (stealRpcOptions) {
@@ -292,7 +292,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
   auto wrappedCallback = apache::thrift::createSinkClientCallback(
     apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)));
 
-  fbthrift_serialize_and_send_method(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
+  methodImpl(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
 
   if (cancellable) {
     folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -355,7 +355,7 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::SinkService>::recv_insta
   return recv_wrapped_method(_return, state);
 }
 
-void apache::thrift::Client<::cpp2::SinkService>::fbthrift_serialize_and_send_methodAndReponse(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
+void apache::thrift::Client<::cpp2::SinkService>::methodAndReponseImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_methodAndReponse(&writer, rpcOptions, *header, contextStack);
     if (stealRpcOptions) {
@@ -403,7 +403,7 @@ folly::coro::Task<apache::thrift::ResponseAndClientSink<::cpp2::InitialResponse,
   auto wrappedCallback = apache::thrift::createSinkClientCallback(
     apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)));
 
-  fbthrift_serialize_and_send_methodAndReponse(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
+  methodAndReponseImpl(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
 
   if (cancellable) {
     folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -466,7 +466,7 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::SinkService>::recv_insta
   return recv_wrapped_methodAndReponse(_return, state);
 }
 
-void apache::thrift::Client<::cpp2::SinkService>::fbthrift_serialize_and_send_methodThrow(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
+void apache::thrift::Client<::cpp2::SinkService>::methodThrowImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_methodThrow(&writer, rpcOptions, *header, contextStack);
     if (stealRpcOptions) {
@@ -514,7 +514,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
   auto wrappedCallback = apache::thrift::createSinkClientCallback(
     apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)));
 
-  fbthrift_serialize_and_send_methodThrow(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
+  methodThrowImpl(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
 
   if (cancellable) {
     folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -577,7 +577,7 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::SinkService>::recv_insta
   return recv_wrapped_methodThrow(_return, state);
 }
 
-void apache::thrift::Client<::cpp2::SinkService>::fbthrift_serialize_and_send_methodSinkThrow(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
+void apache::thrift::Client<::cpp2::SinkService>::methodSinkThrowImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_methodSinkThrow(&writer, rpcOptions, *header, contextStack);
     if (stealRpcOptions) {
@@ -625,7 +625,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
   auto wrappedCallback = apache::thrift::createSinkClientCallback(
     apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)));
 
-  fbthrift_serialize_and_send_methodSinkThrow(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
+  methodSinkThrowImpl(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
 
   if (cancellable) {
     folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -698,7 +698,7 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::SinkService>::recv_insta
   return recv_wrapped_methodSinkThrow(_return, state);
 }
 
-void apache::thrift::Client<::cpp2::SinkService>::fbthrift_serialize_and_send_methodFinalThrow(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
+void apache::thrift::Client<::cpp2::SinkService>::methodFinalThrowImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_methodFinalThrow(&writer, rpcOptions, *header, contextStack);
     if (stealRpcOptions) {
@@ -746,7 +746,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
   auto wrappedCallback = apache::thrift::createSinkClientCallback(
     apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)));
 
-  fbthrift_serialize_and_send_methodFinalThrow(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
+  methodFinalThrowImpl(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
 
   if (cancellable) {
     folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -809,7 +809,7 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::SinkService>::recv_insta
   return recv_wrapped_methodFinalThrow(_return, state);
 }
 
-void apache::thrift::Client<::cpp2::SinkService>::fbthrift_serialize_and_send_methodBothThrow(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
+void apache::thrift::Client<::cpp2::SinkService>::methodBothThrowImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_methodBothThrow(&writer, rpcOptions, *header, contextStack);
     if (stealRpcOptions) {
@@ -857,7 +857,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
   auto wrappedCallback = apache::thrift::createSinkClientCallback(
     apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)));
 
-  fbthrift_serialize_and_send_methodBothThrow(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
+  methodBothThrowImpl(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
 
   if (cancellable) {
     folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -930,7 +930,7 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::SinkService>::recv_insta
   return recv_wrapped_methodBothThrow(_return, state);
 }
 
-void apache::thrift::Client<::cpp2::SinkService>::fbthrift_serialize_and_send_methodFast(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
+void apache::thrift::Client<::cpp2::SinkService>::methodFastImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_methodFast(&writer, rpcOptions, *header, contextStack);
     if (stealRpcOptions) {
@@ -978,7 +978,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
   auto wrappedCallback = apache::thrift::createSinkClientCallback(
     apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)));
 
-  fbthrift_serialize_and_send_methodFast(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
+  methodFastImpl(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
 
   if (cancellable) {
     folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

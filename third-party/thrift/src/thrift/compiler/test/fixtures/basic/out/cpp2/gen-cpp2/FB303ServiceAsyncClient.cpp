@@ -51,10 +51,10 @@ void apache::thrift::Client<::test::fixtures::basic::FB303Service>::simple_rpc(s
 void apache::thrift::Client<::test::fixtures::basic::FB303Service>::simple_rpc(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_int_parameter) {
   auto [ctx, header] = simple_rpcCtx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  fbthrift_serialize_and_send_simple_rpc(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_int_parameter);
+  simple_rpcImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_int_parameter);
 }
 
-void apache::thrift::Client<::test::fixtures::basic::FB303Service>::fbthrift_serialize_and_send_simple_rpc(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_int_parameter, bool stealRpcOptions) {
+void apache::thrift::Client<::test::fixtures::basic::FB303Service>::simple_rpcImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_int_parameter, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_simple_rpc(&writer, rpcOptions, *header, contextStack, p_int_parameter);
     if (stealRpcOptions) {
@@ -104,7 +104,7 @@ void apache::thrift::Client<::test::fixtures::basic::FB303Service>::sync_simple_
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_simple_rpc(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_int_parameter);
+      simple_rpcImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_int_parameter);
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {

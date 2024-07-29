@@ -41,7 +41,7 @@ class Client<::py3::simple::RederivedService> : public ::py3::simple::DerivedSer
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "RederivedService", "function": "get_seven"} */
   virtual void get_seven(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
-  void fbthrift_serialize_and_send_get_seven(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
+  void get_sevenImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "RederivedService", "function": "get_seven"} */
@@ -103,9 +103,9 @@ class Client<::py3::simple::RederivedService> : public ::py3::simple::DerivedSer
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_get_seven(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      get_sevenImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      fbthrift_serialize_and_send_get_seven(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      get_sevenImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

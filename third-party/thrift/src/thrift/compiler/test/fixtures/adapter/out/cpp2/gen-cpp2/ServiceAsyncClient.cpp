@@ -53,10 +53,10 @@ void apache::thrift::Client<::facebook::thrift::test::Service>::func(std::unique
 void apache::thrift::Client<::facebook::thrift::test::Service>::func(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
   auto [ctx, header] = funcCtx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  fbthrift_serialize_and_send_func(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_arg1, p_arg2, p_arg3);
+  funcImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_arg1, p_arg2, p_arg3);
 }
 
-void apache::thrift::Client<::facebook::thrift::test::Service>::fbthrift_serialize_and_send_func(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3, bool stealRpcOptions) {
+void apache::thrift::Client<::facebook::thrift::test::Service>::funcImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_func(&writer, rpcOptions, *header, contextStack, p_arg1, p_arg2, p_arg3);
     if (stealRpcOptions) {
@@ -106,7 +106,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_func(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_arg1, p_arg2, p_arg3);
+      funcImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_arg1, p_arg2, p_arg3);
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {

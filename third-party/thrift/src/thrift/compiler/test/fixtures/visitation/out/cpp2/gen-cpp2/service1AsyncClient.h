@@ -39,7 +39,7 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method1"} */
   virtual void method1(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
-  void fbthrift_serialize_and_send_method1(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
+  void method1Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method1"} */
@@ -101,9 +101,9 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_method1(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      method1Impl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      fbthrift_serialize_and_send_method1(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      method1Impl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -160,7 +160,7 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method2"} */
   virtual void method2(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
  protected:
-  void fbthrift_serialize_and_send_method2(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z, bool stealRpcOptions = false);
+  void method2Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method2"} */
@@ -222,9 +222,9 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_method2(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_x, p_y, p_z);
+      method2Impl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_x, p_y, p_z);
     } else {
-      fbthrift_serialize_and_send_method2(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_x, p_y, p_z);
+      method2Impl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_x, p_y, p_z);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -281,7 +281,7 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method3"} */
   virtual void method3(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
-  void fbthrift_serialize_and_send_method3(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
+  void method3Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method3"} */
@@ -343,9 +343,9 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_method3(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      method3Impl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      fbthrift_serialize_and_send_method3(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      method3Impl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -404,7 +404,7 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method4"} */
   virtual void method4(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
  protected:
-  void fbthrift_serialize_and_send_method4(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k, bool stealRpcOptions = false);
+  void method4Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method4"} */
@@ -466,9 +466,9 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_method4(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_i, p_j, p_k);
+      method4Impl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_i, p_j, p_k);
     } else {
-      fbthrift_serialize_and_send_method4(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_i, p_j, p_k);
+      method4Impl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_i, p_j, p_k);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -527,7 +527,7 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method5"} */
   virtual void method5(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
-  void fbthrift_serialize_and_send_method5(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
+  void method5Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method5"} */
@@ -589,9 +589,9 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_method5(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      method5Impl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      fbthrift_serialize_and_send_method5(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      method5Impl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -650,7 +650,7 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method6"} */
   virtual void method6(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
  protected:
-  void fbthrift_serialize_and_send_method6(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n, bool stealRpcOptions = false);
+  void method6Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method6"} */
@@ -712,9 +712,9 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_method6(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_l, p_m, p_n);
+      method6Impl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_l, p_m, p_n);
     } else {
-      fbthrift_serialize_and_send_method6(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_l, p_m, p_n);
+      method6Impl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_l, p_m, p_n);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

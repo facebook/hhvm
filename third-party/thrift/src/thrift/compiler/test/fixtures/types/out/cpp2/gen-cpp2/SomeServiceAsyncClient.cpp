@@ -81,10 +81,10 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::bou
 void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::bounce_map(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::apache::thrift::fixtures::types::SomeMap& p_m) {
   auto [ctx, header] = bounce_mapCtx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  fbthrift_serialize_and_send_bounce_map(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_m);
+  bounce_mapImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_m);
 }
 
-void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::fbthrift_serialize_and_send_bounce_map(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::apache::thrift::fixtures::types::SomeMap& p_m, bool stealRpcOptions) {
+void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::bounce_mapImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::apache::thrift::fixtures::types::SomeMap& p_m, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_bounce_map(&writer, rpcOptions, *header, contextStack, p_m);
     if (stealRpcOptions) {
@@ -134,7 +134,7 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::syn
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_bounce_map(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_m);
+      bounce_mapImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_m);
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {
@@ -297,10 +297,10 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::bin
 void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int64_t>& p_r) {
   auto [ctx, header] = binary_keyed_mapCtx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  fbthrift_serialize_and_send_binary_keyed_map(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_r);
+  binary_keyed_mapImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_r);
 }
 
-void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::fbthrift_serialize_and_send_binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int64_t>& p_r, bool stealRpcOptions) {
+void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::binary_keyed_mapImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int64_t>& p_r, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_binary_keyed_map(&writer, rpcOptions, *header, contextStack, p_r);
     if (stealRpcOptions) {
@@ -350,7 +350,7 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::syn
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_binary_keyed_map(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_r);
+      binary_keyed_mapImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_r);
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {

@@ -37,7 +37,7 @@ folly::coro::Task<{{ > types/return_type_client}}> {{ > service_common/client_cl
   {{function:created_interaction}} handle(channel_, "{{function:created_interaction}}");
 {{/function:creates_interaction?}}
 
-  fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(header), ctx.get(), wrappedCallback{{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
+  {{function:cpp_name}}Impl(rpcOptions, std::move(header), ctx.get(), wrappedCallback{{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
 
   if (cancellable) {
     folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

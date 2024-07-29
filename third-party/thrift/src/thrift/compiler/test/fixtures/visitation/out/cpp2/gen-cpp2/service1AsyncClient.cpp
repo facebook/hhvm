@@ -204,10 +204,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method1(std:
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method1(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = method1Ctx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  fbthrift_serialize_and_send_method1(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
+  method1Impl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
-void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::fbthrift_serialize_and_send_method1(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
+void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method1Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_method1(&writer, rpcOptions, *header, contextStack);
     if (stealRpcOptions) {
@@ -257,7 +257,7 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::sync_method1
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_method1(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
+      method1Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {
@@ -420,10 +420,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method2(std:
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method2(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z) {
   auto [ctx, header] = method2Ctx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  fbthrift_serialize_and_send_method2(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_x, p_y, p_z);
+  method2Impl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_x, p_y, p_z);
 }
 
-void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::fbthrift_serialize_and_send_method2(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z, bool stealRpcOptions) {
+void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method2Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_method2(&writer, rpcOptions, *header, contextStack, p_x, p_y, p_z);
     if (stealRpcOptions) {
@@ -473,7 +473,7 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::sync_method2
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_method2(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_x, p_y, p_z);
+      method2Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_x, p_y, p_z);
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {
@@ -636,10 +636,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method3(std:
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method3(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = method3Ctx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  fbthrift_serialize_and_send_method3(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
+  method3Impl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
-void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::fbthrift_serialize_and_send_method3(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
+void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method3Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_method3(&writer, rpcOptions, *header, contextStack);
     if (stealRpcOptions) {
@@ -689,7 +689,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_method3(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
+      method3Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {
@@ -854,10 +854,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method4(std:
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method4(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k) {
   auto [ctx, header] = method4Ctx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  fbthrift_serialize_and_send_method4(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_i, p_j, p_k);
+  method4Impl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_i, p_j, p_k);
 }
 
-void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::fbthrift_serialize_and_send_method4(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k, bool stealRpcOptions) {
+void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method4Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_method4(&writer, rpcOptions, *header, contextStack, p_i, p_j, p_k);
     if (stealRpcOptions) {
@@ -907,7 +907,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_method4(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_i, p_j, p_k);
+      method4Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_i, p_j, p_k);
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {
@@ -1072,10 +1072,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method5(std:
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method5(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = method5Ctx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  fbthrift_serialize_and_send_method5(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
+  method5Impl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
-void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::fbthrift_serialize_and_send_method5(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
+void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method5Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_method5(&writer, rpcOptions, *header, contextStack);
     if (stealRpcOptions) {
@@ -1125,7 +1125,7 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::sync_method5
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_method5(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
+      method5Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {
@@ -1288,10 +1288,10 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method6(std:
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method6(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n) {
   auto [ctx, header] = method6Ctx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  fbthrift_serialize_and_send_method6(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_l, p_m, p_n);
+  method6Impl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_l, p_m, p_n);
 }
 
-void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::fbthrift_serialize_and_send_method6(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n, bool stealRpcOptions) {
+void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::method6Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_method6(&writer, rpcOptions, *header, contextStack, p_l, p_m, p_n);
     if (stealRpcOptions) {
@@ -1341,7 +1341,7 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service1>::sync_method6
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_method6(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_l, p_m, p_n);
+      method6Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_l, p_m, p_n);
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {

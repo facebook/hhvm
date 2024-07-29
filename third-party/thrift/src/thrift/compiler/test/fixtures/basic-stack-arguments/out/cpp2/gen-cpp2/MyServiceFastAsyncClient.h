@@ -36,7 +36,7 @@ class Client<::cpp2::MyServiceFast> : public apache::thrift::GeneratedAsyncClien
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "MyServiceFast", "function": "hasDataById"} */
   virtual void hasDataById(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id);
  protected:
-  void fbthrift_serialize_and_send_hasDataById(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, bool stealRpcOptions = false);
+  void hasDataByIdImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "MyServiceFast", "function": "hasDataById"} */
@@ -101,9 +101,9 @@ class Client<::cpp2::MyServiceFast> : public apache::thrift::GeneratedAsyncClien
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_hasDataById(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id);
+      hasDataByIdImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id);
     } else {
-      fbthrift_serialize_and_send_hasDataById(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id);
+      hasDataByIdImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -162,7 +162,7 @@ class Client<::cpp2::MyServiceFast> : public apache::thrift::GeneratedAsyncClien
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "MyServiceFast", "function": "getDataById"} */
   virtual void getDataById(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id);
  protected:
-  void fbthrift_serialize_and_send_getDataById(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, bool stealRpcOptions = false);
+  void getDataByIdImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "MyServiceFast", "function": "getDataById"} */
@@ -227,9 +227,9 @@ class Client<::cpp2::MyServiceFast> : public apache::thrift::GeneratedAsyncClien
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_getDataById(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id);
+      getDataByIdImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id);
     } else {
-      fbthrift_serialize_and_send_getDataById(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id);
+      getDataByIdImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -288,7 +288,7 @@ class Client<::cpp2::MyServiceFast> : public apache::thrift::GeneratedAsyncClien
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "MyServiceFast", "function": "putDataById"} */
   virtual void putDataById(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id, const ::std::string& p_data);
  protected:
-  void fbthrift_serialize_and_send_putDataById(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, const ::std::string& p_data, bool stealRpcOptions = false);
+  void putDataByIdImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, const ::std::string& p_data, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "MyServiceFast", "function": "putDataById"} */
@@ -353,9 +353,9 @@ class Client<::cpp2::MyServiceFast> : public apache::thrift::GeneratedAsyncClien
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_putDataById(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id, p_data);
+      putDataByIdImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id, p_data);
     } else {
-      fbthrift_serialize_and_send_putDataById(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id, p_data);
+      putDataByIdImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id, p_data);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -412,7 +412,7 @@ class Client<::cpp2::MyServiceFast> : public apache::thrift::GeneratedAsyncClien
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "MyServiceFast", "function": "lobDataById"} */
   virtual void lobDataById(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id, const ::std::string& p_data);
  protected:
-  void fbthrift_serialize_and_send_lobDataById(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, const ::std::string& p_data, bool stealRpcOptions = false);
+  void lobDataByIdImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, const ::std::string& p_data, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "MyServiceFast", "function": "lobDataById"} */
@@ -469,9 +469,9 @@ class Client<::cpp2::MyServiceFast> : public apache::thrift::GeneratedAsyncClien
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_lobDataById(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id, p_data);
+      lobDataByIdImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id, p_data);
     } else {
-      fbthrift_serialize_and_send_lobDataById(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id, p_data);
+      lobDataByIdImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id, p_data);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

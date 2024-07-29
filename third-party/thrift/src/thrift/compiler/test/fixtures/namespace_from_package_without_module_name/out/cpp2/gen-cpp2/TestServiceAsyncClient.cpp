@@ -51,10 +51,10 @@ void apache::thrift::Client<::test::namespace_from_package_without_module_name::
 void apache::thrift::Client<::test::namespace_from_package_without_module_name::TestService>::init(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_int1) {
   auto [ctx, header] = initCtx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  fbthrift_serialize_and_send_init(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_int1);
+  initImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_int1);
 }
 
-void apache::thrift::Client<::test::namespace_from_package_without_module_name::TestService>::fbthrift_serialize_and_send_init(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_int1, bool stealRpcOptions) {
+void apache::thrift::Client<::test::namespace_from_package_without_module_name::TestService>::initImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_int1, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_init(&writer, rpcOptions, *header, contextStack, p_int1);
     if (stealRpcOptions) {
@@ -104,7 +104,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_init(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_int1);
+      initImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_int1);
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {

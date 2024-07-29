@@ -50,10 +50,10 @@ void apache::thrift::Client<::test::fixtures::basic::FooService>::simple_rpc(std
 void apache::thrift::Client<::test::fixtures::basic::FooService>::simple_rpc(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = simple_rpcCtx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  fbthrift_serialize_and_send_simple_rpc(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
+  simple_rpcImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
-void apache::thrift::Client<::test::fixtures::basic::FooService>::fbthrift_serialize_and_send_simple_rpc(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
+void apache::thrift::Client<::test::fixtures::basic::FooService>::simple_rpcImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_simple_rpc(&writer, rpcOptions, *header, contextStack);
     if (stealRpcOptions) {
@@ -103,7 +103,7 @@ void apache::thrift::Client<::test::fixtures::basic::FooService>::sync_simple_rp
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_simple_rpc(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
+      simple_rpcImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {

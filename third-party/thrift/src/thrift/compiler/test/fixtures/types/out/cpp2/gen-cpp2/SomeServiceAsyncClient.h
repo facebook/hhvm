@@ -41,7 +41,7 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
   /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "service": "SomeService", "function": "bounce_map"} */
   virtual void bounce_map(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::apache::thrift::fixtures::types::SomeMap& p_m);
  protected:
-  void fbthrift_serialize_and_send_bounce_map(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::apache::thrift::fixtures::types::SomeMap& p_m, bool stealRpcOptions = false);
+  void bounce_mapImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::apache::thrift::fixtures::types::SomeMap& p_m, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "service": "SomeService", "function": "bounce_map"} */
@@ -103,9 +103,9 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_bounce_map(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_m);
+      bounce_mapImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_m);
     } else {
-      fbthrift_serialize_and_send_bounce_map(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_m);
+      bounce_mapImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_m);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -164,7 +164,7 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
   /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "service": "SomeService", "function": "binary_keyed_map"} */
   virtual void binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int64_t>& p_r);
  protected:
-  void fbthrift_serialize_and_send_binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int64_t>& p_r, bool stealRpcOptions = false);
+  void binary_keyed_mapImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int64_t>& p_r, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "service": "SomeService", "function": "binary_keyed_map"} */
@@ -226,9 +226,9 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_binary_keyed_map(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_r);
+      binary_keyed_mapImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_r);
     } else {
-      fbthrift_serialize_and_send_binary_keyed_map(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_r);
+      binary_keyed_mapImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_r);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

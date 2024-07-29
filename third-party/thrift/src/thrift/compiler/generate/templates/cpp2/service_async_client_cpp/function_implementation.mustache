@@ -28,11 +28,11 @@ void {{ > service_common/client_class_name}}::{{function:cpp_name}}(apache::thri
 {{#function:stream?}}
   auto streamCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallback), rpcOptions.getBufferOptions());
 {{/function:stream?}}
-  fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(header), contextStack, {{#function:stream?}}std::move(streamCallback){{/function:stream?}}{{^function:stream?}}std::move(wrappedCallback){{/function:stream?}}{{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
+  {{function:cpp_name}}Impl(rpcOptions, std::move(header), contextStack, {{#function:stream?}}std::move(streamCallback){{/function:stream?}}{{^function:stream?}}std::move(wrappedCallback){{/function:stream?}}{{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
 }
 
 {{/function:sink?}}
-void {{ > service_common/client_class_name}}::fbthrift_serialize_and_send_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, {{ > types/callback_type}} callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/function_param_list_client}}, bool stealRpcOptions) {
+void {{ > service_common/client_class_name}}::{{function:cpp_name}}Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, {{ > types/callback_type}} callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/function_param_list_client}}, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_{{function:cpp_name}}(&writer, rpcOptions, *header, contextStack{{function:comma}}{{ > service_common/param_list}});
     if (stealRpcOptions) {

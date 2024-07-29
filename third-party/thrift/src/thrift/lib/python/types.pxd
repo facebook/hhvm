@@ -254,4 +254,4 @@ cdef class ServiceInterface:
 
 cdef const cTypeInfo* getCTypeInfo(type_info)
 cdef list_compare(object first, object second, int op)
-cdef _fbthrift_compare_struct_less(object lhs, object rhs, object return_if_same_type)
+cdef _fbthrift_compare_struct_less(object lhs, object rhs, object return_if_same_value)

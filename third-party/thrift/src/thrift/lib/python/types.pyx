@@ -945,7 +945,7 @@ cdef api object _get_fbthrift_data(object struct_or_union):
 cdef api object _get_exception_fbthrift_data(object generated_error):
     return (<GeneratedError> generated_error)._fbthrift_data
 
-cdef _fbthrift_compare_struct_less(lhs, rhs, return_if_same_type):
+cdef _fbthrift_compare_struct_less(lhs, rhs, return_if_same_value):
     if type(lhs) != type(rhs):
         return NotImplemented
     for name, lhs_value in lhs:
@@ -957,7 +957,7 @@ cdef _fbthrift_compare_struct_less(lhs, rhs, return_if_same_type):
         if rhs_value is None:
             return False
         return lhs_value < rhs_value
-    return return_if_same_type
+    return return_if_same_value
 
 cdef class Struct(StructOrUnion):
     """

@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"net"
 	"time"
 
@@ -47,9 +48,9 @@ type rocketClient struct {
 	protoID ProtocolID
 	zstd    bool
 
-	reqMetadata  *requestRPCMetadata
-	respMetadata *ResponseRpcMetadata
-	seqID        int32
+	reqMetadata *requestRPCMetadata
+	respHeaders map[string]string
+	seqID       int32
 
 	persistentHeaders map[string]string
 
@@ -237,16 +238,17 @@ func (p *rocketClient) ReadMessageBegin() (string, MessageType, int32, error) {
 	if err != nil {
 		return name, EXCEPTION, p.seqID, err
 	}
+	metadata := &ResponseRpcMetadata{}
 	metadataBytes, ok := resp.Metadata()
 	if ok {
-		metadata := &ResponseRpcMetadata{}
 		if err = deserializeCompact(metadataBytes, metadata); err != nil {
 			return name, EXCEPTION, p.seqID, err
 		}
-		p.respMetadata = metadata
-		if p.respMetadata.PayloadMetadata != nil && p.respMetadata.PayloadMetadata.ExceptionMetadata != nil {
-			exception := newRocketException(p.respMetadata.PayloadMetadata.ExceptionMetadata)
-			exceptionMetadata := p.respMetadata.PayloadMetadata.ExceptionMetadata
+		p.respHeaders = make(map[string]string)
+		maps.Copy(p.respHeaders, metadata.OtherMetadata)
+		if metadata.PayloadMetadata != nil && metadata.PayloadMetadata.ExceptionMetadata != nil {
+			exception := newRocketException(metadata.PayloadMetadata.ExceptionMetadata)
+			exceptionMetadata := metadata.PayloadMetadata.ExceptionMetadata
 			if exceptionMetadata.Metadata != nil {
 				if exceptionMetadata.Metadata.AppUnknownException != nil {
 					return name, EXCEPTION, p.seqID, exception
@@ -259,7 +261,7 @@ func (p *rocketClient) ReadMessageBegin() (string, MessageType, int32, error) {
 		}
 	}
 	dataBytes := resp.Data()
-	if p.respMetadata.Compression != nil && *p.respMetadata.Compression == CompressionAlgorithm_ZSTD {
+	if metadata.Compression != nil && *metadata.Compression == CompressionAlgorithm_ZSTD {
 		dataBytes, err = decompressZstd(dataBytes)
 		if err != nil {
 			return name, EXCEPTION, p.seqID, err
@@ -367,10 +369,7 @@ func (p *rocketClient) GetRequestHeaders() map[string]string {
 }
 
 func (p *rocketClient) GetResponseHeaders() map[string]string {
-	if p.respMetadata == nil {
-		return nil
-	}
-	return p.respMetadata.OtherMetadata
+	return p.respHeaders
 }
 
 func (p *rocketClient) Close() error {

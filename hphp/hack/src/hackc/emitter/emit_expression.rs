@@ -66,7 +66,6 @@ use naming_special_names_rust::pseudo_consts;
 use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::special_functions;
 use naming_special_names_rust::special_idents;
-use naming_special_names_rust::superglobals;
 use naming_special_names_rust::typehints;
 use naming_special_names_rust::user_attributes;
 use oxidized::aast;
@@ -151,8 +150,8 @@ mod inout_locals {
     impl Default for AliasInfo {
         fn default() -> Self {
             AliasInfo {
-                first_inout: std::isize::MAX,
-                last_write: std::isize::MIN,
+                first_inout: isize::MAX,
+                last_write: isize::MIN,
                 num_uses: 0,
             }
         }
@@ -1679,24 +1678,19 @@ fn emit_call_isset_expr<'a, 'd>(
     }
     if let Some(lid) = expr.2.as_lvar() {
         let name = local_id::get_name(&lid.1);
-        return Ok(if superglobals::is_any_global(name) {
-            InstrSeq::gather(vec![
-                emit_pos(outer_pos),
-                instr::string(string_utils::locals::strip_dollar(name)),
-                emit_pos(outer_pos),
-                instr::isset_g(),
-            ])
-        } else if is_local_this(env, &lid.1) && !env.flags.contains(env::Flags::NEEDS_LOCAL_THIS) {
-            InstrSeq::gather(vec![
-                emit_pos(outer_pos),
-                emit_local(e, env, BareThisOp::NoNotice, lid)?,
-                emit_pos(outer_pos),
-                instr::is_type_c(IsTypeOp::Null),
-                instr::not(),
-            ])
-        } else {
-            emit_pos_then(outer_pos, instr::isset_l(get_local(e, env, &lid.0, name)?))
-        });
+        return Ok(
+            if is_local_this(env, &lid.1) && !env.flags.contains(env::Flags::NEEDS_LOCAL_THIS) {
+                InstrSeq::gather(vec![
+                    emit_pos(outer_pos),
+                    emit_local(e, env, BareThisOp::NoNotice, lid)?,
+                    emit_pos(outer_pos),
+                    instr::is_type_c(IsTypeOp::Null),
+                    instr::not(),
+                ])
+            } else {
+                emit_pos_then(outer_pos, instr::isset_l(get_local(e, env, &lid.0, name)?))
+            },
+        );
     }
     Ok(InstrSeq::gather(vec![
         emit_expr(e, env, expr)?,
@@ -2863,16 +2857,6 @@ fn emit_special_function<'a, 'd>(
                     Some(InstrSeq::gather(vec![
                         emit_expr(e, env, error::expect_normal_paramkind(arg_expr)?)?,
                         is_expr,
-                    ]))
-                }
-                (&[(ref pk, Expr(_, _, Expr_::Lvar(ref arg_id)))], Some(i), _)
-                    if superglobals::is_any_global(arg_id.name()) =>
-                {
-                    error::ensure_normal_paramkind(pk)?;
-                    Some(InstrSeq::gather(vec![
-                        emit_local(e, env, BareThisOp::NoNotice, arg_id)?,
-                        emit_pos(pos),
-                        instr::is_type_c(i),
                     ]))
                 }
                 (&[(ref pk, Expr(_, _, Expr_::Lvar(ref arg_id)))], Some(i), _)
@@ -4558,22 +4542,14 @@ fn emit_local<'a, 'd>(
 ) -> Result<InstrSeq> {
     let ast::Lid(pos, id) = lid;
     let id_name = local_id::get_name(id);
-    if superglobals::is_superglobal(id_name) {
-        Ok(InstrSeq::gather(vec![
-            instr::string(string_utils::locals::strip_dollar(id_name)),
-            emit_pos(pos),
-            instr::c_get_g(),
-        ]))
-    } else {
-        Ok(
-            if is_local_this(env, id) && !env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) {
-                emit_pos_then(pos, instr::bare_this(notice))
-            } else {
-                let local = get_local(e, env, pos, id_name)?;
-                instr::c_get_l(local)
-            },
-        )
-    }
+    Ok(
+        if is_local_this(env, id) && !env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) {
+            emit_pos_then(pos, instr::bare_this(notice))
+        } else {
+            let local = get_local(e, env, pos, id_name)?;
+            instr::c_get_l(local)
+        },
+    )
 }
 
 fn emit_class_const<'a, 'd>(
@@ -4758,8 +4734,7 @@ fn emit_first_expr<'a, 'd>(
 ) -> Result<(InstrSeq, bool)> {
     Ok(match &expr.2 {
         ast::Expr_::Lvar(l)
-            if !((is_local_this(env, &l.1) && !env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS))
-                || superglobals::is_any_global(local_id::get_name(&l.1))) =>
+            if !is_local_this(env, &l.1) || env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) =>
         {
             (
                 instr::c_get_l_2(get_local(e, env, &l.0, local_id::get_name(&l.1))?),
@@ -5448,21 +5423,6 @@ fn emit_base_<'a, 'd>(
                 )
             }
         }
-        Expr_::Lvar(x) if superglobals::is_superglobal(&(x.1).1) => {
-            let base_instrs = emit_pos_then(
-                &x.0,
-                instr::string(string_utils::locals::strip_dollar(&(x.1).1)),
-            );
-
-            Ok(emit_default(
-                e,
-                base_instrs,
-                instr::empty(),
-                instr::base_gc(base_offset, base_mode),
-                1,
-                0,
-            ))
-        }
         Expr_::Lvar(x) if is_object && (x.1).1 == special_idents::THIS => {
             let base_instrs = emit_pos_then(&x.0, instr::check_this());
             Ok(emit_default(
@@ -6033,16 +5993,6 @@ pub fn emit_lval_op_nonlist<'a, 'd>(
     .map(|(lhs, rhs, setop)| InstrSeq::gather(vec![lhs, rhs, setop]))
 }
 
-pub fn emit_final_global_op(pos: &Pos, op: LValOp) -> InstrSeq {
-    use LValOp as L;
-    match op {
-        L::Set => emit_pos_then(pos, instr::set_g()),
-        L::SetOp(op) => instr::set_op_g(op),
-        L::IncDec(op) => instr::inc_dec_g(op),
-        L::Unset => emit_pos_then(pos, instr::unset_g()),
-    }
-}
-
 pub fn emit_final_local_op(pos: &Pos, op: LValOp, lid: Local) -> InstrSeq {
     use LValOp as L;
     emit_pos_then(
@@ -6110,14 +6060,6 @@ pub fn emit_lval_op_nonlist_steps<'a, 'd>(
         use ast::Expr_;
         let pos = &expr.1;
         Ok(match &expr.2 {
-            Expr_::Lvar(v) if superglobals::is_any_global(local_id::get_name(&v.1)) => (
-                emit_pos_then(
-                    &v.0,
-                    instr::string(string_utils::lstrip(local_id::get_name(&v.1), "$")),
-                ),
-                rhs_instrs,
-                emit_final_global_op(outer_pos, op),
-            ),
             Expr_::Lvar(v) if is_local_this(env, &v.1) && op.is_incdec() => (
                 emit_local(e, env, BareThisOp::Notice, v)?,
                 rhs_instrs,

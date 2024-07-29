@@ -20,7 +20,6 @@ use naming_special_names_rust::members;
 use naming_special_names_rust::pseudo_consts;
 use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::special_idents;
-use naming_special_names_rust::superglobals;
 use oxidized::aast_visitor;
 use oxidized::aast_visitor::visit_mut;
 use oxidized::aast_visitor::AstParams;
@@ -492,12 +491,9 @@ impl State {
         // Don't bother if it's $this, as this is captured implicitly
         if var == special_idents::THIS {
             self.capture_state.this_ = true;
-        } else if scope.should_capture_var(&var)
-            && (var != special_idents::DOLLAR_DOLLAR)
-            && !superglobals::is_superglobal(&var)
-        {
+        } else if scope.should_capture_var(&var) && (var != special_idents::DOLLAR_DOLLAR) {
             // If it's bound as a parameter or definite assignment, don't add it
-            // Also don't add the pipe variable and superglobals
+            // Also don't add the pipe variable
             self.capture_state.vars.insert(var.into_owned());
         }
     }

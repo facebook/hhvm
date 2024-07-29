@@ -29,7 +29,6 @@ use instruction_sequence::InstrSeq;
 use lazy_static::lazy_static;
 use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::special_idents;
-use naming_special_names_rust::superglobals;
 use oxidized::aast as a;
 use oxidized::aast_visitor;
 use oxidized::aast_visitor::Node;
@@ -1009,13 +1008,11 @@ fn check_l_iter<'a, 'd>(
         _ => None,
     };
 
-    if arr_loc == special_idents::THIS || superglobals::is_superglobal(arr_loc) {
+    if arr_loc == special_idents::THIS {
         return Ok(None);
     }
 
-    if key_loc.map_or(false, |k| {
-        *k == special_idents::THIS || superglobals::is_superglobal(k)
-    }) {
+    if key_loc.map_or(false, |k| *k == special_idents::THIS) {
         return Ok(None);
     }
 
@@ -1351,7 +1348,7 @@ fn emit_iterator_key_value_storage<'a, 'd>(
             let name = local_id::get_name(id);
             if name == special_idents::THIS {
                 return Err(Error::fatal_parse(pos, "Cannot re-assign $this"));
-            } else if !(superglobals::is_superglobal(name)) {
+            } else {
                 return Ok(Some(name));
             }
         };

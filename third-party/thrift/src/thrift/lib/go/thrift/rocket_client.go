@@ -145,11 +145,7 @@ func (p *rocketClient) Flush() (err error) {
 	ctx := p.ctx
 	go func() {
 		val, err := mono.Block(ctx)
-		if val != nil {
-			metadata, _ := val.Metadata()
-			data := val.Data()
-			val = payload.New(data, metadata)
-		}
+		val = payload.Clone(val)
 		p.resultChan <- rsocketResult{val: val, err: err}
 	}()
 	return nil
@@ -182,6 +178,7 @@ func (p *rocketClient) open() error {
 		Acceptor(func(ctx context.Context, socket rsocket.RSocket) rsocket.RSocket {
 			return rsocket.NewAbstractSocket(
 				rsocket.MetadataPush(func(pay payload.Payload) {
+					pay = payload.Clone(pay)
 					// For documentation/reference see the CPP implementation
 					// https://www.internalfb.com/code/fbsource/[ec968d3ea0ab]/fbcode/thrift/lib/cpp2/transport/rocket/client/RocketClient.cpp?lines=181
 					metadataBytes, ok := pay.Metadata()

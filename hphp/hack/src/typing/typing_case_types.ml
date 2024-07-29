@@ -173,7 +173,7 @@ module DataTypeReason = struct
       | Requirement name ->
         Type_expansions.add_and_check_cycles
           trail.expansions
-          (Reason.to_pos reason, name)
+          (Reason.to_pos reason, Type_expansions.Expansion.Type_alias name)
       | ExpansionOfTypeConstant _ -> (trail.expansions, None)
     in
     match cycle with
@@ -345,7 +345,10 @@ module DataType = struct
   let label_to_datatypes ~trail : _ t =
     Set.singleton ~reason:DataTypeReason.(make NoSubreason trail) Tag.LabelData
 
-  module Class = struct
+  module Class : sig
+    val to_datatypes :
+      trail:'phase DataTypeReason.trail -> env -> string -> env * 'phase t
+  end = struct
     (* Set of interfaces that contain non-object members *)
     let special_interfaces =
       SSet.of_list
@@ -776,21 +779,20 @@ let check_overlapping env ~pos ~name data_type1 data_type2 =
     in
     Some err
 
-(**
- * Given the variants of a case type (encoded as a locl_ty) and another locl_ty [intersecting_ty]
- * produce a new locl_ty containing only the types in the variant that map to an intersecting
- * data type. For example:
- *  Given
- *   [variants] = int | vec<int> | Vector<int>
- *   [intersecting_ty] = Container<string>
- *
- *  This function will return the type `vec<int> | Vector<int>` because both `vec<int>` and
- * `Vector<int>` overlap with the tag associated with `Container<string>`.
- *
- * Note that this function only considers the data type associated to each type and not
- * the type itself. So even though `vec<int>` and `Container<string>` do not intersect at
- * the type level, they do intersect when considering only the runtime data types.
- *)
+(** Given the variants of a case type (encoded as a locl_ty) and another locl_ty [intersecting_ty]
+  produce a new locl_ty containing only the types in the variant that map to an intersecting
+  data type. For example:
+   Given
+
+    [variants] = int | vec<int> | Vector<int>
+    [intersecting_ty] = Container<string>
+
+   This function will return the type `vec<int> | Vector<int>` because both `vec<int>` and
+  `Vector<int>` overlap with the tag associated with `Container<string>`.
+
+  Note that this function only considers the data type associated to each type and not
+  the type itself. So even though `vec<int>` and `Container<string>` do not intersect at
+  the type level, they do intersect when considering only the runtime data types. *)
 let filter_variants_using_datatype env reason variants intersecting_ty =
   let (env, tags) = DataType.fromTy env intersecting_ty in
   let (env, vtags) = List.fold_map variants ~init:env ~f:DataType.fromTy in
@@ -805,10 +807,8 @@ let filter_variants_using_datatype env reason variants intersecting_ty =
   in
   Typing_utils.union_list env reason tyl
 
-(**
- * Look up case type via [name]. If the case type exist returns the list of
- * variant types. If the case type doesn't exist, returns [None].
- *)
+(** Look up case type via [name]. If the case type exist returns the list of
+  variant types. If the case type doesn't exist, returns [None]. *)
 let get_variant_tys env name ty_args :
     Typing_env_types.env * locl_ty list option =
   match Env.get_typedef env name with

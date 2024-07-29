@@ -4631,7 +4631,11 @@ end = struct
                          don't report an error, since that will be done
                          during well-formedness checks on type defs *)
                       Type_expansions.empty_w_cycle_report
-                        ~report_cycle:(Some (Pos.none, name_super));
+                        ~report_cycle:
+                          (Some
+                             ( Pos.none,
+                               Type_expansions.Expansion.Type_alias name_super
+                             ));
                     substs =
                       (if List.is_empty lty_supers then
                         SMap.empty

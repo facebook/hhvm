@@ -250,81 +250,6 @@ type deserialization_error =
       (** The input JSON was invalid for some reason. *)
 [@@deriving show]
 
-module Type_expansions : sig
-  (** A list of the type defs and type access we have expanded thus far. Used
-      to prevent entering into a cycle when expanding these types. *)
-  type t
-
-  val empty : t
-
-  (** If we are expanding the RHS of a type definition, [report_cycle] contains
-      the position and id of the LHS. This way, if the RHS expands at some point
-      to the LHS id, we are able to report a cycle. *)
-  val empty_w_cycle_report : report_cycle:(Pos.t * string) option -> t
-
-  (** Returns:
-    - [None] if there was no cycle
-    - [Some None] if there was a cycle which did not involve the first
-      type expansion, i.e. error reporting should be done elsewhere
-    - [Some (Some pos)] if there was a cycle involving the first type
-      expansion in which case an error should be reported at [pos]. *)
-  val add_and_check_cycles :
-    t -> Pos_or_decl.t * string -> t * Pos.t option option
-
-  val ids : t -> string list
-
-  val positions : t -> Pos_or_decl.t list
-
-  (** Returns true if there was an attempt to add a cycle to the expansion list. *)
-  val cyclic_expansion : t -> bool
-end = struct
-  type t = {
-    report_cycle: (Pos.t * string) option;
-        (** If we are expanding the RHS of a type definition, [report_cycle] contains
-            the position and id of the LHS. This way, if the RHS expands at some point
-            to the LHS id, we are able to report a cycle. *)
-    expansions: (Pos_or_decl.t * string) list;
-        (** A list of the type defs and type access we have expanded thus far. Used
-            to prevent entering into a cycle when expanding these types. *)
-    cyclic_expansion: bool ref;
-  }
-
-  let empty_w_cycle_report ~report_cycle =
-    { report_cycle; expansions = []; cyclic_expansion = ref false }
-
-  let empty = empty_w_cycle_report ~report_cycle:None
-
-  let add ({ expansions; _ } as exps) exp =
-    { exps with expansions = exp :: expansions }
-
-  let has_expanded { report_cycle; expansions; _ } x =
-    match report_cycle with
-    | Some (p, x') when String.equal x x' -> Some (Some p)
-    | Some _
-    | None ->
-      List.find_map expansions ~f:(function
-          | (_, x') when String.equal x x' -> Some None
-          | _ -> None)
-
-  let add_and_check_cycles exps (p, id) =
-    let has_cycle = has_expanded exps id in
-    if Option.is_some has_cycle then exps.cyclic_expansion := true;
-    let exps = add exps (p, id) in
-    (exps, has_cycle)
-
-  let as_list { report_cycle; expansions; _ } =
-    (report_cycle
-    |> Option.map ~f:(Tuple2.map_fst ~f:Pos_or_decl.of_raw_pos)
-    |> Option.to_list)
-    @ List.rev expansions
-
-  let ids exps = as_list exps |> List.map ~f:snd
-
-  let positions exps = as_list exps |> List.map ~f:fst
-
-  let cyclic_expansion exps = !(exps.cyclic_expansion)
-end
-
 (** How should we treat the wildcard character _ when localizing?
  *  1. Generate a fresh type variable, e.g. in type argument to constructor or function,
  *     or in a lambda parameter or return type.
@@ -382,12 +307,12 @@ let empty_expand_env =
 let empty_expand_env_with_on_error on_error =
   { empty_expand_env with on_error = Some on_error }
 
-let add_type_expansion_check_cycles env exp =
+let add_type_expansion_check_cycles ety_env exp =
   let (type_expansions, has_cycle) =
-    Type_expansions.add_and_check_cycles env.type_expansions exp
+    Type_expansions.add_and_check_cycles ety_env.type_expansions exp
   in
-  let env = { env with type_expansions } in
-  (env, has_cycle)
+  let ety_env = { ety_env with type_expansions } in
+  (ety_env, has_cycle)
 
 let cyclic_expansion env = Type_expansions.cyclic_expansion env.type_expansions
 

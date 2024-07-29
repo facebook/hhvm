@@ -124,7 +124,7 @@ let typedef_def ctx typedef =
   } =
     typedef
   in
-  let (t_pos, _) = t_name in
+  let (t_pos, t_name_) = t_name in
   let env = Env.set_current_module env t_module in
   let env = Env.set_internal env t_internal in
   let env =
@@ -149,7 +149,7 @@ let typedef_def ctx typedef =
       Phase.localize_hint_no_subst
         env
         ~ignore_errors:false
-        ~report_cycle:t_name
+        ~report_cycle:(t_pos, Type_expansions.Expansion.Type_alias t_name_)
         t_kind
     in
     let env = casetype_def env typedef in

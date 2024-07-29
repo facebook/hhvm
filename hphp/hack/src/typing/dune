@@ -86,6 +86,7 @@
  (modules
   type_visitor
   class_refinement
+  type_expansions
   typing_defs)
  (libraries
   ast

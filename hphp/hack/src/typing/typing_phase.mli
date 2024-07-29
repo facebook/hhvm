@@ -69,7 +69,7 @@ val localize_no_subst :
 val localize_hint_no_subst :
   env ->
   ignore_errors:bool ->
-  ?report_cycle:Pos.t * string ->
+  ?report_cycle:Pos.t * Type_expansions.Expansion.t ->
   Aast.hint ->
   (env * Typing_error.t option) * locl_ty
 

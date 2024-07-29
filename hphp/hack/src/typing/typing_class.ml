@@ -967,7 +967,10 @@ let typeconst_def
       Typing_error.(
         primary
         @@ Primary.Cannot_declare_constant { pos; class_pos; class_name }));
-  let name = snd cls.c_name ^ "::" ^ snd id in
+  let expansion =
+    Type_expansions.Expansion.Type_constant
+      { receiver_name = snd cls.c_name; type_const_name = snd id }
+  in
   (* Check constraints and report cycles through the definition *)
   let (env, ty_err_opt) =
     match c_tconst_kind with
@@ -979,7 +982,7 @@ let typeconst_def
           let ((env, ty_err_opt1), ty) =
             Phase.localize_hint_no_subst
               ~ignore_errors:false
-              ~report_cycle:(pos, name)
+              ~report_cycle:(pos, expansion)
               env
               ty
           in
@@ -1037,7 +1040,7 @@ let typeconst_def
       let ((env, ty_err_opt), _ty) =
         Phase.localize_hint_no_subst
           ~ignore_errors:false
-          ~report_cycle:(pos, name)
+          ~report_cycle:(pos, expansion)
           env
           ty
       in

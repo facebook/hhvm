@@ -752,7 +752,9 @@ and localize_class_instantiation
   | Some class_info ->
     if Option.is_some (Cls.enum_type class_info) then
       let (ety_env, has_cycle) =
-        Typing_defs.add_type_expansion_check_cycles ety_env (pos, name)
+        Typing_defs.add_type_expansion_check_cycles
+          ety_env
+          (pos, Type_expansions.Expansion.Enum name)
       in
       match has_cycle with
       | Some _ ->
@@ -1530,8 +1532,7 @@ let localize_no_subst_
   let ety_env =
     {
       empty_expand_env with
-      type_expansions =
-        Typing_defs.Type_expansions.empty_w_cycle_report ~report_cycle;
+      type_expansions = Type_expansions.empty_w_cycle_report ~report_cycle;
       on_error;
       wildcard_action;
       ish_weakening;

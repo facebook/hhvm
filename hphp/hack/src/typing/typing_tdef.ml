@@ -45,7 +45,9 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl =
     td
   in
   let (ety_env, has_cycle) =
-    Typing_defs.add_type_expansion_check_cycles ety_env (td_pos, x)
+    Typing_defs.add_type_expansion_check_cycles
+      ety_env
+      (td_pos, Type_expansions.Expansion.Type_alias x)
   in
   match has_cycle with
   | Some initial_taccess_pos_opt ->
@@ -119,9 +121,7 @@ let expand_typedef ety_env env r type_name argl =
 let force_expand_typedef ~ety_env env (t : locl_ty) =
   let rec aux e1 ety_env env t =
     let default () =
-      ( (env, e1),
-        t,
-        Typing_defs.Type_expansions.positions ety_env.type_expansions )
+      ((env, e1), t, Type_expansions.positions ety_env.type_expansions)
     in
     match deref t with
     | (_, Tnewtype (x, _, _)) when String.equal SN.Classes.cEnumClassLabel x ->

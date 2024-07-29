@@ -69,18 +69,21 @@ class virtual type_validator =
       List.fold tyl ~init:acc ~f:(fun acc ty ->
           let (env, ty) = Env.expand_type env ty in
           match get_node ty with
-          | Tclass ((_, class_name), _, _) ->
+          | Tclass ((_, receiver_name), _, _) ->
             let ( >>= ) = Option.( >>= ) in
             Option.value
               ~default:acc
-              ( Env.get_class env class_name |> Decl_entry.to_option
+              ( Env.get_class env receiver_name |> Decl_entry.to_option
               >>= fun class_ ->
-                let (id_pos, id_name) = id in
-                Folded_class.get_typeconst class_ id_name >>= fun typeconst ->
+                let (id_pos, type_const_name) = id in
+                Folded_class.get_typeconst class_ type_const_name
+                >>= fun typeconst ->
                 let (ety_env, has_cycle) =
                   Typing_defs.add_type_expansion_check_cycles
                     { acc.ety_env with this_ty = ty }
-                    (id_pos, class_name ^ "::" ^ id_name)
+                    ( id_pos,
+                      Type_expansions.Expansion.Type_constant
+                        { receiver_name; type_const_name } )
                 in
                 match has_cycle with
                 | Some _ ->

@@ -113,8 +113,8 @@ let abstract_or_exact env id ({ name; _ } as abstr) =
   or if it is an upper bound of the base (in which case [ctx.base] is `Some`). *)
 let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
     : _ * result =
-  let { id = (id_pos, id_name) as id; _ } = ctx in
-  match Env.get_typeconst env class_ id_name with
+  let { id = (id_pos, type_const_name) as id; _ } = ctx in
+  match Env.get_typeconst env class_ type_const_name with
   | None ->
     ( (env, None),
       Missing
@@ -130,13 +130,16 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
                         kind = `class_typeconst;
                         class_name;
                         class_pos = Cls.pos class_;
-                        member_name = id_name;
+                        member_name = type_const_name;
                         hint = None;
                       })) )
   | Some typeconst ->
-    let name = tp_name class_name id in
     let (ety_env, has_cycle) =
-      Typing_defs.add_type_expansion_check_cycles ctx.ety_env (id_pos, name)
+      Typing_defs.add_type_expansion_check_cycles
+        ctx.ety_env
+        ( id_pos,
+          Type_expansions.Expansion.Type_constant
+            { receiver_name = class_name; type_const_name } )
     in
     let ctx = { ctx with ety_env } in
     (match has_cycle with
@@ -144,7 +147,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
       let ty_err_opt =
         Option.map initial_taccess_pos_opt ~f:(fun initial_taccess_pos ->
             let seen =
-              Typing_defs.Type_expansions.ids ctx.ety_env.type_expansions
+              Type_expansions.to_string_list ctx.ety_env.type_expansions
             in
             Typing_error.(
               primary
@@ -181,7 +184,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
                          {
                            pos = id_pos;
                            decl_pos = fst typeconst.ttc_name;
-                           tconst_name = id_name;
+                           tconst_name = type_const_name;
                          })
           else
             None

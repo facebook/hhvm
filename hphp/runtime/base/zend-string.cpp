@@ -2426,7 +2426,7 @@ string_convert_hebrew_string(const String& inStr, int /*max_chars_per_line*/,
   const char *tmp;
   char *heb_str, *broken_str;
   char *target;
-  int block_start, block_end, block_type, block_length, i;
+  int block_start, block_end, block_type, i;
   long max_chars=0;
   int begin, end, char_count, orig_begin;
 
@@ -2438,8 +2438,6 @@ string_convert_hebrew_string(const String& inStr, int /*max_chars_per_line*/,
   target = heb_str+str_len;
   *target = 0;
   target--;
-
-  block_length=0;
 
   if (isheb(*tmp)) {
     block_type = HEB_BLOCK_TYPE_HEB;
@@ -2455,7 +2453,6 @@ string_convert_hebrew_string(const String& inStr, int /*max_chars_per_line*/,
               (int)*(tmp+1)=='\n' ) && block_end<str_len-1) {
         tmp++;
         block_end++;
-        block_length++;
       }
       for (i = block_start; i<= block_end; i++) {
         *target = str[i];
@@ -2481,7 +2478,6 @@ string_convert_hebrew_string(const String& inStr, int /*max_chars_per_line*/,
              (int)*(tmp+1)!='\n' && block_end < str_len-1) {
         tmp++;
         block_end++;
-        block_length++;
       }
       while ((_isblank((int)*tmp) ||
               ispunct((int)*tmp)) && *tmp!='/' &&

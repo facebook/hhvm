@@ -1587,13 +1587,9 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
         /* copy the part of the string before the match */
         result.append(piece, match-piece);
 
-        /* copy replacement and backrefs */
-        int result_len = result.size();
-
         if (callable) {
           /* Copy result from custom function to buffer and clean up. */
           result.append(callable_result.data(), callable_result.size());
-          result_len += callable_result.size();
         } else { /* do regular backreference copying */
           walk = replace;
           walk_last = 0;

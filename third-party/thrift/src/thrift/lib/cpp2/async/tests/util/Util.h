@@ -47,9 +47,7 @@ class AsyncTestSetup : public TestSetup {
     setIdleTimeout(std::chrono::milliseconds(0));
     setTaskExpireTime(std::chrono::milliseconds(0));
     setStreamExpireTime(std::chrono::milliseconds(0));
-    server_ = createServer(
-        std::make_shared<ThriftServerAsyncProcessorFactory<Handler>>(handler_),
-        serverPort_);
+    server_ = createServer(handler_, serverPort_);
   }
 
   void TearDown() override {

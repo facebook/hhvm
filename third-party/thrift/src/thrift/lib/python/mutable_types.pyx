@@ -726,32 +726,36 @@ def _gen_mutable_union_field_enum_members(field_infos):
         yield (f.py_name, f.id)
 
 
-cdef _make_fget_union(field_id, adapter_info):
-    """
-    Returns a function that takes a `Union` instance and returns the value of the field
-    with the given `field_id`.
+# DO_BEFORE(aristidis,20240808): Support writing to union fields.
+class _MutableUnionFieldDescriptor:
+    """Descriptor for a field of a (mutable) Thrift Union. """
+    __slots__ = ('_field_info',)
 
-    If `adapter_info` is not None, the corresponding adapter will be called with the
-    field value prior to returning.
+    def __init__(self, field_info):
+        """
+        Args:
+            field_info (FieldInfo): of the target field in the Thrift union that will be
+                exposed by this descriptor.
+        """
+        self._field_info = field_info
 
-    Args:
-        field_id (int)
-        adapter_info (typing.Optional[object])
-    """
-    if adapter_info:
-        adapter_class, transitive_annotation = adapter_info
-        return property(
-            lambda self: adapter_class.from_thrift_field(
-                (<MutableUnion>self)._fbthrift_get_field_value(field_id),
+    def __get__(self, union_instance, union_class):
+        field_info = self._field_info
+        cdef int field_id = self._field_info.id
+
+        adapter_info = field_info.adapter_info
+        if adapter_info:
+            adapter_class, transitive_annotation = adapter_info
+            return adapter_class.from_thrift_field(
+                (<MutableUnion>union_instance)._fbthrift_get_field_value(field_id),
                 field_id,
                 self,
                 transitive_annotation=transitive_annotation(),
-            ),
-        )
-    else:
-        return property(
-            lambda self: (<MutableUnion>self)._fbthrift_get_field_value(field_id)
-        )
+            )
+        else:
+            return (<MutableUnion>union_instance)._fbthrift_get_field_value(
+                field_id
+            )
 
 
 class MutableUnionMeta(type):
@@ -780,8 +784,8 @@ class MutableUnionMeta(type):
         )
 
         for field_info in field_infos:
-            union_class_namespace[field_info.py_name] = _make_fget_union(
-                field_info.id, field_info.adapter_info
+            union_class_namespace[field_info.py_name] = _MutableUnionFieldDescriptor(
+                field_info
             )
 
         return super().__new__(cls, union_name, (MutableUnion,), union_class_namespace)

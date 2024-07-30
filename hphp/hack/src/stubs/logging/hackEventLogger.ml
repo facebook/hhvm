@@ -87,17 +87,11 @@ let server_is_partially_ready () = ()
 
 let server_is_ready _ = ()
 
-let load_deptable_end _ = ()
-
 let saved_state_download_and_load_done
     ~load_state_approach:_ ~success:_ ~state_result:_ _ =
   ()
 
 let tried_to_be_hg_aware_with_precomputed_saved_state_warning _ = ()
-
-let tried_to_load_non_existant_compressed_dep_graph _ = ()
-
-let call_hh_fanout _ = ()
 
 let init_start ~experiments_config_meta:_ _ = ()
 
@@ -109,15 +103,11 @@ let vcs_changed_files_end _ _ = ()
 
 let type_check_dirty ~start_t:_ ~dirty_count:_ ~recheck_count:_ = ()
 
-let out_of_date _ = ()
-
 let lock_stolen _ = ()
 
 let client_init ~init_id:_ ~from:_ ~custom_columns:_ _ = ()
 
 let serverless_ide_init ~init_id:_ = ()
-
-let fanout_init ~init_id:_ = ()
 
 let serverless_ide_done _ = ()
 
@@ -240,10 +230,6 @@ let calling_ocaml_naming_table () = ()
 
 let using_sort_text_for_autocomplete () = ()
 
-let ranked_autocomplete_duration ~start_time:_ = ()
-
-let ranked_autocomplete_request_duration ~start_time:_ = ()
-
 let monitor_dead_but_typechecker_alive () = ()
 
 let spinner_heartbeat _ ~spinner:_ = ()
@@ -266,19 +252,11 @@ let got_client_channels _ = ()
 
 let get_client_channels_exception _ = ()
 
-let got_persistent_client_channels _ = ()
-
 let get_persistent_client_channels_exception _ = ()
 
 let handled_connection _ = ()
 
 let handle_connection_exception _ _ = ()
-
-let handled_persistent_connection _ = ()
-
-let handle_persistent_connection_exception _ _ ~is_fatal:_ = ()
-
-let server_file_edited_error ~reason:_ _ = ()
 
 let handled_command
     _ ~start_t:_ ~major_gc_time:_ ~minor_gc_time:_ ~parsed_files:_ =
@@ -322,8 +300,6 @@ let global_naming_end ~count:_ ~desc:_ ~heap_size:_ ~start_t:_ = ()
 
 let run_search_end _ = ()
 
-let update_search_end _ _ = ()
-
 let naming_from_saved_state_end _ = ()
 
 let naming_sqlite_local_changes_nonempty _ = ()
@@ -336,8 +312,6 @@ let remote_old_decl_end _ _ = ()
 
 let first_redecl_end _ _ = ()
 
-let second_redecl_end _ _ = ()
-
 let type_check_primary_position_bug ~current_file:_ ~message:_ ~stack:_ = ()
 
 let type_check_exn_bug ~path:_ ~pos:_ ~e:_ = ()
@@ -346,8 +320,6 @@ let invariant_violation_bug ?path:_ ?pos:_ ?data:_ ?data_int:_ ?telemetry:_ _ =
   ()
 
 let decl_consistency_bug ?path:_ ?pos:_ ?data:_ _ = ()
-
-let live_squiggle_diff ~uri:_ ~reason:_ ~expected_error_count:_ _ = ()
 
 let type_check_end
     _
@@ -428,8 +400,6 @@ let informant_watcher_starting_server_from_settling _ = ()
 (** Server Monitor events *)
 let accepting_on_socket_exception _ = ()
 
-let malformed_build_id _ = ()
-
 let send_fd_failure _ = ()
 
 let typechecker_already_running _ = ()
@@ -447,8 +417,6 @@ let monitor_giving_up_exception _ = ()
 
 let processed_clients _ = ()
 
-let invalid_mercurial_state_transition ~state:_ = ()
-
 let server_revision_tracker_forced_reset ~telemetry:_ = ()
 
 let search_symbol_index
@@ -460,8 +428,6 @@ let search_symbol_index
     ~caller:_
     ~search_provider:_ =
   ()
-
-let shallow_decl_errors_emitted _ = ()
 
 let server_progress_write_exn ~server_progress_file:_ _ = ()
 

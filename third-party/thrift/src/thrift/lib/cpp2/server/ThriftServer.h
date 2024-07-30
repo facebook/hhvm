@@ -540,9 +540,33 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   std::string getLoadInfo(int64_t load) const;
 
+  /**
+  -----------------------------------------------------------------
+  |                      RESOURCE POOLS BEGIN                     |
+  -----------------------------------------------------------------
+   */
+ public:
+  /**
+   * Apply various runtime checks to determine whether we can use resource pools
+   * in this service. Returns true if resource pools is permitted by runtime
+   * checks.
+   */
+  bool runtimeResourcePoolsChecks();
+  /**
+   * Ensure that this Thrift Server has ResourcePools set up. If there is
+   * already a non-empty ResourcePoolSet, nothing will be done. Otherwise, the
+   * default setup of ResourcePools will be created.
+   */
+  void ensureResourcePools();
+
   bool resourcePoolEnabled() const override {
     return getRuntimeServerActions().resourcePoolEnabled;
   }
+
+  /**
+   * Returns debug information regarding ResourcePool setup on this server.
+   **/
+  serverdbginfo::ResourcePoolsDbgInfo getResourcePoolsDbgInfo() const;
 
   /**
    * Get the ResourcePoolSet used by this ThriftServer. There is always one, but
@@ -619,6 +643,23 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     return runtimeServerActions_.resourcePoolEnabled;
   }
 
+ private:
+  /**
+   * Ensures no further changes can be made to the ResourcePoolSet.
+   */
+  void lockResourcePoolSet();
+
+  //! The ResourcePoolsSet used by this ThriftServer (if in ResourcePools
+  //! are enabled).
+  ResourcePoolSet resourcePoolSet_;
+  std::optional<std::string> resourcePoolsOptOutExplanation_;
+  /**
+  -----------------------------------------------------------------
+  |                      RESOURCE POOLS END                       |
+  -----------------------------------------------------------------
+   */
+
+ public:
   /**
    * Set Thread Manager (for queuing mode).
    * If not set, defaults to the number of worker threads.
@@ -975,10 +1016,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   // PRIORITY_QUEUE ThreadManagerType and if no threadFactory supplied)
   std::optional<concurrency::PosixThreadFactory::THREAD_PRIORITY>
       threadPriority_;
-
-  //! The ResourcePoolsSet used by this ThriftServer (if in ResourcePools
-  //! are enabled).
-  ResourcePoolSet resourcePoolSet_;
 
   AdaptiveConcurrencyController adaptiveConcurrencyController_;
 
@@ -2612,37 +2649,11 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   void setupThreadManager();
 
   /**
-   * Apply various runtime checks to determine whether we can use resource pools
-   * in this service. Returns true if resource pools is permitted by runtime
-   * checks.
-   */
-  bool runtimeResourcePoolsChecks();
-
-  /**
    * Adds resource pools for any priorities not specified in allocated to this
    * server.
    */
   void ensureResourcePoolsDefaultPrioritySetup(
       std::vector<concurrency::PRIORITY> allocated = {concurrency::NORMAL});
-
-  /**
-   * Ensure that this Thrift Server has ResourcePools set up. If there is
-   * already a non-empty ResourcePoolSet, nothing will be done. Otherwise, the
-   * default setup of ResourcePools will be created.
-   */
-  void ensureResourcePools();
-
- private:
-  /**
-   * Ensures no further changes can be made to the ResourcePoolSet.
-   */
-  void lockResourcePoolSet();
-
- public:
-  /**
-   * Returns debug information regarding ResourcePool setup on this server.
-   **/
-  serverdbginfo::ResourcePoolsDbgInfo getResourcePoolsDbgInfo() const;
 
   /**
    * Kill the workers and wait for listeners to quit
@@ -2775,7 +2786,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    * Logically, this is an apache::thrift::MultiplexAsyncProcessorFactory with
    * the following composition:
    *
-   *    ┌────────────────────���───┐
+   *    ┌────────────────────────┐
    *    │      User Service      │
    *    │ (setProcessorFactory)  │  │
    *    └────────────────────────┘  │

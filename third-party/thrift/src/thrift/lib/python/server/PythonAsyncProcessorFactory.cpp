@@ -15,8 +15,8 @@
  */
 
 #include <memory>
+#include <thrift/lib/python/server/PythonAsyncProcessor.h>
 #include <thrift/lib/python/server/PythonAsyncProcessorFactory.h>
-#include <thrift/lib/python/server/server.h>
 #include <thrift/lib/python/server/server_api.h> // @manual
 
 namespace thrift {
@@ -31,64 +31,6 @@ void do_import() {
 }
 
 } // namespace
-
-std::unique_ptr<folly::IOBuf> PythonAsyncProcessor::getPythonMetadata() {
-  [[maybe_unused]] static bool done = (do_import(), false);
-  return getSerializedPythonMetadata(python_server_);
-}
-
-void PythonAsyncProcessor::handlePythonServerCallback(
-    apache::thrift::ProtocolType protocol,
-    apache::thrift::Cpp2RequestContext* context,
-    folly::Promise<std::unique_ptr<folly::IOBuf>> promise,
-    apache::thrift::SerializedRequest serializedRequest,
-    apache::thrift::RpcKind kind) {
-  [[maybe_unused]] static bool done = (do_import(), false);
-  handleServerCallback(
-      functions_.at(context->getMethodName()).second,
-      serviceName_ + "." + context->getMethodName(),
-      context,
-      std::move(promise),
-      std::move(serializedRequest),
-      protocol,
-      kind);
-}
-
-void PythonAsyncProcessor::handlePythonServerCallbackStreaming(
-    apache::thrift::ProtocolType protocol,
-    apache::thrift::Cpp2RequestContext* context,
-    folly::Promise<::apache::thrift::ResponseAndServerStream<
-        std::unique_ptr<::folly::IOBuf>,
-        std::unique_ptr<::folly::IOBuf>>> promise,
-    apache::thrift::SerializedRequest serializedRequest,
-    apache::thrift::RpcKind kind) {
-  [[maybe_unused]] static bool done = (do_import(), false);
-  handleServerStreamCallback(
-      functions_.at(context->getMethodName()).second,
-      serviceName_ + "." + context->getMethodName(),
-      context,
-      std::move(promise),
-      std::move(serializedRequest),
-      protocol,
-      kind);
-}
-
-void PythonAsyncProcessor::handlePythonServerCallbackOneway(
-    apache::thrift::ProtocolType protocol,
-    apache::thrift::Cpp2RequestContext* context,
-    folly::Promise<folly::Unit> promise,
-    apache::thrift::SerializedRequest serializedRequest,
-    apache::thrift::RpcKind kind) {
-  [[maybe_unused]] static bool done = (do_import(), false);
-  handleServerCallbackOneway(
-      functions_.at(context->getMethodName()).second,
-      serviceName_ + "." + context->getMethodName(),
-      context,
-      std::move(promise),
-      std::move(serializedRequest),
-      protocol,
-      kind);
-}
 
 enum class LifecycleFunc {
   ON_START_SERVING = 0,

@@ -1840,6 +1840,10 @@ class HQSession
                                 uint32_t /*errorCode*/) override;
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode>
+    setWebTransportStreamPriority(HTTPCodec::StreamID /*id*/,
+                                  HTTPPriority pri) override;
+
+    folly::Expected<folly::Unit, WebTransport::ErrorCode>
         pauseWebTransportIngress(HTTPCodec::StreamID /*id*/) override;
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode>

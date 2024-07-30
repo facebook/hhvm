@@ -3877,6 +3877,18 @@ HQSession::HQStreamTransport::resetWebTransportEgress(HTTPCodec::StreamID id,
 }
 
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
+HQSession::HQStreamTransport::setWebTransportStreamPriority(
+    HTTPCodec::StreamID id, HTTPPriority pri) {
+  if (session_.sock_) {
+    auto res = session_.sock_->setStreamPriority(id, toQuicPriority(pri));
+    if (res.hasError()) {
+      return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+    }
+  }
+  return folly::unit;
+}
+
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
 HQSession::HQStreamTransport::pauseWebTransportIngress(HTTPCodec::StreamID id) {
   auto res = session_.sock_->pauseRead(id);
   if (res.hasError()) {

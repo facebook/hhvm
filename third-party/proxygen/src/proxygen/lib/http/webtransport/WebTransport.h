@@ -175,6 +175,9 @@ class WebTransport {
       return stopSendingErrorCode_;
     }
 
+    virtual folly::Expected<folly::Unit, ErrorCode> setPriority(
+        uint8_t level, uint64_t order, bool incremental) = 0;
+
    protected:
     folly::Optional<uint32_t> stopSendingErrorCode_;
   };
@@ -215,6 +218,9 @@ class WebTransport {
                   bool fin) = 0;
   virtual folly::Expected<folly::Unit, ErrorCode> resetStream(
       uint64_t streamId, uint32_t error) = 0;
+  virtual folly::Expected<folly::Unit, ErrorCode> setPriority(
+      uint64_t streamId, uint8_t level, uint64_t order, bool incremental) = 0;
+
   virtual folly::Expected<folly::Unit, ErrorCode> stopSending(
       uint64_t streamId, uint32_t error) = 0;
 

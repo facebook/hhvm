@@ -682,6 +682,13 @@ class HTTPTransaction
     }
 
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
+    setWebTransportStreamPriority(HTTPCodec::StreamID /*id*/,
+                                  HTTPPriority /*pri*/) {
+      LOG(FATAL) << __func__ << " not supported";
+      folly::assume_unreachable();
+    }
+
+    virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
     pauseWebTransportIngress(HTTPCodec::StreamID /*id*/) {
       LOG(FATAL) << __func__ << " not supported";
       folly::assume_unreachable();
@@ -2128,6 +2135,15 @@ class HTTPTransaction
       }
       return it->second.resetStream(error);
     }
+    folly::Expected<folly::Unit, WebTransport::ErrorCode> setPriority(
+        uint64_t id, uint8_t level, uint64_t order, bool incremental) override {
+      auto it = txn_.wtEgressStreams_.find(id);
+      if (it == txn_.wtEgressStreams_.end()) {
+        return folly::makeUnexpected(
+            WebTransport::ErrorCode::INVALID_STREAM_ID);
+      }
+      return it->second.setPriority(level, order, incremental);
+    }
     folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
         std::unique_ptr<folly::IOBuf> datagram) override {
       if (!txn_.sendDatagram(std::move(datagram))) {
@@ -2173,6 +2189,12 @@ class HTTPTransaction
     folly::Expected<folly::Unit, WebTransport::ErrorCode> resetStream(
         uint32_t errorCode) override {
       return txn_.resetWebTransportEgress(id_, errorCode);
+    }
+
+    folly::Expected<folly::Unit, WebTransport::ErrorCode> setPriority(
+        uint8_t level, uint64_t order, bool incremental) override {
+      return txn_.transport_.setWebTransportStreamPriority(
+          getID(), {level, incremental, order});
     }
 
     void onStopSending(uint32_t errorCode);

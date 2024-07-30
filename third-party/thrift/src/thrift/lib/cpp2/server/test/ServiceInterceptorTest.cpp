@@ -249,6 +249,30 @@ struct ServiceInterceptorThrowOnResponse
   int onResponseCount = 0;
 };
 
+struct ServiceInterceptorRethrowActiveExceptionOnResponse
+    : public NamedServiceInterceptor<folly::Unit> {
+ public:
+  using NamedServiceInterceptor::NamedServiceInterceptor;
+
+  folly::coro::Task<std::optional<folly::Unit>> onRequest(
+      folly::Unit*, RequestInfo) override {
+    onRequestCount++;
+    co_return std::nullopt;
+  }
+
+  folly::coro::Task<void> onResponse(
+      folly::Unit*, folly::Unit*, ResponseInfo responseInfo) override {
+    onResponseCount++;
+    if (responseInfo.activeException) {
+      responseInfo.activeException->throw_exception();
+    }
+    co_return;
+  }
+
+  int onRequestCount = 0;
+  int onResponseCount = 0;
+};
+
 } // namespace
 
 CO_TEST_P(ServiceInterceptorTestP, BasicTM) {
@@ -710,9 +734,10 @@ CO_TEST_P(
 }
 
 CO_TEST_P(
-    ServiceInterceptorTestP, OnResponseExceptionPreservesApplicationException) {
+    ServiceInterceptorTestP, OnResponseExceptionSwallowsApplicationException) {
   auto interceptor =
-      std::make_shared<ServiceInterceptorThrowOnResponse>("Interceptor1");
+      std::make_shared<ServiceInterceptorRethrowActiveExceptionOnResponse>(
+          "Interceptor1");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(interceptor));
@@ -725,6 +750,11 @@ CO_TEST_P(
         try {
           co_await client->co_echo("throw");
         } catch (const apache::thrift::TApplicationException& ex) {
+          EXPECT_THAT(
+              std::string(ex.what()),
+              HasSubstr("ServiceInterceptor::onResponse threw exceptions"));
+          EXPECT_THAT(
+              std::string(ex.what()), HasSubstr("[TestModule.Interceptor1]"));
           EXPECT_THAT(std::string(ex.what()), HasSubstr("You asked for it!"));
           throw;
         }
@@ -732,6 +762,46 @@ CO_TEST_P(
       apache::thrift::TApplicationException);
   EXPECT_EQ(interceptor->onRequestCount, 1);
   EXPECT_EQ(interceptor->onResponseCount, 1);
+}
+
+CO_TEST_P(
+    ServiceInterceptorTestP, OnResponseExceptionSwallowsOnRequestException) {
+  auto interceptor1 =
+      std::make_shared<ServiceInterceptorThrowOnRequest>("Interceptor1");
+  auto interceptor2 =
+      std::make_shared<ServiceInterceptorRethrowActiveExceptionOnResponse>(
+          "Interceptor2");
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(
+            InterceptorList{interceptor1, interceptor2}));
+      });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  EXPECT_THROW(
+      {
+        try {
+          co_await client->co_noop();
+        } catch (const apache::thrift::TApplicationException& ex) {
+          EXPECT_THAT(
+              std::string(ex.what()),
+              HasSubstr("ServiceInterceptor::onRequest threw exceptions"));
+          EXPECT_THAT(
+              std::string(ex.what()), HasSubstr("[TestModule.Interceptor1]"));
+          EXPECT_THAT(
+              std::string(ex.what()),
+              HasSubstr("ServiceInterceptor::onResponse threw exceptions"));
+          EXPECT_THAT(
+              std::string(ex.what()), HasSubstr("[TestModule.Interceptor2]"));
+          throw;
+        }
+      },
+      apache::thrift::TApplicationException);
+  EXPECT_EQ(interceptor1->onRequestCount, 1);
+  EXPECT_EQ(interceptor1->onResponseCount, 1);
+  EXPECT_EQ(interceptor2->onRequestCount, 1);
+  EXPECT_EQ(interceptor2->onResponseCount, 1);
 }
 
 CO_TEST_P(ServiceInterceptorTestP, BasicInteraction) {

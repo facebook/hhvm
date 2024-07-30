@@ -1148,7 +1148,8 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
 }
 
 folly::coro::Task<void>
-HandlerCallbackBase::processServiceInterceptorsOnResponse() {
+HandlerCallbackBase::processServiceInterceptorsOnResponse(
+    std::optional<folly::exception_wrapper> activeException) {
   DCHECK(shouldProcessServiceInterceptorsOnResponse());
   const apache::thrift::server::ServerConfigs* server =
       reqCtx_->getConnectionContext()->getWorkerContext()->getServerContext();
@@ -1164,7 +1165,9 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse() {
         connectionCtx,
         connectionCtx->getStorageForServiceInterceptorOnConnectionByIndex(i)};
     auto responseInfo = ServiceInterceptorBase::ResponseInfo{
-        reqCtx_, reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i)};
+        reqCtx_,
+        reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i),
+        activeException};
     try {
       co_await serviceInterceptorsInfo[i].interceptor->internal_onResponse(
           std::move(connectionInfo), std::move(responseInfo));

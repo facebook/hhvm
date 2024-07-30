@@ -67,6 +67,7 @@ class ServiceInterceptorBase {
   struct ResponseInfo {
     const Cpp2RequestContext* context = nullptr;
     detail::ServiceInterceptorOnRequestStorage* storage = nullptr;
+    std::optional<folly::exception_wrapper> activeException;
   };
   virtual folly::coro::Task<void> internal_onResponse(
       ConnectionInfo, ResponseInfo) = 0;

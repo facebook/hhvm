@@ -64,10 +64,7 @@ fn merge_simple_jumps(func: &mut Func) {
                     if has_compatible_tcid && (predecessors[&target_bid].len() == 1) {
                         trace!(
                             "Merge blocks: {}[{:?}] <- {}[{:?}]",
-                            bid,
-                            tcid,
-                            target_bid,
-                            target_tcid
+                            bid, tcid, target_bid, target_tcid
                         );
 
                         // Steal the target's iids.  If the target is later then

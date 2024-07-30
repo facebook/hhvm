@@ -48,7 +48,6 @@
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/files-match.h"
-#include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
@@ -649,8 +648,6 @@ std::map<std::string, AccessLogFileData> RuntimeOption::RPCLogs;
 
 std::vector<std::shared_ptr<VirtualHost>> RuntimeOption::VirtualHosts;
 std::shared_ptr<IpBlockMap> RuntimeOption::IpBlocks;
-std::vector<std::shared_ptr<SatelliteServerInfo>>
-  RuntimeOption::SatelliteServerInfos;
 
 std::map<std::string, std::string> RuntimeOption::IncludeRoots;
 
@@ -1230,19 +1227,6 @@ void logTierOverwriteInputs() {
 }
 
 InitFiniNode s_logTierOverwrites(logTierOverwriteInputs, InitFiniNode::When::ServerInit);
-
-void RuntimeOption::ReadSatelliteInfo(
-    const IniSettingMap& ini,
-    const Hdf& hdf,
-    std::vector<std::shared_ptr<SatelliteServerInfo>>& infos) {
-  auto ss_callback = [&] (const IniSettingMap &ini_ss, const Hdf &hdf_ss,
-                         const std::string &ini_ss_key) {
-    auto satellite = std::make_shared<SatelliteServerInfo>(ini_ss, hdf_ss,
-                                                           ini_ss_key);
-    infos.push_back(satellite);
-  };
-  Config::Iterate(ss_callback, ini, hdf, "Satellites");
-}
 
 extern void initialize_apc();
 void RuntimeOption::Load(
@@ -1824,9 +1808,7 @@ void RuntimeOption::Load(
     // IpBlocks
     IpBlocks = std::make_shared<IpBlockMap>(ini, config);
   }
-  {
-    ReadSatelliteInfo(ini, config, SatelliteServerInfos);
-  }
+
   {
     // Static File
 

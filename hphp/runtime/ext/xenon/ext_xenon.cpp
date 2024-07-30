@@ -274,14 +274,14 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
     s_stack, bt,
     s_sourceType, show(sourceType),
     s_isWait, !Xenon::isCPUTime(t),
-    s_pagelets_workers, 
+    s_pagelets_workers,
     RuntimeOption::XenonTrackActiveWorkers ? PageletServer::GetActiveWorker() : -1,
-    s_xbox_workers, 
+    s_xbox_workers,
     RuntimeOption::XenonTrackActiveWorkers ? XboxServer::GetActiveWorkers() : -1,
-    s_http_workers, 
-    RuntimeOption::XenonTrackActiveWorkers ? 
-      (HttpServer::Server ? HttpServer::Server->getSatelliteRequestCount().first : 0) : -1,
-    s_cli_workers, 
+    s_http_workers,
+    RuntimeOption::XenonTrackActiveWorkers ?
+    (HttpServer::Server ? HttpServer::Server->getPageServer()->getActiveWorker() : 0) : -1,
+    s_cli_workers,
     RuntimeOption::XenonTrackActiveWorkers ? cli_server_active_workers() : -1
   ));
 }

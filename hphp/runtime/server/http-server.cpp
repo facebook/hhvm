@@ -207,19 +207,9 @@ HttpServer::HttpServer() {
     m_adminServer->enableSSLWithPlainText();
   }
 
-  for (auto const& info : RuntimeOption::SatelliteServerInfos) {
-    auto satellite(SatelliteServer::Create(info));
-    if (satellite) {
-      m_satellites.push_back(std::move(satellite));
-    }
-  }
-
   m_counterCallback.init(
     [this](std::map<std::string, int64_t>& counters) {
       counters["ev_connections"] = m_pageServer->getLibEventConnectionCount();
-      auto const sat_requests = getSatelliteRequestCount();
-      counters["satellite_inflight_requests"] = sat_requests.first;
-      counters["satellite_queued_requests"] = sat_requests.second;
       auto const uptime = HHVM_FN(server_uptime)();
       counters["uptime"] = uptime;
       counters["stopping_soon"] = HHVM_FN(server_is_prepared_to_stop)();
@@ -258,7 +248,6 @@ HttpServer::HttpServer() {
   }
 }
 
-// Synchronously stop satellites
 void HttpServer::onServerShutdown() {
   // Avoid running this multiple times
   static std::atomic_flag flag = ATOMIC_FLAG_INIT;
@@ -286,18 +275,10 @@ void HttpServer::onServerShutdown() {
     Logger::Info("debugger server stopped");
   }
 
-  // When a new instance of HPHP has taken over our page server socket,
-  // stop our admin server and satellites so it can acquire those
-  // ports.
+  // When a new instance of HPHP has taken over our page server socket, stop our
+  // admin server so it can acquire those ports.
   if (RuntimeOption::AdminServerPort) {
     m_adminServer->stop();
-  }
-  for (unsigned int i = 0; i < m_satellites.size(); i++) {
-    std::string name = m_satellites[i]->getName();
-    m_satellites[i]->stop();
-    Logger::Info("satellite server %s stopped", name.c_str());
-  }
-  if (RuntimeOption::AdminServerPort) {
     m_adminServer->waitForEnd();
     Logger::Info("admin server stopped");
   }
@@ -390,20 +371,6 @@ void HttpServer::runOrExitProcess() {
   // it might result in killing ourself instead of the old server.
   if (Cfg::Server::StopOld) {
     runAdminServerOrExitProcess();
-  }
-
-  for (unsigned int i = 0; i < m_satellites.size(); i++) {
-    std::string name = m_satellites[i]->getName();
-    try {
-      m_satellites[i]->start();
-      Logger::Info("satellite server %s started", name.c_str());
-    } catch (Exception& e) {
-      startupFailure(
-        folly::format("Unable to start satellite server {}: {}",
-                      name, e.getMessage()).str()
-      );
-      not_reached();
-    }
   }
 
   if (!Eval::Debugger::StartServer()) {
@@ -820,28 +787,6 @@ void HttpServer::LogShutdownStats() {
   }
   StructuredLog::log("webserver_shutdown_timing", entry);
   ShutdownStats.clear();
-}
-
-void HttpServer::getSatelliteStats(
-    std::vector<std::pair<std::string, int>> *stats) {
-  for (const auto& i : m_satellites) {
-    std::pair<std::string, int> active("satellite." + i->getName() + ".load",
-                                       i->getActiveWorker());
-    std::pair<std::string, int> queued("satellite." + i->getName() + ".queued",
-                                       i->getQueuedJobs());
-    stats->push_back(active);
-    stats->push_back(queued);
-  }
-}
-
-std::pair<int, int> HttpServer::getSatelliteRequestCount() const {
-  int inflight = 0;
-  int queued = 0;
-  for (const auto& i : m_satellites) {
-    inflight += i->getActiveWorker();
-    queued += i->getQueuedJobs();
-  }
-  return std::make_pair(inflight, queued);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

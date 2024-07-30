@@ -18,7 +18,6 @@ package thrift
 
 import (
 	"fmt"
-	"strings"
 	"time"
 )
 
@@ -79,14 +78,6 @@ func (p *httpProtocol) GetResponseHeaders() map[string]string {
 
 func (p *httpProtocol) SetRequestHeader(key, value string) {
 	p.transport.SetHeader(key, value)
-}
-
-func (p *httpProtocol) GetRequestHeaders() map[string]string {
-	headers := make(map[string]string)
-	for k, v := range p.transport.header {
-		headers[k] = strings.Join(v, ",")
-	}
-	return headers
 }
 
 func (p *httpProtocol) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {

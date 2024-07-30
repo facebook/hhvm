@@ -154,7 +154,3 @@ func (b *bufProtocol) GetResponseHeaders() map[string]string {
 func (b *bufProtocol) SetRequestHeader(key, value string) {
 	b.reqHeaders[key] = value
 }
-
-func (b *bufProtocol) GetRequestHeaders() map[string]string {
-	return b.reqHeaders
-}

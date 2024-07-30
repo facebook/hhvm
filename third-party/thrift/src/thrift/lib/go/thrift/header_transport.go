@@ -103,14 +103,6 @@ func (t *headerTransport) Header(key string) (string, bool) {
 	return v, ok
 }
 
-func (t *headerTransport) getRequestHeaders() map[string]string {
-	res := map[string]string{}
-	for k, v := range t.writeInfoHeaders {
-		res[k] = v
-	}
-	return res
-}
-
 func (t *headerTransport) clearRequestHeaders() {
 	if len(t.writeInfoHeaders) != 0 {
 		t.writeInfoHeaders = map[string]string{}

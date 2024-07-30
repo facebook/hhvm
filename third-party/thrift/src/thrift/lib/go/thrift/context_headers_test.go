@@ -40,7 +40,7 @@ func TestHeaderProtocolSomeHeaders(t *testing.T) {
 	if err := setRequestHeaders(ctx, protocol); err != nil {
 		t.Fatal(err)
 	}
-	got := protocol.(RequestHeaders).GetRequestHeaders()
+	got := protocol.(*headerProtocol).trans.writeInfoHeaders
 	assert.Equal(t, want, got)
 }
 
@@ -72,7 +72,7 @@ func TestRocketProtocolSomeHeaders(t *testing.T) {
 	if err := setRequestHeaders(ctx, protocol); err != nil {
 		t.Fatal(err)
 	}
-	got := protocol.(RequestHeaders).GetRequestHeaders()
+	got := protocol.(*rocketClient).reqMetadata.Other
 	assert.Equal(t, want, got)
 }
 
@@ -85,27 +85,6 @@ func TestRocketProtocolSetNilHeaders(t *testing.T) {
 	if err := setRequestHeaders(nil, protocol); err != nil {
 		t.Fatal(err)
 	}
-}
-
-func TestUpgradeToRocketProtocolSomeHeaders(t *testing.T) {
-	ctx := context.Background()
-	want := map[string]string{"key1": "value1", "key2": "value2"}
-	var err error
-	for key, value := range want {
-		ctx, err = AddHeader(ctx, key, value)
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
-	protocol, err := newUpgradeToRocketClient(newMockSocket(), ProtocolIDCompact, 0, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := setRequestHeaders(ctx, protocol); err != nil {
-		t.Fatal(err)
-	}
-	got := protocol.(RequestHeaders).GetRequestHeaders()
-	assert.Equal(t, want, got)
 }
 
 // somewhere we are still passing context as nil, so we need to support this for now

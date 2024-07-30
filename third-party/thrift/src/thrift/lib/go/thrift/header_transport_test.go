@@ -140,11 +140,11 @@ func TestHeaderHeaders(t *testing.T) {
 	trans1.SetRequestHeader("thrift_transport", "header")
 	trans1.SetRequestHeader("preferred_cheese", "cheddar")
 
-	assertEq(t, 3, len(trans1.getRequestHeaders()))
+	assertEq(t, 3, len(trans1.writeInfoHeaders))
 	// 1 for persistent header and 2 more for identity headers
 	assertEq(t, 3, len(trans1.persistentWriteInfoHeaders))
 
-	headerval, _ := trans1.getRequestHeaders()["preferred_cheese"]
+	headerval, _ := trans1.writeInfoHeaders["preferred_cheese"]
 	assertEq(t, "cheddar", headerval)
 
 	_, err := trans1.Write([]byte("ASDF"))
@@ -157,7 +157,7 @@ func TestHeaderHeaders(t *testing.T) {
 	}
 
 	// Make sure we zero the headers
-	assertEq(t, 0, len(trans1.getRequestHeaders()))
+	assertEq(t, 0, len(trans1.writeInfoHeaders))
 	// But not the persistent ones
 	assertEq(t, 3, len(trans1.persistentWriteInfoHeaders))
 

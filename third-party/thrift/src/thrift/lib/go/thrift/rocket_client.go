@@ -352,10 +352,6 @@ func (p *rocketClient) SetRequestHeader(key, value string) {
 	p.reqMetadata.Other[key] = value
 }
 
-func (p *rocketClient) GetRequestHeaders() map[string]string {
-	return p.reqMetadata.Other
-}
-
 func (p *rocketClient) GetResponseHeaders() map[string]string {
 	return p.respHeaders
 }

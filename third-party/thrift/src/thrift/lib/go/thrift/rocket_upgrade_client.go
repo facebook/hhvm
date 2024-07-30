@@ -71,18 +71,6 @@ func (p *upgradeToRocketClient) SetRequestHeader(key, value string) {
 	p.Protocol.(RequestHeaders).SetRequestHeader(key, value)
 }
 
-func (p *upgradeToRocketClient) GetRequestHeaders() map[string]string {
-	if p.Protocol == nil {
-		headers := p.headerProtocol.(RequestHeaders).GetRequestHeaders()
-		rocketHeaders := p.rocketProtocol.(RequestHeaders).GetRequestHeaders()
-		for k, v := range rocketHeaders {
-			headers[k] = v
-		}
-		return headers
-	}
-	return p.Protocol.(RequestHeaders).GetRequestHeaders()
-}
-
 func (p *upgradeToRocketClient) GetResponseHeaders() map[string]string {
 	if p.Protocol == nil {
 		headers := p.headerProtocol.GetResponseHeaders()

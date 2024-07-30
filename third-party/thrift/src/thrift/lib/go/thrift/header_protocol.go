@@ -132,10 +132,6 @@ func (p *headerProtocol) SetRequestHeader(key, value string) {
 	p.trans.SetRequestHeader(key, value)
 }
 
-func (p *headerProtocol) GetRequestHeaders() map[string]string {
-	return p.trans.getRequestHeaders()
-}
-
 func (p *headerProtocol) GetResponseHeaders() map[string]string {
 	return p.trans.GetResponseHeaders()
 }

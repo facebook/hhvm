@@ -39,7 +39,7 @@ let should_check_ancestor_method ancestor_class ancestor_method =
       true
     | Vprivate _ -> false
 
-let check_methods ctx c cls ~static =
+let ancestors_providing_methods ctx cls =
   let ancestor_names = Cls.all_ancestor_names cls in
   let reqs = Cls.all_ancestor_req_names cls in
   (* filter out interfaces *)
@@ -53,23 +53,26 @@ let check_methods ctx c cls ~static =
         | Decl_entry.Found cls -> not (Ast_defs.is_c_interface (Cls.kind cls)))
       reqs
   in
-  let ancestor_names = ancestor_names @ reqs in
+  ancestor_names @ reqs
+
+let check_methods ctx c cls ~static =
+  let ancestor_names = ancestors_providing_methods ctx cls in
   let get_method =
     if static then
       Cls.get_smethod
     else
       Cls.get_method
   in
-  (* For each method, *)
   let (_, static_methods, c_methods) = split_methods c.c_methods in
+  (* For each method of the shallow class... *)
   (if static then
     static_methods
   else
     c_methods)
   |> Sequence.of_list
-  (* which doesn't have the override attribute, *)
+  (* ... which doesn't have the override attribute, *)
   |> Sequence.filter ~f:(fun m -> not (has_override_attribute m))
-  (* and is not the constructor, *)
+  (* ... and is not the constructor, *)
   |> Sequence.filter ~f:(fun m ->
          not (String.equal (snd m.m_name) SN.Members.__construct))
   |> Sequence.iter ~f:(fun m ->

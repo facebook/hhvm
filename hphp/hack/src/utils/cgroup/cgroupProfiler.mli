@@ -20,11 +20,12 @@ will span all the steps created within callback. If [log] is true
 then each step will be logged to Hh_logger and HackEventLogger. *)
 val step_group : string -> log:bool -> (step_group -> 'a) -> 'a
 
-(** This records cgroup stats at a point in time *)
+(** Record cgroup stats at a point in time. Write to logs and to telemetry. *)
 val step : step_group -> ?telemetry_ref:Telemetry.t option ref -> string -> unit
 
 (** `step_start_end phase "bar" callback` records cgroup stats
-immediately, then executes the callback, then records cgroup a second time. *)
+immediately, then executes the callback, then records cgroup a second time.
+Write to logs and telemetry. *)
 val step_start_end :
   step_group ->
   ?telemetry_ref:Telemetry.t option ref ->

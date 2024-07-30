@@ -58,42 +58,50 @@ func (s *rocketServer) ServeContext(ctx context.Context) error {
 }
 
 func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {
+	conn := &rocketServerSocket{ctx: ctx, proc: s.proc}
 	return rsocket.NewAbstractSocket(
-		rsocket.RequestResponse(func(msg payload.Payload) mono.Mono {
-			reqMetadataBytes, ok := msg.Metadata()
-			if !ok {
-				return mono.Error(fmt.Errorf("expected metadata"))
-			}
-			reqMetadata := &RequestRpcMetadata{}
-			if err := deserializeCompact(reqMetadataBytes, reqMetadata); err != nil {
-				return mono.Error(err)
-			}
-			if reqMetadata.GetProtocol() != ProtocolId_COMPACT {
-				return mono.Error(fmt.Errorf("currently only supporting COMPACT protocol and not %v", reqMetadata.GetProtocol()))
-			}
-			compressed := reqMetadata.Compression != nil && *reqMetadata.Compression == CompressionAlgorithm_ZSTD
-			if compressed {
-				return mono.Error(fmt.Errorf("currently only supporting uncompressed COMPACT protocol"))
-			}
-			typeID, err := rpcKindToMessageType(reqMetadata.GetKind())
-			if err != nil {
-				return mono.Error(err)
-			}
-			protocol := newBufProtocol(msg.Data(), reqMetadata.GetName(), typeID, reqMetadata.GetOtherMetadata())
-			if err := processContext(ctx, s.proc, protocol); err != nil {
-				return mono.Error(err)
-			}
-			respMetadata := NewResponseRpcMetadata()
-			respMetadata.OtherMetadata = protocol.reqHeaders
-			respMetadataBytes, err := serializeCompact(respMetadata)
-			if err != nil {
-				return mono.Error(err)
-			}
-			respDataBytes := protocol.wbuf.Buffer.Bytes()
-			response := payload.New(respDataBytes, respMetadataBytes)
-			return mono.Just(response)
-		}),
+		rsocket.RequestResponse(conn.requestResonse),
 	), nil
+}
+
+type rocketServerSocket struct {
+	ctx  context.Context
+	proc ProcessorContext
+}
+
+func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
+	reqMetadataBytes, ok := msg.Metadata()
+	if !ok {
+		return mono.Error(fmt.Errorf("expected metadata"))
+	}
+	reqMetadata := &RequestRpcMetadata{}
+	if err := deserializeCompact(reqMetadataBytes, reqMetadata); err != nil {
+		return mono.Error(err)
+	}
+	if reqMetadata.GetProtocol() != ProtocolId_COMPACT {
+		return mono.Error(fmt.Errorf("currently only supporting COMPACT protocol and not %v", reqMetadata.GetProtocol()))
+	}
+	compressed := reqMetadata.Compression != nil && *reqMetadata.Compression == CompressionAlgorithm_ZSTD
+	if compressed {
+		return mono.Error(fmt.Errorf("currently only supporting uncompressed COMPACT protocol"))
+	}
+	typeID, err := rpcKindToMessageType(reqMetadata.GetKind())
+	if err != nil {
+		return mono.Error(err)
+	}
+	protocol := newBufProtocol(msg.Data(), reqMetadata.GetName(), typeID, reqMetadata.GetOtherMetadata())
+	if err := processContext(r.ctx, r.proc, protocol); err != nil {
+		return mono.Error(err)
+	}
+	respMetadata := NewResponseRpcMetadata()
+	respMetadata.OtherMetadata = protocol.reqHeaders
+	respMetadataBytes, err := serializeCompact(respMetadata)
+	if err != nil {
+		return mono.Error(err)
+	}
+	respDataBytes := protocol.wbuf.Buffer.Bytes()
+	response := payload.New(respDataBytes, respMetadataBytes)
+	return mono.Just(response)
 }
 
 type bufProtocol struct {

@@ -18,6 +18,7 @@ from datetime import datetime
 
 from thrift.test.thrift_python.union_test.thrift_mutable_types import (  # @manual=//thrift/test/thrift-python:union_test_thrift-python-types
     TestUnion as TestUnionMutable,
+    TestUnionAdaptedTypes as TestUnionAdaptedTypesMutable,
 )
 
 from thrift.test.thrift_python.union_test.thrift_types import (
@@ -501,3 +502,43 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
                 "struct_field": 3,
             },
         )
+
+    def test_adapted_types(self) -> None:
+        u1 = TestUnionAdaptedTypesMutable()
+        self.assertIs(
+            u1.fbthrift_current_field,
+            TestUnionAdaptedTypesMutable.FbThriftUnionFieldEnum.FBTHRIFT_UNION_EMPTY,
+        )
+        self.assertIsNone(u1.fbthrift_current_value)
+
+        with self.assertRaisesRegex(
+            AttributeError, "'int' object has no attribute 'timestamp'"
+        ):
+            TestUnionAdaptedTypesMutable(adapted_i32_to_datetime=123)
+
+        u2 = TestUnionAdaptedTypesMutable(
+            adapted_i32_to_datetime=datetime.fromtimestamp(1718728839)
+        )
+        self.assertIs(
+            u2.fbthrift_current_field,
+            TestUnionAdaptedTypesMutable.FbThriftUnionFieldEnum.adapted_i32_to_datetime,
+        )
+
+        # BAD: The following assertions demonstrate the fact that (immutable) Thrift
+        # unions do not properly convert adapted fields on access. Indeed, u2.fbthrift_current_value
+        # should be a datetime instance, but instead is the underlying (int) value.
+        self.assertNotIsInstance(u2.fbthrift_current_value, datetime)
+        self.assertNotEqual(
+            u2.fbthrift_current_value, datetime.fromtimestamp(1718728839)
+        )
+        self.assertIsInstance(u2.fbthrift_current_value, int)
+        self.assertEqual(u2.fbthrift_current_value, 1718728839)
+        self.assertIsNot(u2.fbthrift_current_value, u2.adapted_i32_to_datetime)
+
+        # Note that the behavior above differs when the field is accessed directly
+        # (instead of the auto-provided "value" attribute): the field value is then
+        # adapted (i.e., datetime instead of the underlying int value).
+        self.assertIsInstance(u2.adapted_i32_to_datetime, datetime)
+        self.assertEqual(u2.adapted_i32_to_datetime, datetime.fromtimestamp(1718728839))
+        self.assertNotIsInstance(u2.adapted_i32_to_datetime, int)
+        self.assertNotEqual(u2.adapted_i32_to_datetime, 1718728839)

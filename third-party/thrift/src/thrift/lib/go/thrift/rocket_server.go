@@ -70,26 +70,22 @@ type rocketServerSocket struct {
 }
 
 func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
+	msg = payload.Clone(msg)
 	reqMetadataBytes, ok := msg.Metadata()
 	if !ok {
 		return mono.Error(fmt.Errorf("expected metadata"))
 	}
-	reqMetadata := &RequestRpcMetadata{}
-	if err := deserializeCompact(reqMetadataBytes, reqMetadata); err != nil {
-		return mono.Error(err)
-	}
-	if reqMetadata.GetProtocol() != ProtocolId_COMPACT {
-		return mono.Error(fmt.Errorf("currently only supporting COMPACT protocol and not %v", reqMetadata.GetProtocol()))
-	}
-	compressed := reqMetadata.Compression != nil && *reqMetadata.Compression == CompressionAlgorithm_ZSTD
-	if compressed {
-		return mono.Error(fmt.Errorf("currently only supporting uncompressed COMPACT protocol"))
-	}
-	typeID, err := rpcKindToMessageType(reqMetadata.GetKind())
+	reqMetadata, err := deserializeRequestRPCMetadata(reqMetadataBytes)
 	if err != nil {
 		return mono.Error(err)
 	}
-	protocol := newBufProtocol(msg.Data(), reqMetadata.GetName(), typeID, reqMetadata.GetOtherMetadata())
+	if reqMetadata.Zstd {
+		return mono.Error(fmt.Errorf("currently only supporting uncompressed COMPACT protocol"))
+	}
+	protocol, err := newBufProtocol(reqMetadata.Name, reqMetadata.TypeID, reqMetadata.Other, reqMetadata.ProtoID, msg.Data())
+	if err != nil {
+		return mono.Error(err)
+	}
 	if err := processContext(r.ctx, r.proc, protocol); err != nil {
 		return mono.Error(err)
 	}
@@ -114,9 +110,9 @@ type bufProtocol struct {
 	respHeaders map[string]string
 }
 
-func newBufProtocol(data []byte, name string, typeID MessageType, respHeaders map[string]string) *bufProtocol {
+func newBufProtocol(name string, typeID MessageType, respHeaders map[string]string, protoID ProtocolID, data []byte) (*bufProtocol, error) {
 	wbuf := NewMemoryBuffer()
-	return &bufProtocol{
+	p := &bufProtocol{
 		Decoder:     newCompactDecoder(NewMemoryBufferWithData(data)),
 		Encoder:     newCompactEncoder(wbuf),
 		wbuf:        wbuf,
@@ -125,6 +121,18 @@ func newBufProtocol(data []byte, name string, typeID MessageType, respHeaders ma
 		respHeaders: respHeaders,
 		reqHeaders:  map[string]string{},
 	}
+	rbuf := NewMemoryBufferWithData(data)
+	switch protoID {
+	case ProtocolIDBinary:
+		p.Decoder = newBinaryDecoder(rbuf)
+		p.Encoder = newBinaryEncoder(wbuf)
+	case ProtocolIDCompact:
+		p.Decoder = newCompactDecoder(rbuf)
+		p.Encoder = newCompactEncoder(wbuf)
+	default:
+		return nil, NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", protoID))
+	}
+	return p, nil
 }
 
 func (b *bufProtocol) ReadMessageBegin() (string, MessageType, int32, error) {

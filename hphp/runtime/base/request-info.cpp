@@ -321,9 +321,8 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
       auto const currUsage = tl_heap->currentUsage();
       // Once a request has the OOM abort flag set, it is never unset through
       // the lifetime of the request.
-      // TODO(#T25950158): add flags to indicate whether a request is safe to
-      // retry, etc. to help the OOM killer to make better decisions.
-      if (currUsage > RequestInfo::OOMKillThreshold() && !p.shouldOOMAbort() &&
+      if (currUsage > (RequestInfo::OOMKillThreshold() * info.m_OOMMultiplier) &&
+          !p.shouldOOMAbort() &&
           s_pendingOOMs.fetch_sub(1, std::memory_order_acq_rel) > 0) {
         p.setRequestOOMAbort();
       }

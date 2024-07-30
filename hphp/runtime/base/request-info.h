@@ -136,6 +136,9 @@ struct RequestInfo {
 
   Executing m_executing{Idling};
 
+  /* Higher numbers would reduce the chance of getting OOM killed. */
+  uint32_t m_OOMMultiplier{1};
+
 private:
   std::atomic<GlobalGCStatus> m_globalGCStatus{Idle};
   static std::atomic_size_t s_OOMKillThreshold;

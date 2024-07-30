@@ -38,14 +38,15 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-array-like.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/extension-registry.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
@@ -759,6 +760,16 @@ static bool HHVM_FUNCTION(hphp_memory_stop_interval) {
   return tl_heap->stopStatsInterval();
 }
 
+static bool HHVM_FUNCTION(set_oom_multiplier, int64_t m) {
+  if (m <= 1) return false;
+  auto& info = RI();
+  if (info.m_OOMMultiplier >= m) return false;
+  // TODO(T25950158): understand what is a reasonable threshold.
+  if (m > 100) m = 100;
+  info.m_OOMMultiplier = m;
+  return true;
+}
+
 const StaticString s_srv("srv"), s_cli("cli");
 
 String HHVM_FUNCTION(php_sapi_name) {
@@ -1097,6 +1108,7 @@ void StandardExtension::registerNativeOptions() {
   HHVM_FE(hphp_memory_get_interval_peak_usage);
   HHVM_FE(hphp_memory_start_interval);
   HHVM_FE(hphp_memory_stop_interval);
+  HHVM_FE(set_oom_multiplier);
   HHVM_FE(php_sapi_name);
   HHVM_FE(php_uname);
   HHVM_FE(phpversion);

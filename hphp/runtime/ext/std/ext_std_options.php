@@ -284,6 +284,22 @@ function hphp_memory_start_interval(): bool;
 <<__Native>>
 function hphp_memory_stop_interval(): bool;
 
+/* Set the OOM multiplier for the current request. A multiplier larger than 1
+ * can increase the chance of survival (without any guarantee) when the host
+ * runs out of memory, but doing so can make other requests suffer. Thus,
+ * discipline is required to manipulate this value. And HHVM could decide to
+ * reject values that are deemed unreasonable.
+ *
+ * Right now, this function is experimental. So you should refrain from using it
+ * without checking with the HHVM team first. The multiplier will also be
+ * applied to cost attribution, i.e., larger multiplier means you pay more for
+ * the execution of the request.
+ *
+ * Returns whether the multiplier was successfuly changed.
+ */
+<<__Native>>
+function set_oom_multiplier(int $m): bool;
+
 /* Retrieve a path to the loaded php.ini file.
  */
 function php_ini_loaded_file(): mixed {

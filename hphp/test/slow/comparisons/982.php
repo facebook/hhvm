@@ -5,7 +5,7 @@
 <<__EntryPoint>>
 function main_982() :mixed{
 $i = 0;
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(true>true); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -20,7 +20,7 @@ $i = 0;
  print "\t";
  print "true > true	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(true>false); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -35,7 +35,7 @@ $i = 0;
  print "\t";
  print "true > false	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(HH\Lib\Legacy_FIXME\gt(true, 1)); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -50,7 +50,7 @@ $i = 0;
  print "\t";
  print "true > 1	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(HH\Lib\Legacy_FIXME\gt(true, 0)); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -65,7 +65,7 @@ $i = 0;
  print "\t";
  print "true > 0	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(HH\Lib\Legacy_FIXME\gt(true, -1)); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -80,7 +80,7 @@ $i = 0;
  print "\t";
  print "true > -1	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(HH\Lib\Legacy_FIXME\gt(true, '1')); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -95,7 +95,7 @@ $i = 0;
  print "\t";
  print "true > '1'	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(HH\Lib\Legacy_FIXME\gt(true, '0')); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -110,7 +110,7 @@ $i = 0;
  print "\t";
  print "true > '0'	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(HH\Lib\Legacy_FIXME\gt(true, '-1')); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -125,7 +125,7 @@ $i = 0;
  print "\t";
  print "true > '-1'	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(HH\Lib\Legacy_FIXME\gt(true, null)); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -140,7 +140,7 @@ $i = 0;
  print "\t";
  print "true > null	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(true>dict[]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -155,7 +155,7 @@ $i = 0;
  print "\t";
  print "true > array()	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(true>vec[1]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -170,7 +170,7 @@ $i = 0;
  print "\t";
  print "true > array(1)	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(true>vec[2]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -185,7 +185,7 @@ $i = 0;
  print "\t";
  print "true > array(2)	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(true>vec['1']); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -200,7 +200,7 @@ $i = 0;
  print "\t";
  print "true > array('1')	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(true>dict['0' => '1']); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -215,7 +215,7 @@ $i = 0;
  print "\t";
  print "true > array('0' => '1')	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(true>vec['a']); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -230,7 +230,7 @@ $i = 0;
  print "\t";
  print "true > array('a')	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(true>dict['a' => 1]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -245,7 +245,7 @@ $i = 0;
  print "\t";
  print "true > array('a' => 1)	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(true>dict['b' => 1]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -260,7 +260,7 @@ $i = 0;
  print "\t";
  print "true > array('b' => 1)	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(true>dict['a' => 1, 'b' => 2]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -275,7 +275,7 @@ $i = 0;
  print "\t";
  print "true > array('a' => 1, 'b' => 2)	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(true>vec[dict['a' => 1]]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -290,7 +290,7 @@ $i = 0;
  print "\t";
  print "true > array(array('a' => 1))	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(true>vec[dict['b' => 1]]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -305,7 +305,7 @@ $i = 0;
  print "\t";
  print "true > array(array('b' => 1))	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(HH\Lib\Legacy_FIXME\gt(true, 'php')); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -320,7 +320,7 @@ $i = 0;
  print "\t";
  print "true > 'php'	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(HH\Lib\Legacy_FIXME\gt(true, '')); } catch (Throwable $_) { print 'E'; }
  $a = 1;

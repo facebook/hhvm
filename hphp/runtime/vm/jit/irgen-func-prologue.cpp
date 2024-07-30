@@ -627,7 +627,7 @@ void emitInitClosureLocals(IRGS& env, const Func* callee) {
   ifThenElse(
     env,
     [&](Block* taken){
-      gen(env, DecReleaseCheck, taken, closure);
+      gen(env, DecReleaseCheck, DecRefData(), taken, closure);
     },
     [&] { // Next: closure RC goes to 0
       for (auto i = 0; i < numUses; ++i) {

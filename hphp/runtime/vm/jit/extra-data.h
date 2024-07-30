@@ -3151,6 +3151,7 @@ X(LdContResumeAddr,             IsAsyncData);
 X(LdContActRec,                 IsAsyncData);
 X(DecRef,                       DecRefData);
 X(DecRefNZ,                     DecRefData);
+X(DecReleaseCheck,              DecRefData);
 X(ProfileDecRef,                DecRefData);
 X(LdTVAux,                      LdTVAuxData);
 X(DbgAssertRefCount,            AssertReason);

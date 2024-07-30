@@ -2695,7 +2695,7 @@ void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
     PreAdder preAdder{&adder};
     for (auto iter = blk->begin(); iter != blk->end(); ++iter) {
       auto& inst = *iter;
-      if (inst.is(DecRef)) {
+      if (inst.is(DecRef) || inst.is(DecReleaseCheck)) {
         auto const id = penv.env.asetMap[inst.src(0)];
         if (id < 0) {
           assertx(inst.src(0)->type() <= TUncounted);
@@ -2714,6 +2714,10 @@ void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
           }
           if (lb >= 2) {
             FTRACE(2, "    ** decnz:  {}\n", inst);
+            if (inst.is(DecReleaseCheck)) {
+              Block* inst_block = inst.block();
+              inst_block->push_back(penv.env.unit.gen(Jmp, inst.bcctx(), inst.taken()));
+            }
             inst.setOpcode(DecRefNZ);
           }
         }
@@ -3441,6 +3445,12 @@ void optimizeRefcounts(IRUnit& unit) {
     // We sunk IncRefs past CheckTypes, which could allow us to
     // specialize them.
     insertNegativeAssertTypes(unit, env.rpoBlocks);
+
+    // Remove unreachable blocks before refineTmps
+    // asserts certain variants related to block reachability
+    bool needsReflow = removeUnreachable(unit);
+    if (needsReflow) reflowTypes(unit);
+
     refineTmps(unit);
   }
 }
@@ -3456,13 +3466,14 @@ bool shouldReleaseShallow(const DecRefProfile& data, SSATmp* tmp) {
 
 IRInstruction* makeReleaseShallow(
     IRUnit& unit, Block* remainder, IRInstruction* inst, SSATmp* tmp) {
+  assertx(inst->is(DecRef));
   auto const block = inst->block();
   auto const bcctx = inst->bcctx();
   auto const next = unit.defBlock(block->profCount());
   next->push_back(unit.gen(ReleaseShallow, bcctx, tmp));
   next->push_back(unit.gen(Jmp, bcctx, remainder));
 
-  auto const decReleaseCheck = unit.gen(DecReleaseCheck, bcctx, remainder, tmp);
+  auto const decReleaseCheck = unit.gen(DecReleaseCheck, bcctx, *(inst->extra<DecRefData>()), remainder, tmp);
   decReleaseCheck->setNext(next);
   return decReleaseCheck;
 }

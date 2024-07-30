@@ -218,33 +218,33 @@ void ensure_fields(MaskRef ref, T& t) {
 }
 
 // Clears the masked fields in the given thrift struct.
-template <typename Struct>
-void clear_fields(MaskRef ref, Struct& t) {
-  if (!validate_mask<Struct>(ref)) {
+template <typename T>
+void clear_fields(MaskRef ref, T& t) {
+  if (!validate_mask<T>(ref)) {
     folly::throw_exception<std::runtime_error>(
         "The mask and struct are incompatible.");
   }
-  if constexpr (!std::is_const_v<std::remove_reference_t<Struct>>) {
-    op::for_each_ordinal<Struct>([&](auto ord) {
+  if constexpr (!std::is_const_v<std::remove_reference_t<T>>) {
+    op::for_each_ordinal<T>([&](auto ord) {
       using Ord = decltype(ord);
-      MaskRef next = ref.get(op::get_field_id<Struct, Ord>());
+      MaskRef next = ref.get(op::get_field_id<T, Ord>());
       if (next.isNoneMask()) {
         return;
       }
-      using FieldTag = op::get_field_tag<Struct, Ord>;
+      using FieldTag = op::get_field_tag<T, Ord>;
       auto&& field_ref = op::get<Ord>(t);
       if (next.isAllMask()) {
         op::clear_field<FieldTag>(field_ref, t);
         return;
       }
-      using FieldType = op::get_native_type<Struct, Ord>;
+      using FieldType = op::get_native_type<T, Ord>;
       auto* field_value = op::getValueOrNull(field_ref);
       if (!field_value) {
-        errorIfNotCompatible<op::get_type_tag<Struct, Ord>>(next.mask);
+        errorIfNotCompatible<op::get_type_tag<T, Ord>>(next.mask);
         return;
       }
-      // Need to clear the struct object.
-      if constexpr (is_thrift_struct_v<FieldType>) {
+      // Need to clear the struct/union object.
+      if constexpr (is_thrift_class_v<FieldType>) {
         clear_fields(next, *field_value);
         return;
       }

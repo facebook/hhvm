@@ -79,9 +79,11 @@ void ensure(const Mask& mask, T& t) {
 // Clears masked fields in the thrift struct.
 // If the field doesn't have value, does nothing.
 // Throws a runtime exception if the mask and struct are incompatible.
-template <typename Struct>
-void clear(const Mask& mask, Struct& t) {
-  static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
+template <typename T>
+void clear(const Mask& mask, T& t) {
+  static_assert(
+      is_thrift_struct_v<T> || is_thrift_union_v<T>,
+      "not a thrift struct or union");
   detail::throwIfContainsMapMask(mask);
   return detail::clear_fields(MaskRef{mask, false}, t);
 }

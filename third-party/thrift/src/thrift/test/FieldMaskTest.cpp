@@ -1671,6 +1671,40 @@ TEST(FieldMaskTest, SchemafulClearException) {
   EXPECT_THROW(protocol::clear(m2, bar), std::runtime_error);
 }
 
+TEST(FieldMaskTest, ClearUnion) {
+  {
+    RecursiveUnion u;
+    protocol::clear(noneMask(), u);
+    EXPECT_EQ(u.getType(), RecursiveUnion::Type::__EMPTY__);
+    protocol::clear(allMask(), u);
+    EXPECT_EQ(u.getType(), RecursiveUnion::Type::__EMPTY__);
+  }
+  {
+    // Clear union arm
+    RecursiveUnion u;
+    u.foo_ref().emplace();
+    Mask m;
+    m.includes_ref().emplace()[2] = allMask();
+    protocol::clear(m, u);
+    EXPECT_TRUE(u.foo_ref().has_value());
+    (*m.includes_ref())[1] = allMask();
+    protocol::clear(m, u);
+    EXPECT_EQ(u.getType(), RecursiveUnion::Type::__EMPTY__);
+  }
+  {
+    // Clear nested field in arm
+    RecursiveUnion u;
+    u.foo_ref().emplace().field1() = 1;
+    Mask m;
+    // {includes: {1: includes: {1: allMask()}}}
+    m.includes_ref().emplace()[1].includes_ref().emplace()[1] = allMask();
+    protocol::clear(m, u);
+    // Make sure union is still set but nested field is cleared
+    EXPECT_TRUE(u.foo_ref().has_value());
+    EXPECT_EQ(u.foo_ref()->field1(), 0);
+  }
+}
+
 void testLogicalOperations(Mask A, Mask B) {
   Mask maskUnion = A | B;
   Mask maskIntersect = A & B;

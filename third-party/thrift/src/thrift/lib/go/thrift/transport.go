@@ -37,6 +37,20 @@ const (
 	TransportIDUpgradeToRocket TransportID = 3
 )
 
+func (t TransportID) String() string {
+	switch t {
+	case TransportIDUnknown:
+		return "TransportIDUnknown"
+	case TransportIDHeader:
+		return "TransportIDHeader"
+	case TransportIDRocket:
+		return "TransportIDRocket"
+	case TransportIDUpgradeToRocket:
+		return "TransportIDUpgradeToRocket"
+	}
+	panic("unreachable")
+}
+
 // Flusher is the interface that wraps the basic Flush method
 type Flusher interface {
 	Flush() (err error)

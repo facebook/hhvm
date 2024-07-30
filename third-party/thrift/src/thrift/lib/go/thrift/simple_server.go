@@ -30,7 +30,9 @@ func NewSimpleServer(processor ProcessorContext, listener net.Listener, transpor
 		return newHeaderServer(processor, listener)
 	case TransportIDRocket:
 		return newRocketServer(processor, listener)
+	case TransportIDUpgradeToRocket:
+		return newUpgradeToRocketServer(processor, listener)
 	default:
-		panic(fmt.Sprintf("SimpleServer only supports Header Transport and not %d", transportType))
+		panic(fmt.Sprintf("SimpleServer does not support: %v", transportType))
 	}
 }

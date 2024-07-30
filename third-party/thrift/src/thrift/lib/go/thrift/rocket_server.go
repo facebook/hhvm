@@ -28,20 +28,30 @@ import (
 )
 
 type rocketServer struct {
-	proc     ProcessorContext
-	listener net.Listener
+	proc        ProcessorContext
+	listener    net.Listener
+	transportID TransportID
 }
 
 func newRocketServer(proc ProcessorContext, listener net.Listener) Server {
 	return &rocketServer{
-		proc:     proc,
-		listener: listener,
+		proc:        proc,
+		listener:    listener,
+		transportID: TransportIDRocket,
+	}
+}
+
+func newUpgradeToRocketServer(proc ProcessorContext, listener net.Listener) Server {
+	return &rocketServer{
+		proc:        proc,
+		listener:    listener,
+		transportID: TransportIDUpgradeToRocket,
 	}
 }
 
 func (s *rocketServer) ServeContext(ctx context.Context) error {
 	transporter := func(context.Context) (transport.ServerTransport, error) {
-		return newRocketServerTransport(s.listener), nil
+		return newRocketServerTransport(s.listener, s.proc, s.transportID), nil
 	}
 	r := rsocket.Receive().Acceptor(s.acceptor).Transport(transporter)
 	return r.Serve(ctx)

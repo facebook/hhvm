@@ -21,19 +21,28 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net"
+	"os"
+	"runtime/debug"
 
 	"github.com/rsocket/rsocket-go/core/transport"
 )
 
 type rocketServerTransport struct {
-	listener net.Listener
-	acceptor transport.ServerTransportAcceptor
+	listener    net.Listener
+	processor   ProcessorContext
+	acceptor    transport.ServerTransportAcceptor
+	transportID TransportID
+	log         *log.Logger
 }
 
-func newRocketServerTransport(listener net.Listener) transport.ServerTransport {
+func newRocketServerTransport(listener net.Listener, processor ProcessorContext, transportID TransportID) transport.ServerTransport {
 	return &rocketServerTransport{
-		listener: listener,
+		listener:    listener,
+		processor:   processor,
+		log:         log.New(os.Stderr, "", log.LstdFlags),
+		transportID: transportID,
 	}
 }
 
@@ -75,13 +84,80 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 		if conn == nil {
 			continue
 		}
-		go func(ctx context.Context, conn net.Conn) {
-			ctx = WithConnInfo(ctx, conn)
-			go r.acceptor(ctx, transport.NewTransport(transport.NewTCPConn(conn)), func(tp *transport.Transport) {})
-		}(ctx, conn)
+		go r.processRequests(ctx, conn)
 	}
 }
 
 func (r *rocketServerTransport) Close() (err error) {
 	return r.listener.Close()
+}
+
+func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Conn) {
+	ctx = WithConnInfo(ctx, conn)
+	switch r.transportID {
+	case TransportIDRocket:
+		r.processRocketRequests(ctx, conn)
+	case TransportIDUpgradeToRocket:
+		processor := newRocketUpgradeProcessor(r.processor)
+		headerProtocol, err := NewHeaderProtocol(conn)
+		if err != nil {
+			r.log.Println("thrift: error constructing header protocol: ", err)
+			return
+		}
+		if err := r.processHeaderRequest(ctx, headerProtocol, processor); err != nil {
+			r.log.Println("thrift: error processing request: ", err)
+			return
+		}
+		if processor.upgraded {
+			r.processRocketRequests(ctx, conn)
+		} else {
+			if err := r.processHeaderRequests(ctx, headerProtocol, processor); err != nil {
+				r.log.Println("thrift: error processing request: ", err)
+			}
+		}
+	case TransportIDHeader:
+		headerProtocol, err := NewHeaderProtocol(conn)
+		if err != nil {
+			r.log.Println("thrift: error constructing header protocol: ", err)
+			return
+		}
+		if err := r.processHeaderRequests(ctx, headerProtocol, r.processor); err != nil {
+			r.log.Println("thrift: error processing request: ", err)
+		}
+	}
+}
+
+func (r *rocketServerTransport) processRocketRequests(ctx context.Context, conn net.Conn) {
+	r.acceptor(ctx, transport.NewTransport(transport.NewTCPConn(conn)), func(*transport.Transport) {})
+}
+
+func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protocol Protocol, processor ProcessorContext) error {
+	exc := processContext(ctx, processor, protocol)
+	if isEOF(exc) {
+		return exc
+	}
+	if exc != nil {
+		protocol.Flush()
+		return exc
+	}
+	return nil
+}
+
+func (r *rocketServerTransport) processHeaderRequests(ctx context.Context, protocol Protocol, processor ProcessorContext) error {
+	defer func() {
+		if err := recover(); err != nil {
+			r.log.Printf("panic in processor: %v: %s", err, debug.Stack())
+		}
+	}()
+	defer protocol.Close()
+	var err error
+	for err == nil {
+		err = r.processHeaderRequest(ctx, protocol, processor)
+	}
+	if isEOF(err) {
+		return nil
+	}
+	protocol.Flush()
+	// graceful exit.  client closed connection
+	return err
 }

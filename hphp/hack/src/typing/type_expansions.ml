@@ -73,7 +73,7 @@ let as_list { report_cycle; expansions; _ } =
   (report_cycle
   |> Option.map ~f:(Tuple2.map_fst ~f:Pos_or_decl.of_raw_pos)
   |> Option.to_list)
-  @ expansions
+  @ List.rev expansions
 
 let to_string_list exps =
   as_list exps |> List.map ~f:(fun x -> x |> snd |> Expansion.to_string)

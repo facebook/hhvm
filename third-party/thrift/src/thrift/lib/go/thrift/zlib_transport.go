@@ -64,10 +64,7 @@ func (z *ZlibTransport) Flush() error {
 	if err := z.writer.Flush(); err != nil {
 		return err
 	}
-	if flusher, ok := z.buffer.(Flusher); ok {
-		return flusher.Flush()
-	}
-	return nil
+	return flush(z.buffer)
 }
 
 func (z *ZlibTransport) Read(p []byte) (int, error) {

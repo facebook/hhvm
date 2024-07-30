@@ -50,11 +50,9 @@ func TransportTest(t *testing.T, writeTrans io.Writer, readTrans io.Reader) {
 	if err != nil {
 		t.Fatalf("Transport %T cannot write binary data of length %d: %s", writeTrans, len(transport_bdata), err)
 	}
-	if flusher, ok := writeTrans.(Flusher); ok {
-		err = flusher.Flush()
-		if err != nil {
-			t.Fatalf("Transport %T cannot flush write of binary data: %s", writeTrans, err)
-		}
+	err = flush(writeTrans)
+	if err != nil {
+		t.Fatalf("Transport %T cannot flush write of binary data: %s", writeTrans, err)
 	}
 
 	if headerTrans != nil {
@@ -79,11 +77,9 @@ func TransportTest(t *testing.T, writeTrans io.Writer, readTrans io.Reader) {
 	if err != nil {
 		t.Fatalf("Transport %T cannot write binary data 2 of length %d: %s", writeTrans, len(transport_bdata), err)
 	}
-	if flusher, ok := writeTrans.(Flusher); ok {
-		err = flusher.Flush()
-		if err != nil {
-			t.Fatalf("Transport %T cannot flush write binary data 2: %s", writeTrans, err)
-		}
+	err = flush(writeTrans)
+	if err != nil {
+		t.Fatalf("Transport %T cannot flush write binary data 2: %s", writeTrans, err)
 	}
 
 	if headerTrans != nil {
@@ -122,11 +118,9 @@ func transportHTTPClientTest(t *testing.T, writeTrans io.Writer, readTrans io.Re
 	if err != nil {
 		t.Fatalf("Transport %T cannot write binary data of length %d: %s", writeTrans, len(transport_bdata), err)
 	}
-	if flusher, ok := writeTrans.(Flusher); ok {
-		err = flusher.Flush()
-		if err != nil {
-			t.Fatalf("Transport %T cannot flush write of binary data: %s", writeTrans, err)
-		}
+	err = flush(writeTrans)
+	if err != nil {
+		t.Fatalf("Transport %T cannot flush write of binary data: %s", writeTrans, err)
 	}
 	// Need to assert type of Transport to HTTPClient to expose the Getter
 	httpRPostTrans := readTrans.(*httpClient)

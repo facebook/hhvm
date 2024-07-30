@@ -25,8 +25,6 @@ type MemoryBuffer struct {
 	*bytes.Buffer
 }
 
-var _ RichTransport = (*MemoryBuffer)(nil)
-
 // NewMemoryBuffer returns a new MemoryBuffer.
 func NewMemoryBuffer() *MemoryBuffer {
 	return &MemoryBuffer{Buffer: &bytes.Buffer{}}
@@ -46,11 +44,6 @@ func NewMemoryBufferLen(size int) *MemoryBuffer {
 // Init initializes the buffer with data.
 func (m *MemoryBuffer) Init(data []byte) {
 	m.Buffer = bytes.NewBuffer(data)
-}
-
-// Flush does nothing and is simply here to satisfy the RichTransport interface.
-func (m *MemoryBuffer) Flush() error {
-	return nil
 }
 
 // Close resets the buffer.

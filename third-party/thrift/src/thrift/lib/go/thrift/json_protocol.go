@@ -450,9 +450,7 @@ func (p *jsonProtocol) ReadBinary() ([]byte, error) {
 func (p *jsonProtocol) Flush() (err error) {
 	err = p.writer.Flush()
 	if err == nil {
-		if flusher, ok := p.buffer.(Flusher); ok {
-			err = flusher.Flush()
-		}
+		return flush(p.buffer)
 	}
 	return NewProtocolException(err)
 }

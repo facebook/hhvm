@@ -56,8 +56,5 @@ func (p *StreamTransport) Close() error {
 
 // Flush flushes the underlying output stream if not null.
 func (p *StreamTransport) Flush() error {
-	if f, ok := p.Writer.(Flusher); ok {
-		return NewTransportExceptionFromError(f.Flush())
-	}
-	return nil
+	return flush(p.Writer)
 }

@@ -18,7 +18,6 @@ package thrift
 
 import (
 	"errors"
-	"io"
 )
 
 var errTransportInterrupted = errors.New("Transport Interrupted")
@@ -50,34 +49,3 @@ func (t TransportID) String() string {
 	}
 	panic("unreachable")
 }
-
-// Flusher is the interface that wraps the basic Flush method
-type Flusher interface {
-	Flush() (err error)
-}
-
-// ReadSizeProvider is the interface that wraps the basic RemainingBytes method
-type ReadSizeProvider interface {
-	RemainingBytes() (numBytes uint64)
-}
-
-type stringWriter interface {
-	WriteString(s string) (n int, err error)
-}
-
-// RichTransport is an "enhanced" transport with extra capabilities.
-// You need to use one of these to construct protocol.
-// Notably, Socket does not implement this interface, and it is always a mistake to use
-// Socket directly in protocol.
-type RichTransport interface {
-	io.ReadWriteCloser
-	io.ByteReader
-	io.ByteWriter
-	stringWriter
-	Flusher
-	ReadSizeProvider
-}
-
-// UnknownRemaining is used by transports that can not return a real answer
-// for RemainingBytes()
-const UnknownRemaining = ^uint64(0)

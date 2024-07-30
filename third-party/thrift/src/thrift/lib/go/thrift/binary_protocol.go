@@ -229,11 +229,7 @@ func (p *binaryEncoder) WriteBinary(value []byte) error {
 }
 
 func (p *binaryEncoder) Flush() (err error) {
-	flusher, ok := p.writer.(Flusher)
-	if !ok {
-		return nil
-	}
-	return NewProtocolException(flusher.Flush())
+	return flush(p.writer)
 }
 
 /**

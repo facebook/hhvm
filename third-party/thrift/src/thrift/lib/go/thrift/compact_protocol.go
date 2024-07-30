@@ -74,7 +74,6 @@ func init() {
 }
 
 type compactProtocol struct {
-	trans RichTransport
 	compactEncoder
 	compactDecoder
 }
@@ -82,15 +81,10 @@ type compactProtocol struct {
 // NewCompactProtocol creates a CompactProtocol
 func NewCompactProtocol(trans io.ReadWriteCloser) Format {
 	p := &compactProtocol{}
-	if et, ok := trans.(RichTransport); ok {
-		p.trans = et
-	} else {
-		p.trans = newRichTransport(trans)
-	}
 	p.compactDecoder.version = COMPACT_VERSION_BE
-	p.compactDecoder.reader = p.trans
+	p.compactDecoder.reader = trans
 	p.compactEncoder.version = COMPACT_VERSION_BE
-	p.compactEncoder.writer = p.trans
+	p.compactEncoder.writer = trans
 	return p
 }
 
@@ -657,11 +651,7 @@ func (p *compactDecoder) ReadBinary() (value []byte, err error) {
 }
 
 func (p *compactEncoder) Flush() (err error) {
-	flusher, ok := p.writer.(Flusher)
-	if !ok {
-		return nil
-	}
-	return NewProtocolException(flusher.Flush())
+	return flush(p.writer)
 }
 
 func (p *compactDecoder) Skip(fieldType Type) (err error) {

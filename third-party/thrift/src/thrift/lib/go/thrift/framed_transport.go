@@ -37,8 +37,6 @@ type FramedTransport struct {
 	maxLength uint32
 }
 
-var _ RichTransport = (*FramedTransport)(nil)
-
 func newFramedTransport(buffer io.ReadWriteCloser) *FramedTransport {
 	return &FramedTransport{buffer: buffer, reader: bufio.NewReader(buffer), maxLength: DEFAULT_MAX_LENGTH}
 }
@@ -121,10 +119,7 @@ func (p *FramedTransport) Flush() error {
 			return NewTransportExceptionFromError(err)
 		}
 	}
-	if flusher, ok := p.buffer.(Flusher); ok {
-		err = flusher.Flush()
-	}
-	return NewTransportExceptionFromError(err)
+	return flush(p.buffer)
 }
 
 func (p *FramedTransport) readFrameHeader() (uint32, error) {

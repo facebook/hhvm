@@ -180,25 +180,29 @@ Mask path(
 }
 
 // Ensures the masked fields in the given thrift struct.
-template <typename Struct>
-void ensure_fields(MaskRef ref, Struct& t) {
-  if (!validate_mask<Struct>(ref)) {
+template <typename T>
+void ensure_fields(MaskRef ref, T& t) {
+  if (!validate_mask<T>(ref)) {
     folly::throw_exception<std::runtime_error>(
         "The mask and struct are incompatible.");
   }
-  if constexpr (!std::is_const_v<std::remove_reference_t<Struct>>) {
-    op::for_each_ordinal<Struct>([&](auto ord) {
+  if (is_thrift_union_v<T> && ref.numFieldsSet<T>() > 1) {
+    folly::throw_exception<std::runtime_error>(
+        "Ensuring more than one field in union");
+  }
+  if constexpr (!std::is_const_v<std::remove_reference_t<T>>) {
+    op::for_each_ordinal<T>([&](auto ord) {
       using Ord = decltype(ord);
-      MaskRef next = ref.get(op::get_field_id<Struct, Ord>());
+      MaskRef next = ref.get(op::get_field_id<T, Ord>());
       if (next.isNoneMask()) {
         return;
       }
-      using FieldTag = op::get_field_tag<Struct, Ord>;
+      using FieldTag = op::get_field_tag<T, Ord>;
       auto&& field_ref = op::get<Ord>(t);
       op::ensure<FieldTag>(field_ref, t);
       // Need to ensure the struct object.
-      using FieldType = op::get_native_type<Struct, Ord>;
-      if constexpr (is_thrift_struct_v<FieldType>) {
+      using FieldType = op::get_native_type<T, Ord>;
+      if constexpr (is_thrift_class_v<FieldType>) {
         auto& value = *op::getValueOrNull(field_ref);
         ensure_fields(next, value);
         return;

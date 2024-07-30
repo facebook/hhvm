@@ -67,9 +67,11 @@ using detail::is_compatible_with;
 // Ensures that the masked fields have value in the thrift struct.
 // If it doesn't, it emplaces the field.
 // Throws a runtime exception if the mask and struct are incompatible.
-template <typename Struct>
-void ensure(const Mask& mask, Struct& t) {
-  static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
+template <typename T>
+void ensure(const Mask& mask, T& t) {
+  static_assert(
+      is_thrift_struct_v<T> || is_thrift_union_v<T>,
+      "not a thrift struct or union");
   detail::throwIfContainsMapMask(mask);
   return detail::ensure_fields(MaskRef{mask, false}, t);
 }

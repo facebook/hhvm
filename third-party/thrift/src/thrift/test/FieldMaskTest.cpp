@@ -1464,6 +1464,40 @@ TEST(FieldMaskTest, EnsureException) {
   EXPECT_THROW(ensure(mask, bar), std::runtime_error); // incompatible
 }
 
+TEST(FieldMaskTest, EnsureUnion) {
+  {
+    RecursiveUnion u;
+
+    ensure(noneMask(), u);
+    EXPECT_EQ(u.getType(), RecursiveUnion::Type::__EMPTY__);
+
+    // test validation for multiple fields
+    EXPECT_THROW(ensure(allMask(), u), std::runtime_error);
+  }
+  {
+    // Simple ensure
+    RecursiveUnion u;
+    Mask m;
+    m.includes_ref().emplace()[1] = allMask();
+    ensure(m, u);
+    EXPECT_TRUE(u.foo_ref().has_value());
+
+    (*m.includes_ref())[2] = allMask();
+    // multiple fields by inclusion
+    EXPECT_THROW(ensure(m, u), std::runtime_error);
+  }
+  {
+    // Nested ensure
+    RecursiveUnion u;
+    Mask m;
+    // u.recurse.ensure().foo.ensure().field1.ensure()
+    m.includes_ref().emplace()[4].includes_ref().emplace()[1] = allMask();
+    ensure(m, u);
+    EXPECT_TRUE(u.recurse_ref().has_value());
+    EXPECT_TRUE(u.recurse_ref()->foo_ref().has_value());
+  }
+}
+
 TEST(FieldMaskTest, SchemafulClear) {
   Mask mask;
   // mask = includes{1: includes{2: excludes{}},

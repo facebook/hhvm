@@ -100,6 +100,18 @@ class MaskRef {
   folly::F14FastMap<Value, Value> filter(
       const folly::F14FastMap<Value, Value>& src) const;
 
+  // Requires isFieldMask() == true
+  // Returns the number of fields that are set in this mask.
+  template <typename T>
+  size_t numFieldsSet() {
+    throwIfNotFieldMask();
+    if (auto includes = mask.includes_ref()) {
+      return includes->size();
+    } else {
+      return op::size_v<T> - mask.excludes_ref()->size();
+    }
+  }
+
  private:
   void throwIfNotFieldMask() const;
   void throwIfNotMapMask() const;

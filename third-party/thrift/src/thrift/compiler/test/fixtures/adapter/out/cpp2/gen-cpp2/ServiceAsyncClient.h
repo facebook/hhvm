@@ -40,7 +40,7 @@ class Client<::facebook::thrift::test::Service> : public apache::thrift::Generat
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
   virtual void func(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
  protected:
-  void funcImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_func(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
@@ -102,9 +102,9 @@ class Client<::facebook::thrift::test::Service> : public apache::thrift::Generat
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      funcImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_arg1, p_arg2, p_arg3);
+      fbthrift_serialize_and_send_func(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_arg1, p_arg2, p_arg3);
     } else {
-      funcImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_arg1, p_arg2, p_arg3);
+      fbthrift_serialize_and_send_func(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_arg1, p_arg2, p_arg3);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

@@ -80,10 +80,10 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::count(std
 void apache::thrift::Client<::facebook::thrift::test::AdapterService>::count(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = countCtx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  countImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
+  fbthrift_serialize_and_send_count(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
-void apache::thrift::Client<::facebook::thrift::test::AdapterService>::countImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
+void apache::thrift::Client<::facebook::thrift::test::AdapterService>::fbthrift_serialize_and_send_count(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_count(&writer, rpcOptions, *header, contextStack);
     if (stealRpcOptions) {
@@ -133,7 +133,7 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::sync_coun
   callback.waitUntilDone(
     evb,
     [&] {
-      countImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
+      fbthrift_serialize_and_send_count(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {
@@ -256,10 +256,10 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::adaptedTy
 void apache::thrift::Client<::facebook::thrift::test::AdapterService>::adaptedTypes(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::facebook::thrift::test::HeapAllocated& p_arg) {
   auto [ctx, header] = adaptedTypesCtx(&rpcOptions);
   auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
-  adaptedTypesImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_arg);
+  fbthrift_serialize_and_send_adaptedTypes(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_arg);
 }
 
-void apache::thrift::Client<::facebook::thrift::test::AdapterService>::adaptedTypesImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::facebook::thrift::test::HeapAllocated& p_arg, bool stealRpcOptions) {
+void apache::thrift::Client<::facebook::thrift::test::AdapterService>::fbthrift_serialize_and_send_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::facebook::thrift::test::HeapAllocated& p_arg, bool stealRpcOptions) {
   apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
     apache::thrift::SerializedRequest request = fbthrift_serialize_adaptedTypes(&writer, rpcOptions, *header, contextStack, p_arg);
     if (stealRpcOptions) {
@@ -309,7 +309,7 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::sync_adap
   callback.waitUntilDone(
     evb,
     [&] {
-      adaptedTypesImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_arg);
+      fbthrift_serialize_and_send_adaptedTypes(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_arg);
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {

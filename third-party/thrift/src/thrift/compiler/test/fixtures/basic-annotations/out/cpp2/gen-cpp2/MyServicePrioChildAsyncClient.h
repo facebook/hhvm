@@ -41,7 +41,7 @@ class Client<::cpp2::MyServicePrioChild> : public ::cpp2::MyServicePrioParentAsy
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioChild", "function": "pang"} */
   virtual void pang(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
-  void pangImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_pang(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioChild", "function": "pang"} */
@@ -103,9 +103,9 @@ class Client<::cpp2::MyServicePrioChild> : public ::cpp2::MyServicePrioParentAsy
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      pangImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      fbthrift_serialize_and_send_pang(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      pangImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      fbthrift_serialize_and_send_pang(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

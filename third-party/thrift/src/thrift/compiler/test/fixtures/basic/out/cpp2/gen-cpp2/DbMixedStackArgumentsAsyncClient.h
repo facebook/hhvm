@@ -40,7 +40,7 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   virtual void getDataByKey0(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key);
  protected:
-  void getDataByKey0Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
@@ -102,9 +102,9 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      getDataByKey0Impl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_key);
+      fbthrift_serialize_and_send_getDataByKey0(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_key);
     } else {
-      getDataByKey0Impl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_key);
+      fbthrift_serialize_and_send_getDataByKey0(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_key);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -163,7 +163,7 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual void getDataByKey1(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key);
  protected:
-  void getDataByKey1Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
@@ -225,9 +225,9 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      getDataByKey1Impl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_key);
+      fbthrift_serialize_and_send_getDataByKey1(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_key);
     } else {
-      getDataByKey1Impl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_key);
+      fbthrift_serialize_and_send_getDataByKey1(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_key);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

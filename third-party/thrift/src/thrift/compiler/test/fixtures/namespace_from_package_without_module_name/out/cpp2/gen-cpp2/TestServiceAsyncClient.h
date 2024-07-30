@@ -40,7 +40,7 @@ class Client<::test::namespace_from_package_without_module_name::TestService> : 
   /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/src/module.thrift", "service": "TestService", "function": "init"} */
   virtual void init(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_int1);
  protected:
-  void initImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_int1, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_init(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_int1, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/src/module.thrift", "service": "TestService", "function": "init"} */
@@ -102,9 +102,9 @@ class Client<::test::namespace_from_package_without_module_name::TestService> : 
       co_await ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
-      initImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_int1);
+      fbthrift_serialize_and_send_init(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_int1);
     } else {
-      initImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_int1);
+      fbthrift_serialize_and_send_init(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_int1);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

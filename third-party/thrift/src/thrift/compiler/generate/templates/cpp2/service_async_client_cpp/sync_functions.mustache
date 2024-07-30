@@ -63,7 +63,7 @@ void {{ > service_common/client_class_name}}::sync_{{function:cpp_name}}(apache:
   callback.waitUntilDone(
     evb,
     [&] {
-      {{function:cpp_name}}Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
+      fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
     });
 #if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {
@@ -131,7 +131,7 @@ folly::Try<apache::thrift::RpcResponseComplete<{{ > types/return_type_client}}>>
   callback.waitUntilDone(
     evb,
     [&] {
-      {{function:cpp_name}}Impl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback){{function:comma}}{{ > service_common/param_list}}, true);
+      fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback){{function:comma}}{{ > service_common/param_list}}, true);
     });
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));

@@ -19,28 +19,8 @@ package thrift
 import (
 	"errors"
 	"io"
-	"reflect"
 	"testing"
 )
-
-func TestEnsureTransportsAreRich(t *testing.T) {
-	http, err := newHTTPPostClient("http://127.0.0.1")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	transports := []io.ReadWriteCloser{
-		NewMemoryBufferLen(1024),
-		newFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH),
-		http,
-	}
-	for _, trans := range transports {
-		_, ok := trans.(RichTransport)
-		if !ok {
-			t.Errorf("Transport %s does not implement RichTransport interface", reflect.ValueOf(trans))
-		}
-	}
-}
 
 // TestReadByte tests whether readByte handles error cases correctly.
 func TestReadByte(t *testing.T) {

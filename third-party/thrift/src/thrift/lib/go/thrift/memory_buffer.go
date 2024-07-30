@@ -20,35 +20,46 @@ import (
 	"bytes"
 )
 
-// Memory buffer-based implementation of the Transport interface.
+// MemoryBuffer is a buffer-based implementation with RemainingBytes method.
 type MemoryBuffer struct {
 	*bytes.Buffer
-	size int
 }
 
+var _ RichTransport = (*MemoryBuffer)(nil)
+
+// NewMemoryBuffer returns a new MemoryBuffer.
 func NewMemoryBuffer() *MemoryBuffer {
-	return &MemoryBuffer{Buffer: &bytes.Buffer{}, size: 0}
+	return &MemoryBuffer{Buffer: &bytes.Buffer{}}
 }
 
+// NewMemoryBufferWithData returns a new MemoryBuffer with data.
 func NewMemoryBufferWithData(data []byte) *MemoryBuffer {
-	return &MemoryBuffer{Buffer: bytes.NewBuffer(data), size: len(data)}
+	return &MemoryBuffer{Buffer: bytes.NewBuffer(data)}
 }
 
+// NewMemoryBufferLen returns a new empty MemoryBuffer with a given size.
 func NewMemoryBufferLen(size int) *MemoryBuffer {
 	buf := make([]byte, 0, size)
-	return &MemoryBuffer{Buffer: bytes.NewBuffer(buf), size: size}
+	return &MemoryBuffer{Buffer: bytes.NewBuffer(buf)}
 }
 
-func (p *MemoryBuffer) Close() error {
-	p.Buffer.Reset()
+// Init initializes the buffer with data.
+func (m *MemoryBuffer) Init(data []byte) {
+	m.Buffer = bytes.NewBuffer(data)
+}
+
+// Flush does nothing and is simply here to satisfy the RichTransport interface.
+func (m *MemoryBuffer) Flush() error {
 	return nil
 }
 
-// Flushing a memory buffer is a no-op
-func (p *MemoryBuffer) Flush() error {
+// Close resets the buffer.
+func (m *MemoryBuffer) Close() error {
+	m.Buffer.Reset()
 	return nil
 }
 
-func (p *MemoryBuffer) RemainingBytes() uint64 {
-	return uint64(p.Buffer.Len())
+// RemainingBytes returns the number of bytes remaining in the buffer.
+func (m *MemoryBuffer) RemainingBytes() uint64 {
+	return uint64(m.Buffer.Len())
 }

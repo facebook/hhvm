@@ -88,9 +88,6 @@ func (s *Serializer) WriteString(msg Struct) (str string, err error) {
 	if err = s.Protocol.Flush(); err != nil {
 		return
 	}
-	if err = s.Transport.Flush(); err != nil {
-		return
-	}
 
 	return s.Transport.String(), nil
 }
@@ -104,10 +101,6 @@ func (s *Serializer) Write(msg Struct) (b []byte, err error) {
 	}
 
 	if err = s.Protocol.Flush(); err != nil {
-		return
-	}
-
-	if err = s.Transport.Flush(); err != nil {
 		return
 	}
 

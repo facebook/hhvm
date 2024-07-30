@@ -35,6 +35,8 @@ type httpClient struct {
 	nsecReadTimeout    int64
 }
 
+var _ RichTransport = (*httpClient)(nil)
+
 // newHTTPPostClient creates a new HTTP POST client.
 func newHTTPPostClient(urlstr string) (*httpClient, error) {
 	parsedURL, err := url.Parse(urlstr)

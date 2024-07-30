@@ -37,6 +37,8 @@ type FramedTransport struct {
 	maxLength uint32
 }
 
+var _ RichTransport = (*FramedTransport)(nil)
+
 func newFramedTransport(buffer io.ReadWriteCloser) *FramedTransport {
 	return &FramedTransport{buffer: buffer, reader: bufio.NewReader(buffer), maxLength: DEFAULT_MAX_LENGTH}
 }

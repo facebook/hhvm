@@ -60,7 +60,7 @@ func TestReadSimpleJSONProtocolBool(t *testing.T) {
 		} else {
 			trans.Write(JSON_FALSE)
 		}
-		trans.Flush()
+
 		s := trans.String()
 		v, e := p.ReadBool()
 		if e != nil {
@@ -107,7 +107,7 @@ func TestReadSimpleJSONProtocolByte(t *testing.T) {
 		trans := NewMemoryBuffer()
 		p := NewSimpleJSONProtocol(trans)
 		trans.WriteString(strconv.Itoa(int(value)))
-		trans.Flush()
+
 		s := trans.String()
 		v, e := p.ReadByte()
 		if e != nil {
@@ -154,7 +154,7 @@ func TestReadSimpleJSONProtocolI16(t *testing.T) {
 		trans := NewMemoryBuffer()
 		p := NewSimpleJSONProtocol(trans)
 		trans.WriteString(strconv.Itoa(int(value)))
-		trans.Flush()
+
 		s := trans.String()
 		v, e := p.ReadI16()
 		if e != nil {
@@ -201,7 +201,7 @@ func TestReadSimpleJSONProtocolI32(t *testing.T) {
 		trans := NewMemoryBuffer()
 		p := NewSimpleJSONProtocol(trans)
 		trans.WriteString(strconv.Itoa(int(value)))
-		trans.Flush()
+
 		s := trans.String()
 		v, e := p.ReadI32()
 		if e != nil {
@@ -225,7 +225,6 @@ func TestReadSimpleJSONProtocolI32Null(t *testing.T) {
 	trans := NewMemoryBuffer()
 	p := NewSimpleJSONProtocol(trans)
 	trans.WriteString(value)
-	trans.Flush()
 	s := trans.String()
 	v, e := p.ReadI32()
 
@@ -269,7 +268,7 @@ func TestReadSimpleJSONProtocolI64(t *testing.T) {
 		trans := NewMemoryBuffer()
 		p := NewSimpleJSONProtocol(trans)
 		trans.WriteString(strconv.FormatInt(value, 10))
-		trans.Flush()
+
 		s := trans.String()
 		v, e := p.ReadI64()
 		if e != nil {
@@ -293,7 +292,6 @@ func TestReadSimpleJSONProtocolI64Null(t *testing.T) {
 	trans := NewMemoryBuffer()
 	p := NewSimpleJSONProtocol(trans)
 	trans.WriteString(value)
-	trans.Flush()
 	s := trans.String()
 	v, e := p.ReadI64()
 
@@ -352,7 +350,7 @@ func TestReadSimpleJSONProtocolDouble(t *testing.T) {
 		p := NewSimpleJSONProtocol(trans)
 		n := NewNumericFromDouble(value)
 		trans.WriteString(n.String())
-		trans.Flush()
+
 		s := trans.String()
 		v, e := p.ReadDouble()
 		if e != nil {
@@ -428,7 +426,7 @@ func TestReadSimpleJSONProtocolFloat(t *testing.T) {
 		p := NewSimpleJSONProtocol(trans)
 		n := NewNumericFromFloat(value)
 		trans.WriteString(n.String())
-		trans.Flush()
+
 		s := trans.String()
 		v, e := p.ReadFloat()
 		if e != nil {
@@ -489,7 +487,7 @@ func TestReadSimpleJSONProtocolString(t *testing.T) {
 		trans := NewMemoryBuffer()
 		p := NewSimpleJSONProtocol(trans)
 		trans.WriteString(jsonQuote(value))
-		trans.Flush()
+
 		s := trans.String()
 		v, e := p.ReadString()
 		if e != nil {
@@ -513,7 +511,6 @@ func TestReadSimpleJSONProtocolStringNull(t *testing.T) {
 	trans := NewMemoryBuffer()
 	p := NewSimpleJSONProtocol(trans)
 	trans.WriteString(value)
-	trans.Flush()
 	s := trans.String()
 	v, e := p.ReadString()
 	if e != nil {
@@ -560,7 +557,6 @@ func TestReadSimpleJSONProtocolBinary(t *testing.T) {
 	trans := NewMemoryBuffer()
 	p := NewSimpleJSONProtocol(trans)
 	trans.WriteString(jsonQuote(b64String))
-	trans.Flush()
 	s := trans.String()
 	v, e := p.ReadBinary()
 	if e != nil {
@@ -589,7 +585,6 @@ func TestReadSimpleJSONProtocolBinaryNull(t *testing.T) {
 	trans := NewMemoryBuffer()
 	p := NewSimpleJSONProtocol(trans)
 	trans.WriteString(value)
-	trans.Flush()
 	s := trans.String()
 	b, e := p.ReadBinary()
 	v := string(b)
@@ -791,7 +786,6 @@ func TestWriteSimpleJSONProtocolSafePeek(t *testing.T) {
 	trans := NewMemoryBuffer()
 	p := newSimpleJSONProtocol(trans)
 	trans.Write([]byte{'a', 'b'})
-	trans.Flush()
 
 	test1 := p.safePeekContains([]byte{'a', 'b'})
 	if !test1 {

@@ -17,7 +17,6 @@
 package thrift
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"maps"
@@ -259,8 +258,7 @@ func (p *rocketClient) ReadMessageBegin() (string, MessageType, int32, error) {
 			return name, EXCEPTION, p.seqID, err
 		}
 	}
-	p.rbuf.Buffer = bytes.NewBuffer(dataBytes)
-	p.rbuf.size = len(dataBytes)
+	p.rbuf.Init(dataBytes)
 	return name, REPLY, p.seqID, err
 }
 

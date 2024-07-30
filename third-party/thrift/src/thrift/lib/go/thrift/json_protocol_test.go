@@ -65,7 +65,6 @@ func TestReadJSONProtocolBool(t *testing.T) {
 		} else {
 			trans.Write([]byte{'0'}) // not JSON_FALSE
 		}
-		trans.Flush()
 		s := trans.String()
 		v, e := p.ReadBool()
 		if e != nil {
@@ -113,7 +112,6 @@ func TestReadJSONProtocolByte(t *testing.T) {
 		trans := NewMemoryBuffer()
 		p := NewJSONProtocol(trans)
 		trans.WriteString(strconv.Itoa(int(value)))
-		trans.Flush()
 		s := trans.String()
 		v, e := p.ReadByte()
 		if e != nil {
@@ -160,7 +158,6 @@ func TestReadJSONProtocolI16(t *testing.T) {
 		trans := NewMemoryBuffer()
 		p := NewJSONProtocol(trans)
 		trans.WriteString(strconv.Itoa(int(value)))
-		trans.Flush()
 		s := trans.String()
 		v, e := p.ReadI16()
 		if e != nil {
@@ -207,7 +204,6 @@ func TestReadJSONProtocolI32(t *testing.T) {
 		trans := NewMemoryBuffer()
 		p := NewJSONProtocol(trans)
 		trans.WriteString(strconv.Itoa(int(value)))
-		trans.Flush()
 		s := trans.String()
 		v, e := p.ReadI32()
 		if e != nil {
@@ -254,7 +250,6 @@ func TestReadJSONProtocolI64(t *testing.T) {
 		trans := NewMemoryBuffer()
 		p := NewJSONProtocol(trans)
 		trans.WriteString(strconv.FormatInt(value, 10))
-		trans.Flush()
 		s := trans.String()
 		v, e := p.ReadI64()
 		if e != nil {
@@ -316,7 +311,6 @@ func TestReadJSONProtocolDouble(t *testing.T) {
 		p := NewJSONProtocol(trans)
 		n := NewNumericFromDouble(value)
 		trans.WriteString(n.String())
-		trans.Flush()
 		s := trans.String()
 		v, e := p.ReadDouble()
 		if e != nil {
@@ -392,7 +386,6 @@ func TestReadJSONProtocolFloat(t *testing.T) {
 		p := NewJSONProtocol(trans)
 		n := NewNumericFromFloat(value)
 		trans.WriteString(n.String())
-		trans.Flush()
 		s := trans.String()
 		v, e := p.ReadFloat()
 		if e != nil {
@@ -453,7 +446,6 @@ func TestReadJSONProtocolString(t *testing.T) {
 		trans := NewMemoryBuffer()
 		p := NewJSONProtocol(trans)
 		trans.WriteString(jsonQuote(value))
-		trans.Flush()
 		s := trans.String()
 		v, e := p.ReadString()
 		if e != nil {
@@ -514,7 +506,6 @@ func TestReadJSONProtocolBinary(t *testing.T) {
 	trans := NewMemoryBuffer()
 	p := NewJSONProtocol(trans)
 	trans.WriteString(jsonQuote(b64String))
-	trans.Flush()
 	s := trans.String()
 	v, e := p.ReadBinary()
 	if e != nil {

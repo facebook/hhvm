@@ -1108,6 +1108,43 @@ TEST(FieldMaskTest, FilterSmartPointer) {
   assertSmartPointerStructIsEmpty(dst);
 }
 
+TEST(FieldMaskTest, FilterUnion) {
+  Mask m;
+  RecursiveUnion leaf, parent, dst;
+
+  leaf.foo_ref().emplace().field1() = 1;
+  leaf.foo_ref()->field2() = 2;
+
+  dst = protocol::filter(allMask(), leaf);
+  EXPECT_EQ(leaf, dst);
+
+  dst = protocol::filter(noneMask(), leaf);
+  EXPECT_EQ(dst.getType(), RecursiveUnion::Type::__EMPTY__);
+
+  parent.recurse_ref().emplace(leaf);
+  dst = protocol::filter(allMask(), parent);
+  EXPECT_EQ(parent, dst);
+
+  // RecursiveUnion.recurse.bar
+  m.includes_ref().emplace()[4].includes_ref().emplace()[2] = allMask();
+  dst = protocol::filter(m, parent);
+  // Filter failed, union-ref should remain empty
+  EXPECT_EQ(dst.getType(), RecursiveUnion::Type::__EMPTY__);
+
+  m = noneMask(); // reset
+  // RecursiveUnion.recurse.foo.field1
+  m.includes_ref()
+      .emplace()[4]
+      .includes_ref()
+      .emplace()[1]
+      .includes_ref()
+      .emplace()[1] = allMask();
+  dst = protocol::filter(m, parent);
+  EXPECT_EQ(*dst.recurse_ref().value().foo_ref().value().field1(), 1);
+  EXPECT_EQ(
+      *dst.recurse_ref().value().foo_ref().value().field2(), 0); // not filtered
+}
+
 TEST(FieldMaskTest, IsCompatibleWithSimple) {
   EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Foo>>(allMask()));
   EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Foo>>(noneMask()));

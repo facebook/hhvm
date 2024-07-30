@@ -258,30 +258,35 @@ void clear_fields(MaskRef ref, T& t) {
 
 // Writes masked fields from src (as specified by ref) into ret (ret must be
 // empty). Returns true if any masked field was written into ret.
-template <typename Struct>
-bool filter_fields(MaskRef ref, const Struct& src, Struct& ret) {
-  if (!validate_mask<Struct>(ref)) {
+template <typename T>
+bool filter_fields(MaskRef ref, const T& src, T& ret) {
+  if (!validate_mask<T>(ref)) {
     folly::throw_exception<std::runtime_error>(
         "The mask and struct are incompatible.");
   }
   bool retained = false;
-  op::for_each_ordinal<Struct>([&](auto ord) {
+  op::for_each_ordinal<T>([&](auto ord) {
     using Ord = decltype(ord);
-    MaskRef next = ref.get(op::get_field_id<Struct, Ord>());
+    MaskRef next = ref.get(op::get_field_id<T, Ord>());
     // Id doesn't exist in field mask, skip.
     if (next.isNoneMask()) {
       return;
     }
-    using FieldType = op::get_native_type<Struct, Ord>;
+    using FieldType = op::get_native_type<T, Ord>;
     auto&& src_ref = op::get<Ord>(src);
     auto&& ret_ref = op::get<Ord>(ret);
     bool srcHasValue = bool(op::getValueOrNull(src_ref));
     if (!srcHasValue) { // skip
-      errorIfNotCompatible<op::get_type_tag<Struct, Ord>>(next.mask);
+      errorIfNotCompatible<op::get_type_tag<T, Ord>>(next.mask);
     } else if (next.isAllMask()) {
-      op::copy(src_ref, ret_ref);
+      if constexpr (is_thrift_union_v<T>) {
+        // Simply copy the entire union over
+        ret = src;
+      } else {
+        op::copy(src_ref, ret_ref);
+      }
       retained = true;
-    } else if constexpr (is_thrift_struct_v<FieldType>) {
+    } else if constexpr (is_thrift_class_v<FieldType>) {
       FieldType nested;
       // If no masked fields are retained, leave this field unset (will leave
       // optional fields unset)

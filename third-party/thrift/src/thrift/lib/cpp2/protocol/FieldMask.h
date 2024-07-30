@@ -91,13 +91,15 @@ void clear(const Mask& mask, T& t) {
 // Returns a new object that contains only the masked fields.
 // Throws a runtime exception if the mask and objects are incompatible.
 // Note: Masked structured (struct/union) fields will be pruned (i.e left unset
-// for optional fields, or set to default for unqualified fields) if no masked
-// unstructued child fields exist in src.
-template <typename Struct>
-inline Struct filter(const Mask& mask, const Struct& src) {
-  static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
+// for optional/union fields, or set to default for unqualified fields) if no
+// masked unstructued child fields exist in src.
+template <typename T>
+inline T filter(const Mask& mask, const T& src) {
+  static_assert(
+      is_thrift_struct_v<T> || is_thrift_union_v<T>,
+      "not a thrift struct or union");
   detail::throwIfContainsMapMask(mask);
-  Struct filtered;
+  T filtered;
   MaskRef mref{mask, false};
   detail::filter_fields(mref, src, filtered);
   return filtered;

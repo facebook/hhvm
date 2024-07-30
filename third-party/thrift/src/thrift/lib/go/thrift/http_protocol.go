@@ -73,15 +73,6 @@ func (p *httpProtocol) Close() error {
 	return p.transport.Close()
 }
 
-func (p *httpProtocol) SetPersistentHeader(key, value string) {
-	p.persistentHeaders[key] = value
-}
-
-func (p *httpProtocol) GetPersistentHeader(key string) (string, bool) {
-	v, ok := p.persistentHeaders[key]
-	return v, ok
-}
-
 func (p *httpProtocol) GetResponseHeaders() map[string]string {
 	return nil
 }

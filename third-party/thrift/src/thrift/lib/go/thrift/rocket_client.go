@@ -342,15 +342,6 @@ func (p *rocketClient) Skip(fieldType Type) (err error) {
 	return SkipDefaultDepth(p, fieldType)
 }
 
-func (p *rocketClient) SetPersistentHeader(key, value string) {
-	p.persistentHeaders[key] = value
-}
-
-func (p *rocketClient) GetPersistentHeader(key string) (string, bool) {
-	v, ok := p.persistentHeaders[key]
-	return v, ok
-}
-
 func (p *rocketClient) SetRequestHeader(key, value string) {
 	if p.reqMetadata == nil {
 		p.reqMetadata = &requestRPCMetadata{}

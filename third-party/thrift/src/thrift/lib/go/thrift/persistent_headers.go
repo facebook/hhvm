@@ -16,18 +16,6 @@
 
 package thrift
 
-// Deprecated: please WithPersistent header instead of SetPersistentHeader and stop using GetPersistentHeader.
-type PersistentHeaders interface {
-	SetPersistentHeader(key, value string)
-	GetPersistentHeader(key string) (string, bool)
-}
-
-// Compile time interface enforcer
-var _ PersistentHeaders = (*headerProtocol)(nil)
-var _ PersistentHeaders = (*rocketClient)(nil)
-var _ PersistentHeaders = (*upgradeToRocketClient)(nil)
-var _ PersistentHeaders = (*httpProtocol)(nil)
-
 // ResponseHeaderGetter is a temporary measure to allow protocols to expose headers received with the response.
 type ResponseHeaderGetter interface {
 	GetResponseHeaders() map[string]string

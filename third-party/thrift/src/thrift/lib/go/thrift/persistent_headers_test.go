@@ -25,7 +25,7 @@ import (
 func TestHeaderProtocolSomePersistentHeaders(t *testing.T) {
 	protocol, err := newHeaderProtocol(newMockSocket(), ProtocolIDCompact, 0, map[string]string{"key": "value"})
 	assert.NoError(t, err)
-	v, ok := protocol.GetPersistentHeader("key")
+	v, ok := protocol.(*headerProtocol).trans.persistentWriteInfoHeaders["key"]
 	assert.True(t, ok)
 	assert.Equal(t, "value", v)
 }
@@ -33,15 +33,20 @@ func TestHeaderProtocolSomePersistentHeaders(t *testing.T) {
 func TestRocketProtocolSomePersistentHeaders(t *testing.T) {
 	protocol, err := newRocketClient(newMockSocket(), ProtocolIDCompact, 0, map[string]string{"key": "value"})
 	assert.NoError(t, err)
-	v, ok := protocol.GetPersistentHeader("key")
+	v, ok := protocol.(*rocketClient).persistentHeaders["key"]
 	assert.True(t, ok)
 	assert.Equal(t, "value", v)
 }
 
 func TestUpgradeToRocketProtocolSomePersistentHeaders(t *testing.T) {
-	protocol, err := newUpgradeToRocketClient(newMockSocket(), ProtocolIDCompact, 0, map[string]string{"key": "value"})
+	upgradeProtocol, err := newUpgradeToRocketClient(newMockSocket(), ProtocolIDCompact, 0, map[string]string{"key": "value"})
 	assert.NoError(t, err)
-	v, ok := protocol.GetPersistentHeader("key")
+	protocol := upgradeProtocol.(*upgradeToRocketClient).headerProtocol
+	v, ok := protocol.(*headerProtocol).trans.persistentWriteInfoHeaders["key"]
+	assert.True(t, ok)
+	assert.Equal(t, "value", v)
+	protocol = upgradeProtocol.(*upgradeToRocketClient).rocketProtocol
+	v, ok = protocol.(*rocketClient).persistentHeaders["key"]
 	assert.True(t, ok)
 	assert.Equal(t, "value", v)
 }

@@ -22,7 +22,11 @@ import (
 
 func TestHeaderProtocolHeaders(t *testing.T) {
 	mockSocket := newMockSocket()
-	proto1, err := NewHeaderProtocol(mockSocket)
+	proto1, err := newHeaderProtocol(mockSocket, ProtocolIDCompact, 0, map[string]string{
+		"preferred_cheese": "gouda",
+		IDVersionHeader:    IDVersion,
+		IdentityHeader:     "batman",
+	})
 	if err != nil {
 		t.Fatalf("failed to create header protocol: %s", err)
 	}
@@ -37,17 +41,6 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 	}
 	if len(proto1.(RequestHeaders).GetRequestHeaders()) != 1 {
 		t.Fatalf("wrong number of headers")
-	}
-
-	proto1.SetPersistentHeader("preferred_cheese", "gouda")
-	if v, _ := proto1.GetPersistentHeader("preferred_cheese"); v != "gouda" {
-		t.Fatalf("failed to set persistent header")
-	}
-
-	proto1.SetPersistentHeader(IDVersionHeader, IDVersion)
-	proto1.SetPersistentHeader(IdentityHeader, "batman")
-	if gotIdentity, ok := proto1.GetPersistentHeader(IdentityHeader); !ok || gotIdentity != "batman" {
-		t.Fatalf("failed to set identity")
 	}
 
 	proto1.WriteMessageBegin("", CALL, 1)

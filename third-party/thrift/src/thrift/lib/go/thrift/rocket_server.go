@@ -140,13 +140,3 @@ func (b *bufProtocol) SetRequestHeader(key, value string) {
 func (b *bufProtocol) GetRequestHeaders() map[string]string {
 	return b.reqHeaders
 }
-
-// Deprecated: should use WithPersistentHeader, so do not implement.
-func (b *bufProtocol) SetPersistentHeader(key, value string) {
-	panic("not implemented: deprecated, so did not implement.")
-}
-
-// Deprecated: only used for testing, so do not implement.
-func (b *bufProtocol) GetPersistentHeader(key string) (string, bool) {
-	panic("not implemented: only used for testing, so did not implement.")
-}

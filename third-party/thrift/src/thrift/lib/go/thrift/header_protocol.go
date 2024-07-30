@@ -43,7 +43,7 @@ func newHeaderProtocol(conn net.Conn, protoID ProtocolID, timeout time.Duration,
 		return nil, err
 	}
 	for name, value := range persistentHeaders {
-		p.SetPersistentHeader(name, value)
+		p.trans.persistentWriteInfoHeaders[name] = value
 	}
 	return p, nil
 }
@@ -126,14 +126,6 @@ func (p *headerProtocol) GetSeqID() uint32 {
 }
 
 // Control underlying header transport
-
-func (p *headerProtocol) SetPersistentHeader(key, value string) {
-	p.trans.SetPersistentHeader(key, value)
-}
-
-func (p *headerProtocol) GetPersistentHeader(key string) (string, bool) {
-	return p.trans.GetPersistentHeader(key)
-}
 
 // Deprecated: SetRequestHeader is deprecated and will eventually be private.
 func (p *headerProtocol) SetRequestHeader(key, value string) {

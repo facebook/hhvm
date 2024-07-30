@@ -62,26 +62,6 @@ func (p *upgradeToRocketClient) upgradeToRocket() error {
 	return upgradeToRocket(context.Background(), p.headerProtocol)
 }
 
-func (p *upgradeToRocketClient) SetPersistentHeader(key, value string) {
-	if p.Protocol == nil {
-		p.rocketProtocol.SetPersistentHeader(key, value)
-		p.headerProtocol.SetPersistentHeader(key, value)
-		return
-	}
-	p.Protocol.SetPersistentHeader(key, value)
-}
-
-func (p *upgradeToRocketClient) GetPersistentHeader(key string) (string, bool) {
-	if p.Protocol == nil {
-		headers, ok := p.headerProtocol.GetPersistentHeader(key)
-		if ok {
-			return headers, ok
-		}
-		return p.rocketProtocol.GetPersistentHeader(key)
-	}
-	return p.Protocol.GetPersistentHeader(key)
-}
-
 func (p *upgradeToRocketClient) SetRequestHeader(key, value string) {
 	if p.Protocol == nil {
 		p.rocketProtocol.(RequestHeaders).SetRequestHeader(key, value)

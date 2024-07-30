@@ -122,6 +122,12 @@ func TestHeaderHeaders(t *testing.T) {
 	tmb := newMockSocket()
 	// write transport
 	trans1 := newHeaderTransport(tmb, ProtocolIDCompact)
+	trans1.persistentWriteInfoHeaders = map[string]string{
+		IDVersionHeader:    IDVersion,
+		IdentityHeader:     "localhost",
+		"preferred_cheese": "gouda",
+	}
+
 	// read transport
 	trans2 := newHeaderTransport(tmb, ProtocolIDCompact)
 
@@ -130,12 +136,9 @@ func TestHeaderHeaders(t *testing.T) {
 	assertEq(t, false, ok)
 	assertEq(t, 0, len(trans1.GetResponseHeaders()))
 
-	trans1.SetPersistentHeader(IDVersionHeader, IDVersion)
-	trans1.SetPersistentHeader(IdentityHeader, "localhost")
 	trans1.SetRequestHeader("thrift_protocol", "compact")
 	trans1.SetRequestHeader("thrift_transport", "header")
 	trans1.SetRequestHeader("preferred_cheese", "cheddar")
-	trans1.SetPersistentHeader("preferred_cheese", "gouda")
 
 	assertEq(t, 3, len(trans1.getRequestHeaders()))
 	// 1 for persistent header and 2 more for identity headers
@@ -143,8 +146,6 @@ func TestHeaderHeaders(t *testing.T) {
 
 	headerval, _ := trans1.getRequestHeaders()["preferred_cheese"]
 	assertEq(t, "cheddar", headerval)
-	headerval, _ = trans1.GetPersistentHeader("preferred_cheese")
-	assertEq(t, "gouda", headerval)
 
 	_, err := trans1.Write([]byte("ASDF"))
 	if err != nil {
@@ -340,13 +341,9 @@ func BenchmarkHeaderFlush(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		tmb := newMockSocket()
 		trans1 := newHeaderTransport(tmb, ProtocolIDCompact)
-
-		trans1.SetPersistentHeader(IDVersionHeader, IDVersion)
-		trans1.SetPersistentHeader(IdentityHeader, "localhost")
 		trans1.SetRequestHeader("thrift_protocol", "compact")
 		trans1.SetRequestHeader("thrift_transport", "header")
 		trans1.SetRequestHeader("preferred_cheese", "cheddar")
-		trans1.SetPersistentHeader("preferred_cheese", "gouda")
 
 		_, err := trans1.Write(data)
 		err = trans1.Flush()

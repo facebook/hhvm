@@ -87,15 +87,6 @@ func (t *headerTransport) SeqID() uint32 {
 	return t.readSeqID
 }
 
-func (t *headerTransport) SetPersistentHeader(key, value string) {
-	t.persistentWriteInfoHeaders[key] = value
-}
-
-func (t *headerTransport) GetPersistentHeader(key string) (string, bool) {
-	v, ok := t.persistentWriteInfoHeaders[key]
-	return v, ok
-}
-
 // SetRequestHeader sets a request header
 func (t *headerTransport) SetRequestHeader(key, value string) {
 	t.writeInfoHeaders[key] = value

@@ -25,17 +25,22 @@ import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
+{{^program:generate_mutable_types}}
 from {{program:base_library_package}}.serializer import serialize_iobuf, deserialize, Protocol
+{{/program:generate_mutable_types}}
+{{#program:generate_mutable_types}}
+from {{program:base_library_package}}.mutable_serializer import serialize_iobuf, deserialize, Protocol
+{{/program:generate_mutable_types}}
 from {{program:base_library_package}}.server import ServiceInterface, RpcKind, PythonUserException
 
-import {{program:module_path}}.thrift_types
+import {{program:module_path}}.{{>types/types_import_path}}
 import {{program:module_path}}.thrift_metadata
 {{#program:include_namespaces}}
 {{#has_services?}}
 import {{included_module_path}}.thrift_services
 {{/has_services?}}
 {{#has_types?}}
-import {{included_module_path}}.thrift_types
+import {{included_module_path}}.{{>types/types_import_path}}
 {{/has_types?}}
 {{/program:include_namespaces}}
 {{#program:adapter_modules}}

@@ -1270,7 +1270,18 @@ void t_mstch_python_generator::generate_services() {
     // services.
     return;
   }
-  generate_file("thrift_services.py", NotTypesFile, false, generate_root_path_);
+  generate_file(
+      "thrift_services.py",
+      NotTypesFile,
+      false, // generate_mutable_types
+      generate_root_path_);
+  if (has_option("experimental_generate_mutable_types")) {
+    generate_file(
+        "thrift_mutable_services.py",
+        NotTypesFile,
+        true, // generate_mutable_types
+        generate_root_path_);
+  }
 }
 
 } // namespace

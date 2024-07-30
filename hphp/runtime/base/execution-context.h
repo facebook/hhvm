@@ -53,6 +53,9 @@ struct Resumable;
 namespace stream_transport {
 struct StreamTransport;
 }
+namespace VSDEBUG {
+struct DebuggerStdoutHook;
+}
 }
 
 namespace HPHP {
@@ -204,8 +207,8 @@ public:
   /**
    * Write to output.
    */
-  void write(const String&, bool outputHookOnly = false);
-  void write(const char* s, int len, bool outputHookOnly = false);
+  void write(const String&);
+  void write(const char* s, int len);
   void write(const char*);
 
   void writeStdout(const char* s, int len, bool skipHooks = false);
@@ -223,6 +226,9 @@ public:
   void addStdoutHook(StdoutHook*);
   bool removeStdoutHook(StdoutHook*);
   std::size_t numStdoutHooks() const;
+
+  void addDebuggerStdoutHook(VSDEBUG::DebuggerStdoutHook*);
+  void removeDebuggerStdoutHook();
 
   /**
    * Output buffering.
@@ -553,6 +559,9 @@ private:
   bool m_implicitFlush;
   int m_protectedLevel;
 
+  // Debugger stdout hook is treated differently. If it is non-null,
+  // ExecutionContext::write always writes to it.
+  VSDEBUG::DebuggerStdoutHook* m_debuggerStdoutHook = nullptr;
   std::unordered_set<StdoutHook*> m_stdoutHooks;
   size_t m_stdoutBytesWritten;
   String m_rawPostData;

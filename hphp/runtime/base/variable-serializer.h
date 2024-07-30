@@ -73,11 +73,9 @@ struct VariableSerializer {
   /**
    * Top level entry function called by native builtins.
    */
-  String serialize(const_variant_ref v, bool ret,
-                   bool keepCount = false, bool outputHookOnly = false);
-  String serialize(const Variant& var, bool ret,
-                   bool keepCount = false, bool outputHookOnly = false) {
-    return serialize(const_variant_ref{var}, ret, keepCount, outputHookOnly);
+  String serialize(const_variant_ref v, bool ret, bool keepCount = false);
+  String serialize(const Variant& var, bool ret, bool keepCount = false) {
+    return serialize(const_variant_ref{var}, ret, keepCount);
   }
   String serializeValue(const Variant& v, bool limit);
 

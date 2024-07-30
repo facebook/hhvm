@@ -1090,7 +1090,7 @@ void Debugger::requestShutdown() {
     m_requestInfoMap.erase(infoItr);
 
     if (!g_context.isNull()) {
-      g_context->removeStdoutHook(getStdoutHook());
+      g_context->removeDebuggerStdoutHook();
     }
     Logger::SetThreadHook(nullptr);
 
@@ -2431,9 +2431,6 @@ void Debugger::interruptAllThreads() {
 }
 
 void DebuggerStdoutHook::operator()(const char* str, int len) {
-  fflush(stdout);
-  write(fileno(stdout), str, len);
-
   // Quickly no-op if there's no client.
   if (!m_debugger->clientConnected()) {
     return;
@@ -2459,12 +2456,12 @@ operator()(const char*, const char* msg, const char* /*ending*/
 DebuggerEvalutionContext::DebuggerEvalutionContext(Debugger* debugger) {
   // In non-server mode, the debugger stdout hook should already be attached.
   if (!debugger || !RuntimeOption::ServerExecutionMode()) return;
-  m_stdoutHook = debugger->getStdoutHook();
-  g_context->addStdoutHook(m_stdoutHook);
+  g_context->addDebuggerStdoutHook(debugger->getStdoutHook());
+  m_shouldReset = true;
 }
 
 DebuggerEvalutionContext::~DebuggerEvalutionContext() {
-  g_context->removeStdoutHook(m_stdoutHook);
+  if (m_shouldReset) g_context->removeDebuggerStdoutHook();
 }
 
 SilentEvaluationContext::SilentEvaluationContext(
@@ -2488,8 +2485,8 @@ SilentEvaluationContext::SilentEvaluationContext(
     // Disable all sorts of output during this eval.
     m_oldHook = debugger->getStdoutHook();
     m_savedOutputBuffer = g_context->swapOutputBuffer(&m_sb);
-    g_context->removeStdoutHook(m_oldHook);
     g_context->addStdoutHook(&m_noOpHook);
+    g_context->removeDebuggerStdoutHook();
   }
 
   // Set aside the flow filters to disable all stepping and bp filtering.
@@ -2509,7 +2506,7 @@ SilentEvaluationContext::~SilentEvaluationContext() {
     rid.setErrorReportingLevel(m_errorLevel);
     g_context->swapOutputBuffer(m_savedOutputBuffer);
     g_context->removeStdoutHook(&m_noOpHook);
-    g_context->addStdoutHook(m_oldHook);
+    g_context->addDebuggerStdoutHook(m_oldHook);
   }
 
   m_savedFlowFilter.swap(rid.m_flowFilter);

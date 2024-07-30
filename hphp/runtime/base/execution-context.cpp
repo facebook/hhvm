@@ -153,6 +153,7 @@ void GContextType::Base::destroy() {
 void ExecutionContext::cleanup() {
   manageAPCHandle();
   auto dead = std::move(m_stdoutHooks);
+  m_debuggerStdoutHook = nullptr;
 }
 
 void ExecutionContext::sweep() {
@@ -219,8 +220,8 @@ void ExecutionContext::setContentType(const String& mimetype,
 ///////////////////////////////////////////////////////////////////////////////
 // write()
 
-void ExecutionContext::write(const String& s, bool outputHookOnly) {
-  write(s.data(), s.size(), outputHookOnly);
+void ExecutionContext::write(const String& s) {
+  write(s.data(), s.size());
 }
 
 void ExecutionContext::addStdoutHook(StdoutHook* hook) {
@@ -239,6 +240,15 @@ bool ExecutionContext::removeStdoutHook(StdoutHook* hook) {
 
 std::size_t ExecutionContext::numStdoutHooks() const {
   return m_stdoutHooks.size();
+}
+
+void ExecutionContext::addDebuggerStdoutHook(
+  VSDEBUG::DebuggerStdoutHook* hook) {
+  m_debuggerStdoutHook = hook;
+}
+
+void ExecutionContext::removeDebuggerStdoutHook() {
+  m_debuggerStdoutHook = nullptr;
 }
 
 static void safe_stdout(const  void  *ptr,  size_t  size) {
@@ -276,14 +286,8 @@ size_t ExecutionContext::getStdoutBytesWritten() const {
   return m_stdoutBytesWritten;
 }
 
-void ExecutionContext::write(const char *s, int len, bool outputHookOnly) {
-  if (outputHookOnly) {
-    for (auto const hook : m_stdoutHooks) {
-      assertx(hook != nullptr);
-      (*hook)(s, len);
-    }
-    return;
-  }
+void ExecutionContext::write(const char *s, int len) {
+  if (m_debuggerStdoutHook) (*m_debuggerStdoutHook)(s, len);
   if (m_sb) {
     m_sb->append(s, len);
     if (m_out && m_out->chunk_size > 0) {

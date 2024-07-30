@@ -105,12 +105,14 @@ private:
 };
 
 // Hooks for intercepting writes to STDOUT and STDERR in attach to server mode.
-struct DebuggerStdoutHook final : ExecutionContext::StdoutHook {
+// It is not a subclass of ExecutionContext::Stdout because
+// it behaves differently in ExecutionContext::write.
+struct DebuggerStdoutHook {
   explicit DebuggerStdoutHook(Debugger* debugger)
     : m_debugger(debugger) {
   }
 
-  void operator()(const char* str, int len) override;
+  void operator()(const char* str, int len);
 
 private:
   Debugger* m_debugger;
@@ -687,7 +689,7 @@ struct DebuggerEvalutionContext {
   DebuggerEvalutionContext(Debugger* debugger);
   ~DebuggerEvalutionContext();
 private:
-  DebuggerStdoutHook* m_stdoutHook = nullptr;
+  bool m_shouldReset {false};
 };
 // When performing an evaluation on behalf of part of the debugger engine
 // that should not be shown to the user in any way (such as for completions,
@@ -709,7 +711,7 @@ private:
   int m_errorLevel;
   StringBuffer* m_savedOutputBuffer;
   NoOpStdoutHook m_noOpHook;
-  ExecutionContext::StdoutHook* m_oldHook;
+  DebuggerStdoutHook* m_oldHook;
   StringBuffer m_sb;
 
   PCFilter m_savedFlowFilter;

@@ -296,8 +296,7 @@ void HHVM_FUNCTION(debugger_dump, const Variant& variable) {
     VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
     vs.serialize(variable,
                 false, // ret
-                false, // keepCount
-                true  // outputHookOnly
+                false // keepCount
                 );
   }
 }

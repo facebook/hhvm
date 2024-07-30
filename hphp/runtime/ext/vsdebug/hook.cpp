@@ -371,7 +371,7 @@ void VSDebugHook::tryEnterDebugger(
       if (debugger->getDebuggerOptions().disableStdoutRedirection == false) {
         if (scriptAttachMode || debugger->isDummyRequest()) {
           if (!g_context.isNull()) {
-            g_context->addStdoutHook(debugger->getStdoutHook());
+            g_context->addDebuggerStdoutHook(debugger->getStdoutHook());
           }
           // Attach to stderr in server mode only for the dummy thread (to show
           // any error spew from evals, etc) or in script attach mode.

@@ -20,9 +20,9 @@
 #include "wangle/bootstrap/ServerBootstrap.h"
 #include "wangle/channel/Handler.h"
 
-#include <folly/experimental/TestUtil.h>
 #include <folly/portability/GTest.h>
 #include <folly/synchronization/Latch.h>
+#include <folly/testing/TestUtil.h>
 #include <glog/logging.h>
 
 using namespace wangle;

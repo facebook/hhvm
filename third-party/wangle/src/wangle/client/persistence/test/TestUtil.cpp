@@ -16,7 +16,7 @@
 
 #include <wangle/client/persistence/test/TestUtil.h>
 
-#include <folly/experimental/TestUtil.h>
+#include <folly/testing/TestUtil.h>
 
 namespace wangle {
 

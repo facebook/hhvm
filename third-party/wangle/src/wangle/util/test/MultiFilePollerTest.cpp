@@ -19,10 +19,10 @@
 #include <folly/FileUtil.h>
 #include <folly/MapUtil.h>
 #include <folly/String.h>
-#include <folly/experimental/TestUtil.h>
 #include <folly/futures/Future.h>
 #include <folly/portability/GTest.h>
 #include <folly/synchronization/SaturatingSemaphore.h>
+#include <folly/testing/TestUtil.h>
 
 using namespace wangle;
 using namespace folly::test;

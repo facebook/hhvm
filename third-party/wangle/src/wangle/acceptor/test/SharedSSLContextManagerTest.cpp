@@ -18,10 +18,10 @@
 #include <functional>
 
 #include <folly/FileUtil.h>
-#include <folly/experimental/TestUtil.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <folly/testing/TestUtil.h>
 #include <wangle/acceptor/FizzConfigUtil.h>
 #include <wangle/acceptor/SharedSSLContextManager.h>
 

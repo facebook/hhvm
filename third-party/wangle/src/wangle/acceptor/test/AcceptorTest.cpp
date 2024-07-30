@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include <folly/experimental/TestUtil.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/test/AsyncSSLSocketTest.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <folly/testing/TestUtil.h>
 #include <glog/logging.h>
 #include <wangle/acceptor/AcceptObserver.h>
 #include <wangle/acceptor/Acceptor.h>

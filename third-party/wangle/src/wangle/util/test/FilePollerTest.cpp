@@ -21,10 +21,10 @@
 #include <folly/File.h>
 #include <folly/FileUtil.h>
 #include <folly/Singleton.h>
-#include <folly/experimental/TestUtil.h>
 #include <folly/portability/GTest.h>
 #include <folly/portability/SysStat.h>
 #include <folly/synchronization/Baton.h>
+#include <folly/testing/TestUtil.h>
 #include <glog/logging.h>
 #include <wangle/util/FilePoller.h>
 

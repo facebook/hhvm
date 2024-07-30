@@ -25,8 +25,8 @@
 #include <wangle/ssl/test/MockSSLStats.h>
 
 #if defined(WANGLE_USE_FOLLY_TESTUTIL)
-#include <folly/experimental/TestUtil.h>
 #include <folly/io/async/test/TestSSLServer.h>
+#include <folly/testing/TestUtil.h>
 
 namespace {
 std::string get_resource(const char* res) {

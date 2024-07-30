@@ -63,7 +63,7 @@ std::string SyncConnectPoolOperation::createTimeoutErrorMessage(
     const PoolKeyStats& pool_key_stats,
     size_t per_key_limit) {
   auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::steady_clock::now() - start_time_);
+      stopwatch_->elapsed());
 
   const auto& key = getConnectionKey();
   return fmt::format(

@@ -565,19 +565,18 @@ class Operation : public std::enable_shared_from_this<Operation> {
 
   // Various accessors for our Operation's start, end, and total elapsed time.
   Timepoint startTime() const {
-    return start_time_;
+    return stopwatch_->getCheckpoint();
   }
   Timepoint endTime() const {
     CHECK_THROW(
         state_ == OperationState::Completed, db::OperationStateException);
-    return end_time_;
+    return startTime() + opDuration_;
   }
 
   Duration elapsed() const {
     CHECK_THROW(
         state_ == OperationState::Completed, db::OperationStateException);
-    return std::chrono::duration_cast<std::chrono::microseconds>(
-        end_time_ - start_time_);
+    return opDuration_;
   }
 
   /**
@@ -748,8 +747,9 @@ class Operation : public std::enable_shared_from_this<Operation> {
 
   // Our client is not owned by us. It must outlive all active Operations.
   Duration timeout_;
-  Timepoint start_time_;
-  Timepoint end_time_;
+  using StopWatch = folly::stop_watch<Duration>;
+  std::unique_ptr<StopWatch> stopwatch_;
+  Duration opDuration_;
 
   // This will contain the max block time of the thread
   Duration max_thread_block_time_ = Duration(0);

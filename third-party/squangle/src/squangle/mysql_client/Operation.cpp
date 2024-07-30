@@ -20,6 +20,8 @@
 #include "squangle/mysql_client/Operation.h"
 #include "squangle/mysql_client/SSLOptionsProviderBase.h"
 
+using namespace std::chrono_literals;
+
 // Default timeout of 0 is no-op for connect tcp timeout
 DEFINE_int64(
     async_mysql_connect_tcp_timeout_micros,
@@ -158,15 +160,14 @@ void Operation::waitForSocketActionable() {
       LOG(FATAL) << "Unknown nonblocking state " << async_blocking_state;
   }
 
-  auto end = timeout_ + start_time_;
-  auto now = chrono::steady_clock::now();
-  if (now >= end) {
+  if (stopwatch_->elapsed(timeout_)) {
     timeoutTriggered();
     return;
   }
 
-  conn()->socketHandler()->scheduleTimeout(
-      chrono::duration_cast<chrono::milliseconds>(end - now).count());
+  auto leftUs = timeout_ - stopwatch_->elapsed();
+  auto leftMs = std::chrono::duration_cast<std::chrono::milliseconds>(leftUs);
+  conn()->socketHandler()->scheduleTimeout(leftMs.count());
   conn()->socketHandler()->registerHandler(event_mask);
 }
 
@@ -208,7 +209,7 @@ void Operation::timeoutTriggered() {
 }
 
 Operation* Operation::run() {
-  start_time_ = chrono::steady_clock::now();
+  stopwatch_ = std::make_unique<StopWatch>();
   if (callbacks_.pre_operation_callback_) {
     CHECK_THROW(
         state() == OperationState::Unstarted, db::OperationStateException);
@@ -251,7 +252,7 @@ void Operation::completeOperation(OperationResult result) {
 void Operation::completeOperationInner(OperationResult result) {
   state_ = OperationState::Completed;
   result_ = result;
-  end_time_ = chrono::steady_clock::now();
+  opDuration_ = stopwatch_->elapsed();
   if ((result == OperationResult::Cancelled ||
        result == OperationResult::TimedOut) &&
       conn()->hasInitialized()) {
@@ -566,12 +567,7 @@ bool ConnectOperation::shouldCompleteOperation(OperationResult result) {
     return true;
   }
 
-  auto now = std::chrono::steady_clock::now() + std::chrono::milliseconds(1);
-  if (now > start_time_ + conn_options_.getTotalTimeout()) {
-    return true;
-  }
-
-  return false;
+  return stopwatch_->elapsed(conn_options_.getTotalTimeout() + 1ms);
 }
 
 void ConnectOperation::attemptFailed(OperationResult result) {
@@ -581,9 +577,8 @@ void ConnectOperation::attemptFailed(OperationResult result) {
     return;
   }
 
-  // We need to update end_time_ here because the logging function uses this
-  // in calculating duration time.
-  end_time_ = std::chrono::steady_clock::now();
+  // We need to update opDuration_ here because the logging function needs it.
+  opDuration_ = stopwatch_->elapsed();
   logConnectCompleted(result);
 
   tcp_timeout_handler_.cancelTimeout();
@@ -592,11 +587,9 @@ void ConnectOperation::attemptFailed(OperationResult result) {
   conn()->socketHandler()->cancelTimeout();
   conn()->close();
 
-  auto now = std::chrono::steady_clock::now();
   // Adjust timeout
-  std::chrono::duration<uint64_t, std::micro> timeout_attempt_based =
-      conn_options_.getTimeout() +
-      std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time_);
+  Duration timeout_attempt_based =
+      conn_options_.getTimeout() + stopwatch_->elapsed();
   timeout_ = min(timeout_attempt_based, conn_options_.getTotalTimeout());
   specializedRun();
 }
@@ -772,8 +765,8 @@ void ConnectOperation::tcpConnectTimeoutTriggered() {
 void ConnectOperation::timeoutHandler(
     bool isTcpTimeout,
     bool isPoolConnection) {
-  auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::steady_clock::now() - start_time_);
+  auto deltaUs = stopwatch_->elapsed();
+  auto deltaMs = std::chrono::duration_cast<std::chrono::milliseconds>(deltaUs);
 
   auto cbDelayUs = client()->callbackDelayMicrosAvg();
   bool stalled = (cbDelayUs >= kCallbackDelayStallThresholdUs);
@@ -798,7 +791,7 @@ void ConnectOperation::timeoutHandler(
         connectStageString(mysql_get_connect_stage(conn()->mysql()))));
   }
 
-  parts.push_back(timeoutMessage(delta));
+  parts.push_back(timeoutMessage(deltaMs));
   if (stalled) {
     parts.push_back(threadOverloadMessage(cbDelayUs));
   }
@@ -824,8 +817,6 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
     return;
   }
   auto* context = connection_context_.get();
-  auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(
-      end_time_ - start_time_);
   if (result == OperationResult::Succeeded) {
     if (context) {
       context->sslVersion = conn()->getTlsVersion();
@@ -833,7 +824,7 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
     client()->logConnectionSuccess(
         db::CommonLoggingData(
             getOperationType(),
-            elapsed,
+            opDuration_,
             timeout_,
             getMaxThreadBlockTime(),
             getTotalThreadBlockTime()),
@@ -849,7 +840,7 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
     client()->logConnectionFailure(
         db::CommonLoggingData(
             getOperationType(),
-            elapsed,
+            opDuration_,
             timeout_,
             getMaxThreadBlockTime(),
             getTotalThreadBlockTime()),
@@ -1422,8 +1413,8 @@ RowBlock makeRowBlockFromStream(
 
 void FetchOperation::specializedTimeoutTriggered() {
   DCHECK(active_fetch_action_ != FetchAction::WaitForConsumer);
-  auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(
-      chrono::steady_clock::now() - start_time_);
+  auto deltaUs = stopwatch_->elapsed();
+  auto deltaMs = std::chrono::duration_cast<std::chrono::milliseconds>(deltaUs);
 
   if (conn()->getKillOnQueryTimeout()) {
     killRunningQuery();
@@ -1477,7 +1468,7 @@ void FetchOperation::specializedTimeoutTriggered() {
       kErrorPrefix));
 
   parts.push_back(std::move(rows));
-  parts.push_back(timeoutMessage(delta));
+  parts.push_back(timeoutMessage(deltaMs));
   if (stalled) {
     parts.push_back(threadOverloadMessage(cbDelayUs));
   }
@@ -2049,10 +2040,9 @@ std::string Operation::threadOverloadMessage(double cbDelayUs) const {
 }
 
 std::string Operation::timeoutMessage(std::chrono::milliseconds delta) const {
+  auto toMs = std::chrono::duration_cast<std::chrono::milliseconds>(timeout_);
   return fmt::format(
-      "(took {}ms, timeout was {}ms)",
-      delta.count(),
-      std::chrono::duration_cast<std::chrono::milliseconds>(timeout_).count());
+      "(took {}ms, timeout was {}ms)", delta.count(), toMs.count());
 }
 
 } // namespace mysql_client

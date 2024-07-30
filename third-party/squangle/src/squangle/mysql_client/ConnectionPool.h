@@ -875,12 +875,11 @@ class ConnectPoolOperation : public ConnectOperation {
     conn()->socketHandler()->unregisterHandler();
     conn()->socketHandler()->cancelTimeout();
 
-    auto now = std::chrono::steady_clock::now();
     // Adjust timeout
     std::chrono::duration<uint64_t, std::micro> timeout_attempt_based =
         getConnectionOptions().getTimeout() +
         std::chrono::duration_cast<std::chrono::milliseconds>(
-            now - start_time_);
+            stopwatch_->elapsed());
 
     timeout_ =
         min(timeout_attempt_based, getConnectionOptions().getTotalTimeout());
@@ -906,16 +905,16 @@ class ConnectPoolOperation : public ConnectOperation {
     }
 
     // Set timeout for waiting for connection
-    auto end = timeout_ + start_time_;
-    auto now = std::chrono::steady_clock::now();
-    if (now >= end) {
+    auto elapsed = stopwatch_->elapsed();
+    if (elapsed >= timeout_) {
       timeoutTriggered();
       return;
     }
 
     if constexpr (uses_one_thread_v<Client>) {
       conn()->socketHandler()->scheduleTimeout(
-          std::chrono::duration_cast<std::chrono::milliseconds>(end - now)
+          std::chrono::duration_cast<std::chrono::milliseconds>(
+              timeout_ - elapsed)
               .count());
     }
 
@@ -994,8 +993,7 @@ class ConnectPoolOperation : public ConnectOperation {
 
   bool syncWait() {
     DCHECK(baton_);
-    auto end = timeout_ + start_time_;
-    return baton_->try_wait_until(end);
+    return baton_->try_wait_for(timeout_ - stopwatch_->elapsed());
   }
 
   void cleanupWait() {

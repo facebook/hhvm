@@ -1,0 +1,145 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Generates a top-level file to be imported in the user's service code. It provides
+wrappers for each of the service handlers that the user is then able to extend.
+}}
+{{> common/auto_generated_py}}
+from abc import ABCMeta
+import typing as _typing
+
+import folly.iobuf as _fbthrift_iobuf
+
+import apache.thrift.metadata.thrift_types as _fbthrift_metadata
+from {{program:base_library_package}}.serializer import serialize_iobuf, deserialize, Protocol
+from {{program:base_library_package}}.server import ServiceInterface, RpcKind, PythonUserException
+
+import {{program:module_path}}.thrift_types
+import {{program:module_path}}.thrift_metadata
+{{#program:include_namespaces}}
+{{#has_services?}}
+import {{included_module_path}}.thrift_services
+{{/has_services?}}
+{{#has_types?}}
+import {{included_module_path}}.thrift_types
+{{/has_types?}}
+{{/program:include_namespaces}}
+{{#program:adapter_modules}}
+import {{module_path}}
+{{/program:adapter_modules}}
+{{#program:adapter_type_hint_modules}}
+import {{module_path}}
+{{/program:adapter_type_hint_modules}}
+
+{{#program:services}}
+class {{service:name}}Interface(
+  {{#service:extends}}{{#service:external_program?}}
+    {{service:module_path}}.thrift_services.{{/service:external_program?}}{{service:name}}Interface,
+    {{/service:extends}}
+    {{^service:extends?}}
+    ServiceInterface,
+    {{/service:extends?}}
+    metaclass=ABCMeta
+):
+
+    @staticmethod
+    def service_name() -> bytes:
+        return b"{{service:name}}"
+
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+        functionTable = {
+        {{#service:supported_service_functions}}
+            b"{{function:name}}": ({{> services/function_kind }}, self._fbthrift__handler_{{function:name}}),
+        {{/service:supported_service_functions}}
+        }
+        return {**super().getFunctionTable(), **functionTable}
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "{{program:name}}.{{service:name}}"
+
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:name}}()
+
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return {{program:module_path}}.thrift_metadata._fbthrift_metadata_service_response_{{service:name}}()
+
+
+{{#service:supported_service_functions}}
+
+    {{^function:stream?}}async {{/function:stream?}}{{#function:stream_has_first_response?}}async {{/function:stream_has_first_response?}}def {{function:name}}(
+            self{{#function:args}},
+            {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}}
+        ) -> {{#function:return_type}}{{> services/service_func_return_type }}{{/function:return_type}}:
+        raise NotImplementedError("async def {{function:name}} is not implemented")
+
+    {{#function:stream?}}
+    async def _fbthrift__stream_wrapper_{{function:name}}(self, stream_generator: _typing.AsyncIterator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
+        {{#function:stream_exceptions?}}
+        try:
+            async for item in stream_generator:
+                yield serialize_iobuf({{> types/function_second_return_type}}(success=item), protocol)
+        {{#function:stream_exceptions}}{{#field:type}}
+        except {{type:module_path}}.{{#type:struct}}{{> structs/unadapted_name}}{{/type:struct}} as e:
+            return_struct = {{> types/function_second_return_type}}({{field:py_name}}=e)
+            buf = serialize_iobuf(return_struct, protocol)
+            exp = PythonUserException('{{type:py3_namespace}}{{#type:struct}}{{> structs/unadapted_name}}{{/type:struct}}', str(e), buf)
+            raise exp
+        {{/field:type}}
+        {{/function:stream_exceptions}}
+        {{/function:stream_exceptions?}}
+        {{^function:stream_exceptions?}}
+        async for item in stream_generator:
+            yield serialize_iobuf({{> types/function_second_return_type}}(success=item), protocol)
+        {{/function:stream_exceptions?}}
+
+    {{/function:stream?}}
+    async def _fbthrift__handler_{{function:name}}(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) {{!
+            }}-> {{> services/service_handler_return_type }}:
+        args_struct = deserialize({{> types/function_args_type}}, args, protocol)
+        {{! TODO: call the postWrite hook here }}
+        {{#function:exceptions?}}
+        try:
+            {{> services/get_handler_result }}
+        {{#function:exceptions}}{{#field:type}}
+
+        except {{type:module_path}}.{{#type:struct}}{{> structs/unadapted_name}}{{/type:struct}} as e:
+            return_struct = {{> types/function_return_type}}({{field:py_name}}=e)
+            buf = serialize_iobuf(return_struct, protocol)
+            exp = PythonUserException('{{type:py3_namespace}}{{#type:struct}}{{> structs/unadapted_name}}{{/type:struct}}', str(e), buf)
+            raise exp
+        {{/field:type}}
+        {{/function:exceptions}}
+        {{/function:exceptions?}}
+        {{^function:exceptions?}}
+        {{> services/get_handler_result }}
+        {{/function:exceptions?}}
+
+
+        {{^function:oneway?}}
+        {{^function:stream?}}
+        return serialize_iobuf(return_struct, protocol)
+        {{/function:stream?}}
+        {{#function:stream?}}
+        return (serialize_iobuf(return_struct, protocol), return_stream)
+        {{/function:stream?}}
+        {{/function:oneway?}}
+
+{{/service:supported_service_functions}}
+{{/program:services}}

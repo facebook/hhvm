@@ -104,25 +104,22 @@ let check_methods ctx c cls ~static =
   |> Sequence.iter ~f:(fun m ->
          let (p, mid) = m.m_name in
          let matching_ancestor =
-           ancestor_names
-           (* inspect each ancestor, *)
-           |> List.filter_map ~f:(fun c ->
-                  Decl_provider.get_class ctx c |> Decl_entry.to_option)
-           (* and if it has a method with the same name, and either that method
-              is non-private or the ancestor is a trait, *)
-           |> List.filter_map ~f:(fun ancestor ->
-                  match get_method ancestor mid with
-                  | None -> None
-                  | Some ancestor_method ->
-                    if should_check_ancestor_method ancestor ancestor_method
-                    then
-                      Some ancestor_method
-                    else
-                      None)
-           (* get the class which defined that method, *)
-           |> List.filter_map ~f:(fun m ->
-                  Decl_provider.get_class ctx m.ce_origin
-                  |> Decl_entry.to_option)
+           (* inspect each ancestor, and if it has a method with the same name,
+              and either that method is non-private or the ancestor is a trait,*)
+           List.filter_map ancestor_names ~f:(fun c ->
+               let open Option.Monad_infix in
+               Decl_provider.get_class ctx c |> Decl_entry.to_option
+               >>= fun ancestor ->
+               (match get_method ancestor mid with
+               | None -> None
+               | Some ancestor_method ->
+                 if should_check_ancestor_method ancestor ancestor_method then
+                   Some ancestor_method
+                 else
+                   None)
+               >>= fun m ->
+               (* get the class which defined that method, *)
+               Decl_provider.get_class ctx m.ce_origin |> Decl_entry.to_option)
            (* as long as it and this class are of the same kind. *)
            |> List.filter ~f:(both_are_or_are_not_interfaces cls)
            (* If such a class exists... *)

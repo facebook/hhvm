@@ -83,6 +83,7 @@ void EvaluatePHPExecutor::callPHPCode()
     SilentEvaluationContext silentContext(m_debugger, m_ri);
     m_result = g_context->evalPHPDebugger(rawUnit, m_frameDepth);
   } else {
+    DebuggerEvalutionContext debuggerContext(m_debugger);
     m_result = g_context->evalPHPDebugger(rawUnit, m_frameDepth);
     if (!m_result.error.empty()) {
       m_debugger->sendUserMessage(

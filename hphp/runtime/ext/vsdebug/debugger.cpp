@@ -2456,6 +2456,17 @@ operator()(const char*, const char* msg, const char* /*ending*/
   m_debugger->sendUserMessage(msg, DebugTransport::OutputLevelStderr);
 }
 
+DebuggerEvalutionContext::DebuggerEvalutionContext(Debugger* debugger) {
+  // In non-server mode, the debugger stdout hook should already be attached.
+  if (!debugger || !RuntimeOption::ServerExecutionMode()) return;
+  m_stdoutHook = debugger->getStdoutHook();
+  g_context->addStdoutHook(m_stdoutHook);
+}
+
+DebuggerEvalutionContext::~DebuggerEvalutionContext() {
+  g_context->removeStdoutHook(m_stdoutHook);
+}
+
 SilentEvaluationContext::SilentEvaluationContext(
   Debugger* debugger,
   DebuggerRequestInfo* ri,

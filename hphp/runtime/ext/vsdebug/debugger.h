@@ -683,6 +683,12 @@ struct NoOpStdoutHook final : ExecutionContext::StdoutHook {
   void operator()(const char* /*str*/, int /*len*/) override {}
 };
 
+struct DebuggerEvalutionContext {
+  DebuggerEvalutionContext(Debugger* debugger);
+  ~DebuggerEvalutionContext();
+private:
+  DebuggerStdoutHook* m_stdoutHook = nullptr;
+};
 // When performing an evaluation on behalf of part of the debugger engine
 // that should not be shown to the user in any way (such as for completions,
 // or conditional breakpoints), we want to suppress all output from the VM,
@@ -715,7 +721,7 @@ struct DebuggerNoBreakContext {
   bool m_prevDbgNoBreak;
   DebuggerRequestInfo* m_requestInfo;
 
-  DebuggerNoBreakContext(Debugger* debugger);
+  explicit DebuggerNoBreakContext(Debugger* debugger);
   ~DebuggerNoBreakContext();
 };
 

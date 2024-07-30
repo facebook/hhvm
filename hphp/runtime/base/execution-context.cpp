@@ -87,6 +87,7 @@
 
 #include "hphp/runtime/base/bespoke-runtime.h"
 #include "hphp/runtime/ext/hh/ext_implicit_context.h"
+#include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -1984,6 +1985,8 @@ ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
   if (!m_requestOptions) {
     onLoadWithOptions(file, RepoOptions::forFile(file));
   }
+  auto const debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
+  HPHP::VSDEBUG::DebuggerEvalutionContext debuggerContext(debugger);
   return evalPHPDebugger(unit, frame);
 }
 

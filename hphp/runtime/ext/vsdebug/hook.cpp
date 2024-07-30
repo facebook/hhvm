@@ -363,16 +363,16 @@ void VSDebugHook::tryEnterDebugger(
     // the wrapper has the actual stdout and stderr pipes to use directly,
     // except for the case where we attached to an already-running script,
     // which behaves like server mode.
-    bool scriptAttachMode = Cfg::Debugger::VSDebuggerListenPort > 0 ||
+    bool scriptAttachMode =
+      Cfg::Debugger::VSDebuggerListenPort > 0 ||
       (!RuntimeOption::ServerExecutionMode() &&
        !Cfg::Debugger::VSDebuggerDomainSocketPath.empty());
     if (!Debugger::hasSameTty()) {
       if (debugger->getDebuggerOptions().disableStdoutRedirection == false) {
-        if (!g_context.isNull()) {
-          g_context->addStdoutHook(debugger->getStdoutHook());
-        }
-
         if (scriptAttachMode || debugger->isDummyRequest()) {
+          if (!g_context.isNull()) {
+            g_context->addStdoutHook(debugger->getStdoutHook());
+          }
           // Attach to stderr in server mode only for the dummy thread (to show
           // any error spew from evals, etc) or in script attach mode.
           // Attaching to all requests in server mode produces way too much error

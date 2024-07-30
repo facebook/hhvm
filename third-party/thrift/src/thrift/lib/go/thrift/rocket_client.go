@@ -47,10 +47,12 @@ type rocketClient struct {
 	protoID ProtocolID
 	zstd    bool
 
-	reqMetadata *requestRPCMetadata
-	respHeaders map[string]string
+	messageName string
+	writeType   MessageType
 	seqID       int32
 
+	reqHeaders        map[string]string
+	respHeaders       map[string]string
 	persistentHeaders map[string]string
 
 	rbuf *MemoryBuffer
@@ -89,14 +91,8 @@ type rsocketResult struct {
 func (p *rocketClient) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
 	p.wbuf.Reset()
 	p.seqID = seqid
-
-	if p.reqMetadata == nil {
-		p.reqMetadata = &requestRPCMetadata{}
-	}
-	p.reqMetadata.Name = name
-	p.reqMetadata.TypeID = typeID
-	p.reqMetadata.ProtoID = p.protoID
-	p.reqMetadata.Zstd = p.zstd
+	p.writeType = typeID
+	p.messageName = name
 	return nil
 }
 
@@ -105,22 +101,22 @@ func (p *rocketClient) WriteMessageEnd() error {
 }
 
 func (p *rocketClient) Flush() (err error) {
-	if p.reqMetadata == nil {
-		p.reqMetadata = &requestRPCMetadata{}
-	}
-	if p.reqMetadata.Other == nil {
-		p.reqMetadata.Other = make(map[string]string)
-	}
-	for k, v := range p.persistentHeaders {
-		p.reqMetadata.Other[k] = v
-	}
-	metadataBytes, err := serializeRequestRPCMetadata(p.reqMetadata)
+	reqMetadata := &requestRPCMetadata{}
+	reqMetadata.Name = p.messageName
+	reqMetadata.TypeID = p.writeType
+	reqMetadata.ProtoID = p.protoID
+	reqMetadata.Zstd = p.zstd
+	reqMetadata.Other = make(map[string]string)
+	maps.Copy(reqMetadata.Other, p.reqHeaders)
+	p.reqHeaders = make(map[string]string)
+	maps.Copy(reqMetadata.Other, p.persistentHeaders)
+	metadataBytes, err := serializeRequestRPCMetadata(reqMetadata)
 	if err != nil {
 		return err
 	}
 	// serializer in the protocol field was writing to the transport's memory buffer.
 	dataBytes := p.wbuf.Bytes()
-	if p.reqMetadata.Zstd {
+	if reqMetadata.Zstd {
 		dataBytes, err = compressZstd(dataBytes)
 		if err != nil {
 			return err
@@ -138,7 +134,7 @@ func (p *rocketClient) Flush() (err error) {
 	// Or something else is happening, but this is very necessary.
 	p.conn.SetDeadline(time.Time{})
 	mono := p.client.RequestResponse(request)
-	if p.reqMetadata.TypeID != CALL {
+	if reqMetadata.TypeID != CALL {
 		return nil
 	}
 	ctx := p.ctx
@@ -229,7 +225,7 @@ func (p *rocketClient) readPayload() (resp payload.Payload, err error) {
 }
 
 func (p *rocketClient) ReadMessageBegin() (string, MessageType, int32, error) {
-	name := p.reqMetadata.Name
+	name := p.messageName
 	resp, err := p.readPayload()
 	if err != nil {
 		return name, EXCEPTION, p.seqID, err
@@ -269,7 +265,6 @@ func (p *rocketClient) ReadMessageBegin() (string, MessageType, int32, error) {
 }
 
 func (p *rocketClient) ReadMessageEnd() error {
-	p.reqMetadata = nil
 	return nil
 }
 
@@ -278,13 +273,10 @@ func (p *rocketClient) Skip(fieldType Type) (err error) {
 }
 
 func (p *rocketClient) SetRequestHeader(key, value string) {
-	if p.reqMetadata == nil {
-		p.reqMetadata = &requestRPCMetadata{}
+	if p.reqHeaders == nil {
+		p.reqHeaders = make(map[string]string)
 	}
-	if p.reqMetadata.Other == nil {
-		p.reqMetadata.Other = make(map[string]string)
-	}
-	p.reqMetadata.Other[key] = value
+	p.reqHeaders[key] = value
 }
 
 func (p *rocketClient) GetResponseHeaders() map[string]string {

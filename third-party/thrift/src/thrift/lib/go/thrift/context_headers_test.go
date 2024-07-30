@@ -72,7 +72,7 @@ func TestRocketProtocolSomeHeaders(t *testing.T) {
 	if err := setRequestHeaders(ctx, protocol); err != nil {
 		t.Fatal(err)
 	}
-	got := protocol.(*rocketClient).reqMetadata.Other
+	got := protocol.(*rocketClient).reqHeaders
 	assert.Equal(t, want, got)
 }
 

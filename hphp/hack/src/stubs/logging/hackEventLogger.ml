@@ -25,8 +25,6 @@ let set_search_chunk_size _ = ()
 
 let set_changed_mergebase _ = ()
 
-let set_from _ = ()
-
 let set_hhconfig_version _ = ()
 
 let set_rollout_group _ = ()

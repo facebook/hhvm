@@ -30,6 +30,7 @@ let init_event_logger root command ~init_id ~from config local_config : unit =
   HackEventLogger.client_init
     ~init_id
     ~from
+    ~is_interactive:(ClientArgs.is_interactive command)
     ~custom_columns:(ClientCommand.get_custom_telemetry_data command)
     (Option.value root ~default:Path.dummy_path);
   Option.iter config ~f:(fun config ->

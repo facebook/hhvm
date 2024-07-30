@@ -117,6 +117,8 @@ let parse_without_command options usage command =
   | x :: rest when String.(lowercase x = lowercase command) -> rest
   | args -> args
 
+let is_interactive = List.mem [""; "[sh]"] ~equal:String.equal
+
 (* *** *** NB *** *** ***
  * Commonly-used options are documented in hphp/hack/man/hh_client.1 --
  * if you are making significant changes you need to update the manpage as
@@ -772,7 +774,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
   if String.equal !from "emacs" then
     Printf.fprintf stdout "-*- mode: compilation -*-\n%!";
 
-  let is_interactive = List.mem [""; "[sh]"] ~equal:String.equal !from in
+  let is_interactive = is_interactive !from in
   {
     autostart = !autostart;
     config = !config;
@@ -1210,3 +1212,5 @@ let from = function
   | CRage { ClientRage.from; _ }
   | CDecompressZhhdg { ClientDecompressZhhdg.from; _ } ->
     from
+
+let is_interactive cmd = from cmd |> is_interactive

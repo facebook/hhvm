@@ -12,4 +12,6 @@ val root : ClientCommand.command -> Path.t option
 
 val from : ClientCommand.command -> string
 
+val is_interactive : ClientCommand.command -> bool
+
 val config : ClientCommand.command -> (string * string) list option

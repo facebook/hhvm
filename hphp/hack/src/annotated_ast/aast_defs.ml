@@ -1249,6 +1249,7 @@ and hint_ =
   | Hwildcard
   | Hnonnull
   | Habstr of string * hint list
+      (** A type parameter *)
   | Hvec_or_dict of hint option * hint
   | Hthis
   | Hdynamic

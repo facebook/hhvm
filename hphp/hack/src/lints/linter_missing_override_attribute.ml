@@ -39,24 +39,50 @@ let should_check_ancestor_method ancestor_class ancestor_method =
       true
     | Vprivate _ -> false
 
-let ancestors_providing_methods ctx cls =
-  let ancestor_names = Cls.all_ancestor_names cls in
-  let reqs = Cls.all_ancestor_req_names cls in
-  (* filter out interfaces *)
+let rec parent_hint_name (_p, hint) =
+  match hint with
+  | Happly ((_, name), _) -> Some name
+  | Hrefinement (hint, _) -> parent_hint_name hint
+  | Hprim _
+  | Hoption _
+  | Hlike _
+  | Hfun _
+  | Htuple _
+  | Hclass_args _
+  | Hshape _
+  | Haccess _
+  | Hsoft _
+  | Hmixed
+  | Hwildcard
+  | Hnonnull
+  | Habstr _
+  | Hvec_or_dict _
+  | Hthis
+  | Hdynamic
+  | Hnothing
+  | Hunion _
+  | Hintersection _
+  | Hfun_context _
+  | Hvar _ ->
+    None
+
+let ancestors_providing_methods
+    ({ c_extends; c_implements; c_uses; c_reqs; _ } : (_, _) class_) =
   let reqs =
-    List.filter
-      ~f:(fun class_name ->
-        match Decl_provider.get_class ctx class_name with
-        | Decl_entry.DoesNotExist
-        | Decl_entry.NotYetAvailable ->
-          false
-        | Decl_entry.Found cls -> not (Ast_defs.is_c_interface (Cls.kind cls)))
-      reqs
+    List.filter_map c_reqs ~f:(fun (hint, req_kind) ->
+        match req_kind with
+        | RequireExtends ->
+          (* We only care if this is a parent that is a class. *)
+          Some hint
+        | RequireImplements
+        | RequireClass ->
+          None)
   in
-  ancestor_names @ reqs
+  c_extends @ c_implements @ c_uses @ reqs
+  |> List.filter_map ~f:parent_hint_name
 
 let check_methods ctx c cls ~static =
-  let ancestor_names = ancestors_providing_methods ctx cls in
+  let ancestor_names = ancestors_providing_methods c in
   let get_method =
     if static then
       Cls.get_smethod

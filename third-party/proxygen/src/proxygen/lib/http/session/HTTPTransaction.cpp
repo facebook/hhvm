@@ -2189,8 +2189,9 @@ void HTTPTransaction::onWebTransportStreamIngress(
 void HTTPTransaction::onWebTransportStreamError(HTTPCodec::StreamID id,
                                                 uint32_t errorCode) {
   auto ingressStreamIt = wtIngressStreams_.find(id);
-  CHECK(ingressStreamIt != wtIngressStreams_.end()) << id;
-  ingressStreamIt->second.error(errorCode);
+  if (ingressStreamIt != wtIngressStreams_.end()) {
+    ingressStreamIt->second.error(errorCode);
+  } // it can be gone if the application STOP_SENDING
 }
 
 bool HTTPTransaction::onWebTransportStopSending(HTTPCodec::StreamID id,

@@ -475,4 +475,18 @@ TEST_F(HTTPTransactionWebTransportTest, RefreshTimeout) {
   evb_.loop();
 }
 
+TEST_F(HTTPTransactionWebTransportTest, StopSendingThenAbort) {
+  WebTransport::StreamReadHandle* readHandle{nullptr};
+  EXPECT_CALL(handler_, onWebTransportUniStream(_, _))
+      .WillOnce(SaveArg<1>(&readHandle));
+
+  txn_->onWebTransportUniStream(0);
+  EXPECT_NE(readHandle, nullptr);
+  EXPECT_CALL(transport_, stopReadingWebTransportIngress(0, WT_APP_ERROR_2))
+      .WillOnce(Return(folly::unit));
+  readHandle->stopSending(WT_APP_ERROR_2);
+  txn_->onWebTransportStreamError(0, WT_APP_ERROR_1);
+  eventBase_.loopOnce();
+}
+
 } // namespace proxygen::test

@@ -286,7 +286,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         self.assertEqual(u1, u2)
 
         u3 = TestUnionImmutable(string_field="world")
-        self.assertIsNot(u1, u2)
+        self.assertIsNot(u1, u3)
         self.assertNotEqual(u1, u3)
 
     def test_ordering(self) -> None:
@@ -637,3 +637,16 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         self.assertEqual(u.string_field, "Hello!")
         with self.assertRaisesRegex(NotImplementedError, "__delete__"):
             del u.string_field
+
+    def test_equality(self) -> None:
+        u1 = TestUnionMutable(string_field="hello")
+        u2 = TestUnionMutable(string_field="hello")
+        self.assertIsNot(u1, u2)
+        self.assertEqual(u1, u2)
+
+        u3 = TestUnionMutable(string_field="world")
+        self.assertIsNot(u1, u3)
+        self.assertNotEqual(u1, u3)
+        u3.string_field = "hello"
+        self.assertIsNot(u1, u3)
+        self.assertEqual(u1, u3)

@@ -735,6 +735,19 @@ cdef class MutableUnion(MutableStructOrUnion):
         inst._fbthrift_data = data
         return inst
 
+    def __eq__(MutableUnion self, other):
+        if other is self:
+            return True
+
+        if type(other) != type(self):
+            return False
+
+        other_union = <MutableUnion>(other)
+        if other_union.fbthrift_current_field != self.fbthrift_current_field:
+            return False
+
+        return other_union.fbthrift_current_value == self.fbthrift_current_value
+
 
 def _gen_mutable_union_field_enum_members(field_infos):
     yield ("FBTHRIFT_UNION_EMPTY", 0)

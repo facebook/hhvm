@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <initializer_list>
+#include <variant>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>

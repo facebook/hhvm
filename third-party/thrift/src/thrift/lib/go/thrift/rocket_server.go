@@ -71,89 +71,33 @@ type rocketServerSocket struct {
 
 func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 	request, err := decodeRequestPayload(msg)
-	if !request.HasMetadata() {
-		return mono.Error(fmt.Errorf("expected metadata"))
+	if err != nil {
+		return mono.Error(err)
 	}
-	protocol, err := newBufProtocol(request.Name(), request.TypeID(), request.Headers(), request.ProtoID(), request.Data())
+	protocol, err := newProtocolBufferFromRequest(request)
 	if err != nil {
 		return mono.Error(err)
 	}
 	if err := processContext(r.ctx, r.proc, protocol); err != nil {
 		return mono.Error(err)
 	}
-	response, err := encodeResponsePayload(protocol.reqHeaders, request.Zstd(), protocol.Bytes())
+	response, err := encodeResponsePayload(protocol.GetRequestHeaders(), request.Zstd(), protocol.Bytes())
 	if err != nil {
 		return mono.Error(err)
 	}
 	return mono.Just(response)
 }
 
-// bufProtocol is a protocol that is provided with a buffer to read from and writes to an empty buffer that can be retrieved via the Bytes method.
-type bufProtocol struct {
-	Decoder
-	Encoder
-	wbuf        *MemoryBuffer
-	name        string
-	typeID      MessageType
-	reqHeaders  map[string]string
-	respHeaders map[string]string
-}
-
-var _ Protocol = (*bufProtocol)(nil)
-
-func newBufProtocol(name string, typeID MessageType, respHeaders map[string]string, protoID ProtocolID, data []byte) (*bufProtocol, error) {
-	wbuf := NewMemoryBuffer()
-	p := &bufProtocol{
-		Decoder:     newCompactDecoder(NewMemoryBufferWithData(data)),
-		Encoder:     newCompactEncoder(wbuf),
-		wbuf:        wbuf,
-		name:        name,
-		typeID:      typeID,
-		respHeaders: respHeaders,
-		reqHeaders:  map[string]string{},
+func newProtocolBufferFromRequest(request *requestPayload) (*protocolBuffer, error) {
+	if !request.HasMetadata() {
+		return nil, fmt.Errorf("expected metadata")
 	}
-	rbuf := NewMemoryBufferWithData(data)
-	switch protoID {
-	case ProtocolIDBinary:
-		p.Decoder = newBinaryDecoder(rbuf)
-		p.Encoder = newBinaryEncoder(wbuf)
-	case ProtocolIDCompact:
-		p.Decoder = newCompactDecoder(rbuf)
-		p.Encoder = newCompactEncoder(wbuf)
-	default:
-		return nil, NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", protoID))
+	protocol, err := newProtocolBuffer(request.Headers(), request.ProtoID(), request.Data())
+	if err != nil {
+		return nil, err
 	}
-	return p, nil
-}
-
-func (b *bufProtocol) Bytes() []byte {
-	return b.wbuf.Buffer.Bytes()
-}
-
-func (b *bufProtocol) ReadMessageBegin() (string, MessageType, int32, error) {
-	return b.name, b.typeID, 0, nil
-}
-
-func (b *bufProtocol) ReadMessageEnd() error {
-	return nil
-}
-
-func (b *bufProtocol) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
-	return nil
-}
-
-func (b *bufProtocol) WriteMessageEnd() error {
-	return nil
-}
-
-func (b *bufProtocol) Close() error {
-	return nil
-}
-
-func (b *bufProtocol) GetResponseHeaders() map[string]string {
-	return b.respHeaders
-}
-
-func (b *bufProtocol) SetRequestHeader(key, value string) {
-	b.reqHeaders[key] = value
+	if err := protocol.WriteMessageBegin(request.Name(), request.TypeID(), 0); err != nil {
+		return nil, err
+	}
+	return protocol, nil
 }

@@ -57,6 +57,7 @@ module Kind = struct
     | Newtype
     | Case
     | Enum
+    | Tuple
   [@@deriving enum]
 
   let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
@@ -161,6 +162,10 @@ end = struct
         disjuncts: t list;
       }
     | Enum of { name: string }
+    | Tuple of {
+        fst: t;
+        snd: t;
+      }
   [@@deriving eq, ord]
 
   (** Reflexive transitive subtypes of the given type. It is based only on the
@@ -189,7 +194,12 @@ end = struct
     | Alias info -> subtypes_of info.aliased
     | Newtype _ -> []
     | Case info -> List.concat_map ~f:subtypes_of info.disjuncts
-    | Enum _ -> [])
+    | Enum _ -> []
+    | Tuple { fst; snd } ->
+      let fst_subtypes = subtypes_of fst in
+      let snd_subtypes = subtypes_of snd in
+      List.Cartesian_product.map2 fst_subtypes snd_subtypes ~f:(fun fst snd ->
+          Tuple { fst; snd }))
 
   let rec show = function
     | Mixed -> "mixed"
@@ -210,6 +220,7 @@ end = struct
     | Newtype info -> info.name
     | Case info -> info.name
     | Enum info -> info.name
+    | Tuple { fst; snd } -> Format.sprintf "(%s,%s)" (show fst) (show snd)
 
   let are_disjoint ty ty' =
     (* For the purposes of disjointness we can go higher up in the typing
@@ -227,6 +238,7 @@ end = struct
       | Case { name; disjuncts } ->
         Case { name; disjuncts = List.map ~f:weaken_for_disjointness disjuncts }
       | Enum _ -> Primitive Primitive.Arraykey
+      | Tuple _ -> Tuple { fst = Mixed; snd = Mixed }
       | Mixed
       | Primitive _
       | Classish _ ->
@@ -254,7 +266,7 @@ end = struct
        || List.mem subtypes' Mixed ~equal
        || have_overlapping_types (subtypes, subtypes'))
 
-  let expr_of = function
+  let rec expr_of = function
     | Primitive prim -> begin
       let open Primitive in
       match prim with
@@ -275,6 +287,12 @@ end = struct
     end
     | Newtype info -> Some (info.producer ^ "()")
     | Enum info -> Some (info.name ^ "::A")
+    | Tuple { fst; snd } ->
+      let open Option.Let_syntax in
+      let* fst_str = expr_of fst in
+      let* snd_str = expr_of snd in
+      let str = Format.sprintf "tuple(%s,%s)" fst_str snd_str in
+      Some str
     | Mixed
     | Option _
     | Alias _
@@ -395,4 +413,8 @@ end = struct
       let value = inhabitant_of underlying_ty in
       let enum_def = Definition.enum ~name underlying_ty ~value in
       (Enum { name }, [enum_def])
+    | Kind.Tuple ->
+      let (fst, fst_defs) = mk () in
+      let (snd, snd_defs) = mk () in
+      (Tuple { fst; snd }, fst_defs @ snd_defs)
 end

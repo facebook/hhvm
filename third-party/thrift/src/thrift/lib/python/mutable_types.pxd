@@ -18,6 +18,7 @@ from libcpp.memory cimport unique_ptr
 from folly.iobuf cimport IOBuf
 
 from thrift.python.protocol cimport Protocol
+from thrift.python.types cimport FieldInfo
 
 cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "::apache::thrift::detail":
     cdef struct cTypeInfo "::apache::thrift::detail::TypeInfo":
@@ -95,6 +96,9 @@ cdef class MutableUnionInfo:
     cdef tuple fields
     cdef dict name_to_index
     cdef void _fill_mutable_union_info(self) except *
+
+cdef class _MutableUnionFieldDescriptor:
+    cdef FieldInfo _field_info
 
 cdef class MutableUnion(MutableStructOrUnion):
     cdef readonly object fbthrift_current_field

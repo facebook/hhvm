@@ -742,11 +742,10 @@ def _gen_mutable_union_field_enum_members(field_infos):
         yield (f.py_name, f.id)
 
 
-class _MutableUnionFieldDescriptor:
+cdef class _MutableUnionFieldDescriptor:
     """Descriptor for a field of a (mutable) Thrift Union. """
-    __slots__ = ('_field_info',)
 
-    def __init__(self, field_info):
+    def __cinit__(self, FieldInfo field_info):
         """
         Args:
             field_info (FieldInfo): of the target field in the Thrift union that will be

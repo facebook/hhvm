@@ -635,5 +635,5 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
     def test_del_field(self) -> None:
         u = TestUnionMutable(string_field="Hello!")
         self.assertEqual(u.string_field, "Hello!")
-        with self.assertRaisesRegex(AttributeError, "__delete__"):
+        with self.assertRaisesRegex(NotImplementedError, "__delete__"):
             del u.string_field

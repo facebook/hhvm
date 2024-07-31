@@ -1538,6 +1538,9 @@ void HQSession::applySettings(const SettingsList& settings) {
           supportsWebTransport_.set(folly::to_underlying(SettingEnabled::PEER));
           break;
         case hq::SettingId::WEBTRANSPORT_MAX_SESSIONS:
+          hasWT = setting.value > 0;
+          VLOG(3) << "Peer sent WEBTRANSPORT_MAX_SESSIONS: " << uint32_t(hasWT);
+          supportsWebTransport_.set(folly::to_underlying(SettingEnabled::PEER));
           break;
       }
     }
@@ -2558,6 +2561,11 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
           [&event](auto observer, auto observed) {
             observer->requestStarted(observed, event);
           });
+    }
+    if (WebTransport::isConnectMessage(*msg)) {
+      VLOG(3) << "Peer sent WT Connect";
+      session_.supportsWebTransport_.set(
+          folly::to_underlying(SettingEnabled::PEER));
     }
   }
 

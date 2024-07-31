@@ -3354,3 +3354,40 @@ INSTANTIATE_TEST_SUITE_P(HQDownstreamSessionTest,
                            return tp;
                          }()),
                          paramsToTestName);
+
+class HQDownstreamSessionTestWebTransport : public HQDownstreamSessionTest {};
+
+TEST_P(HQDownstreamSessionTestWebTransport, WTRequestNegotiates) {
+  HTTPMessage req;
+  req.setHTTPVersion(1, 1);
+  req.setUpgradeProtocol("webtransport");
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setURL("/webtransport");
+  req.getHeaders().set(HTTP_HEADER_HOST, "www.facebook.com");
+  auto sessionId = sendRequest(req, false);
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders();
+  flushRequestsAndLoopN(3);
+
+  HTTPMessage resp;
+  resp.setStatusCode(200);
+  handler->txn_->sendHeaders(resp);
+  EXPECT_NE(handler->txn_->getWebTransport(), nullptr);
+  handler->sendEOM();
+  handler->expectEOM();
+  handler->expectDetachTransaction();
+  socketDriver_->addReadEOF(sessionId, std::chrono::milliseconds(0));
+  hqSession_->closeWhenIdle();
+  flushRequestsAndLoop();
+}
+
+INSTANTIATE_TEST_SUITE_P(HQDownstreamSessionTest,
+                         HQDownstreamSessionTestWebTransport,
+                         Values([] {
+                           TestParams tp;
+                           tp.alpn_ = "h3";
+                           tp.shouldSendSettings_ = false;
+                           tp.webTransport_ = true;
+                           return tp;
+                         }()),
+                         paramsToTestName);

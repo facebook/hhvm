@@ -173,17 +173,36 @@ int fizzGenerateDelegatedCredentialCommand(
     }
     BIO_get_mem_ptr(bio.get(), &bptr);
     auto certPem = std::string(bptr->data, bptr->length);
+    auto clientCredential = DelegatedCredentialUtils::generateCredential(
+        cert,
+        certPrivKey,
+        credPrivKey,
+        *credSignScheme,
+        *credVerifScheme,
+        CertificateVerifyContext::ClientDelegatedCredential,
+        validSec);
 
-    auto credential = DelegatedCredentialUtils::generateCredential(
+    auto serverCredential = DelegatedCredentialUtils::generateCredential(
         std::move(cert),
         certPrivKey,
         credPrivKey,
         *credSignScheme,
         *credVerifScheme,
+        CertificateVerifyContext::ServerDelegatedCredential,
         validSec);
 
-    auto pem = fizz::extensions::generateDelegatedCredentialPEM(
-        std::move(credential), std::move(certPem), std::move(credKeyData));
+    auto clientPem = fizz::extensions::generateDelegatedCredentialPEM(
+        fizz::extensions::DelegatedCredentialMode::Client,
+        std::move(clientCredential),
+        credKeyData);
+
+    auto serverPem = fizz::extensions::generateDelegatedCredentialPEM(
+        fizz::extensions::DelegatedCredentialMode::Server,
+        std::move(serverCredential),
+        credKeyData);
+
+    // Create Combined PEM
+    auto pem = clientPem + serverPem + certPem;
 
     if (outPath.empty()) {
       std::cout << pem;

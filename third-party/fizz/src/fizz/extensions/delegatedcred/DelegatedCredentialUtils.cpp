@@ -80,8 +80,14 @@ DelegatedCredential DelegatedCredentialUtils::generateCredential(
     const folly::ssl::EvpPkeyUniquePtr& credKey,
     SignatureScheme signScheme,
     SignatureScheme verifyScheme,
+    CertificateVerifyContext verifyContext,
     std::chrono::seconds validSeconds) {
   DelegatedCredential cred;
+  if (verifyContext != CertificateVerifyContext::ServerDelegatedCredential &&
+      verifyContext != CertificateVerifyContext::ClientDelegatedCredential) {
+    throw std::runtime_error(
+        "Requested credential with invalid verification context");
+  }
   if (validSeconds > std::chrono::hours(24 * 7)) {
     // Can't be valid longer than a week!
     throw std::runtime_error(
@@ -156,10 +162,8 @@ DelegatedCredential DelegatedCredentialUtils::generateCredential(
 
   auto toSign = prepareSignatureBuffer(
       cred, folly::ssl::OpenSSLCertUtils::derEncode(*cert->getX509()));
-  cred.signature = cert->sign(
-      cred.credential_scheme,
-      CertificateVerifyContext::ServerDelegatedCredential,
-      toSign->coalesce());
+  cred.signature =
+      cert->sign(cred.credential_scheme, verifyContext, toSign->coalesce());
 
   return cred;
 }

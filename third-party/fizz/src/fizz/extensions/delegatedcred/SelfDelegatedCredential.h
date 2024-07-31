@@ -36,6 +36,7 @@ class SelfDelegatedCredentialImpl : public SelfDelegatedCredential {
   ~SelfDelegatedCredentialImpl() override = default;
 
   SelfDelegatedCredentialImpl(
+      DelegatedCredentialMode mode,
       std::vector<folly::ssl::X509UniquePtr> certs,
       folly::ssl::EvpPkeyUniquePtr privateKey,
       DelegatedCredential credential,

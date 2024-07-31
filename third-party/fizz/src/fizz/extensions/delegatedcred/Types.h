@@ -30,6 +30,8 @@ struct DelegatedCredentialSupport {
   std::vector<SignatureScheme> supported_signature_algorithms;
 };
 
+enum class DelegatedCredentialMode { Client, Server };
+
 Extension encodeExtension(const extensions::DelegatedCredential& cred);
 
 Extension encodeExtension(const extensions::DelegatedCredentialSupport& cs);

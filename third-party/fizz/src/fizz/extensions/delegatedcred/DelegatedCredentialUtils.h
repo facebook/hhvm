@@ -53,6 +53,7 @@ class DelegatedCredentialUtils {
       const folly::ssl::EvpPkeyUniquePtr& credKey,
       SignatureScheme signScheme,
       SignatureScheme verifyScheme,
+      CertificateVerifyContext verifyContext,
       std::chrono::seconds validSeconds);
 };
 } // namespace extensions

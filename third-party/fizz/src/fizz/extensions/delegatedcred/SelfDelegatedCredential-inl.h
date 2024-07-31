@@ -32,6 +32,7 @@ SelfDelegatedCredentialImpl<T>::InternalSelfCert::InternalSelfCert(
 
 template <openssl::KeyType T>
 SelfDelegatedCredentialImpl<T>::SelfDelegatedCredentialImpl(
+    DelegatedCredentialMode mode,
     std::vector<folly::ssl::X509UniquePtr> certs,
     folly::ssl::EvpPkeyUniquePtr privateKey,
     DelegatedCredential credential,
@@ -53,7 +54,9 @@ SelfDelegatedCredentialImpl<T>::SelfDelegatedCredentialImpl(
   auto parentCert = openssl::CertUtils::makePeerCert(getX509());
   parentCert->verify(
       credential_.credential_scheme,
-      CertificateVerifyContext::ServerDelegatedCredential,
+      mode == DelegatedCredentialMode::Server
+          ? CertificateVerifyContext::ServerDelegatedCredential
+          : CertificateVerifyContext::ClientDelegatedCredential,
       signBuffer->coalesce(),
       credential_.signature->coalesce());
 

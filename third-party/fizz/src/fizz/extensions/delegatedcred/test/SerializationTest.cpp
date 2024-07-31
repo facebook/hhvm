@@ -51,18 +51,30 @@ zj0EAwIDSAAwRQIgB2EWbwWohYziQ2LmY8Qmn8y0WKR6Mbm5aad0rUBvtK4CIQCv
 
 /*
  *  Randomly generated ECDSA-openssl::P256 private key
- *  Command: openssl ecparam -name secp256r1 -genkey
+ *  Command: openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256
  *  Output: Randomly generated ECDSA-openssl::P256 private key
  */
-StringPiece kP256DelegatedCredKey = R"(
------BEGIN EC PARAMETERS-----
-BggqhkjOPQMBBw==
------END EC PARAMETERS-----
------BEGIN EC PRIVATE KEY-----
-MHcCAQEEIA8/keRkilh8bwUPxH9jiP5SsP4QiZtfofayTsRSI59poAoGCCqGSM49
-AwEHoUQDQgAE8mV/wDAabnJbPLuF/qd/FMIWHDlrJI97cwq4obtPHyKFF2ukoG+6
-/pXOUrEbsIH+/QBpZsnRHjvxryib97Ay+Q==
------END EC PRIVATE KEY-----
+StringPiece kP256DelegatedCredKey = R"(-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgol1GyLd1oigpV72G
+LgiGEcQZsSnVse6Ogdc21OXfS0KhRANCAAQq/x89z+FhnpwdSYyWTc8yT2BI8jlK
+EYl+Yi5t17Rx6L3HuTPY/vpDOpCcQZ6gLgsHOqqsFV7zcG9iX7ADJo2I
+-----END PRIVATE KEY-----
+)";
+
+StringPiece kP256DelegatedCredKeyWServerLabel =
+    R"(-----BEGIN SERVER DC PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgol1GyLd1oigpV72G
+LgiGEcQZsSnVse6Ogdc21OXfS0KhRANCAAQq/x89z+FhnpwdSYyWTc8yT2BI8jlK
+EYl+Yi5t17Rx6L3HuTPY/vpDOpCcQZ6gLgsHOqqsFV7zcG9iX7ADJo2I
+-----END SERVER DC PRIVATE KEY-----
+)";
+
+StringPiece kP256DelegatedCredKeyWClientLabel =
+    R"(-----BEGIN CLIENT DC PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgol1GyLd1oigpV72G
+LgiGEcQZsSnVse6Ogdc21OXfS0KhRANCAAQq/x89z+FhnpwdSYyWTc8yT2BI8jlK
+EYl+Yi5t17Rx6L3HuTPY/vpDOpCcQZ6gLgsHOqqsFV7zcG9iX7ADJo2I
+-----END CLIENT DC PRIVATE KEY-----
 )";
 
 // clang-format off
@@ -77,83 +89,203 @@ AwEHoUQDQgAE8mV/wDAabnJbPLuF/qd/FMIWHDlrJI97cwq4obtPHyKFF2ukoG+6
  */
 // clang-format on
 
-StringPiece kP256DelegatedCredNoLabel = {
-    "CI61NAQDAABbMFkwEwYHKoZIzj0CAQYIKoZIzj0"
-    "DAQcDQgAE8mV/wDAabnJbPLuF/qd/FMIWHDlrJI"
-    "97cwq4obtPHyKFF2ukoG+6/pXOUrEbsIH+/QBpZ"
-    "snRHjvxryib97Ay+QQDAEcwRQIgUrbmZ9uq07B0"
-    "Myg06hZj0uUq2f04eI4Ci0VIRP7XGhACIQDqckz"
-    "1AUqrX1gEw5DVBK8WQ3Q6pYSF4WI4gxIpvcCMEQ=="};
+StringPiece kP256ServerDelegatedCredNoLabel = {
+    "CRlGSAQDAABbMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQ"
+    "gAEKv8fPc/hYZ6cHUmMlk3PMk9gSPI5ShGJfmIubde0cei"
+    "9x7kz2P76QzqQnEGeoC4LBzqqrBVe83BvYl+wAyaNiAQDA"
+    "EYwRAIgMAKLN6Tzp4EHPcFE/fJaT4hPFrdGaOa3Gouw/zo"
+    "sgkYCIHLScqwdF8N3c8LsksL4rE485wUOnhZ0+4aZ15W/qo"
+    "jw"};
 
-StringPiece kP256DelegatedCred = {
-    "-----BEGIN DELEGATED CREDENTIAL-----\n"
-    "CI61NAQDAABbMFkwEwYHKoZIzj0CAQYIKoZIzj0"
-    "DAQcDQgAE8mV/wDAabnJbPLuF/qd/FMIWHDlrJI"
-    "97cwq4obtPHyKFF2ukoG+6/pXOUrEbsIH+/QBpZ"
-    "snRHjvxryib97Ay+QQDAEcwRQIgUrbmZ9uq07B0"
-    "Myg06hZj0uUq2f04eI4Ci0VIRP7XGhACIQDqckz"
-    "1AUqrX1gEw5DVBK8WQ3Q6pYSF4WI4gxIpvcCMEQ==\n"
-    "-----END DELEGATED CREDENTIAL-----\n"};
+StringPiece kP256ClientDelegatedCredNoLabel = {
+    "CRlGSAQDAABbMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQ"
+    "gAEKv8fPc/hYZ6cHUmMlk3PMk9gSPI5ShGJfmIubde0cei"
+    "9x7kz2P76QzqQnEGeoC4LBzqqrBVe83BvYl+wAyaNiAQDA"
+    "EYwRAIgSNvyeG0plZlU79MnilfpqpOIdeXLNSmUttM2/19"
+    "uI6cCIGFjtqRON2paWMAluGcogcNmO0Vi0uHIRwGzu6Y2Af"
+    "aK"};
 
-StringPiece kP256DelegatedCredBadLabel = {
-    "-----BEGIN DC-----\n"
-    "CI61NAQDAABbMFkwEwYHKoZIzj0CAQYIKoZIzj0"
-    "DAQcDQgAE8mV/wDAabnJbPLuF/qd/FMIWHDlrJI"
-    "97cwq4obtPHyKFF2ukoG+6/pXOUrEbsIH+/QBpZ"
-    "snRHjvxryib97Ay+QQDAEcwRQIgUrbmZ9uq07B0"
-    "Myg06hZj0uUq2f04eI4Ci0VIRP7XGhACIQDqckz"
-    "1AUqrX1gEw5DVBK8WQ3Q6pYSF4WI4gxIpvcCMEQ==\n"
-    "-----END DC-----\n"};
+StringPiece kP256ServerDelegatedCred = {
+    "-----BEGIN SERVER DELEGATED CREDENTIAL-----\n"
+    "CRlGSAQDAABbMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQ"
+    "gAEKv8fPc/hYZ6cHUmMlk3PMk9gSPI5ShGJfmIubde0cei"
+    "9x7kz2P76QzqQnEGeoC4LBzqqrBVe83BvYl+wAyaNiAQDA"
+    "EYwRAIgMAKLN6Tzp4EHPcFE/fJaT4hPFrdGaOa3Gouw/zo"
+    "sgkYCIHLScqwdF8N3c8LsksL4rE485wUOnhZ0+4aZ15W/qo"
+    "jw\n"
+    "-----END SERVER DELEGATED CREDENTIAL-----\n"};
 
-StringPiece kP384DelegatedCred = {
-    "-----BEGIN DELEGATED CREDENTIAL-----\n"
-    "CKpfvQUDAAB4MHYwEAYHKoZIzj0CAQYFK4EEACID"
-    "YgAEfDkvSAjmCrrxRNEkpA52igKI5pnE9q/MiKHTJ"
-    "/gfmJfhwK3IGI21+zs4DHvR2iowHSa5Ul+J5Fai9o"
-    "Nr32wTLUgQyrygUfhwNMuS4ucnd3Lz/EEJUBdkbEL"
-    "NnfY98HJcBAMARjBEAiBmz7fIOTsAXTQG55zdTxBy"
-    "QiUv7Ub3qtyYnJMaJKmx9gIgQiv40UZcP8GZkvDfg"
-    "D/EqLaFsDaP4Fl2PGH9NgXkyo8=\n"
-    "-----END DELEGATED CREDENTIAL-----\n"};
+StringPiece kP256ClientDelegatedCred = {
+    "-----BEGIN CLIENT DELEGATED CREDENTIAL-----\n"
+    "CRlGSAQDAABbMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQ"
+    "gAEKv8fPc/hYZ6cHUmMlk3PMk9gSPI5ShGJfmIubde0cei"
+    "9x7kz2P76QzqQnEGeoC4LBzqqrBVe83BvYl+wAyaNiAQDA"
+    "EYwRAIgSNvyeG0plZlU79MnilfpqpOIdeXLNSmUttM2/19"
+    "uI6cCIGFjtqRON2paWMAluGcogcNmO0Vi0uHIRwGzu6Y2Af"
+    "aK\n"
+    "-----END CLIENT DELEGATED CREDENTIAL-----\n"};
+
+StringPiece kP256ServerDelegatedCredBadLabel = {
+    "-----BEGIN SERVERS DELEGATED CREDENTIAL-----\n"
+    "CRlGSAQDAABbMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQ"
+    "gAEKv8fPc/hYZ6cHUmMlk3PMk9gSPI5ShGJfmIubde0cei"
+    "9x7kz2P76QzqQnEGeoC4LBzqqrBVe83BvYl+wAyaNiAQDA"
+    "EYwRAIgMAKLN6Tzp4EHPcFE/fJaT4hPFrdGaOa3Gouw/zo"
+    "sgkYCIHLScqwdF8N3c8LsksL4rE485wUOnhZ0+4aZ15W/qo"
+    "jw\n"
+    "-----END SERVERS DELEGATED CREDENTIAL-----\n"};
+
+StringPiece kP384ServerDelegatedKey = {
+    "-----BEGIN SERVER DC PRIVATE KEY-----\n"
+    "MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDCdidyCCBy328Nk0ZXT"
+    "f0kfeUpcGql3NsW8LAKeW4IyKoqd1iXQMrMbqKqslMjGnBWhZANiAAS24ZlJC1ZK"
+    "86NYdg1C9eC8FtPw+1Oo/0H49PdYRC3kzlLoBdZFuvY6/LVHDILpC9/gaJsUOYTo"
+    "MpJRsnZr96RMvPJuhjHGdqu6rhPI298VbEwtc7lIMMrY5E76dGk0gso=\n"
+    "-----END SERVER DC PRIVATE KEY-----\n"};
+
+StringPiece kP384ServerDelegatedCred = {
+    "-----BEGIN SERVER DELEGATED CREDENTIAL-----\n"
+    "CRlJ6QUDAAB4MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEtu"
+    "GZSQtWSvOjWHYNQvXgvBbT8PtTqP9B+PT3WEQt5M5S6AXWRbr2Ovy1RwyC6Qvf4GibFDmE6DKSUbJ2a/ekTLzyboYxxnaruq4TyNvfFWxMLXO5SDDK2ORO+nRpNILKBAMASDBGAiEAj4Gr1NUAvGmJK4L9+q24HSfb9TJi2wXvF/AQMmB70a0CIQChfMy9fi0uiS9aUlvMRArpz/P0yCDNn83S9ueI/1N1uw==\n"
+    "-----END SERVER DELEGATED CREDENTIAL-----\n"};
 
 TEST(SerializationTest, testValidReadFromPem) {
-  auto combinedPem = kP256DelegatedCred.toString() +
-      kP256DelegatedCredKey.toString() + kP256CredCert.toString();
-  auto dc = loadDCFromPEM(combinedPem);
+  auto combinedPem = kP256ServerDelegatedCred.toString() +
+      kP256DelegatedCredKeyWServerLabel.toString() + kP256CredCert.toString();
+  auto dc = loadDCFromPEM(combinedPem, DelegatedCredentialMode::Server);
   EXPECT_NE(dc, nullptr);
   EXPECT_EQ(
       dc->getSigSchemes(),
       std::vector<SignatureScheme>{SignatureScheme::ecdsa_secp256r1_sha256});
 }
 
+TEST(SerializationTest, testReadFromPemWrongMode) {
+  auto combinedPem = kP256ServerDelegatedCred.toString() +
+      kP256DelegatedCredKeyWServerLabel.toString() + kP256CredCert.toString();
+  EXPECT_THROW(
+      loadDCFromPEM(combinedPem, DelegatedCredentialMode::Client),
+      std::runtime_error);
+}
+
+TEST(SerializationTest, testReadClientAndServer) {
+  auto combinedPem = kP256ClientDelegatedCred.toString() +
+      kP256DelegatedCredKeyWClientLabel.toString() +
+      kP256ServerDelegatedCred.toString() +
+      kP256DelegatedCredKeyWServerLabel.toString() + kP256CredCert.toString();
+  auto clientDC = loadDCFromPEM(combinedPem, DelegatedCredentialMode::Client);
+  auto serverDC = loadDCFromPEM(combinedPem, DelegatedCredentialMode::Server);
+  EXPECT_EQ(
+      clientDC->getSigSchemes(),
+      std::vector<SignatureScheme>{SignatureScheme::ecdsa_secp256r1_sha256});
+  EXPECT_EQ(
+      serverDC->getSigSchemes(),
+      std::vector<SignatureScheme>{SignatureScheme::ecdsa_secp256r1_sha256});
+}
+
 TEST(SerializationTest, BadLabel) {
-  auto combinedPem = kP256DelegatedCredBadLabel.toString() +
-      kP256DelegatedCredKey.toString() + kP256CredCert.toString();
-  EXPECT_THROW(loadDCFromPEM(combinedPem), std::runtime_error);
+  auto combinedPem = kP256ServerDelegatedCredBadLabel.toString() +
+      kP256DelegatedCredKeyWServerLabel.toString() + kP256CredCert.toString();
+  EXPECT_THROW(
+      loadDCFromPEM(combinedPem, DelegatedCredentialMode::Server),
+      std::runtime_error);
 }
 
 TEST(SerializationTest, P384DC) {
-  auto combinedPem = kP256DelegatedCredBadLabel.toString() +
-      kP256DelegatedCredKey.toString() + kP256CredCert.toString();
-  EXPECT_THROW(loadDCFromPEM(combinedPem), std::runtime_error);
+  auto combinedPem = kP384ServerDelegatedCred.toString() +
+      kP384ServerDelegatedKey.toString() + kP256CredCert.toString();
+  EXPECT_THROW(
+      loadDCFromPEM(combinedPem, DelegatedCredentialMode::Server),
+      std::runtime_error);
 }
 
-TEST(SerializationTest, TestBuildCombinedPEM) {
-  auto credData = folly::base64Decode(kP256DelegatedCredNoLabel.toString());
+TEST(SerializationTest, TestBuildServerOnlyPEM) {
+  auto credData =
+      folly::base64Decode(kP256ServerDelegatedCredNoLabel.toString());
   std::vector<Extension> credVec;
   credVec.emplace_back(Extension{
       ExtensionType::delegated_credential,
       folly::IOBuf::copyBuffer(std::move(credData))});
-  auto cred = getExtension<DelegatedCredential>(std::move(credVec));
+  auto serverCred = getExtension<DelegatedCredential>(std::move(credVec));
+  auto combinedPem = kP256ServerDelegatedCred.toString() +
+      kP256DelegatedCredKeyWServerLabel.toString();
 
-  auto combinedPem = kP256DelegatedCred.toString() +
-      kP256DelegatedCredKey.toString() + kP256CredCert.toString();
   EXPECT_EQ(
       combinedPem,
       generateDelegatedCredentialPEM(
-          std::move(*cred),
-          kP256CredCert.toString(),
+          DelegatedCredentialMode::Server,
+          std::move(*serverCred),
           kP256DelegatedCredKey.toString()));
+}
+
+TEST(SerializationTest, TestBuildClientOnlyPEM) {
+  auto credData =
+      folly::base64Decode(kP256ClientDelegatedCredNoLabel.toString());
+  std::vector<Extension> credVec;
+  credVec.emplace_back(Extension{
+      ExtensionType::delegated_credential,
+      folly::IOBuf::copyBuffer(std::move(credData))});
+  auto clientCred = getExtension<DelegatedCredential>(std::move(credVec));
+  auto combinedPem = kP256ClientDelegatedCred.toString() +
+      kP256DelegatedCredKeyWClientLabel.toString();
+
+  EXPECT_EQ(
+      combinedPem,
+      generateDelegatedCredentialPEM(
+          DelegatedCredentialMode::Client,
+          std::move(*clientCred),
+          kP256DelegatedCredKey.toString()));
+}
+
+TEST(SerializationTest, TestBuildMismatchedPEM) {
+  auto credData =
+      folly::base64Decode(kP256ClientDelegatedCredNoLabel.toString());
+  std::vector<Extension> credVec;
+  credVec.emplace_back(Extension{
+      ExtensionType::delegated_credential,
+      folly::IOBuf::copyBuffer(std::move(credData))});
+  auto clientCred = getExtension<DelegatedCredential>(std::move(credVec));
+  auto combinedPem = kP256ClientDelegatedCred.toString() +
+      kP256DelegatedCredKeyWClientLabel.toString();
+
+  EXPECT_NE(
+      combinedPem,
+      generateDelegatedCredentialPEM(
+          DelegatedCredentialMode::Server,
+          std::move(*clientCred),
+          kP256DelegatedCredKey.toString()));
+}
+
+TEST(SerializationTest, TestBuildCombinedClientAndServerPEM) {
+  auto credData =
+      folly::base64Decode(kP256ServerDelegatedCredNoLabel.toString());
+  std::vector<Extension> credVec;
+  credVec.emplace_back(Extension{
+      ExtensionType::delegated_credential,
+      folly::IOBuf::copyBuffer(std::move(credData))});
+  auto serverCred = getExtension<DelegatedCredential>(std::move(credVec));
+  auto credData2 =
+      folly::base64Decode(kP256ClientDelegatedCredNoLabel.toString());
+  std::vector<Extension> credVec2;
+  credVec2.emplace_back(Extension{
+      ExtensionType::delegated_credential,
+      folly::IOBuf::copyBuffer(std::move(credData2))});
+  auto clientCred = getExtension<DelegatedCredential>(std::move(credVec2));
+
+  auto combinedPem = kP256ClientDelegatedCred.toString() +
+      kP256DelegatedCredKeyWClientLabel.toString() +
+      kP256ServerDelegatedCred.toString() +
+      kP256DelegatedCredKeyWServerLabel.toString() + kP256CredCert.toString();
+  EXPECT_EQ(
+      combinedPem,
+      generateDelegatedCredentialPEM(
+          DelegatedCredentialMode::Client,
+          std::move(*clientCred),
+          kP256DelegatedCredKey.toString()) +
+          generateDelegatedCredentialPEM(
+              DelegatedCredentialMode::Server,
+              std::move(*serverCred),
+              kP256DelegatedCredKey.toString()) +
+          kP256CredCert.toString());
 }
 } // namespace test
 } // namespace extensions

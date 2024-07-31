@@ -1029,6 +1029,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
               cert = std::make_unique<
                   fizz::extensions::SelfDelegatedCredentialImpl<
                       openssl::KeyType::RSA>>(
+                  fizz::extensions::DelegatedCredentialMode::Server,
                   std::move(certs),
                   std::move(credPrivKey),
                   std::move(*cred),
@@ -1038,6 +1039,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
               cert = std::make_unique<
                   fizz::extensions::SelfDelegatedCredentialImpl<
                       openssl::KeyType::P256>>(
+                  fizz::extensions::DelegatedCredentialMode::Server,
                   std::move(certs),
                   std::move(credPrivKey),
                   std::move(*cred),
@@ -1047,6 +1049,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
               cert = std::make_unique<
                   fizz::extensions::SelfDelegatedCredentialImpl<
                       openssl::KeyType::P384>>(
+                  fizz::extensions::DelegatedCredentialMode::Server,
                   std::move(certs),
                   std::move(credPrivKey),
                   std::move(*cred),
@@ -1056,6 +1059,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
               cert = std::make_unique<
                   fizz::extensions::SelfDelegatedCredentialImpl<
                       openssl::KeyType::P521>>(
+                  fizz::extensions::DelegatedCredentialMode::Server,
                   std::move(certs),
                   std::move(credPrivKey),
                   std::move(*cred),
@@ -1065,6 +1069,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
               cert = std::make_unique<
                   fizz::extensions::SelfDelegatedCredentialImpl<
                       openssl::KeyType::ED25519>>(
+                  fizz::extensions::DelegatedCredentialMode::Server,
                   std::move(certs),
                   std::move(credPrivKey),
                   std::move(*cred),

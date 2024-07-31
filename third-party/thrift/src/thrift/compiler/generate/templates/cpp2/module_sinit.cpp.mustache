@@ -44,42 +44,26 @@ extern ::std::string_view {{program:schema_name}}();
 {{/program:has_schema?}}
 
 namespace {
-void doRegister() {
-  {{#program:any?}}
-  {{#program:structs}}
-  {{#struct:any?}}
-  __fbthrift_static_init_{{struct:cpp_underlying_name}}();
-  {{/struct:any?}}
-  {{/program:structs}}
-  {{/program:any?}}
 
-  {{#program:has_schema?}}
-  ::apache::thrift::BaseSchemaRegistry::registerSchema("{{program:schema_name}}", {{program:name}}_constants::{{program:schema_name}}(), "{{program:autogen_path}}");
-  {{/program:has_schema?}}
-}
-}
-
-{{#program:sinit_suffix}}
-
-struct StaticInit_{{program:sinit_suffix}} {
-  StaticInit_{{program:sinit_suffix}}() { doRegister(); }
-};
-
-{{ > common/namespace_cpp2_end}}
-
-{{ > common/namespace_cpp2}}StaticInit_{{program:sinit_suffix}} _fbthrift_sinit_{{program:sinit_suffix}};
-
-{{/program:sinit_suffix}}
-{{^program:sinit_suffix}}
-
-namespace{
 struct StaticInit {
-  StaticInit() { doRegister(); }
+  StaticInit() {
+    {{#program:any?}}
+    {{#program:structs}}
+    {{#struct:any?}}
+    __fbthrift_static_init_{{struct:cpp_underlying_name}}();
+    {{/struct:any?}}
+    {{/program:structs}}
+    {{/program:any?}}
+
+    {{#program:has_schema?}}
+    ::apache::thrift::BaseSchemaRegistry::registerSchema("{{program:schema_name}}", {{program:name}}_constants::{{program:schema_name}}(), "{{program:autogen_path}}");
+    {{/program:has_schema?}}
+  }
 };
 
 StaticInit staticInit;
+
 }
 {{ > common/namespace_cpp2_end}}
 
-{{/program:sinit_suffix}}
 {{/program:needs_sinit?}}

@@ -337,7 +337,6 @@ class cpp_mstch_program : public mstch_program {
          {"program:has_schema?", &cpp_mstch_program::has_schema},
          {"program:schema_name", &cpp_mstch_program::schema_name},
          {"program:needs_sinit?", &cpp_mstch_program::needs_sinit},
-         {"program:sinit_suffix", &cpp_mstch_program::sinit_suffix},
          {"program:structs_and_typedefs",
           &cpp_mstch_program::structs_and_typedefs}});
     register_has_option("program:tablebased?", "tablebased");
@@ -672,8 +671,6 @@ class cpp_mstch_program : public mstch_program {
   mstch::node needs_sinit() {
     return compiler::needs_sinit(sm_, *program_, has_option("any"));
   }
-
-  mstch::node sinit_suffix() { return get_option("sinit_suffix"); }
 
  private:
   const std::optional<int32_t> split_id_;

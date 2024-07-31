@@ -30,8 +30,6 @@ python = { version = "0.0.1+unstable", path = "../python" }
 ref-cast = "1.0.18"
 rust = { version = "0.0.1+unstable", path = "../rust" }
 scope = { version = "0.0.1+unstable", path = "../scope" }
-serde = { version = "1.0.185", features = ["derive", "rc"] }
-serde_derive = "1.0.185"
 thiserror = "1.0.49"
 thrift = { version = "0.0.1+unstable", path = "../thrift" }
 

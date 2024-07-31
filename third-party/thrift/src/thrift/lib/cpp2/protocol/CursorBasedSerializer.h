@@ -216,7 +216,7 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
 
   template <typename Ident>
   using enable_string_view = typename std::enable_if_t<
-      Contiguous && type::is_a_v<type_tag<Ident>, type::string_c>,
+      type::is_a_v<type_tag<Ident>, type::string_c> && Contiguous,
       int>;
 
   template <typename U, typename Ident>

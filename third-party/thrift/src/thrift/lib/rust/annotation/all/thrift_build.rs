@@ -6,7 +6,6 @@ use std::path::Path;
 use thrift_compiler::Config;
 use thrift_compiler::GenContext;
 const CRATEMAP: &str = "\
-thrift/annotation/compat.thrift compat //thrift/annotation:compat-rust
 thrift/annotation/cpp.thrift cpp //thrift/annotation:cpp-rust
 thrift/annotation/go.thrift go //thrift/annotation:go-rust
 thrift/annotation/hack.thrift hack //thrift/annotation:hack-rust

@@ -20,8 +20,6 @@ all__types = { package = "all", version = "0.0.1+unstable", path = ".." }
 anyhow = "1.0.75"
 async-trait = "0.1.71"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
-compat = { version = "0.0.1+unstable", path = "../../compat" }
-compat_clients = { version = "0.0.1+unstable", path = "../../compat/clients" }
 cpp = { version = "0.0.1+unstable", path = "../../cpp" }
 cpp_clients = { version = "0.0.1+unstable", path = "../../cpp/clients" }
 fbthrift = { version = "0.0.1+unstable", path = "../../.." }

@@ -228,4 +228,28 @@ serverdbginfo::RequestPileDbgInfo RoundRobinRequestPile::getDbgInfo() const {
   return info;
 }
 
+std::vector<std::vector<uint64_t>> RoundRobinRequestPile::getRequestCounts()
+    const {
+  std::vector<std::vector<uint64_t>> res;
+  res.reserve(opts_.numBucketsPerPriority.size());
+  for (size_t i = 0; i < opts_.numBucketsPerPriority.size(); ++i) {
+    if (!retrievalIndexQueues_[i]) {
+      res.emplace_back(1, singleBucketRequestQueues_[i]->size());
+    } else {
+      std::vector<uint64_t> subRes;
+      if (!retrievalIndexQueues_[i]->empty()) {
+        subRes.reserve(opts_.numBucketsPerPriority[i]);
+        for (size_t j = 0; j < opts_.numBucketsPerPriority[i]; ++j) {
+          subRes.emplace_back(requestQueues_[i][j].size());
+        }
+      } else {
+        subRes.resize(opts_.numBucketsPerPriority[i]);
+      }
+      res.push_back(std::move(subRes));
+    }
+  }
+
+  return res;
+}
+
 } // namespace apache::thrift

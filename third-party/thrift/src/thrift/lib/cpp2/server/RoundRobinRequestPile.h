@@ -121,6 +121,10 @@ class RoundRobinRequestPile : public RequestPileBase {
 
   uint64_t requestCount() const override;
 
+  // Return the current number of requests in the request
+  // pile's queues per priority per bucket.
+  std::vector<std::vector<uint64_t>> getRequestCounts() const;
+
   void onRequestFinished(ServerRequestData&) override {}
 
   std::string describe() const override;

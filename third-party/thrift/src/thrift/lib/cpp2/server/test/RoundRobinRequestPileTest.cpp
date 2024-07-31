@@ -318,6 +318,82 @@ TEST(RoundRobinRequestPileTest, GetDbgInfo) {
   }
 }
 
+TEST(RoundRobinRequestPileTest, getRequestCounts_multipleBuckets) {
+  int priorities = 5;
+  RoundRobinRequestPile::Options opts;
+  opts.setNumPriorities(priorities);
+  for (int i = 0; i < priorities; i++) {
+    opts.setNumBucketsPerPriority(i, i + 3);
+  }
+  opts.pileSelectionFunction = getScopeFunc();
+  RoundRobinRequestPile requestPile(opts);
+
+  vector<unique_ptr<THeader>> tHeaderStorage;
+  vector<unique_ptr<Cpp2RequestContext>> contextStorage;
+  auto getRequest = [&](int pri, int bucket) {
+    return getServerRequest(pri, bucket, tHeaderStorage, contextStorage);
+  };
+
+  requestPile.enqueue(getRequest(1, 0));
+  requestPile.enqueue(getRequest(2, 2));
+  requestPile.enqueue(getRequest(2, 2));
+  requestPile.enqueue(getRequest(4, 0));
+  requestPile.enqueue(getRequest(4, 2));
+  requestPile.enqueue(getRequest(4, 2));
+  requestPile.enqueue(getRequest(4, 6));
+
+  auto requestCountsByPriority = requestPile.getRequestCounts();
+  std::vector<std::vector<uint64_t>> expectedRequestCounts = {
+      {0, 0, 0},
+      {1, 0, 0, 0},
+      {0, 0, 2, 0, 0},
+      {0, 0, 0, 0, 0, 0},
+      {1, 0, 2, 0, 0, 0, 1}};
+
+  EXPECT_EQ(requestCountsByPriority, expectedRequestCounts);
+
+  auto check = [&requestPile](int priority, int bucket) {
+    checkResult(requestPile, priority, bucket);
+  };
+  check(1, 0);
+  check(2, 2);
+  check(2, 2);
+  check(4, 0);
+  check(4, 2);
+  check(4, 6);
+  check(4, 2);
+}
+
+TEST(RoundRobinRequestPileTest, getRequestCounts_singleBucket) {
+  RoundRobinRequestPile::Options opts;
+  opts.setNumPriorities(1);
+  opts.setNumBucketsPerPriority(0, 3);
+  opts.pileSelectionFunction = getScopeFunc();
+  RoundRobinRequestPile requestPile(opts);
+
+  vector<unique_ptr<THeader>> tHeaderStorage;
+  vector<unique_ptr<Cpp2RequestContext>> contextStorage;
+  auto getRequest = [&](int pri, int bucket) {
+    return getServerRequest(pri, bucket, tHeaderStorage, contextStorage);
+  };
+
+  requestPile.enqueue(getRequest(0, 1));
+  requestPile.enqueue(getRequest(0, 1));
+  requestPile.enqueue(getRequest(0, 2));
+
+  auto requestCountsByPriority = requestPile.getRequestCounts();
+  std::vector<std::vector<uint64_t>> expectedRequestCounts = {{0, 2, 1}};
+
+  EXPECT_EQ(requestCountsByPriority, expectedRequestCounts);
+
+  auto check = [&requestPile](int priority, int bucket) {
+    checkResult(requestPile, priority, bucket);
+  };
+  check(0, 1);
+  check(0, 2);
+  check(0, 1);
+}
+
 /*
   WARNING: Benchmark running in DEBUG mode
   ============================================================================

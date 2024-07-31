@@ -79,7 +79,7 @@ class GeneratedAsyncClient : public TClientBase {
   std::pair<RequestClientCallback::Ptr, ContextStack*>
   prepareRequestClientCallback(
       std::unique_ptr<RequestCallback> callback,
-      ContextStack::UniquePtr contextStack) {
+      ContextStack::UniquePtr&& contextStack) {
     RequestCallback::Context callbackContext;
     callbackContext.oneWay = IsOneWay;
     callbackContext.protocolId = this->getChannel()->getProtocolId();

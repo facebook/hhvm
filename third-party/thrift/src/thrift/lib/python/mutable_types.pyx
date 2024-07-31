@@ -553,6 +553,32 @@ cdef class MutableUnionInfo:
             )
 
 
+cdef object _fbthrift_compare_union_less(
+    object lhs,
+    object rhs,
+    return_if_same_value
+):
+    if type(lhs) != type(rhs):
+        return NotImplemented
+
+    lhs_union = <MutableUnion>(lhs)
+    rhs_union = <MutableUnion>(rhs)
+
+    lhs_tuple = (
+        lhs_union.fbthrift_current_field.value,
+        lhs_union.fbthrift_current_value,
+    )
+    rhs_tuple = (
+        rhs_union.fbthrift_current_field.value,
+        rhs_union.fbthrift_current_value,
+    )
+
+    if return_if_same_value:
+        return lhs_tuple <= rhs_tuple
+    else:
+        return lhs_tuple < rhs_tuple
+
+
 cdef class MutableUnion(MutableStructOrUnion):
     def __cinit__(self):
         self._fbthrift_data = createUnionTuple()
@@ -749,6 +775,20 @@ cdef class MutableUnion(MutableStructOrUnion):
             return False
 
         return other_union.fbthrift_current_value == self.fbthrift_current_value
+
+    def __lt__(self, other):
+        return _fbthrift_compare_union_less(
+            self,
+            other,
+            False, # return_if_same_value
+        )
+
+    def __le__(self, other):
+        return _fbthrift_compare_union_less(
+            self,
+            other,
+            True, # return_if_same_value
+        )
 
 
 def _gen_mutable_union_field_enum_members(field_infos):

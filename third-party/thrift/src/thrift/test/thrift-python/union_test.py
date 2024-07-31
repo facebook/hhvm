@@ -642,3 +642,27 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         u3.string_field = "hello"
         self.assertIsNot(u1, u3)
         self.assertEqual(u1, u3)
+
+    def test_ordering(self) -> None:
+        lhs = TestUnionMutable(string_field="hello")
+        rhs = TestUnionMutable(string_field="world")
+
+        self.assertLess(lhs, rhs)
+        self.assertLessEqual(lhs, rhs)
+
+        lhs.int_field = 42
+        self.assertGreater(lhs, rhs)
+        self.assertGreaterEqual(lhs, rhs)
+
+        rhs.int_field = 43
+        self.assertLess(lhs, rhs)
+        self.assertLessEqual(lhs, rhs)
+
+        rhs.int_field = 42
+        self.assertLessEqual(lhs, rhs)
+        self.assertGreaterEqual(lhs, rhs)
+
+        # TEST: Empty union is smaller than all others, except another empty union
+        self.assertLess(TestUnionMutable(), TestUnionMutable(string_field=""))
+        self.assertLessEqual(TestUnionMutable(), TestUnionMutable())
+        self.assertGreaterEqual(TestUnionMutable(), TestUnionMutable())

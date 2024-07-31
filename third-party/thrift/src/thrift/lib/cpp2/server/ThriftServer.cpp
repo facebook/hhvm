@@ -110,6 +110,7 @@ THRIFT_FLAG_DEFINE_bool(server_fizz_prefer_psk_ke, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_receiving_dc, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_presenting_dc, false);
 THRIFT_FLAG_DEFINE_bool(enable_rotation_for_in_memory_ticket_seeds, false);
+THRIFT_FLAG_DEFINE_bool(watch_default_ticket_path, true);
 
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
@@ -1850,14 +1851,19 @@ void ThriftServer::updateCertsToWatch() {
 void ThriftServer::watchTicketPathForChanges(const std::string& ticketPath) {
   auto seeds = TLSCredProcessor::processTLSTickets(ticketPath);
   if (seeds) {
-    setTicketSeeds(std::move(*seeds));
+    setTicketSeeds(*seeds);
   }
-  tlsCredWatcher_.withWLock([this, &ticketPath](auto& credWatcher) {
-    if (!credWatcher) {
-      credWatcher.emplace(this);
-    }
-    credWatcher->setTicketPathToWatch(ticketPath);
-  });
+  /* If the flag is enabled, regardless if we read the seeds successfully from
+     the path, we will stil use this path to read seeds, isntead of using in
+     memory ticket seeds. */
+  if (seeds || THRIFT_FLAG(watch_default_ticket_path)) {
+    tlsCredWatcher_.withWLock([this, &ticketPath](auto& credWatcher) {
+      if (!credWatcher) {
+        credWatcher.emplace(this);
+      }
+      credWatcher->setTicketPathToWatch(ticketPath);
+    });
+  }
 }
 
 EffectiveTicketSeedStrategy ThriftServer::getEffectiveTicketSeedStrategy()

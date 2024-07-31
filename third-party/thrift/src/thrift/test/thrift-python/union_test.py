@@ -432,22 +432,10 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         ):
             TestUnionMutable(int_field="hello!")
 
-        # DO_BEFORE(aristidis,20240810): Replace u3 and u4 below with simple equality
-        # checks with empty TestUnionMutable() when equality operator is implemented for
-        # mutable unions.
-        u3 = TestUnionMutable(int_field=None)
-        self.assertIs(
-            u3.fbthrift_current_field,
-            TestUnionMutable.FbThriftUnionFieldEnum.FBTHRIFT_UNION_EMPTY,
+        self.assertEqual(TestUnionMutable(int_field=None), TestUnionMutable())
+        self.assertEqual(
+            TestUnionMutable(string_field=None, int_field=None), TestUnionMutable()
         )
-        self.assertIsNone(u3.fbthrift_current_value)
-
-        u4 = TestUnionMutable(string_field=None, int_field=None)
-        self.assertIs(
-            u4.fbthrift_current_field,
-            TestUnionMutable.FbThriftUnionFieldEnum.FBTHRIFT_UNION_EMPTY,
-        )
-        self.assertIsNone(u4.fbthrift_current_value)
 
         with self.assertRaises(TypeError):
             TestUnionMutable(field_does_not_exist=None)

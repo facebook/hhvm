@@ -16,7 +16,7 @@ import asyncio
 import sys
 from argparse import ArgumentParser
 
-from apache.thrift.test.asyncio.asyncio_load_handler import LoadHandler
+from thrift.perf.py.asyncio_load_handler import LoadHandler
 from thrift.server.TAsyncioServer import ThriftAsyncServerFactory
 
 

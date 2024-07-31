@@ -19,9 +19,41 @@ package thrift
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 
 	"github.com/rsocket/rsocket-go/payload"
 )
+
+func checkRequestSetupMetadata8(pay payload.Payload) error {
+	pay = payload.Clone(pay)
+	metdataBytes, ok := pay.Metadata()
+	if !ok {
+		return fmt.Errorf("expected metadata in RequestSetupMetadata")
+	}
+	if len(metdataBytes) < 4 {
+		return fmt.Errorf("expected at least 4 bytes for RequestSetupMetadata")
+	}
+	// read first 4 bytes
+	buf := bytes.NewBuffer(metdataBytes[:4])
+	var key uint32
+	err := binary.Read(buf, binary.BigEndian, &key)
+	if err != nil {
+		return err
+	}
+	if int64(key) != KRocketProtocolKey {
+		return fmt.Errorf("expected key %d, got %d", KRocketProtocolKey, key)
+	}
+	req := RequestSetupMetadata{}
+	if err := deserializeCompact(metdataBytes[4:], &req); err != nil {
+		return err
+	}
+	minVersion := req.GetMinVersion()
+	maxVersion := req.GetMaxVersion()
+	if minVersion > 8 || maxVersion < 8 {
+		return fmt.Errorf("unsupported version: %d-%d, only version 8 is supported", minVersion, maxVersion)
+	}
+	return nil
+}
 
 func newRequestSetupMetadataVersion8() *RequestSetupMetadata {
 	res := NewRequestSetupMetadata()

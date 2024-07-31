@@ -59,3 +59,16 @@ func decodeServerMetadataPushVersion8(msg payload.Payload) (*serverMetadataPaylo
 	}
 	return res, nil
 }
+
+func encodeServerMetadataPushVersion8(zstdSupported bool) (payload.Payload, error) {
+	version := int32(8)
+	res := NewServerPushMetadata().
+		SetSetupResponse(NewSetupResponse().
+			SetVersion(&version).
+			SetZstdSupported(&zstdSupported))
+	metadataBytes, err := serializeCompact(res)
+	if err != nil {
+		return nil, fmt.Errorf("unable to serialize metadata push %w", err)
+	}
+	return payload.New(nil, metadataBytes), nil
+}

@@ -28,24 +28,27 @@ import (
 )
 
 type rocketServer struct {
-	proc        ProcessorContext
-	listener    net.Listener
-	transportID TransportID
+	proc          ProcessorContext
+	listener      net.Listener
+	transportID   TransportID
+	zstdSupported bool
 }
 
 func newRocketServer(proc ProcessorContext, listener net.Listener) Server {
 	return &rocketServer{
-		proc:        proc,
-		listener:    listener,
-		transportID: TransportIDRocket,
+		proc:          proc,
+		listener:      listener,
+		transportID:   TransportIDRocket,
+		zstdSupported: true,
 	}
 }
 
 func newUpgradeToRocketServer(proc ProcessorContext, listener net.Listener) Server {
 	return &rocketServer{
-		proc:        proc,
-		listener:    listener,
-		transportID: TransportIDUpgradeToRocket,
+		proc:          proc,
+		listener:      listener,
+		transportID:   TransportIDUpgradeToRocket,
+		zstdSupported: true,
 	}
 }
 
@@ -58,6 +61,14 @@ func (s *rocketServer) ServeContext(ctx context.Context) error {
 }
 
 func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {
+	if err := checkRequestSetupMetadata8(setup); err != nil {
+		return nil, err
+	}
+	serverMetadataPush, err := encodeServerMetadataPushVersion8(s.zstdSupported)
+	if err != nil {
+		return nil, err
+	}
+	sendingSocket.MetadataPush(serverMetadataPush)
 	conn := &rocketServerSocket{ctx: ctx, proc: s.proc}
 	return rsocket.NewAbstractSocket(
 		rsocket.RequestResponse(conn.requestResonse),

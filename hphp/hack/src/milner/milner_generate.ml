@@ -16,7 +16,17 @@ let min_tuple_arity = 1
 
 let max_tuple_arity = 3
 
+let shape_keys = ["'a'"; "'b'"]
+
 let name_ctr = ref 0
+
+let map_and_collect ~f xs =
+  let f (ys, acc) x =
+    let (y, l) = f x in
+    (y :: ys, l @ acc)
+  in
+  let init = ([], []) in
+  List.fold xs ~init ~f
 
 let fresh prefix =
   let n = !name_ctr in
@@ -34,6 +44,8 @@ let rec geometric_between min max =
     geometric_between (min + 1) max
 
 let select l = List.length l - 1 |> Random.int_incl 0 |> List.nth_exn l
+
+let choose_nondet = List.filter ~f:(fun _ -> Random.bool ())
 
 module Primitive = struct
   type t =
@@ -62,6 +74,7 @@ module Kind = struct
     | Case
     | Enum
     | Tuple
+    | Shape
   [@@deriving enum]
 
   let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
@@ -144,7 +157,13 @@ and Type : sig
 
   val mk : unit -> t * Definition.t list
 end = struct
-  type t =
+  type field = {
+    key: string;
+    ty: t;
+    optional: bool;
+  }
+
+  and t =
     | Mixed
     | Primitive of Primitive.t
     | Option of t
@@ -167,13 +186,28 @@ end = struct
       }
     | Enum of { name: string }
     | Tuple of t list
+    | Shape of {
+        fields: field list;
+        open_: bool;
+      }
   [@@deriving eq, ord]
+
+  let rec subfields_of { key; ty; optional } =
+    let open List.Let_syntax in
+    let* ty = subtypes_of ty in
+    let* optional =
+      if optional then
+        [true; false]
+      else
+        [false]
+    in
+    [{ key; ty; optional }]
 
   (** Reflexive transitive subtypes of the given type. It is based only on the
       knowledge about the structure of type and generalities in the system. For
       example, for mixed, we give int as a subtype but no classes because the
       function does not know which classes exist in the program. *)
-  let rec subtypes_of ty =
+  and subtypes_of ty =
     ty
     ::
     (match ty with
@@ -199,9 +233,29 @@ end = struct
     | Tuple tyl ->
       List.map ~f:subtypes_of tyl
       |> List.Cartesian_product.all
-      |> List.map ~f:(fun tyl -> Tuple tyl))
+      |> List.map ~f:(fun tyl -> Tuple tyl)
+    | Shape { fields; open_ } ->
+      let open List.Let_syntax in
+      if open_ then
+        (* Here we should be adding new fields, but with the current setup
+           that's too expensive. Need memoization to make it more affordable. *)
+        let* fields = List.map ~f:subfields_of fields |> List.all in
+        let* open_ = [true; false] in
+        [Shape { fields; open_ }]
+      else
+        let* fields = List.map ~f:subfields_of fields |> List.all in
+        [Shape { fields; open_ }])
 
-  let rec show = function
+  let rec show_field { key; ty; optional } =
+    let optional =
+      if optional then
+        "?"
+      else
+        ""
+    in
+    Format.sprintf "%s%s => %s" optional key (show ty)
+
+  and show = function
     | Mixed -> "mixed"
     | Primitive prim -> begin
       let open Primitive in
@@ -221,7 +275,20 @@ end = struct
     | Case info -> info.name
     | Enum info -> info.name
     | Tuple tyl ->
-      Format.sprintf "(%s)" (List.map ~f:show tyl |> String.concat ~sep:", ")
+      let elements = List.map ~f:show tyl |> String.concat ~sep:", " in
+      Format.sprintf "(%s)" elements
+    | Shape { fields; open_ } ->
+      let is_nullary = List.length fields = 0 in
+      let fields = List.map ~f:show_field fields |> String.concat ~sep:", " in
+      let open_ =
+        if open_ && is_nullary then
+          "..."
+        else if open_ then
+          ", ..."
+        else
+          ""
+      in
+      Format.sprintf "shape(%s%s)" fields open_
 
   let are_disjoint ty ty' =
     (* For the purposes of disjointness we can go higher up in the typing
@@ -257,6 +324,7 @@ end = struct
         let* n = List.init max_tuple_arity ~f:(fun i -> i + 1) in
         let tyl = List.init n ~f:(fun _ -> Mixed) in
         [Tuple tyl]
+      | Shape _ -> [Shape { fields = []; open_ = true }]
       | Mixed
       | Primitive _
       | Classish _ ->
@@ -312,6 +380,17 @@ end = struct
       |> Option.all
       |> Option.map ~f:(fun exprl ->
              String.concat ~sep:", " exprl |> Format.sprintf "tuple(%s)")
+    | Shape { fields; open_ = _ } ->
+      let fields =
+        List.filter fields ~f:(fun f -> (not f.optional) || Random.bool ())
+      in
+      let show_field { key; ty; _ } =
+        expr_of ty |> Option.map ~f:(Format.sprintf "%s => %s" key)
+      in
+      List.map ~f:show_field fields
+      |> Option.all
+      |> Option.map ~f:(fun fields ->
+             String.concat ~sep:", " fields |> Format.sprintf "shape(%s)")
     | Mixed
     | Option _
     | Alias _
@@ -437,9 +516,17 @@ end = struct
          there is no corresponding denotable type. *)
       let n = geometric_between min_tuple_arity max_tuple_arity in
       let (tyl, defs) =
-        List.init n ~f:(fun _ -> mk ())
-        |> List.fold ~init:([], []) ~f:(fun (tyl, defs') (ty, defs) ->
-               (ty :: tyl, defs @ defs'))
+        List.init n ~f:(fun _ -> mk ()) |> map_and_collect ~f:Fn.id
       in
       (Tuple tyl, defs)
+    | Kind.Shape ->
+      let keys = choose_nondet shape_keys in
+      let mk_field key =
+        let (ty, defs) = mk () in
+        let optional = Random.bool () in
+        ({ key; optional; ty }, defs)
+      in
+      let (fields, defs) = map_and_collect ~f:mk_field keys in
+      let open_ = Random.bool () in
+      (Shape { fields; open_ }, defs)
 end

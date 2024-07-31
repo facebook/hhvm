@@ -47,6 +47,12 @@ let select l = List.length l - 1 |> Random.int_incl 0 |> List.nth_exn l
 
 let choose_nondet = List.filter ~f:(fun _ -> Random.bool ())
 
+let permute_nondet xs =
+  let len = List.length xs in
+  List.map xs ~f:(fun x -> (Random.int len, x))
+  |> List.sort ~compare:(fun a b -> compare (fst a) (fst b))
+  |> List.map ~f:snd
+
 module Primitive = struct
   type t =
     | Null
@@ -279,6 +285,7 @@ end = struct
       Format.sprintf "(%s)" elements
     | Shape { fields; open_ } ->
       let is_nullary = List.length fields = 0 in
+      let fields = permute_nondet fields in
       let fields = List.map ~f:show_field fields |> String.concat ~sep:", " in
       let open_ =
         if open_ && is_nullary then
@@ -384,6 +391,7 @@ end = struct
       let fields =
         List.filter fields ~f:(fun f -> (not f.optional) || Random.bool ())
       in
+      let fields = permute_nondet fields in
       let show_field { key; ty; _ } =
         expr_of ty |> Option.map ~f:(Format.sprintf "%s => %s" key)
       in

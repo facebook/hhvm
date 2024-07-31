@@ -28,3 +28,8 @@ val get_thrift_from_container :
    thrift fact. Assume [get_thrift_from_container] was called immediately
    before on the enclosing container. *)
 val get_thrift_from_member : t -> doc:string -> Fbthrift.Declaration.t option
+
+(** Generate thrift declaration fact from an enumerator.
+   Assume [get_thrift_from_container] was called immediately before on the
+   enclosing enum declaration. *)
+val get_thrift_from_enum : t -> string -> Fbthrift.Declaration.t option

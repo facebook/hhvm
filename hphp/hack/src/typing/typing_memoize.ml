@@ -30,7 +30,7 @@ let check_param : env -> Nast.fun_param -> unit =
      fun env ty ->
       let (env, ty) = Env.expand_type env ty in
       let ety_env = empty_expand_env in
-      let ty = Typing_utils.strip_dynamic env ty in
+      let (env, ty) = Typing_dynamic_utils.strip_dynamic env ty in
       let ((env, ty_err_opt), ty, _) =
         Typing_tdef.force_expand_typedef ~ety_env env ty
       in

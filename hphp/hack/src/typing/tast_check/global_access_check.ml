@@ -555,8 +555,7 @@ let is_value_collection_ty env ty =
 let rec has_no_object_ref_ty env (seen : SSet.t) ty =
   let open Typing_defs_core in
   let (env, ty) = Tast_env.expand_type env ty in
-  let tenv = Tast_env.tast_env_as_typing_env env in
-  let ty = Typing_utils.strip_dynamic tenv ty in
+  let ty = Tast_env.strip_dynamic env ty in
   match get_node ty with
   (* Allow all primitive types *)
   | Tprim _ -> true

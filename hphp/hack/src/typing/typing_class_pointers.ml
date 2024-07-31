@@ -44,7 +44,7 @@ let check_string_coercion_point env ~flag pos expr ty =
             | Tprim Tstring -> error env level pos (string_of_class_id_ cid_)
             | _ -> ()
           in
-          let ty = Typing_utils.strip_dynamic env ty in
+          let (_env, ty) = Typing_dynamic_utils.strip_dynamic env ty in
           begin
             match get_node ty with
             | Toption ty -> check ty

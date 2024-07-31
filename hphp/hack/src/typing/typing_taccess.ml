@@ -503,7 +503,9 @@ let rec expand ctx env root =
             (not (is_supportdyn_mixed ty))
             && (* Also ignore ~T if we've seen T *)
             not
-              (TySet.mem (Typing_utils.strip_dynamic env ty) ctx.generics_seen))
+              (TySet.mem
+                 (snd (Typing_dynamic_utils.strip_dynamic env ty))
+                 ctx.generics_seen))
           ub
         |> TySet.elements
       in

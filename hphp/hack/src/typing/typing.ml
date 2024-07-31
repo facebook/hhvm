@@ -232,7 +232,8 @@ end = struct
           | Some (ty, _) -> (env, Some (ty, true))
         end
       else
-        match TUtils.try_strip_dynamic env ty with
+        let (env, ty_opt) = Typing_dynamic_utils.try_strip_dynamic env ty in
+        match ty_opt with
         | Some stripped_ty ->
           (* We've got a type ty = ~stripped_ty so under Sound Dynamic we need to
            * account for like-pushing: the rule (shown here for vec)
@@ -458,7 +459,7 @@ let get_kvc_inst env p kvc_kind ty =
  *)
 let rec is_return_disposable_fun_type env ty =
   let (_env, ty) = Env.expand_type env ty in
-  let ty = TUtils.strip_dynamic env ty in
+  let (_env, ty) = Typing_dynamic_utils.strip_dynamic env ty in
   let (_, _env, ty) = TUtils.strip_supportdyn env ty in
   match get_node ty with
   | Tfun ft ->
@@ -857,7 +858,7 @@ let make_result env p te ty =
   (* Set the variance of any type variables that were generated according
    * to how they appear in the expression type *)
   let env = Env.set_tyvar_variance env ty in
-  let (env, te) = TUtils.make_simplify_typed_expr env p ty te in
+  let (env, te) = Typing_helpers.make_simplify_typed_expr env p ty te in
   (env, te, ty)
 
 let localize_targ env ta =
@@ -1655,11 +1656,13 @@ let check_argument_type_against_parameter_type
         (not is_single_argument)
         && (not (TUtils.is_dynamic env param.fp_type))
         && Option.is_some
-             (Typing_utils.try_strip_dynamic
-                ~accept_intersections:true
-                env
-                dep_ty)
-        && Option.is_none (Typing_utils.try_strip_dynamic env param.fp_type)
+             (snd
+                (Typing_dynamic_utils.try_strip_dynamic
+                   ~accept_intersections:true
+                   env
+                   dep_ty))
+        && Option.is_none
+             (snd (Typing_dynamic_utils.try_strip_dynamic env param.fp_type))
       in
       if check_dynamic_only then
         (* Only try dynamically *)
@@ -2037,8 +2040,11 @@ let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
 let refine_and_simplify_intersection
     ~hint_first env p reason ivar_pos ty hint_ty =
   let (env, (hint_ty, is_class)) =
+    let (env, stripped_ty_opt) =
+      Typing_dynamic_utils.try_strip_dynamic env ty
+    in
     let stripped_ty =
-      match TUtils.try_strip_dynamic env ty with
+      match stripped_ty_opt with
       | Some ty when TCO.enable_sound_dynamic (Env.get_tcopt env) -> ty
       | _ -> ty
     in
@@ -2743,11 +2749,11 @@ end = struct
                *)
               match get_node ety with
               | Tintersection tyl ->
-                let (had_dynamic, tyl) =
-                  List.map_env false tyl ~f:(fun had_dynamic ty ->
-                      match TUtils.try_strip_dynamic env ty with
-                      | None -> (had_dynamic, ty)
-                      | Some ty -> (true, ty))
+                let ((env, had_dynamic), tyl) =
+                  List.map_env (env, false) tyl ~f:(fun (env, had_dynamic) ty ->
+                      match Typing_dynamic_utils.try_strip_dynamic env ty with
+                      | (env, None) -> ((env, had_dynamic), ty)
+                      | (env, Some ty) -> ((env, true), ty))
                 in
                 if had_dynamic then
                   (* Put the intersection back together without the dynamic *)
@@ -2759,7 +2765,7 @@ end = struct
                   (env, ty)
                 else
                   (env, ety)
-              | _ -> (env, TUtils.strip_dynamic env ety)
+              | _ -> Typing_dynamic_utils.strip_dynamic env ety
           in
           (env, expected_with_implicit_like, supertype)
         end
@@ -3955,7 +3961,7 @@ end = struct
           e
       in
       let (env, t_rhs) =
-        TUtils.make_simplify_typed_expr env pid ty (Aast.Id (py, y))
+        Typing_helpers.make_simplify_typed_expr env pid ty (Aast.Id (py, y))
       in
       make_result env p (Aast.Obj_get (t_lhs, t_rhs, nf, is_prop)) ty
     (* Statically-known instance property access e.g. $x->f *)
@@ -4054,7 +4060,7 @@ end = struct
       in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       let (env, inner_te) =
-        TUtils.make_simplify_typed_expr env pm result_ty (Aast.Id m)
+        Typing_helpers.make_simplify_typed_expr env pm result_ty (Aast.Id m)
       in
       make_result
         env
@@ -4111,7 +4117,7 @@ end = struct
       let (env, ty) = (env, MakeType.dynamic (Reason.dynamic_prop p)) in
       let (_, pos, te2) = te2 in
       let env = might_throw ~join_pos:p env in
-      let (env, te2) = TUtils.make_simplify_typed_expr env pos ty te2 in
+      let (env, te2) = Typing_helpers.make_simplify_typed_expr env pos ty te2 in
       make_result env p (Aast.Obj_get (te1, te2, nullflavor, prop_or_method)) ty
     | Yield af ->
       let (env, (taf, opt_key, value)) = Afield.array_field env af in
@@ -5248,7 +5254,7 @@ end = struct
         | _ -> ty_ (Reason.witness p)
       in
       let (env, te) =
-        TUtils.make_simplify_typed_expr env fpos fty (Aast.Id id)
+        Typing_helpers.make_simplify_typed_expr env fpos fty (Aast.Id id)
       in
       make_call env te tal tel None ty
     in
@@ -5280,7 +5286,7 @@ end = struct
           unpacked_element
       in
       let (env, inner_te) =
-        TUtils.make_simplify_typed_expr env fpos fty (Aast.Id id)
+        Typing_helpers.make_simplify_typed_expr env fpos fty (Aast.Id id)
       in
       let result = make_call env inner_te tal tel typed_unpack_element ty in
       (result, should_forget_fakes)
@@ -5348,7 +5354,7 @@ end = struct
           unpacked_element
       in
       let (env, te) =
-        TUtils.make_simplify_typed_expr
+        Typing_helpers.make_simplify_typed_expr
           env
           fpos
           fty
@@ -5411,12 +5417,12 @@ end = struct
              * underneath the like are reported as "dynamic because the expression went
              * through an UNSAFE_CAST"
              *)
-            let ty =
-              match Typing_utils.try_strip_dynamic env ty with
-              | None -> ty
-              | Some ty ->
+            let (env, ty) =
+              match Typing_dynamic_utils.try_strip_dynamic env ty with
+              | (env, None) -> (env, ty)
+              | (env, Some ty) ->
                 let r = Reason.unsafe_cast p in
-                MakeType.locl_like r (Typing_defs.with_reason ty r)
+                (env, MakeType.locl_like r (Typing_defs.with_reason ty r))
             in
             make_result env p te ty
         in
@@ -5655,7 +5661,7 @@ end = struct
         call_parent_construct p pos env el unpacked_element
       in
       let (env, te) =
-        TUtils.make_simplify_typed_expr
+        Typing_helpers.make_simplify_typed_expr
           env
           fpos
           ctor_fty
@@ -5685,7 +5691,7 @@ end = struct
         let (caller_ty, caller_pos, _) = func in
         (* Rewrap the caller in the readonly expression after we're done *)
         let (env, wrapped_caller) =
-          TUtils.make_simplify_typed_expr
+          Typing_helpers.make_simplify_typed_expr
             env
             caller_pos
             caller_ty
@@ -5741,10 +5747,10 @@ end = struct
           unpacked_element
       in
       let (env, inner_te) =
-        TUtils.make_simplify_typed_expr env pos_id tfty (Aast.Id m)
+        Typing_helpers.make_simplify_typed_expr env pos_id tfty (Aast.Id m)
       in
       let (env, te) =
-        TUtils.make_simplify_typed_expr
+        Typing_helpers.make_simplify_typed_expr
           env
           fpos
           tfty
@@ -6056,7 +6062,8 @@ end = struct
           fty
       in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-      match TUtils.try_strip_dynamic env efty with
+      let (env, efty_opt) = Typing_dynamic_utils.try_strip_dynamic env efty in
+      match efty_opt with
       | Some ty
         when TCO.enable_sound_dynamic (Env.get_tcopt env) && is_fun_type ty ->
         call
@@ -6261,7 +6268,7 @@ end = struct
             match opt_param with
             | Some param ->
               let rec set_params_variance env ty =
-                let ty = TUtils.strip_dynamic env ty in
+                let (env, ty) = Typing_dynamic_utils.strip_dynamic env ty in
                 let (env, ty) = Env.expand_type env ty in
                 match get_node ty with
                 | Tunion [ty] -> set_params_variance env ty
@@ -6767,7 +6774,9 @@ end = struct
              * t <: T <: supportdyn<mixed> which is more precise.
              *)
             | Tfun ft
-              when Option.is_some (TUtils.try_strip_dynamic env ft.ft_ret)
+              when Option.is_some
+                     (snd
+                        (Typing_dynamic_utils.try_strip_dynamic env ft.ft_ret))
                    && List.length el = 1 ->
               let ft_params =
                 List.map ft.ft_params ~f:(fun fp ->
@@ -7257,7 +7266,7 @@ end = struct
           | ty -> ty)
     in
     let (env, te) =
-      TUtils.make_simplify_typed_expr
+      Typing_helpers.make_simplify_typed_expr
         env
         fpos
         fty
@@ -9020,7 +9029,7 @@ end = struct
       List.map idl ~f:(fun (local, lid) -> (local.Typing_local_types.ty, lid))
     in
     let (env, te) =
-      TUtils.make_simplify_typed_expr
+      Typing_helpers.make_simplify_typed_expr
         env
         lambda_pos
         ty
@@ -10317,23 +10326,23 @@ end = struct
       let env = set_valid_rvalue ~is_defined:true p env k None ty1 in
       let (env, te, _, _) = Assign.assign p env ev p ty2 in
       let (env, tk) =
-        TUtils.make_simplify_typed_expr env p ty1 (Aast.Lvar id)
+        Typing_helpers.make_simplify_typed_expr env p ty1 (Aast.Lvar id)
       in
       (env, Aast.As_kv (tk, te))
     | As_kv ((_, p, (Lplaceholder _ as k)), ev) ->
       let (env, te, _, _) = Assign.assign p env ev p ty2 in
-      let (env, tk) = TUtils.make_simplify_typed_expr env p ty1 k in
+      let (env, tk) = Typing_helpers.make_simplify_typed_expr env p ty1 k in
       (env, Aast.As_kv (tk, te))
     | Await_as_kv (p, (_, p1, Lvar ((_, k) as id)), ev) ->
       let env = set_valid_rvalue ~is_defined:true p env k None ty1 in
       let (env, te, _, _) = Assign.assign p env ev p ty2 in
       let (env, tk) =
-        TUtils.make_simplify_typed_expr env p1 ty1 (Aast.Lvar id)
+        Typing_helpers.make_simplify_typed_expr env p1 ty1 (Aast.Lvar id)
       in
       (env, Aast.Await_as_kv (p, tk, te))
     | Await_as_kv (p, (_, p1, (Lplaceholder _ as k)), ev) ->
       let (env, te, _, _) = Assign.assign p env ev p ty2 in
-      let (env, tk) = TUtils.make_simplify_typed_expr env p1 ty1 k in
+      let (env, tk) = Typing_helpers.make_simplify_typed_expr env p1 ty1 k in
       (env, Aast.Await_as_kv (p, tk, te))
     | _ ->
       (* TODO Probably impossible, should check that *)
@@ -10419,10 +10428,10 @@ end = struct
           ty
       in
       let (env, inner_tast) =
-        TUtils.make_simplify_typed_expr env lvar_pos ty (Aast.Lvar lvar)
+        Typing_helpers.make_simplify_typed_expr env lvar_pos ty (Aast.Lvar lvar)
       in
       let (env, tast) =
-        TUtils.make_simplify_typed_expr
+        Typing_helpers.make_simplify_typed_expr
           env
           pos
           ty
@@ -10684,10 +10693,10 @@ end = struct
               declared_ty)
           expr_for_string_check;
         let (env, inner_te) =
-          TUtils.make_simplify_typed_expr env pm declared_ty (Aast.Id m)
+          Typing_helpers.make_simplify_typed_expr env pm declared_ty (Aast.Id m)
         in
         let (env, te1) =
-          TUtils.make_simplify_typed_expr
+          Typing_helpers.make_simplify_typed_expr
             env
             pobj
             declared_ty

@@ -174,7 +174,8 @@ let check_instance_method_call
     env p ~as_lint function_type receiver_type method_name tal =
   let tenv = Env.tast_env_as_typing_env env in
   let is_dynamic_call =
-    Option.is_some (Typing_utils.try_strip_dynamic tenv function_type)
+    Option.is_some
+      (snd (Typing_dynamic_utils.try_strip_dynamic tenv function_type))
   in
   Tast_env.get_receiver_ids env receiver_type
   |> List.iter ~f:(fun ri ->

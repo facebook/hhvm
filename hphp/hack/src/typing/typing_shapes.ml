@@ -360,7 +360,10 @@ let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
     ((env, ty_err_opt), res)
   in
   Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-  match get_node (TUtils.strip_dynamic env shape_ty) with
+  let (env, stripped_shape_ty) =
+    Typing_dynamic_utils.strip_dynamic env shape_ty
+  in
+  match get_node stripped_shape_ty with
   | Tnewtype (n, _, _)
     when String.equal n Naming_special_names.Classes.cSupportDyn ->
     let r = get_reason shape_ty in

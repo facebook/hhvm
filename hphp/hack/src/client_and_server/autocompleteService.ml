@@ -85,9 +85,7 @@ let strip_like_ret_type_decl ty =
  *)
 let expand_and_strip_dynamic env ty =
   let (_, ty) = Tast_env.expand_type env ty in
-  let ty =
-    Typing_utils.strip_dynamic (Tast_env.tast_env_as_typing_env env) ty
-  in
+  let ty = Tast_env.strip_dynamic env ty in
   Tast_env.expand_type env ty
 
 let expand_and_strip_supportdyn env ty =

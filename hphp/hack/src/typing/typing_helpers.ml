@@ -239,7 +239,17 @@ let refine_and_simplify_intersection ~hint_first env ~is_class reason ty hint_ty
     else
       (env, MakeType.locl_like reason intersection_ty)
   in
-  match Utils.try_strip_dynamic env ty with
-  | Some ty when TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) ->
+  match Typing_dynamic_utils.try_strip_dynamic env ty with
+  | (env, Some ty)
+    when TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) ->
     like_type_simplify env ty hint_ty ~is_class
-  | _ -> intersect ~hint_first ~is_class env reason ty hint_ty
+  | (env, _) -> intersect ~hint_first ~is_class env reason ty hint_ty
+
+let make_simplify_typed_expr env p ty te =
+  let (env, ty) =
+    if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+      Typing_dynamic_utils.recompose_like_type env ty
+    else
+      (env, ty)
+  in
+  (env, Tast.make_typed_expr p ty te)

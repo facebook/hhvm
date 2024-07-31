@@ -968,6 +968,7 @@ let close_tyvars_and_solve env =
   let env = Env.close_tyvars env in
   let (env, ty_errs) =
     List.fold_left tyvars ~init:(env, []) ~f:(fun (env, ty_errs) tyvar ->
+        (*Printf.printf "tyvar = #%s\n" (Tvid.show tyvar);*)
         match solve_to_equal_bound_or_wrt_variance env Reason.none tyvar with
         | (env, Some ty_err) -> (env, ty_err :: ty_errs)
         | (env, _) -> (env, ty_errs))
@@ -1025,3 +1026,48 @@ let rec non_null env pos ty =
 let try_bind_to_equal_bound env v =
   (* The reason we pass here doesn't matter since it's used only when `freshen` is true. *)
   try_bind_to_equal_bound ~freshen:false env Reason.none v
+
+let bind_to_like_fresh env r var lower_bounds upper_bounds =
+  let (env, fresh_ty) =
+    Env.fresh_type_invariant
+      env
+      (Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos)
+  in
+  let like_ty = MakeType.locl_like r fresh_ty in
+  let (env, _bind_ty_err) = bind env var like_ty in
+  match get_node fresh_ty with
+  | Tvar var' ->
+    let env = Env.set_tyvar_lower_bounds env var' lower_bounds in
+    let env = Env.set_tyvar_upper_bounds env var' upper_bounds in
+    (env, like_ty)
+  | _ -> failwith "fresh_type_invariant did not return a Tvar"
+
+let expand_type_for_strip_dynamic env ty =
+  let (env, ty) = Env.expand_type env ty in
+  match deref ty with
+  | (r, Tvar var) ->
+    let is_locl_dynamic ty =
+      match ty with
+      | LoclType t -> is_dynamic t
+      | _ -> false
+    in
+    let lower_bounds = Env.get_tyvar_lower_bounds env var in
+    let upper_bounds = Env.get_tyvar_upper_bounds env var in
+    let dynamic_is_lower_bound =
+      ITySet.exists is_locl_dynamic lower_bounds
+      && not (ITySet.for_all is_locl_dynamic lower_bounds)
+    in
+    if dynamic_is_lower_bound then begin
+      (* We have dynamic, t1, ..., tn <: #0 <: u
+       * Let's simplify to #0 := dynamic | #1
+       * with t1, ..., tn <: #1 <: u
+       *)
+      bind_to_like_fresh
+        env
+        r
+        var
+        (ITySet.filter (fun t -> not (is_locl_dynamic t)) lower_bounds)
+        upper_bounds
+    end else
+      (env, ty)
+  | _ -> (env, ty)

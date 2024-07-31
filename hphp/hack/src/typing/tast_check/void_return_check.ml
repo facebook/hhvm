@@ -74,8 +74,7 @@ let validate_state fun_span fun_kind env s =
                 when String.equal
                        (snd cid)
                        Naming_special_names.Classes.cAwaitable ->
-                let tenv = Tast_env.tast_env_as_typing_env env in
-                Tclass (cid, ex, [Typing_utils.strip_dynamic tenv ty])
+                Tclass (cid, ex, [Tast_env.strip_dynamic env ty])
               | x -> x))
       else
         sup

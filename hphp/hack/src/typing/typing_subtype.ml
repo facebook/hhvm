@@ -664,25 +664,37 @@ let mk_issubtype_prop ~sub_supportdyn ~coerce env ty1 ty2 =
             LoclType ty
         | _ -> ty1) )
   in
-  ( env,
-    match ty2 with
-    | LoclType ty2 ->
-      let (coerce, ty2) =
-        (* If we are in dynamic-aware subtyping mode, that fact will be lost when ty2
-           ends up on the upper bound of a type variable. Here we find if ty2 contains
-           dynamic and replace it with supportdyn<mixed> which is equivalent, but does not
-           require dynamic-aware subtyping mode to be a supertype of types that support dynamic. *)
-        match (coerce, TUtils.try_strip_dynamic env ty2) with
-        | (Some TL.CoerceToDynamic, Some non_dyn_ty) ->
-          let r = get_reason ty2 in
-          ( None,
-            MakeType.union
-              r
-              [non_dyn_ty; MakeType.supportdyn_mixed ~mixed_reason:r r] )
-        | _ -> (coerce, ty2)
-      in
-      TL.IsSubtype (coerce, ty1, LoclType ty2)
-    | _ -> TL.IsSubtype (coerce, ty1, ty2) )
+  match ty2 with
+  | LoclType ty2 ->
+    (* TODO akenn: somehow we lose this environment *)
+    let (env, coerce, ty2) =
+      (* If we are in dynamic-aware subtyping mode, that fact will be lost when ty2
+         ends up on the upper bound of a type variable. Here we find if ty2 contains
+         dynamic and replace it with supportdyn<mixed> which is equivalent, but does not
+         require dynamic-aware subtyping mode to be a supertype of types that support dynamic. *)
+      match coerce with
+      | Some TL.CoerceToDynamic ->
+        let (env, ty_opt) =
+          Typing_dynamic_utils.try_strip_dynamic
+            ~do_not_solve_likes:true
+            env
+            ty2
+        in
+        begin
+          match ty_opt with
+          | Some non_dyn_ty ->
+            let r = get_reason ty2 in
+            ( env,
+              None,
+              MakeType.union
+                r
+                [non_dyn_ty; MakeType.supportdyn_mixed ~mixed_reason:r r] )
+          | None -> (env, coerce, ty2)
+        end
+      | _ -> (env, coerce, ty2)
+    in
+    (env, TL.IsSubtype (coerce, ty1, LoclType ty2))
+  | _ -> (env, TL.IsSubtype (coerce, ty1, ty2))
 
 (* All of our constraints have a type with additional context to support <:D *)
 type lhs = {
@@ -1217,7 +1229,7 @@ end = struct
     in
     let stripped_dynamic =
       if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-        TUtils.try_strip_dynamic_from_union env lty_supers
+        Typing_dynamic_utils.try_strip_dynamic_from_union env lty_supers
       else
         None
     in
@@ -2059,7 +2071,7 @@ end = struct
            * to override Awaitable<dynamic> and and Awaitable<t> to
            * override ~Awaitable<dynamic>.
            *)
-          let ty_super = TUtils.strip_dynamic env ty_super in
+          let (_, ty_super) = Typing_dynamic_utils.strip_dynamic env ty_super in
           match get_node ty_super with
           | Tdynamic -> Subtype_env.set_coercing_to_dynamic subtype_env
           | Tclass ((_, class_name), _, [ty])
@@ -2865,13 +2877,18 @@ end = struct
         ~ty_sub:(LoclType ty_sub)
         ~ty_super:(LoclType ty_super)
     in
-    let ty_sub =
+    let (env, ty_sub) =
       if subtype_env.Subtype_env.ignore_likes then
-        Option.value
-          ~default:ty_sub
-          (Typing_utils.try_strip_dynamic ~accept_intersections:true env ty_sub)
+        let (env, ty_opt) =
+          Typing_dynamic_utils.try_strip_dynamic
+            ~do_not_solve_likes:true
+            ~accept_intersections:true
+            env
+            ty_sub
+        in
+        (env, Option.value ~default:ty_sub ty_opt)
       else
-        ty_sub
+        (env, ty_sub)
     in
     match (deref ty_sub, deref ty_super) with
     (* -- C-Var-R ----------------------------------------------------------- *)
@@ -6534,7 +6551,7 @@ end = struct
         | _ -> true
       in
       begin
-        match TUtils.try_strip_dynamic_from_union env ty_subs with
+        match Typing_dynamic_utils.try_strip_dynamic_from_union env ty_subs with
         | None -> simplify_union_l ty_subs env
         | Some (dyn, ty_subs) ->
           let simplify_dyn_sub_super ty_super env =
@@ -6762,7 +6779,7 @@ end = struct
     (* Prioritize types that aren't dynamic or intersections with dynamic
        to get better error messages *)
     let (last_tyl, first_tyl) =
-      TUtils.partition_union
+      Typing_dynamic_utils.partition_union
         ~f:contains_dynamic_through_intersection
         env
         ty_subs

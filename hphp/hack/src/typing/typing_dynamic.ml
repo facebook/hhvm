@@ -149,7 +149,7 @@ let sound_dynamic_interface_check_from_fun_ty ~this_class env fun_ty =
 let make_like env changed ty =
   if
     Typing_defs.is_dynamic ty
-    || Option.is_some (Typing_utils.try_strip_dynamic env ty)
+    || Option.is_some (snd (Typing_dynamic_utils.try_strip_dynamic env ty))
   then
     (changed, ty)
   else
@@ -287,9 +287,11 @@ let rec try_push_like env ty =
  *   e.g. tuple and shape components, covariant type arguments to generic classes.
  *)
 let rec strip_covariant_like env ty =
-  match Typing_utils.try_strip_dynamic ~accept_intersections:true env ty with
-  | Some ty -> (env, ty)
-  | None ->
+  match
+    Typing_dynamic_utils.try_strip_dynamic ~accept_intersections:true env ty
+  with
+  | (env, Some ty) -> (env, ty)
+  | (env, None) ->
     (match deref ty with
     | (r, Ttuple tyl) ->
       let (env, tyl) = List.map_env env ~f:strip_covariant_like tyl in

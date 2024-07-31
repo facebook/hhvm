@@ -358,19 +358,19 @@ let check_inout_return ret_pos env =
   env
 
 let rec remove_like_for_return env ty =
-  match TUtils.try_strip_dynamic env ty with
-  | Some ty -> ty
+  let (env, ty_opt) = Typing_dynamic_utils.try_strip_dynamic env ty in
+  match ty_opt with
+  | Some ty -> (env, ty)
   | None ->
     (match get_node ty with
     | Tclass ((p, class_name), exact, [ty])
       when String.equal class_name SN.Classes.cAwaitable ->
-      mk
-        ( get_reason ty,
-          Tclass ((p, class_name), exact, [remove_like_for_return env ty]) )
-    | _ -> ty)
+      let (env, ty_res) = remove_like_for_return env ty in
+      (env, mk (get_reason ty, Tclass ((p, class_name), exact, [ty_res])))
+    | _ -> (env, ty))
 
 let fun_implicit_return env pos ret =
-  let ret =
+  let (env, ret) =
     if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
       (* Under sound dynamic, void <D: dynamic, which means that it void <D: ~T for any T.
        * However, for ergonomic reasons, it should not be the case that a function
@@ -379,7 +379,7 @@ let fun_implicit_return env pos ret =
        * can have an implicit return, while requiring an explicit return for like types. *)
       remove_like_for_return env ret
     else
-      ret
+      (env, ret)
   in
   let ret_pos = Some (Typing_defs_core.get_pos ret) in
 

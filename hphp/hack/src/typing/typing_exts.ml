@@ -51,7 +51,8 @@ let magic_method_name input =
 
 let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
     env * (locl_fun_params * locl_ty option) option =
-  match get_node (Typing_utils.strip_dynamic env class_) with
+  let (env, ty) = Typing_dynamic_utils.strip_dynamic env class_ in
+  match get_node ty with
   | Tclass ((_, className), _, []) ->
     let ( >>= ) = Option.( >>= ) in
     let ce_type =

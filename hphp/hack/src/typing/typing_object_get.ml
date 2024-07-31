@@ -1499,7 +1499,9 @@ let obj_get_with_mismatches
       | _ -> (env, ty)
     in
     (* First strip off top-level like, so we can see the class (or union of classes) underneath *)
-    let stripped_receiver_ty = Typing_utils.strip_dynamic env receiver_ty in
+    let (env, stripped_receiver_ty) =
+      Typing_dynamic_utils.strip_dynamic env receiver_ty
+    in
     let (env, freshened_receiver_ty) =
       freshen_receiver_ty_and_assert_subtype env stripped_receiver_ty
     in

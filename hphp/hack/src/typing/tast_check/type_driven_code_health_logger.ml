@@ -65,8 +65,8 @@ let always_false level pos kind env lhs_ty rhs_ty =
   let (env, lhs_ty) = Tast_env.expand_type env lhs_ty in
   let (env, rhs_ty) = Tast_env.expand_type env rhs_ty in
   let tenv = Tast_env.tast_env_as_typing_env env in
-  let lhs_ty = Typing_utils.strip_dynamic tenv lhs_ty in
-  let rhs_ty = Typing_utils.strip_dynamic tenv rhs_ty in
+  let lhs_ty = Tast_env.strip_dynamic env lhs_ty in
+  let rhs_ty = Tast_env.strip_dynamic env rhs_ty in
   let tenv = Typing_env.open_tyvars tenv Pos.none in
   let (tenv, rhs_ty) = replace_placeholders_with_tvars tenv rhs_ty in
   if Tast_env.is_sub_type env lhs_ty nothing_ty then
@@ -85,9 +85,7 @@ let is_toplevelish_dynamic env (ty, hint_opt) =
   | Some (pos, _) ->
     let rec is_toplevelish_dynamic ty =
       let (_env, ty) = Tast_env.expand_type env ty in
-      let ty =
-        Typing_utils.strip_dynamic (Tast_env.tast_env_as_typing_env env) ty
-      in
+      let ty = Tast_env.strip_dynamic env ty in
       let (_env, ty) = Tast_env.expand_type env ty in
       match T.get_node ty with
       | T.Tdynamic -> true

@@ -170,7 +170,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     in
     let hte1 = hole_on_err te1 err_opt1 and hte2 = hole_on_err te2 err_opt2 in
     let (env, te) =
-      Typing_utils.make_simplify_typed_expr
+      Typing_helpers.make_simplify_typed_expr
         env
         p
         ty
@@ -624,7 +624,7 @@ let unop p env uop te ty =
   let make_result env te err_opt result_ty =
     let hte = hole_on_err te err_opt in
     let (env, te) =
-      Typing_utils.make_simplify_typed_expr
+      Typing_helpers.make_simplify_typed_expr
         env
         p
         result_ty

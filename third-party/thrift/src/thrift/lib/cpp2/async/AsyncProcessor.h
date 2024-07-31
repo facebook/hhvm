@@ -1504,7 +1504,7 @@ class HandlerCallbackBase {
   folly::coro::Task<void> processServiceInterceptorsOnRequest(
       detail::ServiceInterceptorOnRequestArguments arguments);
   folly::coro::Task<void> processServiceInterceptorsOnResponse(
-      std::optional<folly::exception_wrapper> activeException);
+      detail::ServiceInterceptorOnResponseResult resultOrActiveException);
 
   friend folly::coro::Task<void> detail::processServiceInterceptorsOnRequest(
       HandlerCallbackBase&,
@@ -1611,7 +1611,7 @@ class HandlerCallback : public HandlerCallbackBase {
                                 auto result) -> folly::coro::Task<void> {
         folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
             callback->processServiceInterceptorsOnResponse(
-                std::nullopt /* activeException */));
+                apache::thrift::util::TypeErasedRef::of<InnerType>(result)));
         if (onResponseResult.hasException()) {
           callback->doException(
               onResponseResult.exception().to_exception_ptr());
@@ -1698,7 +1698,8 @@ class HandlerCallback<void> : public HandlerCallbackBase {
       const auto doProcess = [](Ptr callback) -> folly::coro::Task<void> {
         folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
             callback->processServiceInterceptorsOnResponse(
-                std::nullopt /* activeException */));
+                apache::thrift::util::TypeErasedRef::of<folly::Unit>(
+                    folly::unit)));
         if (onResponseResult.hasException()) {
           callback->doException(
               onResponseResult.exception().to_exception_ptr());

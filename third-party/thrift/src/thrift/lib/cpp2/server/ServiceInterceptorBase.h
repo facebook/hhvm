@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <variant>
+
 #include <folly/experimental/coro/Task.h>
 
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
@@ -29,6 +31,11 @@ class ServiceInterceptorBase;
 class Cpp2ConnContext;
 class Cpp2RequestContext;
 class ContextStack;
+
+namespace detail {
+using ServiceInterceptorOnResponseResult =
+    std::variant<folly::exception_wrapper, apache::thrift::util::TypeErasedRef>;
+}
 
 class ServiceInterceptorBase {
  public:
@@ -67,7 +74,7 @@ class ServiceInterceptorBase {
   struct ResponseInfo {
     const Cpp2RequestContext* context = nullptr;
     detail::ServiceInterceptorOnRequestStorage* storage = nullptr;
-    std::optional<folly::exception_wrapper> activeException;
+    detail::ServiceInterceptorOnResponseResult resultOrActiveException;
   };
   virtual folly::coro::Task<void> internal_onResponse(
       ConnectionInfo, ResponseInfo) = 0;

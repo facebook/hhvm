@@ -31,6 +31,11 @@ struct RequestArgsStruct {
   2: string bar;
 }
 
+struct ResponseArgsStruct {
+  1: i32 foo;
+  2: string bar;
+}
+
 service ServiceInterceptorTest {
   void noop();
 
@@ -46,6 +51,8 @@ service ServiceInterceptorTest {
     2: string str,
     3: RequestArgsStruct request,
   );
+
+  ResponseArgsStruct echoStruct(1: RequestArgsStruct request);
 
   @cpp.ProcessInEbThreadUnsafe
   string echo_eb(1: string str);

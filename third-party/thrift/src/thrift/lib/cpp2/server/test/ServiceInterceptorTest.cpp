@@ -108,6 +108,14 @@ struct TestHandler
     co_return std::make_unique<std::string>("return value");
   }
 
+  folly::coro::Task<std::unique_ptr<test::ResponseArgsStruct>> co_echoStruct(
+      std::unique_ptr<test::RequestArgsStruct> request) override {
+    auto result = std::make_unique<test::ResponseArgsStruct>();
+    result->foo() = std::move(*request->foo());
+    result->bar() = std::move(*request->bar());
+    co_return result;
+  }
+
   void async_eb_echo_eb(
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::string>> callback,
       std::unique_ptr<std::string> str) override {
@@ -123,6 +131,16 @@ struct TestHandler
       }
     };
     co_return {std::make_unique<SampleInteractionImpl>()};
+  }
+
+  std::unique_ptr<SampleInteraction2If> createSampleInteraction2() override {
+    class SampleInteraction2Impl : public SampleInteraction2If {
+      folly::coro::Task<std::unique_ptr<std::string>> co_echo(
+          std::unique_ptr<std::string> str) override {
+        co_return std::move(str);
+      }
+    };
+    return std::make_unique<SampleInteraction2Impl>();
   }
 
   apache::thrift::ServerStream<std::int32_t> sync_iota(
@@ -263,14 +281,55 @@ struct ServiceInterceptorRethrowActiveExceptionOnResponse
   folly::coro::Task<void> onResponse(
       folly::Unit*, folly::Unit*, ResponseInfo responseInfo) override {
     onResponseCount++;
-    if (responseInfo.activeException) {
-      responseInfo.activeException->throw_exception();
+    if (auto* ex = std::get_if<folly::exception_wrapper>(
+            &responseInfo.resultOrActiveException)) {
+      ex->throw_exception();
     }
     co_return;
   }
 
   int onRequestCount = 0;
   int onResponseCount = 0;
+};
+
+struct ServiceInterceptorLogResultTypeOnResponse
+    : public NamedServiceInterceptor<folly::Unit> {
+ public:
+  using NamedServiceInterceptor::NamedServiceInterceptor;
+
+  folly::coro::Task<void> onResponse(
+      folly::Unit*, folly::Unit*, ResponseInfo responseInfo) override {
+    results.emplace_back(folly::variant_match(
+        responseInfo.resultOrActiveException,
+        [](const folly::exception_wrapper& ex) -> Entry {
+          return Entry{ResultKind::EXCEPTION, *ex.type()};
+        },
+        [](const apache::thrift::util::TypeErasedRef& result) -> Entry {
+          return Entry{ResultKind::OK, result.type()};
+        }));
+    co_return;
+  }
+
+  enum class ResultKind {
+    OK,
+    EXCEPTION,
+  };
+  struct Entry {
+    ResultKind kind;
+    std::type_index type;
+
+    bool operator==(const Entry& other) const {
+      return std::tie(kind, type) == std::tie(other.kind, other.type);
+    }
+  };
+  [[maybe_unused]] friend std::ostream& operator<<(
+      std::ostream& os, const Entry& entry) {
+    auto kindStr = entry.kind == ResultKind::OK ? "OK" : "EXCEPTION";
+    return os << "Entry(kind=" << kindStr
+              << ", type=" << folly::demangle(entry.type.name()) << ")";
+  }
+
+  std::vector<Entry> results;
 };
 
 } // namespace
@@ -974,6 +1033,82 @@ CO_TEST_P(ServiceInterceptorTestP, ServiceAndMethodNames) {
   }
 
   EXPECT_THAT(interceptor->names, ElementsAreArray(expectedNames));
+}
+
+CO_TEST_P(ServiceInterceptorTestP, ResultOrActiveExceptionTypesAreCorrect) {
+  if (transportType() != TransportType::ROCKET) {
+    // only rocket supports all transport features being tested here
+    co_return;
+  }
+
+  auto interceptor =
+      std::make_shared<ServiceInterceptorLogResultTypeOnResponse>(
+          "Interceptor1");
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(interceptor));
+      });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  co_await client->co_echo("");
+  co_await client->co_noop();
+
+  {
+    auto stream = (co_await client->co_iota(1)).toAsyncGenerator();
+    EXPECT_EQ((co_await stream.next()).value(), 1);
+    EXPECT_EQ((co_await stream.next()).value(), 2);
+    // close stream
+  }
+
+  {
+    auto interaction = co_await client->co_createInteraction();
+    co_await interaction.co_echo("");
+    // terminate interaction
+  }
+
+  {
+    auto interaction = client->createSampleInteraction2();
+    co_await interaction.co_echo("");
+    // terminate interaction
+  }
+
+  EXPECT_THROW(
+      co_await client->co_echo("throw"), apache::thrift::TApplicationException);
+
+  co_await client->co_echo_eb("");
+
+  {
+    test::RequestArgsStruct requestArgs;
+    requestArgs.foo() = 1;
+    requestArgs.bar() = "hello";
+    co_await client->co_echoStruct(requestArgs);
+  }
+
+  using ResultKind = ServiceInterceptorLogResultTypeOnResponse::ResultKind;
+  std::vector<ServiceInterceptorLogResultTypeOnResponse::Entry>
+      expectedResults = {
+          // echo
+          {ResultKind::OK, typeid(std::string)},
+          // noop
+          {ResultKind::OK, typeid(folly::Unit)},
+          // iota
+          {ResultKind::OK, typeid(apache::thrift::ServerStream<std::int32_t>)},
+          // createInteraction
+          {ResultKind::OK, typeid(folly::Unit)},
+          // SampleInteraction.echo
+          {ResultKind::OK, typeid(std::string)},
+          // SampleInteraction2.echo
+          {ResultKind::OK, typeid(std::string)},
+          // echo("throw")
+          {ResultKind::EXCEPTION, typeid(std::runtime_error)},
+          // echo_eb
+          {ResultKind::OK, typeid(std::string)},
+          // echoStruct
+          {ResultKind::OK, typeid(test::ResponseArgsStruct)},
+      };
+
+  EXPECT_THAT(interceptor->results, ElementsAreArray(expectedResults));
 }
 
 INSTANTIATE_TEST_SUITE_P(

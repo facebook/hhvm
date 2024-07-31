@@ -79,8 +79,12 @@ func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 	if err != nil {
 		return mono.Error(err)
 	}
+	dataBytes := msg.Data()
 	if reqMetadata.Zstd {
-		return mono.Error(fmt.Errorf("currently only supporting uncompressed COMPACT protocol"))
+		dataBytes, err = decompressZstd(dataBytes)
+		if err != nil {
+			return mono.Error(err)
+		}
 	}
 	protocol, err := newBufProtocol(reqMetadata.Name, reqMetadata.TypeID, reqMetadata.Other, reqMetadata.ProtoID, msg.Data())
 	if err != nil {
@@ -98,6 +102,12 @@ func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 		return mono.Error(err)
 	}
 	respDataBytes := protocol.Bytes()
+	if respMetadata.Zstd {
+		respDataBytes, err = compressZstd(respDataBytes)
+		if err != nil {
+			return mono.Error(err)
+		}
+	}
 	response := payload.New(respDataBytes, respMetadataBytes)
 	return mono.Just(response)
 }

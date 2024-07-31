@@ -100,29 +100,12 @@ func (p *rocketClient) WriteMessageEnd() error {
 }
 
 func (p *rocketClient) Flush() (err error) {
-	reqMetadata := &requestRPCMetadata{}
-	reqMetadata.Name = p.messageName
-	reqMetadata.TypeID = p.writeType
-	reqMetadata.ProtoID = p.protoID
-	reqMetadata.Zstd = p.zstd
-	reqMetadata.Other = make(map[string]string)
-	maps.Copy(reqMetadata.Other, p.reqHeaders)
-	p.reqHeaders = make(map[string]string)
-	maps.Copy(reqMetadata.Other, p.persistentHeaders)
-	metadataBytes, err := serializeRequestRPCMetadata(reqMetadata)
+	dataBytes := p.wbuf.Bytes()
+	request, err := encodeRequestPayload(p.messageName, p.protoID, p.writeType, p.reqHeaders, p.persistentHeaders, p.zstd, dataBytes)
 	if err != nil {
 		return err
 	}
-	// serializer in the protocol field was writing to the transport's memory buffer.
-	dataBytes := p.wbuf.Bytes()
-	if reqMetadata.Zstd {
-		dataBytes, err = compressZstd(dataBytes)
-		if err != nil {
-			return err
-		}
-	}
 
-	request := payload.New(dataBytes, metadataBytes)
 	p.resultChan = make(chan rsocketResult, 1)
 	if err := p.open(); err != nil {
 		return err
@@ -133,7 +116,7 @@ func (p *rocketClient) Flush() (err error) {
 	// Or something else is happening, but this is very necessary.
 	p.conn.SetDeadline(time.Time{})
 	mono := p.client.RequestResponse(request)
-	if reqMetadata.TypeID != CALL {
+	if p.writeType != CALL {
 		return nil
 	}
 	ctx := p.ctx
@@ -229,26 +212,14 @@ func (p *rocketClient) ReadMessageBegin() (string, MessageType, int32, error) {
 	if err != nil {
 		return name, EXCEPTION, p.seqID, err
 	}
-	dataBytes := resp.Data()
-	metadataBytes, ok := resp.Metadata()
-	if ok {
-		metadata, err := deserializeResponseRPCMetadata(metadataBytes)
-		if err != nil {
-			return name, EXCEPTION, p.seqID, err
-		}
-		p.respHeaders = make(map[string]string)
-		maps.Copy(p.respHeaders, metadata.Other)
-		if metadata.exception != nil && !metadata.exception.IsDeclared() {
-			return name, EXCEPTION, p.seqID, metadata.exception
-		}
-		if metadata.Zstd {
-			dataBytes, err = decompressZstd(dataBytes)
-			if err != nil {
-				return name, EXCEPTION, p.seqID, err
-			}
-		}
+	response, err := decodeResponsePayload(resp)
+	p.respHeaders = make(map[string]string)
+	maps.Copy(p.respHeaders, response.Headers())
+	if err != nil {
+		return name, EXCEPTION, p.seqID, err
 	}
-	p.rbuf.Init(dataBytes)
+
+	p.rbuf.Init(response.Data())
 	return name, REPLY, p.seqID, err
 }
 

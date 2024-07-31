@@ -70,45 +70,21 @@ type rocketServerSocket struct {
 }
 
 func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
-	msg = payload.Clone(msg)
-	reqMetadataBytes, ok := msg.Metadata()
-	if !ok {
+	request, err := decodeRequestPayload(msg)
+	if !request.HasMetadata() {
 		return mono.Error(fmt.Errorf("expected metadata"))
 	}
-	reqMetadata, err := deserializeRequestRPCMetadata(reqMetadataBytes)
-	if err != nil {
-		return mono.Error(err)
-	}
-	dataBytes := msg.Data()
-	if reqMetadata.Zstd {
-		dataBytes, err = decompressZstd(dataBytes)
-		if err != nil {
-			return mono.Error(err)
-		}
-	}
-	protocol, err := newBufProtocol(reqMetadata.Name, reqMetadata.TypeID, reqMetadata.Other, reqMetadata.ProtoID, msg.Data())
+	protocol, err := newBufProtocol(request.Name(), request.TypeID(), request.Headers(), request.ProtoID(), request.Data())
 	if err != nil {
 		return mono.Error(err)
 	}
 	if err := processContext(r.ctx, r.proc, protocol); err != nil {
 		return mono.Error(err)
 	}
-	respMetadata := &responseRPCMetadata{
-		Zstd:  reqMetadata.Zstd,
-		Other: protocol.reqHeaders,
-	}
-	respMetadataBytes, err := serializeResponseRPCMetadata(respMetadata)
+	response, err := encodeResponsePayload(protocol.reqHeaders, request.Zstd(), protocol.Bytes())
 	if err != nil {
 		return mono.Error(err)
 	}
-	respDataBytes := protocol.Bytes()
-	if respMetadata.Zstd {
-		respDataBytes, err = compressZstd(respDataBytes)
-		if err != nil {
-			return mono.Error(err)
-		}
-	}
-	response := payload.New(respDataBytes, respMetadataBytes)
 	return mono.Just(response)
 }
 

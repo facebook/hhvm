@@ -23,16 +23,18 @@ import (
 )
 
 func TestRequestRPCMetadata(t *testing.T) {
-	want := &requestRPCMetadata{
-		Name:    "test123",
-		TypeID:  CALL,
-		ProtoID: ProtocolIDCompact,
-		Zstd:    true,
-		Other:   map[string]string{"header": "1"},
-	}
-	data, err := serializeRequestRPCMetadata(want)
+	wantName := "test123"
+	wantType := CALL
+	wantProto := ProtocolIDCompact
+	wantZstd := false
+	wantOther := map[string]string{"header": "1"}
+	data, err := encodeRequestPayload(wantName, wantProto, wantType, wantOther, nil, wantZstd, nil)
 	require.NoError(t, err)
-	got, err := deserializeRequestRPCMetadata(data)
+	got, err := decodeRequestPayload(data)
 	require.NoError(t, err)
-	require.Equal(t, want, got)
+	require.Equal(t, wantName, got.Name())
+	require.Equal(t, wantType, got.TypeID())
+	require.Equal(t, wantProto, got.ProtoID())
+	require.Equal(t, wantZstd, got.Zstd())
+	require.Equal(t, wantOther, got.Headers())
 }

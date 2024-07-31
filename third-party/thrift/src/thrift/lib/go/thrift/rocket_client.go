@@ -39,7 +39,8 @@ type rocketClient struct {
 	cancel func()
 	client rsocket.Client
 
-	resultChan chan rsocketResult
+	resultVal payload.Payload
+	resultErr error
 
 	timeout time.Duration
 
@@ -82,11 +83,6 @@ func newRocketClient(conn net.Conn, protoID ProtocolID, timeout time.Duration, p
 	return p, nil
 }
 
-type rsocketResult struct {
-	val payload.Payload
-	err error
-}
-
 func (p *rocketClient) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
 	p.wbuf.Reset()
 	p.seqID = seqid
@@ -106,7 +102,6 @@ func (p *rocketClient) Flush() (err error) {
 		return err
 	}
 
-	p.resultChan = make(chan rsocketResult, 1)
 	if err := p.open(); err != nil {
 		return err
 	}
@@ -120,11 +115,14 @@ func (p *rocketClient) Flush() (err error) {
 		return nil
 	}
 	ctx := p.ctx
-	go func() {
-		val, err := mono.Block(ctx)
-		val = payload.Clone(val)
-		p.resultChan <- rsocketResult{val: val, err: err}
-	}()
+	if p.timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, p.timeout)
+		defer cancel()
+	}
+	val, err := mono.Block(ctx)
+	p.resultVal = payload.Clone(val)
+	p.resultErr = err
 	return nil
 }
 
@@ -175,28 +173,12 @@ func (p *rocketClient) serverMetadataPush(pay payload.Payload) {
 	}
 }
 
-func (p *rocketClient) readPayload() (resp payload.Payload, err error) {
-	ctx := p.ctx
-	if p.timeout > 0 {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, p.timeout)
-		defer cancel()
-	}
-	select {
-	case r := <-p.resultChan:
-		return r.val, r.err
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	}
-}
-
 func (p *rocketClient) ReadMessageBegin() (string, MessageType, int32, error) {
 	name := p.messageName
-	resp, err := p.readPayload()
-	if err != nil {
-		return name, EXCEPTION, p.seqID, err
+	if p.resultErr != nil {
+		return name, EXCEPTION, p.seqID, p.resultErr
 	}
-	response, err := decodeResponsePayload(resp)
+	response, err := decodeResponsePayload(p.resultVal)
 	p.respHeaders = make(map[string]string)
 	maps.Copy(p.respHeaders, response.Headers())
 	if err != nil {
@@ -227,14 +209,13 @@ func (p *rocketClient) GetResponseHeaders() map[string]string {
 }
 
 func (p *rocketClient) Close() error {
-	if err := p.conn.Close(); err != nil {
-		return err
-	}
 	if p.client != nil {
 		if err := p.client.Close(); err != nil {
 			return err
 		}
 		p.client = nil
+	} else {
+		p.conn.Close()
 	}
 	if p.cancel != nil {
 		p.cancel()

@@ -201,13 +201,13 @@ end = struct
   let rec subfields_of { key; ty; optional } =
     let open List.Let_syntax in
     let* ty = subtypes_of ty in
-    let* optional =
+    let+ optional =
       if optional then
         [true; false]
       else
         [false]
     in
-    [{ key; ty; optional }]
+    { key; ty; optional }
 
   (** Reflexive transitive subtypes of the given type. It is based only on the
       knowledge about the structure of type and generalities in the system. For
@@ -242,15 +242,18 @@ end = struct
       |> List.map ~f:(fun tyl -> Tuple tyl)
     | Shape { fields; open_ } ->
       let open List.Let_syntax in
-      if open_ then
-        (* Here we should be adding new fields, but with the current setup
-           that's too expensive. Need memoization to make it more affordable. *)
-        let* fields = List.map ~f:subfields_of fields |> List.all in
-        let* open_ = [true; false] in
-        [Shape { fields; open_ }]
-      else
-        let* fields = List.map ~f:subfields_of fields |> List.all in
-        [Shape { fields; open_ }])
+      let* fields =
+        List.map ~f:subfields_of fields |> List.Cartesian_product.all
+      in
+      let+ open_ =
+        if open_ then
+          (* Here we should be adding new fields, but with the current setup
+             that's too expensive. Need memoization to make it more affordable. *)
+          [true; false]
+        else
+          [false]
+      in
+      Shape { fields; open_ })
 
   let rec show_field { key; ty; optional } =
     let optional =
@@ -315,22 +318,23 @@ end = struct
         [Mixed]
       | Option ty ->
         let open List.Let_syntax in
-        let* ty = weaken_for_disjointness ty in
-        [Option ty]
+        let+ ty = weaken_for_disjointness ty in
+        Option ty
       | Alias info -> weaken_for_disjointness info.aliased
       | Newtype _ -> [Mixed]
       | Case { name; disjuncts } ->
         let open List.Let_syntax in
-        let* disjuncts =
-          List.map ~f:weaken_for_disjointness disjuncts |> List.all
+        let+ disjuncts =
+          List.map ~f:weaken_for_disjointness disjuncts
+          |> List.Cartesian_product.all
         in
-        [Case { name; disjuncts }]
+        Case { name; disjuncts }
       | Enum _ -> [Primitive Primitive.Arraykey]
       | Tuple _ ->
         let open List.Let_syntax in
-        let* n = List.init max_tuple_arity ~f:(fun i -> i + 1) in
+        let+ n = List.init max_tuple_arity ~f:(fun i -> i + 1) in
         let tyl = List.init n ~f:(fun _ -> Mixed) in
-        [Tuple tyl]
+        Tuple tyl
       | Shape _ -> [Shape { fields = []; open_ = true }]
       | Mixed
       | Primitive _

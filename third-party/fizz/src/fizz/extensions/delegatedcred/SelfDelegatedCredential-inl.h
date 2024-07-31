@@ -53,7 +53,7 @@ SelfDelegatedCredentialImpl<T>::SelfDelegatedCredentialImpl(
   auto parentCert = openssl::CertUtils::makePeerCert(getX509());
   parentCert->verify(
       credential_.credential_scheme,
-      CertificateVerifyContext::DelegatedCredential,
+      CertificateVerifyContext::ServerDelegatedCredential,
       signBuffer->coalesce(),
       credential_.signature->coalesce());
 

@@ -46,20 +46,30 @@ Buf CertUtils::prepareSignData(
   static constexpr folly::StringPiece kClientLabel =
       "TLS 1.3, client CertificateVerify";
   static constexpr folly::StringPiece kAuthLabel = "Exported Authenticator";
-  static constexpr folly::StringPiece kDelegatedCredLabel =
+  static constexpr folly::StringPiece kServerDelegatedCredLabel =
       "TLS, server delegated credentials";
+  static constexpr folly::StringPiece kClientDelegatedCredLabel =
+      "TLS, client delegated credentials";
   static constexpr size_t kSigPrefixLen = 64;
   static constexpr uint8_t kSigPrefix = 32;
 
   folly::StringPiece label;
-  if (context == CertificateVerifyContext::Server) {
-    label = kServerLabel;
-  } else if (context == CertificateVerifyContext::Client) {
-    label = kClientLabel;
-  } else if (context == CertificateVerifyContext::Authenticator) {
-    label = kAuthLabel;
-  } else {
-    label = kDelegatedCredLabel;
+  switch (context) {
+    case CertificateVerifyContext::Server:
+      label = kServerLabel;
+      break;
+    case CertificateVerifyContext::Client:
+      label = kClientLabel;
+      break;
+    case CertificateVerifyContext::Authenticator:
+      label = kAuthLabel;
+      break;
+    case CertificateVerifyContext::ClientDelegatedCredential:
+      label = kClientDelegatedCredLabel;
+      break;
+    case CertificateVerifyContext::ServerDelegatedCredential:
+      label = kServerDelegatedCredLabel;
+      break;
   }
 
   size_t sigDataLen = kSigPrefixLen + label.size() + 1 + toBeSigned.size();

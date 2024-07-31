@@ -188,7 +188,7 @@ class SelfDelegatedCredentialTest : public Test {
         cred, folly::ssl::OpenSSLCertUtils::derEncode(*parentCert_->getX509()));
     cred.signature = parentCert_->sign(
         cred.credential_scheme,
-        CertificateVerifyContext::DelegatedCredential,
+        CertificateVerifyContext::ServerDelegatedCredential,
         toSign->coalesce());
   }
 

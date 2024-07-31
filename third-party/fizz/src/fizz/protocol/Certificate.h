@@ -43,7 +43,8 @@ enum class CertificateVerifyContext {
   Server,
   Client,
   Authenticator,
-  DelegatedCredential
+  ClientDelegatedCredential,
+  ServerDelegatedCredential
 };
 
 class IdentityCert : public IdentityCertBase {

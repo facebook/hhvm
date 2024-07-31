@@ -58,7 +58,7 @@ void PeerDelegatedCredentialImpl<T>::verify(
   try {
     parentCert->verify(
         credential_.credential_scheme,
-        CertificateVerifyContext::DelegatedCredential,
+        CertificateVerifyContext::ServerDelegatedCredential,
         credSignBuf->coalesce(),
         credential_.signature->coalesce());
   } catch (const std::exception& e) {

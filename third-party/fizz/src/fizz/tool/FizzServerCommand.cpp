@@ -1003,7 +1003,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
         try {
           leafPeer->verify(
               cred->credential_scheme,
-              CertificateVerifyContext::DelegatedCredential,
+              CertificateVerifyContext::ServerDelegatedCredential,
               toSign->coalesce(),
               cred->signature->coalesce());
           // Verification succeeded, so make the credential.

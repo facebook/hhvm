@@ -158,7 +158,7 @@ DelegatedCredential DelegatedCredentialUtils::generateCredential(
       cred, folly::ssl::OpenSSLCertUtils::derEncode(*cert->getX509()));
   cred.signature = cert->sign(
       cred.credential_scheme,
-      CertificateVerifyContext::DelegatedCredential,
+      CertificateVerifyContext::ServerDelegatedCredential,
       toSign->coalesce());
 
   return cred;

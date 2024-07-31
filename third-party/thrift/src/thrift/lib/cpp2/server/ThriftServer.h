@@ -2788,7 +2788,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    *
    *    ┌────────────────────────┐
    *    │      User Service      │
-   *    │ (setProcessorFactory)  │  │
+   *    │     (setInterface)     │  │
    *    └────────────────────────┘  │
    *                                │
    *    ┌────────────────────────┐  │

@@ -83,11 +83,6 @@ Useful (but not complete set of) options that can be set on the ThriftServer:
 
 * `setSSLContext(context)` - Allow SSL connections.
 
-*There are other options for specific use cases, such as*
-
-* `setProcessorFactory(factory)` - Not necessary if setInterface is
-  called. Used for custom processors, usually proxies.
-
 ### Code example
 
 A service like the following

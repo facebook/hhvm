@@ -229,33 +229,23 @@ func (p *rocketClient) ReadMessageBegin() (string, MessageType, int32, error) {
 	if err != nil {
 		return name, EXCEPTION, p.seqID, err
 	}
-	metadata := &ResponseRpcMetadata{}
+	dataBytes := resp.Data()
 	metadataBytes, ok := resp.Metadata()
 	if ok {
-		if err = deserializeCompact(metadataBytes, metadata); err != nil {
+		metadata, err := deserializeResponseRPCMetadata(metadataBytes)
+		if err != nil {
 			return name, EXCEPTION, p.seqID, err
 		}
 		p.respHeaders = make(map[string]string)
-		maps.Copy(p.respHeaders, metadata.OtherMetadata)
-		if metadata.PayloadMetadata != nil && metadata.PayloadMetadata.ExceptionMetadata != nil {
-			exception := newRocketException(metadata.PayloadMetadata.ExceptionMetadata)
-			exceptionMetadata := metadata.PayloadMetadata.ExceptionMetadata
-			if exceptionMetadata.Metadata != nil {
-				if exceptionMetadata.Metadata.AppUnknownException != nil {
-					return name, EXCEPTION, p.seqID, exception
-				}
-				// This is necessary for SR Proxy timeouts to work
-				if exceptionMetadata.Metadata.DEPRECATEDProxyException != nil {
-					return name, EXCEPTION, p.seqID, exception
-				}
-			}
+		maps.Copy(p.respHeaders, metadata.Other)
+		if metadata.exception != nil && !metadata.exception.IsDeclared() {
+			return name, EXCEPTION, p.seqID, metadata.exception
 		}
-	}
-	dataBytes := resp.Data()
-	if metadata.Compression != nil && *metadata.Compression == CompressionAlgorithm_ZSTD {
-		dataBytes, err = decompressZstd(dataBytes)
-		if err != nil {
-			return name, EXCEPTION, p.seqID, err
+		if metadata.Zstd {
+			dataBytes, err = decompressZstd(dataBytes)
+			if err != nil {
+				return name, EXCEPTION, p.seqID, err
+			}
 		}
 	}
 	p.rbuf.Init(dataBytes)

@@ -89,17 +89,20 @@ func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 	if err := processContext(r.ctx, r.proc, protocol); err != nil {
 		return mono.Error(err)
 	}
-	respMetadata := NewResponseRpcMetadata()
-	respMetadata.OtherMetadata = protocol.reqHeaders
-	respMetadataBytes, err := serializeCompact(respMetadata)
+	respMetadata := &responseRPCMetadata{
+		Zstd:  reqMetadata.Zstd,
+		Other: protocol.reqHeaders,
+	}
+	respMetadataBytes, err := serializeResponseRPCMetadata(respMetadata)
 	if err != nil {
 		return mono.Error(err)
 	}
-	respDataBytes := protocol.wbuf.Buffer.Bytes()
+	respDataBytes := protocol.Bytes()
 	response := payload.New(respDataBytes, respMetadataBytes)
 	return mono.Just(response)
 }
 
+// bufProtocol is a protocol that is provided with a buffer to read from and writes to an empty buffer that can be retrieved via the Bytes method.
 type bufProtocol struct {
 	Decoder
 	Encoder
@@ -109,6 +112,8 @@ type bufProtocol struct {
 	reqHeaders  map[string]string
 	respHeaders map[string]string
 }
+
+var _ Protocol = (*bufProtocol)(nil)
 
 func newBufProtocol(name string, typeID MessageType, respHeaders map[string]string, protoID ProtocolID, data []byte) (*bufProtocol, error) {
 	wbuf := NewMemoryBuffer()
@@ -133,6 +138,10 @@ func newBufProtocol(name string, typeID MessageType, respHeaders map[string]stri
 		return nil, NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", protoID))
 	}
 	return p, nil
+}
+
+func (b *bufProtocol) Bytes() []byte {
+	return b.wbuf.Buffer.Bytes()
 }
 
 func (b *bufProtocol) ReadMessageBegin() (string, MessageType, int32, error) {

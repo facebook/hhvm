@@ -20,28 +20,52 @@ import (
 	"encoding/json"
 )
 
+type rocketExceptionType int16
+
+const (
+	rocketExceptionUnknown         rocketExceptionType = 0
+	rocketExceptionDeclared        rocketExceptionType = 1
+	rocketExceptionAppUnknown      rocketExceptionType = 2
+	rocketExceptionAny             rocketExceptionType = 3
+	rocketExceptionDeprecatedProxy rocketExceptionType = 4 // This is necessary for SR Proxy timeouts to work
+)
+
+func (e rocketExceptionType) String() string {
+	switch e {
+	case rocketExceptionUnknown:
+		return "UnknownException"
+	case rocketExceptionDeclared:
+		return "DeclaredException"
+	case rocketExceptionAppUnknown:
+		return "AppUnknownException"
+	case rocketExceptionAny:
+		return "AnyException"
+	case rocketExceptionDeprecatedProxy:
+		return "DEPRECATEDProxyException"
+	}
+	panic("unreachable")
+}
+
+func (e rocketExceptionType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(e.String())
+}
+
 type rocketException struct {
 	Name          string
 	What          string
-	ExceptionType string
+	ExceptionType rocketExceptionType
 	Kind          string
 	Blame         string
 	Safety        string
 }
 
-func (e *rocketException) Error() string {
-	data, err := json.Marshal(e)
-	if err != nil {
-		panic(err)
-	}
-	return string(data)
-}
+var _ error = (*rocketException)(nil)
 
-func newRocketException(exception *PayloadExceptionMetadataBase) error {
+func newRocketException(exception *PayloadExceptionMetadataBase) *rocketException {
 	err := &rocketException{
 		Name:          "unknown",
 		What:          "unknown",
-		ExceptionType: "unknown",
+		ExceptionType: rocketExceptionUnknown,
 		Kind:          "none",
 		Blame:         "none",
 		Safety:        "none",
@@ -55,19 +79,19 @@ func newRocketException(exception *PayloadExceptionMetadataBase) error {
 	var class *ErrorClassification
 	if exception.Metadata != nil {
 		if exception.Metadata.DeclaredException != nil {
-			err.ExceptionType = "DeclaredException"
+			err.ExceptionType = rocketExceptionDeclared
 			if exception.Metadata.DeclaredException.ErrorClassification != nil {
 				class = exception.Metadata.DeclaredException.ErrorClassification
 			}
 		} else if exception.Metadata.AppUnknownException != nil {
-			err.ExceptionType = "AppUnknownException"
+			err.ExceptionType = rocketExceptionAppUnknown
 			if exception.Metadata.AppUnknownException.ErrorClassification != nil {
 				class = exception.Metadata.AppUnknownException.ErrorClassification
 			}
 		} else if exception.Metadata.AnyException != nil {
-			err.ExceptionType = "AnyException"
+			err.ExceptionType = rocketExceptionAny
 		} else if exception.Metadata.DEPRECATEDProxyException != nil {
-			err.ExceptionType = "DEPRECATEDProxyException"
+			err.ExceptionType = rocketExceptionDeprecatedProxy
 		}
 		if class != nil {
 			if class.Kind != nil {
@@ -81,5 +105,17 @@ func newRocketException(exception *PayloadExceptionMetadataBase) error {
 			}
 		}
 	}
-	return NewTransportExceptionFromError(err)
+	return err
+}
+
+func (e *rocketException) Error() string {
+	data, err := json.Marshal(e)
+	if err != nil {
+		panic(err)
+	}
+	return string(data)
+}
+
+func (e *rocketException) IsDeclared() bool {
+	return e.ExceptionType == rocketExceptionDeclared
 }

@@ -137,58 +137,44 @@ func (p *rocketClient) open() error {
 	if err != nil {
 		return err
 	}
-	transporter := func(ctx context.Context) (*transport.Transport, error) {
-		conn := transport.NewTCPClientTransport(p.conn)
-		conn.SetLifetime(time.Millisecond * 3600000)
-		return conn, nil
-	}
 	p.ctx, p.cancel = context.WithCancel(context.Background())
 	clientBuilder := rsocket.Connect()
 	// See T182939211. This copies the keep alives from Java Rocket.
 	// KeepaliveLifetime = time.Duration(missedAcks = 1) * (ackTimeout = 3600000)
 	clientBuilder = clientBuilder.KeepAlive(time.Millisecond*30000, time.Millisecond*3600000, 1)
 	clientBuilder = clientBuilder.SetupPayload(setupPayload)
-	clientBuilder = clientBuilder.OnClose(func(err error) {
-		p.cancel()
-	})
-	clientStarter := clientBuilder.
-		Acceptor(func(ctx context.Context, socket rsocket.RSocket) rsocket.RSocket {
-			return rsocket.NewAbstractSocket(
-				rsocket.MetadataPush(func(pay payload.Payload) {
-					pay = payload.Clone(pay)
-					// For documentation/reference see the CPP implementation
-					// https://www.internalfb.com/code/fbsource/[ec968d3ea0ab]/fbcode/thrift/lib/cpp2/transport/rocket/client/RocketClient.cpp?lines=181
-					metadataBytes, ok := pay.Metadata()
-					if !ok {
-						panic("no metadata in metadata push")
-					}
-					// Use ServerPushMetadata{} and do not use &ServerPushMetadata{} to ensure stack and avoid heap allocation.
-					metadata := ServerPushMetadata{}
-					if err := deserializeCompact(metadataBytes, &metadata); err != nil {
-						panic(fmt.Errorf("unable to deserialize metadata push into ServerPushMetadata %w", err))
-					}
-					if metadata.SetupResponse != nil {
-						// If zstdSupported is not set (or if false) client SHOULD not use ZSTD compression.
-						if metadata.SetupResponse.ZstdSupported == nil {
-							p.zstd = false
-						} else {
-							p.zstd = p.zstd && *metadata.SetupResponse.ZstdSupported
-						}
-						if metadata.SetupResponse.Version != nil {
-							if *metadata.SetupResponse.Version != 8 {
-								panic(fmt.Errorf("unsupported protocol version received in metadata push: %d", *metadata.SetupResponse.Version))
-							}
-						}
-					} else if metadata.StreamHeadersPush != nil {
-						panic("metadata push: StreamHeadersPush not implemented")
-					} else if metadata.DrainCompletePush != nil {
-						p.Close()
-					}
-				}),
-			)
-		})
-	p.client, err = clientStarter.Transport(transporter).Start(p.ctx)
+	clientBuilder = clientBuilder.OnClose(p.onClose)
+	clientStarter := clientBuilder.Acceptor(p.acceptor)
+	p.client, err = clientStarter.Transport(p.transporter).Start(p.ctx)
 	return err
+}
+
+func (p *rocketClient) onClose(_ error) {
+	p.cancel()
+}
+
+func (p *rocketClient) acceptor(_ context.Context, socket rsocket.RSocket) rsocket.RSocket {
+	return rsocket.NewAbstractSocket(
+		rsocket.MetadataPush(p.serverMetadataPush),
+	)
+}
+
+func (p *rocketClient) transporter(_ context.Context) (*transport.Transport, error) {
+	conn := transport.NewTCPClientTransport(p.conn)
+	conn.SetLifetime(time.Millisecond * 3600000)
+	return conn, nil
+}
+
+func (p *rocketClient) serverMetadataPush(pay payload.Payload) {
+	metadata, err := decodeServerMetadataPushVersion8(pay)
+	if err != nil {
+		panic(err)
+	}
+	// zstd is only supported if both the client and the server support it.
+	p.zstd = p.zstd && metadata.zstd
+	if metadata.drain {
+		p.Close()
+	}
 }
 
 func (p *rocketClient) readPayload() (resp payload.Payload, err error) {

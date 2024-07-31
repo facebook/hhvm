@@ -25,12 +25,12 @@ namespace st {
 template struct enum_find<int>;
 
 static_assert(
-    folly::detail::is_instantiation_of_v<
+    folly::is_instantiation_of_v<
         folly::F14FastMap,
         enum_find<int>::find_name_map_t>,
     "mismatch");
 static_assert(
-    folly::detail::is_instantiation_of_v<
+    folly::is_instantiation_of_v<
         folly::F14FastMap,
         enum_find<int>::find_value_map_t>,
     "mismatch");

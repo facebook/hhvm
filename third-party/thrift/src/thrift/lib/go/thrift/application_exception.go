@@ -31,8 +31,8 @@ const (
 type ApplicationException interface {
 	Exception
 	TypeID() int32
-	Read(prot Format) (ApplicationException, error)
-	Write(prot Format) error
+	Read(prot Decoder) (ApplicationException, error)
+	Write(prot Encoder) error
 }
 
 type applicationException struct {
@@ -67,7 +67,7 @@ func (e *applicationException) Unwrap() error {
 }
 
 // Read reads an ApplicationException from the protocol
-func (e *applicationException) Read(prot Format) (ApplicationException, error) {
+func (e *applicationException) Read(prot Decoder) (ApplicationException, error) {
 	_, err := prot.ReadStructBegin()
 	if err != nil {
 		return nil, err
@@ -118,7 +118,7 @@ func (e *applicationException) Read(prot Format) (ApplicationException, error) {
 }
 
 // Write writes an exception to the protocol
-func (e *applicationException) Write(prot Format) (err error) {
+func (e *applicationException) Write(prot Encoder) (err error) {
 	err = prot.WriteStructBegin("TApplicationException")
 	if len(e.Error()) > 0 {
 		err = prot.WriteFieldBegin("message", STRING, 1)
@@ -156,7 +156,7 @@ func (e *applicationException) Write(prot Format) (err error) {
 
 // sendException is a utility function to send the exception for the specified
 // method.
-func sendException(prot Format, name string, seqID int32, err ApplicationException) error {
+func sendException(prot Encoder, name string, seqID int32, err ApplicationException) error {
 	if e2 := prot.WriteMessageBegin(name, EXCEPTION, seqID); e2 != nil {
 		return e2
 	} else if e2 := err.Write(prot); e2 != nil {

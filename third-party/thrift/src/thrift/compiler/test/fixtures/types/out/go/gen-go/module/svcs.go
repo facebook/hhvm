@@ -159,7 +159,7 @@ func (x *reqSomeServiceBounceMap) IsSetM() bool {
     return x != nil && x.M != nil
 }
 
-func (x *reqSomeServiceBounceMap) writeField1(p thrift.Format) error {  // M
+func (x *reqSomeServiceBounceMap) writeField1(p thrift.Encoder) error {  // M
     if err := p.WriteFieldBegin("m", thrift.MAP, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -176,7 +176,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqSomeServiceBounceMap) readField1(p thrift.Format) error {  // M
+func (x *reqSomeServiceBounceMap) readField1(p thrift.Decoder) error {  // M
     result, err := included.ReadSomeMap(p)
 if err != nil {
     return err
@@ -192,7 +192,7 @@ func (x *reqSomeServiceBounceMap) toString1() string {  // M
 
 
 
-func (x *reqSomeServiceBounceMap) Write(p thrift.Format) error {
+func (x *reqSomeServiceBounceMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSomeServiceBounceMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -211,7 +211,7 @@ func (x *reqSomeServiceBounceMap) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqSomeServiceBounceMap) Read(p thrift.Format) error {
+func (x *reqSomeServiceBounceMap) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -298,7 +298,7 @@ func (x *respSomeServiceBounceMap) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respSomeServiceBounceMap) writeField0(p thrift.Format) error {  // Success
+func (x *respSomeServiceBounceMap) writeField0(p thrift.Encoder) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -319,7 +319,7 @@ if err != nil {
     return nil
 }
 
-func (x *respSomeServiceBounceMap) readField0(p thrift.Format) error {  // Success
+func (x *respSomeServiceBounceMap) readField0(p thrift.Decoder) error {  // Success
     result, err := included.ReadSomeMap(p)
 if err != nil {
     return err
@@ -339,7 +339,7 @@ func (x *respSomeServiceBounceMap) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respSomeServiceBounceMap) Write(p thrift.Format) error {
+func (x *respSomeServiceBounceMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respSomeServiceBounceMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -358,7 +358,7 @@ func (x *respSomeServiceBounceMap) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respSomeServiceBounceMap) Read(p thrift.Format) error {
+func (x *respSomeServiceBounceMap) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -445,7 +445,7 @@ func (x *reqSomeServiceBinaryKeyedMap) IsSetR() bool {
     return x != nil && x.R != nil
 }
 
-func (x *reqSomeServiceBinaryKeyedMap) writeField1(p thrift.Format) error {  // R
+func (x *reqSomeServiceBinaryKeyedMap) writeField1(p thrift.Encoder) error {  // R
     if err := p.WriteFieldBegin("r", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -472,7 +472,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *reqSomeServiceBinaryKeyedMap) readField1(p thrift.Format) error {  // R
+func (x *reqSomeServiceBinaryKeyedMap) readField1(p thrift.Decoder) error {  // R
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -506,7 +506,7 @@ func (x *reqSomeServiceBinaryKeyedMap) toString1() string {  // R
 
 
 
-func (x *reqSomeServiceBinaryKeyedMap) Write(p thrift.Format) error {
+func (x *reqSomeServiceBinaryKeyedMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSomeServiceBinaryKeyedMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -525,7 +525,7 @@ func (x *reqSomeServiceBinaryKeyedMap) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqSomeServiceBinaryKeyedMap) Read(p thrift.Format) error {
+func (x *reqSomeServiceBinaryKeyedMap) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -612,7 +612,7 @@ func (x *respSomeServiceBinaryKeyedMap) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respSomeServiceBinaryKeyedMap) writeField0(p thrift.Format) error {  // Success
+func (x *respSomeServiceBinaryKeyedMap) writeField0(p thrift.Encoder) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -655,7 +655,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *respSomeServiceBinaryKeyedMap) readField0(p thrift.Format) error {  // Success
+func (x *respSomeServiceBinaryKeyedMap) readField0(p thrift.Decoder) error {  // Success
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -703,7 +703,7 @@ func (x *respSomeServiceBinaryKeyedMap) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respSomeServiceBinaryKeyedMap) Write(p thrift.Format) error {
+func (x *respSomeServiceBinaryKeyedMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respSomeServiceBinaryKeyedMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -722,7 +722,7 @@ func (x *respSomeServiceBinaryKeyedMap) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respSomeServiceBinaryKeyedMap) Read(p thrift.Format) error {
+func (x *respSomeServiceBinaryKeyedMap) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -828,7 +828,7 @@ type procFuncSomeServiceBounceMap struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncSomeServiceBounceMap)(nil)
 
-func (p *procFuncSomeServiceBounceMap) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncSomeServiceBounceMap) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqSomeServiceBounceMap()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -837,7 +837,7 @@ func (p *procFuncSomeServiceBounceMap) Read(iprot thrift.Format) (thrift.Struct,
     return args, nil
 }
 
-func (p *procFuncSomeServiceBounceMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncSomeServiceBounceMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -880,7 +880,7 @@ type procFuncSomeServiceBinaryKeyedMap struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncSomeServiceBinaryKeyedMap)(nil)
 
-func (p *procFuncSomeServiceBinaryKeyedMap) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncSomeServiceBinaryKeyedMap) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqSomeServiceBinaryKeyedMap()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -889,7 +889,7 @@ func (p *procFuncSomeServiceBinaryKeyedMap) Read(iprot thrift.Format) (thrift.St
     return args, nil
 }
 
-func (p *procFuncSomeServiceBinaryKeyedMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncSomeServiceBinaryKeyedMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

@@ -28,14 +28,14 @@ func NewPlate() Plate {
     return ""
 }
 
-func WritePlate(item Plate, p thrift.Format) error {
+func WritePlate(item Plate, p thrift.Encoder) error {
     if err := p.WriteString(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadPlate(p thrift.Format) (Plate, error) {
+func ReadPlate(p thrift.Decoder) (Plate, error) {
     var decodeResult Plate
     decodeErr := func() error {
         result, err := p.ReadString()
@@ -54,14 +54,14 @@ func NewState() State {
     return ""
 }
 
-func WriteState(item State, p thrift.Format) error {
+func WriteState(item State, p thrift.Encoder) error {
     if err := p.WriteString(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadState(p thrift.Format) (State, error) {
+func ReadState(p thrift.Decoder) (State, error) {
     var decodeResult State
     decodeErr := func() error {
         result, err := p.ReadString()
@@ -80,14 +80,14 @@ func NewYear() Year {
     return 0
 }
 
-func WriteYear(item Year, p thrift.Format) error {
+func WriteYear(item Year, p thrift.Encoder) error {
     if err := p.WriteI32(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadYear(p thrift.Format) (Year, error) {
+func ReadYear(p thrift.Decoder) (Year, error) {
     var decodeResult Year
     decodeErr := func() error {
         result, err := p.ReadI32()
@@ -106,7 +106,7 @@ func NewDrivers() Drivers {
     return make([]string, 0)
 }
 
-func WriteDrivers(item Drivers, p thrift.Format) error {
+func WriteDrivers(item Drivers, p thrift.Encoder) error {
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -124,7 +124,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func ReadDrivers(p thrift.Format) (Drivers, error) {
+func ReadDrivers(p thrift.Decoder) (Drivers, error) {
     var decodeResult Drivers
     decodeErr := func() error {
         _ /* elemType */, size, err := p.ReadListBegin()
@@ -161,14 +161,14 @@ func NewAccessory() *Accessory {
     return module0.NewAccessory()
 }
 
-func WriteAccessory(item *Accessory, p thrift.Format) error {
+func WriteAccessory(item *Accessory, p thrift.Encoder) error {
     if err := item.Write(p); err != nil {
     return err
 }
     return nil
 }
 
-func ReadAccessory(p thrift.Format) (Accessory, error) {
+func ReadAccessory(p thrift.Decoder) (Accessory, error) {
     var decodeResult Accessory
     decodeErr := func() error {
         result := *module0.NewAccessory()
@@ -188,14 +188,14 @@ func NewCarPartName() *CarPartName {
     return module0.NewPartName()
 }
 
-func WriteCarPartName(item *CarPartName, p thrift.Format) error {
+func WriteCarPartName(item *CarPartName, p thrift.Encoder) error {
     if err := item.Write(p); err != nil {
     return err
 }
     return nil
 }
 
-func ReadCarPartName(p thrift.Format) (CarPartName, error) {
+func ReadCarPartName(p thrift.Decoder) (CarPartName, error) {
     var decodeResult CarPartName
     decodeErr := func() error {
         result := *module0.NewPartName()
@@ -232,14 +232,14 @@ func NewEnum() Enum {
     return 0
 }
 
-func WriteEnum(item Enum, p thrift.Format) error {
+func WriteEnum(item Enum, p thrift.Encoder) error {
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
     return nil
 }
 
-func ReadEnum(p thrift.Format) (Enum, error) {
+func ReadEnum(p thrift.Decoder) (Enum, error) {
     var decodeResult Enum
     decodeErr := func() error {
         enumResult, err := p.ReadI32()
@@ -259,14 +259,14 @@ func NewCar() *Car {
     return NewAutomobile()
 }
 
-func WriteCar(item *Car, p thrift.Format) error {
+func WriteCar(item *Car, p thrift.Encoder) error {
     if err := item.Write(p); err != nil {
     return err
 }
     return nil
 }
 
-func ReadCar(p thrift.Format) (Car, error) {
+func ReadCar(p thrift.Decoder) (Car, error) {
     var decodeResult Car
     decodeErr := func() error {
         result := *NewAutomobile()
@@ -440,7 +440,7 @@ func (x *Automobile) IsSetPartNames() bool {
     return x != nil && x.PartNames != nil
 }
 
-func (x *Automobile) writeField1(p thrift.Format) error {  // Plate
+func (x *Automobile) writeField1(p thrift.Encoder) error {  // Plate
     if err := p.WriteFieldBegin("plate", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -457,7 +457,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) writeField2(p thrift.Format) error {  // PreviousPlate
+func (x *Automobile) writeField2(p thrift.Encoder) error {  // PreviousPlate
     if !x.IsSetPreviousPlate() {
         return nil
     }
@@ -478,7 +478,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) writeField3(p thrift.Format) error {  // FirstPlate
+func (x *Automobile) writeField3(p thrift.Encoder) error {  // FirstPlate
     if !x.IsSetFirstPlate() {
         return nil
     }
@@ -499,7 +499,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) writeField4(p thrift.Format) error {  // Year
+func (x *Automobile) writeField4(p thrift.Encoder) error {  // Year
     if err := p.WriteFieldBegin("year", thrift.I32, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -516,7 +516,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) writeField5(p thrift.Format) error {  // Drivers
+func (x *Automobile) writeField5(p thrift.Encoder) error {  // Drivers
     if err := p.WriteFieldBegin("drivers", thrift.LIST, 5); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -533,7 +533,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) writeField6(p thrift.Format) error {  // Accessories
+func (x *Automobile) writeField6(p thrift.Encoder) error {  // Accessories
     if err := p.WriteFieldBegin("Accessories", thrift.LIST, 6); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -561,7 +561,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *Automobile) writeField7(p thrift.Format) error {  // PartNames
+func (x *Automobile) writeField7(p thrift.Encoder) error {  // PartNames
     if err := p.WriteFieldBegin("PartNames", thrift.MAP, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -596,7 +596,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *Automobile) readField1(p thrift.Format) error {  // Plate
+func (x *Automobile) readField1(p thrift.Decoder) error {  // Plate
     result, err := ReadPlate(p)
 if err != nil {
     return err
@@ -606,7 +606,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) readField2(p thrift.Format) error {  // PreviousPlate
+func (x *Automobile) readField2(p thrift.Decoder) error {  // PreviousPlate
     result, err := ReadPlate(p)
 if err != nil {
     return err
@@ -616,7 +616,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) readField3(p thrift.Format) error {  // FirstPlate
+func (x *Automobile) readField3(p thrift.Decoder) error {  // FirstPlate
     result, err := ReadPlate(p)
 if err != nil {
     return err
@@ -626,7 +626,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) readField4(p thrift.Format) error {  // Year
+func (x *Automobile) readField4(p thrift.Decoder) error {  // Year
     result, err := ReadYear(p)
 if err != nil {
     return err
@@ -636,7 +636,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) readField5(p thrift.Format) error {  // Drivers
+func (x *Automobile) readField5(p thrift.Decoder) error {  // Drivers
     result, err := ReadDrivers(p)
 if err != nil {
     return err
@@ -646,7 +646,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) readField6(p thrift.Format) error {  // Accessories
+func (x *Automobile) readField6(p thrift.Decoder) error {  // Accessories
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -674,7 +674,7 @@ result := listResult
     return nil
 }
 
-func (x *Automobile) readField7(p thrift.Format) error {  // PartNames
+func (x *Automobile) readField7(p thrift.Decoder) error {  // PartNames
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -750,7 +750,7 @@ func (x *Automobile) toString7() string {  // PartNames
 
 
 
-func (x *Automobile) Write(p thrift.Format) error {
+func (x *Automobile) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Automobile"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -793,7 +793,7 @@ func (x *Automobile) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *Automobile) Read(p thrift.Format) error {
+func (x *Automobile) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -916,7 +916,7 @@ func (x *MapKey) SetStrval(value string) *MapKey {
     return x
 }
 
-func (x *MapKey) writeField1(p thrift.Format) error {  // Num
+func (x *MapKey) writeField1(p thrift.Encoder) error {  // Num
     if err := p.WriteFieldBegin("num", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -932,7 +932,7 @@ func (x *MapKey) writeField1(p thrift.Format) error {  // Num
     return nil
 }
 
-func (x *MapKey) writeField2(p thrift.Format) error {  // Strval
+func (x *MapKey) writeField2(p thrift.Encoder) error {  // Strval
     if err := p.WriteFieldBegin("strval", thrift.STRING, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -948,7 +948,7 @@ func (x *MapKey) writeField2(p thrift.Format) error {  // Strval
     return nil
 }
 
-func (x *MapKey) readField1(p thrift.Format) error {  // Num
+func (x *MapKey) readField1(p thrift.Decoder) error {  // Num
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -958,7 +958,7 @@ if err != nil {
     return nil
 }
 
-func (x *MapKey) readField2(p thrift.Format) error {  // Strval
+func (x *MapKey) readField2(p thrift.Decoder) error {  // Strval
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -978,7 +978,7 @@ func (x *MapKey) toString2() string {  // Strval
 
 
 
-func (x *MapKey) Write(p thrift.Format) error {
+func (x *MapKey) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MapKey"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1001,7 +1001,7 @@ func (x *MapKey) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *MapKey) Read(p thrift.Format) error {
+func (x *MapKey) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1091,7 +1091,7 @@ func (x *MapContainer) IsSetMapval() bool {
     return x != nil && x.Mapval != nil
 }
 
-func (x *MapContainer) writeField1(p thrift.Format) error {  // Mapval
+func (x *MapContainer) writeField1(p thrift.Encoder) error {  // Mapval
     if err := p.WriteFieldBegin("mapval", thrift.MAP, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1125,7 +1125,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *MapContainer) readField1(p thrift.Format) error {  // Mapval
+func (x *MapContainer) readField1(p thrift.Decoder) error {  // Mapval
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -1170,7 +1170,7 @@ func (x *MapContainer) toString1() string {  // Mapval
 
 
 
-func (x *MapContainer) Write(p thrift.Format) error {
+func (x *MapContainer) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MapContainer"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1189,7 +1189,7 @@ func (x *MapContainer) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *MapContainer) Read(p thrift.Format) error {
+func (x *MapContainer) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1298,7 +1298,7 @@ func (x *Pair) IsSetCar() bool {
     return x != nil && x.Car != nil
 }
 
-func (x *Pair) writeField1(p thrift.Format) error {  // Automobile
+func (x *Pair) writeField1(p thrift.Encoder) error {  // Automobile
     if !x.IsSetAutomobile() {
         return nil
     }
@@ -1318,7 +1318,7 @@ func (x *Pair) writeField1(p thrift.Format) error {  // Automobile
     return nil
 }
 
-func (x *Pair) writeField2(p thrift.Format) error {  // Car
+func (x *Pair) writeField2(p thrift.Encoder) error {  // Car
     if !x.IsSetCar() {
         return nil
     }
@@ -1339,7 +1339,7 @@ if err != nil {
     return nil
 }
 
-func (x *Pair) readField1(p thrift.Format) error {  // Automobile
+func (x *Pair) readField1(p thrift.Decoder) error {  // Automobile
     result := *NewAutomobile()
 err := result.Read(p)
 if err != nil {
@@ -1350,7 +1350,7 @@ if err != nil {
     return nil
 }
 
-func (x *Pair) readField2(p thrift.Format) error {  // Car
+func (x *Pair) readField2(p thrift.Decoder) error {  // Car
     result, err := ReadCar(p)
 if err != nil {
     return err
@@ -1386,7 +1386,7 @@ func (x *Pair) DefaultGetCar() *Car {
 
 
 
-func (x *Pair) Write(p thrift.Format) error {
+func (x *Pair) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Pair"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1409,7 +1409,7 @@ func (x *Pair) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *Pair) Read(p thrift.Format) error {
+func (x *Pair) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1523,7 +1523,7 @@ func (x *Collection) IsSetCars() bool {
     return x != nil && x.Cars != nil
 }
 
-func (x *Collection) writeField1(p thrift.Format) error {  // Automobiles
+func (x *Collection) writeField1(p thrift.Encoder) error {  // Automobiles
     if err := p.WriteFieldBegin("automobiles", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1550,7 +1550,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *Collection) writeField2(p thrift.Format) error {  // Cars
+func (x *Collection) writeField2(p thrift.Encoder) error {  // Cars
     if err := p.WriteFieldBegin("cars", thrift.LIST, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1578,7 +1578,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *Collection) readField1(p thrift.Format) error {  // Automobiles
+func (x *Collection) readField1(p thrift.Decoder) error {  // Automobiles
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1607,7 +1607,7 @@ result := listResult
     return nil
 }
 
-func (x *Collection) readField2(p thrift.Format) error {  // Cars
+func (x *Collection) readField2(p thrift.Decoder) error {  // Cars
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1645,7 +1645,7 @@ func (x *Collection) toString2() string {  // Cars
 
 
 
-func (x *Collection) Write(p thrift.Format) error {
+func (x *Collection) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Collection"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1668,7 +1668,7 @@ func (x *Collection) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *Collection) Read(p thrift.Format) error {
+func (x *Collection) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

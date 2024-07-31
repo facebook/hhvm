@@ -148,7 +148,7 @@ func (x *reqExtendTestServiceCheck) IsSetStruct1() bool {
     return x != nil && x.Struct1 != nil
 }
 
-func (x *reqExtendTestServiceCheck) writeField1(p thrift.Format) error {  // Struct1
+func (x *reqExtendTestServiceCheck) writeField1(p thrift.Encoder) error {  // Struct1
     if !x.IsSetStruct1() {
         return nil
     }
@@ -168,7 +168,7 @@ func (x *reqExtendTestServiceCheck) writeField1(p thrift.Format) error {  // Str
     return nil
 }
 
-func (x *reqExtendTestServiceCheck) readField1(p thrift.Format) error {  // Struct1
+func (x *reqExtendTestServiceCheck) readField1(p thrift.Decoder) error {  // Struct1
     result := *test0.NewHsFoo()
 err := result.Read(p)
 if err != nil {
@@ -193,7 +193,7 @@ func (x *reqExtendTestServiceCheck) DefaultGetStruct1() *test0.HsFoo {
 
 
 
-func (x *reqExtendTestServiceCheck) Write(p thrift.Format) error {
+func (x *reqExtendTestServiceCheck) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqExtendTestServiceCheck"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -212,7 +212,7 @@ func (x *reqExtendTestServiceCheck) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqExtendTestServiceCheck) Read(p thrift.Format) error {
+func (x *reqExtendTestServiceCheck) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -299,7 +299,7 @@ func (x *respExtendTestServiceCheck) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respExtendTestServiceCheck) writeField0(p thrift.Format) error {  // Success
+func (x *respExtendTestServiceCheck) writeField0(p thrift.Encoder) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -319,7 +319,7 @@ func (x *respExtendTestServiceCheck) writeField0(p thrift.Format) error {  // Su
     return nil
 }
 
-func (x *respExtendTestServiceCheck) readField0(p thrift.Format) error {  // Success
+func (x *respExtendTestServiceCheck) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadBool()
 if err != nil {
     return err
@@ -343,7 +343,7 @@ func (x *respExtendTestServiceCheck) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respExtendTestServiceCheck) Write(p thrift.Format) error {
+func (x *respExtendTestServiceCheck) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respExtendTestServiceCheck"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -362,7 +362,7 @@ func (x *respExtendTestServiceCheck) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respExtendTestServiceCheck) Read(p thrift.Format) error {
+func (x *respExtendTestServiceCheck) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -443,7 +443,7 @@ type procFuncExtendTestServiceCheck struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncExtendTestServiceCheck)(nil)
 
-func (p *procFuncExtendTestServiceCheck) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncExtendTestServiceCheck) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqExtendTestServiceCheck()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -452,7 +452,7 @@ func (p *procFuncExtendTestServiceCheck) Read(iprot thrift.Format) (thrift.Struc
     return args, nil
 }
 
-func (p *procFuncExtendTestServiceCheck) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncExtendTestServiceCheck) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

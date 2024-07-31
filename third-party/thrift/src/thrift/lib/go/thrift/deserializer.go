@@ -22,7 +22,7 @@ import (
 
 type Deserializer struct {
 	Transport io.ReadWriteCloser
-	Protocol  Format
+	Protocol  Decoder
 }
 
 func NewDeserializer() *Deserializer {

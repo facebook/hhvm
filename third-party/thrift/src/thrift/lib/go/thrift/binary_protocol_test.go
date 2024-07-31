@@ -32,8 +32,8 @@ func TestReadWriteBinaryProtocol(t *testing.T) {
 func TestWriteBinaryEmptyBinaryProtocol(t *testing.T) {
 	m := NewMyTestStruct()
 	m.Bin = nil
-	s := NewDeserializer()
-	transport := s.Transport.(*MemoryBuffer)
+	s := NewSerializer()
+	transport := s.Transport
 	transport.Buffer = bytes.NewBuffer([]byte(nil))
 	if err := m.Write(s.Protocol); err != nil {
 		t.Fatal(err)

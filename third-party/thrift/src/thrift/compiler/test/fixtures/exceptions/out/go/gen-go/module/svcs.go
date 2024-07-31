@@ -189,7 +189,7 @@ func newReqRaiserDoBland() *reqRaiserDoBland {
 
 
 
-func (x *reqRaiserDoBland) Write(p thrift.Format) error {
+func (x *reqRaiserDoBland) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqRaiserDoBland"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -204,7 +204,7 @@ func (x *reqRaiserDoBland) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqRaiserDoBland) Read(p thrift.Format) error {
+func (x *reqRaiserDoBland) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -269,7 +269,7 @@ func (x *respRaiserDoBland) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respRaiserDoBland) Write(p thrift.Format) error {
+func (x *respRaiserDoBland) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respRaiserDoBland"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -284,7 +284,7 @@ func (x *respRaiserDoBland) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respRaiserDoBland) Read(p thrift.Format) error {
+func (x *respRaiserDoBland) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -344,7 +344,7 @@ func newReqRaiserDoRaise() *reqRaiserDoRaise {
 
 
 
-func (x *reqRaiserDoRaise) Write(p thrift.Format) error {
+func (x *reqRaiserDoRaise) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqRaiserDoRaise"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -359,7 +359,7 @@ func (x *reqRaiserDoRaise) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqRaiserDoRaise) Read(p thrift.Format) error {
+func (x *reqRaiserDoRaise) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -487,7 +487,7 @@ func (x *respRaiserDoRaise) IsSetS() bool {
     return x != nil && x.S != nil
 }
 
-func (x *respRaiserDoRaise) writeField1(p thrift.Format) error {  // B
+func (x *respRaiserDoRaise) writeField1(p thrift.Encoder) error {  // B
     if !x.IsSetB() {
         return nil
     }
@@ -507,7 +507,7 @@ func (x *respRaiserDoRaise) writeField1(p thrift.Format) error {  // B
     return nil
 }
 
-func (x *respRaiserDoRaise) writeField2(p thrift.Format) error {  // F
+func (x *respRaiserDoRaise) writeField2(p thrift.Encoder) error {  // F
     if !x.IsSetF() {
         return nil
     }
@@ -527,7 +527,7 @@ func (x *respRaiserDoRaise) writeField2(p thrift.Format) error {  // F
     return nil
 }
 
-func (x *respRaiserDoRaise) writeField3(p thrift.Format) error {  // S
+func (x *respRaiserDoRaise) writeField3(p thrift.Encoder) error {  // S
     if !x.IsSetS() {
         return nil
     }
@@ -547,7 +547,7 @@ func (x *respRaiserDoRaise) writeField3(p thrift.Format) error {  // S
     return nil
 }
 
-func (x *respRaiserDoRaise) readField1(p thrift.Format) error {  // B
+func (x *respRaiserDoRaise) readField1(p thrift.Decoder) error {  // B
     result := *NewBanal()
 err := result.Read(p)
 if err != nil {
@@ -558,7 +558,7 @@ if err != nil {
     return nil
 }
 
-func (x *respRaiserDoRaise) readField2(p thrift.Format) error {  // F
+func (x *respRaiserDoRaise) readField2(p thrift.Decoder) error {  // F
     result := *NewFiery()
 err := result.Read(p)
 if err != nil {
@@ -569,7 +569,7 @@ if err != nil {
     return nil
 }
 
-func (x *respRaiserDoRaise) readField3(p thrift.Format) error {  // S
+func (x *respRaiserDoRaise) readField3(p thrift.Decoder) error {  // S
     result := *NewSerious()
 err := result.Read(p)
 if err != nil {
@@ -631,7 +631,7 @@ func (x *respRaiserDoRaise) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respRaiserDoRaise) Write(p thrift.Format) error {
+func (x *respRaiserDoRaise) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respRaiserDoRaise"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -658,7 +658,7 @@ func (x *respRaiserDoRaise) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respRaiserDoRaise) Read(p thrift.Format) error {
+func (x *respRaiserDoRaise) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -733,7 +733,7 @@ func newReqRaiserGet200() *reqRaiserGet200 {
 
 
 
-func (x *reqRaiserGet200) Write(p thrift.Format) error {
+func (x *reqRaiserGet200) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqRaiserGet200"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -748,7 +748,7 @@ func (x *reqRaiserGet200) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqRaiserGet200) Read(p thrift.Format) error {
+func (x *reqRaiserGet200) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -830,7 +830,7 @@ func (x *respRaiserGet200) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respRaiserGet200) writeField0(p thrift.Format) error {  // Success
+func (x *respRaiserGet200) writeField0(p thrift.Encoder) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -850,7 +850,7 @@ func (x *respRaiserGet200) writeField0(p thrift.Format) error {  // Success
     return nil
 }
 
-func (x *respRaiserGet200) readField0(p thrift.Format) error {  // Success
+func (x *respRaiserGet200) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -874,7 +874,7 @@ func (x *respRaiserGet200) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respRaiserGet200) Write(p thrift.Format) error {
+func (x *respRaiserGet200) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respRaiserGet200"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -893,7 +893,7 @@ func (x *respRaiserGet200) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respRaiserGet200) Read(p thrift.Format) error {
+func (x *respRaiserGet200) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -958,7 +958,7 @@ func newReqRaiserGet500() *reqRaiserGet500 {
 
 
 
-func (x *reqRaiserGet500) Write(p thrift.Format) error {
+func (x *reqRaiserGet500) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqRaiserGet500"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -973,7 +973,7 @@ func (x *reqRaiserGet500) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqRaiserGet500) Read(p thrift.Format) error {
+func (x *reqRaiserGet500) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1124,7 +1124,7 @@ func (x *respRaiserGet500) IsSetS() bool {
     return x != nil && x.S != nil
 }
 
-func (x *respRaiserGet500) writeField0(p thrift.Format) error {  // Success
+func (x *respRaiserGet500) writeField0(p thrift.Encoder) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -1144,7 +1144,7 @@ func (x *respRaiserGet500) writeField0(p thrift.Format) error {  // Success
     return nil
 }
 
-func (x *respRaiserGet500) writeField1(p thrift.Format) error {  // F
+func (x *respRaiserGet500) writeField1(p thrift.Encoder) error {  // F
     if !x.IsSetF() {
         return nil
     }
@@ -1164,7 +1164,7 @@ func (x *respRaiserGet500) writeField1(p thrift.Format) error {  // F
     return nil
 }
 
-func (x *respRaiserGet500) writeField2(p thrift.Format) error {  // B
+func (x *respRaiserGet500) writeField2(p thrift.Encoder) error {  // B
     if !x.IsSetB() {
         return nil
     }
@@ -1184,7 +1184,7 @@ func (x *respRaiserGet500) writeField2(p thrift.Format) error {  // B
     return nil
 }
 
-func (x *respRaiserGet500) writeField3(p thrift.Format) error {  // S
+func (x *respRaiserGet500) writeField3(p thrift.Encoder) error {  // S
     if !x.IsSetS() {
         return nil
     }
@@ -1204,7 +1204,7 @@ func (x *respRaiserGet500) writeField3(p thrift.Format) error {  // S
     return nil
 }
 
-func (x *respRaiserGet500) readField0(p thrift.Format) error {  // Success
+func (x *respRaiserGet500) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -1214,7 +1214,7 @@ if err != nil {
     return nil
 }
 
-func (x *respRaiserGet500) readField1(p thrift.Format) error {  // F
+func (x *respRaiserGet500) readField1(p thrift.Decoder) error {  // F
     result := *NewFiery()
 err := result.Read(p)
 if err != nil {
@@ -1225,7 +1225,7 @@ if err != nil {
     return nil
 }
 
-func (x *respRaiserGet500) readField2(p thrift.Format) error {  // B
+func (x *respRaiserGet500) readField2(p thrift.Decoder) error {  // B
     result := *NewBanal()
 err := result.Read(p)
 if err != nil {
@@ -1236,7 +1236,7 @@ if err != nil {
     return nil
 }
 
-func (x *respRaiserGet500) readField3(p thrift.Format) error {  // S
+func (x *respRaiserGet500) readField3(p thrift.Decoder) error {  // S
     result := *NewSerious()
 err := result.Read(p)
 if err != nil {
@@ -1306,7 +1306,7 @@ func (x *respRaiserGet500) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respRaiserGet500) Write(p thrift.Format) error {
+func (x *respRaiserGet500) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respRaiserGet500"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1337,7 +1337,7 @@ func (x *respRaiserGet500) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respRaiserGet500) Read(p thrift.Format) error {
+func (x *respRaiserGet500) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1462,7 +1462,7 @@ type procFuncRaiserDoBland struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncRaiserDoBland)(nil)
 
-func (p *procFuncRaiserDoBland) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncRaiserDoBland) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserDoBland()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -1471,7 +1471,7 @@ func (p *procFuncRaiserDoBland) Read(iprot thrift.Format) (thrift.Struct, thrift
     return args, nil
 }
 
-func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -1512,7 +1512,7 @@ type procFuncRaiserDoRaise struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncRaiserDoRaise)(nil)
 
-func (p *procFuncRaiserDoRaise) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncRaiserDoRaise) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserDoRaise()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -1521,7 +1521,7 @@ func (p *procFuncRaiserDoRaise) Read(iprot thrift.Format) (thrift.Struct, thrift
     return args, nil
 }
 
-func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch v := result.(type) {
@@ -1586,7 +1586,7 @@ type procFuncRaiserGet200 struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncRaiserGet200)(nil)
 
-func (p *procFuncRaiserGet200) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncRaiserGet200) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserGet200()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -1595,7 +1595,7 @@ func (p *procFuncRaiserGet200) Read(iprot thrift.Format) (thrift.Struct, thrift.
     return args, nil
 }
 
-func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -1637,7 +1637,7 @@ type procFuncRaiserGet500 struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncRaiserGet500)(nil)
 
-func (p *procFuncRaiserGet500) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncRaiserGet500) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserGet500()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -1646,7 +1646,7 @@ func (p *procFuncRaiserGet500) Read(iprot thrift.Format) (thrift.Struct, thrift.
     return args, nil
 }
 
-func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch v := result.(type) {

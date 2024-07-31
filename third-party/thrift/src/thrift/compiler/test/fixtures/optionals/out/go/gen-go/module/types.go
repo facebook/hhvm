@@ -24,14 +24,14 @@ func NewPersonID() PersonID {
     return 0
 }
 
-func WritePersonID(item PersonID, p thrift.Format) error {
+func WritePersonID(item PersonID, p thrift.Encoder) error {
     if err := p.WriteI64(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadPersonID(p thrift.Format) (PersonID, error) {
+func ReadPersonID(p thrift.Decoder) (PersonID, error) {
     var decodeResult PersonID
     decodeErr := func() error {
         result, err := p.ReadI64()
@@ -160,7 +160,7 @@ func (x *Color) SetAlpha(value float64) *Color {
     return x
 }
 
-func (x *Color) writeField1(p thrift.Format) error {  // Red
+func (x *Color) writeField1(p thrift.Encoder) error {  // Red
     if err := p.WriteFieldBegin("red", thrift.DOUBLE, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -176,7 +176,7 @@ func (x *Color) writeField1(p thrift.Format) error {  // Red
     return nil
 }
 
-func (x *Color) writeField2(p thrift.Format) error {  // Green
+func (x *Color) writeField2(p thrift.Encoder) error {  // Green
     if err := p.WriteFieldBegin("green", thrift.DOUBLE, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -192,7 +192,7 @@ func (x *Color) writeField2(p thrift.Format) error {  // Green
     return nil
 }
 
-func (x *Color) writeField3(p thrift.Format) error {  // Blue
+func (x *Color) writeField3(p thrift.Encoder) error {  // Blue
     if err := p.WriteFieldBegin("blue", thrift.DOUBLE, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -208,7 +208,7 @@ func (x *Color) writeField3(p thrift.Format) error {  // Blue
     return nil
 }
 
-func (x *Color) writeField4(p thrift.Format) error {  // Alpha
+func (x *Color) writeField4(p thrift.Encoder) error {  // Alpha
     if err := p.WriteFieldBegin("alpha", thrift.DOUBLE, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -224,7 +224,7 @@ func (x *Color) writeField4(p thrift.Format) error {  // Alpha
     return nil
 }
 
-func (x *Color) readField1(p thrift.Format) error {  // Red
+func (x *Color) readField1(p thrift.Decoder) error {  // Red
     result, err := p.ReadDouble()
 if err != nil {
     return err
@@ -234,7 +234,7 @@ if err != nil {
     return nil
 }
 
-func (x *Color) readField2(p thrift.Format) error {  // Green
+func (x *Color) readField2(p thrift.Decoder) error {  // Green
     result, err := p.ReadDouble()
 if err != nil {
     return err
@@ -244,7 +244,7 @@ if err != nil {
     return nil
 }
 
-func (x *Color) readField3(p thrift.Format) error {  // Blue
+func (x *Color) readField3(p thrift.Decoder) error {  // Blue
     result, err := p.ReadDouble()
 if err != nil {
     return err
@@ -254,7 +254,7 @@ if err != nil {
     return nil
 }
 
-func (x *Color) readField4(p thrift.Format) error {  // Alpha
+func (x *Color) readField4(p thrift.Decoder) error {  // Alpha
     result, err := p.ReadDouble()
 if err != nil {
     return err
@@ -282,7 +282,7 @@ func (x *Color) toString4() string {  // Alpha
 
 
 
-func (x *Color) Write(p thrift.Format) error {
+func (x *Color) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Color"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -313,7 +313,7 @@ func (x *Color) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *Color) Read(p thrift.Format) error {
+func (x *Color) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -506,7 +506,7 @@ func (x *Vehicle) IsSetHasAC() bool {
     return x != nil && x.HasAC != nil
 }
 
-func (x *Vehicle) writeField1(p thrift.Format) error {  // Color
+func (x *Vehicle) writeField1(p thrift.Encoder) error {  // Color
     if !x.IsSetColor() {
         return nil
     }
@@ -526,7 +526,7 @@ func (x *Vehicle) writeField1(p thrift.Format) error {  // Color
     return nil
 }
 
-func (x *Vehicle) writeField2(p thrift.Format) error {  // LicensePlate
+func (x *Vehicle) writeField2(p thrift.Encoder) error {  // LicensePlate
     if !x.IsSetLicensePlate() {
         return nil
     }
@@ -546,7 +546,7 @@ func (x *Vehicle) writeField2(p thrift.Format) error {  // LicensePlate
     return nil
 }
 
-func (x *Vehicle) writeField3(p thrift.Format) error {  // Description
+func (x *Vehicle) writeField3(p thrift.Encoder) error {  // Description
     if !x.IsSetDescription() {
         return nil
     }
@@ -566,7 +566,7 @@ func (x *Vehicle) writeField3(p thrift.Format) error {  // Description
     return nil
 }
 
-func (x *Vehicle) writeField4(p thrift.Format) error {  // Name
+func (x *Vehicle) writeField4(p thrift.Encoder) error {  // Name
     if !x.IsSetName() {
         return nil
     }
@@ -586,7 +586,7 @@ func (x *Vehicle) writeField4(p thrift.Format) error {  // Name
     return nil
 }
 
-func (x *Vehicle) writeField5(p thrift.Format) error {  // HasAC
+func (x *Vehicle) writeField5(p thrift.Encoder) error {  // HasAC
     if !x.IsSetHasAC() {
         return nil
     }
@@ -606,7 +606,7 @@ func (x *Vehicle) writeField5(p thrift.Format) error {  // HasAC
     return nil
 }
 
-func (x *Vehicle) readField1(p thrift.Format) error {  // Color
+func (x *Vehicle) readField1(p thrift.Decoder) error {  // Color
     result := *NewColor()
 err := result.Read(p)
 if err != nil {
@@ -617,7 +617,7 @@ if err != nil {
     return nil
 }
 
-func (x *Vehicle) readField2(p thrift.Format) error {  // LicensePlate
+func (x *Vehicle) readField2(p thrift.Decoder) error {  // LicensePlate
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -627,7 +627,7 @@ if err != nil {
     return nil
 }
 
-func (x *Vehicle) readField3(p thrift.Format) error {  // Description
+func (x *Vehicle) readField3(p thrift.Decoder) error {  // Description
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -637,7 +637,7 @@ if err != nil {
     return nil
 }
 
-func (x *Vehicle) readField4(p thrift.Format) error {  // Name
+func (x *Vehicle) readField4(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -647,7 +647,7 @@ if err != nil {
     return nil
 }
 
-func (x *Vehicle) readField5(p thrift.Format) error {  // HasAC
+func (x *Vehicle) readField5(p thrift.Decoder) error {  // HasAC
     result, err := p.ReadBool()
 if err != nil {
     return err
@@ -703,7 +703,7 @@ func (x *Vehicle) DefaultGetColor() *Color {
 
 
 
-func (x *Vehicle) Write(p thrift.Format) error {
+func (x *Vehicle) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Vehicle"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -738,7 +738,7 @@ func (x *Vehicle) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *Vehicle) Read(p thrift.Format) error {
+func (x *Vehicle) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1035,7 +1035,7 @@ func (x *Person) IsSetVehicles() bool {
     return x != nil && x.Vehicles != nil
 }
 
-func (x *Person) writeField1(p thrift.Format) error {  // Id
+func (x *Person) writeField1(p thrift.Encoder) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1052,7 +1052,7 @@ if err != nil {
     return nil
 }
 
-func (x *Person) writeField2(p thrift.Format) error {  // Name
+func (x *Person) writeField2(p thrift.Encoder) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1068,7 +1068,7 @@ func (x *Person) writeField2(p thrift.Format) error {  // Name
     return nil
 }
 
-func (x *Person) writeField3(p thrift.Format) error {  // Age
+func (x *Person) writeField3(p thrift.Encoder) error {  // Age
     if !x.IsSetAge() {
         return nil
     }
@@ -1088,7 +1088,7 @@ func (x *Person) writeField3(p thrift.Format) error {  // Age
     return nil
 }
 
-func (x *Person) writeField4(p thrift.Format) error {  // Address
+func (x *Person) writeField4(p thrift.Encoder) error {  // Address
     if !x.IsSetAddress() {
         return nil
     }
@@ -1108,7 +1108,7 @@ func (x *Person) writeField4(p thrift.Format) error {  // Address
     return nil
 }
 
-func (x *Person) writeField5(p thrift.Format) error {  // FavoriteColor
+func (x *Person) writeField5(p thrift.Encoder) error {  // FavoriteColor
     if !x.IsSetFavoriteColor() {
         return nil
     }
@@ -1128,7 +1128,7 @@ func (x *Person) writeField5(p thrift.Format) error {  // FavoriteColor
     return nil
 }
 
-func (x *Person) writeField6(p thrift.Format) error {  // Friends
+func (x *Person) writeField6(p thrift.Encoder) error {  // Friends
     if !x.IsSetFriends() {
         return nil
     }
@@ -1160,7 +1160,7 @@ if err := p.WriteSetEnd(); err != nil {
     return nil
 }
 
-func (x *Person) writeField7(p thrift.Format) error {  // BestFriend
+func (x *Person) writeField7(p thrift.Encoder) error {  // BestFriend
     if !x.IsSetBestFriend() {
         return nil
     }
@@ -1181,7 +1181,7 @@ if err != nil {
     return nil
 }
 
-func (x *Person) writeField8(p thrift.Format) error {  // PetNames
+func (x *Person) writeField8(p thrift.Encoder) error {  // PetNames
     if !x.IsSetPetNames() {
         return nil
     }
@@ -1219,7 +1219,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *Person) writeField9(p thrift.Format) error {  // AfraidOfAnimal
+func (x *Person) writeField9(p thrift.Encoder) error {  // AfraidOfAnimal
     if !x.IsSetAfraidOfAnimal() {
         return nil
     }
@@ -1239,7 +1239,7 @@ func (x *Person) writeField9(p thrift.Format) error {  // AfraidOfAnimal
     return nil
 }
 
-func (x *Person) writeField10(p thrift.Format) error {  // Vehicles
+func (x *Person) writeField10(p thrift.Encoder) error {  // Vehicles
     if !x.IsSetVehicles() {
         return nil
     }
@@ -1270,7 +1270,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *Person) readField1(p thrift.Format) error {  // Id
+func (x *Person) readField1(p thrift.Decoder) error {  // Id
     result, err := ReadPersonID(p)
 if err != nil {
     return err
@@ -1280,7 +1280,7 @@ if err != nil {
     return nil
 }
 
-func (x *Person) readField2(p thrift.Format) error {  // Name
+func (x *Person) readField2(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -1290,7 +1290,7 @@ if err != nil {
     return nil
 }
 
-func (x *Person) readField3(p thrift.Format) error {  // Age
+func (x *Person) readField3(p thrift.Decoder) error {  // Age
     result, err := p.ReadI16()
 if err != nil {
     return err
@@ -1300,7 +1300,7 @@ if err != nil {
     return nil
 }
 
-func (x *Person) readField4(p thrift.Format) error {  // Address
+func (x *Person) readField4(p thrift.Decoder) error {  // Address
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -1310,7 +1310,7 @@ if err != nil {
     return nil
 }
 
-func (x *Person) readField5(p thrift.Format) error {  // FavoriteColor
+func (x *Person) readField5(p thrift.Decoder) error {  // FavoriteColor
     result := *NewColor()
 err := result.Read(p)
 if err != nil {
@@ -1321,7 +1321,7 @@ if err != nil {
     return nil
 }
 
-func (x *Person) readField6(p thrift.Format) error {  // Friends
+func (x *Person) readField6(p thrift.Decoder) error {  // Friends
     _ /* elemType */, size, err := p.ReadSetBegin()
 if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -1349,7 +1349,7 @@ result := setResult
     return nil
 }
 
-func (x *Person) readField7(p thrift.Format) error {  // BestFriend
+func (x *Person) readField7(p thrift.Decoder) error {  // BestFriend
     result, err := ReadPersonID(p)
 if err != nil {
     return err
@@ -1359,7 +1359,7 @@ if err != nil {
     return nil
 }
 
-func (x *Person) readField8(p thrift.Format) error {  // PetNames
+func (x *Person) readField8(p thrift.Decoder) error {  // PetNames
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -1398,7 +1398,7 @@ result := mapResult
     return nil
 }
 
-func (x *Person) readField9(p thrift.Format) error {  // AfraidOfAnimal
+func (x *Person) readField9(p thrift.Decoder) error {  // AfraidOfAnimal
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -1409,7 +1409,7 @@ result := Animal(enumResult)
     return nil
 }
 
-func (x *Person) readField10(p thrift.Format) error {  // Vehicles
+func (x *Person) readField10(p thrift.Decoder) error {  // Vehicles
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1504,7 +1504,7 @@ func (x *Person) DefaultGetFavoriteColor() *Color {
 
 
 
-func (x *Person) Write(p thrift.Format) error {
+func (x *Person) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Person"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1559,7 +1559,7 @@ func (x *Person) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *Person) Read(p thrift.Format) error {
+func (x *Person) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

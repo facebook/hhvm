@@ -29,7 +29,7 @@ func NewEmpty() *Empty {
 
 
 
-func (x *Empty) Write(p thrift.Format) error {
+func (x *Empty) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Empty"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -44,7 +44,7 @@ func (x *Empty) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *Empty) Read(p thrift.Format) error {
+func (x *Empty) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -111,7 +111,7 @@ func (x *Nada) CountSetFieldsNada() int {
 
 
 
-func (x *Nada) Write(p thrift.Format) error {
+func (x *Nada) Write(p thrift.Encoder) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
     }
@@ -129,7 +129,7 @@ func (x *Nada) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *Nada) Read(p thrift.Format) error {
+func (x *Nada) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

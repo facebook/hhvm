@@ -43,7 +43,7 @@ func (x *TrivialStruct) SetIntValue(value int32) *TrivialStruct {
     return x
 }
 
-func (x *TrivialStruct) writeField1(p thrift.Format) error {  // IntValue
+func (x *TrivialStruct) writeField1(p thrift.Encoder) error {  // IntValue
     if err := p.WriteFieldBegin("int_value", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -59,7 +59,7 @@ func (x *TrivialStruct) writeField1(p thrift.Format) error {  // IntValue
     return nil
 }
 
-func (x *TrivialStruct) readField1(p thrift.Format) error {  // IntValue
+func (x *TrivialStruct) readField1(p thrift.Decoder) error {  // IntValue
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -75,7 +75,7 @@ func (x *TrivialStruct) toString1() string {  // IntValue
 
 
 
-func (x *TrivialStruct) Write(p thrift.Format) error {
+func (x *TrivialStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("TrivialStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -94,7 +94,7 @@ func (x *TrivialStruct) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *TrivialStruct) Read(p thrift.Format) error {
+func (x *TrivialStruct) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -281,7 +281,7 @@ func (x *StructWithNoCustomDefaultValues) IsSetRequiredStruct() bool {
     return x != nil && x.RequiredStruct != nil
 }
 
-func (x *StructWithNoCustomDefaultValues) writeField1(p thrift.Format) error {  // UnqualifiedInteger
+func (x *StructWithNoCustomDefaultValues) writeField1(p thrift.Encoder) error {  // UnqualifiedInteger
     if err := p.WriteFieldBegin("unqualified_integer", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -297,7 +297,7 @@ func (x *StructWithNoCustomDefaultValues) writeField1(p thrift.Format) error {  
     return nil
 }
 
-func (x *StructWithNoCustomDefaultValues) writeField2(p thrift.Format) error {  // OptionalInteger
+func (x *StructWithNoCustomDefaultValues) writeField2(p thrift.Encoder) error {  // OptionalInteger
     if !x.IsSetOptionalInteger() {
         return nil
     }
@@ -317,7 +317,7 @@ func (x *StructWithNoCustomDefaultValues) writeField2(p thrift.Format) error {  
     return nil
 }
 
-func (x *StructWithNoCustomDefaultValues) writeField3(p thrift.Format) error {  // RequiredInteger
+func (x *StructWithNoCustomDefaultValues) writeField3(p thrift.Encoder) error {  // RequiredInteger
     if err := p.WriteFieldBegin("required_integer", thrift.I32, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -333,7 +333,7 @@ func (x *StructWithNoCustomDefaultValues) writeField3(p thrift.Format) error {  
     return nil
 }
 
-func (x *StructWithNoCustomDefaultValues) writeField4(p thrift.Format) error {  // UnqualifiedStruct
+func (x *StructWithNoCustomDefaultValues) writeField4(p thrift.Encoder) error {  // UnqualifiedStruct
     if !x.IsSetUnqualifiedStruct() {
         return nil
     }
@@ -353,7 +353,7 @@ func (x *StructWithNoCustomDefaultValues) writeField4(p thrift.Format) error {  
     return nil
 }
 
-func (x *StructWithNoCustomDefaultValues) writeField5(p thrift.Format) error {  // OptionalStruct
+func (x *StructWithNoCustomDefaultValues) writeField5(p thrift.Encoder) error {  // OptionalStruct
     if !x.IsSetOptionalStruct() {
         return nil
     }
@@ -373,7 +373,7 @@ func (x *StructWithNoCustomDefaultValues) writeField5(p thrift.Format) error {  
     return nil
 }
 
-func (x *StructWithNoCustomDefaultValues) writeField6(p thrift.Format) error {  // RequiredStruct
+func (x *StructWithNoCustomDefaultValues) writeField6(p thrift.Encoder) error {  // RequiredStruct
     if !x.IsSetRequiredStruct() {
         return nil
     }
@@ -393,7 +393,7 @@ func (x *StructWithNoCustomDefaultValues) writeField6(p thrift.Format) error {  
     return nil
 }
 
-func (x *StructWithNoCustomDefaultValues) readField1(p thrift.Format) error {  // UnqualifiedInteger
+func (x *StructWithNoCustomDefaultValues) readField1(p thrift.Decoder) error {  // UnqualifiedInteger
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -403,7 +403,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructWithNoCustomDefaultValues) readField2(p thrift.Format) error {  // OptionalInteger
+func (x *StructWithNoCustomDefaultValues) readField2(p thrift.Decoder) error {  // OptionalInteger
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -413,7 +413,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructWithNoCustomDefaultValues) readField3(p thrift.Format) error {  // RequiredInteger
+func (x *StructWithNoCustomDefaultValues) readField3(p thrift.Decoder) error {  // RequiredInteger
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -423,7 +423,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructWithNoCustomDefaultValues) readField4(p thrift.Format) error {  // UnqualifiedStruct
+func (x *StructWithNoCustomDefaultValues) readField4(p thrift.Decoder) error {  // UnqualifiedStruct
     result := *NewTrivialStruct()
 err := result.Read(p)
 if err != nil {
@@ -434,7 +434,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructWithNoCustomDefaultValues) readField5(p thrift.Format) error {  // OptionalStruct
+func (x *StructWithNoCustomDefaultValues) readField5(p thrift.Decoder) error {  // OptionalStruct
     result := *NewTrivialStruct()
 err := result.Read(p)
 if err != nil {
@@ -445,7 +445,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructWithNoCustomDefaultValues) readField6(p thrift.Format) error {  // RequiredStruct
+func (x *StructWithNoCustomDefaultValues) readField6(p thrift.Decoder) error {  // RequiredStruct
     result := *NewTrivialStruct()
 err := result.Read(p)
 if err != nil {
@@ -510,7 +510,7 @@ func (x *StructWithNoCustomDefaultValues) DefaultGetRequiredStruct() *TrivialStr
 
 
 
-func (x *StructWithNoCustomDefaultValues) Write(p thrift.Format) error {
+func (x *StructWithNoCustomDefaultValues) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("StructWithNoCustomDefaultValues"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -549,7 +549,7 @@ func (x *StructWithNoCustomDefaultValues) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *StructWithNoCustomDefaultValues) Read(p thrift.Format) error {
+func (x *StructWithNoCustomDefaultValues) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -772,7 +772,7 @@ func (x *StructWithCustomDefaultValues) IsSetRequiredStruct() bool {
     return x != nil && x.RequiredStruct != nil
 }
 
-func (x *StructWithCustomDefaultValues) writeField1(p thrift.Format) error {  // UnqualifiedInteger
+func (x *StructWithCustomDefaultValues) writeField1(p thrift.Encoder) error {  // UnqualifiedInteger
     if err := p.WriteFieldBegin("unqualified_integer", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -788,7 +788,7 @@ func (x *StructWithCustomDefaultValues) writeField1(p thrift.Format) error {  //
     return nil
 }
 
-func (x *StructWithCustomDefaultValues) writeField2(p thrift.Format) error {  // OptionalInteger
+func (x *StructWithCustomDefaultValues) writeField2(p thrift.Encoder) error {  // OptionalInteger
     if !x.IsSetOptionalInteger() {
         return nil
     }
@@ -808,7 +808,7 @@ func (x *StructWithCustomDefaultValues) writeField2(p thrift.Format) error {  //
     return nil
 }
 
-func (x *StructWithCustomDefaultValues) writeField3(p thrift.Format) error {  // RequiredInteger
+func (x *StructWithCustomDefaultValues) writeField3(p thrift.Encoder) error {  // RequiredInteger
     if err := p.WriteFieldBegin("required_integer", thrift.I32, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -824,7 +824,7 @@ func (x *StructWithCustomDefaultValues) writeField3(p thrift.Format) error {  //
     return nil
 }
 
-func (x *StructWithCustomDefaultValues) writeField4(p thrift.Format) error {  // UnqualifiedStruct
+func (x *StructWithCustomDefaultValues) writeField4(p thrift.Encoder) error {  // UnqualifiedStruct
     if !x.IsSetUnqualifiedStruct() {
         return nil
     }
@@ -844,7 +844,7 @@ func (x *StructWithCustomDefaultValues) writeField4(p thrift.Format) error {  //
     return nil
 }
 
-func (x *StructWithCustomDefaultValues) writeField5(p thrift.Format) error {  // OptionalStruct
+func (x *StructWithCustomDefaultValues) writeField5(p thrift.Encoder) error {  // OptionalStruct
     if !x.IsSetOptionalStruct() {
         return nil
     }
@@ -864,7 +864,7 @@ func (x *StructWithCustomDefaultValues) writeField5(p thrift.Format) error {  //
     return nil
 }
 
-func (x *StructWithCustomDefaultValues) writeField6(p thrift.Format) error {  // RequiredStruct
+func (x *StructWithCustomDefaultValues) writeField6(p thrift.Encoder) error {  // RequiredStruct
     if !x.IsSetRequiredStruct() {
         return nil
     }
@@ -884,7 +884,7 @@ func (x *StructWithCustomDefaultValues) writeField6(p thrift.Format) error {  //
     return nil
 }
 
-func (x *StructWithCustomDefaultValues) readField1(p thrift.Format) error {  // UnqualifiedInteger
+func (x *StructWithCustomDefaultValues) readField1(p thrift.Decoder) error {  // UnqualifiedInteger
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -894,7 +894,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructWithCustomDefaultValues) readField2(p thrift.Format) error {  // OptionalInteger
+func (x *StructWithCustomDefaultValues) readField2(p thrift.Decoder) error {  // OptionalInteger
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -904,7 +904,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructWithCustomDefaultValues) readField3(p thrift.Format) error {  // RequiredInteger
+func (x *StructWithCustomDefaultValues) readField3(p thrift.Decoder) error {  // RequiredInteger
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -914,7 +914,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructWithCustomDefaultValues) readField4(p thrift.Format) error {  // UnqualifiedStruct
+func (x *StructWithCustomDefaultValues) readField4(p thrift.Decoder) error {  // UnqualifiedStruct
     result := *NewTrivialStruct()
 err := result.Read(p)
 if err != nil {
@@ -925,7 +925,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructWithCustomDefaultValues) readField5(p thrift.Format) error {  // OptionalStruct
+func (x *StructWithCustomDefaultValues) readField5(p thrift.Decoder) error {  // OptionalStruct
     result := *NewTrivialStruct()
 err := result.Read(p)
 if err != nil {
@@ -936,7 +936,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructWithCustomDefaultValues) readField6(p thrift.Format) error {  // RequiredStruct
+func (x *StructWithCustomDefaultValues) readField6(p thrift.Decoder) error {  // RequiredStruct
     result := *NewTrivialStruct()
 err := result.Read(p)
 if err != nil {
@@ -1001,7 +1001,7 @@ func (x *StructWithCustomDefaultValues) DefaultGetRequiredStruct() *TrivialStruc
 
 
 
-func (x *StructWithCustomDefaultValues) Write(p thrift.Format) error {
+func (x *StructWithCustomDefaultValues) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("StructWithCustomDefaultValues"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1040,7 +1040,7 @@ func (x *StructWithCustomDefaultValues) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *StructWithCustomDefaultValues) Read(p thrift.Format) error {
+func (x *StructWithCustomDefaultValues) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

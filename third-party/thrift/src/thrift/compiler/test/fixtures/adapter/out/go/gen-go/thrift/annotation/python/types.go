@@ -29,7 +29,7 @@ func NewPy3Hidden() *Py3Hidden {
 
 
 
-func (x *Py3Hidden) Write(p thrift.Format) error {
+func (x *Py3Hidden) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Py3Hidden"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -44,7 +44,7 @@ func (x *Py3Hidden) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *Py3Hidden) Read(p thrift.Format) error {
+func (x *Py3Hidden) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -102,7 +102,7 @@ func NewFlags() *Flags {
 
 
 
-func (x *Flags) Write(p thrift.Format) error {
+func (x *Flags) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Flags"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -117,7 +117,7 @@ func (x *Flags) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *Flags) Read(p thrift.Format) error {
+func (x *Flags) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -189,7 +189,7 @@ func (x *Name) SetName(value string) *Name {
     return x
 }
 
-func (x *Name) writeField1(p thrift.Format) error {  // Name
+func (x *Name) writeField1(p thrift.Encoder) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -205,7 +205,7 @@ func (x *Name) writeField1(p thrift.Format) error {  // Name
     return nil
 }
 
-func (x *Name) readField1(p thrift.Format) error {  // Name
+func (x *Name) readField1(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -221,7 +221,7 @@ func (x *Name) toString1() string {  // Name
 
 
 
-func (x *Name) Write(p thrift.Format) error {
+func (x *Name) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Name"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -240,7 +240,7 @@ func (x *Name) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *Name) Read(p thrift.Format) error {
+func (x *Name) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -333,7 +333,7 @@ func (x *Adapter) SetTypeHint(value string) *Adapter {
     return x
 }
 
-func (x *Adapter) writeField1(p thrift.Format) error {  // Name
+func (x *Adapter) writeField1(p thrift.Encoder) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -349,7 +349,7 @@ func (x *Adapter) writeField1(p thrift.Format) error {  // Name
     return nil
 }
 
-func (x *Adapter) writeField2(p thrift.Format) error {  // TypeHint
+func (x *Adapter) writeField2(p thrift.Encoder) error {  // TypeHint
     if err := p.WriteFieldBegin("typeHint", thrift.STRING, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -365,7 +365,7 @@ func (x *Adapter) writeField2(p thrift.Format) error {  // TypeHint
     return nil
 }
 
-func (x *Adapter) readField1(p thrift.Format) error {  // Name
+func (x *Adapter) readField1(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -375,7 +375,7 @@ if err != nil {
     return nil
 }
 
-func (x *Adapter) readField2(p thrift.Format) error {  // TypeHint
+func (x *Adapter) readField2(p thrift.Decoder) error {  // TypeHint
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -395,7 +395,7 @@ func (x *Adapter) toString2() string {  // TypeHint
 
 
 
-func (x *Adapter) Write(p thrift.Format) error {
+func (x *Adapter) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Adapter"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -418,7 +418,7 @@ func (x *Adapter) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *Adapter) Read(p thrift.Format) error {
+func (x *Adapter) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -500,7 +500,7 @@ func (x *UseCAPI) SetSerialize(value bool) *UseCAPI {
     return x
 }
 
-func (x *UseCAPI) writeField1(p thrift.Format) error {  // Serialize
+func (x *UseCAPI) writeField1(p thrift.Encoder) error {  // Serialize
     if err := p.WriteFieldBegin("serialize", thrift.BOOL, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -516,7 +516,7 @@ func (x *UseCAPI) writeField1(p thrift.Format) error {  // Serialize
     return nil
 }
 
-func (x *UseCAPI) readField1(p thrift.Format) error {  // Serialize
+func (x *UseCAPI) readField1(p thrift.Decoder) error {  // Serialize
     result, err := p.ReadBool()
 if err != nil {
     return err
@@ -532,7 +532,7 @@ func (x *UseCAPI) toString1() string {  // Serialize
 
 
 
-func (x *UseCAPI) Write(p thrift.Format) error {
+func (x *UseCAPI) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("UseCAPI"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -551,7 +551,7 @@ func (x *UseCAPI) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *UseCAPI) Read(p thrift.Format) error {
+func (x *UseCAPI) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

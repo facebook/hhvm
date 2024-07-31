@@ -43,7 +43,7 @@ func (x *CustomException) SetMessage(value string) *CustomException {
     return x
 }
 
-func (x *CustomException) writeField1(p thrift.Format) error {  // Message
+func (x *CustomException) writeField1(p thrift.Encoder) error {  // Message
     if err := p.WriteFieldBegin("message", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -59,7 +59,7 @@ func (x *CustomException) writeField1(p thrift.Format) error {  // Message
     return nil
 }
 
-func (x *CustomException) readField1(p thrift.Format) error {  // Message
+func (x *CustomException) readField1(p thrift.Decoder) error {  // Message
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -75,7 +75,7 @@ func (x *CustomException) toString1() string {  // Message
 
 
 
-func (x *CustomException) Write(p thrift.Format) error {
+func (x *CustomException) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("CustomException"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -94,7 +94,7 @@ func (x *CustomException) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *CustomException) Read(p thrift.Format) error {
+func (x *CustomException) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

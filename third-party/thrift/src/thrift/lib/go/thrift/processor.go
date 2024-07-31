@@ -41,11 +41,11 @@ type ProcessorContext interface {
 // order to perform io and message processing
 type ProcessorFunctionContext interface {
 	// Read a serializable message from the protocol.
-	Read(prot Format) (Struct, Exception)
+	Read(prot Decoder) (Struct, Exception)
 	// RunContext processes a message handing it to the client handler.
 	RunContext(ctx context.Context, args Struct) (WritableStruct, ApplicationException)
 	// Write a serializable response
-	Write(seqID int32, result WritableStruct, prot Format) Exception
+	Write(seqID int32, result WritableStruct, prot Encoder) Exception
 }
 
 func errorType(err error) string {

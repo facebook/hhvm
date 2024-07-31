@@ -36,14 +36,14 @@ func NewIOBufPtr() IOBufPtr {
 	return []byte("")
 }
 
-func WriteIOBufPtr(item IOBufPtr, p Format) error {
+func WriteIOBufPtr(item IOBufPtr, p Encoder) error {
 	if err := p.WriteBinary(item); err != nil {
 		return err
 	}
 	return nil
 }
 
-func ReadIOBufPtr(p Format) (IOBufPtr, error) {
+func ReadIOBufPtr(p Decoder) (IOBufPtr, error) {
 	var decodeResult IOBufPtr
 	decodeErr := func() error {
 		result, err := p.ReadBinary()
@@ -62,14 +62,14 @@ func NewManagedStringViewField() ManagedStringViewField {
 	return ""
 }
 
-func WriteManagedStringViewField(item ManagedStringViewField, p Format) error {
+func WriteManagedStringViewField(item ManagedStringViewField, p Encoder) error {
 	if err := p.WriteString(item); err != nil {
 		return err
 	}
 	return nil
 }
 
-func ReadManagedStringViewField(p Format) (ManagedStringViewField, error) {
+func ReadManagedStringViewField(p Decoder) (ManagedStringViewField, error) {
 	var decodeResult ManagedStringViewField
 	decodeErr := func() error {
 		result, err := p.ReadString()
@@ -88,14 +88,14 @@ func NewString_4852() String_4852 {
 	return ""
 }
 
-func WriteString_4852(item String_4852, p Format) error {
+func WriteString_4852(item String_4852, p Encoder) error {
 	if err := p.WriteString(item); err != nil {
 		return err
 	}
 	return nil
 }
 
-func ReadString_4852(p Format) (String_4852, error) {
+func ReadString_4852(p Decoder) (String_4852, error) {
 	var decodeResult String_4852
 	decodeErr := func() error {
 		result, err := p.ReadString()
@@ -760,7 +760,7 @@ func NewZlibCompressionCodecConfig() *ZlibCompressionCodecConfig {
 	return (&ZlibCompressionCodecConfig{})
 }
 
-func (x *ZlibCompressionCodecConfig) Write(p Format) error {
+func (x *ZlibCompressionCodecConfig) Write(p Encoder) error {
 	if err := p.WriteStructBegin("ZlibCompressionCodecConfig"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -775,7 +775,7 @@ func (x *ZlibCompressionCodecConfig) Write(p Format) error {
 	return nil
 }
 
-func (x *ZlibCompressionCodecConfig) Read(p Format) error {
+func (x *ZlibCompressionCodecConfig) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -832,7 +832,7 @@ func NewZstdCompressionCodecConfig() *ZstdCompressionCodecConfig {
 	return (&ZstdCompressionCodecConfig{})
 }
 
-func (x *ZstdCompressionCodecConfig) Write(p Format) error {
+func (x *ZstdCompressionCodecConfig) Write(p Encoder) error {
 	if err := p.WriteStructBegin("ZstdCompressionCodecConfig"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -847,7 +847,7 @@ func (x *ZstdCompressionCodecConfig) Write(p Format) error {
 	return nil
 }
 
-func (x *ZstdCompressionCodecConfig) Read(p Format) error {
+func (x *ZstdCompressionCodecConfig) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -958,7 +958,7 @@ func (x *CodecConfig) IsSetZstdConfig() bool {
 	return x != nil && x.ZstdConfig != nil
 }
 
-func (x *CodecConfig) writeField1(p Format) error { // ZlibConfig
+func (x *CodecConfig) writeField1(p Encoder) error { // ZlibConfig
 	if !x.IsSetZlibConfig() {
 		return nil
 	}
@@ -978,7 +978,7 @@ func (x *CodecConfig) writeField1(p Format) error { // ZlibConfig
 	return nil
 }
 
-func (x *CodecConfig) writeField2(p Format) error { // ZstdConfig
+func (x *CodecConfig) writeField2(p Encoder) error { // ZstdConfig
 	if !x.IsSetZstdConfig() {
 		return nil
 	}
@@ -998,7 +998,7 @@ func (x *CodecConfig) writeField2(p Format) error { // ZstdConfig
 	return nil
 }
 
-func (x *CodecConfig) readField1(p Format) error { // ZlibConfig
+func (x *CodecConfig) readField1(p Decoder) error { // ZlibConfig
 	result := *NewZlibCompressionCodecConfig()
 	err := result.Read(p)
 	if err != nil {
@@ -1009,7 +1009,7 @@ func (x *CodecConfig) readField1(p Format) error { // ZlibConfig
 	return nil
 }
 
-func (x *CodecConfig) readField2(p Format) error { // ZstdConfig
+func (x *CodecConfig) readField2(p Decoder) error { // ZstdConfig
 	result := *NewZstdCompressionCodecConfig()
 	err := result.Read(p)
 	if err != nil {
@@ -1043,7 +1043,7 @@ func (x *CodecConfig) CountSetFieldsCodecConfig() int {
 	return x.countSetFields()
 }
 
-func (x *CodecConfig) Write(p Format) error {
+func (x *CodecConfig) Write(p Encoder) error {
 	if countSet := x.countSetFields(); countSet > 1 {
 		return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
 	}
@@ -1069,7 +1069,7 @@ func (x *CodecConfig) Write(p Format) error {
 	return nil
 }
 
-func (x *CodecConfig) Read(p Format) error {
+func (x *CodecConfig) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -1190,7 +1190,7 @@ func (x *CompressionConfig) IsSetCompressionSizeLimit() bool {
 	return x != nil && x.CompressionSizeLimit != nil
 }
 
-func (x *CompressionConfig) writeField1(p Format) error { // CodecConfig
+func (x *CompressionConfig) writeField1(p Encoder) error { // CodecConfig
 	if !x.IsSetCodecConfig() {
 		return nil
 	}
@@ -1210,7 +1210,7 @@ func (x *CompressionConfig) writeField1(p Format) error { // CodecConfig
 	return nil
 }
 
-func (x *CompressionConfig) writeField2(p Format) error { // CompressionSizeLimit
+func (x *CompressionConfig) writeField2(p Encoder) error { // CompressionSizeLimit
 	if !x.IsSetCompressionSizeLimit() {
 		return nil
 	}
@@ -1230,7 +1230,7 @@ func (x *CompressionConfig) writeField2(p Format) error { // CompressionSizeLimi
 	return nil
 }
 
-func (x *CompressionConfig) readField1(p Format) error { // CodecConfig
+func (x *CompressionConfig) readField1(p Decoder) error { // CodecConfig
 	result := *NewCodecConfig()
 	err := result.Read(p)
 	if err != nil {
@@ -1241,7 +1241,7 @@ func (x *CompressionConfig) readField1(p Format) error { // CodecConfig
 	return nil
 }
 
-func (x *CompressionConfig) readField2(p Format) error { // CompressionSizeLimit
+func (x *CompressionConfig) readField2(p Decoder) error { // CompressionSizeLimit
 	result, err := p.ReadI64()
 	if err != nil {
 		return err
@@ -1262,7 +1262,7 @@ func (x *CompressionConfig) toString2() string { // CompressionSizeLimit
 	return fmt.Sprintf("%v", x.GetCompressionSizeLimitNonCompat())
 }
 
-func (x *CompressionConfig) Write(p Format) error {
+func (x *CompressionConfig) Write(p Encoder) error {
 	if err := p.WriteStructBegin("CompressionConfig"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -1285,7 +1285,7 @@ func (x *CompressionConfig) Write(p Format) error {
 	return nil
 }
 
-func (x *CompressionConfig) Read(p Format) error {
+func (x *CompressionConfig) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -1406,7 +1406,7 @@ func (x *NegotiationParameters) IsSetUseStopTLS() bool {
 	return x != nil && x.UseStopTLS != nil
 }
 
-func (x *NegotiationParameters) writeField1(p Format) error { // CompressionAlgos
+func (x *NegotiationParameters) writeField1(p Encoder) error { // CompressionAlgos
 	if !x.IsSetCompressionAlgos() {
 		return nil
 	}
@@ -1426,7 +1426,7 @@ func (x *NegotiationParameters) writeField1(p Format) error { // CompressionAlgo
 	return nil
 }
 
-func (x *NegotiationParameters) writeField2(p Format) error { // UseStopTLS
+func (x *NegotiationParameters) writeField2(p Encoder) error { // UseStopTLS
 	if !x.IsSetUseStopTLS() {
 		return nil
 	}
@@ -1446,7 +1446,7 @@ func (x *NegotiationParameters) writeField2(p Format) error { // UseStopTLS
 	return nil
 }
 
-func (x *NegotiationParameters) readField1(p Format) error { // CompressionAlgos
+func (x *NegotiationParameters) readField1(p Decoder) error { // CompressionAlgos
 	result, err := p.ReadI64()
 	if err != nil {
 		return err
@@ -1456,7 +1456,7 @@ func (x *NegotiationParameters) readField1(p Format) error { // CompressionAlgos
 	return nil
 }
 
-func (x *NegotiationParameters) readField2(p Format) error { // UseStopTLS
+func (x *NegotiationParameters) readField2(p Decoder) error { // UseStopTLS
 	result, err := p.ReadBool()
 	if err != nil {
 		return err
@@ -1480,7 +1480,7 @@ func (x *NegotiationParameters) toString2() string { // UseStopTLS
 	return fmt.Sprintf("%v", x.GetUseStopTLSNonCompat())
 }
 
-func (x *NegotiationParameters) Write(p Format) error {
+func (x *NegotiationParameters) Write(p Encoder) error {
 	if err := p.WriteStructBegin("NegotiationParameters"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -1503,7 +1503,7 @@ func (x *NegotiationParameters) Write(p Format) error {
 	return nil
 }
 
-func (x *NegotiationParameters) Read(p Format) error {
+func (x *NegotiationParameters) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -1610,7 +1610,7 @@ func (x *InteractionCreate) SetInteractionName(value ManagedStringViewField) *In
 	return x
 }
 
-func (x *InteractionCreate) writeField1(p Format) error { // InteractionId
+func (x *InteractionCreate) writeField1(p Encoder) error { // InteractionId
 	if err := p.WriteFieldBegin("interactionId", I64, 1); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
 	}
@@ -1626,7 +1626,7 @@ func (x *InteractionCreate) writeField1(p Format) error { // InteractionId
 	return nil
 }
 
-func (x *InteractionCreate) writeField2(p Format) error { // InteractionName
+func (x *InteractionCreate) writeField2(p Encoder) error { // InteractionName
 	if err := p.WriteFieldBegin("interactionName", STRING, 2); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
 	}
@@ -1643,7 +1643,7 @@ func (x *InteractionCreate) writeField2(p Format) error { // InteractionName
 	return nil
 }
 
-func (x *InteractionCreate) readField1(p Format) error { // InteractionId
+func (x *InteractionCreate) readField1(p Decoder) error { // InteractionId
 	result, err := p.ReadI64()
 	if err != nil {
 		return err
@@ -1653,7 +1653,7 @@ func (x *InteractionCreate) readField1(p Format) error { // InteractionId
 	return nil
 }
 
-func (x *InteractionCreate) readField2(p Format) error { // InteractionName
+func (x *InteractionCreate) readField2(p Decoder) error { // InteractionName
 	result, err := ReadManagedStringViewField(p)
 	if err != nil {
 		return err
@@ -1671,7 +1671,7 @@ func (x *InteractionCreate) toString2() string { // InteractionName
 	return fmt.Sprintf("%v", x.GetInteractionNameNonCompat())
 }
 
-func (x *InteractionCreate) Write(p Format) error {
+func (x *InteractionCreate) Write(p Encoder) error {
 	if err := p.WriteStructBegin("InteractionCreate"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -1694,7 +1694,7 @@ func (x *InteractionCreate) Write(p Format) error {
 	return nil
 }
 
-func (x *InteractionCreate) Read(p Format) error {
+func (x *InteractionCreate) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -1781,7 +1781,7 @@ func (x *InteractionTerminate) SetInteractionId(value int64) *InteractionTermina
 	return x
 }
 
-func (x *InteractionTerminate) writeField1(p Format) error { // InteractionId
+func (x *InteractionTerminate) writeField1(p Encoder) error { // InteractionId
 	if err := p.WriteFieldBegin("interactionId", I64, 1); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
 	}
@@ -1797,7 +1797,7 @@ func (x *InteractionTerminate) writeField1(p Format) error { // InteractionId
 	return nil
 }
 
-func (x *InteractionTerminate) readField1(p Format) error { // InteractionId
+func (x *InteractionTerminate) readField1(p Decoder) error { // InteractionId
 	result, err := p.ReadI64()
 	if err != nil {
 		return err
@@ -1811,7 +1811,7 @@ func (x *InteractionTerminate) toString1() string { // InteractionId
 	return fmt.Sprintf("%v", x.GetInteractionIdNonCompat())
 }
 
-func (x *InteractionTerminate) Write(p Format) error {
+func (x *InteractionTerminate) Write(p Encoder) error {
 	if err := p.WriteStructBegin("InteractionTerminate"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -1830,7 +1830,7 @@ func (x *InteractionTerminate) Write(p Format) error {
 	return nil
 }
 
-func (x *InteractionTerminate) Read(p Format) error {
+func (x *InteractionTerminate) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -1946,7 +1946,7 @@ func (x *FdMetadata) IsSetNumFds() bool {
 	return x != nil && x.NumFds != nil
 }
 
-func (x *FdMetadata) writeField1(p Format) error { // FdSeqNum
+func (x *FdMetadata) writeField1(p Encoder) error { // FdSeqNum
 	if !x.IsSetFdSeqNum() {
 		return nil
 	}
@@ -1966,7 +1966,7 @@ func (x *FdMetadata) writeField1(p Format) error { // FdSeqNum
 	return nil
 }
 
-func (x *FdMetadata) writeField2(p Format) error { // NumFds
+func (x *FdMetadata) writeField2(p Encoder) error { // NumFds
 	if !x.IsSetNumFds() {
 		return nil
 	}
@@ -1986,7 +1986,7 @@ func (x *FdMetadata) writeField2(p Format) error { // NumFds
 	return nil
 }
 
-func (x *FdMetadata) readField1(p Format) error { // FdSeqNum
+func (x *FdMetadata) readField1(p Decoder) error { // FdSeqNum
 	result, err := p.ReadI64()
 	if err != nil {
 		return err
@@ -1996,7 +1996,7 @@ func (x *FdMetadata) readField1(p Format) error { // FdSeqNum
 	return nil
 }
 
-func (x *FdMetadata) readField2(p Format) error { // NumFds
+func (x *FdMetadata) readField2(p Decoder) error { // NumFds
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -2020,7 +2020,7 @@ func (x *FdMetadata) toString2() string { // NumFds
 	return fmt.Sprintf("%v", x.GetNumFdsNonCompat())
 }
 
-func (x *FdMetadata) Write(p Format) error {
+func (x *FdMetadata) Write(p Encoder) error {
 	if err := p.WriteStructBegin("FdMetadata"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -2043,7 +2043,7 @@ func (x *FdMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *FdMetadata) Read(p Format) error {
+func (x *FdMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -2204,7 +2204,7 @@ func (x *LoggingContext) IsSetRoutingTarget() bool {
 	return x != nil && x.RoutingTarget != nil
 }
 
-func (x *LoggingContext) writeField1(p Format) error { // LogSampleRatio
+func (x *LoggingContext) writeField1(p Encoder) error { // LogSampleRatio
 	if err := p.WriteFieldBegin("logSampleRatio", I64, 1); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
 	}
@@ -2220,7 +2220,7 @@ func (x *LoggingContext) writeField1(p Format) error { // LogSampleRatio
 	return nil
 }
 
-func (x *LoggingContext) writeField2(p Format) error { // LogErrorSampleRatio
+func (x *LoggingContext) writeField2(p Encoder) error { // LogErrorSampleRatio
 	if err := p.WriteFieldBegin("logErrorSampleRatio", I64, 2); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
 	}
@@ -2236,7 +2236,7 @@ func (x *LoggingContext) writeField2(p Format) error { // LogErrorSampleRatio
 	return nil
 }
 
-func (x *LoggingContext) writeField3(p Format) error { // RequestId
+func (x *LoggingContext) writeField3(p Encoder) error { // RequestId
 	if !x.IsSetRequestId() {
 		return nil
 	}
@@ -2256,7 +2256,7 @@ func (x *LoggingContext) writeField3(p Format) error { // RequestId
 	return nil
 }
 
-func (x *LoggingContext) writeField4(p Format) error { // RoutingTarget
+func (x *LoggingContext) writeField4(p Encoder) error { // RoutingTarget
 	if !x.IsSetRoutingTarget() {
 		return nil
 	}
@@ -2276,7 +2276,7 @@ func (x *LoggingContext) writeField4(p Format) error { // RoutingTarget
 	return nil
 }
 
-func (x *LoggingContext) readField1(p Format) error { // LogSampleRatio
+func (x *LoggingContext) readField1(p Decoder) error { // LogSampleRatio
 	result, err := p.ReadI64()
 	if err != nil {
 		return err
@@ -2286,7 +2286,7 @@ func (x *LoggingContext) readField1(p Format) error { // LogSampleRatio
 	return nil
 }
 
-func (x *LoggingContext) readField2(p Format) error { // LogErrorSampleRatio
+func (x *LoggingContext) readField2(p Decoder) error { // LogErrorSampleRatio
 	result, err := p.ReadI64()
 	if err != nil {
 		return err
@@ -2296,7 +2296,7 @@ func (x *LoggingContext) readField2(p Format) error { // LogErrorSampleRatio
 	return nil
 }
 
-func (x *LoggingContext) readField3(p Format) error { // RequestId
+func (x *LoggingContext) readField3(p Decoder) error { // RequestId
 	result, err := p.ReadString()
 	if err != nil {
 		return err
@@ -2306,7 +2306,7 @@ func (x *LoggingContext) readField3(p Format) error { // RequestId
 	return nil
 }
 
-func (x *LoggingContext) readField4(p Format) error { // RoutingTarget
+func (x *LoggingContext) readField4(p Decoder) error { // RoutingTarget
 	result, err := p.ReadString()
 	if err != nil {
 		return err
@@ -2338,7 +2338,7 @@ func (x *LoggingContext) toString4() string { // RoutingTarget
 	return fmt.Sprintf("%v", x.GetRoutingTargetNonCompat())
 }
 
-func (x *LoggingContext) Write(p Format) error {
+func (x *LoggingContext) Write(p Encoder) error {
 	if err := p.WriteStructBegin("LoggingContext"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -2369,7 +2369,7 @@ func (x *LoggingContext) Write(p Format) error {
 	return nil
 }
 
-func (x *LoggingContext) Read(p Format) error {
+func (x *LoggingContext) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -2959,7 +2959,7 @@ func (x *RequestRpcMetadata) IsSetTenantId() bool {
 	return x != nil && x.TenantId != nil
 }
 
-func (x *RequestRpcMetadata) writeField1(p Format) error { // Protocol
+func (x *RequestRpcMetadata) writeField1(p Encoder) error { // Protocol
 	if !x.IsSetProtocol() {
 		return nil
 	}
@@ -2979,7 +2979,7 @@ func (x *RequestRpcMetadata) writeField1(p Format) error { // Protocol
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField2(p Format) error { // Name
+func (x *RequestRpcMetadata) writeField2(p Encoder) error { // Name
 	if !x.IsSetName() {
 		return nil
 	}
@@ -3000,7 +3000,7 @@ func (x *RequestRpcMetadata) writeField2(p Format) error { // Name
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField3(p Format) error { // Kind
+func (x *RequestRpcMetadata) writeField3(p Encoder) error { // Kind
 	if !x.IsSetKind() {
 		return nil
 	}
@@ -3020,7 +3020,7 @@ func (x *RequestRpcMetadata) writeField3(p Format) error { // Kind
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField5(p Format) error { // ClientTimeoutMs
+func (x *RequestRpcMetadata) writeField5(p Encoder) error { // ClientTimeoutMs
 	if !x.IsSetClientTimeoutMs() {
 		return nil
 	}
@@ -3040,7 +3040,7 @@ func (x *RequestRpcMetadata) writeField5(p Format) error { // ClientTimeoutMs
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField6(p Format) error { // QueueTimeoutMs
+func (x *RequestRpcMetadata) writeField6(p Encoder) error { // QueueTimeoutMs
 	if !x.IsSetQueueTimeoutMs() {
 		return nil
 	}
@@ -3060,7 +3060,7 @@ func (x *RequestRpcMetadata) writeField6(p Format) error { // QueueTimeoutMs
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField7(p Format) error { // Priority
+func (x *RequestRpcMetadata) writeField7(p Encoder) error { // Priority
 	if !x.IsSetPriority() {
 		return nil
 	}
@@ -3080,7 +3080,7 @@ func (x *RequestRpcMetadata) writeField7(p Format) error { // Priority
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField8(p Format) error { // OtherMetadata
+func (x *RequestRpcMetadata) writeField8(p Encoder) error { // OtherMetadata
 	if !x.IsSetOtherMetadata() {
 		return nil
 	}
@@ -3118,7 +3118,7 @@ func (x *RequestRpcMetadata) writeField8(p Format) error { // OtherMetadata
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField11(p Format) error { // Crc32c
+func (x *RequestRpcMetadata) writeField11(p Encoder) error { // Crc32c
 	if !x.IsSetCrc32c() {
 		return nil
 	}
@@ -3138,7 +3138,7 @@ func (x *RequestRpcMetadata) writeField11(p Format) error { // Crc32c
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField13(p Format) error { // LoadMetric
+func (x *RequestRpcMetadata) writeField13(p Encoder) error { // LoadMetric
 	if !x.IsSetLoadMetric() {
 		return nil
 	}
@@ -3158,7 +3158,7 @@ func (x *RequestRpcMetadata) writeField13(p Format) error { // LoadMetric
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField14(p Format) error { // Compression
+func (x *RequestRpcMetadata) writeField14(p Encoder) error { // Compression
 	if !x.IsSetCompression() {
 		return nil
 	}
@@ -3178,7 +3178,7 @@ func (x *RequestRpcMetadata) writeField14(p Format) error { // Compression
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField15(p Format) error { // CompressionConfig
+func (x *RequestRpcMetadata) writeField15(p Encoder) error { // CompressionConfig
 	if !x.IsSetCompressionConfig() {
 		return nil
 	}
@@ -3198,7 +3198,7 @@ func (x *RequestRpcMetadata) writeField15(p Format) error { // CompressionConfig
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField16(p Format) error { // InteractionId
+func (x *RequestRpcMetadata) writeField16(p Encoder) error { // InteractionId
 	if !x.IsSetInteractionId() {
 		return nil
 	}
@@ -3218,7 +3218,7 @@ func (x *RequestRpcMetadata) writeField16(p Format) error { // InteractionId
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField17(p Format) error { // InteractionCreate
+func (x *RequestRpcMetadata) writeField17(p Encoder) error { // InteractionCreate
 	if !x.IsSetInteractionCreate() {
 		return nil
 	}
@@ -3238,7 +3238,7 @@ func (x *RequestRpcMetadata) writeField17(p Format) error { // InteractionCreate
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField18(p Format) error { // ClientId
+func (x *RequestRpcMetadata) writeField18(p Encoder) error { // ClientId
 	if !x.IsSetClientId() {
 		return nil
 	}
@@ -3258,7 +3258,7 @@ func (x *RequestRpcMetadata) writeField18(p Format) error { // ClientId
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField19(p Format) error { // ServiceTraceMeta
+func (x *RequestRpcMetadata) writeField19(p Encoder) error { // ServiceTraceMeta
 	if !x.IsSetServiceTraceMeta() {
 		return nil
 	}
@@ -3278,7 +3278,7 @@ func (x *RequestRpcMetadata) writeField19(p Format) error { // ServiceTraceMeta
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField20(p Format) error { // FrameworkMetadata
+func (x *RequestRpcMetadata) writeField20(p Encoder) error { // FrameworkMetadata
 	if !x.IsSetFrameworkMetadata() {
 		return nil
 	}
@@ -3299,7 +3299,7 @@ func (x *RequestRpcMetadata) writeField20(p Format) error { // FrameworkMetadata
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField22(p Format) error { // FdMetadata
+func (x *RequestRpcMetadata) writeField22(p Encoder) error { // FdMetadata
 	if !x.IsSetFdMetadata() {
 		return nil
 	}
@@ -3319,7 +3319,7 @@ func (x *RequestRpcMetadata) writeField22(p Format) error { // FdMetadata
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField23(p Format) error { // LoggingContext
+func (x *RequestRpcMetadata) writeField23(p Encoder) error { // LoggingContext
 	if !x.IsSetLoggingContext() {
 		return nil
 	}
@@ -3339,7 +3339,7 @@ func (x *RequestRpcMetadata) writeField23(p Format) error { // LoggingContext
 	return nil
 }
 
-func (x *RequestRpcMetadata) writeField24(p Format) error { // TenantId
+func (x *RequestRpcMetadata) writeField24(p Encoder) error { // TenantId
 	if !x.IsSetTenantId() {
 		return nil
 	}
@@ -3359,7 +3359,7 @@ func (x *RequestRpcMetadata) writeField24(p Format) error { // TenantId
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField1(p Format) error { // Protocol
+func (x *RequestRpcMetadata) readField1(p Decoder) error { // Protocol
 	enumResult, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -3370,7 +3370,7 @@ func (x *RequestRpcMetadata) readField1(p Format) error { // Protocol
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField2(p Format) error { // Name
+func (x *RequestRpcMetadata) readField2(p Decoder) error { // Name
 	result, err := ReadManagedStringViewField(p)
 	if err != nil {
 		return err
@@ -3380,7 +3380,7 @@ func (x *RequestRpcMetadata) readField2(p Format) error { // Name
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField3(p Format) error { // Kind
+func (x *RequestRpcMetadata) readField3(p Decoder) error { // Kind
 	enumResult, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -3391,7 +3391,7 @@ func (x *RequestRpcMetadata) readField3(p Format) error { // Kind
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField5(p Format) error { // ClientTimeoutMs
+func (x *RequestRpcMetadata) readField5(p Decoder) error { // ClientTimeoutMs
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -3401,7 +3401,7 @@ func (x *RequestRpcMetadata) readField5(p Format) error { // ClientTimeoutMs
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField6(p Format) error { // QueueTimeoutMs
+func (x *RequestRpcMetadata) readField6(p Decoder) error { // QueueTimeoutMs
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -3411,7 +3411,7 @@ func (x *RequestRpcMetadata) readField6(p Format) error { // QueueTimeoutMs
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField7(p Format) error { // Priority
+func (x *RequestRpcMetadata) readField7(p Decoder) error { // Priority
 	enumResult, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -3422,7 +3422,7 @@ func (x *RequestRpcMetadata) readField7(p Format) error { // Priority
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField8(p Format) error { // OtherMetadata
+func (x *RequestRpcMetadata) readField8(p Decoder) error { // OtherMetadata
 	_ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 	if err != nil {
 		return PrependError("error reading map begin: ", err)
@@ -3460,7 +3460,7 @@ func (x *RequestRpcMetadata) readField8(p Format) error { // OtherMetadata
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField11(p Format) error { // Crc32c
+func (x *RequestRpcMetadata) readField11(p Decoder) error { // Crc32c
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -3470,7 +3470,7 @@ func (x *RequestRpcMetadata) readField11(p Format) error { // Crc32c
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField13(p Format) error { // LoadMetric
+func (x *RequestRpcMetadata) readField13(p Decoder) error { // LoadMetric
 	result, err := p.ReadString()
 	if err != nil {
 		return err
@@ -3480,7 +3480,7 @@ func (x *RequestRpcMetadata) readField13(p Format) error { // LoadMetric
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField14(p Format) error { // Compression
+func (x *RequestRpcMetadata) readField14(p Decoder) error { // Compression
 	enumResult, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -3491,7 +3491,7 @@ func (x *RequestRpcMetadata) readField14(p Format) error { // Compression
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField15(p Format) error { // CompressionConfig
+func (x *RequestRpcMetadata) readField15(p Decoder) error { // CompressionConfig
 	result := *NewCompressionConfig()
 	err := result.Read(p)
 	if err != nil {
@@ -3502,7 +3502,7 @@ func (x *RequestRpcMetadata) readField15(p Format) error { // CompressionConfig
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField16(p Format) error { // InteractionId
+func (x *RequestRpcMetadata) readField16(p Decoder) error { // InteractionId
 	result, err := p.ReadI64()
 	if err != nil {
 		return err
@@ -3512,7 +3512,7 @@ func (x *RequestRpcMetadata) readField16(p Format) error { // InteractionId
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField17(p Format) error { // InteractionCreate
+func (x *RequestRpcMetadata) readField17(p Decoder) error { // InteractionCreate
 	result := *NewInteractionCreate()
 	err := result.Read(p)
 	if err != nil {
@@ -3523,7 +3523,7 @@ func (x *RequestRpcMetadata) readField17(p Format) error { // InteractionCreate
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField18(p Format) error { // ClientId
+func (x *RequestRpcMetadata) readField18(p Decoder) error { // ClientId
 	result, err := p.ReadString()
 	if err != nil {
 		return err
@@ -3533,7 +3533,7 @@ func (x *RequestRpcMetadata) readField18(p Format) error { // ClientId
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField19(p Format) error { // ServiceTraceMeta
+func (x *RequestRpcMetadata) readField19(p Decoder) error { // ServiceTraceMeta
 	result, err := p.ReadString()
 	if err != nil {
 		return err
@@ -3543,7 +3543,7 @@ func (x *RequestRpcMetadata) readField19(p Format) error { // ServiceTraceMeta
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField20(p Format) error { // FrameworkMetadata
+func (x *RequestRpcMetadata) readField20(p Decoder) error { // FrameworkMetadata
 	result, err := ReadIOBufPtr(p)
 	if err != nil {
 		return err
@@ -3553,7 +3553,7 @@ func (x *RequestRpcMetadata) readField20(p Format) error { // FrameworkMetadata
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField22(p Format) error { // FdMetadata
+func (x *RequestRpcMetadata) readField22(p Decoder) error { // FdMetadata
 	result := *NewFdMetadata()
 	err := result.Read(p)
 	if err != nil {
@@ -3564,7 +3564,7 @@ func (x *RequestRpcMetadata) readField22(p Format) error { // FdMetadata
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField23(p Format) error { // LoggingContext
+func (x *RequestRpcMetadata) readField23(p Decoder) error { // LoggingContext
 	result := *NewLoggingContext()
 	err := result.Read(p)
 	if err != nil {
@@ -3575,7 +3575,7 @@ func (x *RequestRpcMetadata) readField23(p Format) error { // LoggingContext
 	return nil
 }
 
-func (x *RequestRpcMetadata) readField24(p Format) error { // TenantId
+func (x *RequestRpcMetadata) readField24(p Decoder) error { // TenantId
 	result, err := p.ReadString()
 	if err != nil {
 		return err
@@ -3700,7 +3700,7 @@ func (x *RequestRpcMetadata) toString24() string { // TenantId
 	return fmt.Sprintf("%v", x.GetTenantIdNonCompat())
 }
 
-func (x *RequestRpcMetadata) Write(p Format) error {
+func (x *RequestRpcMetadata) Write(p Encoder) error {
 	if err := p.WriteStructBegin("RequestRpcMetadata"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -3791,7 +3791,7 @@ func (x *RequestRpcMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *RequestRpcMetadata) Read(p Format) error {
+func (x *RequestRpcMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -4024,7 +4024,7 @@ func (x *ErrorClassification) IsSetSafety() bool {
 	return x != nil && x.Safety != nil
 }
 
-func (x *ErrorClassification) writeField1(p Format) error { // Kind
+func (x *ErrorClassification) writeField1(p Encoder) error { // Kind
 	if !x.IsSetKind() {
 		return nil
 	}
@@ -4044,7 +4044,7 @@ func (x *ErrorClassification) writeField1(p Format) error { // Kind
 	return nil
 }
 
-func (x *ErrorClassification) writeField2(p Format) error { // Blame
+func (x *ErrorClassification) writeField2(p Encoder) error { // Blame
 	if !x.IsSetBlame() {
 		return nil
 	}
@@ -4064,7 +4064,7 @@ func (x *ErrorClassification) writeField2(p Format) error { // Blame
 	return nil
 }
 
-func (x *ErrorClassification) writeField3(p Format) error { // Safety
+func (x *ErrorClassification) writeField3(p Encoder) error { // Safety
 	if !x.IsSetSafety() {
 		return nil
 	}
@@ -4084,7 +4084,7 @@ func (x *ErrorClassification) writeField3(p Format) error { // Safety
 	return nil
 }
 
-func (x *ErrorClassification) readField1(p Format) error { // Kind
+func (x *ErrorClassification) readField1(p Decoder) error { // Kind
 	enumResult, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -4095,7 +4095,7 @@ func (x *ErrorClassification) readField1(p Format) error { // Kind
 	return nil
 }
 
-func (x *ErrorClassification) readField2(p Format) error { // Blame
+func (x *ErrorClassification) readField2(p Decoder) error { // Blame
 	enumResult, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -4106,7 +4106,7 @@ func (x *ErrorClassification) readField2(p Format) error { // Blame
 	return nil
 }
 
-func (x *ErrorClassification) readField3(p Format) error { // Safety
+func (x *ErrorClassification) readField3(p Decoder) error { // Safety
 	enumResult, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -4138,7 +4138,7 @@ func (x *ErrorClassification) toString3() string { // Safety
 	return fmt.Sprintf("%v", x.GetSafetyNonCompat())
 }
 
-func (x *ErrorClassification) Write(p Format) error {
+func (x *ErrorClassification) Write(p Encoder) error {
 	if err := p.WriteStructBegin("ErrorClassification"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -4165,7 +4165,7 @@ func (x *ErrorClassification) Write(p Format) error {
 	return nil
 }
 
-func (x *ErrorClassification) Read(p Format) error {
+func (x *ErrorClassification) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -4237,7 +4237,7 @@ func NewPayloadResponseMetadata() *PayloadResponseMetadata {
 	return (&PayloadResponseMetadata{})
 }
 
-func (x *PayloadResponseMetadata) Write(p Format) error {
+func (x *PayloadResponseMetadata) Write(p Encoder) error {
 	if err := p.WriteStructBegin("PayloadResponseMetadata"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -4252,7 +4252,7 @@ func (x *PayloadResponseMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *PayloadResponseMetadata) Read(p Format) error {
+func (x *PayloadResponseMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -4336,7 +4336,7 @@ func (x *PayloadDeclaredExceptionMetadata) IsSetErrorClassification() bool {
 	return x != nil && x.ErrorClassification != nil
 }
 
-func (x *PayloadDeclaredExceptionMetadata) writeField1(p Format) error { // ErrorClassification
+func (x *PayloadDeclaredExceptionMetadata) writeField1(p Encoder) error { // ErrorClassification
 	if !x.IsSetErrorClassification() {
 		return nil
 	}
@@ -4356,7 +4356,7 @@ func (x *PayloadDeclaredExceptionMetadata) writeField1(p Format) error { // Erro
 	return nil
 }
 
-func (x *PayloadDeclaredExceptionMetadata) readField1(p Format) error { // ErrorClassification
+func (x *PayloadDeclaredExceptionMetadata) readField1(p Decoder) error { // ErrorClassification
 	result := *NewErrorClassification()
 	err := result.Read(p)
 	if err != nil {
@@ -4371,7 +4371,7 @@ func (x *PayloadDeclaredExceptionMetadata) toString1() string { // ErrorClassifi
 	return fmt.Sprintf("%v", x.GetErrorClassificationNonCompat())
 }
 
-func (x *PayloadDeclaredExceptionMetadata) Write(p Format) error {
+func (x *PayloadDeclaredExceptionMetadata) Write(p Encoder) error {
 	if err := p.WriteStructBegin("PayloadDeclaredExceptionMetadata"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -4390,7 +4390,7 @@ func (x *PayloadDeclaredExceptionMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *PayloadDeclaredExceptionMetadata) Read(p Format) error {
+func (x *PayloadDeclaredExceptionMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -4452,7 +4452,7 @@ func NewPayloadProxyExceptionMetadata() *PayloadProxyExceptionMetadata {
 	return (&PayloadProxyExceptionMetadata{})
 }
 
-func (x *PayloadProxyExceptionMetadata) Write(p Format) error {
+func (x *PayloadProxyExceptionMetadata) Write(p Encoder) error {
 	if err := p.WriteStructBegin("PayloadProxyExceptionMetadata"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -4467,7 +4467,7 @@ func (x *PayloadProxyExceptionMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *PayloadProxyExceptionMetadata) Read(p Format) error {
+func (x *PayloadProxyExceptionMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -4524,7 +4524,7 @@ func NewPayloadProxiedExceptionMetadata() *PayloadProxiedExceptionMetadata {
 	return (&PayloadProxiedExceptionMetadata{})
 }
 
-func (x *PayloadProxiedExceptionMetadata) Write(p Format) error {
+func (x *PayloadProxiedExceptionMetadata) Write(p Encoder) error {
 	if err := p.WriteStructBegin("PayloadProxiedExceptionMetadata"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -4539,7 +4539,7 @@ func (x *PayloadProxiedExceptionMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *PayloadProxiedExceptionMetadata) Read(p Format) error {
+func (x *PayloadProxiedExceptionMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -4623,7 +4623,7 @@ func (x *PayloadAppUnknownExceptionMetdata) IsSetErrorClassification() bool {
 	return x != nil && x.ErrorClassification != nil
 }
 
-func (x *PayloadAppUnknownExceptionMetdata) writeField1(p Format) error { // ErrorClassification
+func (x *PayloadAppUnknownExceptionMetdata) writeField1(p Encoder) error { // ErrorClassification
 	if !x.IsSetErrorClassification() {
 		return nil
 	}
@@ -4643,7 +4643,7 @@ func (x *PayloadAppUnknownExceptionMetdata) writeField1(p Format) error { // Err
 	return nil
 }
 
-func (x *PayloadAppUnknownExceptionMetdata) readField1(p Format) error { // ErrorClassification
+func (x *PayloadAppUnknownExceptionMetdata) readField1(p Decoder) error { // ErrorClassification
 	result := *NewErrorClassification()
 	err := result.Read(p)
 	if err != nil {
@@ -4658,7 +4658,7 @@ func (x *PayloadAppUnknownExceptionMetdata) toString1() string { // ErrorClassif
 	return fmt.Sprintf("%v", x.GetErrorClassificationNonCompat())
 }
 
-func (x *PayloadAppUnknownExceptionMetdata) Write(p Format) error {
+func (x *PayloadAppUnknownExceptionMetdata) Write(p Encoder) error {
 	if err := p.WriteStructBegin("PayloadAppUnknownExceptionMetdata"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -4677,7 +4677,7 @@ func (x *PayloadAppUnknownExceptionMetdata) Write(p Format) error {
 	return nil
 }
 
-func (x *PayloadAppUnknownExceptionMetdata) Read(p Format) error {
+func (x *PayloadAppUnknownExceptionMetdata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -4739,7 +4739,7 @@ func NewPayloadAnyExceptionMetadata() *PayloadAnyExceptionMetadata {
 	return (&PayloadAnyExceptionMetadata{})
 }
 
-func (x *PayloadAnyExceptionMetadata) Write(p Format) error {
+func (x *PayloadAnyExceptionMetadata) Write(p Encoder) error {
 	if err := p.WriteStructBegin("PayloadAnyExceptionMetadata"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -4754,7 +4754,7 @@ func (x *PayloadAnyExceptionMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *PayloadAnyExceptionMetadata) Read(p Format) error {
+func (x *PayloadAnyExceptionMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -4919,7 +4919,7 @@ func (x *PayloadExceptionMetadata) IsSetAnyException() bool {
 	return x != nil && x.AnyException != nil
 }
 
-func (x *PayloadExceptionMetadata) writeField1(p Format) error { // DeclaredException
+func (x *PayloadExceptionMetadata) writeField1(p Encoder) error { // DeclaredException
 	if !x.IsSetDeclaredException() {
 		return nil
 	}
@@ -4939,7 +4939,7 @@ func (x *PayloadExceptionMetadata) writeField1(p Format) error { // DeclaredExce
 	return nil
 }
 
-func (x *PayloadExceptionMetadata) writeField2(p Format) error { // DEPRECATEDProxyException
+func (x *PayloadExceptionMetadata) writeField2(p Encoder) error { // DEPRECATEDProxyException
 	if !x.IsSetDEPRECATEDProxyException() {
 		return nil
 	}
@@ -4959,7 +4959,7 @@ func (x *PayloadExceptionMetadata) writeField2(p Format) error { // DEPRECATEDPr
 	return nil
 }
 
-func (x *PayloadExceptionMetadata) writeField6(p Format) error { // AppUnknownException
+func (x *PayloadExceptionMetadata) writeField6(p Encoder) error { // AppUnknownException
 	if !x.IsSetAppUnknownException() {
 		return nil
 	}
@@ -4979,7 +4979,7 @@ func (x *PayloadExceptionMetadata) writeField6(p Format) error { // AppUnknownEx
 	return nil
 }
 
-func (x *PayloadExceptionMetadata) writeField7(p Format) error { // AnyException
+func (x *PayloadExceptionMetadata) writeField7(p Encoder) error { // AnyException
 	if !x.IsSetAnyException() {
 		return nil
 	}
@@ -4999,7 +4999,7 @@ func (x *PayloadExceptionMetadata) writeField7(p Format) error { // AnyException
 	return nil
 }
 
-func (x *PayloadExceptionMetadata) readField1(p Format) error { // DeclaredException
+func (x *PayloadExceptionMetadata) readField1(p Decoder) error { // DeclaredException
 	result := *NewPayloadDeclaredExceptionMetadata()
 	err := result.Read(p)
 	if err != nil {
@@ -5010,7 +5010,7 @@ func (x *PayloadExceptionMetadata) readField1(p Format) error { // DeclaredExcep
 	return nil
 }
 
-func (x *PayloadExceptionMetadata) readField2(p Format) error { // DEPRECATEDProxyException
+func (x *PayloadExceptionMetadata) readField2(p Decoder) error { // DEPRECATEDProxyException
 	result := *NewPayloadProxyExceptionMetadata()
 	err := result.Read(p)
 	if err != nil {
@@ -5021,7 +5021,7 @@ func (x *PayloadExceptionMetadata) readField2(p Format) error { // DEPRECATEDPro
 	return nil
 }
 
-func (x *PayloadExceptionMetadata) readField6(p Format) error { // AppUnknownException
+func (x *PayloadExceptionMetadata) readField6(p Decoder) error { // AppUnknownException
 	result := *NewPayloadAppUnknownExceptionMetdata()
 	err := result.Read(p)
 	if err != nil {
@@ -5032,7 +5032,7 @@ func (x *PayloadExceptionMetadata) readField6(p Format) error { // AppUnknownExc
 	return nil
 }
 
-func (x *PayloadExceptionMetadata) readField7(p Format) error { // AnyException
+func (x *PayloadExceptionMetadata) readField7(p Decoder) error { // AnyException
 	result := *NewPayloadAnyExceptionMetadata()
 	err := result.Read(p)
 	if err != nil {
@@ -5080,7 +5080,7 @@ func (x *PayloadExceptionMetadata) CountSetFieldsPayloadExceptionMetadata() int 
 	return x.countSetFields()
 }
 
-func (x *PayloadExceptionMetadata) Write(p Format) error {
+func (x *PayloadExceptionMetadata) Write(p Encoder) error {
 	if countSet := x.countSetFields(); countSet > 1 {
 		return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
 	}
@@ -5114,7 +5114,7 @@ func (x *PayloadExceptionMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *PayloadExceptionMetadata) Read(p Format) error {
+func (x *PayloadExceptionMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -5272,7 +5272,7 @@ func (x *PayloadExceptionMetadataBase) IsSetMetadata() bool {
 	return x != nil && x.Metadata != nil
 }
 
-func (x *PayloadExceptionMetadataBase) writeField1(p Format) error { // NameUTF8
+func (x *PayloadExceptionMetadataBase) writeField1(p Encoder) error { // NameUTF8
 	if !x.IsSetNameUTF8() {
 		return nil
 	}
@@ -5292,7 +5292,7 @@ func (x *PayloadExceptionMetadataBase) writeField1(p Format) error { // NameUTF8
 	return nil
 }
 
-func (x *PayloadExceptionMetadataBase) writeField2(p Format) error { // WhatUTF8
+func (x *PayloadExceptionMetadataBase) writeField2(p Encoder) error { // WhatUTF8
 	if !x.IsSetWhatUTF8() {
 		return nil
 	}
@@ -5312,7 +5312,7 @@ func (x *PayloadExceptionMetadataBase) writeField2(p Format) error { // WhatUTF8
 	return nil
 }
 
-func (x *PayloadExceptionMetadataBase) writeField3(p Format) error { // Metadata
+func (x *PayloadExceptionMetadataBase) writeField3(p Encoder) error { // Metadata
 	if !x.IsSetMetadata() {
 		return nil
 	}
@@ -5332,7 +5332,7 @@ func (x *PayloadExceptionMetadataBase) writeField3(p Format) error { // Metadata
 	return nil
 }
 
-func (x *PayloadExceptionMetadataBase) readField1(p Format) error { // NameUTF8
+func (x *PayloadExceptionMetadataBase) readField1(p Decoder) error { // NameUTF8
 	result, err := p.ReadString()
 	if err != nil {
 		return err
@@ -5342,7 +5342,7 @@ func (x *PayloadExceptionMetadataBase) readField1(p Format) error { // NameUTF8
 	return nil
 }
 
-func (x *PayloadExceptionMetadataBase) readField2(p Format) error { // WhatUTF8
+func (x *PayloadExceptionMetadataBase) readField2(p Decoder) error { // WhatUTF8
 	result, err := p.ReadString()
 	if err != nil {
 		return err
@@ -5352,7 +5352,7 @@ func (x *PayloadExceptionMetadataBase) readField2(p Format) error { // WhatUTF8
 	return nil
 }
 
-func (x *PayloadExceptionMetadataBase) readField3(p Format) error { // Metadata
+func (x *PayloadExceptionMetadataBase) readField3(p Decoder) error { // Metadata
 	result := *NewPayloadExceptionMetadata()
 	err := result.Read(p)
 	if err != nil {
@@ -5381,7 +5381,7 @@ func (x *PayloadExceptionMetadataBase) toString3() string { // Metadata
 	return fmt.Sprintf("%v", x.GetMetadataNonCompat())
 }
 
-func (x *PayloadExceptionMetadataBase) Write(p Format) error {
+func (x *PayloadExceptionMetadataBase) Write(p Encoder) error {
 	if err := p.WriteStructBegin("PayloadExceptionMetadataBase"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -5408,7 +5408,7 @@ func (x *PayloadExceptionMetadataBase) Write(p Format) error {
 	return nil
 }
 
-func (x *PayloadExceptionMetadataBase) Read(p Format) error {
+func (x *PayloadExceptionMetadataBase) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -5534,7 +5534,7 @@ func (x *PayloadMetadata) IsSetExceptionMetadata() bool {
 	return x != nil && x.ExceptionMetadata != nil
 }
 
-func (x *PayloadMetadata) writeField1(p Format) error { // ResponseMetadata
+func (x *PayloadMetadata) writeField1(p Encoder) error { // ResponseMetadata
 	if !x.IsSetResponseMetadata() {
 		return nil
 	}
@@ -5554,7 +5554,7 @@ func (x *PayloadMetadata) writeField1(p Format) error { // ResponseMetadata
 	return nil
 }
 
-func (x *PayloadMetadata) writeField2(p Format) error { // ExceptionMetadata
+func (x *PayloadMetadata) writeField2(p Encoder) error { // ExceptionMetadata
 	if !x.IsSetExceptionMetadata() {
 		return nil
 	}
@@ -5574,7 +5574,7 @@ func (x *PayloadMetadata) writeField2(p Format) error { // ExceptionMetadata
 	return nil
 }
 
-func (x *PayloadMetadata) readField1(p Format) error { // ResponseMetadata
+func (x *PayloadMetadata) readField1(p Decoder) error { // ResponseMetadata
 	result := *NewPayloadResponseMetadata()
 	err := result.Read(p)
 	if err != nil {
@@ -5585,7 +5585,7 @@ func (x *PayloadMetadata) readField1(p Format) error { // ResponseMetadata
 	return nil
 }
 
-func (x *PayloadMetadata) readField2(p Format) error { // ExceptionMetadata
+func (x *PayloadMetadata) readField2(p Decoder) error { // ExceptionMetadata
 	result := *NewPayloadExceptionMetadataBase()
 	err := result.Read(p)
 	if err != nil {
@@ -5619,7 +5619,7 @@ func (x *PayloadMetadata) CountSetFieldsPayloadMetadata() int {
 	return x.countSetFields()
 }
 
-func (x *PayloadMetadata) Write(p Format) error {
+func (x *PayloadMetadata) Write(p Encoder) error {
 	if countSet := x.countSetFields(); countSet > 1 {
 		return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
 	}
@@ -5645,7 +5645,7 @@ func (x *PayloadMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *PayloadMetadata) Read(p Format) error {
+func (x *PayloadMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -5712,7 +5712,7 @@ func NewProxiedPayloadMetadata() *ProxiedPayloadMetadata {
 	return (&ProxiedPayloadMetadata{})
 }
 
-func (x *ProxiedPayloadMetadata) Write(p Format) error {
+func (x *ProxiedPayloadMetadata) Write(p Encoder) error {
 	if err := p.WriteStructBegin("ProxiedPayloadMetadata"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -5727,7 +5727,7 @@ func (x *ProxiedPayloadMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *ProxiedPayloadMetadata) Read(p Format) error {
+func (x *ProxiedPayloadMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -5831,7 +5831,7 @@ func (x *QueueMetadata) IsSetQueueTimeoutMs() bool {
 	return x != nil && x.QueueTimeoutMs != nil
 }
 
-func (x *QueueMetadata) writeField1(p Format) error { // QueueingTimeMs
+func (x *QueueMetadata) writeField1(p Encoder) error { // QueueingTimeMs
 	if err := p.WriteFieldBegin("queueingTimeMs", I32, 1); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
 	}
@@ -5847,7 +5847,7 @@ func (x *QueueMetadata) writeField1(p Format) error { // QueueingTimeMs
 	return nil
 }
 
-func (x *QueueMetadata) writeField2(p Format) error { // QueueTimeoutMs
+func (x *QueueMetadata) writeField2(p Encoder) error { // QueueTimeoutMs
 	if !x.IsSetQueueTimeoutMs() {
 		return nil
 	}
@@ -5867,7 +5867,7 @@ func (x *QueueMetadata) writeField2(p Format) error { // QueueTimeoutMs
 	return nil
 }
 
-func (x *QueueMetadata) readField1(p Format) error { // QueueingTimeMs
+func (x *QueueMetadata) readField1(p Decoder) error { // QueueingTimeMs
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -5877,7 +5877,7 @@ func (x *QueueMetadata) readField1(p Format) error { // QueueingTimeMs
 	return nil
 }
 
-func (x *QueueMetadata) readField2(p Format) error { // QueueTimeoutMs
+func (x *QueueMetadata) readField2(p Decoder) error { // QueueTimeoutMs
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -5898,7 +5898,7 @@ func (x *QueueMetadata) toString2() string { // QueueTimeoutMs
 	return fmt.Sprintf("%v", x.GetQueueTimeoutMsNonCompat())
 }
 
-func (x *QueueMetadata) Write(p Format) error {
+func (x *QueueMetadata) Write(p Encoder) error {
 	if err := p.WriteStructBegin("QueueMetadata"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -5921,7 +5921,7 @@ func (x *QueueMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *QueueMetadata) Read(p Format) error {
+func (x *QueueMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -6258,7 +6258,7 @@ func (x *ResponseRpcMetadata) IsSetFrameworkMetadata() bool {
 	return x != nil && x.FrameworkMetadata != nil
 }
 
-func (x *ResponseRpcMetadata) writeField3(p Format) error { // OtherMetadata
+func (x *ResponseRpcMetadata) writeField3(p Encoder) error { // OtherMetadata
 	if !x.IsSetOtherMetadata() {
 		return nil
 	}
@@ -6296,7 +6296,7 @@ func (x *ResponseRpcMetadata) writeField3(p Format) error { // OtherMetadata
 	return nil
 }
 
-func (x *ResponseRpcMetadata) writeField4(p Format) error { // Load
+func (x *ResponseRpcMetadata) writeField4(p Encoder) error { // Load
 	if !x.IsSetLoad() {
 		return nil
 	}
@@ -6316,7 +6316,7 @@ func (x *ResponseRpcMetadata) writeField4(p Format) error { // Load
 	return nil
 }
 
-func (x *ResponseRpcMetadata) writeField5(p Format) error { // Crc32c
+func (x *ResponseRpcMetadata) writeField5(p Encoder) error { // Crc32c
 	if !x.IsSetCrc32c() {
 		return nil
 	}
@@ -6336,7 +6336,7 @@ func (x *ResponseRpcMetadata) writeField5(p Format) error { // Crc32c
 	return nil
 }
 
-func (x *ResponseRpcMetadata) writeField6(p Format) error { // Compression
+func (x *ResponseRpcMetadata) writeField6(p Encoder) error { // Compression
 	if !x.IsSetCompression() {
 		return nil
 	}
@@ -6356,7 +6356,7 @@ func (x *ResponseRpcMetadata) writeField6(p Format) error { // Compression
 	return nil
 }
 
-func (x *ResponseRpcMetadata) writeField7(p Format) error { // PayloadMetadata
+func (x *ResponseRpcMetadata) writeField7(p Encoder) error { // PayloadMetadata
 	if !x.IsSetPayloadMetadata() {
 		return nil
 	}
@@ -6376,7 +6376,7 @@ func (x *ResponseRpcMetadata) writeField7(p Format) error { // PayloadMetadata
 	return nil
 }
 
-func (x *ResponseRpcMetadata) writeField8(p Format) error { // ProxiedPayloadMetadata
+func (x *ResponseRpcMetadata) writeField8(p Encoder) error { // ProxiedPayloadMetadata
 	if !x.IsSetProxiedPayloadMetadata() {
 		return nil
 	}
@@ -6396,7 +6396,7 @@ func (x *ResponseRpcMetadata) writeField8(p Format) error { // ProxiedPayloadMet
 	return nil
 }
 
-func (x *ResponseRpcMetadata) writeField9(p Format) error { // StreamId
+func (x *ResponseRpcMetadata) writeField9(p Encoder) error { // StreamId
 	if !x.IsSetStreamId() {
 		return nil
 	}
@@ -6416,7 +6416,7 @@ func (x *ResponseRpcMetadata) writeField9(p Format) error { // StreamId
 	return nil
 }
 
-func (x *ResponseRpcMetadata) writeField10(p Format) error { // QueueMetadata
+func (x *ResponseRpcMetadata) writeField10(p Encoder) error { // QueueMetadata
 	if !x.IsSetQueueMetadata() {
 		return nil
 	}
@@ -6436,7 +6436,7 @@ func (x *ResponseRpcMetadata) writeField10(p Format) error { // QueueMetadata
 	return nil
 }
 
-func (x *ResponseRpcMetadata) writeField12(p Format) error { // FdMetadata
+func (x *ResponseRpcMetadata) writeField12(p Encoder) error { // FdMetadata
 	if !x.IsSetFdMetadata() {
 		return nil
 	}
@@ -6456,7 +6456,7 @@ func (x *ResponseRpcMetadata) writeField12(p Format) error { // FdMetadata
 	return nil
 }
 
-func (x *ResponseRpcMetadata) writeField13(p Format) error { // FrameworkMetadata
+func (x *ResponseRpcMetadata) writeField13(p Encoder) error { // FrameworkMetadata
 	if !x.IsSetFrameworkMetadata() {
 		return nil
 	}
@@ -6477,7 +6477,7 @@ func (x *ResponseRpcMetadata) writeField13(p Format) error { // FrameworkMetadat
 	return nil
 }
 
-func (x *ResponseRpcMetadata) readField3(p Format) error { // OtherMetadata
+func (x *ResponseRpcMetadata) readField3(p Decoder) error { // OtherMetadata
 	_ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 	if err != nil {
 		return PrependError("error reading map begin: ", err)
@@ -6515,7 +6515,7 @@ func (x *ResponseRpcMetadata) readField3(p Format) error { // OtherMetadata
 	return nil
 }
 
-func (x *ResponseRpcMetadata) readField4(p Format) error { // Load
+func (x *ResponseRpcMetadata) readField4(p Decoder) error { // Load
 	result, err := p.ReadI64()
 	if err != nil {
 		return err
@@ -6525,7 +6525,7 @@ func (x *ResponseRpcMetadata) readField4(p Format) error { // Load
 	return nil
 }
 
-func (x *ResponseRpcMetadata) readField5(p Format) error { // Crc32c
+func (x *ResponseRpcMetadata) readField5(p Decoder) error { // Crc32c
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -6535,7 +6535,7 @@ func (x *ResponseRpcMetadata) readField5(p Format) error { // Crc32c
 	return nil
 }
 
-func (x *ResponseRpcMetadata) readField6(p Format) error { // Compression
+func (x *ResponseRpcMetadata) readField6(p Decoder) error { // Compression
 	enumResult, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -6546,7 +6546,7 @@ func (x *ResponseRpcMetadata) readField6(p Format) error { // Compression
 	return nil
 }
 
-func (x *ResponseRpcMetadata) readField7(p Format) error { // PayloadMetadata
+func (x *ResponseRpcMetadata) readField7(p Decoder) error { // PayloadMetadata
 	result := *NewPayloadMetadata()
 	err := result.Read(p)
 	if err != nil {
@@ -6557,7 +6557,7 @@ func (x *ResponseRpcMetadata) readField7(p Format) error { // PayloadMetadata
 	return nil
 }
 
-func (x *ResponseRpcMetadata) readField8(p Format) error { // ProxiedPayloadMetadata
+func (x *ResponseRpcMetadata) readField8(p Decoder) error { // ProxiedPayloadMetadata
 	result := *NewProxiedPayloadMetadata()
 	err := result.Read(p)
 	if err != nil {
@@ -6568,7 +6568,7 @@ func (x *ResponseRpcMetadata) readField8(p Format) error { // ProxiedPayloadMeta
 	return nil
 }
 
-func (x *ResponseRpcMetadata) readField9(p Format) error { // StreamId
+func (x *ResponseRpcMetadata) readField9(p Decoder) error { // StreamId
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -6578,7 +6578,7 @@ func (x *ResponseRpcMetadata) readField9(p Format) error { // StreamId
 	return nil
 }
 
-func (x *ResponseRpcMetadata) readField10(p Format) error { // QueueMetadata
+func (x *ResponseRpcMetadata) readField10(p Decoder) error { // QueueMetadata
 	result := *NewQueueMetadata()
 	err := result.Read(p)
 	if err != nil {
@@ -6589,7 +6589,7 @@ func (x *ResponseRpcMetadata) readField10(p Format) error { // QueueMetadata
 	return nil
 }
 
-func (x *ResponseRpcMetadata) readField12(p Format) error { // FdMetadata
+func (x *ResponseRpcMetadata) readField12(p Decoder) error { // FdMetadata
 	result := *NewFdMetadata()
 	err := result.Read(p)
 	if err != nil {
@@ -6600,7 +6600,7 @@ func (x *ResponseRpcMetadata) readField12(p Format) error { // FdMetadata
 	return nil
 }
 
-func (x *ResponseRpcMetadata) readField13(p Format) error { // FrameworkMetadata
+func (x *ResponseRpcMetadata) readField13(p Decoder) error { // FrameworkMetadata
 	result, err := ReadIOBufPtr(p)
 	if err != nil {
 		return err
@@ -6662,7 +6662,7 @@ func (x *ResponseRpcMetadata) toString13() string { // FrameworkMetadata
 	return fmt.Sprintf("%v", x.GetFrameworkMetadataNonCompat())
 }
 
-func (x *ResponseRpcMetadata) Write(p Format) error {
+func (x *ResponseRpcMetadata) Write(p Encoder) error {
 	if err := p.WriteStructBegin("ResponseRpcMetadata"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -6717,7 +6717,7 @@ func (x *ResponseRpcMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *ResponseRpcMetadata) Read(p Format) error {
+func (x *ResponseRpcMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -6959,7 +6959,7 @@ func (x *ResponseRpcError) IsSetLoad() bool {
 	return x != nil && x.Load != nil
 }
 
-func (x *ResponseRpcError) writeField1(p Format) error { // NameUTF8
+func (x *ResponseRpcError) writeField1(p Encoder) error { // NameUTF8
 	if !x.IsSetNameUTF8() {
 		return nil
 	}
@@ -6979,7 +6979,7 @@ func (x *ResponseRpcError) writeField1(p Format) error { // NameUTF8
 	return nil
 }
 
-func (x *ResponseRpcError) writeField2(p Format) error { // WhatUTF8
+func (x *ResponseRpcError) writeField2(p Encoder) error { // WhatUTF8
 	if !x.IsSetWhatUTF8() {
 		return nil
 	}
@@ -6999,7 +6999,7 @@ func (x *ResponseRpcError) writeField2(p Format) error { // WhatUTF8
 	return nil
 }
 
-func (x *ResponseRpcError) writeField3(p Format) error { // Category
+func (x *ResponseRpcError) writeField3(p Encoder) error { // Category
 	if !x.IsSetCategory() {
 		return nil
 	}
@@ -7019,7 +7019,7 @@ func (x *ResponseRpcError) writeField3(p Format) error { // Category
 	return nil
 }
 
-func (x *ResponseRpcError) writeField4(p Format) error { // Code
+func (x *ResponseRpcError) writeField4(p Encoder) error { // Code
 	if !x.IsSetCode() {
 		return nil
 	}
@@ -7039,7 +7039,7 @@ func (x *ResponseRpcError) writeField4(p Format) error { // Code
 	return nil
 }
 
-func (x *ResponseRpcError) writeField5(p Format) error { // Load
+func (x *ResponseRpcError) writeField5(p Encoder) error { // Load
 	if !x.IsSetLoad() {
 		return nil
 	}
@@ -7059,7 +7059,7 @@ func (x *ResponseRpcError) writeField5(p Format) error { // Load
 	return nil
 }
 
-func (x *ResponseRpcError) readField1(p Format) error { // NameUTF8
+func (x *ResponseRpcError) readField1(p Decoder) error { // NameUTF8
 	result, err := p.ReadString()
 	if err != nil {
 		return err
@@ -7069,7 +7069,7 @@ func (x *ResponseRpcError) readField1(p Format) error { // NameUTF8
 	return nil
 }
 
-func (x *ResponseRpcError) readField2(p Format) error { // WhatUTF8
+func (x *ResponseRpcError) readField2(p Decoder) error { // WhatUTF8
 	result, err := p.ReadString()
 	if err != nil {
 		return err
@@ -7079,7 +7079,7 @@ func (x *ResponseRpcError) readField2(p Format) error { // WhatUTF8
 	return nil
 }
 
-func (x *ResponseRpcError) readField3(p Format) error { // Category
+func (x *ResponseRpcError) readField3(p Decoder) error { // Category
 	enumResult, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -7090,7 +7090,7 @@ func (x *ResponseRpcError) readField3(p Format) error { // Category
 	return nil
 }
 
-func (x *ResponseRpcError) readField4(p Format) error { // Code
+func (x *ResponseRpcError) readField4(p Decoder) error { // Code
 	enumResult, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -7101,7 +7101,7 @@ func (x *ResponseRpcError) readField4(p Format) error { // Code
 	return nil
 }
 
-func (x *ResponseRpcError) readField5(p Format) error { // Load
+func (x *ResponseRpcError) readField5(p Decoder) error { // Load
 	result, err := p.ReadI64()
 	if err != nil {
 		return err
@@ -7146,7 +7146,7 @@ func (x *ResponseRpcError) toString5() string { // Load
 	return fmt.Sprintf("%v", x.GetLoadNonCompat())
 }
 
-func (x *ResponseRpcError) Write(p Format) error {
+func (x *ResponseRpcError) Write(p Encoder) error {
 	if err := p.WriteStructBegin("ResponseRpcError"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -7181,7 +7181,7 @@ func (x *ResponseRpcError) Write(p Format) error {
 	return nil
 }
 
-func (x *ResponseRpcError) Read(p Format) error {
+func (x *ResponseRpcError) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -7344,7 +7344,7 @@ func (x *StreamRpcError) IsSetCode() bool {
 	return x != nil && x.Code != nil
 }
 
-func (x *StreamRpcError) writeField1(p Format) error { // NameUTF8
+func (x *StreamRpcError) writeField1(p Encoder) error { // NameUTF8
 	if !x.IsSetNameUTF8() {
 		return nil
 	}
@@ -7364,7 +7364,7 @@ func (x *StreamRpcError) writeField1(p Format) error { // NameUTF8
 	return nil
 }
 
-func (x *StreamRpcError) writeField2(p Format) error { // WhatUTF8
+func (x *StreamRpcError) writeField2(p Encoder) error { // WhatUTF8
 	if !x.IsSetWhatUTF8() {
 		return nil
 	}
@@ -7384,7 +7384,7 @@ func (x *StreamRpcError) writeField2(p Format) error { // WhatUTF8
 	return nil
 }
 
-func (x *StreamRpcError) writeField4(p Format) error { // Code
+func (x *StreamRpcError) writeField4(p Encoder) error { // Code
 	if !x.IsSetCode() {
 		return nil
 	}
@@ -7404,7 +7404,7 @@ func (x *StreamRpcError) writeField4(p Format) error { // Code
 	return nil
 }
 
-func (x *StreamRpcError) readField1(p Format) error { // NameUTF8
+func (x *StreamRpcError) readField1(p Decoder) error { // NameUTF8
 	result, err := p.ReadString()
 	if err != nil {
 		return err
@@ -7414,7 +7414,7 @@ func (x *StreamRpcError) readField1(p Format) error { // NameUTF8
 	return nil
 }
 
-func (x *StreamRpcError) readField2(p Format) error { // WhatUTF8
+func (x *StreamRpcError) readField2(p Decoder) error { // WhatUTF8
 	result, err := p.ReadString()
 	if err != nil {
 		return err
@@ -7424,7 +7424,7 @@ func (x *StreamRpcError) readField2(p Format) error { // WhatUTF8
 	return nil
 }
 
-func (x *StreamRpcError) readField4(p Format) error { // Code
+func (x *StreamRpcError) readField4(p Decoder) error { // Code
 	enumResult, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -7456,7 +7456,7 @@ func (x *StreamRpcError) toString4() string { // Code
 	return fmt.Sprintf("%v", x.GetCodeNonCompat())
 }
 
-func (x *StreamRpcError) Write(p Format) error {
+func (x *StreamRpcError) Write(p Encoder) error {
 	if err := p.WriteStructBegin("StreamRpcError"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -7483,7 +7483,7 @@ func (x *StreamRpcError) Write(p Format) error {
 	return nil
 }
 
-func (x *StreamRpcError) Read(p Format) error {
+func (x *StreamRpcError) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -7663,7 +7663,7 @@ func (x *StreamPayloadMetadata) IsSetFdMetadata() bool {
 	return x != nil && x.FdMetadata != nil
 }
 
-func (x *StreamPayloadMetadata) writeField1(p Format) error { // Compression
+func (x *StreamPayloadMetadata) writeField1(p Encoder) error { // Compression
 	if !x.IsSetCompression() {
 		return nil
 	}
@@ -7683,7 +7683,7 @@ func (x *StreamPayloadMetadata) writeField1(p Format) error { // Compression
 	return nil
 }
 
-func (x *StreamPayloadMetadata) writeField2(p Format) error { // OtherMetadata
+func (x *StreamPayloadMetadata) writeField2(p Encoder) error { // OtherMetadata
 	if !x.IsSetOtherMetadata() {
 		return nil
 	}
@@ -7722,7 +7722,7 @@ func (x *StreamPayloadMetadata) writeField2(p Format) error { // OtherMetadata
 	return nil
 }
 
-func (x *StreamPayloadMetadata) writeField3(p Format) error { // PayloadMetadata
+func (x *StreamPayloadMetadata) writeField3(p Encoder) error { // PayloadMetadata
 	if !x.IsSetPayloadMetadata() {
 		return nil
 	}
@@ -7742,7 +7742,7 @@ func (x *StreamPayloadMetadata) writeField3(p Format) error { // PayloadMetadata
 	return nil
 }
 
-func (x *StreamPayloadMetadata) writeField5(p Format) error { // FdMetadata
+func (x *StreamPayloadMetadata) writeField5(p Encoder) error { // FdMetadata
 	if !x.IsSetFdMetadata() {
 		return nil
 	}
@@ -7762,7 +7762,7 @@ func (x *StreamPayloadMetadata) writeField5(p Format) error { // FdMetadata
 	return nil
 }
 
-func (x *StreamPayloadMetadata) readField1(p Format) error { // Compression
+func (x *StreamPayloadMetadata) readField1(p Decoder) error { // Compression
 	enumResult, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -7773,7 +7773,7 @@ func (x *StreamPayloadMetadata) readField1(p Format) error { // Compression
 	return nil
 }
 
-func (x *StreamPayloadMetadata) readField2(p Format) error { // OtherMetadata
+func (x *StreamPayloadMetadata) readField2(p Decoder) error { // OtherMetadata
 	_ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 	if err != nil {
 		return PrependError("error reading map begin: ", err)
@@ -7811,7 +7811,7 @@ func (x *StreamPayloadMetadata) readField2(p Format) error { // OtherMetadata
 	return nil
 }
 
-func (x *StreamPayloadMetadata) readField3(p Format) error { // PayloadMetadata
+func (x *StreamPayloadMetadata) readField3(p Decoder) error { // PayloadMetadata
 	result := *NewPayloadMetadata()
 	err := result.Read(p)
 	if err != nil {
@@ -7822,7 +7822,7 @@ func (x *StreamPayloadMetadata) readField3(p Format) error { // PayloadMetadata
 	return nil
 }
 
-func (x *StreamPayloadMetadata) readField5(p Format) error { // FdMetadata
+func (x *StreamPayloadMetadata) readField5(p Decoder) error { // FdMetadata
 	result := *NewFdMetadata()
 	err := result.Read(p)
 	if err != nil {
@@ -7852,7 +7852,7 @@ func (x *StreamPayloadMetadata) toString5() string { // FdMetadata
 	return fmt.Sprintf("%v", x.GetFdMetadataNonCompat())
 }
 
-func (x *StreamPayloadMetadata) Write(p Format) error {
+func (x *StreamPayloadMetadata) Write(p Encoder) error {
 	if err := p.WriteStructBegin("StreamPayloadMetadata"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -7883,7 +7883,7 @@ func (x *StreamPayloadMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *StreamPayloadMetadata) Read(p Format) error {
+func (x *StreamPayloadMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -8041,7 +8041,7 @@ func (x *RocketClientMetadata) IsSetOtherMetadata() bool {
 	return x != nil && x.OtherMetadata != nil
 }
 
-func (x *RocketClientMetadata) writeField1(p Format) error { // Agent
+func (x *RocketClientMetadata) writeField1(p Encoder) error { // Agent
 	if !x.IsSetAgent() {
 		return nil
 	}
@@ -8061,7 +8061,7 @@ func (x *RocketClientMetadata) writeField1(p Format) error { // Agent
 	return nil
 }
 
-func (x *RocketClientMetadata) writeField2(p Format) error { // Hostname
+func (x *RocketClientMetadata) writeField2(p Encoder) error { // Hostname
 	if !x.IsSetHostname() {
 		return nil
 	}
@@ -8081,7 +8081,7 @@ func (x *RocketClientMetadata) writeField2(p Format) error { // Hostname
 	return nil
 }
 
-func (x *RocketClientMetadata) writeField3(p Format) error { // OtherMetadata
+func (x *RocketClientMetadata) writeField3(p Encoder) error { // OtherMetadata
 	if !x.IsSetOtherMetadata() {
 		return nil
 	}
@@ -8119,7 +8119,7 @@ func (x *RocketClientMetadata) writeField3(p Format) error { // OtherMetadata
 	return nil
 }
 
-func (x *RocketClientMetadata) readField1(p Format) error { // Agent
+func (x *RocketClientMetadata) readField1(p Decoder) error { // Agent
 	result, err := p.ReadString()
 	if err != nil {
 		return err
@@ -8129,7 +8129,7 @@ func (x *RocketClientMetadata) readField1(p Format) error { // Agent
 	return nil
 }
 
-func (x *RocketClientMetadata) readField2(p Format) error { // Hostname
+func (x *RocketClientMetadata) readField2(p Decoder) error { // Hostname
 	result, err := p.ReadString()
 	if err != nil {
 		return err
@@ -8139,7 +8139,7 @@ func (x *RocketClientMetadata) readField2(p Format) error { // Hostname
 	return nil
 }
 
-func (x *RocketClientMetadata) readField3(p Format) error { // OtherMetadata
+func (x *RocketClientMetadata) readField3(p Decoder) error { // OtherMetadata
 	_ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 	if err != nil {
 		return PrependError("error reading map begin: ", err)
@@ -8195,7 +8195,7 @@ func (x *RocketClientMetadata) toString3() string { // OtherMetadata
 	return fmt.Sprintf("%v", x.GetOtherMetadataNonCompat())
 }
 
-func (x *RocketClientMetadata) Write(p Format) error {
+func (x *RocketClientMetadata) Write(p Encoder) error {
 	if err := p.WriteStructBegin("RocketClientMetadata"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -8222,7 +8222,7 @@ func (x *RocketClientMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *RocketClientMetadata) Read(p Format) error {
+func (x *RocketClientMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -8537,7 +8537,7 @@ func (x *RequestSetupMetadata) IsSetQosPolicyId() bool {
 	return x != nil && x.QosPolicyId != nil
 }
 
-func (x *RequestSetupMetadata) writeField1(p Format) error { // Opaque
+func (x *RequestSetupMetadata) writeField1(p Encoder) error { // Opaque
 	if !x.IsSetOpaque() {
 		return nil
 	}
@@ -8575,7 +8575,7 @@ func (x *RequestSetupMetadata) writeField1(p Format) error { // Opaque
 	return nil
 }
 
-func (x *RequestSetupMetadata) writeField2(p Format) error { // InterfaceKind
+func (x *RequestSetupMetadata) writeField2(p Encoder) error { // InterfaceKind
 	if !x.IsSetInterfaceKind() {
 		return nil
 	}
@@ -8595,7 +8595,7 @@ func (x *RequestSetupMetadata) writeField2(p Format) error { // InterfaceKind
 	return nil
 }
 
-func (x *RequestSetupMetadata) writeField3(p Format) error { // MinVersion
+func (x *RequestSetupMetadata) writeField3(p Encoder) error { // MinVersion
 	if !x.IsSetMinVersion() {
 		return nil
 	}
@@ -8615,7 +8615,7 @@ func (x *RequestSetupMetadata) writeField3(p Format) error { // MinVersion
 	return nil
 }
 
-func (x *RequestSetupMetadata) writeField4(p Format) error { // MaxVersion
+func (x *RequestSetupMetadata) writeField4(p Encoder) error { // MaxVersion
 	if !x.IsSetMaxVersion() {
 		return nil
 	}
@@ -8635,7 +8635,7 @@ func (x *RequestSetupMetadata) writeField4(p Format) error { // MaxVersion
 	return nil
 }
 
-func (x *RequestSetupMetadata) writeField5(p Format) error { // DscpToReflect
+func (x *RequestSetupMetadata) writeField5(p Encoder) error { // DscpToReflect
 	if !x.IsSetDscpToReflect() {
 		return nil
 	}
@@ -8655,7 +8655,7 @@ func (x *RequestSetupMetadata) writeField5(p Format) error { // DscpToReflect
 	return nil
 }
 
-func (x *RequestSetupMetadata) writeField6(p Format) error { // MarkToReflect
+func (x *RequestSetupMetadata) writeField6(p Encoder) error { // MarkToReflect
 	if !x.IsSetMarkToReflect() {
 		return nil
 	}
@@ -8675,7 +8675,7 @@ func (x *RequestSetupMetadata) writeField6(p Format) error { // MarkToReflect
 	return nil
 }
 
-func (x *RequestSetupMetadata) writeField9(p Format) error { // ClientMetadata
+func (x *RequestSetupMetadata) writeField9(p Encoder) error { // ClientMetadata
 	if !x.IsSetClientMetadata() {
 		return nil
 	}
@@ -8695,7 +8695,7 @@ func (x *RequestSetupMetadata) writeField9(p Format) error { // ClientMetadata
 	return nil
 }
 
-func (x *RequestSetupMetadata) writeField10(p Format) error { // QosUseCaseId
+func (x *RequestSetupMetadata) writeField10(p Encoder) error { // QosUseCaseId
 	if !x.IsSetQosUseCaseId() {
 		return nil
 	}
@@ -8715,7 +8715,7 @@ func (x *RequestSetupMetadata) writeField10(p Format) error { // QosUseCaseId
 	return nil
 }
 
-func (x *RequestSetupMetadata) writeField11(p Format) error { // QosPolicyId
+func (x *RequestSetupMetadata) writeField11(p Encoder) error { // QosPolicyId
 	if !x.IsSetQosPolicyId() {
 		return nil
 	}
@@ -8735,7 +8735,7 @@ func (x *RequestSetupMetadata) writeField11(p Format) error { // QosPolicyId
 	return nil
 }
 
-func (x *RequestSetupMetadata) readField1(p Format) error { // Opaque
+func (x *RequestSetupMetadata) readField1(p Decoder) error { // Opaque
 	_ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 	if err != nil {
 		return PrependError("error reading map begin: ", err)
@@ -8773,7 +8773,7 @@ func (x *RequestSetupMetadata) readField1(p Format) error { // Opaque
 	return nil
 }
 
-func (x *RequestSetupMetadata) readField2(p Format) error { // InterfaceKind
+func (x *RequestSetupMetadata) readField2(p Decoder) error { // InterfaceKind
 	enumResult, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -8784,7 +8784,7 @@ func (x *RequestSetupMetadata) readField2(p Format) error { // InterfaceKind
 	return nil
 }
 
-func (x *RequestSetupMetadata) readField3(p Format) error { // MinVersion
+func (x *RequestSetupMetadata) readField3(p Decoder) error { // MinVersion
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -8794,7 +8794,7 @@ func (x *RequestSetupMetadata) readField3(p Format) error { // MinVersion
 	return nil
 }
 
-func (x *RequestSetupMetadata) readField4(p Format) error { // MaxVersion
+func (x *RequestSetupMetadata) readField4(p Decoder) error { // MaxVersion
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -8804,7 +8804,7 @@ func (x *RequestSetupMetadata) readField4(p Format) error { // MaxVersion
 	return nil
 }
 
-func (x *RequestSetupMetadata) readField5(p Format) error { // DscpToReflect
+func (x *RequestSetupMetadata) readField5(p Decoder) error { // DscpToReflect
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -8814,7 +8814,7 @@ func (x *RequestSetupMetadata) readField5(p Format) error { // DscpToReflect
 	return nil
 }
 
-func (x *RequestSetupMetadata) readField6(p Format) error { // MarkToReflect
+func (x *RequestSetupMetadata) readField6(p Decoder) error { // MarkToReflect
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -8824,7 +8824,7 @@ func (x *RequestSetupMetadata) readField6(p Format) error { // MarkToReflect
 	return nil
 }
 
-func (x *RequestSetupMetadata) readField9(p Format) error { // ClientMetadata
+func (x *RequestSetupMetadata) readField9(p Decoder) error { // ClientMetadata
 	result := *NewRocketClientMetadata()
 	err := result.Read(p)
 	if err != nil {
@@ -8835,7 +8835,7 @@ func (x *RequestSetupMetadata) readField9(p Format) error { // ClientMetadata
 	return nil
 }
 
-func (x *RequestSetupMetadata) readField10(p Format) error { // QosUseCaseId
+func (x *RequestSetupMetadata) readField10(p Decoder) error { // QosUseCaseId
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -8845,7 +8845,7 @@ func (x *RequestSetupMetadata) readField10(p Format) error { // QosUseCaseId
 	return nil
 }
 
-func (x *RequestSetupMetadata) readField11(p Format) error { // QosPolicyId
+func (x *RequestSetupMetadata) readField11(p Decoder) error { // QosPolicyId
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -8912,7 +8912,7 @@ func (x *RequestSetupMetadata) toString11() string { // QosPolicyId
 	return fmt.Sprintf("%v", x.GetQosPolicyIdNonCompat())
 }
 
-func (x *RequestSetupMetadata) Write(p Format) error {
+func (x *RequestSetupMetadata) Write(p Encoder) error {
 	if err := p.WriteStructBegin("RequestSetupMetadata"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -8963,7 +8963,7 @@ func (x *RequestSetupMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *RequestSetupMetadata) Read(p Format) error {
+func (x *RequestSetupMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -9119,7 +9119,7 @@ func (x *SetupResponse) IsSetZstdSupported() bool {
 	return x != nil && x.ZstdSupported != nil
 }
 
-func (x *SetupResponse) writeField1(p Format) error { // Version
+func (x *SetupResponse) writeField1(p Encoder) error { // Version
 	if !x.IsSetVersion() {
 		return nil
 	}
@@ -9139,7 +9139,7 @@ func (x *SetupResponse) writeField1(p Format) error { // Version
 	return nil
 }
 
-func (x *SetupResponse) writeField2(p Format) error { // ZstdSupported
+func (x *SetupResponse) writeField2(p Encoder) error { // ZstdSupported
 	if !x.IsSetZstdSupported() {
 		return nil
 	}
@@ -9159,7 +9159,7 @@ func (x *SetupResponse) writeField2(p Format) error { // ZstdSupported
 	return nil
 }
 
-func (x *SetupResponse) readField1(p Format) error { // Version
+func (x *SetupResponse) readField1(p Decoder) error { // Version
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -9169,7 +9169,7 @@ func (x *SetupResponse) readField1(p Format) error { // Version
 	return nil
 }
 
-func (x *SetupResponse) readField2(p Format) error { // ZstdSupported
+func (x *SetupResponse) readField2(p Decoder) error { // ZstdSupported
 	result, err := p.ReadBool()
 	if err != nil {
 		return err
@@ -9193,7 +9193,7 @@ func (x *SetupResponse) toString2() string { // ZstdSupported
 	return fmt.Sprintf("%v", x.GetZstdSupportedNonCompat())
 }
 
-func (x *SetupResponse) Write(p Format) error {
+func (x *SetupResponse) Write(p Encoder) error {
 	if err := p.WriteStructBegin("SetupResponse"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -9216,7 +9216,7 @@ func (x *SetupResponse) Write(p Format) error {
 	return nil
 }
 
-func (x *SetupResponse) Read(p Format) error {
+func (x *SetupResponse) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -9337,7 +9337,7 @@ func (x *StreamHeadersPush) IsSetHeadersPayloadContent() bool {
 	return x != nil && x.HeadersPayloadContent != nil
 }
 
-func (x *StreamHeadersPush) writeField1(p Format) error { // StreamId
+func (x *StreamHeadersPush) writeField1(p Encoder) error { // StreamId
 	if !x.IsSetStreamId() {
 		return nil
 	}
@@ -9357,7 +9357,7 @@ func (x *StreamHeadersPush) writeField1(p Format) error { // StreamId
 	return nil
 }
 
-func (x *StreamHeadersPush) writeField2(p Format) error { // HeadersPayloadContent
+func (x *StreamHeadersPush) writeField2(p Encoder) error { // HeadersPayloadContent
 	if !x.IsSetHeadersPayloadContent() {
 		return nil
 	}
@@ -9377,7 +9377,7 @@ func (x *StreamHeadersPush) writeField2(p Format) error { // HeadersPayloadConte
 	return nil
 }
 
-func (x *StreamHeadersPush) readField1(p Format) error { // StreamId
+func (x *StreamHeadersPush) readField1(p Decoder) error { // StreamId
 	result, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -9387,7 +9387,7 @@ func (x *StreamHeadersPush) readField1(p Format) error { // StreamId
 	return nil
 }
 
-func (x *StreamHeadersPush) readField2(p Format) error { // HeadersPayloadContent
+func (x *StreamHeadersPush) readField2(p Decoder) error { // HeadersPayloadContent
 	result := *NewHeadersPayloadContent()
 	err := result.Read(p)
 	if err != nil {
@@ -9409,7 +9409,7 @@ func (x *StreamHeadersPush) toString2() string { // HeadersPayloadContent
 	return fmt.Sprintf("%v", x.GetHeadersPayloadContentNonCompat())
 }
 
-func (x *StreamHeadersPush) Write(p Format) error {
+func (x *StreamHeadersPush) Write(p Encoder) error {
 	if err := p.WriteStructBegin("StreamHeadersPush"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -9432,7 +9432,7 @@ func (x *StreamHeadersPush) Write(p Format) error {
 	return nil
 }
 
-func (x *StreamHeadersPush) Read(p Format) error {
+func (x *StreamHeadersPush) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -9526,7 +9526,7 @@ func (x *TransportMetadataPush) IsSetTransportMetadata() bool {
 	return x != nil && x.TransportMetadata != nil
 }
 
-func (x *TransportMetadataPush) writeField1(p Format) error { // TransportMetadata
+func (x *TransportMetadataPush) writeField1(p Encoder) error { // TransportMetadata
 	if !x.IsSetTransportMetadata() {
 		return nil
 	}
@@ -9564,7 +9564,7 @@ func (x *TransportMetadataPush) writeField1(p Format) error { // TransportMetada
 	return nil
 }
 
-func (x *TransportMetadataPush) readField1(p Format) error { // TransportMetadata
+func (x *TransportMetadataPush) readField1(p Decoder) error { // TransportMetadata
 	_ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 	if err != nil {
 		return PrependError("error reading map begin: ", err)
@@ -9606,7 +9606,7 @@ func (x *TransportMetadataPush) toString1() string { // TransportMetadata
 	return fmt.Sprintf("%v", x.GetTransportMetadataNonCompat())
 }
 
-func (x *TransportMetadataPush) Write(p Format) error {
+func (x *TransportMetadataPush) Write(p Encoder) error {
 	if err := p.WriteStructBegin("TransportMetadataPush"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -9625,7 +9625,7 @@ func (x *TransportMetadataPush) Write(p Format) error {
 	return nil
 }
 
-func (x *TransportMetadataPush) Read(p Format) error {
+func (x *TransportMetadataPush) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -9714,7 +9714,7 @@ func (x *DrainCompletePush) IsSetDrainCompleteCode() bool {
 	return x != nil && x.DrainCompleteCode != nil
 }
 
-func (x *DrainCompletePush) writeField1(p Format) error { // DrainCompleteCode
+func (x *DrainCompletePush) writeField1(p Encoder) error { // DrainCompleteCode
 	if !x.IsSetDrainCompleteCode() {
 		return nil
 	}
@@ -9734,7 +9734,7 @@ func (x *DrainCompletePush) writeField1(p Format) error { // DrainCompleteCode
 	return nil
 }
 
-func (x *DrainCompletePush) readField1(p Format) error { // DrainCompleteCode
+func (x *DrainCompletePush) readField1(p Decoder) error { // DrainCompleteCode
 	enumResult, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -9752,7 +9752,7 @@ func (x *DrainCompletePush) toString1() string { // DrainCompleteCode
 	return fmt.Sprintf("%v", x.GetDrainCompleteCodeNonCompat())
 }
 
-func (x *DrainCompletePush) Write(p Format) error {
+func (x *DrainCompletePush) Write(p Encoder) error {
 	if err := p.WriteStructBegin("DrainCompletePush"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -9771,7 +9771,7 @@ func (x *DrainCompletePush) Write(p Format) error {
 	return nil
 }
 
-func (x *DrainCompletePush) Read(p Format) error {
+func (x *DrainCompletePush) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -9914,7 +9914,7 @@ func (x *ServerPushMetadata) IsSetDrainCompletePush() bool {
 	return x != nil && x.DrainCompletePush != nil
 }
 
-func (x *ServerPushMetadata) writeField1(p Format) error { // SetupResponse
+func (x *ServerPushMetadata) writeField1(p Encoder) error { // SetupResponse
 	if !x.IsSetSetupResponse() {
 		return nil
 	}
@@ -9934,7 +9934,7 @@ func (x *ServerPushMetadata) writeField1(p Format) error { // SetupResponse
 	return nil
 }
 
-func (x *ServerPushMetadata) writeField2(p Format) error { // StreamHeadersPush
+func (x *ServerPushMetadata) writeField2(p Encoder) error { // StreamHeadersPush
 	if !x.IsSetStreamHeadersPush() {
 		return nil
 	}
@@ -9954,7 +9954,7 @@ func (x *ServerPushMetadata) writeField2(p Format) error { // StreamHeadersPush
 	return nil
 }
 
-func (x *ServerPushMetadata) writeField3(p Format) error { // DrainCompletePush
+func (x *ServerPushMetadata) writeField3(p Encoder) error { // DrainCompletePush
 	if !x.IsSetDrainCompletePush() {
 		return nil
 	}
@@ -9974,7 +9974,7 @@ func (x *ServerPushMetadata) writeField3(p Format) error { // DrainCompletePush
 	return nil
 }
 
-func (x *ServerPushMetadata) readField1(p Format) error { // SetupResponse
+func (x *ServerPushMetadata) readField1(p Decoder) error { // SetupResponse
 	result := *NewSetupResponse()
 	err := result.Read(p)
 	if err != nil {
@@ -9985,7 +9985,7 @@ func (x *ServerPushMetadata) readField1(p Format) error { // SetupResponse
 	return nil
 }
 
-func (x *ServerPushMetadata) readField2(p Format) error { // StreamHeadersPush
+func (x *ServerPushMetadata) readField2(p Decoder) error { // StreamHeadersPush
 	result := *NewStreamHeadersPush()
 	err := result.Read(p)
 	if err != nil {
@@ -9996,7 +9996,7 @@ func (x *ServerPushMetadata) readField2(p Format) error { // StreamHeadersPush
 	return nil
 }
 
-func (x *ServerPushMetadata) readField3(p Format) error { // DrainCompletePush
+func (x *ServerPushMetadata) readField3(p Decoder) error { // DrainCompletePush
 	result := *NewDrainCompletePush()
 	err := result.Read(p)
 	if err != nil {
@@ -10037,7 +10037,7 @@ func (x *ServerPushMetadata) CountSetFieldsServerPushMetadata() int {
 	return x.countSetFields()
 }
 
-func (x *ServerPushMetadata) Write(p Format) error {
+func (x *ServerPushMetadata) Write(p Encoder) error {
 	if countSet := x.countSetFields(); countSet > 1 {
 		return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
 	}
@@ -10067,7 +10067,7 @@ func (x *ServerPushMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *ServerPushMetadata) Read(p Format) error {
+func (x *ServerPushMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -10220,7 +10220,7 @@ func (x *ClientPushMetadata) IsSetTransportMetadataPush() bool {
 	return x != nil && x.TransportMetadataPush != nil
 }
 
-func (x *ClientPushMetadata) writeField1(p Format) error { // InteractionTerminate
+func (x *ClientPushMetadata) writeField1(p Encoder) error { // InteractionTerminate
 	if !x.IsSetInteractionTerminate() {
 		return nil
 	}
@@ -10240,7 +10240,7 @@ func (x *ClientPushMetadata) writeField1(p Format) error { // InteractionTermina
 	return nil
 }
 
-func (x *ClientPushMetadata) writeField2(p Format) error { // StreamHeadersPush
+func (x *ClientPushMetadata) writeField2(p Encoder) error { // StreamHeadersPush
 	if !x.IsSetStreamHeadersPush() {
 		return nil
 	}
@@ -10260,7 +10260,7 @@ func (x *ClientPushMetadata) writeField2(p Format) error { // StreamHeadersPush
 	return nil
 }
 
-func (x *ClientPushMetadata) writeField3(p Format) error { // TransportMetadataPush
+func (x *ClientPushMetadata) writeField3(p Encoder) error { // TransportMetadataPush
 	if !x.IsSetTransportMetadataPush() {
 		return nil
 	}
@@ -10280,7 +10280,7 @@ func (x *ClientPushMetadata) writeField3(p Format) error { // TransportMetadataP
 	return nil
 }
 
-func (x *ClientPushMetadata) readField1(p Format) error { // InteractionTerminate
+func (x *ClientPushMetadata) readField1(p Decoder) error { // InteractionTerminate
 	result := *NewInteractionTerminate()
 	err := result.Read(p)
 	if err != nil {
@@ -10291,7 +10291,7 @@ func (x *ClientPushMetadata) readField1(p Format) error { // InteractionTerminat
 	return nil
 }
 
-func (x *ClientPushMetadata) readField2(p Format) error { // StreamHeadersPush
+func (x *ClientPushMetadata) readField2(p Decoder) error { // StreamHeadersPush
 	result := *NewStreamHeadersPush()
 	err := result.Read(p)
 	if err != nil {
@@ -10302,7 +10302,7 @@ func (x *ClientPushMetadata) readField2(p Format) error { // StreamHeadersPush
 	return nil
 }
 
-func (x *ClientPushMetadata) readField3(p Format) error { // TransportMetadataPush
+func (x *ClientPushMetadata) readField3(p Decoder) error { // TransportMetadataPush
 	result := *NewTransportMetadataPush()
 	err := result.Read(p)
 	if err != nil {
@@ -10343,7 +10343,7 @@ func (x *ClientPushMetadata) CountSetFieldsClientPushMetadata() int {
 	return x.countSetFields()
 }
 
-func (x *ClientPushMetadata) Write(p Format) error {
+func (x *ClientPushMetadata) Write(p Encoder) error {
 	if countSet := x.countSetFields(); countSet > 1 {
 		return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
 	}
@@ -10373,7 +10373,7 @@ func (x *ClientPushMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *ClientPushMetadata) Read(p Format) error {
+func (x *ClientPushMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -10472,7 +10472,7 @@ func (x *HeadersPayloadContent) IsSetOtherMetadata() bool {
 	return x != nil && x.OtherMetadata != nil
 }
 
-func (x *HeadersPayloadContent) writeField1(p Format) error { // OtherMetadata
+func (x *HeadersPayloadContent) writeField1(p Encoder) error { // OtherMetadata
 	if !x.IsSetOtherMetadata() {
 		return nil
 	}
@@ -10511,7 +10511,7 @@ func (x *HeadersPayloadContent) writeField1(p Format) error { // OtherMetadata
 	return nil
 }
 
-func (x *HeadersPayloadContent) readField1(p Format) error { // OtherMetadata
+func (x *HeadersPayloadContent) readField1(p Decoder) error { // OtherMetadata
 	_ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 	if err != nil {
 		return PrependError("error reading map begin: ", err)
@@ -10553,7 +10553,7 @@ func (x *HeadersPayloadContent) toString1() string { // OtherMetadata
 	return fmt.Sprintf("%v", x.GetOtherMetadataNonCompat())
 }
 
-func (x *HeadersPayloadContent) Write(p Format) error {
+func (x *HeadersPayloadContent) Write(p Encoder) error {
 	if err := p.WriteStructBegin("HeadersPayloadContent"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -10572,7 +10572,7 @@ func (x *HeadersPayloadContent) Write(p Format) error {
 	return nil
 }
 
-func (x *HeadersPayloadContent) Read(p Format) error {
+func (x *HeadersPayloadContent) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -10661,7 +10661,7 @@ func (x *HeadersPayloadMetadata) IsSetCompression() bool {
 	return x != nil && x.Compression != nil
 }
 
-func (x *HeadersPayloadMetadata) writeField1(p Format) error { // Compression
+func (x *HeadersPayloadMetadata) writeField1(p Encoder) error { // Compression
 	if !x.IsSetCompression() {
 		return nil
 	}
@@ -10681,7 +10681,7 @@ func (x *HeadersPayloadMetadata) writeField1(p Format) error { // Compression
 	return nil
 }
 
-func (x *HeadersPayloadMetadata) readField1(p Format) error { // Compression
+func (x *HeadersPayloadMetadata) readField1(p Decoder) error { // Compression
 	enumResult, err := p.ReadI32()
 	if err != nil {
 		return err
@@ -10699,7 +10699,7 @@ func (x *HeadersPayloadMetadata) toString1() string { // Compression
 	return fmt.Sprintf("%v", x.GetCompressionNonCompat())
 }
 
-func (x *HeadersPayloadMetadata) Write(p Format) error {
+func (x *HeadersPayloadMetadata) Write(p Encoder) error {
 	if err := p.WriteStructBegin("HeadersPayloadMetadata"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -10718,7 +10718,7 @@ func (x *HeadersPayloadMetadata) Write(p Format) error {
 	return nil
 }
 
-func (x *HeadersPayloadMetadata) Read(p Format) error {
+func (x *HeadersPayloadMetadata) Read(p Decoder) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}

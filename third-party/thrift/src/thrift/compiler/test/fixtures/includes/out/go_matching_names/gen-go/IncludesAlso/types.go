@@ -29,7 +29,7 @@ func NewAlso() *Also {
 
 
 
-func (x *Also) Write(p thrift.Format) error {
+func (x *Also) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Also"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -44,7 +44,7 @@ func (x *Also) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *Also) Read(p thrift.Format) error {
+func (x *Also) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

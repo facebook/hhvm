@@ -43,7 +43,7 @@ func (x *Foo) SetA(value int64) *Foo {
     return x
 }
 
-func (x *Foo) writeField1(p thrift.Format) error {  // A
+func (x *Foo) writeField1(p thrift.Encoder) error {  // A
     if err := p.WriteFieldBegin("a", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -59,7 +59,7 @@ func (x *Foo) writeField1(p thrift.Format) error {  // A
     return nil
 }
 
-func (x *Foo) readField1(p thrift.Format) error {  // A
+func (x *Foo) readField1(p thrift.Decoder) error {  // A
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -75,7 +75,7 @@ func (x *Foo) toString1() string {  // A
 
 
 
-func (x *Foo) Write(p thrift.Format) error {
+func (x *Foo) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Foo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -94,7 +94,7 @@ func (x *Foo) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *Foo) Read(p thrift.Format) error {
+func (x *Foo) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

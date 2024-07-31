@@ -59,7 +59,7 @@ func (x *Accessory) SetName(value string) *Accessory {
     return x
 }
 
-func (x *Accessory) writeField1(p thrift.Format) error {  // InventoryId
+func (x *Accessory) writeField1(p thrift.Encoder) error {  // InventoryId
     if err := p.WriteFieldBegin("InventoryId", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -75,7 +75,7 @@ func (x *Accessory) writeField1(p thrift.Format) error {  // InventoryId
     return nil
 }
 
-func (x *Accessory) writeField2(p thrift.Format) error {  // Name
+func (x *Accessory) writeField2(p thrift.Encoder) error {  // Name
     if err := p.WriteFieldBegin("Name", thrift.STRING, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -91,7 +91,7 @@ func (x *Accessory) writeField2(p thrift.Format) error {  // Name
     return nil
 }
 
-func (x *Accessory) readField1(p thrift.Format) error {  // InventoryId
+func (x *Accessory) readField1(p thrift.Decoder) error {  // InventoryId
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -101,7 +101,7 @@ if err != nil {
     return nil
 }
 
-func (x *Accessory) readField2(p thrift.Format) error {  // Name
+func (x *Accessory) readField2(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -121,7 +121,7 @@ func (x *Accessory) toString2() string {  // Name
 
 
 
-func (x *Accessory) Write(p thrift.Format) error {
+func (x *Accessory) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Accessory"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -144,7 +144,7 @@ func (x *Accessory) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *Accessory) Read(p thrift.Format) error {
+func (x *Accessory) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -242,7 +242,7 @@ func (x *PartName) SetName(value string) *PartName {
     return x
 }
 
-func (x *PartName) writeField1(p thrift.Format) error {  // InventoryId
+func (x *PartName) writeField1(p thrift.Encoder) error {  // InventoryId
     if err := p.WriteFieldBegin("InventoryId", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -258,7 +258,7 @@ func (x *PartName) writeField1(p thrift.Format) error {  // InventoryId
     return nil
 }
 
-func (x *PartName) writeField2(p thrift.Format) error {  // Name
+func (x *PartName) writeField2(p thrift.Encoder) error {  // Name
     if err := p.WriteFieldBegin("Name", thrift.STRING, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -274,7 +274,7 @@ func (x *PartName) writeField2(p thrift.Format) error {  // Name
     return nil
 }
 
-func (x *PartName) readField1(p thrift.Format) error {  // InventoryId
+func (x *PartName) readField1(p thrift.Decoder) error {  // InventoryId
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -284,7 +284,7 @@ if err != nil {
     return nil
 }
 
-func (x *PartName) readField2(p thrift.Format) error {  // Name
+func (x *PartName) readField2(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -304,7 +304,7 @@ func (x *PartName) toString2() string {  // Name
 
 
 
-func (x *PartName) Write(p thrift.Format) error {
+func (x *PartName) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("PartName"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -327,7 +327,7 @@ func (x *PartName) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *PartName) Read(p thrift.Format) error {
+func (x *PartName) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

@@ -187,7 +187,7 @@ func (x *reqMyServiceQuery) IsSetI() bool {
     return x != nil && x.I != nil
 }
 
-func (x *reqMyServiceQuery) writeField1(p thrift.Format) error {  // S
+func (x *reqMyServiceQuery) writeField1(p thrift.Encoder) error {  // S
     if !x.IsSetS() {
         return nil
     }
@@ -207,7 +207,7 @@ func (x *reqMyServiceQuery) writeField1(p thrift.Format) error {  // S
     return nil
 }
 
-func (x *reqMyServiceQuery) writeField2(p thrift.Format) error {  // I
+func (x *reqMyServiceQuery) writeField2(p thrift.Encoder) error {  // I
     if !x.IsSetI() {
         return nil
     }
@@ -227,7 +227,7 @@ func (x *reqMyServiceQuery) writeField2(p thrift.Format) error {  // I
     return nil
 }
 
-func (x *reqMyServiceQuery) readField1(p thrift.Format) error {  // S
+func (x *reqMyServiceQuery) readField1(p thrift.Decoder) error {  // S
     result := *module.NewMyStruct()
 err := result.Read(p)
 if err != nil {
@@ -238,7 +238,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqMyServiceQuery) readField2(p thrift.Format) error {  // I
+func (x *reqMyServiceQuery) readField2(p thrift.Decoder) error {  // I
     result := *includes.NewIncluded()
 err := result.Read(p)
 if err != nil {
@@ -275,7 +275,7 @@ func (x *reqMyServiceQuery) DefaultGetI() *includes.Included {
 
 
 
-func (x *reqMyServiceQuery) Write(p thrift.Format) error {
+func (x *reqMyServiceQuery) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceQuery"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -298,7 +298,7 @@ func (x *reqMyServiceQuery) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqMyServiceQuery) Read(p thrift.Format) error {
+func (x *reqMyServiceQuery) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -373,7 +373,7 @@ func (x *respMyServiceQuery) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respMyServiceQuery) Write(p thrift.Format) error {
+func (x *respMyServiceQuery) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceQuery"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -388,7 +388,7 @@ func (x *respMyServiceQuery) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respMyServiceQuery) Read(p thrift.Format) error {
+func (x *respMyServiceQuery) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -494,7 +494,7 @@ func (x *reqMyServiceHasArgDocs) IsSetI() bool {
     return x != nil && x.I != nil
 }
 
-func (x *reqMyServiceHasArgDocs) writeField1(p thrift.Format) error {  // S
+func (x *reqMyServiceHasArgDocs) writeField1(p thrift.Encoder) error {  // S
     if !x.IsSetS() {
         return nil
     }
@@ -514,7 +514,7 @@ func (x *reqMyServiceHasArgDocs) writeField1(p thrift.Format) error {  // S
     return nil
 }
 
-func (x *reqMyServiceHasArgDocs) writeField2(p thrift.Format) error {  // I
+func (x *reqMyServiceHasArgDocs) writeField2(p thrift.Encoder) error {  // I
     if !x.IsSetI() {
         return nil
     }
@@ -534,7 +534,7 @@ func (x *reqMyServiceHasArgDocs) writeField2(p thrift.Format) error {  // I
     return nil
 }
 
-func (x *reqMyServiceHasArgDocs) readField1(p thrift.Format) error {  // S
+func (x *reqMyServiceHasArgDocs) readField1(p thrift.Decoder) error {  // S
     result := *module.NewMyStruct()
 err := result.Read(p)
 if err != nil {
@@ -545,7 +545,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqMyServiceHasArgDocs) readField2(p thrift.Format) error {  // I
+func (x *reqMyServiceHasArgDocs) readField2(p thrift.Decoder) error {  // I
     result := *includes.NewIncluded()
 err := result.Read(p)
 if err != nil {
@@ -582,7 +582,7 @@ func (x *reqMyServiceHasArgDocs) DefaultGetI() *includes.Included {
 
 
 
-func (x *reqMyServiceHasArgDocs) Write(p thrift.Format) error {
+func (x *reqMyServiceHasArgDocs) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceHasArgDocs"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -605,7 +605,7 @@ func (x *reqMyServiceHasArgDocs) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqMyServiceHasArgDocs) Read(p thrift.Format) error {
+func (x *reqMyServiceHasArgDocs) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -680,7 +680,7 @@ func (x *respMyServiceHasArgDocs) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respMyServiceHasArgDocs) Write(p thrift.Format) error {
+func (x *respMyServiceHasArgDocs) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceHasArgDocs"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -695,7 +695,7 @@ func (x *respMyServiceHasArgDocs) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respMyServiceHasArgDocs) Read(p thrift.Format) error {
+func (x *respMyServiceHasArgDocs) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -796,7 +796,7 @@ type procFuncMyServiceQuery struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceQuery)(nil)
 
-func (p *procFuncMyServiceQuery) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncMyServiceQuery) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceQuery()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -805,7 +805,7 @@ func (p *procFuncMyServiceQuery) Read(iprot thrift.Format) (thrift.Struct, thrif
     return args, nil
 }
 
-func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -847,7 +847,7 @@ type procFuncMyServiceHasArgDocs struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceHasArgDocs)(nil)
 
-func (p *procFuncMyServiceHasArgDocs) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncMyServiceHasArgDocs) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceHasArgDocs()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -856,7 +856,7 @@ func (p *procFuncMyServiceHasArgDocs) Read(iprot thrift.Format) (thrift.Struct, 
     return args, nil
 }
 
-func (p *procFuncMyServiceHasArgDocs) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncMyServiceHasArgDocs) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

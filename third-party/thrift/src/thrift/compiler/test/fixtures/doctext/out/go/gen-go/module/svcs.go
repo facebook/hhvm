@@ -138,7 +138,7 @@ func newReqCF() *reqCF {
 
 
 
-func (x *reqCF) Write(p thrift.Format) error {
+func (x *reqCF) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqCF"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -153,7 +153,7 @@ func (x *reqCF) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqCF) Read(p thrift.Format) error {
+func (x *reqCF) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -218,7 +218,7 @@ func (x *respCF) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respCF) Write(p thrift.Format) error {
+func (x *respCF) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respCF"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -233,7 +233,7 @@ func (x *respCF) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respCF) Read(p thrift.Format) error {
+func (x *respCF) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -347,7 +347,7 @@ func (x *reqCThing) IsSetC() bool {
     return x != nil && x.C != nil
 }
 
-func (x *reqCThing) writeField1(p thrift.Format) error {  // A
+func (x *reqCThing) writeField1(p thrift.Encoder) error {  // A
     if err := p.WriteFieldBegin("a", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -363,7 +363,7 @@ func (x *reqCThing) writeField1(p thrift.Format) error {  // A
     return nil
 }
 
-func (x *reqCThing) writeField2(p thrift.Format) error {  // B
+func (x *reqCThing) writeField2(p thrift.Encoder) error {  // B
     if err := p.WriteFieldBegin("b", thrift.STRING, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -379,7 +379,7 @@ func (x *reqCThing) writeField2(p thrift.Format) error {  // B
     return nil
 }
 
-func (x *reqCThing) writeField3(p thrift.Format) error {  // C
+func (x *reqCThing) writeField3(p thrift.Encoder) error {  // C
     if err := p.WriteFieldBegin("c", thrift.SET, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -406,7 +406,7 @@ if err := p.WriteSetEnd(); err != nil {
     return nil
 }
 
-func (x *reqCThing) readField1(p thrift.Format) error {  // A
+func (x *reqCThing) readField1(p thrift.Decoder) error {  // A
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -416,7 +416,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqCThing) readField2(p thrift.Format) error {  // B
+func (x *reqCThing) readField2(p thrift.Decoder) error {  // B
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -426,7 +426,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqCThing) readField3(p thrift.Format) error {  // C
+func (x *reqCThing) readField3(p thrift.Decoder) error {  // C
     _ /* elemType */, size, err := p.ReadSetBegin()
 if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -468,7 +468,7 @@ func (x *reqCThing) toString3() string {  // C
 
 
 
-func (x *reqCThing) Write(p thrift.Format) error {
+func (x *reqCThing) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqCThing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -495,7 +495,7 @@ func (x *reqCThing) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqCThing) Read(p thrift.Format) error {
+func (x *reqCThing) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -615,7 +615,7 @@ func (x *respCThing) IsSetBang() bool {
     return x != nil && x.Bang != nil
 }
 
-func (x *respCThing) writeField0(p thrift.Format) error {  // Success
+func (x *respCThing) writeField0(p thrift.Encoder) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -635,7 +635,7 @@ func (x *respCThing) writeField0(p thrift.Format) error {  // Success
     return nil
 }
 
-func (x *respCThing) writeField1(p thrift.Format) error {  // Bang
+func (x *respCThing) writeField1(p thrift.Encoder) error {  // Bang
     if !x.IsSetBang() {
         return nil
     }
@@ -655,7 +655,7 @@ func (x *respCThing) writeField1(p thrift.Format) error {  // Bang
     return nil
 }
 
-func (x *respCThing) readField0(p thrift.Format) error {  // Success
+func (x *respCThing) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -665,7 +665,7 @@ if err != nil {
     return nil
 }
 
-func (x *respCThing) readField1(p thrift.Format) error {  // Bang
+func (x *respCThing) readField1(p thrift.Decoder) error {  // Bang
     result := *NewBang()
 err := result.Read(p)
 if err != nil {
@@ -705,7 +705,7 @@ func (x *respCThing) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respCThing) Write(p thrift.Format) error {
+func (x *respCThing) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respCThing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -728,7 +728,7 @@ func (x *respCThing) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respCThing) Read(p thrift.Format) error {
+func (x *respCThing) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -839,7 +839,7 @@ type procFuncCF struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncCF)(nil)
 
-func (p *procFuncCF) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncCF) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqCF()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -848,7 +848,7 @@ func (p *procFuncCF) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception)
     return args, nil
 }
 
-func (p *procFuncCF) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncCF) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -889,7 +889,7 @@ type procFuncCThing struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncCThing)(nil)
 
-func (p *procFuncCThing) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncCThing) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqCThing()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -898,7 +898,7 @@ func (p *procFuncCThing) Read(iprot thrift.Format) (thrift.Struct, thrift.Except
     return args, nil
 }
 
-func (p *procFuncCThing) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncCThing) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch v := result.(type) {

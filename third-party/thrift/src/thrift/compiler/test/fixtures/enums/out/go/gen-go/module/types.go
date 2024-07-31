@@ -434,7 +434,7 @@ func (x *SomeStruct) IsSetTags() bool {
     return x != nil && x.Tags != nil
 }
 
-func (x *SomeStruct) writeField1(p thrift.Format) error {  // Reasonable
+func (x *SomeStruct) writeField1(p thrift.Encoder) error {  // Reasonable
     if err := p.WriteFieldBegin("reasonable", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -450,7 +450,7 @@ func (x *SomeStruct) writeField1(p thrift.Format) error {  // Reasonable
     return nil
 }
 
-func (x *SomeStruct) writeField2(p thrift.Format) error {  // Fine
+func (x *SomeStruct) writeField2(p thrift.Encoder) error {  // Fine
     if err := p.WriteFieldBegin("fine", thrift.I32, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -466,7 +466,7 @@ func (x *SomeStruct) writeField2(p thrift.Format) error {  // Fine
     return nil
 }
 
-func (x *SomeStruct) writeField3(p thrift.Format) error {  // Questionable
+func (x *SomeStruct) writeField3(p thrift.Encoder) error {  // Questionable
     if err := p.WriteFieldBegin("questionable", thrift.I32, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -482,7 +482,7 @@ func (x *SomeStruct) writeField3(p thrift.Format) error {  // Questionable
     return nil
 }
 
-func (x *SomeStruct) writeField4(p thrift.Format) error {  // Tags
+func (x *SomeStruct) writeField4(p thrift.Encoder) error {  // Tags
     if err := p.WriteFieldBegin("tags", thrift.SET, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -509,7 +509,7 @@ if err := p.WriteSetEnd(); err != nil {
     return nil
 }
 
-func (x *SomeStruct) readField1(p thrift.Format) error {  // Reasonable
+func (x *SomeStruct) readField1(p thrift.Decoder) error {  // Reasonable
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -520,7 +520,7 @@ result := Metasyntactic(enumResult)
     return nil
 }
 
-func (x *SomeStruct) readField2(p thrift.Format) error {  // Fine
+func (x *SomeStruct) readField2(p thrift.Decoder) error {  // Fine
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -531,7 +531,7 @@ result := Metasyntactic(enumResult)
     return nil
 }
 
-func (x *SomeStruct) readField3(p thrift.Format) error {  // Questionable
+func (x *SomeStruct) readField3(p thrift.Decoder) error {  // Questionable
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -542,7 +542,7 @@ result := Metasyntactic(enumResult)
     return nil
 }
 
-func (x *SomeStruct) readField4(p thrift.Format) error {  // Tags
+func (x *SomeStruct) readField4(p thrift.Decoder) error {  // Tags
     _ /* elemType */, size, err := p.ReadSetBegin()
 if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -588,7 +588,7 @@ func (x *SomeStruct) toString4() string {  // Tags
 
 
 
-func (x *SomeStruct) Write(p thrift.Format) error {
+func (x *SomeStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("SomeStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -619,7 +619,7 @@ func (x *SomeStruct) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *SomeStruct) Read(p thrift.Format) error {
+func (x *SomeStruct) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -767,7 +767,7 @@ func (x *MyStruct) SetMe1T2(value MyEnum1) *MyStruct {
     return x
 }
 
-func (x *MyStruct) writeField1(p thrift.Format) error {  // Me2_3
+func (x *MyStruct) writeField1(p thrift.Encoder) error {  // Me2_3
     if err := p.WriteFieldBegin("me2_3", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -783,7 +783,7 @@ func (x *MyStruct) writeField1(p thrift.Format) error {  // Me2_3
     return nil
 }
 
-func (x *MyStruct) writeField2(p thrift.Format) error {  // Me3N3
+func (x *MyStruct) writeField2(p thrift.Encoder) error {  // Me3N3
     if err := p.WriteFieldBegin("me3_n3", thrift.I32, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -799,7 +799,7 @@ func (x *MyStruct) writeField2(p thrift.Format) error {  // Me3N3
     return nil
 }
 
-func (x *MyStruct) writeField4(p thrift.Format) error {  // Me1T1
+func (x *MyStruct) writeField4(p thrift.Encoder) error {  // Me1T1
     if err := p.WriteFieldBegin("me1_t1", thrift.I32, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -815,7 +815,7 @@ func (x *MyStruct) writeField4(p thrift.Format) error {  // Me1T1
     return nil
 }
 
-func (x *MyStruct) writeField6(p thrift.Format) error {  // Me1T2
+func (x *MyStruct) writeField6(p thrift.Encoder) error {  // Me1T2
     if err := p.WriteFieldBegin("me1_t2", thrift.I32, 6); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -831,7 +831,7 @@ func (x *MyStruct) writeField6(p thrift.Format) error {  // Me1T2
     return nil
 }
 
-func (x *MyStruct) readField1(p thrift.Format) error {  // Me2_3
+func (x *MyStruct) readField1(p thrift.Decoder) error {  // Me2_3
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -842,7 +842,7 @@ result := MyEnum2(enumResult)
     return nil
 }
 
-func (x *MyStruct) readField2(p thrift.Format) error {  // Me3N3
+func (x *MyStruct) readField2(p thrift.Decoder) error {  // Me3N3
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -853,7 +853,7 @@ result := MyEnum3(enumResult)
     return nil
 }
 
-func (x *MyStruct) readField4(p thrift.Format) error {  // Me1T1
+func (x *MyStruct) readField4(p thrift.Decoder) error {  // Me1T1
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -864,7 +864,7 @@ result := MyEnum1(enumResult)
     return nil
 }
 
-func (x *MyStruct) readField6(p thrift.Format) error {  // Me1T2
+func (x *MyStruct) readField6(p thrift.Decoder) error {  // Me1T2
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -893,7 +893,7 @@ func (x *MyStruct) toString6() string {  // Me1T2
 
 
 
-func (x *MyStruct) Write(p thrift.Format) error {
+func (x *MyStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -924,7 +924,7 @@ func (x *MyStruct) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *MyStruct) Read(p thrift.Format) error {
+func (x *MyStruct) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

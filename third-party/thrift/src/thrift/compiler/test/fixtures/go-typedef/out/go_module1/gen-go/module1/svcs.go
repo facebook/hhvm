@@ -176,7 +176,7 @@ func (x *reqFinderByPlate) SetPlate(value Plate) *reqFinderByPlate {
     return x
 }
 
-func (x *reqFinderByPlate) writeField1(p thrift.Format) error {  // Plate
+func (x *reqFinderByPlate) writeField1(p thrift.Encoder) error {  // Plate
     if err := p.WriteFieldBegin("plate", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -193,7 +193,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqFinderByPlate) readField1(p thrift.Format) error {  // Plate
+func (x *reqFinderByPlate) readField1(p thrift.Decoder) error {  // Plate
     result, err := ReadPlate(p)
 if err != nil {
     return err
@@ -209,7 +209,7 @@ func (x *reqFinderByPlate) toString1() string {  // Plate
 
 
 
-func (x *reqFinderByPlate) Write(p thrift.Format) error {
+func (x *reqFinderByPlate) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFinderByPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -228,7 +228,7 @@ func (x *reqFinderByPlate) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqFinderByPlate) Read(p thrift.Format) error {
+func (x *reqFinderByPlate) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -315,7 +315,7 @@ func (x *respFinderByPlate) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respFinderByPlate) writeField0(p thrift.Format) error {  // Success
+func (x *respFinderByPlate) writeField0(p thrift.Encoder) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -335,7 +335,7 @@ func (x *respFinderByPlate) writeField0(p thrift.Format) error {  // Success
     return nil
 }
 
-func (x *respFinderByPlate) readField0(p thrift.Format) error {  // Success
+func (x *respFinderByPlate) readField0(p thrift.Decoder) error {  // Success
     result := *NewAutomobile()
 err := result.Read(p)
 if err != nil {
@@ -364,7 +364,7 @@ func (x *respFinderByPlate) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respFinderByPlate) Write(p thrift.Format) error {
+func (x *respFinderByPlate) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFinderByPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -383,7 +383,7 @@ func (x *respFinderByPlate) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respFinderByPlate) Read(p thrift.Format) error {
+func (x *respFinderByPlate) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -462,7 +462,7 @@ func (x *reqFinderAliasByPlate) SetPlate(value Plate) *reqFinderAliasByPlate {
     return x
 }
 
-func (x *reqFinderAliasByPlate) writeField1(p thrift.Format) error {  // Plate
+func (x *reqFinderAliasByPlate) writeField1(p thrift.Encoder) error {  // Plate
     if err := p.WriteFieldBegin("plate", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -479,7 +479,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqFinderAliasByPlate) readField1(p thrift.Format) error {  // Plate
+func (x *reqFinderAliasByPlate) readField1(p thrift.Decoder) error {  // Plate
     result, err := ReadPlate(p)
 if err != nil {
     return err
@@ -495,7 +495,7 @@ func (x *reqFinderAliasByPlate) toString1() string {  // Plate
 
 
 
-func (x *reqFinderAliasByPlate) Write(p thrift.Format) error {
+func (x *reqFinderAliasByPlate) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFinderAliasByPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -514,7 +514,7 @@ func (x *reqFinderAliasByPlate) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqFinderAliasByPlate) Read(p thrift.Format) error {
+func (x *reqFinderAliasByPlate) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -601,7 +601,7 @@ func (x *respFinderAliasByPlate) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respFinderAliasByPlate) writeField0(p thrift.Format) error {  // Success
+func (x *respFinderAliasByPlate) writeField0(p thrift.Encoder) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -622,7 +622,7 @@ if err != nil {
     return nil
 }
 
-func (x *respFinderAliasByPlate) readField0(p thrift.Format) error {  // Success
+func (x *respFinderAliasByPlate) readField0(p thrift.Decoder) error {  // Success
     result, err := ReadCar(p)
 if err != nil {
     return err
@@ -650,7 +650,7 @@ func (x *respFinderAliasByPlate) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respFinderAliasByPlate) Write(p thrift.Format) error {
+func (x *respFinderAliasByPlate) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFinderAliasByPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -669,7 +669,7 @@ func (x *respFinderAliasByPlate) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respFinderAliasByPlate) Read(p thrift.Format) error {
+func (x *respFinderAliasByPlate) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -748,7 +748,7 @@ func (x *reqFinderPreviousPlate) SetPlate(value Plate) *reqFinderPreviousPlate {
     return x
 }
 
-func (x *reqFinderPreviousPlate) writeField1(p thrift.Format) error {  // Plate
+func (x *reqFinderPreviousPlate) writeField1(p thrift.Encoder) error {  // Plate
     if err := p.WriteFieldBegin("plate", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -765,7 +765,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqFinderPreviousPlate) readField1(p thrift.Format) error {  // Plate
+func (x *reqFinderPreviousPlate) readField1(p thrift.Decoder) error {  // Plate
     result, err := ReadPlate(p)
 if err != nil {
     return err
@@ -781,7 +781,7 @@ func (x *reqFinderPreviousPlate) toString1() string {  // Plate
 
 
 
-func (x *reqFinderPreviousPlate) Write(p thrift.Format) error {
+func (x *reqFinderPreviousPlate) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFinderPreviousPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -800,7 +800,7 @@ func (x *reqFinderPreviousPlate) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqFinderPreviousPlate) Read(p thrift.Format) error {
+func (x *reqFinderPreviousPlate) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -887,7 +887,7 @@ func (x *respFinderPreviousPlate) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respFinderPreviousPlate) writeField0(p thrift.Format) error {  // Success
+func (x *respFinderPreviousPlate) writeField0(p thrift.Encoder) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -908,7 +908,7 @@ if err != nil {
     return nil
 }
 
-func (x *respFinderPreviousPlate) readField0(p thrift.Format) error {  // Success
+func (x *respFinderPreviousPlate) readField0(p thrift.Decoder) error {  // Success
     result, err := ReadPlate(p)
 if err != nil {
     return err
@@ -932,7 +932,7 @@ func (x *respFinderPreviousPlate) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respFinderPreviousPlate) Write(p thrift.Format) error {
+func (x *respFinderPreviousPlate) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFinderPreviousPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -951,7 +951,7 @@ func (x *respFinderPreviousPlate) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respFinderPreviousPlate) Read(p thrift.Format) error {
+func (x *respFinderPreviousPlate) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1059,7 +1059,7 @@ type procFuncFinderByPlate struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncFinderByPlate)(nil)
 
-func (p *procFuncFinderByPlate) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncFinderByPlate) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqFinderByPlate()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -1068,7 +1068,7 @@ func (p *procFuncFinderByPlate) Read(iprot thrift.Format) (thrift.Struct, thrift
     return args, nil
 }
 
-func (p *procFuncFinderByPlate) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncFinderByPlate) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -1111,7 +1111,7 @@ type procFuncFinderAliasByPlate struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncFinderAliasByPlate)(nil)
 
-func (p *procFuncFinderAliasByPlate) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncFinderAliasByPlate) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqFinderAliasByPlate()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -1120,7 +1120,7 @@ func (p *procFuncFinderAliasByPlate) Read(iprot thrift.Format) (thrift.Struct, t
     return args, nil
 }
 
-func (p *procFuncFinderAliasByPlate) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncFinderAliasByPlate) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -1163,7 +1163,7 @@ type procFuncFinderPreviousPlate struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncFinderPreviousPlate)(nil)
 
-func (p *procFuncFinderPreviousPlate) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncFinderPreviousPlate) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqFinderPreviousPlate()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -1172,7 +1172,7 @@ func (p *procFuncFinderPreviousPlate) Read(iprot thrift.Format) (thrift.Struct, 
     return args, nil
 }
 
-func (p *procFuncFinderPreviousPlate) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncFinderPreviousPlate) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

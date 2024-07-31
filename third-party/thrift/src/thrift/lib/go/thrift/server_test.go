@@ -73,7 +73,7 @@ func (t *testProcessor) GetProcessorFunctionContext(name string) ProcessorFuncti
 
 type testProcessorFunction struct{}
 
-func (p *testProcessorFunction) Read(prot Format) (Struct, Exception) {
+func (p *testProcessorFunction) Read(prot Decoder) (Struct, Exception) {
 	args := NewMyTestStruct()
 	if err := args.Read(prot); err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (p *testProcessorFunction) Read(prot Format) (Struct, Exception) {
 	return args, nil
 }
 
-func (p *testProcessorFunction) Write(seqID int32, result WritableStruct, oprot Format) (err Exception) {
+func (p *testProcessorFunction) Write(seqID int32, result WritableStruct, oprot Encoder) (err Exception) {
 	var err2 error
 	messageType := REPLY
 	switch result.(type) {

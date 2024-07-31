@@ -50,7 +50,7 @@ type fakeProto struct {
 	errOnFlush        bool
 }
 
-func (f *fakeRequest) Write(proto Format) error {
+func (f *fakeRequest) Write(proto Encoder) error {
 	if f.shouldReturnError {
 		return errFakeRequestWrite
 	}
@@ -87,7 +87,7 @@ func (f *fakeProto) ReadMessageBegin() (method string, typeID MessageType, seqID
 	return f.method, f.typeID, f.seqID, nil
 }
 
-func (f *fakeResponse) Read(proto Format) error {
+func (f *fakeResponse) Read(proto Decoder) error {
 	if f.shouldReturnError {
 		return errFakeResponseRead
 	}

@@ -111,7 +111,7 @@ func newReqMyRootDoRoot() *reqMyRootDoRoot {
 
 
 
-func (x *reqMyRootDoRoot) Write(p thrift.Format) error {
+func (x *reqMyRootDoRoot) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyRootDoRoot"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -126,7 +126,7 @@ func (x *reqMyRootDoRoot) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqMyRootDoRoot) Read(p thrift.Format) error {
+func (x *reqMyRootDoRoot) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -191,7 +191,7 @@ func (x *respMyRootDoRoot) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respMyRootDoRoot) Write(p thrift.Format) error {
+func (x *respMyRootDoRoot) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyRootDoRoot"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -206,7 +206,7 @@ func (x *respMyRootDoRoot) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respMyRootDoRoot) Read(p thrift.Format) error {
+func (x *respMyRootDoRoot) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -305,7 +305,7 @@ type procFuncMyRootDoRoot struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncMyRootDoRoot)(nil)
 
-func (p *procFuncMyRootDoRoot) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncMyRootDoRoot) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyRootDoRoot()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -314,7 +314,7 @@ func (p *procFuncMyRootDoRoot) Read(iprot thrift.Format) (thrift.Struct, thrift.
     return args, nil
 }
 
-func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -450,7 +450,7 @@ func newReqMyNodeDoMid() *reqMyNodeDoMid {
 
 
 
-func (x *reqMyNodeDoMid) Write(p thrift.Format) error {
+func (x *reqMyNodeDoMid) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyNodeDoMid"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -465,7 +465,7 @@ func (x *reqMyNodeDoMid) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqMyNodeDoMid) Read(p thrift.Format) error {
+func (x *reqMyNodeDoMid) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -530,7 +530,7 @@ func (x *respMyNodeDoMid) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respMyNodeDoMid) Write(p thrift.Format) error {
+func (x *respMyNodeDoMid) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyNodeDoMid"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -545,7 +545,7 @@ func (x *respMyNodeDoMid) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respMyNodeDoMid) Read(p thrift.Format) error {
+func (x *respMyNodeDoMid) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -621,7 +621,7 @@ type procFuncMyNodeDoMid struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncMyNodeDoMid)(nil)
 
-func (p *procFuncMyNodeDoMid) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncMyNodeDoMid) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyNodeDoMid()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -630,7 +630,7 @@ func (p *procFuncMyNodeDoMid) Read(iprot thrift.Format) (thrift.Struct, thrift.E
     return args, nil
 }
 
-func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -766,7 +766,7 @@ func newReqMyLeafDoLeaf() *reqMyLeafDoLeaf {
 
 
 
-func (x *reqMyLeafDoLeaf) Write(p thrift.Format) error {
+func (x *reqMyLeafDoLeaf) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyLeafDoLeaf"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -781,7 +781,7 @@ func (x *reqMyLeafDoLeaf) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *reqMyLeafDoLeaf) Read(p thrift.Format) error {
+func (x *reqMyLeafDoLeaf) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -846,7 +846,7 @@ func (x *respMyLeafDoLeaf) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respMyLeafDoLeaf) Write(p thrift.Format) error {
+func (x *respMyLeafDoLeaf) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyLeafDoLeaf"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -861,7 +861,7 @@ func (x *respMyLeafDoLeaf) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *respMyLeafDoLeaf) Read(p thrift.Format) error {
+func (x *respMyLeafDoLeaf) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -937,7 +937,7 @@ type procFuncMyLeafDoLeaf struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = (*procFuncMyLeafDoLeaf)(nil)
 
-func (p *procFuncMyLeafDoLeaf) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
+func (p *procFuncMyLeafDoLeaf) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyLeafDoLeaf()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -946,7 +946,7 @@ func (p *procFuncMyLeafDoLeaf) Read(iprot thrift.Format) (thrift.Struct, thrift.
     return args, nil
 }
 
-func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
+func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

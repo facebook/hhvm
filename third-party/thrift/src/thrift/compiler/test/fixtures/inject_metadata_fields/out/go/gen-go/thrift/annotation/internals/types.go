@@ -43,7 +43,7 @@ func (x *InjectMetadataFields) SetType(value string) *InjectMetadataFields {
     return x
 }
 
-func (x *InjectMetadataFields) writeField1(p thrift.Format) error {  // Type
+func (x *InjectMetadataFields) writeField1(p thrift.Encoder) error {  // Type
     if err := p.WriteFieldBegin("type", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -59,7 +59,7 @@ func (x *InjectMetadataFields) writeField1(p thrift.Format) error {  // Type
     return nil
 }
 
-func (x *InjectMetadataFields) readField1(p thrift.Format) error {  // Type
+func (x *InjectMetadataFields) readField1(p thrift.Decoder) error {  // Type
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -75,7 +75,7 @@ func (x *InjectMetadataFields) toString1() string {  // Type
 
 
 
-func (x *InjectMetadataFields) Write(p thrift.Format) error {
+func (x *InjectMetadataFields) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("InjectMetadataFields"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -94,7 +94,7 @@ func (x *InjectMetadataFields) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *InjectMetadataFields) Read(p thrift.Format) error {
+func (x *InjectMetadataFields) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

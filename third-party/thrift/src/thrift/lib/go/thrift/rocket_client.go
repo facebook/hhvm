@@ -149,20 +149,18 @@ func (p *rocketClient) open() error {
 	return err
 }
 
+func (p *rocketClient) transporter(_ context.Context) (*transport.Transport, error) {
+	conn := transport.NewTCPClientTransport(p.conn)
+	conn.SetLifetime(time.Millisecond * 3600000)
+	return conn, nil
+}
+
 func (p *rocketClient) onClose(_ error) {
 	p.cancel()
 }
 
 func (p *rocketClient) acceptor(_ context.Context, socket rsocket.RSocket) rsocket.RSocket {
-	return rsocket.NewAbstractSocket(
-		rsocket.MetadataPush(p.serverMetadataPush),
-	)
-}
-
-func (p *rocketClient) transporter(_ context.Context) (*transport.Transport, error) {
-	conn := transport.NewTCPClientTransport(p.conn)
-	conn.SetLifetime(time.Millisecond * 3600000)
-	return conn, nil
+	return rsocket.NewAbstractSocket(rsocket.MetadataPush(p.serverMetadataPush))
 }
 
 func (p *rocketClient) serverMetadataPush(pay payload.Payload) {

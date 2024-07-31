@@ -53,7 +53,7 @@ func (x *IncludesAlso) IsSetAlso() bool {
     return x != nil && x.Also != nil
 }
 
-func (x *IncludesAlso) writeField1(p thrift.Format) error {  // Also
+func (x *IncludesAlso) writeField1(p thrift.Encoder) error {  // Also
     if !x.IsSetAlso() {
         return nil
     }
@@ -73,7 +73,7 @@ func (x *IncludesAlso) writeField1(p thrift.Format) error {  // Also
     return nil
 }
 
-func (x *IncludesAlso) readField1(p thrift.Format) error {  // Also
+func (x *IncludesAlso) readField1(p thrift.Decoder) error {  // Also
     result := *includesAlso.NewAlso()
 err := result.Read(p)
 if err != nil {
@@ -98,7 +98,7 @@ func (x *IncludesAlso) DefaultGetAlso() *includesAlso.Also {
 
 
 
-func (x *IncludesAlso) Write(p thrift.Format) error {
+func (x *IncludesAlso) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("IncludesAlso"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -117,7 +117,7 @@ func (x *IncludesAlso) Write(p thrift.Format) error {
     return nil
 }
 
-func (x *IncludesAlso) Read(p thrift.Format) error {
+func (x *IncludesAlso) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

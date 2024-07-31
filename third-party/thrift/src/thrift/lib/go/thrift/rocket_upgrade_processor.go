@@ -43,7 +43,7 @@ func (r *rocketUpgradeProcessor) GetProcessorFunctionContext(name string) Proces
 
 type rocketUpgradeProcessorFunction struct{}
 
-func (r *rocketUpgradeProcessorFunction) Read(prot Format) (Struct, Exception) {
+func (r *rocketUpgradeProcessorFunction) Read(prot Decoder) (Struct, Exception) {
 	args := &reqServiceUpgradeToRocket{}
 	if err := args.Read(prot); err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func (r *rocketUpgradeProcessorFunction) RunContext(_ context.Context, _ Struct)
 	return &respServiceUpgradeToRocket{}, nil
 }
 
-func (r *rocketUpgradeProcessorFunction) Write(seqID int32, result WritableStruct, prot Format) (err Exception) {
+func (r *rocketUpgradeProcessorFunction) Write(seqID int32, result WritableStruct, prot Encoder) (err Exception) {
 	var err2 error
 	messageType := REPLY
 	switch result.(type) {

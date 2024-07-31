@@ -60,12 +60,12 @@ type chainHandler struct {
 }
 
 // Read does nothing here, it is not used and shouldn't be called
-func (ch *chainHandler) Read(_ Format) (Struct, Exception) {
+func (ch *chainHandler) Read(_ Decoder) (Struct, Exception) {
 	return nil, nil
 }
 
 // Write does nothing here, it is not used and shouldn't be called
-func (ch *chainHandler) Write(_ int32, _ WritableStruct, _ Format) Exception {
+func (ch *chainHandler) Write(_ int32, _ WritableStruct, _ Encoder) Exception {
 	return nil
 }
 

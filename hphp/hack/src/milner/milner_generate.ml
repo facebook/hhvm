@@ -12,6 +12,10 @@ let max_hierarchy_depth = 3
 
 let max_branching_factor = 2
 
+let min_tuple_arity = 1
+
+let max_tuple_arity = 3
+
 let name_ctr = ref 0
 
 let fresh prefix =
@@ -162,10 +166,7 @@ end = struct
         disjuncts: t list;
       }
     | Enum of { name: string }
-    | Tuple of {
-        fst: t;
-        snd: t;
-      }
+    | Tuple of t list
   [@@deriving eq, ord]
 
   (** Reflexive transitive subtypes of the given type. It is based only on the
@@ -195,11 +196,10 @@ end = struct
     | Newtype _ -> []
     | Case info -> List.concat_map ~f:subtypes_of info.disjuncts
     | Enum _ -> []
-    | Tuple { fst; snd } ->
-      let fst_subtypes = subtypes_of fst in
-      let snd_subtypes = subtypes_of snd in
-      List.Cartesian_product.map2 fst_subtypes snd_subtypes ~f:(fun fst snd ->
-          Tuple { fst; snd }))
+    | Tuple tyl ->
+      List.map ~f:subtypes_of tyl
+      |> List.Cartesian_product.all
+      |> List.map ~f:(fun tyl -> Tuple tyl))
 
   let rec show = function
     | Mixed -> "mixed"
@@ -220,32 +220,52 @@ end = struct
     | Newtype info -> info.name
     | Case info -> info.name
     | Enum info -> info.name
-    | Tuple { fst; snd } -> Format.sprintf "(%s,%s)" (show fst) (show snd)
+    | Tuple tyl ->
+      Format.sprintf "(%s)" (List.map ~f:show tyl |> String.concat ~sep:", ")
 
   let are_disjoint ty ty' =
     (* For the purposes of disjointness we can go higher up in the typing
        hierarchy so that it is easy to enumerate subtypes. This is fine because
-       it can only make disjointness more conservative. *)
-    let rec weaken_for_disjointness ty =
+       it can only make disjointness more conservative.
+
+       The reason we output multiple types is that not every type has a unique
+       weakening to establish disjointness. For example, 2-tuples are not
+       disjoint from 3-tuples. So we weaken all tuples to (mixed),
+       (mixed,mixed), and (mixed,mixed,mixed) (because we only generate 1/2/3 tuples).
+    *)
+    let rec weaken_for_disjointness ty : t list =
       match ty with
       | Classish info when Kind.equal_classish info.kind Kind.Interface ->
         (* This can be improved on if we introduce an internal Object type which
            is still disjoint to non classish types. *)
-        Mixed
-      | Option ty -> Option (weaken_for_disjointness ty)
+        [Mixed]
+      | Option ty ->
+        let open List.Let_syntax in
+        let* ty = weaken_for_disjointness ty in
+        [Option ty]
       | Alias info -> weaken_for_disjointness info.aliased
-      | Newtype _ -> Mixed
+      | Newtype _ -> [Mixed]
       | Case { name; disjuncts } ->
-        Case { name; disjuncts = List.map ~f:weaken_for_disjointness disjuncts }
-      | Enum _ -> Primitive Primitive.Arraykey
-      | Tuple _ -> Tuple { fst = Mixed; snd = Mixed }
+        let open List.Let_syntax in
+        let* disjuncts =
+          List.map ~f:weaken_for_disjointness disjuncts |> List.all
+        in
+        [Case { name; disjuncts }]
+      | Enum _ -> [Primitive Primitive.Arraykey]
+      | Tuple _ ->
+        let open List.Let_syntax in
+        let* n = List.init max_tuple_arity ~f:(fun i -> i + 1) in
+        let tyl = List.init n ~f:(fun _ -> Mixed) in
+        [Tuple tyl]
       | Mixed
       | Primitive _
       | Classish _ ->
-        ty
+        [ty]
     in
     let ordered_subtypes ty =
-      weaken_for_disjointness ty |> subtypes_of |> List.sort ~compare
+      weaken_for_disjointness ty
+      |> List.concat_map ~f:subtypes_of
+      |> List.sort ~compare
     in
     let subtypes = ordered_subtypes ty in
     let subtypes' = ordered_subtypes ty' in
@@ -287,12 +307,11 @@ end = struct
     end
     | Newtype info -> Some (info.producer ^ "()")
     | Enum info -> Some (info.name ^ "::A")
-    | Tuple { fst; snd } ->
-      let open Option.Let_syntax in
-      let* fst_str = expr_of fst in
-      let* snd_str = expr_of snd in
-      let str = Format.sprintf "tuple(%s,%s)" fst_str snd_str in
-      Some str
+    | Tuple tyl ->
+      List.map ~f:expr_of tyl
+      |> Option.all
+      |> Option.map ~f:(fun exprl ->
+             String.concat ~sep:", " exprl |> Format.sprintf "tuple(%s)")
     | Mixed
     | Option _
     | Alias _
@@ -414,7 +433,13 @@ end = struct
       let enum_def = Definition.enum ~name underlying_ty ~value in
       (Enum { name }, [enum_def])
     | Kind.Tuple ->
-      let (fst, fst_defs) = mk () in
-      let (snd, snd_defs) = mk () in
-      (Tuple { fst; snd }, fst_defs @ snd_defs)
+      (* Sadly, although nullary tuples can be generated with an expression,
+         there is no corresponding denotable type. *)
+      let n = geometric_between min_tuple_arity max_tuple_arity in
+      let (tyl, defs) =
+        List.init n ~f:(fun _ -> mk ())
+        |> List.fold ~init:([], []) ~f:(fun (tyl, defs') (ty, defs) ->
+               (ty :: tyl, defs @ defs'))
+      in
+      (Tuple tyl, defs)
 end

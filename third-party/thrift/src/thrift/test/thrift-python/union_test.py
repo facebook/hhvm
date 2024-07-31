@@ -638,6 +638,10 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         with self.assertRaisesRegex(NotImplementedError, "__delete__"):
             del u.string_field
 
+    def test_hash(self) -> None:
+        with self.assertRaisesRegex(TypeError, "unhashable type: 'TestUnion'"):
+            hash(TestUnionMutable())
+
     def test_equality(self) -> None:
         u1 = TestUnionMutable(string_field="hello")
         u2 = TestUnionMutable(string_field="hello")

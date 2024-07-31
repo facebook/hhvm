@@ -735,6 +735,8 @@ cdef class MutableUnion(MutableStructOrUnion):
         inst._fbthrift_data = data
         return inst
 
+    __hash__ = None
+
     def __eq__(MutableUnion self, other):
         if other is self:
             return True

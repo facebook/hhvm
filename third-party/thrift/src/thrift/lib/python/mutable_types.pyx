@@ -577,12 +577,15 @@ cdef class MutableUnion(MutableStructOrUnion):
         """
         Updates this union to hold the given value (corresponding to the given field).
 
+        If the corresponding field has an adapter, the given value should be in the
+        adapted type, and will be "adapted back" to the underlying Thrift type.
+
         Args:
             field_id: Thrift field ID of the field being set (or 0 to "clear" this union
                 and mark it as empty).
             field_python_value: Value for the given field, in "python value" format (as
                 opposed to "internal data", see `TypeInfoBase`). If `field_id` is 0,
-                this must be `None`.
+                this must be `None`. If field is adapted, should be in the adapted type.
         """
         field_internal_value = (
             self._fbthrift_convert_field_python_value_to_internal_data(
@@ -612,6 +615,10 @@ cdef class MutableUnion(MutableStructOrUnion):
         If `field_id` is the special value 0 (corresponding to the case where the Thrift
         union is "empty", i.e. does not have any field set), `field_python_value` MUST
         be `None` and the returned value will always be `None`.
+
+        If the field corresponding to `field_id` has an adapter, the given
+        `field_python_value` should be in the adapted type, and will be "adapted back"
+        to the underlying Thrift type.
 
         Raises:
             AssertionError if `field_id` is 0 (i.e., FBTHRIFT_UNION_EMPTY) but
@@ -661,6 +668,10 @@ cdef class MutableUnion(MutableStructOrUnion):
         Returns the current value for this union, in "python" format (as opposed to
         "internal data", see `TypeInfoBase`).
 
+        This method DOES NOT handle adapted fields, i.e. if the current field has an
+        adapter, the returned value will NOT be the adapted value, but rather that of
+        the underlying Thrift type.
+
         Args:
             current_field_enum_value: the field ID of the current field, read from
                 `self._fbthrift_data[0]` and passed in to avoid unnecessarily reading it
@@ -690,6 +701,11 @@ cdef class MutableUnion(MutableStructOrUnion):
         """
         Returns the value of the field with the given `field_id` if it is indeed the
         field that is (currently) set for this union.
+
+        This method DOES NOT handle adapted fields, i.e. if the field corresponding to
+        the given `field_id` has an adapter (and satisfies the conditions above), the
+        returned value will NOT be the adapted value, but rather that of the underlying
+        Thrift type (in "python value" format, not internal data).
 
         Raises:
             ValueError if `field_id` does not correspond to a valid field id for this
@@ -726,7 +742,6 @@ def _gen_mutable_union_field_enum_members(field_infos):
         yield (f.py_name, f.id)
 
 
-# DO_BEFORE(aristidis,20240808): Support writing to union fields.
 class _MutableUnionFieldDescriptor:
     """Descriptor for a field of a (mutable) Thrift Union. """
     __slots__ = ('_field_info',)
@@ -739,23 +754,62 @@ class _MutableUnionFieldDescriptor:
         """
         self._field_info = field_info
 
-    def __get__(self, union_instance, union_class):
+    def __get__(self, union_instance, unused_union_class):
+        """
+        Returns the value of the Thrift union field corresponding to this descriptor,
+        for the given `union_instance`, iff it is currently set.
+
+        On success, the returned value will be the adapted (if needed) value of this
+        field in "python value" format (as opposed to "internal data", see
+        `TypeInfoBase`).
+
+        Args:
+            union_instance (MutableUnion): the Thrift union instance whose field
+                (corresponding to `self._field_info`) is being retrieved.
+
+        Raises error if this field is not currently set on the given `union_instance`.
+        """
         field_info = self._field_info
         cdef int field_id = self._field_info.id
 
+        field_python_value = (
+            (<MutableUnion>union_instance)._fbthrift_get_field_value(field_id)
+        )
+
         adapter_info = field_info.adapter_info
-        if adapter_info:
-            adapter_class, transitive_annotation = adapter_info
-            return adapter_class.from_thrift_field(
-                (<MutableUnion>union_instance)._fbthrift_get_field_value(field_id),
-                field_id,
-                self,
-                transitive_annotation=transitive_annotation(),
-            )
-        else:
-            return (<MutableUnion>union_instance)._fbthrift_get_field_value(
-                field_id
-            )
+        if not adapter_info:
+            return field_python_value
+
+        adapter_class, transitive_annotation = adapter_info
+        return adapter_class.from_thrift_field(
+            field_python_value,
+            field_id,
+            union_instance,
+            transitive_annotation=transitive_annotation(),
+        )
+
+    def __set__(self, union_instance, field_python_value):
+        """
+        Sets the field corresponding to this descriptor on the given `union_instance`,
+        with the given value.
+
+        Args:
+            union_instance (MutableUnion): the Thrift union instance on which to set the
+                field (corresponding to `self._field_info`).
+            field_python_value (object): The value to set for this field, given in
+                "python value" format (as opposed to "internal data", see
+                `TypeInfoBase`). If this field is adapted, this value should be in the
+                adapted type (as opposed to the underlying Thrift type).
+        """
+        field_info = self._field_info
+        cdef int field_id = self._field_info.id
+
+        # NOTE: ._fbthrift_set_mutable_union_value() handles adapted fields, i.e. it
+        # takes care of "adapting back" `field_python_value` from the adapted type to
+        # the underlying Thrift type if needed.
+        (<MutableUnion>union_instance)._fbthrift_set_mutable_union_value(
+            field_id, field_python_value
+        )
 
 
 class MutableUnionMeta(type):

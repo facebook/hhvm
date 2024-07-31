@@ -43,6 +43,10 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         u = TestUnionImmutable()
         self.assertIs(u.type, TestUnionImmutable.Type.EMPTY)
         self.assertIsNone(u.value)
+        with self.assertRaisesRegex(
+            AttributeError, "Union contains a value of type EMPTY, not string_field"
+        ):
+            u.string_field
 
         # Specifying exactly one keyword argument whose name corresponds to that of a
         # field for this Union, and a non-None value whose type is valid for that field,
@@ -370,6 +374,14 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
             TestUnionMutable.FbThriftUnionFieldEnum.FBTHRIFT_UNION_EMPTY,
         )
         self.assertIsNone(u.fbthrift_current_value)
+        with self.assertRaisesRegex(
+            AttributeError,
+            (
+                r"Error retrieving Thrift union \(TestUnion\) field: requested "
+                r"'string_field', but currently holds 'FBTHRIFT_UNION_EMPTY'."
+            ),
+        ):
+            u.string_field
 
         # Specifying exactly one keyword argument whose name corresponds to that of a
         # field for this Union, and a non-None value whose type is valid for that field,
@@ -542,3 +554,86 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         self.assertEqual(u2.adapted_i32_to_datetime, datetime.fromtimestamp(1718728839))
         self.assertNotIsInstance(u2.adapted_i32_to_datetime, int)
         self.assertNotEqual(u2.adapted_i32_to_datetime, 1718728839)
+
+    def test_adapted_types_assignment(self) -> None:
+        # TEST: Assigning a (adapted) field takes in an adapted type and sets the field
+        # correctly.
+        u1 = TestUnionAdaptedTypesMutable()
+        u1.adapted_i32_to_datetime = datetime.fromtimestamp(1718728839)
+        self.assertIs(
+            u1.fbthrift_current_field,
+            TestUnionAdaptedTypesMutable.FbThriftUnionFieldEnum.adapted_i32_to_datetime,
+        )
+        self.assertEqual(u1.adapted_i32_to_datetime, datetime.fromtimestamp(1718728839))
+        # BAD: Note that, as described above, the fbthrift_current_value exposes the
+        # underlying (non-adapted) Thrift type, as opposed to the adapted type..
+        self.assertEqual(u1.fbthrift_current_value, 1718728839)
+
+        # TEST: We can assign to a different field (adapted or not):
+        # At first, trying to access unset field raises Error:
+        with self.assertRaisesRegex(
+            AttributeError,
+            (
+                r"Error retrieving Thrift union \(TestUnionAdaptedTypes\) field: "
+                "requested 'non_adapted_i32', but currently holds "
+                "'adapted_i32_to_datetime'"
+            ),
+        ):
+            _ = u1.non_adapted_i32
+        # Setting an (unadapted) field makes it available:
+        u1.non_adapted_i32 = 42
+        self.assertEqual(u1.non_adapted_i32, 42)
+        self.assertIs(
+            u1.fbthrift_current_field,
+            TestUnionAdaptedTypesMutable.FbThriftUnionFieldEnum.non_adapted_i32,
+        )
+        self.assertEqual(u1.fbthrift_current_value, 42)
+        # Setting another adapted field:
+        u1.adapted_string_to_i32 = 123
+        self.assertEqual(u1.adapted_string_to_i32, 123)
+        self.assertIs(
+            u1.fbthrift_current_field,
+            TestUnionAdaptedTypesMutable.FbThriftUnionFieldEnum.adapted_string_to_i32,
+        )
+        self.assertEqual(u1.fbthrift_current_value, "123")
+
+    def test_set_field(self) -> None:
+        u = TestUnionMutable()
+        self.assertIs(
+            u.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.FBTHRIFT_UNION_EMPTY,
+        )
+        self.assertIsNone(u.fbthrift_current_value)
+
+        u.string_field = "Hello, world!"
+        self.assertIs(
+            u.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.string_field,
+        )
+        self.assertEqual(u.fbthrift_current_value, "Hello, world!")
+        self.assertIs(u.fbthrift_current_value, u.string_field)
+        with self.assertRaisesRegex(
+            AttributeError,
+            (
+                r"Error retrieving Thrift union \(TestUnion\) field: requested "
+                r"'int_field', but currently holds 'string_field'."
+            ),
+        ):
+            u.int_field
+
+        u.int_field = 42
+        self.assertIs(
+            u.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.int_field,
+        )
+        self.assertEqual(u.fbthrift_current_value, 42)
+        self.assertIs(u.fbthrift_current_value, u.int_field)
+
+        u.int_field = 43
+        self.assertEqual(u.int_field, 43)
+
+    def test_del_field(self) -> None:
+        u = TestUnionMutable(string_field="Hello!")
+        self.assertEqual(u.string_field, "Hello!")
+        with self.assertRaisesRegex(AttributeError, "__delete__"):
+            del u.string_field

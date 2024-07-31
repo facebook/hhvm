@@ -123,6 +123,18 @@ TEST(CursorSerializer, UnionRead) {
   wrapper.endRead(std::move(reader));
 }
 
+TEST(CursorSerializer, ManagedStringViewRead) {
+  StructWithCppType obj;
+  obj.someId() = 15u;
+  obj.someName() = "baz";
+
+  CursorSerializationWrapper<StructWithCppType> wrapper(obj);
+  auto reader = wrapper.beginRead();
+  EXPECT_EQ(reader.read<ident::someId>(), 15u);
+  EXPECT_EQ(reader.read<ident::someName>().str(), "baz");
+  wrapper.endRead(std::move(reader));
+}
+
 TEST(CursorSerializer, NumericRead) {
   Numerics obj;
   obj.int16() = 1;
@@ -408,6 +420,18 @@ TEST(CursorSerializer, UnionWrite) {
 
   auto obj = wrapper.deserialize();
   EXPECT_EQ(*obj.string_field_ref(), "foo");
+}
+
+TEST(CursorSerializer, ManagedStringViewWrite) {
+  CursorSerializationWrapper<StructWithCppType> wrapper;
+  auto writer = wrapper.beginWrite();
+  writer.write<ident::someId>(14);
+  writer.write<ident::someName>("foobar");
+  wrapper.endWrite(std::move(writer));
+
+  auto obj = wrapper.deserialize();
+  EXPECT_EQ(obj.someId(), 14u);
+  EXPECT_EQ(obj.someName()->str(), "foobar");
 }
 
 TEST(CursorSerializer, NumericWrite) {

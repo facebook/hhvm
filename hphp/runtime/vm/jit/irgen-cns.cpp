@@ -126,8 +126,14 @@ void exactClsCns(IRGS& env,
       return;
     }
     case Class::ClassLookupResult::None: {
-      getCnsWithType(TInitCell);
-      return;
+      if (RO::SandboxSpeculate) {
+        gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, clsNameStr));
+        gen(env, Jmp, makeExit(env));
+        return;
+      } else {
+        getCnsWithType(TInitCell);
+        return;
+      }
     }
     case Class::ClassLookupResult::Maybe: {
       // TODO: Remove after fixing modules

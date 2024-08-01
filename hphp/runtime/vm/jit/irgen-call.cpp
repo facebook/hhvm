@@ -1551,7 +1551,15 @@ void emitNewObjD(IRGS& env, const StringData* className) {
 
   switch (lookup.tag) {
     case Class::ClassLookupResult::Exact: return knownClass();
-    case Class::ClassLookupResult::None: return slow();
+    case Class::ClassLookupResult::None: {
+      if (RO::SandboxSpeculate) {
+        gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
+        gen(env, Jmp, makeExit(env));
+        return;
+      } else {
+        return slow();
+      }
+    };
     case Class::ClassLookupResult::Maybe: {
       if (!fastPath) return slow();
       gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
@@ -1761,7 +1769,13 @@ void emitFCallClsMethodD(IRGS& env,
       return prepareAndCallKnown(env, func, fca, ctx, false, false);
     }
     case Class::ClassLookupResult::None: {
-      return slow();
+      if (RO::SandboxSpeculate) {
+        gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
+        gen(env, Jmp, makeExit(env));
+        return;
+      } else {
+        return slow();
+      }
     }
     case Class::ClassLookupResult::Maybe: {
       auto const cls = lookup.cls;

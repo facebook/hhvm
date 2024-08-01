@@ -168,13 +168,15 @@ function apc_cache_info(
 );
 
 /**
- * Clears the user/system cache.
+ * apc_clear_cache does nothing. If you manage a cross-request cache using APC,
+ * consider using TTL and explicit invalidation when needed.
  *
- * @return bool - Returns TRUE on success or FALSE on failure.
+ * @return bool - Returns FALSE
  *
  */
-<<__Native>>
-function apc_clear_cache(string $cache_type = "")[globals]: bool;
+function apc_clear_cache(string $cache_type = "")[]: bool {
+  return false;
+}
 
 /**
  * Retrieves APC's Shared Memory Allocation information.

@@ -433,7 +433,18 @@ ErrorCode HTTP2Codec::parseHeadersImpl(
     const folly::Optional<http2::PriorityUpdate>& priority,
     const folly::Optional<uint32_t>& promisedStream,
     const folly::Optional<ExAttributes>& exAttributes) {
-  curHeaderBlock_.append(std::move(headerBuf));
+  if (curHeader_.type == http2::FrameType::CONTINUATION && headerBuf) {
+    constexpr size_t kMinTailroomForUnshare = 1024;
+    if (!curHeaderBlock_.empty() &&
+        curHeaderBlock_.front()->prev()->isSharedOne() &&
+        headerBuf->prev()->tailroom() > kMinTailroomForUnshare) {
+      // tail of the current block is shared, but tail of new block has ample
+      // space.  Unshare tail of the new buf to allow future packing
+      headerBuf->prev()->unshareOne();
+    }
+  }
+  curHeaderBlock_.append(
+      std::move(headerBuf), /*pack=*/true, /*reuseTail=*/false);
   std::unique_ptr<HTTPMessage> msg;
   uint32_t headersCompleteStream = curHeader_.stream;
 

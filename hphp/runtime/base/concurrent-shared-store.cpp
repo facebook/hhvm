@@ -374,19 +374,6 @@ bool HotCache::clearValueIdx(Idx idx) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool ConcurrentTableSharedStore::clear() {
-  std::unique_lock l(m_lock);
-  for (Map::iterator iter = m_vars.begin(); iter != m_vars.end();
-       ++iter) {
-    s_hotCache.clearValue(iter->second);
-    iter->second.data()->unreferenceRoot(iter->second.dataSize);
-    const void* vpKey = iter->first;
-    free(const_cast<void*>(vpKey));
-  }
-  m_vars.clear();
-  return true;
-}
-
 bool ConcurrentTableSharedStore::eraseKey(const String& key) {
   assertx(!key.isNull());
   return eraseImpl(tagStringData(key.get()), false, nullptr);
@@ -396,9 +383,6 @@ bool ConcurrentTableSharedStore::eraseKey(const String& key) {
  * The Map::accessor here establishes a write lock, which means that other
  * threads, protected by read locks through Map::const_accessor, will not
  * read erased values from APC.
- *
- * The ReadLock here is to sync with clear(), which only has a WriteLock,
- * not a specific accessor.
  */
 bool ConcurrentTableSharedStore::eraseImpl(const char* key,
                                            bool expired,

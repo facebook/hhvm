@@ -395,11 +395,6 @@ Variant HHVM_FUNCTION(apc_delete,
   return apc_store().eraseKey(key.toString());
 }
 
-bool HHVM_FUNCTION(apc_clear_cache, const String& /*cache_type*/ /* = "" */) {
-  if (!apcExtension::Enable) return false;
-  if (RuntimeOption::ServerExecutionMode()) return false;
-  return apc_store().clear();
-}
 
 Variant HHVM_FUNCTION(apc_inc,
                       const String& key,
@@ -835,7 +830,6 @@ void apcExtension::moduleRegisterNative() {
   HHVM_FE(apc_fetch);
   HHVM_FE(apc_fetch_with_pure_wakeup);
   HHVM_FE(apc_delete);
-  HHVM_FE(apc_clear_cache);
   HHVM_FE(apc_inc);
   HHVM_FE(apc_dec);
   HHVM_FE(apc_cas);

@@ -268,11 +268,6 @@ struct ConcurrentTableSharedStore {
   void purgeDeferred(req::vector<StringData*>&&);
 
   /*
-   * Clear the entire APC table.
-   */
-  bool clear();
-
-  /*
    * Init
    */
   void init();

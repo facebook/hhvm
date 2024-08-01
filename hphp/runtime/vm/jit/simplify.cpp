@@ -1050,10 +1050,19 @@ SSATmp* simplifyDivInt(State& env, const IRInstruction* inst) {
     return dividend;
   }
 
+  // X / -1 -> -X
+  if (divisorVal == -1) {
+    return gen(env, SubInt, cns(env, 0), dividend);
+  }
+
   if (!dividend->hasConstVal()) {
     // X / 2^n -> X >> n
     if (isPowTwo(divisorVal)) {
       return gen(env, Shr, dividend, cns(env, log2(divisorVal)));
+    }
+    // X / -2^n -> -(X >> n)
+    if (isPowTwo(-divisorVal)) {
+      return gen(env, SubInt, cns(env, 0), gen(env, Shr, dividend, cns(env, log2(-divisorVal))));
     }
     return nullptr;
   }

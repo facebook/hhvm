@@ -105,15 +105,22 @@ func (p *rocketClient) Flush() (err error) {
 	if err := p.open(); err != nil {
 		return err
 	}
+
 	// It is necessary to reset the deadline to 0.
 	// The rsocket library only sets the deadline at connection start.
 	// This means if you wait long enough, the connection will become useless.
 	// Or something else is happening, but this is very necessary.
 	p.conn.SetDeadline(time.Time{})
-	mono := p.client.RequestResponse(request)
+
+	if p.writeType == ONEWAY {
+		p.client.FireAndForget(request)
+		return nil
+	}
 	if p.writeType != CALL {
 		return nil
 	}
+	mono := p.client.RequestResponse(request)
+
 	ctx := p.ctx
 	if p.timeout > 0 {
 		var cancel context.CancelFunc

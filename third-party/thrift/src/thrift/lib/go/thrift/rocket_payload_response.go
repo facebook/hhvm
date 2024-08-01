@@ -50,6 +50,9 @@ func (r *responsePayload) Error() error {
 
 func decodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 	msg = payload.Clone(msg)
+	if msg == nil {
+		return &responsePayload{metadata: &ResponseRpcMetadata{}, data: []byte{}}, nil
+	}
 	res := &responsePayload{metadata: &ResponseRpcMetadata{}, data: msg.Data()}
 	var err error
 	metadataBytes, ok := msg.Metadata()

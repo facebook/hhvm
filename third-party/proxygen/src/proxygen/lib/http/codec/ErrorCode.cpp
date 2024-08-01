@@ -12,8 +12,6 @@
 
 namespace proxygen {
 
-const uint8_t kMaxErrorCode = 12;
-
 const char* getErrorCodeString(ErrorCode error) {
   switch (error) {
     case ErrorCode::NO_ERROR:
@@ -44,6 +42,8 @@ const char* getErrorCodeString(ErrorCode error) {
       return "INADEQUATE_SECURITY";
     case ErrorCode::HTTP_1_1_REQUIRED:
       return "HTTP_1_1_REQUIRED";
+    case ErrorCode::MAX:
+      return "MAX";
   }
   LOG(FATAL) << "Unreachable";
   return "";

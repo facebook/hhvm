@@ -38,9 +38,8 @@ enum class ErrorCode : uint8_t {
   ENHANCE_YOUR_CALM = 11,
   INADEQUATE_SECURITY = 12,
   HTTP_1_1_REQUIRED = 13,
+  MAX,
 };
-
-extern const uint8_t kMaxErrorCode;
 
 /**
  * Returns a string representation of the error code.

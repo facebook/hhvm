@@ -212,7 +212,7 @@ uint32_t parseUint31(Cursor& cursor) {
 
 ErrorCode parseErrorCode(Cursor& cursor, ErrorCode& outCode) {
   auto code = cursor.readBE<uint32_t>();
-  if (code > kMaxErrorCode) {
+  if (code >= static_cast<uint32_t>(ErrorCode::MAX)) {
     return ErrorCode::PROTOCOL_ERROR;
   }
   outCode = ErrorCode(code);

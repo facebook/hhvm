@@ -149,7 +149,7 @@ ThriftRocketServerHandler::~ThriftRocketServerHandler() {
   if (auto* observer = worker_->getServer()->getObserver()) {
     observer->connClosed(server::TServerObserver::ConnectionInfo(
         reinterpret_cast<uint64_t>(transport_),
-        transport_->getSecurityProtocol()));
+        connContext_.getSecurityProtocol()));
   }
 }
 

@@ -929,6 +929,9 @@ class DynamicStructInfo {
 detail::TypeInfo createImmutableStructTypeInfo(
     const DynamicStructInfo& dynamicStructInfo);
 
+detail::TypeInfo createMutableStructTypeInfo(
+    const DynamicStructInfo& dynamicStructInfo);
+
 } // namespace apache::thrift::python
 
 namespace apache::thrift::python::capi {

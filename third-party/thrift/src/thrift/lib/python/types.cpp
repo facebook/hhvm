@@ -418,6 +418,14 @@ void* setImmutableStruct(void* objectPtr, const detail::TypeInfo& typeInfo) {
           getStandardImmutableDefaultValueForType)});
 }
 
+void* setMutableStruct(void* objectPtr, const detail::TypeInfo& typeInfo) {
+  return setPyObject(
+      objectPtr,
+      UniquePyObjectPtr{createStructTupleWithDefaultValues(
+          *static_cast<const detail::StructInfo*>(typeInfo.typeExt),
+          getStandardMutableDefaultValueForType)});
+}
+
 void* setUnion(void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
   return setPyObject(objectPtr, UniquePyObjectPtr{createUnionTuple()});
 }
@@ -767,6 +775,18 @@ detail::TypeInfo createImmutableStructTypeInfo(
       /* .set */
       reinterpret_cast<detail::VoidFuncPtr>(
           dynamicStructInfo.isUnion() ? setUnion : setImmutableStruct),
+      /* .typeExt */ &dynamicStructInfo.getStructInfo(),
+  };
+}
+
+detail::TypeInfo createMutableStructTypeInfo(
+    const DynamicStructInfo& dynamicStructInfo) {
+  return {
+      /* .type */ protocol::TType::T_STRUCT,
+      /* .get */ getStruct,
+      /* .set */
+      reinterpret_cast<detail::VoidFuncPtr>(
+          dynamicStructInfo.isUnion() ? setUnion : setMutableStruct),
       /* .typeExt */ &dynamicStructInfo.getStructInfo(),
   };
 }

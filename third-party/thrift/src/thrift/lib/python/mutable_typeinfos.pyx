@@ -54,7 +54,7 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
         else:
             c_struct_info = (<MutableStructInfo>py_mutable_struct_info).cpp_obj.get()
 
-        self.cpp_obj = createImmutableStructTypeInfo(deref(c_struct_info))
+        self.cpp_obj = createMutableStructTypeInfo(deref(c_struct_info))
 
     cdef const cTypeInfo* get_cTypeInfo(self):
         return &self.cpp_obj

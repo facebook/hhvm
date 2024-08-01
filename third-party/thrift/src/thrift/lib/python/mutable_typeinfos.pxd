@@ -46,7 +46,7 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
         const cTypeInfo* get()
 
 cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
-    cdef cTypeInfo createImmutableStructTypeInfo(const cDynamicStructInfo& structInfo) except+
+    cdef cTypeInfo createMutableStructTypeInfo(const cDynamicStructInfo& structInfo) except+
 
 from thrift.python.types cimport TypeInfoBase
 

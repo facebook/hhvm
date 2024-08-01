@@ -175,6 +175,10 @@ Variant HHVM_FUNCTION(xbox_process_call_message,
                            false, true);
 }
 
+int64_t HHVM_FUNCTION(xbox_tasks_started) {
+  return g_context->getXboxTasksStarted();
+}
+
 bool HHVM_FUNCTION(server_is_stopping) {
   if (HttpServer::Server) {
     if (auto const server = HttpServer::Server->getPageServer()) {
@@ -235,6 +239,7 @@ void ServerExtension::moduleRegisterNative() {
   HHVM_FE(xbox_task_status);
   HHVM_FE(xbox_task_result);
   HHVM_FE(xbox_process_call_message);
+  HHVM_FE(xbox_tasks_started);
   HHVM_FALIAS(HH\\server_is_stopping, server_is_stopping);
   HHVM_FALIAS(HH\\server_is_prepared_to_stop, server_is_prepared_to_stop);
   HHVM_FALIAS(HH\\server_health_level, server_health_level);

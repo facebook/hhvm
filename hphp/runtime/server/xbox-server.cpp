@@ -298,6 +298,7 @@ OptResource XboxServer::TaskStart(const String& msg,
 
       assertx(s_dispatcher);
       s_dispatcher->enqueue(job);
+      g_context->incrXboxTasksStarted();
 
       return OptResource(std::move(task));
     }

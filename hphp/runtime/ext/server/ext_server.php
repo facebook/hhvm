@@ -155,6 +155,14 @@ function xbox_task_result(
 <<__Native>>
 function xbox_process_call_message(string $msg): mixed;
 
+/**
+ * Return the number of xbox tasks started during this request.
+ *
+ * @return int - Number of xbox tasks started.
+ */
+<<__Native>>
+function xbox_tasks_started(): int;
+
 } // root namespace
 
 namespace HH {

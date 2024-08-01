@@ -188,6 +188,14 @@ inline void ExecutionContext::incrPageletTasksStarted() {
   ++m_pageletTasksStarted;
 }
 
+inline int ExecutionContext::getXboxTasksStarted() const {
+  return m_xboxTasksStarted;
+}
+
+inline void ExecutionContext::incrXboxTasksStarted() {
+  ++m_xboxTasksStarted;
+}
+
 inline const VirtualHost* ExecutionContext::getVirtualHost() const {
   return m_vhost;
 }

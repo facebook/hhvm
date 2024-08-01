@@ -325,6 +325,9 @@ public:
   int getPageletTasksStarted() const;
   void incrPageletTasksStarted();
 
+  int getXboxTasksStarted() const;
+  void incrXboxTasksStarted();
+
   const VirtualHost* getVirtualHost() const;
   void setVirtualHost(const VirtualHost*);
 
@@ -592,7 +595,8 @@ private:
   req::vector<Variant> m_userExceptionHandlersBackup;
   Variant m_exitCallback;
   String m_sandboxId; // cache the sandbox id for the request
-  int m_pageletTasksStarted;
+  int m_pageletTasksStarted{0};
+  int m_xboxTasksStarted{0};
   const VirtualHost* m_vhost;
 public:
   DebuggerSettings debuggerSettings;

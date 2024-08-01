@@ -146,7 +146,6 @@ InjectMetadataFields.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 InjectMetadataFields.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/InjectMetadataFields",
 }
 InjectMetadataFields.thrift_field_annotations = {
 }

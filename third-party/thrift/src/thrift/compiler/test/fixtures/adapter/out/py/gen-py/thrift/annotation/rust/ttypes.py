@@ -1646,7 +1646,6 @@ Adapter.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 Adapter.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/rust/Adapter",
 }
 Adapter.thrift_field_annotations = {
 }
@@ -1669,7 +1668,6 @@ Derive.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 Derive.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/rust/Derive",
 }
 Derive.thrift_field_annotations = {
 }
@@ -1692,7 +1690,6 @@ ServiceExn.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 ServiceExn.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/rust/ServiceExn",
 }
 ServiceExn.thrift_field_annotations = {
 }

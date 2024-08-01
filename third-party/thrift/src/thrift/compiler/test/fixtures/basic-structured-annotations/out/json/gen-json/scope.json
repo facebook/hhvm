@@ -272,25 +272,11 @@
           "source_range" : {
             "begin" : {
               "line" : 112,
-              "column" : 69
-            },
-            "end" : {
-              "line" : 112,
-              "column" : 79
-            }
-          }
-        }
-,
-        "thrift.uri" : {
-          "value" : "facebook.com/thrift/annotation/Enum",
-          "source_range" : {
-            "begin" : {
-              "line" : 112,
               "column" : 17
             },
             "end" : {
               "line" : 112,
-              "column" : 67
+              "column" : 27
             }
           }
         }
@@ -305,7 +291,7 @@
         },
         "end" : {
           "line" : 112,
-          "column" : 80
+          "column" : 28
         }
       }
     },

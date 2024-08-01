@@ -78,7 +78,7 @@ struct Adapter {
   /// Fully qualified type hint the above implementation adapts to.
   /// If ending with "[]", it becomes a generic, and the unadapted type will be filled between the brackets.
   2: string typeHint;
-} (thrift.uri = "facebook.com/thrift/annotation/python/Adapter")
+}
 
 /// Controls cpp <-> python FFI for a struct or union
 /// By default, struct uses marshal C API unless cpp.Type or cpp.Adapter is present
@@ -88,4 +88,4 @@ struct Adapter {
 @scope.Structured
 struct UseCAPI {
   1: bool serialize = false;
-} (thrift.uri = "facebook.com/thrift/annotation/python/UseCAPI")
+}

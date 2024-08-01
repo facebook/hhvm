@@ -57,7 +57,7 @@ struct Adapter {
 
   // Fully qualified name the above implementation adapts to
   2: string typeClassName;
-} (thrift.uri = "facebook.com/thrift/annotation/java/Adapter")
+}
 
 @scope.Field
 struct Wrapper {
@@ -66,7 +66,7 @@ struct Wrapper {
 
   // Fully qualified name the above implementation wraps to
   2: string typeClassName;
-} (thrift.uri = "facebook.com/thrift/annotation/java/Wrapper")
+}
 
 @scope.Field
 struct Recursive {}

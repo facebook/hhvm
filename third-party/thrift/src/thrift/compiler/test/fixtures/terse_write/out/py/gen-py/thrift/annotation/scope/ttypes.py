@@ -1790,7 +1790,6 @@ Enum.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 
 Enum.thrift_struct_annotations = {
   "py3.hidden": "1",
-  "thrift.uri": "facebook.com/thrift/annotation/Enum",
 }
 Enum.thrift_field_annotations = {
 }

@@ -109,7 +109,7 @@ struct Const {} (hack.name = "TConst")
 
 // Due to cython bug, we can not use `Enum` as class name directly
 // https://github.com/cython/cython/issues/2474
-struct Enum {} (thrift.uri = "facebook.com/thrift/annotation/Enum", py3.hidden)
+struct Enum {} (py3.hidden)
 
 /** A scope that includes all 'structured' definitions. */
 @Struct

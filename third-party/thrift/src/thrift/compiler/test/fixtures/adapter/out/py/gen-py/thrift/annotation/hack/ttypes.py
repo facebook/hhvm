@@ -1348,7 +1348,6 @@ Wrapper.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 Wrapper.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/hack/Wrapper",
 }
 Wrapper.thrift_field_annotations = {
 }

@@ -49,4 +49,4 @@ namespace py thrift.annotation.internal
 @thrift.Experimental
 struct InjectMetadataFields {
   1: string type;
-} (thrift.uri = "facebook.com/thrift/annotation/InjectMetadataFields")
+}

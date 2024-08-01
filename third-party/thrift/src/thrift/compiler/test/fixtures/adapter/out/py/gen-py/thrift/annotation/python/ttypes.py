@@ -677,7 +677,6 @@ Adapter.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 Adapter.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/python/Adapter",
 }
 Adapter.thrift_field_annotations = {
 }
@@ -702,7 +701,6 @@ UseCAPI.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 UseCAPI.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/python/UseCAPI",
 }
 UseCAPI.thrift_field_annotations = {
 }

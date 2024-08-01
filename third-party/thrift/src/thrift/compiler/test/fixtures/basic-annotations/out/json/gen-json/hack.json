@@ -46,21 +46,6 @@
       "lineno" : 50,
       "is_exception" : false,
       "is_union" : false,
-      "annotations" : {
-        "thrift.uri" : {
-          "value" : "facebook.com/thrift/annotation/hack/Wrapper",
-          "source_range" : {
-            "begin" : {
-              "line" : 64,
-              "column" : 4
-            },
-            "end" : {
-              "line" : 64,
-              "column" : 62
-            }
-          }
-        }
-      },
       "structured_annotations" : {
         "scope.Typedef" : {  },
         "scope.Struct" : {  },
@@ -121,7 +106,7 @@
         },
         "end" : {
           "line" : 64,
-          "column" : 63
+          "column" : 2
         }
       }
     },

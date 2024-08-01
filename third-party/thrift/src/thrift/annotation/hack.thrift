@@ -61,7 +61,7 @@ struct Wrapper {
   /// Empty string enables the nested namespace and uses the IDL name for the struct.
   2: string underlyingName;
   3: string extraNamespace = "thrift_adapted_types";
-} (thrift.uri = "facebook.com/thrift/annotation/hack/Wrapper")
+}
 
 /// An annotation that applies a Hack adapter to types. For example:
 /// @hack.Adapter{name="\\TimestampAdapter"}

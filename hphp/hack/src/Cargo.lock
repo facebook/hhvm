@@ -401,7 +401,7 @@ dependencies = [
  "aast_parser",
  "ast_and_decl_parser",
  "bumpalo",
- "clap 4.5.6",
+ "clap 4.5.11",
  "criterion",
  "cst_and_decl_parser",
  "direct_decl_parser",
@@ -680,19 +680,19 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.6"
+version = "4.5.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9689a29b593160de5bc4aacab7b5d54fb52231de70122626c178e6a368994c7"
+checksum = "35723e6a11662c2afb578bcf0b88bf6ea8e21282a953428f240574fcc3a2b5b3"
 dependencies = [
  "clap_builder",
- "clap_derive 4.5.5",
+ "clap_derive 4.5.11",
 ]
 
 [[package]]
 name = "clap_builder"
-version = "4.5.6"
+version = "4.5.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e5387378c84f6faa26890ebf9f0a92989f8873d4d380467bcd0d8d8620424df"
+checksum = "49eb96cbfa7cfa35017b7cd548c75b14c3118c98b423041d70562665e07fb0fa"
 dependencies = [
  "anstream",
  "anstyle",
@@ -718,9 +718,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "4.5.5"
+version = "4.5.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c780290ccf4fb26629baa7a1081e68ced113f1d3ec302fa5948f1c381ebf06c6"
+checksum = "5d029b67f89d30bbb547c89fd5161293c0aec155fc691d7924b64550662db93e"
 dependencies = [
  "heck 0.5.0",
  "proc-macro2",
@@ -809,7 +809,7 @@ dependencies = [
  "bc_to_ir",
  "bstr",
  "bytecode_printer",
- "clap 4.5.6",
+ "clap 4.5.11",
  "decl_provider",
  "elab",
  "emit_unit",
@@ -1473,7 +1473,7 @@ name = "dump-opcodes"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 4.5.6",
+ "clap 4.5.11",
  "emit_opcodes",
  "hhbc-gen",
  "quote",
@@ -1483,7 +1483,7 @@ dependencies = [
 name = "dump_saved_state_depgraph"
 version = "0.0.0"
 dependencies = [
- "clap 4.5.6",
+ "clap 4.5.11",
  "depgraph_reader",
  "indicatif",
 ]
@@ -2097,7 +2097,7 @@ dependencies = [
  "bumpalo",
  "byte-unit",
  "bytecode_printer",
- "clap 4.5.6",
+ "clap 4.5.11",
  "cmp",
  "compile",
  "decl_parser",
@@ -2320,7 +2320,7 @@ name = "hh_codegen"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 4.5.6",
+ "clap 4.5.11",
  "hash",
  "proc-macro2",
  "quote",
@@ -2491,7 +2491,7 @@ name = "hhvm_options"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 4.5.6",
+ "clap 4.5.11",
  "hdf",
  "hhvm_runtime_options",
 ]

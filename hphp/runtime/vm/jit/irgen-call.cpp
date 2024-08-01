@@ -1530,23 +1530,47 @@ void emitNewObj(IRGS& env) {
 }
 
 void emitNewObjD(IRGS& env, const StringData* className) {
-  auto const cls = lookupKnown(env, className);
+  auto const lookup = lookupKnownMaybe(env, className);
+  auto const cls = lookup.cls;
+  bool const fastPath = lookup.cls && isNormalClass(cls) 
+    && !isAbstract(cls) && !cls->hasNativePropHandler();
 
   auto const knownClass = [&]() {
-    bool const canInstantiate = isNormalClass(cls) && !isAbstract(cls);
-    if (canInstantiate && !cls->hasNativePropHandler()) {
+    if (fastPath) {
       push(env, allocObjFast(env, cls));
     } else {
       push(env, gen(env, AllocObj, cns(env, cls)));
     }
   };
-  if (cls) return knownClass();
 
-  auto const cachedCls = gen(env,
-                             LdClsCached,
-                             LdClsFallbackData::Fatal(),
-                             cns(env, className));
-  push(env, gen(env, AllocObj, cachedCls));
+  auto const slow = [&]() {
+    auto const cachedCls = gen(env, LdClsCached, LdClsFallbackData::Fatal(),
+                               cns(env, className));
+    push(env, gen(env, AllocObj, cachedCls));
+  };
+
+  switch (lookup.tag) {
+    case Class::ClassLookupResult::Exact: return knownClass();
+    case Class::ClassLookupResult::None: return slow();
+    case Class::ClassLookupResult::Maybe: {
+      if (!fastPath) return slow();
+      gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
+      return ifThenElse(
+        env,
+        [&] (Block* taken) {
+          gen(env, EqClassId, ClassIdData(cls), taken);
+        },
+        [&] {
+          push(env, allocObjFast(env, cls));
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          slow();
+        }
+      );
+    }
+    not_reached();
+  }
 }
 
 void emitNewObjS(IRGS& env, SpecialClsRef ref) {

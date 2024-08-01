@@ -173,6 +173,11 @@ val localize :
 
 val localize_hint_for_refinement : env -> Aast.hint -> env * Tast.ty
 
+(** Return [Result.Ok ()] if the current hint is supported in the new
+  constraint-based refinement logic. Otherwise returns [Result.Err string],
+  where [string] is the reason why the hint isn't supported. *)
+val supports_new_refinement : env -> Aast.hint -> (unit, string) Result.t
+
 (** Transforms a declaration phase type ({!Typing_defs.decl_ty})
     into a localized type ({!Typing_defs.locl_ty} = {!Tast.ty}).
     Performs no substitutions of generics and initializes the late static bound

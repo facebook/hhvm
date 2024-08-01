@@ -7066,7 +7066,7 @@ end = struct
         in
         (env, cond_false, cond_true)
       | _ -> begin
-        match Typing_refinement.TyPredicate.of_ty env hint_ty with
+        match Result.ok @@ Typing_refinement.TyPredicate.of_ty env hint_ty with
         | None -> default_branch env
         | Some predicate ->
           branch_for_type_switch

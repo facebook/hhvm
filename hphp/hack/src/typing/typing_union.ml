@@ -427,7 +427,7 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
     (* TODO with Tclass, union type arguments if covariant *)
     | (ty, (_, Tneg (Neg_predicate predicate)))
     | ((_, Tneg (Neg_predicate predicate)), ty) ->
-      (match Typing_refinement.TyPredicate.of_ty env (mk ty) with
+      (match Result.ok @@ Typing_refinement.TyPredicate.of_ty env (mk ty) with
       | Some other when equal_type_predicate predicate other ->
         (env, Some (MakeType.mixed r))
       | _ -> ty_equiv env ty1 ty2 ~are_ty_param:false)

@@ -59,7 +59,7 @@ module TyPredicate : sig
   val of_ty :
     Typing_env_types.env ->
     Typing_defs.locl_ty ->
-    Typing_defs.type_predicate option
+    (Typing_defs.type_predicate, string) Result.t
 
   val to_ty :
     Typing_defs.Reason.t -> Typing_defs.type_predicate -> Typing_defs.locl_ty

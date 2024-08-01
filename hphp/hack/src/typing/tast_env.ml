@@ -199,6 +199,15 @@ let localize_hint_for_refinement env h =
   in
   (env, lty)
 
+let supports_new_refinement env h =
+  let (env, ty) = localize_hint_for_refinement env h in
+  if Typing_defs.is_nonnull ty then
+    Result.Ok ()
+  else
+    match Typing_refinement.TyPredicate.of_ty env ty with
+    | Result.Error err -> Result.Error err
+    | Result.Ok _ -> Result.Ok ()
+
 let localize_no_subst env ~ignore_errors dty =
   let ((env, ty_err_opt), lty) =
     Typing_phase.localize_no_subst env ~ignore_errors dty

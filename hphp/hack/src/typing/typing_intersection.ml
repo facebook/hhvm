@@ -35,7 +35,7 @@ let negate_type env r ty ~approx =
     match get_node ty with
     | Tprim Aast.Tnull -> MkType.nonnull r
     | Tprim _ -> begin
-      match Typing_refinement.TyPredicate.of_ty env ty with
+      match Result.ok @@ Typing_refinement.TyPredicate.of_ty env ty with
       | Some predicate -> MkType.neg r (Neg_predicate predicate)
       | None -> approximated (* void, noreturn *)
     end

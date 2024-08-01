@@ -394,32 +394,32 @@ let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
     } )
 
 module TyPredicate = struct
-  let rec of_ty env ty =
+  let rec of_ty env (ty : locl_ty) =
     match get_node ty with
-    | Tprim Aast.Tbool -> Some IsBool
-    | Tprim Aast.Tint -> Some IsInt
-    | Tprim Aast.Tstring -> Some IsString
-    | Tprim Aast.Tarraykey -> Some IsArraykey
-    | Tprim Aast.Tfloat -> Some IsFloat
-    | Tprim Aast.Tnum -> Some IsNum
-    | Tprim Aast.Tresource -> Some IsResource
-    | Tprim Aast.Tnull -> Some IsNull
+    | Tprim Aast.Tbool -> Result.Ok IsBool
+    | Tprim Aast.Tint -> Result.Ok IsInt
+    | Tprim Aast.Tstring -> Result.Ok IsString
+    | Tprim Aast.Tarraykey -> Result.Ok IsArraykey
+    | Tprim Aast.Tfloat -> Result.Ok IsFloat
+    | Tprim Aast.Tnum -> Result.Ok IsNum
+    | Tprim Aast.Tresource -> Result.Ok IsResource
+    | Tprim Aast.Tnull -> Result.Ok IsNull
     | Ttuple tys -> begin
       match
-        List.fold_left tys ~init:(Some []) ~f:(fun acc ty ->
-            let open Option.Monad_infix in
+        List.fold_left tys ~init:(Result.Ok []) ~f:(fun acc ty ->
+            let open Result.Monad_infix in
             acc >>= fun predicates ->
             of_ty env ty >>| fun predicate -> predicate :: predicates)
       with
-      | None -> None
-      | Some predicates -> Some (IsTupleOf (List.rev predicates))
+      | Result.Error err -> Result.Error ("tuple-" ^ err)
+      | Result.Ok predicates -> Result.Ok (IsTupleOf (List.rev predicates))
     end
     | Tshape { s_origin = _; s_unknown_value; s_fields } ->
       if
         not
         @@ TypecheckerOptions.type_refinement_partition_shapes env.genv.tcopt
       then
-        None
+        Result.Error "shape"
       else if
         (* this type comes from localizing a hint so a closed shape should have
            the canonical form of the nothing type *)
@@ -430,20 +430,39 @@ module TyPredicate = struct
             (fun key s_field acc ->
               if s_field.sft_optional then
                 (* Skip shapes with optional fields for now T196048813 *)
-                None
+                Result.Error "optional_field"
               else
-                let open Option.Monad_infix in
+                let open Result.Monad_infix in
                 acc >>= fun sf_predicates ->
                 of_ty env s_field.sft_ty >>| fun sfp_predicate ->
                 (key, { sfp_predicate }) :: sf_predicates)
             s_fields
-            (Some [])
+            (Result.Ok [])
         with
-        | None -> None
-        | Some elts -> Some (IsShapeOf { sp_fields = TShapeMap.of_list elts })
+        | Result.Error err -> Result.Error ("shape-" ^ err)
+        | Result.Ok elts ->
+          Result.Ok (IsShapeOf { sp_fields = TShapeMap.of_list elts })
       end else
-        None
-    | _ -> None
+        Result.Error "open_shape"
+    | Tprim Aast.Tvoid -> Result.Error "void"
+    | Tprim Aast.Tnoreturn -> Result.Error "noreturn"
+    | Tnonnull -> Result.Error "nonnull"
+    | Tdynamic -> Result.Error "dynamic"
+    | Tany _ -> Result.Error "any"
+    | Toption _ -> Result.Error "option"
+    | Tfun _ -> Result.Error "fun"
+    | Tgeneric (_, _) -> Result.Error "generic"
+    | Tunion _ -> Result.Error "union"
+    | Tintersection _ -> Result.Error "intersection"
+    | Tvec_or_dict _ -> Result.Error "vec_or_dict"
+    | Taccess _ -> Result.Error "access"
+    | Tvar _ -> Result.Error "tvar"
+    | Tnewtype (s, _, _) -> Result.Error ("newtype-" ^ s)
+    | Tunapplied_alias _ -> Result.Error "unapplied_alias"
+    | Tdependent _ -> Result.Error "dependent"
+    | Tclass _ -> Result.Error "class"
+    | Tneg _ -> Result.Error "neg"
+    | Tlabel _ -> Result.Error "label"
 
   let rec to_ty reason predicate =
     match predicate with

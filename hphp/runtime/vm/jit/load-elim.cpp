@@ -117,7 +117,15 @@ struct State {
    * If we know whether various RDS entries have been initialized at this
    * position.
    */
-  jit::flat_set<rds::Handle> initRDS{};
+  hphp_fast_set<rds::Handle> initRDS{};
+
+  /*
+   * If we know we've already executed a jmpz on an SSATmp, we can elide
+   * future jmpz instructions on same SSATmp. For jmpnz, we could just 
+   * use the tracked field above, but there is not a current way to 
+   * specify "not zero" for type/value.
+   */
+  hphp_fast_set<SSATmp*> jmpz{};
 };
 
 struct BlockInfo {
@@ -613,6 +621,21 @@ Flags handle_general_effects(Local& env,
   return FNone{};
 }
 
+Flags handle_irrelevant_effects(Local& env, const IRInstruction& inst) {
+  switch (inst.op()) {
+    case JmpZero: {
+      auto const src = inst.src(0);
+      if (env.state.jmpz.count(src) > 0) return FJmpNext{};
+      // set this unconditionally; we record taken state before every
+      // instruction, and next state after each instruction
+      env.state.jmpz.insert(src);
+      break;
+    }
+    default: break;
+  }
+  return FNone{};
+}
+
 void handle_call_effects(Local& env,
                          const IRInstruction& inst,
                          const CallEffects& effects) {
@@ -927,7 +950,9 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
   auto flags = Flags{};
   match<void>(
     effects,
-    [&] (const IrrelevantEffects&) {},
+    [&] (const IrrelevantEffects&) {
+      flags = handle_irrelevant_effects(env, inst);
+    },
     [&] (const UnknownEffects&)    { clear_everything(env); },
     [&] (const ExitEffects&)       {
       if (inst.op() == EndCatch) flags = handle_end_catch(env, inst);
@@ -1551,13 +1576,8 @@ void merge_into(Global& genv, Block* target, State& dst, const State& src) {
     }
   );
 
-  for (auto it = dst.initRDS.begin(); it != dst.initRDS.end();) {
-    if (!src.initRDS.count(*it)) {
-      it = dst.initRDS.erase(it);
-    } else {
-      ++it;
-    }
-  }
+  folly::erase_if(dst.initRDS, [&](rds::Handle x) {return !src.initRDS.count(x);});
+  folly::erase_if(dst.jmpz, [&](SSATmp* x) {return !src.jmpz.count(x);});
 }
 
 //////////////////////////////////////////////////////////////////////

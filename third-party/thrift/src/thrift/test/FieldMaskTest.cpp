@@ -1109,7 +1109,7 @@ TEST(FieldMaskTest, FilterSmartPointer) {
 }
 
 TEST(FieldMaskTest, FilterUnion) {
-  Mask m;
+  MaskBuilder<RecursiveUnion> m(noneMask());
   RecursiveUnion leaf, parent, dst;
 
   leaf.foo_ref().emplace().field1() = 1;
@@ -1125,21 +1125,13 @@ TEST(FieldMaskTest, FilterUnion) {
   dst = protocol::filter(allMask(), parent);
   EXPECT_EQ(parent, dst);
 
-  // RecursiveUnion.recurse.bar
-  m.includes_ref().emplace()[4].includes_ref().emplace()[2] = allMask();
-  dst = protocol::filter(m, parent);
+  m.includes<ident::recurse, ident::bar>();
+  dst = m.filter(parent);
   // Filter failed, union-ref should remain empty
   EXPECT_EQ(dst.getType(), RecursiveUnion::Type::__EMPTY__);
 
-  m = noneMask(); // reset
-  // RecursiveUnion.recurse.foo.field1
-  m.includes_ref()
-      .emplace()[4]
-      .includes_ref()
-      .emplace()[1]
-      .includes_ref()
-      .emplace()[1] = allMask();
-  dst = protocol::filter(m, parent);
+  m.reset_and_includes<ident::recurse, ident::foo, ident::field1>();
+  dst = m.filter(parent);
   EXPECT_EQ(*dst.recurse_ref().value().foo_ref().value().field1(), 1);
   EXPECT_EQ(
       *dst.recurse_ref().value().foo_ref().value().field2(), 0); // not filtered
@@ -1514,22 +1506,21 @@ TEST(FieldMaskTest, EnsureUnion) {
   {
     // Simple ensure
     RecursiveUnion u;
-    Mask m;
-    m.includes_ref().emplace()[1] = allMask();
-    ensure(m, u);
+    MaskBuilder<RecursiveUnion> m(noneMask());
+    m.includes<ident::foo>();
+    ensure(m.toThrift(), u);
     EXPECT_TRUE(u.foo_ref().has_value());
 
-    (*m.includes_ref())[2] = allMask();
+    m.includes<ident::bar>();
     // multiple fields by inclusion
-    EXPECT_THROW(ensure(m, u), std::runtime_error);
+    EXPECT_THROW(ensure(m.toThrift(), u), std::runtime_error);
   }
   {
     // Nested ensure
     RecursiveUnion u;
-    Mask m;
-    // u.recurse.ensure().foo.ensure().field1.ensure()
-    m.includes_ref().emplace()[4].includes_ref().emplace()[1] = allMask();
-    ensure(m, u);
+    MaskBuilder<RecursiveUnion> m(noneMask());
+    m.includes<ident::recurse, ident::foo>();
+    ensure(m.toThrift(), u);
     EXPECT_TRUE(u.recurse_ref().has_value());
     EXPECT_TRUE(u.recurse_ref()->foo_ref().has_value());
   }
@@ -1720,22 +1711,22 @@ TEST(FieldMaskTest, ClearUnion) {
     // Clear union arm
     RecursiveUnion u;
     u.foo_ref().emplace();
-    Mask m;
-    m.includes_ref().emplace()[2] = allMask();
-    protocol::clear(m, u);
+    MaskBuilder<RecursiveUnion> m(noneMask());
+    m.includes<ident::bar>();
+    protocol::clear(m.toThrift(), u);
     EXPECT_TRUE(u.foo_ref().has_value());
-    (*m.includes_ref())[1] = allMask();
-    protocol::clear(m, u);
+    m.includes<ident::foo>();
+    protocol::clear(m.toThrift(), u);
     EXPECT_EQ(u.getType(), RecursiveUnion::Type::__EMPTY__);
   }
   {
     // Clear nested field in arm
     RecursiveUnion u;
     u.foo_ref().emplace().field1() = 1;
-    Mask m;
+    MaskBuilder<RecursiveUnion> m(noneMask());
     // {includes: {1: includes: {1: allMask()}}}
-    m.includes_ref().emplace()[1].includes_ref().emplace()[1] = allMask();
-    protocol::clear(m, u);
+    m.includes<ident::foo, ident::field1>();
+    protocol::clear(m.toThrift(), u);
     // Make sure union is still set but nested field is cleared
     EXPECT_TRUE(u.foo_ref().has_value());
     EXPECT_EQ(u.foo_ref()->field1(), 0);
@@ -2627,6 +2618,49 @@ TEST(FieldMaskTest, MaskBuilderNestedWithFieldName) {
   testMaskBuilderNested(true);
 }
 
+TEST(FieldMaskTest, MaskBuilderUnion) {
+  {
+    // simple
+    Mask expected;
+    expected.includes_ref().emplace()[1] = allMask();
+
+    MaskBuilder<RecursiveUnion> builder(noneMask());
+    builder.includes<ident::foo>();
+    EXPECT_EQ(builder.toThrift(), expected);
+
+    builder.reset_and_includes({"foo"});
+    EXPECT_EQ(builder.toThrift(), expected);
+  }
+  {
+    // nested
+    Mask nested;
+    nested.excludes_ref().emplace()[11] = allMask();
+
+    Mask expected;
+    expected.includes_ref().emplace()[1] = nested;
+
+    MaskBuilder<RecursiveUnion> builder(noneMask());
+    builder.includes<ident::foo>(nested);
+    EXPECT_EQ(builder.toThrift(), expected);
+
+    builder.reset_and_includes({"foo"}, nested);
+    EXPECT_EQ(builder.toThrift(), expected);
+  }
+  {
+    // recurse
+    Mask expected;
+    expected.includes_ref().emplace()[4].includes_ref().emplace()[1] =
+        allMask();
+
+    MaskBuilder<RecursiveUnion> builder(noneMask());
+    builder.includes<ident::recurse, ident::foo>();
+    EXPECT_EQ(builder.toThrift(), expected);
+
+    builder.reset_and_includes({"recurse", "foo"});
+    EXPECT_EQ(builder.toThrift(), expected);
+  }
+}
+
 TEST(FieldMaskTest, MaskBuilderWithFieldNameError) {
   MaskBuilder<Bar2> builder(noneMask());
   // field not found
@@ -2884,14 +2918,9 @@ TEST(FieldMaskTest, UnionCompare) {
     RecursiveUnion dst(src);
     dst.foo_ref()->field1() = 2;
 
-    EXPECT_EQ(
-        [] {
-          Mask m;
-          // m = {includes: {1: includes{1: allMask()}}}
-          m.includes_ref().emplace()[1].includes_ref().emplace()[1] = allMask();
-          return m;
-        }(),
-        protocol::compare(src, dst));
+    MaskBuilder<RecursiveUnion> m(noneMask());
+    m.includes<ident::foo, ident::field1>();
+    EXPECT_EQ(m.toThrift(), protocol::compare(src, dst));
   }
   {
     // different fields set
@@ -2900,16 +2929,11 @@ TEST(FieldMaskTest, UnionCompare) {
 
     RecursiveUnion dst;
     dst.bar_ref().emplace();
-    EXPECT_EQ(
-        [] {
-          Mask m;
-          // m = {includes: {1: allMask(), 2: allMask()}}
-          auto& includes = m.includes_ref().emplace();
-          includes[1] = allMask();
-          includes[2] = allMask();
-          return m;
-        }(),
-        protocol::compare(src, dst));
+
+    MaskBuilder<RecursiveUnion> m(noneMask());
+    m.includes<ident::foo>();
+    m.includes<ident::bar>();
+    EXPECT_EQ(m.toThrift(), protocol::compare(src, dst));
   }
   {
     // nested field mismatch
@@ -2925,21 +2949,10 @@ TEST(FieldMaskTest, UnionCompare) {
     nestedDst.foo_ref().emplace();
     nestedDst.foo_ref()->field2() = 2;
 
-    EXPECT_EQ(
-        []() {
-          Mask m;
-          // m = {includes: {4: includes{1: {includes: 1: allMask(), 3:
-          // allMask()}}}}
-          m.includes_ref()
-              .emplace()[4]
-              .includes_ref()
-              .emplace()[1]
-              .includes_ref()
-              .emplace() =
-              (protocol::FieldIdToMask{{1, allMask()}, {3, allMask()}});
-          return m;
-        }(),
-        protocol::compare(src, dst));
+    MaskBuilder<RecursiveUnion> m(noneMask());
+    m.includes<ident::recurse, ident::foo, ident::field1>();
+    m.includes<ident::recurse, ident::foo, ident::field2>();
+    EXPECT_EQ(m.toThrift(), protocol::compare(src, dst));
   }
 }
 

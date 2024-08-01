@@ -119,12 +119,17 @@ Mask operator-(const Mask&, const Mask&); // subtract
 //   mask.excludes({"fieldname"}, anotherMask);
 //   mask.toThrift();  // --> reference to the underlying FieldMask.
 
-template <typename Struct>
+template <typename T>
 struct MaskBuilder : type::detail::Wrap<Mask> {
-  static_assert(is_thrift_struct_v<Struct>);
+ private:
+  using Tag = type::infer_tag<T>;
+
+ public:
+  static_assert(
+      is_thrift_struct_v<T> || is_thrift_union_v<T>, "not a struct or union");
   MaskBuilder() { data_ = Mask{}; }
   /* implicit */ MaskBuilder(Mask mask) {
-    detail::errorIfNotCompatible<type::struct_t<Struct>>(mask);
+    detail::errorIfNotCompatible<Tag>(mask);
     data_ = std::move(mask);
   }
 
@@ -149,7 +154,7 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   // Throws runtime exception if the field doesn't exist.
   template <typename... Id>
   MaskBuilder& includes(const Mask& mask = allMask()) {
-    data_ = data_ | detail::path<type::struct_t<Struct>, Id...>(mask);
+    data_ = data_ | detail::path<Tag, Id...>(mask);
     return *this;
   }
 
@@ -171,7 +176,7 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   MaskBuilder& includes(
       const std::vector<folly::StringPiece>& fieldNames,
       const Mask& mask = allMask()) {
-    data_ = data_ | detail::path<type::struct_t<Struct>>(fieldNames, 0, mask);
+    data_ = data_ | detail::path<Tag>(fieldNames, 0, mask);
     return *this;
   }
 
@@ -181,7 +186,7 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   // Throws runtime exception if the field doesn't exist.
   template <typename... Id>
   MaskBuilder& excludes(const Mask& mask = allMask()) {
-    data_ = data_ - detail::path<type::struct_t<Struct>, Id...>(mask);
+    data_ = data_ - detail::path<Tag, Id...>(mask);
     return *this;
   }
 
@@ -203,7 +208,7 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   MaskBuilder& excludes(
       const std::vector<folly::StringPiece>& fieldNames,
       const Mask& mask = allMask()) {
-    data_ = data_ - detail::path<type::struct_t<Struct>>(fieldNames, 0, mask);
+    data_ = data_ - detail::path<Tag>(fieldNames, 0, mask);
     return *this;
   }
 
@@ -229,11 +234,9 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   }
 
   // Mask APIs
-  void ensure(Struct& obj) const { protocol::ensure(data_, obj); }
-  void clear(Struct& obj) const { protocol::clear(data_, obj); }
-  Struct filter(const Struct& src) const {
-    return protocol::filter(data_, src);
-  }
+  void ensure(T& obj) const { protocol::ensure(data_, obj); }
+  void clear(T& obj) const { protocol::clear(data_, obj); }
+  T filter(const T& src) const { return protocol::filter(data_, src); }
 };
 
 template <typename Struct>

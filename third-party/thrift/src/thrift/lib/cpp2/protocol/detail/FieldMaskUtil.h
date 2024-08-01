@@ -135,13 +135,13 @@ Mask path(const Mask& other) {
 
 template <typename Tag, typename Id, typename... Ids>
 Mask path(const Mask& other) {
-  using Struct = type::native_type<Tag>;
-  static_assert(is_thrift_struct_v<Struct>);
+  using T = type::native_type<Tag>;
+  static_assert(is_thrift_class_v<T>);
   Mask mask;
-  using fieldId = op::get_field_id<Struct, Id>;
+  using fieldId = op::get_field_id<T, Id>;
   static_assert(fieldId::value != FieldId{});
   mask.includes_ref().emplace()[static_cast<int16_t>(fieldId::value)] =
-      path<op::get_type_tag<Struct, Id>, Ids...>(other);
+      path<op::get_type_tag<T, Id>, Ids...>(other);
   return mask;
 }
 
@@ -157,17 +157,17 @@ Mask path(
     return other;
   }
   // static_assert doesn't work as it compiles this code for every field.
-  using Struct = type::native_type<Tag>;
-  if constexpr (is_thrift_struct_v<Struct>) {
+  using T = type::native_type<Tag>;
+  if constexpr (is_thrift_class_v<T>) {
     Mask mask;
-    op::for_each_field_id<Struct>([&](auto id) {
+    op::for_each_field_id<T>([&](auto id) {
       using Id = decltype(id);
       if (mask.includes_ref()) { // already set
         return;
       }
-      if (op::get_name_v<Struct, Id> == fieldNames[index]) {
+      if (op::get_name_v<T, Id> == fieldNames[index]) {
         mask.includes_ref().emplace()[folly::to_underlying(id())] =
-            path<op::get_type_tag<Struct, Id>>(fieldNames, index + 1, other);
+            path<op::get_type_tag<T, Id>>(fieldNames, index + 1, other);
       }
     });
     if (!mask.includes_ref()) { // field not found
@@ -176,7 +176,7 @@ Mask path(
     return mask;
   }
   folly::throw_exception<std::runtime_error>(
-      "Path contains a non thrift struct field.");
+      "Path contains a non thrift struct/union field.");
 }
 
 // Ensures the masked fields in the given thrift struct.

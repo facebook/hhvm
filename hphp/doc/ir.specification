@@ -1081,9 +1081,9 @@ To string conversions:
 
   Load the size of S0's constant table.
 
-| EqClassId<cls, classId>, ND, NA, B
+| EqClassId<cls, classId>, D(Bool), NA, NF
 
-  Check if the ClassId in RDS matches jit-time ClassId. Branch to B if not.
+  Tests if the ClassId in RDS matches jit-time classId.
 
 | LdResolvedTypeCns<slot>, D(StaticDict), S(Cls), B|LA
 

@@ -128,7 +128,9 @@ private:
    * Setter for exit label.
    */
   void setter(IRInstruction* inst, Block* target) {
-    assertx(!target || inst->hasEdges());
+    assert_flog(!target || inst->hasEdges(),
+      fmt::format("{}: Mismatch between declared edges and specified target", inst->op())
+    );
     inst->setTaken(target);
   }
 

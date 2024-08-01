@@ -1555,10 +1555,11 @@ void emitNewObjD(IRGS& env, const StringData* className) {
     case Class::ClassLookupResult::Maybe: {
       if (!fastPath) return slow();
       gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
+      auto const isEqual = gen(env, EqClassId, ClassIdData(lookup.cls));
       return ifThenElse(
         env,
         [&] (Block* taken) {
-          gen(env, EqClassId, ClassIdData(cls), taken);
+          gen(env, JmpZero, taken, isEqual);
         },
         [&] {
           push(env, allocObjFast(env, cls));
@@ -1773,10 +1774,11 @@ void emitFCallClsMethodD(IRGS& env,
       if (!func) return slow();
 
       gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
+      auto const isEqual = gen(env, EqClassId, ClassIdData(lookup.cls));
       return ifThenElse(
         env,
         [&] (Block* taken) {
-          gen(env, EqClassId, ClassIdData(lookup.cls), taken);
+          gen(env, JmpZero, taken, isEqual);
         },
         [&] {
           updateStackOffset(env);

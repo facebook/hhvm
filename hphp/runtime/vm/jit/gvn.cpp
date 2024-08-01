@@ -207,6 +207,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LtInt:
   case LteInt:
   case EqInt:
+  case EqClassId:
   case NeqInt:
   case CmpInt:
   case GtDbl:

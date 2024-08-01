@@ -152,10 +152,11 @@ void exactClsCns(IRGS& env,
         if (type(tv) != KindOfUninit) {
           if (auto const val = Type::tryCns(*tv)) {
             gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, clsNameStr));
+            auto const isEqual = gen(env, EqClassId, ClassIdData(lookup.cls));
             ifThenElse(
               env,
               [&] (Block* taken) {
-                gen(env, EqClassId, ClassIdData(lookup.cls), taken);
+                gen(env, JmpZero, taken, isEqual);
               },
               [&] {
                 push(env, cns(env, *val));

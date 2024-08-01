@@ -66,6 +66,10 @@ val int_list : ?truncate_list:int -> key:string -> value:int list -> t -> t
 
 val json_ : key:string -> value:Hh_json.json -> t -> t
 
+val json : key:string -> value:Yojson.Safe.t -> t -> t
+
+val json_opt : key:string -> value:Yojson.Safe.t option -> t -> t
+
 val object_ : key:string -> value:t -> t -> t
 
 val object_opt : key:string -> value:t option -> t -> t

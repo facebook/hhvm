@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 type load_state_error =
   (* an error reported when downloading saved-state through [Saved_state_loader] *)
@@ -113,15 +114,16 @@ type loaded_info = {
   dirty_master_files: Relative_path.Set.t; [@printer Relative_path.Set.pp_large]
   (* Files changed between public merge base and current revision *)
   dirty_local_files: Relative_path.Set.t; [@printer Relative_path.Set.pp_large]
-  old_naming_table: Naming_table.t; [@opaque]
-  old_errors: SaveStateServiceTypes.saved_state_errors; [@opaque]
-  old_warnings: Warnings_saved_state.t; [@opaque]
+  old_naming_table: (Naming_table.t[@yojson.opaque]); [@show.opaque]
+  old_errors: (SaveStateServiceTypes.saved_state_errors[@yojson.opaque]);
+      [@show.opaque]
+  old_warnings: (Warnings_saved_state.t[@yojson.opaque]); [@show.opaque]
   saved_state_revs_info: ServerEnv.saved_state_revs_info;
   (* The manifold path for naming table saved state, to be used by remote type checker
      for downloading the naming table in the case of a saved-state init *)
   naming_table_manifold_path: string option;
 }
-[@@deriving show]
+[@@deriving show, yojson_of]
 
 type lazy_level =
   | Eager

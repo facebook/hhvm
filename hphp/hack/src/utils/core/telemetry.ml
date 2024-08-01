@@ -110,6 +110,12 @@ let int_list
 let json_ ~(key : string) ~(value : Hh_json.json) (telemetry : t) : t =
   (key, value) :: telemetry
 
+let json ~key ~(value : Yojson.Safe.t) telemetry : t =
+  (key, Hh_json.of_yojson value) :: telemetry
+
+let json_opt ~key ~(value : Yojson.Safe.t option) telemetry : t =
+  (key, Hh_json.of_yojson_opt value) :: telemetry
+
 let object_ ~(key : string) ~(value : t) (telemetry : t) : t =
   (key, Hh_json.JSON_Object (List.rev value)) :: telemetry
 

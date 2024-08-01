@@ -45,6 +45,34 @@ type json =
   | JSON_Bool of bool
   | JSON_Null
 
+let rec of_yojson (t : Yojson.Safe.t) : json =
+  match t with
+  | `Assoc kv -> JSON_Object (List.map kv ~f:(fun (k, v) -> (k, of_yojson v)))
+  | `List l
+  | `Tuple l ->
+    JSON_Array (List.map l ~f:of_yojson)
+  | `Variant (k, v) ->
+    JSON_Object
+      [
+        ( k,
+          match v with
+          | None -> JSON_Null
+          | Some j -> of_yojson j );
+      ]
+  | `Bool b -> JSON_Bool b
+  | `Float d -> JSON_Number (Float.to_string d)
+  | `Int i -> JSON_Number (Int.to_string i)
+  | `Intlit i -> JSON_Number i
+  | `Null -> JSON_Null
+  | `String s -> JSON_String s
+
+let of_opt of_t t =
+  match t with
+  | None -> JSON_Null
+  | Some t -> of_t t
+
+let of_yojson_opt = of_opt of_yojson
+
 let is_digit = function
   | '0' .. '9' -> true
   | _ -> false

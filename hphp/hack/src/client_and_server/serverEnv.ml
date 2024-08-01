@@ -9,6 +9,7 @@
 
 open Hh_prelude
 open Option.Monad_infix
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 (*****************************************************************************)
 (* Recheck loop types. *)
@@ -166,7 +167,6 @@ end
     Distance tracks the number of revisions between X and Y, using globalrev.
     Age tracks the time elapsed between X and Y in seconds, according to hg log data.
 *)
-open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 type saved_state_revs_info = {
   distance: int option;

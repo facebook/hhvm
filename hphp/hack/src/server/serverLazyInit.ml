@@ -1345,7 +1345,7 @@ let saved_state_init
     ~state_result:
       (match state_result with
       | Error _ -> None
-      | Ok (i, _, _) -> Some (show_loaded_info i))
+      | Ok (i, _, _) -> Some (yojson_of_loaded_info i))
     t;
   state_result >>| fun (loaded_info, changed_while_parsing, clock) ->
   Server_progress.write "loading saved state succeeded";

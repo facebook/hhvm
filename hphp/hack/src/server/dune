@@ -177,4 +177,7 @@
    (facebook signed_source -> serverInitMessages.fb.ml)
    (-> serverInitMessages.stubs.ml)))
  (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
+  (pps
+   lwt_ppx
+   ppx_deriving.std
+   ppx_yojson_conv)))

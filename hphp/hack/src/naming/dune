@@ -113,7 +113,8 @@
   relative_path
   temp_file)
  (preprocess
-  (pps ppx_deriving.std)))
+  (pps
+   ppx_deriving.std)))
 
 (library
  (name naming_global)

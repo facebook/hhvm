@@ -49,6 +49,7 @@
 #include <folly/Memory.h>
 #include <folly/String.h>
 #include <folly/Unit.h>
+#include <folly/concurrency/AtomicSharedPtr.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/AsyncTimeout.h>
 #include <folly/io/async/EventHandler.h>
@@ -801,7 +802,7 @@ class Operation : public std::enable_shared_from_this<Operation> {
   // Restore folly::RequestContext and also invoke socketActionable()
   void invokeSocketActionable();
 
-  std::shared_ptr<folly::RequestContext> request_context_;
+  folly::atomic_shared_ptr<folly::RequestContext> request_context_;
 
   folly::Optional<folly::dynamic> user_data_;
   ObserverCallback observer_callback_;

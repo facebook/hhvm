@@ -13,6 +13,7 @@
 #include <folly/ssl/OpenSSLPtrTypes.h>
 #include <gflags/gflags.h>
 #include <mysql_async.h>
+#include <atomic>
 #include <cmath>
 
 #include "squangle/base/ExceptionUtil.h"
@@ -116,11 +117,12 @@ Operation::Operation(ConnectionProxy&& safe_conn)
       result_(OperationResult::Unknown),
       conn_proxy_(std::move(safe_conn)),
       mysql_errno_(0),
-      request_context_(folly::RequestContext::saveContext()),
       observer_callback_(nullptr),
       mysql_client_(conn()->mysql_client_) {
   timeout_ = Duration(FLAGS_async_mysql_timeout_micros);
   conn()->resetActionable();
+  request_context_.store(
+      folly::RequestContext::saveContext(), std::memory_order_relaxed);
 }
 
 bool Operation::isInEventBaseThread() const {
@@ -135,7 +137,8 @@ Operation::~Operation() {}
 
 void Operation::invokeSocketActionable() {
   DCHECK(isInEventBaseThread());
-  folly::RequestContextScopeGuard guard(request_context_);
+  folly::RequestContextScopeGuard guard(
+      request_context_.load(std::memory_order_relaxed));
   socketActionable();
 }
 
@@ -172,7 +175,8 @@ void Operation::waitForSocketActionable() {
 }
 
 void Operation::cancel() {
-  folly::RequestContextScopeGuard guard(std::move(request_context_));
+  folly::RequestContextScopeGuard guard(
+      request_context_.exchange(nullptr, std::memory_order_relaxed));
 
   {
     // This code competes with `run()` to see who changes `state_` first,

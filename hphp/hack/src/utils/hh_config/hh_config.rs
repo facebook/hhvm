@@ -55,6 +55,7 @@ pub struct HhConfig {
     pub sharedmem_heap_size: usize,
     pub ide_fall_back_to_full_index: bool,
     pub hh_distc_should_disable_trace_store: bool,
+    pub hh_distc_exponential_backoff_num_retries: usize,
     pub naming_table_compression_level: usize,
     pub naming_table_compression_threads: usize,
     pub eden_fetch_parallelism: usize,
@@ -438,6 +439,8 @@ impl HhConfig {
             re_no_cache: hhconfig.get_bool_or("re_no_cache", default.re_no_cache)?,
             hh_distc_should_disable_trace_store: hhconfig.get_bool_or(
                     "hh_distc_should_disable_trace_store", default.hh_distc_should_disable_trace_store)?,
+            hh_distc_exponential_backoff_num_retries: hhconfig.get_int_or(
+                    "hh_distc_exponential_backoff_num_retries", default.hh_distc_exponential_backoff_num_retries)?,
             tco_enable_abstract_method_optional_parameters: hhconfig.get_bool_or("enable_abstract_method_optional_parameters", default.tco_enable_abstract_method_optional_parameters)?,
         };
         let mut c = Self {
@@ -492,6 +495,9 @@ impl HhConfig {
                 }
                 "eden_fetch_parallelism" => {
                     c.eden_fetch_parallelism = parse_json(&value)?;
+                }
+                "hh_distc_exponential_backoff_num_retries" => {
+                    c.hh_distc_exponential_backoff_num_retries = parse_json(&value)?;
                 }
                 _ => {}
             }

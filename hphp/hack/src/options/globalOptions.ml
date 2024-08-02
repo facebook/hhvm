@@ -184,6 +184,7 @@ type t = {
   preexisting_warnings: bool;
   re_no_cache: bool;
   hh_distc_should_disable_trace_store: bool;
+  hh_distc_exponential_backoff_num_retries: int;
   tco_enable_abstract_method_optional_parameters: bool;
 }
 [@@deriving eq, show]
@@ -292,6 +293,7 @@ let default =
     preexisting_warnings = false;
     re_no_cache = false;
     hh_distc_should_disable_trace_store = false;
+    hh_distc_exponential_backoff_num_retries = 10;
     tco_enable_abstract_method_optional_parameters = false;
   }
 
@@ -398,6 +400,7 @@ let set
     ?preexisting_warnings
     ?re_no_cache
     ?hh_distc_should_disable_trace_store
+    ?hh_distc_exponential_backoff_num_retries
     ?tco_enable_abstract_method_optional_parameters
     options =
   let setting setting option =
@@ -671,6 +674,10 @@ let set
       setting
         hh_distc_should_disable_trace_store
         options.hh_distc_should_disable_trace_store;
+    hh_distc_exponential_backoff_num_retries =
+      setting
+        hh_distc_exponential_backoff_num_retries
+        options.hh_distc_exponential_backoff_num_retries;
     tco_enable_abstract_method_optional_parameters =
       setting
         tco_enable_abstract_method_optional_parameters

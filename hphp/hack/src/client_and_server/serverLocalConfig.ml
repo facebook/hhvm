@@ -233,6 +233,7 @@ type t = {
       (** use remote type-checking (hh_distc) rather than only local type-checking*)
   hh_distc_fanout_threshold: int;
       (** POC: @bobren - fanout threshold where we trigger hh_distc *)
+  hh_distc_exponential_backoff_num_retries: int;
   ide_load_naming_table_on_disk: bool;
       (** POC: @nzthomas - allow ClientIdeDaemon to grab any naming table from disk before trying Watchman / Manifold *)
   ide_naming_table_update_threshold: int;
@@ -331,6 +332,7 @@ let default =
     use_compressed_dep_graph = true;
     use_old_decls_from_cas = false;
     hh_distc_fanout_threshold = 250_000;
+    hh_distc_exponential_backoff_num_retries = 10;
     ide_load_naming_table_on_disk = true;
     ide_naming_table_update_threshold = 1000;
     dump_tast_hashes = false;
@@ -983,6 +985,12 @@ let load_
       ~default:default.hh_distc_fanout_threshold
       config
   in
+  let hh_distc_exponential_backoff_num_retries =
+    int_
+      "hh_distc_exponential_backoff_num_retries"
+      ~default:default.hh_distc_exponential_backoff_num_retries
+      config
+  in
   let ide_load_naming_table_on_disk =
     bool_if_min_version
       "ide_load_naming_table_on_disk"
@@ -1124,6 +1132,7 @@ let load_
     use_compressed_dep_graph;
     use_old_decls_from_cas;
     hh_distc_fanout_threshold;
+    hh_distc_exponential_backoff_num_retries;
     ide_load_naming_table_on_disk;
     ide_naming_table_update_threshold;
     dump_tast_hashes;

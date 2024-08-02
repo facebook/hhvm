@@ -270,6 +270,8 @@ type t = {
   hh_distc_should_disable_trace_store: bool;
       (** Disable trace store when calling hh_distc. Useful for performance testing.
         Corresponds to the `--trace-store-mode local` options of hh_distc.*)
+  hh_distc_exponential_backoff_num_retries: int;
+      (** Number of retries when uploading/download/executing with hh_distc *)
   tco_enable_abstract_method_optional_parameters: bool;
       (** Enable use of optional on parameters in abstract methods *)
 }
@@ -378,6 +380,7 @@ val set :
   ?preexisting_warnings:bool ->
   ?re_no_cache:bool ->
   ?hh_distc_should_disable_trace_store:bool ->
+  ?hh_distc_exponential_backoff_num_retries:int ->
   ?tco_enable_abstract_method_optional_parameters:bool ->
   t ->
   t

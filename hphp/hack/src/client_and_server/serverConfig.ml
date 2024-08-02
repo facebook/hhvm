@@ -470,6 +470,8 @@ let load_config config options =
     ?re_no_cache:(bool_opt "re_no_cache" config)
     ?hh_distc_should_disable_trace_store:
       (bool_opt "hh_distc_should_disable_trace_store" config)
+    ?hh_distc_exponential_backoff_num_retries:
+      (int_opt "hh_distc_exponential_backoff_num_retries" config)
     ?tco_enable_abstract_method_optional_parameters:
       (bool_opt "enable_abstract_method_optional_parameters" config)
     options
@@ -587,6 +589,8 @@ let load ~silent options : t * ServerLocalConfig.t =
         ~tco_lsp_invalidation:local_config.lsp_invalidation
         ~tco_autocomplete_sort_text:local_config.autocomplete_sort_text
         ~hack_warnings:local_config.hack_warnings
+        ~hh_distc_exponential_backoff_num_retries:
+          local_config.hh_distc_exponential_backoff_num_retries
         GlobalOptions.default
     in
     load_config config local_config_opts

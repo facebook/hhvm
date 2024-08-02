@@ -1518,3 +1518,104 @@ TEST(InteractionCodegenTest, FactoryHandlerCallback) {
     EXPECT_THROW(client->sync_initializedAddition(42), TApplicationException);
   }
 }
+
+TEST(InteractionResourcePoolsThriftFlags, GeneratedAsyncProcessorFactory) {
+  if (!FLAGS_thrift_experimental_use_resource_pools) {
+    // This test is only relevant when resource pools is requested.
+    return;
+  }
+  auto handler = std::make_shared<SemiCalculatorHandler>();
+
+  // both flags true, expect resource pool enabled
+  {
+    THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
+    THRIFT_FLAG_SET_MOCK(
+        enable_resource_pools_for_interaction_generated_processor_only, true);
+    ScopedServerInterfaceThread server(handler);
+    EXPECT_TRUE(server.getThriftServer().resourcePoolEnabled());
+  }
+
+  // only generated processor flag true, expect resource pool enabled
+  {
+    THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, false);
+    THRIFT_FLAG_SET_MOCK(
+        enable_resource_pools_for_interaction_generated_processor_only, true);
+    ScopedServerInterfaceThread server(handler);
+    EXPECT_TRUE(server.getThriftServer().resourcePoolEnabled());
+  }
+
+  // only generated processor flag false, expect resource pool enabled
+  {
+    THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
+    THRIFT_FLAG_SET_MOCK(
+        enable_resource_pools_for_interaction_generated_processor_only, false);
+    ScopedServerInterfaceThread server(handler);
+    EXPECT_TRUE(server.getThriftServer().resourcePoolEnabled());
+  }
+
+  // both flags false, expect resource pool disabled
+  {
+    THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, false);
+    THRIFT_FLAG_SET_MOCK(
+        enable_resource_pools_for_interaction_generated_processor_only, false);
+    ScopedServerInterfaceThread server(handler);
+    EXPECT_FALSE(server.getThriftServer().resourcePoolEnabled());
+  }
+}
+
+TEST(InteractionResourcePoolsThriftFlags, CustomAsyncProcessorFactory) {
+  if (!FLAGS_thrift_experimental_use_resource_pools) {
+    // This test is only relevant when resource pools is requested.
+    return;
+  }
+  class CustomAsyncProcessorFactory : public AsyncProcessorFactory {
+   public:
+    std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
+      return handler_.getProcessor();
+    }
+    std::vector<ServiceHandlerBase*> getServiceHandlers() override {
+      return handler_.getServiceHandlers();
+    }
+    CreateMethodMetadataResult createMethodMetadata() override {
+      return handler_.createMethodMetadata();
+    }
+    SemiCalculatorHandler handler_;
+  };
+  auto handler = std::make_shared<CustomAsyncProcessorFactory>();
+
+  // both flags true, expect resource pool enabled
+  {
+    THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
+    THRIFT_FLAG_SET_MOCK(
+        enable_resource_pools_for_interaction_generated_processor_only, true);
+    ScopedServerInterfaceThread server(handler);
+    EXPECT_TRUE(server.getThriftServer().resourcePoolEnabled());
+  }
+
+  // only generated processor flag true, expect resource pool disabled
+  {
+    THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, false);
+    THRIFT_FLAG_SET_MOCK(
+        enable_resource_pools_for_interaction_generated_processor_only, true);
+    ScopedServerInterfaceThread server(handler);
+    EXPECT_FALSE(server.getThriftServer().resourcePoolEnabled());
+  }
+
+  // only generated processor flag false, expect resource pool enabled
+  {
+    THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
+    THRIFT_FLAG_SET_MOCK(
+        enable_resource_pools_for_interaction_generated_processor_only, false);
+    ScopedServerInterfaceThread server(handler);
+    EXPECT_TRUE(server.getThriftServer().resourcePoolEnabled());
+  }
+
+  // both flags false, expect resource pool disabled
+  {
+    THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, false);
+    THRIFT_FLAG_SET_MOCK(
+        enable_resource_pools_for_interaction_generated_processor_only, false);
+    ScopedServerInterfaceThread server(handler);
+    EXPECT_FALSE(server.getThriftServer().resourcePoolEnabled());
+  }
+}

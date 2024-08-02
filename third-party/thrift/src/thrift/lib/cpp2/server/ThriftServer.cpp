@@ -1115,14 +1115,35 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
         if (metadata.interactionType ==
             AsyncProcessorFactory::MethodMetadata::InteractionType::
                 INTERACTION_V1) {
+          // We've found an interaction in this service. We check if the
+          // AsyncProcessorFactory is a Thrift-generated one or not.
+          //
+          // If it is a generated AsyncProcessorFactory:
+          //  Check enable_resource_pools_for_interaction AND
+          //  enable_resource_pools_for_interaction_generated_processor_only. If
+          //  BOTH are disabled, we disable Resource Pools.
+          //
+          // If it is a custom AsyncProcessorFactory:
+          //  Check enable_resource_pools_for_interaction. If it is disabled, we
+          //  disable Resource Pools.
           runtimeServerActions_.interactionInService = true;
-          if (!THRIFT_FLAG(enable_resource_pools_for_interaction)) {
-            // We've found an interaction in this service. Mark it is
-            // incompatible with resource pools
-            XLOG_IF(INFO, infoLoggingEnabled_)
-                << "Resource pools disabled. Interaction on request "
-                << methodToMetadataPtr.first;
-            runtimeDisableResourcePoolsDeprecated();
+          if (auto apf = getProcessorFactory();
+              apf && apf->isThriftGenerated()) {
+            if (!THRIFT_FLAG(enable_resource_pools_for_interaction) &&
+                !THRIFT_FLAG(
+                    enable_resource_pools_for_interaction_generated_processor_only)) {
+              XLOG_IF(INFO, infoLoggingEnabled_)
+                  << "Resource pools disabled on generated processor. Interaction on request "
+                  << methodToMetadataPtr.first;
+              runtimeDisableResourcePoolsDeprecated();
+            }
+          } else {
+            if (!THRIFT_FLAG(enable_resource_pools_for_interaction)) {
+              XLOG_IF(INFO, infoLoggingEnabled_)
+                  << "Resource pools disabled on custom processor. Interaction on request "
+                  << methodToMetadataPtr.first;
+              runtimeDisableResourcePoolsDeprecated();
+            }
           }
         }
       }

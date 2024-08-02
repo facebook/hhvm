@@ -50,6 +50,89 @@ But got `C1`
 
 File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
 
+Derivation:
+{
+  "Derivation":[
+    {
+      "Begin":{
+        "sub":[
+          {
+            "Support_dynamic_type":[{"filename":"workplace_non_exact.php","line":4,"char_start":19,"char_end":19}]
+          }
+        ],
+        "super":[
+          {
+            "Witness":[{"filename":"workplace_non_exact.php","line":12,"char_start":5,"char_end":27}]
+          }
+        ]
+      }
+    },
+    {
+      "Step":{
+        "rule":{"Using_prj":{"Prj_symm_fn_param":[0,0]}},
+        "on_":"Both",
+        "sub":[
+          {
+            "Flow":{
+              "from":[
+                {
+                  "Solved":{
+                    "solution":[
+                      {
+                        "Def":[
+                          {"filename":"workplace_non_exact.php","line":3,"char_start":16,"char_end":17},
+                          [
+                            {
+                              "Hint":[{"filename":"workplace_non_exact.php","line":9,"char_start":11,"char_end":12}]
+                            }
+                          ]
+                        ]
+                      }
+                    ],
+                    "of_":"1",
+                    "in_":[
+                      {
+                        "Type_variable":[
+                          {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26},
+                          "1"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "kind":"Flow_fun_return",
+              "into":[
+                {
+                  "Witness":[
+                    {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "super":[
+          {
+            "Expr_dep_type":[
+              [
+                {
+                  "Hint":[{"filename":"workplace_non_exact.php","line":4,"char_start":21,"char_end":24}]
+                }
+              ],
+              {"filename":"workplace_non_exact.php","line":12,"char_start":5,"char_end":13},
+              {"ERexpr":["3"]}
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Reason:
 {
   "Subtype":{

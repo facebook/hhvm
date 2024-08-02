@@ -24,6 +24,131 @@ But got `Super`
 
 File "assign_list.php", line 8, character 24 - line 8, character 28:
 
+Derivation:
+{
+  "Derivation":[
+    {
+      "Begin":{
+        "sub":[
+          {
+            "Support_dynamic_type":[{"filename":"assign_list.php","line":6,"char_start":10,"char_end":12}]
+          }
+        ],
+        "super":[
+          {
+            "Witness":[{"filename":"assign_list.php","line":10,"char_start":3,"char_end":9}]
+          }
+        ]
+      }
+    },
+    {
+      "Step":{
+        "rule":{"Using_prj":{"Prj_symm_fn_param":[0,0]}},
+        "on_":"Both",
+        "sub":[
+          {
+            "Flow":{
+              "from":[
+                {
+                  "Hint":[{"filename":"assign_list.php","line":8,"char_start":16,"char_end":34}]
+                }
+              ],
+              "kind":"Flow_param_hint",
+              "into":[
+                {
+                  "Flow":{
+                    "from":[
+                      {
+                        "Witness":[{"filename":"assign_list.php","line":8,"char_start":36,"char_end":39}]
+                      }
+                    ],
+                    "kind":"Flow_local",
+                    "into":[
+                      {
+                        "Flow":{
+                          "from":[
+                            {
+                              "Witness":[{"filename":"assign_list.php","line":9,"char_start":22,"char_end":25}]
+                            }
+                          ],
+                          "kind":"Flow_assign",
+                          "into":[
+                            {
+                              "Flow":{
+                                "from":[
+                                  {
+                                    "Solved":{
+                                      "solution":[
+                                        {
+                                          "Def":[
+                                            {"filename":"assign_list.php","line":3,"char_start":7,"char_end":11},
+                                            [
+                                              {
+                                                "Hint":[{"filename":"assign_list.php","line":8,"char_start":24,"char_end":28}]
+                                              }
+                                            ]
+                                          ]
+                                        }
+                                      ],
+                                      "of_":"1",
+                                      "in_":[
+                                        {
+                                          "Type_variable":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13},"1"]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ],
+                                "kind":"Flow_assign",
+                                "into":[
+                                  {
+                                    "Flow":{
+                                      "from":[
+                                        {
+                                          "Witness":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13}]
+                                        }
+                                      ],
+                                      "kind":"Flow_local",
+                                      "into":[
+                                        {
+                                          "Witness":[{"filename":"assign_list.php","line":10,"char_start":7,"char_end":8}]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "super":[
+          {
+            "Def":[
+              {"filename":"assign_list.php","line":4,"char_start":7,"char_end":9},
+              [
+                {
+                  "Hint":[{"filename":"assign_list.php","line":6,"char_start":14,"char_end":16}]
+                }
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Reason:
 {
   "Subtype":{

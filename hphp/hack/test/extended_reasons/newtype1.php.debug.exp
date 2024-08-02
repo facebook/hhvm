@@ -20,6 +20,92 @@ But got `int`
 
 File "newtype1.php--file1.php", line 3, character 18 - line 3, character 20:
 
+Derivation:
+{
+  "Derivation":[
+    {
+      "Begin":{
+        "sub":[
+          {
+            "Support_dynamic_type":[{"filename":"newtype1.php--file2.php","line":3,"char_start":10,"char_end":20}]
+          }
+        ],
+        "super":[
+          {
+            "Witness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":10,"char_end":24}]
+          }
+        ]
+      }
+    },
+    {
+      "Step":{
+        "rule":{"Using_prj":{"Prj_symm_fn_param":[0,0]}},
+        "on_":"Both",
+        "sub":[
+          {
+            "Flow":{
+              "from":[
+                {
+                  "Def":[
+                    {"filename":"newtype1.php--file1.php","line":3,"char_start":9,"char_end":13},
+                    [
+                      {
+                        "Hint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              "kind":"Flow_param_hint",
+              "into":[
+                {
+                  "Flow":{
+                    "from":[
+                      {
+                        "Witness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
+                      }
+                    ],
+                    "kind":"Flow_local",
+                    "into":[
+                      {
+                        "Witness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "super":[
+          {
+            "Hint":[{"filename":"newtype1.php--file2.php","line":3,"char_start":22,"char_end":25}]
+          }
+        ]
+      }
+    },
+    {
+      "Step":{
+        "rule":{"Using axiom_sub":"Upper_bound"},
+        "on_":"Subtype",
+        "sub":[
+          {
+            "Hint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":18,"char_end":20}]
+          }
+        ],
+        "super":[
+          {
+            "Hint":[{"filename":"newtype1.php--file2.php","line":3,"char_start":22,"char_end":25}]
+          }
+        ]
+      }
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Reason:
 {
   "Subtype":{

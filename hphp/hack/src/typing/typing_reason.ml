@@ -2774,6 +2774,420 @@ let string_of_ureason = function
 
 (* ~~ Extended reasons rendering ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+module Derivation = struct
+  module Subtype_rule : sig
+    (** Tells us why a derivation step follows the previous one *)
+    type t
+
+    (** We reached the next step in the derivation by projecting into the subtype *)
+    val using_prj_sub : prj_asymm -> t
+
+    (** We reached the next step in the derivation by projecting into the supertype *)
+    val using_prj_super : prj_asymm -> t
+
+    (** We reached the next step in the derivation by projecting into both the
+       subtype and supertype *)
+    val using_prj : prj_symm -> t
+
+    (** We reached the next step in the derivation by making use of some
+        user-declared axiom on about the subtype *)
+    val using_axiom_sub : axiom -> t
+
+    (** We reached the next step in the derivation by making use of some
+        user-declared axiom on about the supertype *)
+    val using_axiom_super : axiom -> t
+
+    val to_json : t -> Hh_json.json
+  end = struct
+    type t =
+      | Using_prj of prj_symm
+      | Using_prj_sub of prj_asymm
+      | Using_prj_super of prj_asymm
+      | Using_axiom_sub of axiom
+      | Using_axiom_super of axiom
+
+    let using_prj prj = Using_prj prj
+
+    let using_prj_sub prj = Using_prj_sub prj
+
+    let using_prj_super prj = Using_prj_super prj
+
+    let using_axiom_sub axiom = Using_axiom_sub axiom
+
+    let using_axiom_super axiom = Using_axiom_super axiom
+
+    let to_json = function
+      | Using_prj prj ->
+        Hh_json.(JSON_Object [("Using_prj", prj_symm_to_json prj)])
+      | Using_prj_sub prj ->
+        Hh_json.(JSON_Object [("Using_prj_sub", prj_asymm_to_json prj)])
+      | Using_prj_super prj ->
+        Hh_json.(JSON_Object [("Using_prj_super", prj_asymm_to_json prj)])
+      | Using_axiom_sub axiom ->
+        Hh_json.(JSON_Object [("Using axiom_sub", axiom_to_json axiom)])
+      | Using_axiom_super axiom ->
+        Hh_json.(JSON_Object [("Using axiom_super", axiom_to_json axiom)])
+  end
+
+  module Subtype_step : sig
+    type arg =
+      | Subtype
+      | Supertype
+      | Both
+
+    (** Represents a step in a subtyping derivation for a single subtype proposition*)
+    type t =
+      | Begin of {
+          sub: locl_phase t_;
+          super: locl_phase t_;
+        }
+      | Step of {
+          rule: Subtype_rule.t;
+          on_: arg;
+          sub: locl_phase t_;
+          super: locl_phase t_;
+        }
+
+    val begin_ : sub:locl_phase t_ -> super:locl_phase t_ -> t
+
+    val step :
+      Subtype_rule.t -> arg -> sub:locl_phase t_ -> super:locl_phase t_ -> t
+
+    val to_json : t -> Hh_json.json
+  end = struct
+    type arg =
+      | Subtype
+      | Supertype
+      | Both
+
+    let arg_to_json = function
+      | Subtype -> Hh_json.string_ "Subtype"
+      | Supertype -> Hh_json.string_ "Supertype"
+      | Both -> Hh_json.string_ "Both"
+
+    type t =
+      | Begin of {
+          sub: locl_phase t_;
+          super: locl_phase t_;
+        }
+      | Step of {
+          rule: Subtype_rule.t;
+          on_: arg;
+          sub: locl_phase t_;
+          super: locl_phase t_;
+        }
+
+    let step rule on_ ~sub ~super = Step { sub; super; rule; on_ }
+
+    let begin_ ~sub ~super = Begin { sub; super }
+
+    let to_json = function
+      | Begin { sub; super } ->
+        Hh_json.(
+          JSON_Object
+            [
+              ( "Begin",
+                JSON_Object [("sub", to_json sub); ("super", to_json super)] );
+            ])
+      | Step { sub; super; rule; on_ } ->
+        Hh_json.(
+          JSON_Object
+            [
+              ( "Step",
+                JSON_Object
+                  [
+                    ("rule", Subtype_rule.to_json rule);
+                    ("on_", arg_to_json on_);
+                    ("sub", to_json sub);
+                    ("super", to_json super);
+                  ] );
+            ])
+  end
+
+  (** Represents a complete derivation for a single subtype proposition and
+        the typing rule used to reach it from the previous subtype proposition *)
+  type t =
+    | Derivation of Subtype_step.t list
+    | Lower of {
+        bound: t;
+        in_: t;
+      }
+    | Upper of {
+        bound: t;
+        in_: t;
+      }
+    | Transitive of {
+        lower: t;
+        upper: t;
+        in_: t;
+        on_: locl_phase t_;
+      }
+
+  let derivation steps = Derivation steps
+
+  let transitive ~upper ~lower ~on_ ~in_ = Transitive { in_; on_; upper; lower }
+
+  let upper_bound ~bound ~in_ = Upper { bound; in_ }
+
+  let lower_bound ~bound ~in_ = Lower { bound; in_ }
+
+  let to_json t =
+    let rec aux = function
+      | Derivation steps ->
+        Hh_json.(
+          JSON_Object [("Derivation", array_ Subtype_step.to_json steps)])
+      | Upper { bound; in_ } ->
+        Hh_json.(
+          JSON_Object
+            [("Upper", JSON_Object [("bound", aux bound); ("in_", aux in_)])])
+      | Lower { bound; in_ } ->
+        Hh_json.(
+          JSON_Object
+            [("Lower", JSON_Object [("bound", aux bound); ("in_", aux in_)])])
+      | Transitive { lower; upper; on_; in_ } ->
+        Hh_json.(
+          JSON_Object
+            [
+              ( "Transitive",
+                JSON_Object
+                  [
+                    ("lower", aux lower);
+                    ("upper", aux upper);
+                    ("on_", to_json on_);
+                    ("in_", aux in_);
+                  ] );
+            ])
+    in
+    aux t
+
+  let rec push_solutions t ~solutions =
+    match t with
+    | From_witness_locl (Type_variable (_, id))
+    | From_witness_locl (Type_variable_generics (_, _, _, id))
+    | From_witness_locl (Type_variable_error (_, id)) ->
+      Option.value_map ~default:t ~f:(fun solution ->
+          solved id ~solution ~in_:t)
+      @@ Tvid.Map.find_opt id solutions
+    | Flow { from; into; kind } ->
+      Flow
+        {
+          from = push_solutions from ~solutions;
+          into = push_solutions into ~solutions;
+          kind;
+        }
+    | Def (pos, of_) -> Def (pos, push_solutions of_ ~solutions)
+    | Instantiate (r1, s, r2) ->
+      Instantiate (push_solutions r1 ~solutions, s, push_solutions r2 ~solutions)
+    | Typeconst (r1, p, q, r2) ->
+      Typeconst
+        (push_solutions r1 ~solutions, p, q, push_solutions r2 ~solutions)
+    | Expr_dep_type (r, s, t) ->
+      Expr_dep_type (push_solutions r ~solutions, s, t)
+    | Lost_info (x, t, y) -> Lost_info (x, push_solutions t ~solutions, y)
+    | Type_access (t, x) -> Type_access (push_solutions t ~solutions, x)
+    | Invariant_generic (t, x) ->
+      Invariant_generic (push_solutions ~solutions t, x)
+    | Contravariant_generic (t, x) ->
+      Contravariant_generic (push_solutions ~solutions t, x)
+    | Dynamic_coercion t -> Dynamic_coercion (push_solutions ~solutions t)
+    | _ -> t
+
+  let rec extract_last t =
+    match t with
+    | Prj_both { sub; _ } -> extract_last sub
+    | Prj_one { whole; _ } -> extract_last whole
+    | Axiom { prev; _ } -> extract_last prev
+    | Flow { into; _ } -> extract_last into
+    | Lower_bound { of_; _ } -> extract_last of_
+    | Upper_bound { of_; _ } -> extract_last of_
+    | Solved _
+    | No_reason
+    | From_witness_decl _
+    | From_witness_locl _
+    | Instantiate _
+    | Def _
+    | Invalid
+    | Missing_field
+    | Idx _
+    | Arith_ret_float _
+    | Arith_ret_num _
+    | Lost_info _
+    | Format _
+    | Typeconst _
+    | Type_access _
+    | Expr_dep_type _
+    | Contravariant_generic _
+    | Invariant_generic _
+    | Lambda_param _
+    | Dynamic_coercion _
+    | Dynamic_partial_enforcement _
+    | Rigid_tvar_escape _
+    | Opaque_type_from_module _ ->
+      t
+
+  let rec extract_first t =
+    match t with
+    | Prj_both { sub_prj; _ } -> extract_first sub_prj
+    | Prj_one { part; _ } -> extract_first part
+    | Axiom { next; _ } -> extract_first next
+    | Flow { from; _ } -> extract_first from
+    | Lower_bound { bound; _ } -> extract_first bound
+    | Upper_bound { bound; _ } -> extract_first bound
+    | Solved _
+    | No_reason
+    | From_witness_decl _
+    | From_witness_locl _
+    | Instantiate _
+    | Def _
+    | Invalid
+    | Missing_field
+    | Idx _
+    | Arith_ret_float _
+    | Arith_ret_num _
+    | Lost_info _
+    | Format _
+    | Typeconst _
+    | Type_access _
+    | Expr_dep_type _
+    | Contravariant_generic _
+    | Invariant_generic _
+    | Lambda_param _
+    | Dynamic_coercion _
+    | Dynamic_partial_enforcement _
+    | Rigid_tvar_escape _
+    | Opaque_type_from_module _ ->
+      t
+
+  (** Reasons are constructed by keeping track of preceeding subtype propositions
+      during subtype constraint simplification. We reach a child subtype proposition
+      either through a projection into a type constructor or using some user-declared
+      axiom. We can convert this to a list of derivation steps for each subtype constraint.
+      Since we also apply transitivity during constraint simplification, each reason may
+      actually contain multiple subtype derivations. We reach a new derivation either
+      because a upper- or lower-bound was added to a type variable and a new constraint
+      generated for an exist lower- or upper-bound.
+
+      This function is used to recover this representation from the reason representation. *)
+  let of_reason ~sub ~super =
+    let rec aux (sub, super) ~deriv ~solutions =
+      match (sub, super) with
+      (* -- Accumulate solutions -- *)
+      | (Solved { solution; of_; in_ }, _) ->
+        let solutions = Tvid.Map.add of_ (extract_first solution) solutions in
+        aux (in_, super) ~deriv ~solutions
+      | (_, Solved { solution; of_; in_ }) ->
+        let solutions = Tvid.Map.add of_ (extract_first solution) solutions in
+        aux (sub, in_) ~deriv ~solutions
+      (* -- Transitive constraints -- *)
+      | ( Lower_bound { bound = lb_sub; of_ = lb_super },
+          Upper_bound { bound = ub_super; of_ = ub_sub } ) ->
+        let lower = aux (lb_sub, lb_super) ~deriv:[] ~solutions
+        and upper = aux (ub_sub, ub_super) ~deriv:[] ~solutions
+        and in_ = aux (lb_sub, ub_super) ~deriv ~solutions
+        and on_ = extract_last lb_super in
+        transitive ~lower ~upper ~on_ ~in_
+      | (Lower_bound { bound; of_ }, super) ->
+        let bound = aux (bound, of_) ~deriv:[] ~solutions
+        and in_ = aux (bound, super) ~deriv ~solutions in
+        lower_bound ~bound ~in_
+      | (sub, Lower_bound { bound; of_ }) ->
+        let bound = aux (bound, of_) ~deriv:[] ~solutions
+        and in_ = aux (sub, bound) ~deriv ~solutions in
+        lower_bound ~bound ~in_
+      | (sub, Upper_bound { bound; of_ }) ->
+        let bound = aux (of_, bound) ~deriv:[] ~solutions
+        and in_ = aux (sub, bound) ~deriv ~solutions in
+        upper_bound ~bound ~in_
+      | (Upper_bound { bound; of_ }, super) ->
+        let bound = aux (of_, bound) ~deriv:[] ~solutions
+        and in_ = aux (bound, super) ~deriv ~solutions in
+        upper_bound ~bound ~in_
+      (* -- One-sided projection on subtype -- *)
+      | (Prj_one { part; whole; prj }, _) ->
+        let step =
+          let sub = push_solutions part ~solutions
+          and super = push_solutions super ~solutions
+          and rule = Subtype_rule.using_prj_sub prj in
+          Subtype_step.(step rule Subtype ~sub ~super)
+        in
+        let deriv = step :: deriv in
+        aux (whole, super) ~deriv ~solutions
+      | (Axiom { next; prev; axiom }, _) ->
+        let step =
+          let sub = push_solutions next ~solutions
+          and super = push_solutions super ~solutions
+          and rule = Subtype_rule.using_axiom_sub axiom in
+          Subtype_step.(step rule Subtype ~sub ~super)
+        in
+        let deriv = step :: deriv in
+        aux (prev, super) ~deriv ~solutions
+      (* -- One-sided projection on supertype -- *)
+      | (_, Prj_one { part; whole; prj }) ->
+        let step =
+          let sub = push_solutions sub ~solutions
+          and super = push_solutions part ~solutions
+          and rule = Subtype_rule.using_prj_super prj in
+          Subtype_step.(step rule Supertype ~sub ~super)
+        in
+        let deriv = step :: deriv in
+        aux (sub, whole) ~deriv ~solutions
+      | (_, Axiom { next; prev; axiom }) ->
+        let step =
+          let sub = push_solutions sub ~solutions
+          and super = push_solutions next ~solutions
+          and rule = Subtype_rule.using_axiom_super axiom in
+          Subtype_step.(step rule Supertype ~sub ~super)
+        in
+        let deriv = step :: deriv in
+        aux (sub, prev) ~deriv ~solutions
+      (* -- Two-sided projections -- *)
+      | (Prj_both { sub_prj; sub = parent_sub; super = parent_super; prj }, _)
+        ->
+        let step =
+          let sub = push_solutions sub_prj ~solutions
+          and super = push_solutions super ~solutions
+          and rule = Subtype_rule.using_prj prj in
+          Subtype_step.(step rule Both ~sub ~super)
+        in
+        let deriv = step :: deriv in
+        aux (parent_sub, parent_super) ~deriv ~solutions
+      | (_, Prj_both { sub_prj; sub = parent_sub; super = parent_super; prj })
+        ->
+        (* Does this happen? Should it?? *)
+        let step =
+          let sub = push_solutions sub ~solutions
+          and super = push_solutions sub_prj ~solutions
+          and rule = Subtype_rule.using_prj prj in
+          Subtype_step.(step rule Both ~sub ~super)
+        in
+        let deriv = step :: deriv in
+        aux (parent_sub, parent_super) ~deriv ~solutions
+      (* -- Reasons corresponding to a single step -- *)
+      | ( ( No_reason | From_witness_decl _ | From_witness_locl _
+          | Instantiate _ | Flow _ | Def _ | Invalid | Missing_field | Idx _
+          | Arith_ret_float _ | Arith_ret_num _ | Lost_info _ | Format _
+          | Typeconst _ | Type_access _ | Expr_dep_type _
+          | Contravariant_generic _ | Invariant_generic _ | Lambda_param _
+          | Dynamic_coercion _ | Dynamic_partial_enforcement _
+          | Rigid_tvar_escape _ | Opaque_type_from_module _ ),
+          ( No_reason | From_witness_decl _ | From_witness_locl _
+          | Instantiate _ | Flow _ | Def _ | Invalid | Missing_field | Idx _
+          | Arith_ret_float _ | Arith_ret_num _ | Lost_info _ | Format _
+          | Typeconst _ | Type_access _ | Expr_dep_type _
+          | Contravariant_generic _ | Invariant_generic _ | Lambda_param _
+          | Dynamic_coercion _ | Dynamic_partial_enforcement _
+          | Rigid_tvar_escape _ | Opaque_type_from_module _ ) ) ->
+        let step =
+          let sub = push_solutions sub ~solutions
+          and super = push_solutions super ~solutions in
+          Subtype_step.begin_ ~sub ~super
+        in
+        derivation (step :: deriv)
+    in
+
+    aux (sub, super) ~deriv:[] ~solutions:Tvid.Map.empty
+end
+
 let explain ~sub:_ ~super:_ ~complexity:_ = []
 
 let debug ~sub ~super =
@@ -2786,6 +3200,10 @@ let debug ~sub ~super =
         ])
   in
   [
+    ( Pos_or_decl.none,
+      Format.sprintf "Derivation:\n%s"
+      @@ Hh_json.json_to_string ~pretty:true
+      @@ Derivation.(to_json @@ of_reason ~sub ~super) );
     ( Pos_or_decl.none,
       Format.sprintf "Reason:\n%s"
       @@ Hh_json.json_to_string ~pretty:true json_repr );

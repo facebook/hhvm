@@ -25,6 +25,214 @@ But got `Super`
 
 File "fn_subtyping_variadic_2.php", line 6, character 40 - line 6, character 44:
 
+Derivation:
+{
+  "Derivation":[
+    {
+      "Begin":{
+        "sub":[
+          {
+            "Support_dynamic_type":[
+              {
+                "filename":"fn_subtyping_variadic_2.php",
+                "line":6,
+                "char_start":10,
+                "char_end":23
+              }
+            ]
+          }
+        ],
+        "super":[
+          {
+            "Witness":[
+              {
+                "filename":"fn_subtyping_variadic_2.php",
+                "line":8,
+                "char_start":3,
+                "char_end":20
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "Step":{
+        "rule":{"Using_prj":{"Prj_symm_fn_param":[0,0]}},
+        "on_":"Both",
+        "sub":[
+          {
+            "Flow":{
+              "from":[
+                {
+                  "Def":[
+                    {
+                      "filename":"/tmp/8l8Zz8lbgQ/supportdynamic.hhi",
+                      "line":6,
+                      "char_start":11,
+                      "char_end":20
+                    },
+                    [
+                      {
+                        "Hint":[
+                          {
+                            "filename":"fn_subtyping_variadic_2.php",
+                            "line":7,
+                            "char_start":25,
+                            "char_end":47
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              "kind":"Flow_param_hint",
+              "into":[
+                {
+                  "Flow":{
+                    "from":[
+                      {
+                        "Witness":[
+                          {
+                            "filename":"fn_subtyping_variadic_2.php",
+                            "line":7,
+                            "char_start":49,
+                            "char_end":50
+                          }
+                        ]
+                      }
+                    ],
+                    "kind":"Flow_local",
+                    "into":[
+                      {
+                        "Witness":[
+                          {
+                            "filename":"fn_subtyping_variadic_2.php",
+                            "line":8,
+                            "char_start":18,
+                            "char_end":19
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "super":[
+          {
+            "Def":[
+              {
+                "filename":"/tmp/8l8Zz8lbgQ/supportdynamic.hhi",
+                "line":6,
+                "char_start":11,
+                "char_end":20
+              },
+              [
+                {
+                  "Hint":[
+                    {
+                      "filename":"fn_subtyping_variadic_2.php",
+                      "line":6,
+                      "char_start":25,
+                      "char_end":54
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "Step":{
+        "rule":{"Using_prj":"Prj_symm_supportdyn"},
+        "on_":"Both",
+        "sub":[
+          {
+            "Hint":[
+              {
+                "filename":"fn_subtyping_variadic_2.php",
+                "line":7,
+                "char_start":25,
+                "char_end":47
+              }
+            ]
+          }
+        ],
+        "super":[
+          {
+            "Witness_from_decl":[
+              {
+                "filename":"fn_subtyping_variadic_2.php",
+                "line":6,
+                "char_start":25,
+                "char_end":54
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "Step":{
+        "rule":{"Using_prj":{"Prj_symm_fn_param":[1,0]}},
+        "on_":"Both",
+        "sub":[
+          {
+            "Def":[
+              {
+                "filename":"fn_subtyping_variadic_2.php",
+                "line":3,
+                "char_start":7,
+                "char_end":11
+              },
+              [
+                {
+                  "Hint":[
+                    {
+                      "filename":"fn_subtyping_variadic_2.php",
+                      "line":6,
+                      "char_start":40,
+                      "char_end":44
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        ],
+        "super":[
+          {
+            "Def":[
+              {"filename":"fn_subtyping_variadic_2.php","line":4,"char_start":7,"char_end":9},
+              [
+                {
+                  "Hint":[
+                    {
+                      "filename":"fn_subtyping_variadic_2.php",
+                      "line":7,
+                      "char_start":35,
+                      "char_end":37
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Reason:
 {
   "Subtype":{
@@ -82,7 +290,7 @@ Reason:
                               {
                                 "Def":[
                                   {
-                                    "filename":"/tmp/xVMtEUTrkM/supportdynamic.hhi",
+                                    "filename":"/tmp/8l8Zz8lbgQ/supportdynamic.hhi",
                                     "line":6,
                                     "char_start":11,
                                     "char_end":20
@@ -169,7 +377,7 @@ Reason:
                   {
                     "Def":[
                       {
-                        "filename":"/tmp/xVMtEUTrkM/supportdynamic.hhi",
+                        "filename":"/tmp/8l8Zz8lbgQ/supportdynamic.hhi",
                         "line":6,
                         "char_start":11,
                         "char_end":20

@@ -25,6 +25,223 @@ But got `Super`
 
 File "fn_subtyping_contra_2.php", line 7, character 36 - line 7, character 40:
 
+Derivation:
+{
+  "Derivation":[
+    {
+      "Begin":{
+        "sub":[
+          {
+            "Support_dynamic_type":[
+              {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":10,"char_end":14}
+            ]
+          }
+        ],
+        "super":[
+          {
+            "Witness":[
+              {"filename":"fn_subtyping_contra_2.php","line":8,"char_start":3,"char_end":11}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "Step":{
+        "rule":{"Using_prj":{"Prj_symm_fn_param":[0,0]}},
+        "on_":"Both",
+        "sub":[
+          {
+            "Flow":{
+              "from":[
+                {
+                  "Def":[
+                    {
+                      "filename":"/tmp/8l8Zz8lbgQ/supportdynamic.hhi",
+                      "line":6,
+                      "char_start":11,
+                      "char_end":20
+                    },
+                    [
+                      {
+                        "Hint":[
+                          {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":16,"char_end":56}
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              "kind":"Flow_param_hint",
+              "into":[
+                {
+                  "Flow":{
+                    "from":[
+                      {
+                        "Witness":[
+                          {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":58,"char_end":59}
+                        ]
+                      }
+                    ],
+                    "kind":"Flow_local",
+                    "into":[
+                      {
+                        "Witness":[
+                          {"filename":"fn_subtyping_contra_2.php","line":8,"char_start":9,"char_end":10}
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "super":[
+          {
+            "Def":[
+              {
+                "filename":"/tmp/8l8Zz8lbgQ/supportdynamic.hhi",
+                "line":6,
+                "char_start":11,
+                "char_end":20
+              },
+              [
+                {
+                  "Hint":[
+                    {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":16,"char_end":54}
+                  ]
+                }
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "Step":{
+        "rule":{"Using_prj":"Prj_symm_supportdyn"},
+        "on_":"Both",
+        "sub":[
+          {
+            "Hint":[
+              {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":16,"char_end":56}
+            ]
+          }
+        ],
+        "super":[
+          {
+            "Witness_from_decl":[
+              {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":16,"char_end":54}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "Step":{
+        "rule":{"Using_prj":{"Prj_symm_fn_param":[0,0]}},
+        "on_":"Both",
+        "sub":[
+          {
+            "Def":[
+              {
+                "filename":"/tmp/8l8Zz8lbgQ/supportdynamic.hhi",
+                "line":6,
+                "char_start":11,
+                "char_end":20
+              },
+              [
+                {
+                  "Hint":[
+                    {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":26,"char_end":46}
+                  ]
+                }
+              ]
+            ]
+          }
+        ],
+        "super":[
+          {
+            "Def":[
+              {
+                "filename":"/tmp/8l8Zz8lbgQ/supportdynamic.hhi",
+                "line":6,
+                "char_start":11,
+                "char_end":20
+              },
+              [
+                {
+                  "Hint":[
+                    {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":26,"char_end":48}
+                  ]
+                }
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "Step":{
+        "rule":{"Using_prj":"Prj_symm_supportdyn"},
+        "on_":"Both",
+        "sub":[
+          {
+            "Witness_from_decl":[
+              {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":26,"char_end":46}
+            ]
+          }
+        ],
+        "super":[
+          {
+            "Hint":[
+              {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":26,"char_end":48}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "Step":{
+        "rule":{"Using_prj":{"Prj_symm_fn_param":[0,0]}},
+        "on_":"Both",
+        "sub":[
+          {
+            "Def":[
+              {"filename":"fn_subtyping_contra_2.php","line":3,"char_start":7,"char_end":11},
+              [
+                {
+                  "Hint":[
+                    {"filename":"fn_subtyping_contra_2.php","line":7,"char_start":36,"char_end":40}
+                  ]
+                }
+              ]
+            ]
+          }
+        ],
+        "super":[
+          {
+            "Def":[
+              {"filename":"fn_subtyping_contra_2.php","line":4,"char_start":7,"char_end":9},
+              [
+                {
+                  "Hint":[
+                    {"filename":"fn_subtyping_contra_2.php","line":6,"char_start":36,"char_end":38}
+                  ]
+                }
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+
+
+File "", line 0, character 0 - line 0, character -1:
+
 Reason:
 {
   "Subtype":{
@@ -64,7 +281,7 @@ Reason:
                         {
                           "Def":[
                             {
-                              "filename":"/tmp/xVMtEUTrkM/supportdynamic.hhi",
+                              "filename":"/tmp/8l8Zz8lbgQ/supportdynamic.hhi",
                               "line":6,
                               "char_start":11,
                               "char_end":20
@@ -101,7 +318,7 @@ Reason:
                                           {
                                             "Def":[
                                               {
-                                                "filename":"/tmp/xVMtEUTrkM/supportdynamic.hhi",
+                                                "filename":"/tmp/8l8Zz8lbgQ/supportdynamic.hhi",
                                                 "line":6,
                                                 "char_start":11,
                                                 "char_end":20
@@ -163,7 +380,7 @@ Reason:
                               {
                                 "Def":[
                                   {
-                                    "filename":"/tmp/xVMtEUTrkM/supportdynamic.hhi",
+                                    "filename":"/tmp/8l8Zz8lbgQ/supportdynamic.hhi",
                                     "line":6,
                                     "char_start":11,
                                     "char_end":20
@@ -195,7 +412,7 @@ Reason:
                   {
                     "Def":[
                       {
-                        "filename":"/tmp/xVMtEUTrkM/supportdynamic.hhi",
+                        "filename":"/tmp/8l8Zz8lbgQ/supportdynamic.hhi",
                         "line":6,
                         "char_start":11,
                         "char_end":20

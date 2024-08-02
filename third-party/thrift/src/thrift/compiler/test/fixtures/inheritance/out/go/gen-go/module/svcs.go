@@ -255,17 +255,17 @@ func (x *respMyRootDoRoot) String() string {
 
 
 type MyRootProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunctionContext
+    processorMap       map[string]thrift.ProcessorFunction
     functionServiceMap map[string]string
     handler            MyRoot
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*MyRootProcessor)(nil)
+var _ thrift.Processor = (*MyRootProcessor)(nil)
 
 func NewMyRootProcessor(handler MyRoot) *MyRootProcessor {
     p := &MyRootProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        processorMap:       make(map[string]thrift.ProcessorFunction),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("do_root", &procFuncMyRootDoRoot{handler: handler})
@@ -274,7 +274,7 @@ func NewMyRootProcessor(handler MyRoot) *MyRootProcessor {
     return p
 }
 
-func (p *MyRootProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+func (p *MyRootProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
     p.processorMap[key] = processor
 }
 
@@ -282,11 +282,11 @@ func (p *MyRootProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *MyRootProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+func (p *MyRootProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
     return p.processorMap[key]
 }
 
-func (p *MyRootProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+func (p *MyRootProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorMap
 }
 
@@ -303,7 +303,7 @@ type procFuncMyRootDoRoot struct {
     handler MyRoot
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncMyRootDoRoot)(nil)
+var _ thrift.ProcessorFunction = (*procFuncMyRootDoRoot)(nil)
 
 func (p *procFuncMyRootDoRoot) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyRootDoRoot()
@@ -598,7 +598,7 @@ type MyNodeProcessor struct {
     *MyRootProcessor
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*MyNodeProcessor)(nil)
+var _ thrift.Processor = (*MyNodeProcessor)(nil)
 
 func NewMyNodeProcessor(handler MyNode) *MyNodeProcessor {
     p := &MyNodeProcessor{
@@ -619,7 +619,7 @@ type procFuncMyNodeDoMid struct {
     handler MyNode
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncMyNodeDoMid)(nil)
+var _ thrift.ProcessorFunction = (*procFuncMyNodeDoMid)(nil)
 
 func (p *procFuncMyNodeDoMid) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyNodeDoMid()
@@ -914,7 +914,7 @@ type MyLeafProcessor struct {
     *MyNodeProcessor
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*MyLeafProcessor)(nil)
+var _ thrift.Processor = (*MyLeafProcessor)(nil)
 
 func NewMyLeafProcessor(handler MyLeaf) *MyLeafProcessor {
     p := &MyLeafProcessor{
@@ -935,7 +935,7 @@ type procFuncMyLeafDoLeaf struct {
     handler MyLeaf
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncMyLeafDoLeaf)(nil)
+var _ thrift.ProcessorFunction = (*procFuncMyLeafDoLeaf)(nil)
 
 func (p *procFuncMyLeafDoLeaf) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyLeafDoLeaf()

@@ -44,7 +44,7 @@ func Serve(addr string) error {
 	return srv.ServeContext(context.Background())
 }
 
-func newServer(processor thrift.ProcessorContext, addr string) (thrift.Server, error) {
+func newServer(processor thrift.Processor, addr string) (thrift.Server, error) {
 	socket, err := thrift.NewServerSocket(addr)
 	if err != nil {
 		return nil, err

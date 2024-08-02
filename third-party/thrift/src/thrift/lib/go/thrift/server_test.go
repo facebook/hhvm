@@ -64,7 +64,7 @@ func TestSimpleServer(t *testing.T) {
 type testProcessor struct {
 }
 
-func (t *testProcessor) GetProcessorFunctionContext(name string) ProcessorFunctionContext {
+func (t *testProcessor) GetProcessorFunction(name string) ProcessorFunction {
 	if name == "test" {
 		return &testProcessorFunction{}
 	}

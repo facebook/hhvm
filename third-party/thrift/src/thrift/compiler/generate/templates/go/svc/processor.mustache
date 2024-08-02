@@ -28,13 +28,13 @@ type {{service:go_name}}Processor struct {
     {{/service:extends}}
     {{/service:extends?}}
     {{^service:extends?}}
-    processorMap       map[string]thrift.ProcessorFunctionContext
+    processorMap       map[string]thrift.ProcessorFunction
     functionServiceMap map[string]string
     handler            {{service:go_name}}
     {{/service:extends?}}
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*{{service:go_name}}Processor)(nil)
+var _ thrift.Processor = (*{{service:go_name}}Processor)(nil)
 
 func New{{service:go_name}}Processor(handler {{service:go_name}}) *{{service:go_name}}Processor {
     p := &{{service:go_name}}Processor{
@@ -45,7 +45,7 @@ func New{{service:go_name}}Processor(handler {{service:go_name}}) *{{service:go_
     {{/service:extends?}}
     {{^service:extends?}}
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        processorMap:       make(map[string]thrift.ProcessorFunction),
         functionServiceMap: make(map[string]string),
     {{/service:extends?}}
     }
@@ -64,7 +64,7 @@ func New{{service:go_name}}Processor(handler {{service:go_name}}) *{{service:go_
 }
 {{^service:extends?}}
 
-func (p *{{service:go_name}}Processor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+func (p *{{service:go_name}}Processor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
     p.processorMap[key] = processor
 }
 
@@ -72,12 +72,12 @@ func (p *{{service:go_name}}Processor) AddToFunctionServiceMap(key, service stri
     p.functionServiceMap[key] = service
 }
 
-func (p *{{service:go_name}}Processor) GetProcessorFunctionContext{{!
-  }}(key string) (processor thrift.ProcessorFunctionContext) {
+func (p *{{service:go_name}}Processor) GetProcessorFunction{{!
+  }}(key string) (processor thrift.ProcessorFunction) {
     return p.processorMap[key]
 }
 
-func (p *{{service:go_name}}Processor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+func (p *{{service:go_name}}Processor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorMap
 }
 
@@ -99,7 +99,7 @@ type {{> svc/proc_func_name}} struct {
     handler {{service:go_name}}
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*{{> svc/proc_func_name}})(nil)
+var _ thrift.ProcessorFunction = (*{{> svc/proc_func_name}})(nil)
 
 func (p *{{> svc/proc_func_name}}) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReq{{service:go_name}}{{function:go_name}}()

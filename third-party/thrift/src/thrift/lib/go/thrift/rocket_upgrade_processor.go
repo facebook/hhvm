@@ -22,14 +22,14 @@ import (
 
 type rocketUpgradeProcessor struct {
 	upgraded  bool
-	processor ProcessorContext
+	processor Processor
 }
 
-func newRocketUpgradeProcessor(processor ProcessorContext) *rocketUpgradeProcessor {
+func newRocketUpgradeProcessor(processor Processor) *rocketUpgradeProcessor {
 	return &rocketUpgradeProcessor{processor: processor}
 }
 
-func (r *rocketUpgradeProcessor) GetProcessorFunctionContext(name string) ProcessorFunctionContext {
+func (r *rocketUpgradeProcessor) GetProcessorFunction(name string) ProcessorFunction {
 	// The upgradeToRocket function in thrift/lib/thrift/RocketUpgrade.thrift
 	// asks the server to upgrade to using the rocket protocol.
 	// If the server does not respond with an error,
@@ -38,7 +38,7 @@ func (r *rocketUpgradeProcessor) GetProcessorFunctionContext(name string) Proces
 		r.upgraded = true
 		return &rocketUpgradeProcessorFunction{}
 	}
-	return r.processor.GetProcessorFunctionContext(name)
+	return r.processor.GetProcessorFunction(name)
 }
 
 type rocketUpgradeProcessorFunction struct{}

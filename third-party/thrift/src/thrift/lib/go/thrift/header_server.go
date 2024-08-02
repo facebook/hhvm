@@ -34,13 +34,13 @@ import (
 // connection are not supported, as the per-connection gofunc reads
 // the request, processes it, and writes the response serially
 type headerServer struct {
-	processor ProcessorContext
+	processor Processor
 	listener  net.Listener
 	log       *log.Logger
 }
 
 // newHeaderServer creates a new server that only supports Header Transport.
-func newHeaderServer(processor ProcessorContext, listener net.Listener) Server {
+func newHeaderServer(processor Processor, listener net.Listener) Server {
 	return &headerServer{
 		processor: processor,
 		listener:  listener,

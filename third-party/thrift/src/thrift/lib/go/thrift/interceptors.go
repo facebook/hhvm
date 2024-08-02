@@ -27,7 +27,7 @@ func ChainInterceptors(interceptors ...Interceptor) Interceptor {
 	n := len(interceptors)
 	switch n {
 	case 0:
-		return func(ctx context.Context, name string, pf ProcessorFunctionContext,
+		return func(ctx context.Context, name string, pf ProcessorFunction,
 			args Struct) (WritableStruct, ApplicationException) {
 
 			return pf.RunContext(ctx, args)
@@ -36,7 +36,7 @@ func ChainInterceptors(interceptors ...Interceptor) Interceptor {
 		return interceptors[0]
 	}
 
-	return func(ctx context.Context, name string, pf ProcessorFunctionContext,
+	return func(ctx context.Context, name string, pf ProcessorFunction,
 		args Struct) (WritableStruct, ApplicationException) {
 
 		handler := &chainHandler{
@@ -49,13 +49,13 @@ func ChainInterceptors(interceptors ...Interceptor) Interceptor {
 	}
 }
 
-// chainHandler is a utility struct that implements the ProcessorFunctionContext
+// chainHandler is a utility struct that implements the ProcessorFunction
 // interface and executes the interceptors in the list in order.
 type chainHandler struct {
 	curI         int
 	last         int
 	name         string
-	origHandler  ProcessorFunctionContext
+	origHandler  ProcessorFunction
 	interceptors []Interceptor
 }
 

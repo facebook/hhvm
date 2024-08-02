@@ -1745,17 +1745,17 @@ func (x *respNestedContainersTurtles) String() string {
 
 
 type NestedContainersProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunctionContext
+    processorMap       map[string]thrift.ProcessorFunction
     functionServiceMap map[string]string
     handler            NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*NestedContainersProcessor)(nil)
+var _ thrift.Processor = (*NestedContainersProcessor)(nil)
 
 func NewNestedContainersProcessor(handler NestedContainers) *NestedContainersProcessor {
     p := &NestedContainersProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        processorMap:       make(map[string]thrift.ProcessorFunction),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("mapList", &procFuncNestedContainersMapList{handler: handler})
@@ -1772,7 +1772,7 @@ func NewNestedContainersProcessor(handler NestedContainers) *NestedContainersPro
     return p
 }
 
-func (p *NestedContainersProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+func (p *NestedContainersProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
     p.processorMap[key] = processor
 }
 
@@ -1780,11 +1780,11 @@ func (p *NestedContainersProcessor) AddToFunctionServiceMap(key, service string)
     p.functionServiceMap[key] = service
 }
 
-func (p *NestedContainersProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+func (p *NestedContainersProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
     return p.processorMap[key]
 }
 
-func (p *NestedContainersProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+func (p *NestedContainersProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorMap
 }
 
@@ -1801,7 +1801,7 @@ type procFuncNestedContainersMapList struct {
     handler NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncNestedContainersMapList)(nil)
+var _ thrift.ProcessorFunction = (*procFuncNestedContainersMapList)(nil)
 
 func (p *procFuncNestedContainersMapList) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersMapList()
@@ -1852,7 +1852,7 @@ type procFuncNestedContainersMapSet struct {
     handler NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncNestedContainersMapSet)(nil)
+var _ thrift.ProcessorFunction = (*procFuncNestedContainersMapSet)(nil)
 
 func (p *procFuncNestedContainersMapSet) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersMapSet()
@@ -1903,7 +1903,7 @@ type procFuncNestedContainersListMap struct {
     handler NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncNestedContainersListMap)(nil)
+var _ thrift.ProcessorFunction = (*procFuncNestedContainersListMap)(nil)
 
 func (p *procFuncNestedContainersListMap) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersListMap()
@@ -1954,7 +1954,7 @@ type procFuncNestedContainersListSet struct {
     handler NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncNestedContainersListSet)(nil)
+var _ thrift.ProcessorFunction = (*procFuncNestedContainersListSet)(nil)
 
 func (p *procFuncNestedContainersListSet) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersListSet()
@@ -2005,7 +2005,7 @@ type procFuncNestedContainersTurtles struct {
     handler NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncNestedContainersTurtles)(nil)
+var _ thrift.ProcessorFunction = (*procFuncNestedContainersTurtles)(nil)
 
 func (p *procFuncNestedContainersTurtles) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersTurtles()

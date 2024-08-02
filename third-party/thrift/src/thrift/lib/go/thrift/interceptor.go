@@ -25,44 +25,44 @@ import (
 // The interceptor is responsible for calling pfunc.RunContext() and it can
 // return a result or an exception which are then sent back to the caller.
 // The interceptor is expected to be concurrency safe.
-type Interceptor func(ctx context.Context, methodName string, pfunc ProcessorFunctionContext, args Struct) (WritableStruct, ApplicationException)
+type Interceptor func(ctx context.Context, methodName string, pfunc ProcessorFunction, args Struct) (WritableStruct, ApplicationException)
 
-type interceptorProcessorContext struct {
+type interceptorProcessor struct {
 	interceptor Interceptor
-	ProcessorContext
+	Processor
 }
 
-// WrapInterceptorContext wraps an interceptor around the ProcessorContext p
+// WrapInterceptor wraps an interceptor around the Processor p
 // such as when running the method returned by that processor it will execute
 // the interceptor instead.
-func WrapInterceptorContext(interceptor Interceptor, p ProcessorContext) ProcessorContext {
+func WrapInterceptor(interceptor Interceptor, p Processor) Processor {
 	if interceptor == nil {
 		return p
 	}
-	return &interceptorProcessorContext{
-		interceptor:      interceptor,
-		ProcessorContext: p,
+	return &interceptorProcessor{
+		interceptor: interceptor,
+		Processor:   p,
 	}
 }
 
-func (p *interceptorProcessorContext) GetProcessorFunctionContext(name string) ProcessorFunctionContext {
-	pf := p.ProcessorContext.GetProcessorFunctionContext(name)
+func (p *interceptorProcessor) GetProcessorFunction(name string) ProcessorFunction {
+	pf := p.Processor.GetProcessorFunction(name)
 	if pf == nil {
 		return nil // see ProcessContext, this semantic means 'no such function'.
 	}
-	return &interceptorProcessorFunctionContext{
-		interceptor:              p.interceptor,
-		methodName:               name,
-		ProcessorFunctionContext: pf,
+	return &interceptorProcessorFunction{
+		interceptor:       p.interceptor,
+		methodName:        name,
+		ProcessorFunction: pf,
 	}
 }
 
-type interceptorProcessorFunctionContext struct {
+type interceptorProcessorFunction struct {
 	interceptor Interceptor
 	methodName  string
-	ProcessorFunctionContext
+	ProcessorFunction
 }
 
-func (pf *interceptorProcessorFunctionContext) RunContext(ctx context.Context, args Struct) (WritableStruct, ApplicationException) {
-	return pf.interceptor(ctx, pf.methodName, pf.ProcessorFunctionContext, args)
+func (pf *interceptorProcessorFunction) RunContext(ctx context.Context, args Struct) (WritableStruct, ApplicationException) {
+	return pf.interceptor(ctx, pf.methodName, pf.ProcessorFunction, args)
 }

@@ -22,24 +22,24 @@ import (
 	"strings"
 )
 
-// ProcessorContext exposes access to processor functions which
+// Processor exposes access to processor functions which
 // manage I/O and processing of a input message for a specific
 // server function
-type ProcessorContext interface {
-	// GetProcessorFunctionContext is given the name of a thrift function and
+type Processor interface {
+	// GetProcessorFunction is given the name of a thrift function and
 	// the type of the inbound thrift message.  It is expected to return
-	// a non-nil GetProcessorFunctionContext when the function can be successfully
+	// a non-nil GetProcessorFunction when the function can be successfully
 	// found.
 	//
-	// If ProcessorFunctionContext is nil, a generic error will be
+	// If ProcessorFunction is nil, a generic error will be
 	// sent which explains that no processor function exists with the specified
 	// name on this server.
-	GetProcessorFunctionContext(name string) ProcessorFunctionContext
+	GetProcessorFunction(name string) ProcessorFunction
 }
 
 // ProcessorFunctionContext is the interface that must be implemented in
 // order to perform io and message processing
-type ProcessorFunctionContext interface {
+type ProcessorFunction interface {
 	// Read a serializable message from the protocol.
 	Read(prot Decoder) (Struct, Exception)
 	// RunContext processes a message handing it to the client handler.
@@ -59,21 +59,21 @@ func errorType(err error) string {
 // and fully process a message. It understands the thrift protocol.
 // A framework could be written outside of the thrift library but would need to
 // duplicate this logic.
-func processContext(ctx context.Context, processor ProcessorContext, prot Protocol) (ext Exception) {
+func processContext(ctx context.Context, processor Processor, prot Protocol) (ext Exception) {
 	name, messageType, seqID, rerr := prot.ReadMessageBegin()
 	if rerr != nil {
 		return rerr
 	}
 	ctx = WithHeaders(ctx, prot.GetResponseHeaders())
 	var err ApplicationException
-	var pfunc ProcessorFunctionContext
+	var pfunc ProcessorFunction
 	if messageType != CALL && messageType != ONEWAY {
 		// case one: invalid message type
 		err = NewApplicationException(UNKNOWN_METHOD, fmt.Sprintf("unexpected message type: %d", messageType))
 		// error should be sent, connection should stay open if successful
 	}
 	if err == nil {
-		pf := processor.GetProcessorFunctionContext(name)
+		pf := processor.GetProcessorFunction(name)
 		if pf == nil {
 			err = NewApplicationException(UNKNOWN_METHOD, fmt.Sprintf("no such function: %q", name))
 		} else {

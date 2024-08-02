@@ -22,11 +22,11 @@ import (
 )
 
 type exampleProcessor struct {
-	ProcessorContext
+	Processor
 	hit *bool
 }
 
-func (ep *exampleProcessor) GetProcessorFunctionContext(name string) ProcessorFunctionContext {
+func (ep *exampleProcessor) GetProcessorFunction(name string) ProcessorFunction {
 	*ep.hit = true
 	return nil // happens in "no such method" case
 }
@@ -35,8 +35,8 @@ func TestInterceptorWrapperNilFunctionContext(t *testing.T) {
 	var hit bool
 	proc := &exampleProcessor{nil, &hit}
 
-	derivedProc := WrapInterceptorContext(emptyInterceptor, proc)
-	pFunc := derivedProc.GetProcessorFunctionContext("blah")
+	derivedProc := WrapInterceptor(emptyInterceptor, proc)
+	pFunc := derivedProc.GetProcessorFunction("blah")
 	if hit != true {
 		t.Fatalf("interceptor should have called underlying processor function handler.")
 	}
@@ -45,6 +45,6 @@ func TestInterceptorWrapperNilFunctionContext(t *testing.T) {
 	}
 }
 
-func emptyInterceptor(ctx context.Context, methodName string, pfunc ProcessorFunctionContext, args Struct) (WritableStruct, ApplicationException) {
+func emptyInterceptor(ctx context.Context, methodName string, pfunc ProcessorFunction, args Struct) (WritableStruct, ApplicationException) {
 	return pfunc.RunContext(ctx, args)
 }

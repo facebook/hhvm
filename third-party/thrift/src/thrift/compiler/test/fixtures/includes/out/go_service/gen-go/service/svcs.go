@@ -744,17 +744,17 @@ func (x *respMyServiceHasArgDocs) String() string {
 
 
 type MyServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunctionContext
+    processorMap       map[string]thrift.ProcessorFunction
     functionServiceMap map[string]string
     handler            MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*MyServiceProcessor)(nil)
+var _ thrift.Processor = (*MyServiceProcessor)(nil)
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     p := &MyServiceProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        processorMap:       make(map[string]thrift.ProcessorFunction),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("query", &procFuncMyServiceQuery{handler: handler})
@@ -765,7 +765,7 @@ func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     return p
 }
 
-func (p *MyServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+func (p *MyServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
     p.processorMap[key] = processor
 }
 
@@ -773,11 +773,11 @@ func (p *MyServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *MyServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+func (p *MyServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
     return p.processorMap[key]
 }
 
-func (p *MyServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+func (p *MyServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorMap
 }
 
@@ -794,7 +794,7 @@ type procFuncMyServiceQuery struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceQuery)(nil)
+var _ thrift.ProcessorFunction = (*procFuncMyServiceQuery)(nil)
 
 func (p *procFuncMyServiceQuery) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceQuery()
@@ -845,7 +845,7 @@ type procFuncMyServiceHasArgDocs struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceHasArgDocs)(nil)
+var _ thrift.ProcessorFunction = (*procFuncMyServiceHasArgDocs)(nil)
 
 func (p *procFuncMyServiceHasArgDocs) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceHasArgDocs()

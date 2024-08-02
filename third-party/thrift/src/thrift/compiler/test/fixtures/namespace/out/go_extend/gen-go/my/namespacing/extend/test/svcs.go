@@ -420,7 +420,7 @@ type ExtendTestServiceProcessor struct {
     *test0.HsTestServiceProcessor
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*ExtendTestServiceProcessor)(nil)
+var _ thrift.Processor = (*ExtendTestServiceProcessor)(nil)
 
 func NewExtendTestServiceProcessor(handler ExtendTestService) *ExtendTestServiceProcessor {
     p := &ExtendTestServiceProcessor{
@@ -441,7 +441,7 @@ type procFuncExtendTestServiceCheck struct {
     handler ExtendTestService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncExtendTestServiceCheck)(nil)
+var _ thrift.ProcessorFunction = (*procFuncExtendTestServiceCheck)(nil)
 
 func (p *procFuncExtendTestServiceCheck) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqExtendTestServiceCheck()

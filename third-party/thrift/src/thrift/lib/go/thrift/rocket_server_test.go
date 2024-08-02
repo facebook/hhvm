@@ -66,7 +66,7 @@ func TestRocketServerConnInfo(t *testing.T) {
 
 type rocketServerTestProcessor struct{}
 
-func (t *rocketServerTestProcessor) GetProcessorFunctionContext(name string) ProcessorFunctionContext {
+func (t *rocketServerTestProcessor) GetProcessorFunction(name string) ProcessorFunction {
 	if name == "test" {
 		return &rocketServerTestProcessorFunction{&testProcessorFunction{}}
 	}
@@ -74,7 +74,7 @@ func (t *rocketServerTestProcessor) GetProcessorFunctionContext(name string) Pro
 }
 
 type rocketServerTestProcessorFunction struct {
-	ProcessorFunctionContext
+	ProcessorFunction
 }
 
 func (p *rocketServerTestProcessorFunction) RunContext(ctx context.Context, reqStruct Struct) (WritableStruct, ApplicationException) {

@@ -63,7 +63,7 @@ func main() {
 	os.Exit(0)
 }
 
-func newServer(processor thrift.ProcessorContext, addr string) (thrift.Server, net.Addr, error) {
+func newServer(processor thrift.Processor, addr string) (thrift.Server, net.Addr, error) {
 	socket, err := thrift.NewServerSocket(addr)
 	if err != nil {
 		return nil, nil, err

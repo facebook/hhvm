@@ -31,13 +31,13 @@ import (
 
 type rocketServerTransport struct {
 	listener    net.Listener
-	processor   ProcessorContext
+	processor   Processor
 	acceptor    transport.ServerTransportAcceptor
 	transportID TransportID
 	log         *log.Logger
 }
 
-func newRocketServerTransport(listener net.Listener, processor ProcessorContext, transportID TransportID) transport.ServerTransport {
+func newRocketServerTransport(listener net.Listener, processor Processor, transportID TransportID) transport.ServerTransport {
 	return &rocketServerTransport{
 		listener:    listener,
 		processor:   processor,
@@ -131,7 +131,7 @@ func (r *rocketServerTransport) processRocketRequests(ctx context.Context, conn 
 	r.acceptor(ctx, transport.NewTransport(transport.NewTCPConn(conn)), func(*transport.Transport) {})
 }
 
-func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protocol Protocol, processor ProcessorContext) error {
+func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protocol Protocol, processor Processor) error {
 	exc := processContext(ctx, processor, protocol)
 	if isEOF(exc) {
 		return exc
@@ -143,7 +143,7 @@ func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protoc
 	return nil
 }
 
-func (r *rocketServerTransport) processHeaderRequests(ctx context.Context, protocol Protocol, processor ProcessorContext) error {
+func (r *rocketServerTransport) processHeaderRequests(ctx context.Context, protocol Protocol, processor Processor) error {
 	defer func() {
 		if err := recover(); err != nil {
 			r.log.Printf("panic in processor: %v: %s", err, debug.Stack())

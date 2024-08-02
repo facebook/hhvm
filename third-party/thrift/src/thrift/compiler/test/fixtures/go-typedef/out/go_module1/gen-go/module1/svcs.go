@@ -1005,17 +1005,17 @@ func (x *respFinderPreviousPlate) String() string {
 
 
 type FinderProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunctionContext
+    processorMap       map[string]thrift.ProcessorFunction
     functionServiceMap map[string]string
     handler            Finder
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*FinderProcessor)(nil)
+var _ thrift.Processor = (*FinderProcessor)(nil)
 
 func NewFinderProcessor(handler Finder) *FinderProcessor {
     p := &FinderProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        processorMap:       make(map[string]thrift.ProcessorFunction),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("byPlate", &procFuncFinderByPlate{handler: handler})
@@ -1028,7 +1028,7 @@ func NewFinderProcessor(handler Finder) *FinderProcessor {
     return p
 }
 
-func (p *FinderProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+func (p *FinderProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
     p.processorMap[key] = processor
 }
 
@@ -1036,11 +1036,11 @@ func (p *FinderProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *FinderProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+func (p *FinderProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
     return p.processorMap[key]
 }
 
-func (p *FinderProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+func (p *FinderProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorMap
 }
 
@@ -1057,7 +1057,7 @@ type procFuncFinderByPlate struct {
     handler Finder
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncFinderByPlate)(nil)
+var _ thrift.ProcessorFunction = (*procFuncFinderByPlate)(nil)
 
 func (p *procFuncFinderByPlate) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqFinderByPlate()
@@ -1109,7 +1109,7 @@ type procFuncFinderAliasByPlate struct {
     handler Finder
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncFinderAliasByPlate)(nil)
+var _ thrift.ProcessorFunction = (*procFuncFinderAliasByPlate)(nil)
 
 func (p *procFuncFinderAliasByPlate) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqFinderAliasByPlate()
@@ -1161,7 +1161,7 @@ type procFuncFinderPreviousPlate struct {
     handler Finder
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncFinderPreviousPlate)(nil)
+var _ thrift.ProcessorFunction = (*procFuncFinderPreviousPlate)(nil)
 
 func (p *procFuncFinderPreviousPlate) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqFinderPreviousPlate()

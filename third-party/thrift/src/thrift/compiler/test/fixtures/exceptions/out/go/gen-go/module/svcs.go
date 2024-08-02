@@ -1406,17 +1406,17 @@ func (x *respRaiserGet500) String() string {
 
 
 type RaiserProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunctionContext
+    processorMap       map[string]thrift.ProcessorFunction
     functionServiceMap map[string]string
     handler            Raiser
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*RaiserProcessor)(nil)
+var _ thrift.Processor = (*RaiserProcessor)(nil)
 
 func NewRaiserProcessor(handler Raiser) *RaiserProcessor {
     p := &RaiserProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        processorMap:       make(map[string]thrift.ProcessorFunction),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("doBland", &procFuncRaiserDoBland{handler: handler})
@@ -1431,7 +1431,7 @@ func NewRaiserProcessor(handler Raiser) *RaiserProcessor {
     return p
 }
 
-func (p *RaiserProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+func (p *RaiserProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
     p.processorMap[key] = processor
 }
 
@@ -1439,11 +1439,11 @@ func (p *RaiserProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *RaiserProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+func (p *RaiserProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
     return p.processorMap[key]
 }
 
-func (p *RaiserProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+func (p *RaiserProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorMap
 }
 
@@ -1460,7 +1460,7 @@ type procFuncRaiserDoBland struct {
     handler Raiser
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncRaiserDoBland)(nil)
+var _ thrift.ProcessorFunction = (*procFuncRaiserDoBland)(nil)
 
 func (p *procFuncRaiserDoBland) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserDoBland()
@@ -1510,7 +1510,7 @@ type procFuncRaiserDoRaise struct {
     handler Raiser
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncRaiserDoRaise)(nil)
+var _ thrift.ProcessorFunction = (*procFuncRaiserDoRaise)(nil)
 
 func (p *procFuncRaiserDoRaise) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserDoRaise()
@@ -1584,7 +1584,7 @@ type procFuncRaiserGet200 struct {
     handler Raiser
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncRaiserGet200)(nil)
+var _ thrift.ProcessorFunction = (*procFuncRaiserGet200)(nil)
 
 func (p *procFuncRaiserGet200) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserGet200()
@@ -1635,7 +1635,7 @@ type procFuncRaiserGet500 struct {
     handler Raiser
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncRaiserGet500)(nil)
+var _ thrift.ProcessorFunction = (*procFuncRaiserGet500)(nil)
 
 func (p *procFuncRaiserGet500) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserGet500()

@@ -28,13 +28,13 @@ import (
 )
 
 type rocketServer struct {
-	proc          ProcessorContext
+	proc          Processor
 	listener      net.Listener
 	transportID   TransportID
 	zstdSupported bool
 }
 
-func newRocketServer(proc ProcessorContext, listener net.Listener) Server {
+func newRocketServer(proc Processor, listener net.Listener) Server {
 	return &rocketServer{
 		proc:          proc,
 		listener:      listener,
@@ -43,7 +43,7 @@ func newRocketServer(proc ProcessorContext, listener net.Listener) Server {
 	}
 }
 
-func newUpgradeToRocketServer(proc ProcessorContext, listener net.Listener) Server {
+func newUpgradeToRocketServer(proc Processor, listener net.Listener) Server {
 	return &rocketServer{
 		proc:          proc,
 		listener:      listener,
@@ -77,7 +77,7 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 
 type rocketServerSocket struct {
 	ctx  context.Context
-	proc ProcessorContext
+	proc Processor
 }
 
 func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {

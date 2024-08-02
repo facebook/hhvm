@@ -381,17 +381,17 @@ func (x *respHsTestServiceInit) String() string {
 
 
 type HsTestServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunctionContext
+    processorMap       map[string]thrift.ProcessorFunction
     functionServiceMap map[string]string
     handler            HsTestService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*HsTestServiceProcessor)(nil)
+var _ thrift.Processor = (*HsTestServiceProcessor)(nil)
 
 func NewHsTestServiceProcessor(handler HsTestService) *HsTestServiceProcessor {
     p := &HsTestServiceProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        processorMap:       make(map[string]thrift.ProcessorFunction),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("init", &procFuncHsTestServiceInit{handler: handler})
@@ -400,7 +400,7 @@ func NewHsTestServiceProcessor(handler HsTestService) *HsTestServiceProcessor {
     return p
 }
 
-func (p *HsTestServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+func (p *HsTestServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
     p.processorMap[key] = processor
 }
 
@@ -408,11 +408,11 @@ func (p *HsTestServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *HsTestServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+func (p *HsTestServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
     return p.processorMap[key]
 }
 
-func (p *HsTestServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+func (p *HsTestServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorMap
 }
 
@@ -429,7 +429,7 @@ type procFuncHsTestServiceInit struct {
     handler HsTestService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncHsTestServiceInit)(nil)
+var _ thrift.ProcessorFunction = (*procFuncHsTestServiceInit)(nil)
 
 func (p *procFuncHsTestServiceInit) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqHsTestServiceInit()

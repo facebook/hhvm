@@ -22,9 +22,9 @@ import (
 )
 
 // NewSimpleServer creates a new server that only supports Header Transport.
-func NewSimpleServer(processor ProcessorContext, listener net.Listener, transportType TransportID, options ...func(*ServerOptions)) Server {
+func NewSimpleServer(processor Processor, listener net.Listener, transportType TransportID, options ...func(*ServerOptions)) Server {
 	serverOptions := simpleServerOptions(options...)
-	processor = WrapInterceptorContext(serverOptions.interceptor, processor)
+	processor = WrapInterceptor(serverOptions.interceptor, processor)
 	switch transportType {
 	case TransportIDHeader:
 		return newHeaderServer(processor, listener)

@@ -776,17 +776,17 @@ func (x *respSomeServiceBinaryKeyedMap) String() string {
 
 
 type SomeServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunctionContext
+    processorMap       map[string]thrift.ProcessorFunction
     functionServiceMap map[string]string
     handler            SomeService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*SomeServiceProcessor)(nil)
+var _ thrift.Processor = (*SomeServiceProcessor)(nil)
 
 func NewSomeServiceProcessor(handler SomeService) *SomeServiceProcessor {
     p := &SomeServiceProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        processorMap:       make(map[string]thrift.ProcessorFunction),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("bounce_map", &procFuncSomeServiceBounceMap{handler: handler})
@@ -797,7 +797,7 @@ func NewSomeServiceProcessor(handler SomeService) *SomeServiceProcessor {
     return p
 }
 
-func (p *SomeServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+func (p *SomeServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
     p.processorMap[key] = processor
 }
 
@@ -805,11 +805,11 @@ func (p *SomeServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *SomeServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+func (p *SomeServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
     return p.processorMap[key]
 }
 
-func (p *SomeServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+func (p *SomeServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorMap
 }
 
@@ -826,7 +826,7 @@ type procFuncSomeServiceBounceMap struct {
     handler SomeService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncSomeServiceBounceMap)(nil)
+var _ thrift.ProcessorFunction = (*procFuncSomeServiceBounceMap)(nil)
 
 func (p *procFuncSomeServiceBounceMap) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqSomeServiceBounceMap()
@@ -878,7 +878,7 @@ type procFuncSomeServiceBinaryKeyedMap struct {
     handler SomeService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncSomeServiceBinaryKeyedMap)(nil)
+var _ thrift.ProcessorFunction = (*procFuncSomeServiceBinaryKeyedMap)(nil)
 
 func (p *procFuncSomeServiceBinaryKeyedMap) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqSomeServiceBinaryKeyedMap()

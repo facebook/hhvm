@@ -1938,17 +1938,17 @@ func (x *respMyServiceGoDoNothing) String() string {
 
 
 type MyServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunctionContext
+    processorMap       map[string]thrift.ProcessorFunction
     functionServiceMap map[string]string
     handler            MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*MyServiceProcessor)(nil)
+var _ thrift.Processor = (*MyServiceProcessor)(nil)
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     p := &MyServiceProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        processorMap:       make(map[string]thrift.ProcessorFunction),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("ping", &procFuncMyServicePing{handler: handler})
@@ -1969,7 +1969,7 @@ func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     return p
 }
 
-func (p *MyServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+func (p *MyServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
     p.processorMap[key] = processor
 }
 
@@ -1977,11 +1977,11 @@ func (p *MyServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *MyServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+func (p *MyServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
     return p.processorMap[key]
 }
 
-func (p *MyServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+func (p *MyServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorMap
 }
 
@@ -1998,7 +1998,7 @@ type procFuncMyServicePing struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncMyServicePing)(nil)
+var _ thrift.ProcessorFunction = (*procFuncMyServicePing)(nil)
 
 func (p *procFuncMyServicePing) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyServicePing()
@@ -2058,7 +2058,7 @@ type procFuncMyServiceGetRandomData struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceGetRandomData)(nil)
+var _ thrift.ProcessorFunction = (*procFuncMyServiceGetRandomData)(nil)
 
 func (p *procFuncMyServiceGetRandomData) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceGetRandomData()
@@ -2109,7 +2109,7 @@ type procFuncMyServiceHasDataById struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceHasDataById)(nil)
+var _ thrift.ProcessorFunction = (*procFuncMyServiceHasDataById)(nil)
 
 func (p *procFuncMyServiceHasDataById) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceHasDataById()
@@ -2161,7 +2161,7 @@ type procFuncMyServiceGoGetDataById struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceGoGetDataById)(nil)
+var _ thrift.ProcessorFunction = (*procFuncMyServiceGoGetDataById)(nil)
 
 func (p *procFuncMyServiceGoGetDataById) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceGoGetDataById()
@@ -2213,7 +2213,7 @@ type procFuncMyServicePutDataById struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncMyServicePutDataById)(nil)
+var _ thrift.ProcessorFunction = (*procFuncMyServicePutDataById)(nil)
 
 func (p *procFuncMyServicePutDataById) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyServicePutDataById()
@@ -2264,7 +2264,7 @@ type procFuncMyServiceLobDataById struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceLobDataById)(nil)
+var _ thrift.ProcessorFunction = (*procFuncMyServiceLobDataById)(nil)
 
 func (p *procFuncMyServiceLobDataById) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceLobDataById()
@@ -2314,7 +2314,7 @@ type procFuncMyServiceGoDoNothing struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncMyServiceGoDoNothing)(nil)
+var _ thrift.ProcessorFunction = (*procFuncMyServiceGoDoNothing)(nil)
 
 func (p *procFuncMyServiceGoDoNothing) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceGoDoNothing()
@@ -2770,17 +2770,17 @@ func (x *respMyServicePrioParentPong) String() string {
 
 
 type MyServicePrioParentProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunctionContext
+    processorMap       map[string]thrift.ProcessorFunction
     functionServiceMap map[string]string
     handler            MyServicePrioParent
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*MyServicePrioParentProcessor)(nil)
+var _ thrift.Processor = (*MyServicePrioParentProcessor)(nil)
 
 func NewMyServicePrioParentProcessor(handler MyServicePrioParent) *MyServicePrioParentProcessor {
     p := &MyServicePrioParentProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        processorMap:       make(map[string]thrift.ProcessorFunction),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("ping", &procFuncMyServicePrioParentPing{handler: handler})
@@ -2791,7 +2791,7 @@ func NewMyServicePrioParentProcessor(handler MyServicePrioParent) *MyServicePrio
     return p
 }
 
-func (p *MyServicePrioParentProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+func (p *MyServicePrioParentProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
     p.processorMap[key] = processor
 }
 
@@ -2799,11 +2799,11 @@ func (p *MyServicePrioParentProcessor) AddToFunctionServiceMap(key, service stri
     p.functionServiceMap[key] = service
 }
 
-func (p *MyServicePrioParentProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+func (p *MyServicePrioParentProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
     return p.processorMap[key]
 }
 
-func (p *MyServicePrioParentProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+func (p *MyServicePrioParentProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorMap
 }
 
@@ -2820,7 +2820,7 @@ type procFuncMyServicePrioParentPing struct {
     handler MyServicePrioParent
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncMyServicePrioParentPing)(nil)
+var _ thrift.ProcessorFunction = (*procFuncMyServicePrioParentPing)(nil)
 
 func (p *procFuncMyServicePrioParentPing) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyServicePrioParentPing()
@@ -2870,7 +2870,7 @@ type procFuncMyServicePrioParentPong struct {
     handler MyServicePrioParent
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncMyServicePrioParentPong)(nil)
+var _ thrift.ProcessorFunction = (*procFuncMyServicePrioParentPong)(nil)
 
 func (p *procFuncMyServicePrioParentPong) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyServicePrioParentPong()
@@ -3165,7 +3165,7 @@ type MyServicePrioChildProcessor struct {
     *MyServicePrioParentProcessor
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*MyServicePrioChildProcessor)(nil)
+var _ thrift.Processor = (*MyServicePrioChildProcessor)(nil)
 
 func NewMyServicePrioChildProcessor(handler MyServicePrioChild) *MyServicePrioChildProcessor {
     p := &MyServicePrioChildProcessor{
@@ -3186,7 +3186,7 @@ type procFuncMyServicePrioChildPang struct {
     handler MyServicePrioChild
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncMyServicePrioChildPang)(nil)
+var _ thrift.ProcessorFunction = (*procFuncMyServicePrioChildPang)(nil)
 
 func (p *procFuncMyServicePrioChildPang) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqMyServicePrioChildPang()
@@ -3535,17 +3535,17 @@ func (x *respBadServiceBar) String() string {
 
 
 type BadServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunctionContext
+    processorMap       map[string]thrift.ProcessorFunction
     functionServiceMap map[string]string
     handler            BadService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*BadServiceProcessor)(nil)
+var _ thrift.Processor = (*BadServiceProcessor)(nil)
 
 func NewBadServiceProcessor(handler BadService) *BadServiceProcessor {
     p := &BadServiceProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        processorMap:       make(map[string]thrift.ProcessorFunction),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("bar", &procFuncBadServiceBar{handler: handler})
@@ -3554,7 +3554,7 @@ func NewBadServiceProcessor(handler BadService) *BadServiceProcessor {
     return p
 }
 
-func (p *BadServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+func (p *BadServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
     p.processorMap[key] = processor
 }
 
@@ -3562,11 +3562,11 @@ func (p *BadServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *BadServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+func (p *BadServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
     return p.processorMap[key]
 }
 
-func (p *BadServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+func (p *BadServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorMap
 }
 
@@ -3583,7 +3583,7 @@ type procFuncBadServiceBar struct {
     handler BadService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncBadServiceBar)(nil)
+var _ thrift.ProcessorFunction = (*procFuncBadServiceBar)(nil)
 
 func (p *procFuncBadServiceBar) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqBadServiceBar()
@@ -4217,17 +4217,17 @@ func (x *respFooBarBazServiceBaz) String() string {
 
 
 type FooBarBazServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunctionContext
+    processorMap       map[string]thrift.ProcessorFunction
     functionServiceMap map[string]string
     handler            FooBarBazService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*FooBarBazServiceProcessor)(nil)
+var _ thrift.Processor = (*FooBarBazServiceProcessor)(nil)
 
 func NewFooBarBazServiceProcessor(handler FooBarBazService) *FooBarBazServiceProcessor {
     p := &FooBarBazServiceProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        processorMap:       make(map[string]thrift.ProcessorFunction),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("foo", &procFuncFooBarBazServiceFooStructured{handler: handler})
@@ -4240,7 +4240,7 @@ func NewFooBarBazServiceProcessor(handler FooBarBazService) *FooBarBazServicePro
     return p
 }
 
-func (p *FooBarBazServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+func (p *FooBarBazServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
     p.processorMap[key] = processor
 }
 
@@ -4248,11 +4248,11 @@ func (p *FooBarBazServiceProcessor) AddToFunctionServiceMap(key, service string)
     p.functionServiceMap[key] = service
 }
 
-func (p *FooBarBazServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+func (p *FooBarBazServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
     return p.processorMap[key]
 }
 
-func (p *FooBarBazServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+func (p *FooBarBazServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorMap
 }
 
@@ -4269,7 +4269,7 @@ type procFuncFooBarBazServiceFooStructured struct {
     handler FooBarBazService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncFooBarBazServiceFooStructured)(nil)
+var _ thrift.ProcessorFunction = (*procFuncFooBarBazServiceFooStructured)(nil)
 
 func (p *procFuncFooBarBazServiceFooStructured) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqFooBarBazServiceFooStructured()
@@ -4319,7 +4319,7 @@ type procFuncFooBarBazServiceBarNonStructured struct {
     handler FooBarBazService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncFooBarBazServiceBarNonStructured)(nil)
+var _ thrift.ProcessorFunction = (*procFuncFooBarBazServiceBarNonStructured)(nil)
 
 func (p *procFuncFooBarBazServiceBarNonStructured) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqFooBarBazServiceBarNonStructured()
@@ -4369,7 +4369,7 @@ type procFuncFooBarBazServiceBaz struct {
     handler FooBarBazService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncFooBarBazServiceBaz)(nil)
+var _ thrift.ProcessorFunction = (*procFuncFooBarBazServiceBaz)(nil)
 
 func (p *procFuncFooBarBazServiceBaz) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqFooBarBazServiceBaz()

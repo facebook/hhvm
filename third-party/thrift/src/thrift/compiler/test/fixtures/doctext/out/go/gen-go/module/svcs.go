@@ -787,17 +787,17 @@ func (x *respCThing) String() string {
 
 
 type CProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunctionContext
+    processorMap       map[string]thrift.ProcessorFunction
     functionServiceMap map[string]string
     handler            C
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorContext = (*CProcessor)(nil)
+var _ thrift.Processor = (*CProcessor)(nil)
 
 func NewCProcessor(handler C) *CProcessor {
     p := &CProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        processorMap:       make(map[string]thrift.ProcessorFunction),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("f", &procFuncCF{handler: handler})
@@ -808,7 +808,7 @@ func NewCProcessor(handler C) *CProcessor {
     return p
 }
 
-func (p *CProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+func (p *CProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
     p.processorMap[key] = processor
 }
 
@@ -816,11 +816,11 @@ func (p *CProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *CProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext) {
+func (p *CProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
     return p.processorMap[key]
 }
 
-func (p *CProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+func (p *CProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorMap
 }
 
@@ -837,7 +837,7 @@ type procFuncCF struct {
     handler C
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncCF)(nil)
+var _ thrift.ProcessorFunction = (*procFuncCF)(nil)
 
 func (p *procFuncCF) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqCF()
@@ -887,7 +887,7 @@ type procFuncCThing struct {
     handler C
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunctionContext = (*procFuncCThing)(nil)
+var _ thrift.ProcessorFunction = (*procFuncCThing)(nil)
 
 func (p *procFuncCThing) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
     args := newReqCThing()

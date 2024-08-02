@@ -16,12 +16,12 @@
 
 package thrift
 
-// Deprecated: use WrapInterceptorContext
+// Deprecated: use WrapInterceptor
 type ServerOptions struct {
 	interceptor Interceptor
 }
 
-// Deprecated: use WrapInterceptorContext
+// Deprecated: use WrapInterceptor
 func WithInterceptor(interceptor Interceptor) func(*ServerOptions) {
 	return func(server *ServerOptions) {
 		server.interceptor = interceptor

@@ -2411,7 +2411,11 @@ module Constructors = struct
 
   let pattern p = from_witness_locl @@ Pattern p
 
-  let flow ~from ~into ~kind = Flow { from; kind; into }
+  let rec flow ~from ~into ~kind =
+    match (from, into) with
+    | (Flow { from; into = into_l; kind = kind_l }, _) ->
+      Flow { from; into = flow ~from:into_l ~into ~kind; kind = kind_l }
+    | _ -> Flow { from; kind; into }
 
   let solved of_ ~solution ~in_ = Solved { solution; of_; in_ }
 

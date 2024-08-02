@@ -47,25 +47,25 @@ Reason:
                     "Flow":{
                       "from":[
                         {
+                          "Hint":[{"filename":"shape_subtyping_1.php","line":9,"char_start":3,"char_end":20}]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
                           "Flow":{
                             "from":[
                               {
-                                "Hint":[{"filename":"shape_subtyping_1.php","line":9,"char_start":3,"char_end":20}]
+                                "Witness":[{"filename":"shape_subtyping_1.php","line":9,"char_start":22,"char_end":23}]
                               }
                             ],
-                            "kind":"Flow_param_hint",
+                            "kind":"Flow_local",
                             "into":[
                               {
-                                "Witness":[{"filename":"shape_subtyping_1.php","line":9,"char_start":22,"char_end":23}]
+                                "Witness":[{"filename":"shape_subtyping_1.php","line":11,"char_start":29,"char_end":30}]
                               }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"shape_subtyping_1.php","line":11,"char_start":29,"char_end":30}]
                         }
                       ]
                     }

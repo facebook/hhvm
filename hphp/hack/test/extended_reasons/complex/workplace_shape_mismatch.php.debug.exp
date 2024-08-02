@@ -52,33 +52,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -89,21 +89,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -244,33 +244,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -281,21 +281,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -436,33 +436,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -473,21 +473,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -628,33 +628,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -665,21 +665,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -820,33 +820,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -857,21 +857,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -1012,33 +1012,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -1049,21 +1049,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -1204,33 +1204,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -1241,21 +1241,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -1396,33 +1396,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -1433,21 +1433,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -1588,33 +1588,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -1625,21 +1625,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -1780,33 +1780,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -1817,21 +1817,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -1972,33 +1972,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -2009,21 +2009,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -2164,33 +2164,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -2201,21 +2201,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -2356,33 +2356,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -2393,21 +2393,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -2548,33 +2548,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -2585,21 +2585,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -2739,33 +2739,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -2776,21 +2776,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -2943,33 +2943,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -2980,21 +2980,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }
@@ -3135,33 +3135,33 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
+                          "Def":[
+                            {
+                              "filename":"workplace_shape_mismatch.php",
+                              "line":5,
+                              "char_start":6,
+                              "char_end":20
+                            },
+                            [
                               {
-                                "Def":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_shape_mismatch.php",
-                                    "line":5,
-                                    "char_start":6,
-                                    "char_end":20
-                                  },
-                                  [
-                                    {
-                                      "Hint":[
-                                        {
-                                          "filename":"workplace_shape_mismatch.php",
-                                          "line":95,
-                                          "char_start":5,
-                                          "char_end":19
-                                        }
-                                      ]
-                                    }
-                                  ]
+                                    "line":95,
+                                    "char_start":5,
+                                    "char_end":19
+                                  }
                                 ]
                               }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
                               {
                                 "Witness":[
                                   {
@@ -3172,21 +3172,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"workplace_shape_mismatch.php",
+                                    "line":97,
+                                    "char_start":36,
+                                    "char_end":43
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"workplace_shape_mismatch.php",
-                              "line":97,
-                              "char_start":36,
-                              "char_end":43
-                            }
-                          ]
                         }
                       ]
                     }

@@ -33,44 +33,44 @@ Reason:
         "Flow":{
           "from":[
             {
+              "Def":[
+                {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
+                [
+                  {
+                    "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                  }
+                ]
+              ]
+            }
+          ],
+          "kind":"Flow_param_hint",
+          "into":[
+            {
               "Flow":{
                 "from":[
                   {
-                    "Flow":{
-                      "from":[
-                        {
-                          "Def":[
-                            {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
-                            [
-                              {
-                                "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
-                              }
-                            ]
-                          ]
-                        }
-                      ],
-                      "kind":"Flow_param_hint",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
-                        }
-                      ]
-                    }
+                    "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
                   }
                 ],
                 "kind":"Flow_local",
                 "into":[
                   {
-                    "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+                    "Flow":{
+                      "from":[
+                        {
+                          "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+                        }
+                      ],
+                      "kind":"Flow_return_expr",
+                      "into":[
+                        {
+                          "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+                        }
+                      ]
+                    }
                   }
                 ]
               }
-            }
-          ],
-          "kind":"Flow_return_expr",
-          "into":[
-            {
-              "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
             }
           ]
         }
@@ -122,44 +122,44 @@ Reason:
         "Flow":{
           "from":[
             {
+              "Def":[
+                {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
+                [
+                  {
+                    "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                  }
+                ]
+              ]
+            }
+          ],
+          "kind":"Flow_param_hint",
+          "into":[
+            {
               "Flow":{
                 "from":[
                   {
-                    "Flow":{
-                      "from":[
-                        {
-                          "Def":[
-                            {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
-                            [
-                              {
-                                "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
-                              }
-                            ]
-                          ]
-                        }
-                      ],
-                      "kind":"Flow_param_hint",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
-                        }
-                      ]
-                    }
+                    "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
                   }
                 ],
                 "kind":"Flow_local",
                 "into":[
                   {
-                    "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+                    "Flow":{
+                      "from":[
+                        {
+                          "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+                        }
+                      ],
+                      "kind":"Flow_return_expr",
+                      "into":[
+                        {
+                          "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+                        }
+                      ]
+                    }
                   }
                 ]
               }
-            }
-          ],
-          "kind":"Flow_return_expr",
-          "into":[
-            {
-              "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
             }
           ]
         }
@@ -230,44 +230,44 @@ Reason:
         "Flow":{
           "from":[
             {
+              "Def":[
+                {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
+                [
+                  {
+                    "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                  }
+                ]
+              ]
+            }
+          ],
+          "kind":"Flow_param_hint",
+          "into":[
+            {
               "Flow":{
                 "from":[
                   {
-                    "Flow":{
-                      "from":[
-                        {
-                          "Def":[
-                            {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
-                            [
-                              {
-                                "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
-                              }
-                            ]
-                          ]
-                        }
-                      ],
-                      "kind":"Flow_param_hint",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
-                        }
-                      ]
-                    }
+                    "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
                   }
                 ],
                 "kind":"Flow_local",
                 "into":[
                   {
-                    "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+                    "Flow":{
+                      "from":[
+                        {
+                          "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+                        }
+                      ],
+                      "kind":"Flow_return_expr",
+                      "into":[
+                        {
+                          "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+                        }
+                      ]
+                    }
                   }
                 ]
               }
-            }
-          ],
-          "kind":"Flow_return_expr",
-          "into":[
-            {
-              "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
             }
           ]
         }

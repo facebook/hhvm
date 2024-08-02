@@ -32,44 +32,44 @@ Reason:
               "Flow":{
                 "from":[
                   {
+                    "Def":[
+                      {"filename":"union_join_point.php","line":3,"char_start":7,"char_end":7},
+                      [
+                        {
+                          "Hint":[{"filename":"union_join_point.php","line":5,"char_start":30,"char_end":30}]
+                        }
+                      ]
+                    ]
+                  }
+                ],
+                "kind":"Flow_param_hint",
+                "into":[
+                  {
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
-                              {
-                                "Def":[
-                                  {"filename":"union_join_point.php","line":3,"char_start":7,"char_end":7},
-                                  [
-                                    {
-                                      "Hint":[{"filename":"union_join_point.php","line":5,"char_start":30,"char_end":30}]
-                                    }
-                                  ]
-                                ]
-                              }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
-                              {
-                                "Witness":[{"filename":"union_join_point.php","line":5,"char_start":32,"char_end":33}]
-                              }
-                            ]
-                          }
+                          "Witness":[{"filename":"union_join_point.php","line":5,"char_start":32,"char_end":33}]
                         }
                       ],
                       "kind":"Flow_local",
                       "into":[
                         {
-                          "Witness":[{"filename":"union_join_point.php","line":9,"char_start":10,"char_end":11}]
+                          "Flow":{
+                            "from":[
+                              {
+                                "Witness":[{"filename":"union_join_point.php","line":9,"char_start":10,"char_end":11}]
+                              }
+                            ],
+                            "kind":"Flow_assign",
+                            "into":[
+                              {
+                                "Witness":[{"filename":"union_join_point.php","line":9,"char_start":5,"char_end":6}]
+                              }
+                            ]
+                          }
                         }
                       ]
                     }
-                  }
-                ],
-                "kind":"Flow_assign",
-                "into":[
-                  {
-                    "Witness":[{"filename":"union_join_point.php","line":9,"char_start":5,"char_end":6}]
                   }
                 ]
               }
@@ -81,25 +81,25 @@ Reason:
               "Flow":{
                 "from":[
                   {
+                    "Witness":[{"filename":"union_join_point.php","line":6,"char_start":3,"char_end":49}]
+                  }
+                ],
+                "kind":"Flow_local",
+                "into":[
+                  {
                     "Flow":{
                       "from":[
                         {
-                          "Witness":[{"filename":"union_join_point.php","line":6,"char_start":3,"char_end":49}]
+                          "Witness":[{"filename":"union_join_point.php","line":12,"char_start":10,"char_end":11}]
                         }
                       ],
-                      "kind":"Flow_local",
+                      "kind":"Flow_return_expr",
                       "into":[
                         {
-                          "Witness":[{"filename":"union_join_point.php","line":12,"char_start":10,"char_end":11}]
+                          "Witness":[{"filename":"union_join_point.php","line":12,"char_start":3,"char_end":12}]
                         }
                       ]
                     }
-                  }
-                ],
-                "kind":"Flow_return_expr",
-                "into":[
-                  {
-                    "Witness":[{"filename":"union_join_point.php","line":12,"char_start":3,"char_end":12}]
                   }
                 ]
               }

@@ -30,77 +30,77 @@ Reason:
         "Flow":{
           "from":[
             {
+              "Def":[
+                {
+                  "filename":"intersection_subtyping_r.php",
+                  "line":5,
+                  "char_start":7,
+                  "char_end":7
+                },
+                [
+                  {
+                    "Hint":[
+                      {
+                        "filename":"intersection_subtyping_r.php",
+                        "line":7,
+                        "char_start":18,
+                        "char_end":18
+                      }
+                    ]
+                  }
+                ]
+              ]
+            }
+          ],
+          "kind":"Flow_param_hint",
+          "into":[
+            {
               "Flow":{
                 "from":[
+                  {
+                    "Witness":[
+                      {
+                        "filename":"intersection_subtyping_r.php",
+                        "line":7,
+                        "char_start":20,
+                        "char_end":21
+                      }
+                    ]
+                  }
+                ],
+                "kind":"Flow_local",
+                "into":[
                   {
                     "Flow":{
                       "from":[
                         {
-                          "Def":[
+                          "Witness":[
                             {
                               "filename":"intersection_subtyping_r.php",
-                              "line":5,
-                              "char_start":7,
-                              "char_end":7
-                            },
-                            [
-                              {
-                                "Hint":[
-                                  {
-                                    "filename":"intersection_subtyping_r.php",
-                                    "line":7,
-                                    "char_start":18,
-                                    "char_end":18
-                                  }
-                                ]
-                              }
-                            ]
+                              "line":8,
+                              "char_start":10,
+                              "char_end":11
+                            }
                           ]
                         }
                       ],
-                      "kind":"Flow_param_hint",
+                      "kind":"Flow_return_expr",
                       "into":[
                         {
                           "Witness":[
                             {
                               "filename":"intersection_subtyping_r.php",
-                              "line":7,
-                              "char_start":20,
-                              "char_end":21
+                              "line":8,
+                              "char_start":3,
+                              "char_end":12
                             }
                           ]
                         }
                       ]
                     }
                   }
-                ],
-                "kind":"Flow_local",
-                "into":[
-                  {
-                    "Witness":[
-                      {
-                        "filename":"intersection_subtyping_r.php",
-                        "line":8,
-                        "char_start":10,
-                        "char_end":11
-                      }
-                    ]
-                  }
                 ]
               }
-            }
-          ],
-          "kind":"Flow_return_expr",
-          "into":[
-            {
-              "Witness":[
-                {
-                  "filename":"intersection_subtyping_r.php",
-                  "line":8,
-                  "char_start":3,
-                  "char_end":12
-                }
-              ]
             }
           ]
         }

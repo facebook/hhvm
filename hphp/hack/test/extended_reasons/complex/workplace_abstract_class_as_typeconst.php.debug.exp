@@ -137,21 +137,21 @@ Reason:
                                       "Flow":{
                                         "from":[
                                           {
+                                            "Witness":[
+                                              {
+                                                "filename":"workplace_abstract_class_as_typeconst.php",
+                                                "line":36,
+                                                "char_start":13,
+                                                "char_end":32
+                                              }
+                                            ]
+                                          }
+                                        ],
+                                        "kind":"Flow_assign",
+                                        "into":[
+                                          {
                                             "Flow":{
                                               "from":[
-                                                {
-                                                  "Witness":[
-                                                    {
-                                                      "filename":"workplace_abstract_class_as_typeconst.php",
-                                                      "line":36,
-                                                      "char_start":13,
-                                                      "char_end":32
-                                                    }
-                                                  ]
-                                                }
-                                              ],
-                                              "kind":"Flow_assign",
-                                              "into":[
                                                 {
                                                   "Witness":[
                                                     {
@@ -162,21 +162,21 @@ Reason:
                                                     }
                                                   ]
                                                 }
+                                              ],
+                                              "kind":"Flow_local",
+                                              "into":[
+                                                {
+                                                  "Witness":[
+                                                    {
+                                                      "filename":"workplace_abstract_class_as_typeconst.php",
+                                                      "line":37,
+                                                      "char_start":3,
+                                                      "char_end":5
+                                                    }
+                                                  ]
+                                                }
                                               ]
                                             }
-                                          }
-                                        ],
-                                        "kind":"Flow_local",
-                                        "into":[
-                                          {
-                                            "Witness":[
-                                              {
-                                                "filename":"workplace_abstract_class_as_typeconst.php",
-                                                "line":37,
-                                                "char_start":3,
-                                                "char_end":5
-                                              }
-                                            ]
                                           }
                                         ]
                                       }

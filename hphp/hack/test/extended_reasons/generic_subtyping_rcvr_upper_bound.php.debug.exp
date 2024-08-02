@@ -39,33 +39,33 @@ Reason:
               "Flow":{
                 "from":[
                   {
-                    "Flow":{
-                      "from":[
+                    "Def":[
+                      {
+                        "filename":"generic_subtyping_rcvr_upper_bound.php",
+                        "line":4,
+                        "char_start":7,
+                        "char_end":7
+                      },
+                      [
                         {
-                          "Def":[
+                          "Hint":[
                             {
                               "filename":"generic_subtyping_rcvr_upper_bound.php",
-                              "line":4,
-                              "char_start":7,
-                              "char_end":7
-                            },
-                            [
-                              {
-                                "Hint":[
-                                  {
-                                    "filename":"generic_subtyping_rcvr_upper_bound.php",
-                                    "line":9,
-                                    "char_start":40,
-                                    "char_end":40
-                                  }
-                                ]
-                              }
-                            ]
+                              "line":9,
+                              "char_start":40,
+                              "char_end":40
+                            }
                           ]
                         }
-                      ],
-                      "kind":"Flow_param_hint",
-                      "into":[
+                      ]
+                    ]
+                  }
+                ],
+                "kind":"Flow_param_hint",
+                "into":[
+                  {
+                    "Flow":{
+                      "from":[
                         {
                           "Witness":[
                             {
@@ -76,21 +76,21 @@ Reason:
                             }
                           ]
                         }
+                      ],
+                      "kind":"Flow_local",
+                      "into":[
+                        {
+                          "Witness":[
+                            {
+                              "filename":"generic_subtyping_rcvr_upper_bound.php",
+                              "line":10,
+                              "char_start":20,
+                              "char_end":21
+                            }
+                          ]
+                        }
                       ]
                     }
-                  }
-                ],
-                "kind":"Flow_local",
-                "into":[
-                  {
-                    "Witness":[
-                      {
-                        "filename":"generic_subtyping_rcvr_upper_bound.php",
-                        "line":10,
-                        "char_start":20,
-                        "char_end":21
-                      }
-                    ]
                   }
                 ]
               }

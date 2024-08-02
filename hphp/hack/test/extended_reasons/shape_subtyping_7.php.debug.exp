@@ -50,32 +50,32 @@ Reason:
                     "Flow":{
                       "from":[
                         {
+                          "Def":[
+                            {"filename":"shape_subtyping_7.php","line":4,"char_start":6,"char_end":14},
+                            [
+                              {
+                                "Hint":[{"filename":"shape_subtyping_7.php","line":12,"char_start":3,"char_end":11}]
+                              }
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
                           "Flow":{
                             "from":[
                               {
-                                "Def":[
-                                  {"filename":"shape_subtyping_7.php","line":4,"char_start":6,"char_end":14},
-                                  [
-                                    {
-                                      "Hint":[{"filename":"shape_subtyping_7.php","line":12,"char_start":3,"char_end":11}]
-                                    }
-                                  ]
-                                ]
+                                "Witness":[{"filename":"shape_subtyping_7.php","line":12,"char_start":13,"char_end":14}]
                               }
                             ],
-                            "kind":"Flow_param_hint",
+                            "kind":"Flow_local",
                             "into":[
                               {
-                                "Witness":[{"filename":"shape_subtyping_7.php","line":12,"char_start":13,"char_end":14}]
+                                "Witness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":35,"char_end":36}]
                               }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":35,"char_end":36}]
                         }
                       ]
                     }
@@ -160,32 +160,32 @@ Reason:
                     "Flow":{
                       "from":[
                         {
+                          "Def":[
+                            {"filename":"shape_subtyping_7.php","line":4,"char_start":6,"char_end":14},
+                            [
+                              {
+                                "Hint":[{"filename":"shape_subtyping_7.php","line":12,"char_start":3,"char_end":11}]
+                              }
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
                           "Flow":{
                             "from":[
                               {
-                                "Def":[
-                                  {"filename":"shape_subtyping_7.php","line":4,"char_start":6,"char_end":14},
-                                  [
-                                    {
-                                      "Hint":[{"filename":"shape_subtyping_7.php","line":12,"char_start":3,"char_end":11}]
-                                    }
-                                  ]
-                                ]
+                                "Witness":[{"filename":"shape_subtyping_7.php","line":12,"char_start":13,"char_end":14}]
                               }
                             ],
-                            "kind":"Flow_param_hint",
+                            "kind":"Flow_local",
                             "into":[
                               {
-                                "Witness":[{"filename":"shape_subtyping_7.php","line":12,"char_start":13,"char_end":14}]
+                                "Witness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":35,"char_end":36}]
                               }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"shape_subtyping_7.php","line":14,"char_start":35,"char_end":36}]
                         }
                       ]
                     }

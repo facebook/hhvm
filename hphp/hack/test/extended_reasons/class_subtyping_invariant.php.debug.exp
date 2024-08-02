@@ -70,33 +70,33 @@ Reason:
                           "Flow":{
                             "from":[
                               {
-                                "Flow":{
-                                  "from":[
+                                "Def":[
+                                  {
+                                    "filename":"class_subtyping_invariant.php",
+                                    "line":5,
+                                    "char_start":7,
+                                    "char_end":9
+                                  },
+                                  [
                                     {
-                                      "Def":[
+                                      "Hint":[
                                         {
                                           "filename":"class_subtyping_invariant.php",
-                                          "line":5,
-                                          "char_start":7,
-                                          "char_end":9
-                                        },
-                                        [
-                                          {
-                                            "Hint":[
-                                              {
-                                                "filename":"class_subtyping_invariant.php",
-                                                "line":13,
-                                                "char_start":32,
-                                                "char_end":46
-                                              }
-                                            ]
-                                          }
-                                        ]
+                                          "line":13,
+                                          "char_start":32,
+                                          "char_end":46
+                                        }
                                       ]
                                     }
-                                  ],
-                                  "kind":"Flow_param_hint",
-                                  "into":[
+                                  ]
+                                ]
+                              }
+                            ],
+                            "kind":"Flow_param_hint",
+                            "into":[
+                              {
+                                "Flow":{
+                                  "from":[
                                     {
                                       "Witness":[
                                         {
@@ -107,21 +107,21 @@ Reason:
                                         }
                                       ]
                                     }
+                                  ],
+                                  "kind":"Flow_local",
+                                  "into":[
+                                    {
+                                      "Witness":[
+                                        {
+                                          "filename":"class_subtyping_invariant.php",
+                                          "line":14,
+                                          "char_start":14,
+                                          "char_end":15
+                                        }
+                                      ]
+                                    }
                                   ]
                                 }
-                              }
-                            ],
-                            "kind":"Flow_local",
-                            "into":[
-                              {
-                                "Witness":[
-                                  {
-                                    "filename":"class_subtyping_invariant.php",
-                                    "line":14,
-                                    "char_start":14,
-                                    "char_end":15
-                                  }
-                                ]
                               }
                             ]
                           }

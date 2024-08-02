@@ -33,103 +33,103 @@ Reason:
         "Flow":{
           "from":[
             {
+              "Hint":[
+                {
+                  "filename":"intersection_subtyping_l.php",
+                  "line":7,
+                  "char_start":18,
+                  "char_end":24
+                }
+              ]
+            }
+          ],
+          "kind":"Flow_param_hint",
+          "into":[
+            {
               "Flow":{
                 "from":[
+                  {
+                    "Witness":[
+                      {
+                        "filename":"intersection_subtyping_l.php",
+                        "line":7,
+                        "char_start":26,
+                        "char_end":28
+                      }
+                    ]
+                  }
+                ],
+                "kind":"Flow_local",
+                "into":[
                   {
                     "Flow":{
                       "from":[
                         {
+                          "Witness":[
+                            {
+                              "filename":"intersection_subtyping_l.php",
+                              "line":8,
+                              "char_start":8,
+                              "char_end":10
+                            }
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_assign",
+                      "into":[
+                        {
                           "Flow":{
                             "from":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"intersection_subtyping_l.php",
+                                    "line":8,
+                                    "char_start":3,
+                                    "char_end":4
+                                  }
+                                ]
+                              }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
                               {
                                 "Flow":{
                                   "from":[
                                     {
-                                      "Hint":[
+                                      "Witness":[
                                         {
                                           "filename":"intersection_subtyping_l.php",
-                                          "line":7,
-                                          "char_start":18,
-                                          "char_end":24
+                                          "line":9,
+                                          "char_start":10,
+                                          "char_end":11
                                         }
                                       ]
                                     }
                                   ],
-                                  "kind":"Flow_param_hint",
+                                  "kind":"Flow_return_expr",
                                   "into":[
                                     {
                                       "Witness":[
                                         {
                                           "filename":"intersection_subtyping_l.php",
-                                          "line":7,
-                                          "char_start":26,
-                                          "char_end":28
+                                          "line":9,
+                                          "char_start":3,
+                                          "char_end":12
                                         }
                                       ]
                                     }
                                   ]
                                 }
                               }
-                            ],
-                            "kind":"Flow_local",
-                            "into":[
-                              {
-                                "Witness":[
-                                  {
-                                    "filename":"intersection_subtyping_l.php",
-                                    "line":8,
-                                    "char_start":8,
-                                    "char_end":10
-                                  }
-                                ]
-                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_assign",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"intersection_subtyping_l.php",
-                              "line":8,
-                              "char_start":3,
-                              "char_end":4
-                            }
-                          ]
                         }
                       ]
                     }
                   }
-                ],
-                "kind":"Flow_local",
-                "into":[
-                  {
-                    "Witness":[
-                      {
-                        "filename":"intersection_subtyping_l.php",
-                        "line":9,
-                        "char_start":10,
-                        "char_end":11
-                      }
-                    ]
-                  }
                 ]
               }
-            }
-          ],
-          "kind":"Flow_return_expr",
-          "into":[
-            {
-              "Witness":[
-                {
-                  "filename":"intersection_subtyping_l.php",
-                  "line":9,
-                  "char_start":3,
-                  "char_end":12
-                }
-              ]
             }
           ]
         }
@@ -228,103 +228,103 @@ Reason:
               "Flow":{
                 "from":[
                   {
+                    "Hint":[
+                      {
+                        "filename":"intersection_subtyping_l.php",
+                        "line":7,
+                        "char_start":18,
+                        "char_end":24
+                      }
+                    ]
+                  }
+                ],
+                "kind":"Flow_param_hint",
+                "into":[
+                  {
                     "Flow":{
                       "from":[
+                        {
+                          "Witness":[
+                            {
+                              "filename":"intersection_subtyping_l.php",
+                              "line":7,
+                              "char_start":26,
+                              "char_end":28
+                            }
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_local",
+                      "into":[
                         {
                           "Flow":{
                             "from":[
                               {
+                                "Witness":[
+                                  {
+                                    "filename":"intersection_subtyping_l.php",
+                                    "line":8,
+                                    "char_start":8,
+                                    "char_end":10
+                                  }
+                                ]
+                              }
+                            ],
+                            "kind":"Flow_assign",
+                            "into":[
+                              {
                                 "Flow":{
                                   "from":[
+                                    {
+                                      "Witness":[
+                                        {
+                                          "filename":"intersection_subtyping_l.php",
+                                          "line":8,
+                                          "char_start":3,
+                                          "char_end":4
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "kind":"Flow_local",
+                                  "into":[
                                     {
                                       "Flow":{
                                         "from":[
                                           {
-                                            "Hint":[
+                                            "Witness":[
                                               {
                                                 "filename":"intersection_subtyping_l.php",
-                                                "line":7,
-                                                "char_start":18,
-                                                "char_end":24
+                                                "line":9,
+                                                "char_start":10,
+                                                "char_end":11
                                               }
                                             ]
                                           }
                                         ],
-                                        "kind":"Flow_param_hint",
+                                        "kind":"Flow_return_expr",
                                         "into":[
                                           {
                                             "Witness":[
                                               {
                                                 "filename":"intersection_subtyping_l.php",
-                                                "line":7,
-                                                "char_start":26,
-                                                "char_end":28
+                                                "line":9,
+                                                "char_start":3,
+                                                "char_end":12
                                               }
                                             ]
                                           }
                                         ]
                                       }
                                     }
-                                  ],
-                                  "kind":"Flow_local",
-                                  "into":[
-                                    {
-                                      "Witness":[
-                                        {
-                                          "filename":"intersection_subtyping_l.php",
-                                          "line":8,
-                                          "char_start":8,
-                                          "char_end":10
-                                        }
-                                      ]
-                                    }
                                   ]
                                 }
-                              }
-                            ],
-                            "kind":"Flow_assign",
-                            "into":[
-                              {
-                                "Witness":[
-                                  {
-                                    "filename":"intersection_subtyping_l.php",
-                                    "line":8,
-                                    "char_start":3,
-                                    "char_end":4
-                                  }
-                                ]
                               }
                             ]
                           }
                         }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"intersection_subtyping_l.php",
-                              "line":9,
-                              "char_start":10,
-                              "char_end":11
-                            }
-                          ]
-                        }
                       ]
                     }
-                  }
-                ],
-                "kind":"Flow_return_expr",
-                "into":[
-                  {
-                    "Witness":[
-                      {
-                        "filename":"intersection_subtyping_l.php",
-                        "line":9,
-                        "char_start":3,
-                        "char_end":12
-                      }
-                    ]
                   }
                 ]
               }
@@ -426,103 +426,103 @@ Reason:
               "Flow":{
                 "from":[
                   {
+                    "Hint":[
+                      {
+                        "filename":"intersection_subtyping_l.php",
+                        "line":7,
+                        "char_start":18,
+                        "char_end":24
+                      }
+                    ]
+                  }
+                ],
+                "kind":"Flow_param_hint",
+                "into":[
+                  {
                     "Flow":{
                       "from":[
+                        {
+                          "Witness":[
+                            {
+                              "filename":"intersection_subtyping_l.php",
+                              "line":7,
+                              "char_start":26,
+                              "char_end":28
+                            }
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_local",
+                      "into":[
                         {
                           "Flow":{
                             "from":[
                               {
+                                "Witness":[
+                                  {
+                                    "filename":"intersection_subtyping_l.php",
+                                    "line":8,
+                                    "char_start":8,
+                                    "char_end":10
+                                  }
+                                ]
+                              }
+                            ],
+                            "kind":"Flow_assign",
+                            "into":[
+                              {
                                 "Flow":{
                                   "from":[
+                                    {
+                                      "Witness":[
+                                        {
+                                          "filename":"intersection_subtyping_l.php",
+                                          "line":8,
+                                          "char_start":3,
+                                          "char_end":4
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "kind":"Flow_local",
+                                  "into":[
                                     {
                                       "Flow":{
                                         "from":[
                                           {
-                                            "Hint":[
+                                            "Witness":[
                                               {
                                                 "filename":"intersection_subtyping_l.php",
-                                                "line":7,
-                                                "char_start":18,
-                                                "char_end":24
+                                                "line":9,
+                                                "char_start":10,
+                                                "char_end":11
                                               }
                                             ]
                                           }
                                         ],
-                                        "kind":"Flow_param_hint",
+                                        "kind":"Flow_return_expr",
                                         "into":[
                                           {
                                             "Witness":[
                                               {
                                                 "filename":"intersection_subtyping_l.php",
-                                                "line":7,
-                                                "char_start":26,
-                                                "char_end":28
+                                                "line":9,
+                                                "char_start":3,
+                                                "char_end":12
                                               }
                                             ]
                                           }
                                         ]
                                       }
                                     }
-                                  ],
-                                  "kind":"Flow_local",
-                                  "into":[
-                                    {
-                                      "Witness":[
-                                        {
-                                          "filename":"intersection_subtyping_l.php",
-                                          "line":8,
-                                          "char_start":8,
-                                          "char_end":10
-                                        }
-                                      ]
-                                    }
                                   ]
                                 }
-                              }
-                            ],
-                            "kind":"Flow_assign",
-                            "into":[
-                              {
-                                "Witness":[
-                                  {
-                                    "filename":"intersection_subtyping_l.php",
-                                    "line":8,
-                                    "char_start":3,
-                                    "char_end":4
-                                  }
-                                ]
                               }
                             ]
                           }
                         }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"intersection_subtyping_l.php",
-                              "line":9,
-                              "char_start":10,
-                              "char_end":11
-                            }
-                          ]
-                        }
                       ]
                     }
-                  }
-                ],
-                "kind":"Flow_return_expr",
-                "into":[
-                  {
-                    "Witness":[
-                      {
-                        "filename":"intersection_subtyping_l.php",
-                        "line":9,
-                        "char_start":3,
-                        "char_end":12
-                      }
-                    ]
                   }
                 ]
               }

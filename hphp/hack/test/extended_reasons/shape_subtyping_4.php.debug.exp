@@ -44,32 +44,32 @@ Reason:
                     "Flow":{
                       "from":[
                         {
+                          "Def":[
+                            {"filename":"shape_subtyping_4.php","line":4,"char_start":6,"char_end":23},
+                            [
+                              {
+                                "Hint":[{"filename":"shape_subtyping_4.php","line":12,"char_start":3,"char_end":20}]
+                              }
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
                           "Flow":{
                             "from":[
                               {
-                                "Def":[
-                                  {"filename":"shape_subtyping_4.php","line":4,"char_start":6,"char_end":23},
-                                  [
-                                    {
-                                      "Hint":[{"filename":"shape_subtyping_4.php","line":12,"char_start":3,"char_end":20}]
-                                    }
-                                  ]
-                                ]
+                                "Witness":[{"filename":"shape_subtyping_4.php","line":12,"char_start":22,"char_end":23}]
                               }
                             ],
-                            "kind":"Flow_param_hint",
+                            "kind":"Flow_local",
                             "into":[
                               {
-                                "Witness":[{"filename":"shape_subtyping_4.php","line":12,"char_start":22,"char_end":23}]
+                                "Witness":[{"filename":"shape_subtyping_4.php","line":14,"char_start":35,"char_end":36}]
                               }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"shape_subtyping_4.php","line":14,"char_start":35,"char_end":36}]
                         }
                       ]
                     }

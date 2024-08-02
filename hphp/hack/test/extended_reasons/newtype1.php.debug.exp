@@ -34,32 +34,32 @@ Reason:
                     "Flow":{
                       "from":[
                         {
+                          "Def":[
+                            {"filename":"newtype1.php--file1.php","line":3,"char_start":9,"char_end":13},
+                            [
+                              {
+                                "Hint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
+                              }
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
                           "Flow":{
                             "from":[
                               {
-                                "Def":[
-                                  {"filename":"newtype1.php--file1.php","line":3,"char_start":9,"char_end":13},
-                                  [
-                                    {
-                                      "Hint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
-                                    }
-                                  ]
-                                ]
+                                "Witness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
                               }
                             ],
-                            "kind":"Flow_param_hint",
+                            "kind":"Flow_local",
                             "into":[
                               {
-                                "Witness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
+                                "Witness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
                               }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
                         }
                       ]
                     }

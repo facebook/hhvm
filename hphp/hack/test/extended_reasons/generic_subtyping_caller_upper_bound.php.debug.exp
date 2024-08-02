@@ -42,21 +42,21 @@ Reason:
                     "Flow":{
                       "from":[
                         {
+                          "Hint":[
+                            {
+                              "filename":"generic_subtyping_caller_upper_bound.php",
+                              "line":9,
+                              "char_start":48,
+                              "char_end":48
+                            }
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
                           "Flow":{
                             "from":[
-                              {
-                                "Hint":[
-                                  {
-                                    "filename":"generic_subtyping_caller_upper_bound.php",
-                                    "line":9,
-                                    "char_start":48,
-                                    "char_end":48
-                                  }
-                                ]
-                              }
-                            ],
-                            "kind":"Flow_param_hint",
-                            "into":[
                               {
                                 "Witness":[
                                   {
@@ -67,21 +67,21 @@ Reason:
                                   }
                                 ]
                               }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"generic_subtyping_caller_upper_bound.php",
+                                    "line":10,
+                                    "char_start":17,
+                                    "char_end":18
+                                  }
+                                ]
+                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[
-                            {
-                              "filename":"generic_subtyping_caller_upper_bound.php",
-                              "line":10,
-                              "char_start":17,
-                              "char_end":18
-                            }
-                          ]
                         }
                       ]
                     }
@@ -214,21 +214,21 @@ Reason:
               "Flow":{
                 "from":[
                   {
+                    "Hint":[
+                      {
+                        "filename":"generic_subtyping_caller_upper_bound.php",
+                        "line":9,
+                        "char_start":48,
+                        "char_end":48
+                      }
+                    ]
+                  }
+                ],
+                "kind":"Flow_param_hint",
+                "into":[
+                  {
                     "Flow":{
                       "from":[
-                        {
-                          "Hint":[
-                            {
-                              "filename":"generic_subtyping_caller_upper_bound.php",
-                              "line":9,
-                              "char_start":48,
-                              "char_end":48
-                            }
-                          ]
-                        }
-                      ],
-                      "kind":"Flow_param_hint",
-                      "into":[
                         {
                           "Witness":[
                             {
@@ -239,21 +239,21 @@ Reason:
                             }
                           ]
                         }
+                      ],
+                      "kind":"Flow_local",
+                      "into":[
+                        {
+                          "Witness":[
+                            {
+                              "filename":"generic_subtyping_caller_upper_bound.php",
+                              "line":10,
+                              "char_start":17,
+                              "char_end":18
+                            }
+                          ]
+                        }
                       ]
                     }
-                  }
-                ],
-                "kind":"Flow_local",
-                "into":[
-                  {
-                    "Witness":[
-                      {
-                        "filename":"generic_subtyping_caller_upper_bound.php",
-                        "line":10,
-                        "char_start":17,
-                        "char_end":18
-                      }
-                    ]
                   }
                 ]
               }

@@ -34,44 +34,44 @@ Reason:
               "Flow":{
                 "from":[
                   {
+                    "Def":[
+                      {"filename":"assign_obj_get.php","line":3,"char_start":7,"char_end":11},
+                      [
+                        {
+                          "Hint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
+                        }
+                      ]
+                    ]
+                  }
+                ],
+                "kind":"Flow_call",
+                "into":[
+                  {
                     "Flow":{
                       "from":[
                         {
-                          "Flow":{
-                            "from":[
-                              {
-                                "Def":[
-                                  {"filename":"assign_obj_get.php","line":3,"char_start":7,"char_end":11},
-                                  [
-                                    {
-                                      "Hint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
-                                    }
-                                  ]
-                                ]
-                              }
-                            ],
-                            "kind":"Flow_call",
-                            "into":[
-                              {
-                                "Witness":[{"filename":"assign_obj_get.php","line":15,"char_start":8,"char_end":16}]
-                              }
-                            ]
-                          }
+                          "Witness":[{"filename":"assign_obj_get.php","line":15,"char_start":8,"char_end":16}]
                         }
                       ],
                       "kind":"Flow_assign",
                       "into":[
                         {
-                          "Witness":[{"filename":"assign_obj_get.php","line":15,"char_start":3,"char_end":4}]
+                          "Flow":{
+                            "from":[
+                              {
+                                "Witness":[{"filename":"assign_obj_get.php","line":15,"char_start":3,"char_end":4}]
+                              }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[{"filename":"assign_obj_get.php","line":16,"char_start":7,"char_end":8}]
+                              }
+                            ]
+                          }
                         }
                       ]
                     }
-                  }
-                ],
-                "kind":"Flow_local",
-                "into":[
-                  {
-                    "Witness":[{"filename":"assign_obj_get.php","line":16,"char_start":7,"char_end":8}]
                   }
                 ]
               }

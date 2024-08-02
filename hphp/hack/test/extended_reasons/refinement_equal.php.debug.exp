@@ -30,31 +30,25 @@ Reason:
         "Flow":{
           "from":[
             {
-              "Flow":{
-                "from":[
+              "Solved":{
+                "solution":[
                   {
-                    "Solved":{
-                      "solution":[
+                    "Lower_bound":{
+                      "bound":[
                         {
-                          "Lower_bound":{
-                            "bound":[
+                          "Flow":{
+                            "from":[
+                              {
+                                "Hint":[{"filename":"refinement_equal.php","line":6,"char_start":22,"char_end":23}]
+                              }
+                            ],
+                            "kind":"Flow_param_hint",
+                            "into":[
                               {
                                 "Flow":{
                                   "from":[
                                     {
-                                      "Flow":{
-                                        "from":[
-                                          {
-                                            "Hint":[{"filename":"refinement_equal.php","line":6,"char_start":22,"char_end":23}]
-                                          }
-                                        ],
-                                        "kind":"Flow_param_hint",
-                                        "into":[
-                                          {
-                                            "Witness":[{"filename":"refinement_equal.php","line":6,"char_start":25,"char_end":26}]
-                                          }
-                                        ]
-                                      }
+                                      "Witness":[{"filename":"refinement_equal.php","line":6,"char_start":25,"char_end":26}]
                                     }
                                   ],
                                   "kind":"Flow_local",
@@ -65,34 +59,34 @@ Reason:
                                   ]
                                 }
                               }
-                            ],
-                            "of":[
-                              {
-                                "Type_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15},"0"]
-                              }
                             ]
                           }
                         }
                       ],
-                      "of_":"0",
-                      "in_":[
+                      "of":[
+                        {
+                          "Type_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15},"0"]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "of_":"0",
+                "in_":[
+                  {
+                    "Flow":{
+                      "from":[
+                        {
+                          "Type_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15},"0"]
+                        }
+                      ],
+                      "kind":"Flow_local",
+                      "into":[
                         {
                           "Flow":{
                             "from":[
                               {
-                                "Flow":{
-                                  "from":[
-                                    {
-                                      "Type_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15},"0"]
-                                    }
-                                  ],
-                                  "kind":"Flow_local",
-                                  "into":[
-                                    {
-                                      "Witness":[{"filename":"refinement_equal.php","line":8,"char_start":10,"char_end":11}]
-                                    }
-                                  ]
-                                }
+                                "Witness":[{"filename":"refinement_equal.php","line":8,"char_start":10,"char_end":11}]
                               }
                             ],
                             "kind":"Flow_assign",
@@ -106,20 +100,26 @@ Reason:
                       ]
                     }
                   }
-                ],
-                "kind":"Flow_local",
-                "into":[
-                  {
-                    "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":10,"char_end":11}]
-                  }
                 ]
               }
             }
           ],
-          "kind":"Flow_return_expr",
+          "kind":"Flow_local",
           "into":[
             {
-              "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":3,"char_end":12}]
+              "Flow":{
+                "from":[
+                  {
+                    "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":10,"char_end":11}]
+                  }
+                ],
+                "kind":"Flow_return_expr",
+                "into":[
+                  {
+                    "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":3,"char_end":12}]
+                  }
+                ]
+              }
             }
           ]
         }

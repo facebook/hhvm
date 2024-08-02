@@ -42,25 +42,25 @@ Reason:
                     "Flow":{
                       "from":[
                         {
+                          "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":39,"char_end":44}]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
                           "Flow":{
                             "from":[
                               {
-                                "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":39,"char_end":44}]
+                                "Witness":[{"filename":"ctor_generic.php","line":20,"char_start":46,"char_end":47}]
                               }
                             ],
-                            "kind":"Flow_param_hint",
+                            "kind":"Flow_local",
                             "into":[
                               {
-                                "Witness":[{"filename":"ctor_generic.php","line":20,"char_start":46,"char_end":47}]
+                                "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":29,"char_end":30}]
                               }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":29,"char_end":30}]
                         }
                       ]
                     }
@@ -141,32 +141,32 @@ Reason:
                                       "Flow":{
                                         "from":[
                                           {
+                                            "Def":[
+                                              {"filename":"ctor_generic.php","line":3,"char_start":11,"char_end":17},
+                                              [
+                                                {
+                                                  "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":50,"char_end":67}]
+                                                }
+                                              ]
+                                            ]
+                                          }
+                                        ],
+                                        "kind":"Flow_param_hint",
+                                        "into":[
+                                          {
                                             "Flow":{
                                               "from":[
                                                 {
-                                                  "Def":[
-                                                    {"filename":"ctor_generic.php","line":3,"char_start":11,"char_end":17},
-                                                    [
-                                                      {
-                                                        "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":50,"char_end":67}]
-                                                      }
-                                                    ]
-                                                  ]
+                                                  "Witness":[{"filename":"ctor_generic.php","line":20,"char_start":69,"char_end":75}]
                                                 }
                                               ],
-                                              "kind":"Flow_param_hint",
+                                              "kind":"Flow_local",
                                               "into":[
                                                 {
-                                                  "Witness":[{"filename":"ctor_generic.php","line":20,"char_start":69,"char_end":75}]
+                                                  "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":33,"char_end":39}]
                                                 }
                                               ]
                                             }
-                                          }
-                                        ],
-                                        "kind":"Flow_local",
-                                        "into":[
-                                          {
-                                            "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":33,"char_end":39}]
                                           }
                                         ]
                                       }

@@ -35,56 +35,56 @@ Reason:
               "Flow":{
                 "from":[
                   {
+                    "Def":[
+                      {"filename":"assign_local.php","line":3,"char_start":7,"char_end":11},
+                      [
+                        {
+                          "Hint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
+                        }
+                      ]
+                    ]
+                  }
+                ],
+                "kind":"Flow_param_hint",
+                "into":[
+                  {
                     "Flow":{
                       "from":[
+                        {
+                          "Witness":[{"filename":"assign_local.php","line":9,"char_start":20,"char_end":21}]
+                        }
+                      ],
+                      "kind":"Flow_local",
+                      "into":[
                         {
                           "Flow":{
                             "from":[
                               {
+                                "Witness":[{"filename":"assign_local.php","line":10,"char_start":8,"char_end":9}]
+                              }
+                            ],
+                            "kind":"Flow_assign",
+                            "into":[
+                              {
                                 "Flow":{
                                   "from":[
                                     {
-                                      "Def":[
-                                        {"filename":"assign_local.php","line":3,"char_start":7,"char_end":11},
-                                        [
-                                          {
-                                            "Hint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
-                                          }
-                                        ]
-                                      ]
+                                      "Witness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":4}]
                                     }
                                   ],
-                                  "kind":"Flow_param_hint",
+                                  "kind":"Flow_local",
                                   "into":[
                                     {
-                                      "Witness":[{"filename":"assign_local.php","line":9,"char_start":20,"char_end":21}]
+                                      "Witness":[{"filename":"assign_local.php","line":11,"char_start":7,"char_end":8}]
                                     }
                                   ]
                                 }
                               }
-                            ],
-                            "kind":"Flow_local",
-                            "into":[
-                              {
-                                "Witness":[{"filename":"assign_local.php","line":10,"char_start":8,"char_end":9}]
-                              }
                             ]
                           }
                         }
-                      ],
-                      "kind":"Flow_assign",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":4}]
-                        }
                       ]
                     }
-                  }
-                ],
-                "kind":"Flow_local",
-                "into":[
-                  {
-                    "Witness":[{"filename":"assign_local.php","line":11,"char_start":7,"char_end":8}]
                   }
                 ]
               }

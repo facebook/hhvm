@@ -54,25 +54,25 @@ Reason:
                           "Flow":{
                             "from":[
                               {
+                                "Hint":[{"filename":"assign_list.php","line":8,"char_start":16,"char_end":34}]
+                              }
+                            ],
+                            "kind":"Flow_param_hint",
+                            "into":[
+                              {
                                 "Flow":{
                                   "from":[
                                     {
-                                      "Hint":[{"filename":"assign_list.php","line":8,"char_start":16,"char_end":34}]
+                                      "Witness":[{"filename":"assign_list.php","line":8,"char_start":36,"char_end":39}]
                                     }
                                   ],
-                                  "kind":"Flow_param_hint",
+                                  "kind":"Flow_local",
                                   "into":[
                                     {
-                                      "Witness":[{"filename":"assign_list.php","line":8,"char_start":36,"char_end":39}]
+                                      "Witness":[{"filename":"assign_list.php","line":9,"char_start":22,"char_end":25}]
                                     }
                                   ]
                                 }
-                              }
-                            ],
-                            "kind":"Flow_local",
-                            "into":[
-                              {
-                                "Witness":[{"filename":"assign_list.php","line":9,"char_start":22,"char_end":25}]
                               }
                             ]
                           }
@@ -91,37 +91,37 @@ Reason:
                     "Flow":{
                       "from":[
                         {
+                          "Hint":[{"filename":"assign_list.php","line":8,"char_start":16,"char_end":34}]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
                           "Flow":{
                             "from":[
                               {
-                                "Flow":{
-                                  "from":[
-                                    {
-                                      "Hint":[{"filename":"assign_list.php","line":8,"char_start":16,"char_end":34}]
-                                    }
-                                  ],
-                                  "kind":"Flow_param_hint",
-                                  "into":[
-                                    {
-                                      "Witness":[{"filename":"assign_list.php","line":8,"char_start":36,"char_end":39}]
-                                    }
-                                  ]
-                                }
+                                "Witness":[{"filename":"assign_list.php","line":8,"char_start":36,"char_end":39}]
                               }
                             ],
                             "kind":"Flow_local",
                             "into":[
                               {
-                                "Witness":[{"filename":"assign_list.php","line":9,"char_start":22,"char_end":25}]
+                                "Flow":{
+                                  "from":[
+                                    {
+                                      "Witness":[{"filename":"assign_list.php","line":9,"char_start":22,"char_end":25}]
+                                    }
+                                  ],
+                                  "kind":"Flow_assign",
+                                  "into":[
+                                    {
+                                      "Type_variable":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13},"1"]
+                                    }
+                                  ]
+                                }
                               }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_assign",
-                      "into":[
-                        {
-                          "Type_variable":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13},"1"]
                         }
                       ]
                     }
@@ -139,61 +139,61 @@ Reason:
                     "Flow":{
                       "from":[
                         {
+                          "Hint":[{"filename":"assign_list.php","line":8,"char_start":16,"char_end":34}]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
                           "Flow":{
                             "from":[
+                              {
+                                "Witness":[{"filename":"assign_list.php","line":8,"char_start":36,"char_end":39}]
+                              }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
                               {
                                 "Flow":{
                                   "from":[
                                     {
-                                      "Flow":{
-                                        "from":[
-                                          {
-                                            "Flow":{
-                                              "from":[
-                                                {
-                                                  "Hint":[{"filename":"assign_list.php","line":8,"char_start":16,"char_end":34}]
-                                                }
-                                              ],
-                                              "kind":"Flow_param_hint",
-                                              "into":[
-                                                {
-                                                  "Witness":[{"filename":"assign_list.php","line":8,"char_start":36,"char_end":39}]
-                                                }
-                                              ]
-                                            }
-                                          }
-                                        ],
-                                        "kind":"Flow_local",
-                                        "into":[
-                                          {
-                                            "Witness":[{"filename":"assign_list.php","line":9,"char_start":22,"char_end":25}]
-                                          }
-                                        ]
-                                      }
+                                      "Witness":[{"filename":"assign_list.php","line":9,"char_start":22,"char_end":25}]
                                     }
                                   ],
                                   "kind":"Flow_assign",
                                   "into":[
                                     {
-                                      "Type_variable":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13},"1"]
+                                      "Flow":{
+                                        "from":[
+                                          {
+                                            "Type_variable":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13},"1"]
+                                          }
+                                        ],
+                                        "kind":"Flow_assign",
+                                        "into":[
+                                          {
+                                            "Flow":{
+                                              "from":[
+                                                {
+                                                  "Witness":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13}]
+                                                }
+                                              ],
+                                              "kind":"Flow_local",
+                                              "into":[
+                                                {
+                                                  "Witness":[{"filename":"assign_list.php","line":10,"char_start":7,"char_end":8}]
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        ]
+                                      }
                                     }
                                   ]
                                 }
                               }
-                            ],
-                            "kind":"Flow_assign",
-                            "into":[
-                              {
-                                "Witness":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13}]
-                              }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"assign_list.php","line":10,"char_start":7,"char_end":8}]
                         }
                       ]
                     }

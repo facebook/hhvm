@@ -33,32 +33,32 @@ Reason:
               "Flow":{
                 "from":[
                   {
+                    "Def":[
+                      {"filename":"refinment_is.php","line":4,"char_start":7,"char_end":7},
+                      [
+                        {
+                          "Hint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
+                        }
+                      ]
+                    ]
+                  }
+                ],
+                "kind":"Flow_param_hint",
+                "into":[
+                  {
                     "Flow":{
                       "from":[
                         {
-                          "Def":[
-                            {"filename":"refinment_is.php","line":4,"char_start":7,"char_end":7},
-                            [
-                              {
-                                "Hint":[{"filename":"refinment_is.php","line":7,"char_start":19,"char_end":19}]
-                              }
-                            ]
-                          ]
+                          "Witness":[{"filename":"refinment_is.php","line":7,"char_start":21,"char_end":22}]
                         }
                       ],
-                      "kind":"Flow_param_hint",
+                      "kind":"Flow_local",
                       "into":[
                         {
-                          "Witness":[{"filename":"refinment_is.php","line":7,"char_start":21,"char_end":22}]
+                          "Witness":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":7}]
                         }
                       ]
                     }
-                  }
-                ],
-                "kind":"Flow_local",
-                "into":[
-                  {
-                    "Witness":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":7}]
                   }
                 ]
               }
@@ -73,25 +73,25 @@ Reason:
                     "Flow":{
                       "from":[
                         {
+                          "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+                        }
+                      ],
+                      "kind":"Flow_local",
+                      "into":[
+                        {
                           "Flow":{
                             "from":[
                               {
-                                "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+                                "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
                               }
                             ],
-                            "kind":"Flow_local",
+                            "kind":"Flow_assign",
                             "into":[
                               {
-                                "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+                                "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
                               }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_assign",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
                         }
                       ]
                     }
@@ -103,25 +103,25 @@ Reason:
                     "Flow":{
                       "from":[
                         {
+                          "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                        }
+                      ],
+                      "kind":"Flow_local",
+                      "into":[
+                        {
                           "Flow":{
                             "from":[
                               {
-                                "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
                               }
                             ],
-                            "kind":"Flow_local",
+                            "kind":"Flow_return_expr",
                             "into":[
                               {
-                                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+                                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
                               }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_return_expr",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
                         }
                       ]
                     }
@@ -188,25 +188,25 @@ Reason:
               "Flow":{
                 "from":[
                   {
+                    "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+                  }
+                ],
+                "kind":"Flow_local",
+                "into":[
+                  {
                     "Flow":{
                       "from":[
                         {
-                          "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+                          "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
                         }
                       ],
-                      "kind":"Flow_local",
+                      "kind":"Flow_assign",
                       "into":[
                         {
-                          "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+                          "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
                         }
                       ]
                     }
-                  }
-                ],
-                "kind":"Flow_assign",
-                "into":[
-                  {
-                    "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
                   }
                 ]
               }
@@ -218,25 +218,25 @@ Reason:
               "Flow":{
                 "from":[
                   {
+                    "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                  }
+                ],
+                "kind":"Flow_local",
+                "into":[
+                  {
                     "Flow":{
                       "from":[
                         {
-                          "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                          "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
                         }
                       ],
-                      "kind":"Flow_local",
+                      "kind":"Flow_return_expr",
                       "into":[
                         {
-                          "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+                          "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
                         }
                       ]
                     }
-                  }
-                ],
-                "kind":"Flow_return_expr",
-                "into":[
-                  {
-                    "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
                   }
                 ]
               }
@@ -316,25 +316,25 @@ Reason:
                     "Flow":{
                       "from":[
                         {
+                          "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+                        }
+                      ],
+                      "kind":"Flow_local",
+                      "into":[
+                        {
                           "Flow":{
                             "from":[
                               {
-                                "Is_refinement":[{"filename":"refinment_is.php","line":8,"char_start":6,"char_end":12}]
+                                "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
                               }
                             ],
-                            "kind":"Flow_local",
+                            "kind":"Flow_assign",
                             "into":[
                               {
-                                "Witness":[{"filename":"refinment_is.php","line":9,"char_start":10,"char_end":11}]
+                                "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
                               }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_assign",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"refinment_is.php","line":9,"char_start":5,"char_end":6}]
                         }
                       ]
                     }
@@ -346,25 +346,25 @@ Reason:
                     "Flow":{
                       "from":[
                         {
+                          "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                        }
+                      ],
+                      "kind":"Flow_local",
+                      "into":[
+                        {
                           "Flow":{
                             "from":[
                               {
-                                "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
                               }
                             ],
-                            "kind":"Flow_local",
+                            "kind":"Flow_return_expr",
                             "into":[
                               {
-                                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":10,"char_end":11}]
+                                "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
                               }
                             ]
                           }
-                        }
-                      ],
-                      "kind":"Flow_return_expr",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"refinment_is.php","line":13,"char_start":3,"char_end":12}]
                         }
                       ]
                     }

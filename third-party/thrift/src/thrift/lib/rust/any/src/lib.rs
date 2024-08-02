@@ -25,14 +25,22 @@ mod uri;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
+pub enum AnyTypeExpectationViolated {
+    #[error("`{:?}` and `{:?}` are inconsistent", (.0).0, (.0).1)]
+    TypeUrisInconsistent((standard::TypeUri, standard::TypeUri)),
+    #[error("`{:?}` and `{:?}` are inconsistent", (.0).0, (.0).1)]
+    TypeNamesInconsistent((standard::TypeName, standard::TypeName)),
+}
+
+#[derive(Error, Debug)]
 pub enum AnyError {
-    #[error("an `Any` value is of unexpected type")]
-    AnyTypeExpectationViolated,
-    #[error("not a standard protocol `{:?}`", .0)]
+    #[error("Type expectation violation")]
+    AnyTypeExpectationViolated(#[from] AnyTypeExpectationViolated),
+    #[error("Not a standard protocol `{:?}`", .0)]
     StandardThriftProtocolExpectationViolated(type_rep::ProtocolUnion),
-    #[error("unsupported standard protocol `{:?}`", .0)]
+    #[error("Unsupported standard protocol `{:?}`", .0)]
     UnsupportedStandardThriftProtocol(standard::StandardProtocol),
-    #[error("unsupported protocol `{:?}`", .0)]
+    #[error("Unsupported protocol `{:?}`", .0)]
     UnsupportedThriftProtocol(type_rep::ProtocolUnion),
 }
 

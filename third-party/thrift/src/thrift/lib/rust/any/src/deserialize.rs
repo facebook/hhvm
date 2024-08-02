@@ -15,6 +15,7 @@
  */
 
 use anyhow::bail;
+use anyhow::Context;
 use anyhow::Result;
 use fbthrift::binary_protocol;
 use fbthrift::compact_protocol;
@@ -60,7 +61,7 @@ pub fn deserialize<T>(any: &any::Any) -> Result<T>
 where
     T: DeserializableFromAny,
 {
-    ensure_thrift_any_type::<T>(any)?;
+    ensure_thrift_any_type::<T>(any).context("Deserializing a Thrift `Any` failed")?;
     match &any.protocol {
         ProtocolUnion::standard(standard_protocol) => {
             deserialize_standard(*standard_protocol, &any.data)
@@ -104,6 +105,7 @@ where
 #[cfg(test)]
 mod tests {
     use any::Any;
+    use anyhow::anyhow;
     use anyhow::Result;
     use standard::StandardProtocol;
     use standard::TypeName;
@@ -112,11 +114,10 @@ mod tests {
     use type_::Type;
 
     use super::deserialize;
+    use crate::AnyError;
 
-    #[test]
-    fn test_deserialize_0() -> Result<()> {
-        use artifact_builder_override::ExperimentOverrideRequestContext;
-        let val = Any {
+    fn make_test_any() -> Result<Any> {
+        Ok(Any {
             r#type: Type {
                 name: TypeName::structType(TypeUri::typeHashPrefixSha2_256(
                     base64::decode("e3AbYkUAP8FICiPtbGYI6w").unwrap(),
@@ -129,12 +130,52 @@ mod tests {
                 "GAozNjAwNjUwNzQ0GA5jb2d3aGVlbF90ZXN0cxwcHLwoENBU+E6zAHkpmP0Y3JboyaMAABkMABwVBAAYlgMZHBgNY29nd2hlZWxfdGVzdBkcGBIvbG9ncy90aHJpZnRfbW9ja3MYDHRocmlmdF9tb2NrczbAmgwAABwYjAJ7ImFsbF9zaWRlcyI6IFsiYSJdLCAicnBtX21hcCI6IHt9LCAiYnVuZGxlX3BhY2thZ2VfbWFwIjogeyJyY2VzZXJ2aWNlIjogImY4NDZjZjczNGM2YjQ3NDI5OTdiNDBjNTA2MWI1NmJhIiwgInR1cHBlcndhcmUuaW1hZ2Uud2ViZm91bmRhdGlvbi5jOS5yY2VzZXJ2aWNlIjogImZkNDZmN2VmMzQ0ZDYxNTIzMTdhODJlMzE4ZjZkMjk4In0sICJzZmlkIjogInJjZXNlcnZpY2Uvd3d3X2dlbmVyaWMiLCAiYnVuZGxlX2lkIjogODE4OCwgIm1pbm9yX2J1bmRsZV9pZCI6IDF9HBwSEgAcIRISHBIWAAAAHAAcJAIAHBglY29nd2hlZWxfcmNlc2VydmljZV90ZXN0X3Rlc3RfaGFybmVzcwAcAAAcGwAAABgAGwAAABIbABwAAA",
             )?,
             ..Default::default()
-        };
+        })
+    }
 
+    #[test]
+    fn test_deserialize_0() -> Result<()> {
+        use artifact_builder_override::ExperimentOverrideRequestContext;
+        let val = make_test_any()?;
         let ctx = deserialize::<ExperimentOverrideRequestContext>(&val)?;
         assert_eq!(ctx.windtunnel_trial_id, "3600650744");
         assert_eq!(ctx.reservation_name, "cogwheel_tests");
 
         Ok(())
+    }
+
+    #[test]
+    fn test_deserialize_1() -> Result<()> {
+        fn test_failed() -> Result<()> {
+            Err(anyhow!("expected type uri inconsistency error"))
+        }
+        let val = make_test_any()?;
+        match deserialize::<test_structs::Basic>(&val) {
+            Ok(_) => test_failed(),
+            Err(err) => match err.downcast_ref::<AnyError>() {
+                Some(AnyError::AnyTypeExpectationViolated(_)) => Ok(()),
+                _ => test_failed(),
+            },
+        }
+    }
+
+    #[test]
+    fn test_deserialize_2() -> Result<()> {
+        fn test_failed() -> Result<()> {
+            Err(anyhow!("expected type uri inconsistency error"))
+        }
+        let val = make_test_any()?;
+        match deserialize::<test_structs::Basic>(&val) {
+            Ok(_) => test_failed(),
+            Err(err) => {
+                let plain_msg = format!("{}", err);
+                let detailed_msg = format!("{:?}", err);
+                assert_eq!(plain_msg, "Deserializing a Thrift `Any` failed");
+                assert!(detailed_msg.contains("Deserializing a Thrift `Any` failed"));
+                assert!(detailed_msg.contains("Type expectation violation"));
+                assert!(detailed_msg.contains("facebook.com/icsp/new_any/Basic"));
+                Ok(())
+            }
+        }
     }
 }

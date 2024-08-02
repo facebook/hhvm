@@ -21,6 +21,7 @@ use standard::TypeName;
 use standard::TypeUri;
 
 use crate::AnyError;
+use crate::AnyTypeExpectationViolated;
 use crate::ThriftAnyType;
 
 pub trait GetThriftAnyType: fbthrift::GetUri {
@@ -65,7 +66,9 @@ fn check_uri_consistency(uri: &TypeUri, other: &TypeUri) -> Result<()> {
         (TypeUri::scopedName(s), TypeUri::scopedName(t)) => s == t,
         (_, _) => true,
     }) {
-        bail!(crate::AnyError::AnyTypeExpectationViolated);
+        bail!(AnyError::from(
+            AnyTypeExpectationViolated::TypeUrisInconsistent((uri.clone(), other.clone()))
+        ));
     }
     Ok(())
 }
@@ -78,11 +81,21 @@ where
     match &any.r#type.name {
         TypeName::structType(uri) => match &t_type.name {
             TypeName::structType(other_uri) => check_uri_consistency(uri, other_uri)?,
-            _ => bail!(AnyError::AnyTypeExpectationViolated),
+            _ => bail!(AnyError::from(
+                AnyTypeExpectationViolated::TypeNamesInconsistent((
+                    any.r#type.name.clone(),
+                    t_type.name
+                ))
+            )),
         },
         TypeName::unionType(uri) => match &t_type.name {
             TypeName::unionType(other) => check_uri_consistency(uri, other)?,
-            _ => bail!(AnyError::AnyTypeExpectationViolated),
+            _ => bail!(AnyError::from(
+                AnyTypeExpectationViolated::TypeNamesInconsistent((
+                    any.r#type.name.clone(),
+                    t_type.name
+                ))
+            )),
         },
         _ => (), // Avoiding being overly prescriptive.
     }
@@ -94,12 +107,16 @@ where
 mod tests {
 
     use any::Any;
+    use anyhow::anyhow;
     use anyhow::Result;
     use standard::TypeName;
     use standard::TypeUri;
     use type_::Type;
 
+    use super::check_uri_consistency;
     use super::ensure_thrift_any_type;
+    use crate::AnyError;
+    use crate::AnyTypeExpectationViolated;
 
     #[test]
     fn test_ensure_thrift_any_type_0() -> Result<()> {
@@ -114,5 +131,49 @@ mod tests {
             ..Default::default()
         };
         ensure_thrift_any_type::<ExperimentOverrideRequestContext>(&val)
+    }
+
+    #[test]
+    fn test_ensure_thrift_any_type_1() -> Result<()> {
+        fn test_failed() -> Result<()> {
+            Err(anyhow!("expected type uri inconsistency error"))
+        }
+        let l = TypeUri::uri("facebook.com/icsp/domains/container/ContainerBuildState".to_owned());
+        let r = TypeUri::uri(
+            "facebook.com/icsp/domains/container/ContainerBuildInstanceState".to_owned(),
+        );
+        match check_uri_consistency(&l, &r) {
+            Err(err) => match err.downcast_ref::<AnyError>() {
+                Some(AnyError::AnyTypeExpectationViolated(
+                    AnyTypeExpectationViolated::TypeUrisInconsistent(_),
+                )) => Ok(()),
+                _ => test_failed(),
+            },
+            _ => test_failed(),
+        }
+    }
+
+    #[test]
+    fn test_ensure_thrift_any_type_2() -> Result<()> {
+        fn test_failed() -> Result<()> {
+            Err(anyhow!("expected type name inconsistency error"))
+        }
+        use artifact_builder_override::ExperimentOverrideRequestContext;
+        let val = Any {
+            r#type: Type {
+                name: TypeName::unionType(TypeUri::uri("foo/bar/baz".to_owned())),
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        match ensure_thrift_any_type::<ExperimentOverrideRequestContext>(&val) {
+            Err(err) => match err.downcast_ref::<AnyError>() {
+                Some(AnyError::AnyTypeExpectationViolated(
+                    AnyTypeExpectationViolated::TypeNamesInconsistent(_),
+                )) => Ok(()),
+                _ => test_failed(),
+            },
+            _ => test_failed(),
+        }
     }
 }

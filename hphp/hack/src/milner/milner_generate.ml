@@ -45,6 +45,12 @@ let rec geometric_between min max =
 
 let select l = List.length l - 1 |> Random.int_incl 0 |> List.nth_exn l
 
+let select_or_id ~pick xs =
+  if pick then
+    [select xs]
+  else
+    xs
+
 let choose_nondet = List.filter ~f:(fun _ -> Random.bool ())
 
 let permute_nondet xs =
@@ -198,26 +204,7 @@ end = struct
       }
   [@@deriving eq, ord]
 
-  let rec subfields_of { key; ty; optional } =
-    let open List.Let_syntax in
-    let* ty = subtypes_of ty in
-    let+ optional =
-      if optional then
-        [true; false]
-      else
-        [false]
-    in
-    { key; ty; optional }
-
-  (** Reflexive transitive subtypes of the given type. It is based only on the
-      knowledge about the structure of type and generalities in the system. For
-      example, for mixed, we give int as a subtype but no classes because the
-      function does not know which classes exist in the program. *)
-  and subtypes_of ty =
-    ty
-    ::
-    (match ty with
-    | Mixed -> List.map ~f:(fun prim -> Primitive prim) Primitive.all
+  let rec is_immediately_inhabited = function
     | Primitive prim -> begin
       let open Primitive in
       match prim with
@@ -226,34 +213,102 @@ end = struct
       | String
       | Float
       | Bool ->
-        []
-      | Arraykey -> [Primitive Int; Primitive String]
-      | Num -> [Primitive Int; Primitive Float]
+        true
+      | Arraykey
+      | Num ->
+        false
     end
-    | Option ty -> Primitive Primitive.Null :: subtypes_of ty
-    | Classish info -> List.concat_map ~f:subtypes_of info.children
-    | Alias info -> subtypes_of info.aliased
-    | Newtype _ -> []
-    | Case info -> List.concat_map ~f:subtypes_of info.disjuncts
-    | Enum _ -> []
-    | Tuple tyl ->
-      List.map ~f:subtypes_of tyl
-      |> List.Cartesian_product.all
-      |> List.map ~f:(fun tyl -> Tuple tyl)
-    | Shape { fields; open_ } ->
-      let open List.Let_syntax in
-      let* fields =
-        List.map ~f:subfields_of fields |> List.Cartesian_product.all
-      in
-      let+ open_ =
-        if open_ then
-          (* Here we should be adding new fields, but with the current setup
-             that's too expensive. Need memoization to make it more affordable. *)
-          [true; false]
-        else
-          [false]
-      in
-      Shape { fields; open_ })
+    | Classish info -> begin
+      match info.kind with
+      | Kind.AbstractClass
+      | Kind.Interface ->
+        false
+      | Kind.Class -> true
+    end
+    | Newtype _ -> true
+    | Enum _ -> true
+    | Tuple tyl -> List.for_all tyl ~f:is_immediately_inhabited
+    | Shape { fields; open_ = _ } ->
+      List.for_all fields ~f:(fun field -> is_immediately_inhabited field.ty)
+    | Mixed
+    | Option _
+    | Alias _
+    | Case _ ->
+      false
+
+  (** Computes all subfields of a given field. It combines all subtypes with
+      optional status of the field.
+
+      If `pick` is set it curtails field selection to one inhabited subfield for
+      efficiency. *)
+  let rec subfields_of ~pick { key; ty; optional } =
+    let open List.Let_syntax in
+    let* ty = subtypes_of ~pick ty in
+    let+ optional =
+      if optional then
+        select_or_id ~pick [true; false]
+      else
+        [false]
+    in
+    { key; ty; optional }
+
+  (** Reflexive transitive subtypes of the given type. It is based only on the
+      knowledge about the structure of type and generalities in the system. For
+      example, for mixed, we give int as a subtype but no classes because the
+      function does not know which classes exist in the program.
+
+      If `pick` is set to true, then we curtail picked types along the way to
+      make it efficient to pick an inhabited type. *)
+  and subtypes_of ~pick ty =
+    let subtypes_of = subtypes_of ~pick in
+    let subfields_of = subfields_of ~pick in
+    let pick_inhabited xs =
+      if pick then
+        [select @@ List.filter ~f:is_immediately_inhabited xs]
+      else
+        xs
+    in
+    pick_inhabited
+    @@ ty
+       ::
+       (match ty with
+       | Mixed -> List.map ~f:(fun prim -> Primitive prim) Primitive.all
+       | Primitive prim -> begin
+         let open Primitive in
+         match prim with
+         | Null
+         | Int
+         | String
+         | Float
+         | Bool ->
+           []
+         | Arraykey -> [Primitive Int; Primitive String]
+         | Num -> [Primitive Int; Primitive Float]
+       end
+       | Option ty -> Primitive Primitive.Null :: subtypes_of ty
+       | Classish info -> List.concat_map ~f:subtypes_of info.children
+       | Alias info -> subtypes_of info.aliased
+       | Newtype _ -> []
+       | Case info -> List.concat_map ~f:subtypes_of info.disjuncts
+       | Enum _ -> []
+       | Tuple tyl ->
+         List.map ~f:subtypes_of tyl
+         |> List.Cartesian_product.all
+         |> List.map ~f:(fun tyl -> Tuple tyl)
+       | Shape { fields; open_ } ->
+         let open List.Let_syntax in
+         let* fields =
+           List.map ~f:subfields_of fields |> List.Cartesian_product.all
+         in
+         let+ open_ =
+           if open_ then
+             (* Here we should be adding new fields, but with the current setup
+                that's too expensive. Need memoization to make it more affordable. *)
+             select_or_id ~pick [true; false]
+           else
+             [false]
+         in
+         Shape { fields; open_ })
 
   let rec show_field { key; ty; optional } =
     let optional =
@@ -343,7 +398,7 @@ end = struct
     in
     let ordered_subtypes ty =
       weaken_for_disjointness ty
-      |> List.concat_map ~f:subtypes_of
+      |> List.concat_map ~f:(subtypes_of ~pick:false)
       |> List.sort ~compare
     in
     let subtypes = ordered_subtypes ty in
@@ -410,7 +465,7 @@ end = struct
       None
 
   let inhabitant_of ty =
-    let subtypes = subtypes_of ty in
+    let subtypes = subtypes_of ~pick:true ty in
     let inhabitants = List.filter_map subtypes ~f:expr_of in
     try select inhabitants with
     | Failure _ ->

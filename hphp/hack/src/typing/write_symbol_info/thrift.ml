@@ -110,42 +110,45 @@ let get_thrift_from_container_aux ~thrift_path ~doc =
   | _ -> None
 
 let get_thrift_from_container t ~thrift_path con =
-  let (container, fact) =
-    match con.c_doc_comment with
-    | Some (_, doc) ->
-      (match get_thrift_from_container_aux ~thrift_path ~doc with
-      | Some (container, fact) -> (Some container, Some fact)
-      | None -> (None, None))
-    | None -> (None, None)
-  in
-  let parent_kind =
-    match con.c_kind with
-    | Ast_defs.Cenum -> None
-    | _ -> Some (Predicate.get_parent_kind con.c_kind)
-  in
-  (match (container, parent_kind) with
-  | ( Some { thrift_path; name; kind = Service },
-      Some Predicate.InterfaceContainer ) ->
-    add t ~interface:(snd con.c_name) ~service:name ~thrift_path
-  | _ -> ());
-  let implements_to_string = function
-    | (_, Aast_defs.Happly ((_, x), _)) -> Some x
-    | _ -> None
-  in
-  let container =
-    match (parent_kind, container) with
-    | (Some Predicate.ClassContainer, None) ->
-      let interfaces =
-        List.filter_map ~f:implements_to_string con.c_implements
-      in
-      (match lookup t ~interfaces with
-      | Some (thrift_path, service) ->
-        Some { thrift_path; name = service; kind = Service }
-      | None -> container)
-    | _ -> container
-  in
-  Option.iter ~f:(fun container -> t.cur_container <- Some container) container;
-  fact
+  match con.c_kind with
+  | Ast_defs.Cenum
+  | Ast_defs.Cenum_class _ ->
+    None
+  | _ ->
+    let (container, fact) =
+      match con.c_doc_comment with
+      | Some (_, doc) ->
+        (match get_thrift_from_container_aux ~thrift_path ~doc with
+        | Some (container, fact) -> (Some container, Some fact)
+        | None -> (None, None))
+      | None -> (None, None)
+    in
+    let parent_kind = Predicate.get_parent_kind con.c_kind in
+    (match (container, parent_kind) with
+    | (Some { thrift_path; name; kind = Service }, Predicate.InterfaceContainer)
+      ->
+      add t ~interface:(snd con.c_name) ~service:name ~thrift_path
+    | _ -> ());
+    let implements_to_string = function
+      | (_, Aast_defs.Happly ((_, x), _)) -> Some x
+      | _ -> None
+    in
+    let container =
+      match (parent_kind, container) with
+      | (Predicate.ClassContainer, None) ->
+        let interfaces =
+          List.filter_map ~f:implements_to_string con.c_implements
+        in
+        (match lookup t ~interfaces with
+        | Some (thrift_path, service) ->
+          Some { thrift_path; name = service; kind = Service }
+        | None -> container)
+      | _ -> container
+    in
+    Option.iter
+      ~f:(fun container -> t.cur_container <- Some container)
+      container;
+    fact
 
 let make_member_decl member_name container_qname kind =
   let name = container_qname in

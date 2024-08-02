@@ -1,0 +1,30 @@
+error: Typing[4110] Invalid argument
+
+ 16 |   $chain = chain($s);
+ 17 |   $chain->thenMPZ(»ReproIGCreatorAIMetachain::class«);
+ 18 | }
+
+File "metachain.php", line 17, character 19 - line 17, character 50:
+
+Expected `string`
+
+ 21 |   const type TInput = shape(
+ 22 |     'prompt' => »string«,
+ 23 |   );
+ 24 | }
+
+File "metachain.php", line 22, character 17 - line 22, character 22:
+
+But got `dynamic`
+
+ 6 | ): Awaitable<void> {
+ 7 |   $foo = »await genX(
+ 8 |     // ReproMetaChain::fromValue(shape()) instead of $val
+ 9 |     $val->then($obj),
+10 |   );«
+11 |   list($_, $user_prompt) = $foo;
+12 |   //$user_prompt = $foo[1];
+
+File "metachain.php", line 7, character 10 - line 10, character 3:
+
+1 error found.

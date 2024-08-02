@@ -19,7 +19,9 @@ package thrift
 import (
 	"context"
 	"fmt"
+	"log"
 	"net"
+	"os"
 
 	rsocket "github.com/rsocket/rsocket-go"
 	"github.com/rsocket/rsocket-go/core/transport"
@@ -32,6 +34,7 @@ type rocketServer struct {
 	listener      net.Listener
 	transportID   TransportID
 	zstdSupported bool
+	log           *log.Logger
 }
 
 func newRocketServer(proc Processor, listener net.Listener) Server {
@@ -40,6 +43,7 @@ func newRocketServer(proc Processor, listener net.Listener) Server {
 		listener:      listener,
 		transportID:   TransportIDRocket,
 		zstdSupported: true,
+		log:           log.New(os.Stderr, "", log.LstdFlags),
 	}
 }
 
@@ -49,6 +53,7 @@ func newUpgradeToRocketServer(proc Processor, listener net.Listener) Server {
 		listener:      listener,
 		transportID:   TransportIDUpgradeToRocket,
 		zstdSupported: true,
+		log:           log.New(os.Stderr, "", log.LstdFlags),
 	}
 }
 
@@ -69,15 +74,21 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 		return nil, err
 	}
 	sendingSocket.MetadataPush(serverMetadataPush)
-	conn := &rocketServerSocket{ctx: ctx, proc: s.proc}
+	conn := newRocketServerSocket(ctx, s.proc, s.log)
 	return rsocket.NewAbstractSocket(
 		rsocket.RequestResponse(conn.requestResonse),
+		rsocket.FireAndForget(conn.fireAndForget),
 	), nil
 }
 
 type rocketServerSocket struct {
 	ctx  context.Context
 	proc Processor
+	log  *log.Logger
+}
+
+func newRocketServerSocket(ctx context.Context, proc Processor, log *log.Logger) *rocketServerSocket {
+	return &rocketServerSocket{ctx: ctx, proc: proc, log: log}
 }
 
 func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
@@ -97,6 +108,23 @@ func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 		return mono.Error(err)
 	}
 	return mono.Just(response)
+}
+
+func (r *rocketServerSocket) fireAndForget(msg payload.Payload) {
+	request, err := decodeRequestPayload(msg)
+	if err != nil {
+		r.log.Printf("rocketServer fireAndForget decode request payload error: %v", err)
+		return
+	}
+	protocol, err := newProtocolBufferFromRequest(request)
+	if err != nil {
+		r.log.Printf("rocketServer fireAndForget error creating protocol: %v", err)
+		return
+	}
+	if err := processContext(r.ctx, r.proc, protocol); err != nil {
+		r.log.Printf("rocketServer fireAndForget process error: %v", err)
+		return
+	}
 }
 
 func newProtocolBufferFromRequest(request *requestPayload) (*protocolBuffer, error) {

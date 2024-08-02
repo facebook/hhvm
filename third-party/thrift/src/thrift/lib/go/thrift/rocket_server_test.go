@@ -23,6 +23,33 @@ import (
 	"testing"
 )
 
+type rocketServerTestProcessor struct {
+	requests chan<- *MyTestStruct
+}
+
+func (t *rocketServerTestProcessor) GetProcessorFunction(name string) ProcessorFunction {
+	if name == "test" {
+		return &rocketServerTestProcessorFunction{&testProcessorFunction{}, t.requests}
+	}
+	return nil
+}
+
+type rocketServerTestProcessorFunction struct {
+	ProcessorFunction
+	requests chan<- *MyTestStruct
+}
+
+func (p *rocketServerTestProcessorFunction) RunContext(ctx context.Context, reqStruct Struct) (WritableStruct, ApplicationException) {
+	v, ok := ConnInfoFromContext(ctx)
+	if ok {
+		reqStruct.(*MyTestStruct).Bin = []byte(v.RemoteAddr.String())
+	}
+	if p.requests != nil {
+		p.requests <- reqStruct.(*MyTestStruct)
+	}
+	return reqStruct, nil
+}
+
 // Make sure that ConnInfo is added to the context of a rocket server.
 func TestRocketServerConnInfo(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -64,23 +91,38 @@ func TestRocketServerConnInfo(t *testing.T) {
 	<-errChan
 }
 
-type rocketServerTestProcessor struct{}
-
-func (t *rocketServerTestProcessor) GetProcessorFunction(name string) ProcessorFunction {
-	if name == "test" {
-		return &rocketServerTestProcessorFunction{&testProcessorFunction{}}
+// Test that rocket server accepts one way calls.
+func TestRocketServerOneWay(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	errChan := make(chan error)
+	defer close(errChan)
+	listener, err := net.Listen("tcp", ":0")
+	if err != nil {
+		t.Fatalf("failed to listen: %v", err)
 	}
-	return nil
-}
-
-type rocketServerTestProcessorFunction struct {
-	ProcessorFunction
-}
-
-func (p *rocketServerTestProcessorFunction) RunContext(ctx context.Context, reqStruct Struct) (WritableStruct, ApplicationException) {
-	v, ok := ConnInfoFromContext(ctx)
-	if ok {
-		reqStruct.(*MyTestStruct).Bin = []byte(v.RemoteAddr.String())
+	received := make(chan *MyTestStruct)
+	server := NewSimpleServer(&rocketServerTestProcessor{received}, listener, TransportIDRocket)
+	go func() {
+		errChan <- server.ServeContext(ctx)
+	}()
+	addr := listener.Addr()
+	conn, err := net.Dial(addr.Network(), addr.String())
+	if err != nil {
+		t.Fatalf("failed to dial: %v", err)
 	}
-	return reqStruct, nil
+	proto, err := newRocketClient(conn, ProtocolIDCompact, 0, nil)
+	if err != nil {
+		t.Fatalf("could not create client protocol: %s", err)
+	}
+	client := NewSerialChannel(proto)
+	req := &MyTestStruct{
+		St: "hello",
+	}
+	if err := client.Oneway(context.Background(), "test", req); err != nil {
+		t.Fatalf("could not complete call: %v", err)
+	}
+	<-received
+	cancel()
+	<-errChan
 }

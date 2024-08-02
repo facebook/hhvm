@@ -35,7 +35,7 @@ Here's why: this hint
 
 File "assign_list.php", line 8, character 24 - line 8, character 28:
 
-flows into this hint because they are required to be subtypes
+flows up into this hint as the 1st element of the tuple
 
  8 | function bar_1(»(string,Super,bool)« $xyz): void {
  9 |   list($_, $y, $_) = $xyz;
@@ -62,16 +62,16 @@ which itself flows into this expression because the local variable has this type
 
 File "assign_list.php", line 9, character 22 - line 9, character 25:
 
-which itself flows into this type variable because of an assignment
+which itself flows into this destructure expression because they are required to be subtypes
 
  8 | function bar_1((string,Super,bool) $xyz): void {
- 9 |   list($_, »$y«, $_) = $xyz;
+ 9 |   »list($_, $y, $_)« = $xyz;
 10 |   foo($y);
 11 | }
 
-File "assign_list.php", line 9, character 12 - line 9, character 13:
+File "assign_list.php", line 9, character 3 - line 9, character 18:
 
-which itself flows into this hint because of inference
+which itself flows down into this hint as the 1st element of the tuple
 
  8 | function bar_1(»(string,Super,bool)« $xyz): void {
  9 |   list($_, $y, $_) = $xyz;

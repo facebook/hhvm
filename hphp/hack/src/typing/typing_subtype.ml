@@ -5200,29 +5200,33 @@ end = struct
       let len_optional = List.length d_optional in
       let (ts_required, remain) = List.split_n ty_subs len_required in
       let (ts_optional, ts_variadic) = List.split_n remain len_optional in
-      List.fold2_exn
-        ts_required
-        d_required
-        ~init:(env, TL.valid)
-        ~f:(fun res ty_from ty_into ->
-          let ty_from =
-            Typing_env.update_reason env ty_from ~f:(fun from ->
-                Typing_reason.(
-                  flow ~from ~into:(get_reason ty_into) ~kind:Flow_subtype))
-          in
-          res
-          &&& Subtype.(
-                simplify
-                  ~subtype_env
-                  ~this_ty
-                  ~lhs:{ sub_supportdyn; ty_sub = ty_from }
-                  ~rhs:
-                    {
-                      super_like = false;
-                      super_supportdyn = false;
-                      ty_super = ty_into;
-                    }))
-      &&& fun env ->
+      let (res, n) =
+        List.fold2_exn
+          ts_required
+          d_required
+          ~init:((env, TL.valid), 0)
+          ~f:(fun (res, n) ty_from ty_into ->
+            let ty_from =
+              Typing_env.update_reason env ty_from ~f:(fun sub_prj ->
+                  Typing_reason.(
+                    prj_tuple ~sub:(reason_tuple, sub_prj) ~super:r_super n))
+            in
+            ( (res
+              &&& Subtype.(
+                    simplify
+                      ~subtype_env
+                      ~this_ty
+                      ~lhs:{ sub_supportdyn; ty_sub = ty_from }
+                      ~rhs:
+                        {
+                          super_like = false;
+                          super_supportdyn = false;
+                          ty_super = ty_into;
+                        })),
+              n + 1 ))
+      in
+
+      res &&& fun env ->
       let len_ts_opt = List.length ts_optional in
       let d_optional_part =
         if len_ts_opt < len_optional then
@@ -5230,38 +5234,45 @@ end = struct
         else
           d_optional
       in
-      List.fold2_exn
-        ts_optional
-        d_optional_part
-        ~init:(env, TL.valid)
-        ~f:(fun res ty_from ty_into ->
-          let ty_from =
-            Typing_env.update_reason env ty_from ~f:(fun from ->
-                Typing_reason.(
-                  flow ~from ~into:(get_reason ty_into) ~kind:Flow_subtype))
-          in
-          res
-          &&& Subtype.(
-                simplify
-                  ~subtype_env
-                  ~this_ty
-                  ~lhs:{ sub_supportdyn; ty_sub = ty_from }
-                  ~rhs:
-                    {
-                      super_like = false;
-                      super_supportdyn = false;
-                      ty_super = ty_into;
-                    }))
-      &&& fun env ->
+      let (res, n) =
+        List.fold2_exn
+          ts_optional
+          d_optional_part
+          ~init:((env, TL.valid), n)
+          ~f:(fun (res, n) ty_from ty_into ->
+            let ty_from =
+              Typing_env.update_reason env ty_from ~f:(fun sub_prj ->
+                  Typing_reason.(
+                    prj_tuple ~sub:(reason_tuple, sub_prj) ~super:r_super n))
+            in
+            ( (res
+              &&& Subtype.(
+                    simplify
+                      ~subtype_env
+                      ~this_ty
+                      ~lhs:{ sub_supportdyn; ty_sub = ty_from }
+                      ~rhs:
+                        {
+                          super_like = false;
+                          super_supportdyn = false;
+                          ty_super = ty_into;
+                        })),
+              n + 1 ))
+      in
+
+      res &&& fun env ->
       match (ts_variadic, d_variadic) with
       | (vars, Some ty_into) ->
-        let into = get_reason ty_into in
         List.fold vars ~init:(env, TL.valid) ~f:(fun res ty_from ->
             res
             &&& Subtype.(
                   let ty_from =
-                    Typing_env.update_reason env ty_from ~f:(fun from ->
-                        Typing_reason.(flow ~from ~into ~kind:Flow_subtype))
+                    Typing_env.update_reason env ty_from ~f:(fun sub_prj ->
+                        Typing_reason.(
+                          prj_tuple
+                            ~sub:(reason_tuple, sub_prj)
+                            ~super:r_super
+                            (n + 1)))
                   in
                   simplify
                     ~subtype_env

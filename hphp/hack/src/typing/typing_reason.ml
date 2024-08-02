@@ -3076,6 +3076,8 @@ let rec explain_witness = function
     | Splice pos -> (Pos_or_decl.of_raw_pos pos, "this splice expression")
     | No_return pos -> (Pos_or_decl.of_raw_pos pos, "this declaration")
     | Shape_literal pos -> (Pos_or_decl.of_raw_pos pos, "this shape literal")
+    | Destructure pos ->
+      (Pos_or_decl.of_raw_pos pos, "this destructure expression")
     | _ ->
       ( witness_locl_to_raw_pos witness,
         Format.sprintf

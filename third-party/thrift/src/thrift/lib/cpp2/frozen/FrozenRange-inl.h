@@ -192,7 +192,7 @@ struct ArrayLayout : public LayoutBase {
       }
     }
 
-    ItemView operator[](ptrdiff_t index) const {
+    ItemView operator[](size_t index) const {
       return itemLayout().view(indexPosition(data_, index, itemLayout()));
     }
 

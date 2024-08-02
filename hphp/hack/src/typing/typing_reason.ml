@@ -2315,333 +2315,343 @@ and to_rev_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
 
 (* -- Constructors ---------------------------------------------------------- *)
 
-let none = No_reason
+module Constructors = struct
+  let none = No_reason
 
-let from_witness_locl witness = From_witness_locl witness
+  let from_witness_locl witness = From_witness_locl witness
 
-let from_witness_decl witness = From_witness_decl witness
+  let from_witness_decl witness = From_witness_decl witness
 
-let witness p = from_witness_locl @@ Witness p
+  let witness p = from_witness_locl @@ Witness p
 
-let witness_from_decl p = from_witness_decl @@ Witness_from_decl p
+  let witness_from_decl p = from_witness_decl @@ Witness_from_decl p
 
-let idx (p, r) = Idx (p, r)
+  let idx (p, r) = Idx (p, r)
 
-let idx_vector p = from_witness_locl @@ Idx_vector p
+  let idx_vector p = from_witness_locl @@ Idx_vector p
 
-let idx_vector_from_decl p = from_witness_decl @@ Idx_vector_from_decl p
+  let idx_vector_from_decl p = from_witness_decl @@ Idx_vector_from_decl p
 
-let foreach p = from_witness_locl @@ Foreach p
+  let foreach p = from_witness_locl @@ Foreach p
 
-let asyncforeach p = from_witness_locl @@ Asyncforeach p
+  let asyncforeach p = from_witness_locl @@ Asyncforeach p
 
-let arith p = from_witness_locl @@ Arith p
+  let arith p = from_witness_locl @@ Arith p
 
-let arith_ret p = from_witness_locl @@ Arith_ret p
+  let arith_ret p = from_witness_locl @@ Arith_ret p
 
-let arith_ret_float (p, r, a) = Arith_ret_float (p, r, a)
+  let arith_ret_float (p, r, a) = Arith_ret_float (p, r, a)
 
-let arith_ret_num (p, r, a) = Arith_ret_num (p, r, a)
+  let arith_ret_num (p, r, a) = Arith_ret_num (p, r, a)
 
-let arith_ret_int p = from_witness_locl @@ Arith_ret_int p
+  let arith_ret_int p = from_witness_locl @@ Arith_ret_int p
 
-let arith_dynamic p = from_witness_locl @@ Arith_dynamic p
+  let arith_dynamic p = from_witness_locl @@ Arith_dynamic p
 
-let bitwise_dynamic p = from_witness_locl @@ Bitwise_dynamic p
+  let bitwise_dynamic p = from_witness_locl @@ Bitwise_dynamic p
 
-let incdec_dynamic p = from_witness_locl @@ Incdec_dynamic p
+  let incdec_dynamic p = from_witness_locl @@ Incdec_dynamic p
 
-let comp p = from_witness_locl @@ Comp p
+  let comp p = from_witness_locl @@ Comp p
 
-let concat_ret p = from_witness_locl @@ Concat_ret p
+  let concat_ret p = from_witness_locl @@ Concat_ret p
 
-let logic_ret p = from_witness_locl @@ Logic_ret p
+  let logic_ret p = from_witness_locl @@ Logic_ret p
 
-let bitwise p = from_witness_locl @@ Bitwise p
+  let bitwise p = from_witness_locl @@ Bitwise p
 
-let bitwise_ret p = from_witness_locl @@ Bitwise_ret p
+  let bitwise_ret p = from_witness_locl @@ Bitwise_ret p
 
-let no_return p = from_witness_locl @@ No_return p
+  let no_return p = from_witness_locl @@ No_return p
 
-let no_return_async p = from_witness_locl @@ No_return_async p
+  let no_return_async p = from_witness_locl @@ No_return_async p
 
-let ret_fun_kind (p, k) = from_witness_locl @@ Ret_fun_kind (p, k)
+  let ret_fun_kind (p, k) = from_witness_locl @@ Ret_fun_kind (p, k)
 
-let ret_fun_kind_from_decl (p, k) =
-  from_witness_decl @@ Ret_fun_kind_from_decl (p, k)
+  let ret_fun_kind_from_decl (p, k) =
+    from_witness_decl @@ Ret_fun_kind_from_decl (p, k)
 
-let hint p = from_witness_decl @@ Hint p
+  let hint p = from_witness_decl @@ Hint p
 
-let throw p = from_witness_locl @@ Throw p
+  let throw p = from_witness_locl @@ Throw p
 
-let placeholder p = from_witness_locl @@ Placeholder p
+  let placeholder p = from_witness_locl @@ Placeholder p
 
-let ret_div p = from_witness_locl @@ Ret_div p
+  let ret_div p = from_witness_locl @@ Ret_div p
 
-let yield_gen p = from_witness_locl @@ Yield_gen p
+  let yield_gen p = from_witness_locl @@ Yield_gen p
 
-let yield_asyncgen p = from_witness_locl @@ Yield_asyncgen p
+  let yield_asyncgen p = from_witness_locl @@ Yield_asyncgen p
 
-let yield_asyncnull p = from_witness_locl @@ Yield_asyncnull p
+  let yield_asyncnull p = from_witness_locl @@ Yield_asyncnull p
 
-let yield_send p = from_witness_locl @@ Yield_send p
+  let yield_send p = from_witness_locl @@ Yield_send p
 
-let lost_info (s, r, b) = Lost_info (s, r, b)
+  let lost_info (s, r, b) = Lost_info (s, r, b)
 
-let format (p, s, r) = Format (p, s, r)
+  let format (p, s, r) = Format (p, s, r)
 
-let class_class (p, s) = from_witness_decl @@ Class_class (p, s)
+  let class_class (p, s) = from_witness_decl @@ Class_class (p, s)
 
-let unknown_class p = from_witness_locl @@ Unknown_class p
+  let unknown_class p = from_witness_locl @@ Unknown_class p
 
-let var_param p = from_witness_locl @@ Var_param p
+  let var_param p = from_witness_locl @@ Var_param p
 
-let var_param_from_decl p = from_witness_decl @@ Var_param_from_decl p
+  let var_param_from_decl p = from_witness_decl @@ Var_param_from_decl p
 
-let unpack_param (p1, p2, n) = from_witness_locl @@ Unpack_param (p1, p2, n)
+  let unpack_param (p1, p2, n) = from_witness_locl @@ Unpack_param (p1, p2, n)
 
-let inout_param p = from_witness_decl @@ Inout_param p
+  let inout_param p = from_witness_decl @@ Inout_param p
 
-let instantiate (r1, s, r2) = Instantiate (r1, s, r2)
+  let instantiate (r1, s, r2) = Instantiate (r1, s, r2)
 
-let typeconst (r, p, s, r2) = Typeconst (r, p, s, r2)
+  let typeconst (r, p, s, r2) = Typeconst (r, p, s, r2)
 
-let type_access (r, l) = Type_access (r, l)
+  let type_access (r, l) = Type_access (r, l)
 
-let expr_dep_type (r, p, d) = Expr_dep_type (r, p, d)
+  let expr_dep_type (r, p, d) = Expr_dep_type (r, p, d)
 
-let nullsafe_op p = from_witness_locl @@ Nullsafe_op p
+  let nullsafe_op p = from_witness_locl @@ Nullsafe_op p
 
-let tconst_no_cstr id = from_witness_decl @@ Tconst_no_cstr id
+  let tconst_no_cstr id = from_witness_decl @@ Tconst_no_cstr id
 
-let predicated (p, s) = from_witness_locl @@ Predicated (p, s)
+  let predicated (p, s) = from_witness_locl @@ Predicated (p, s)
 
-let is_refinement p = from_witness_locl @@ Is_refinement p
+  let is_refinement p = from_witness_locl @@ Is_refinement p
 
-let as_refinement p = from_witness_locl @@ As_refinement p
+  let as_refinement p = from_witness_locl @@ As_refinement p
 
-let equal p = from_witness_locl @@ Equal p
+  let equal p = from_witness_locl @@ Equal p
 
-let varray_or_darray_key p = from_witness_decl @@ Varray_or_darray_key p
+  let varray_or_darray_key p = from_witness_decl @@ Varray_or_darray_key p
 
-let vec_or_dict_key p = from_witness_decl @@ Vec_or_dict_key p
+  let vec_or_dict_key p = from_witness_decl @@ Vec_or_dict_key p
 
-let using p = from_witness_locl @@ Using p
+  let using p = from_witness_locl @@ Using p
 
-let dynamic_prop p = from_witness_locl @@ Dynamic_prop p
+  let dynamic_prop p = from_witness_locl @@ Dynamic_prop p
 
-let dynamic_call p = from_witness_locl @@ Dynamic_call p
+  let dynamic_call p = from_witness_locl @@ Dynamic_call p
 
-let dynamic_construct p = from_witness_locl @@ Dynamic_construct p
+  let dynamic_construct p = from_witness_locl @@ Dynamic_construct p
 
-let idx_dict p = from_witness_locl @@ Idx_dict p
+  let idx_dict p = from_witness_locl @@ Idx_dict p
 
-let idx_set_element p = from_witness_locl @@ Idx_set_element p
+  let idx_set_element p = from_witness_locl @@ Idx_set_element p
 
-let missing_optional_field (p, s) =
-  from_witness_decl @@ Missing_optional_field (p, s)
+  let missing_optional_field (p, s) =
+    from_witness_decl @@ Missing_optional_field (p, s)
 
-let unset_field (p, s) = from_witness_locl @@ Unset_field (p, s)
+  let unset_field (p, s) = from_witness_locl @@ Unset_field (p, s)
 
-let contravariant_generic (r, s) = Contravariant_generic (r, s)
+  let contravariant_generic (r, s) = Contravariant_generic (r, s)
 
-let invariant_generic (r, s) = Invariant_generic (r, s)
+  let invariant_generic (r, s) = Invariant_generic (r, s)
 
-let regex p = from_witness_locl @@ Regex p
+  let regex p = from_witness_locl @@ Regex p
 
-let implicit_upper_bound (p, s) =
-  from_witness_decl @@ Implicit_upper_bound (p, s)
+  let implicit_upper_bound (p, s) =
+    from_witness_decl @@ Implicit_upper_bound (p, s)
 
-let type_variable p = from_witness_locl @@ Type_variable p
+  let type_variable p = from_witness_locl @@ Type_variable p
 
-let type_variable_generics (p, n1, n2) =
-  from_witness_locl @@ Type_variable_generics (p, n1, n2)
+  let type_variable_generics (p, n1, n2) =
+    from_witness_locl @@ Type_variable_generics (p, n1, n2)
 
-let type_variable_error p = from_witness_locl @@ Type_variable_error p
+  let type_variable_error p = from_witness_locl @@ Type_variable_error p
 
-let global_type_variable_generics (p, n1, n2) =
-  from_witness_decl @@ Global_type_variable_generics (p, n1, n2)
+  let global_type_variable_generics (p, n1, n2) =
+    from_witness_decl @@ Global_type_variable_generics (p, n1, n2)
 
-let solve_fail p = from_witness_decl @@ Solve_fail p
+  let solve_fail p = from_witness_decl @@ Solve_fail p
 
-let cstr_on_generics (p, id) = from_witness_decl @@ Cstr_on_generics (p, id)
+  let cstr_on_generics (p, id) = from_witness_decl @@ Cstr_on_generics (p, id)
 
-let lambda_param (p, r) = Lambda_param (p, r)
+  let lambda_param (p, r) = Lambda_param (p, r)
 
-let shape (p, s) = from_witness_locl @@ Shape (p, s)
+  let shape (p, s) = from_witness_locl @@ Shape (p, s)
 
-let shape_literal p = from_witness_locl @@ Shape_literal p
+  let shape_literal p = from_witness_locl @@ Shape_literal p
 
-let enforceable p = from_witness_decl @@ Enforceable p
+  let enforceable p = from_witness_decl @@ Enforceable p
 
-let destructure p = from_witness_locl @@ Destructure p
+  let destructure p = from_witness_locl @@ Destructure p
 
-let key_value_collection_key p = from_witness_locl @@ Key_value_collection_key p
+  let key_value_collection_key p =
+    from_witness_locl @@ Key_value_collection_key p
 
-let global_class_prop p = from_witness_decl @@ Global_class_prop p
+  let global_class_prop p = from_witness_decl @@ Global_class_prop p
 
-let global_fun_param p = from_witness_decl @@ Global_fun_param p
+  let global_fun_param p = from_witness_decl @@ Global_fun_param p
 
-let global_fun_ret p = from_witness_decl @@ Global_fun_ret p
+  let global_fun_ret p = from_witness_decl @@ Global_fun_ret p
 
-let splice p = from_witness_locl @@ Splice p
+  let splice p = from_witness_locl @@ Splice p
 
-let et_boolean p = from_witness_locl @@ Et_boolean p
+  let et_boolean p = from_witness_locl @@ Et_boolean p
 
-let default_capability p = from_witness_decl @@ Default_capability p
+  let default_capability p = from_witness_decl @@ Default_capability p
 
-let concat_operand p = from_witness_locl @@ Concat_operand p
+  let concat_operand p = from_witness_locl @@ Concat_operand p
 
-let interp_operand p = from_witness_locl @@ Interp_operand p
+  let interp_operand p = from_witness_locl @@ Interp_operand p
 
-let dynamic_coercion r = Dynamic_coercion r
+  let dynamic_coercion r = Dynamic_coercion r
 
-let support_dynamic_type p = from_witness_decl @@ Support_dynamic_type p
+  let support_dynamic_type p = from_witness_decl @@ Support_dynamic_type p
 
-let dynamic_partial_enforcement (p, s, r) = Dynamic_partial_enforcement (p, s, r)
+  let dynamic_partial_enforcement (p, s, r) =
+    Dynamic_partial_enforcement (p, s, r)
 
-let rigid_tvar_escape (p, n1, n2, r) = Rigid_tvar_escape (p, n1, n2, r)
+  let rigid_tvar_escape (p, n1, n2, r) = Rigid_tvar_escape (p, n1, n2, r)
 
-let opaque_type_from_module (p, s, r) = Opaque_type_from_module (p, s, r)
+  let opaque_type_from_module (p, s, r) = Opaque_type_from_module (p, s, r)
 
-let missing_class p = from_witness_locl @@ Missing_class p
+  let missing_class p = from_witness_locl @@ Missing_class p
 
-let invalid = Invalid
+  let invalid = Invalid
 
-let captured_like p = from_witness_locl @@ Captured_like p
+  let captured_like p = from_witness_locl @@ Captured_like p
 
-let pessimised_inout p = from_witness_decl @@ Pessimised_inout p
+  let pessimised_inout p = from_witness_decl @@ Pessimised_inout p
 
-let pessimised_return p = from_witness_decl @@ Pessimised_return p
+  let pessimised_return p = from_witness_decl @@ Pessimised_return p
 
-let pessimised_prop p = from_witness_decl @@ Pessimised_prop p
+  let pessimised_prop p = from_witness_decl @@ Pessimised_prop p
 
-let unsafe_cast p = from_witness_locl @@ Unsafe_cast p
+  let unsafe_cast p = from_witness_locl @@ Unsafe_cast p
 
-let pattern p = from_witness_locl @@ Pattern p
+  let pattern p = from_witness_locl @@ Pattern p
 
-let flow ~from ~into ~kind = Flow (from, kind, into)
+  let flow ~from ~into ~kind = Flow (from, kind, into)
 
-let definition def of_ = Def (def, of_)
+  let definition def of_ = Def (def, of_)
 
-let reverse r = Rev r
+  let reverse r = Rev r
 
-(* -- Symmetric projections -- *)
-let prj_symm t ~prj = Prj (Symm prj, t)
+  (* -- Symmetric projections -- *)
+  let prj_symm t ~prj = Prj (Symm prj, t)
 
-let prj_ctor_co
-    ~sub:(r_sub, r_sub_prj) ~super:r_super ctor_kind nm idx is_invariant =
-  let parent_flow = flow ~from:r_sub ~into:r_super ~kind:Flow_subtype in
-  let var =
-    if is_invariant then
-      Inv Co
-    else
-      Dir Co
-  in
-  let prj = Prj_symm_ctor (ctor_kind, nm, idx, var) in
-  let into = prj_symm parent_flow ~prj in
-  flow ~from:r_sub_prj ~into ~kind:Flow_prj
+  let prj_ctor_co
+      ~sub:(r_sub, r_sub_prj) ~super:r_super ctor_kind nm idx is_invariant =
+    let parent_flow = flow ~from:r_sub ~into:r_super ~kind:Flow_subtype in
+    let var =
+      if is_invariant then
+        Inv Co
+      else
+        Dir Co
+    in
+    let prj = Prj_symm_ctor (ctor_kind, nm, idx, var) in
+    let into = prj_symm parent_flow ~prj in
+    flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
-let prj_ctor_contra
-    ~sub:r_sub ~super:(r_super, r_super_prj) ctor_kind nm idx is_invariant =
-  let parent_flow =
-    flow ~from:r_super ~into:(reverse r_sub) ~kind:Flow_subtype
-  in
-  let var =
-    if is_invariant then
-      Inv Co
-    else
-      Dir Co
-  in
-  let prj = Prj_symm_ctor (ctor_kind, nm, idx, var) in
-  let into = prj_symm parent_flow ~prj in
-  flow ~from:r_super_prj ~into ~kind:Flow_prj
+  let prj_ctor_contra
+      ~sub:r_sub ~super:(r_super, r_super_prj) ctor_kind nm idx is_invariant =
+    let parent_flow =
+      flow ~from:r_super ~into:(reverse r_sub) ~kind:Flow_subtype
+    in
+    let var =
+      if is_invariant then
+        Inv Co
+      else
+        Dir Co
+    in
+    let prj = Prj_symm_ctor (ctor_kind, nm, idx, var) in
+    let into = prj_symm parent_flow ~prj in
+    flow ~from:r_super_prj ~into ~kind:Flow_prj
 
-let prj_neg ~sub:(r_sub, r_sub_prj) ~super =
-  let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
-  let prj = Prj_symm_neg in
-  let into = prj_symm parent_flow ~prj in
-  flow ~from:r_sub_prj ~into ~kind:Flow_prj
+  let prj_neg ~sub:(r_sub, r_sub_prj) ~super =
+    let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
+    let prj = Prj_symm_neg in
+    let into = prj_symm parent_flow ~prj in
+    flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
-let prj_nullable ~sub:(r_sub, r_sub_prj) ~super =
-  let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
-  let prj = Prj_symm_nullable in
-  let into = prj_symm parent_flow ~prj in
-  flow ~from:r_sub_prj ~into ~kind:Flow_prj
+  let prj_nullable ~sub:(r_sub, r_sub_prj) ~super =
+    let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
+    let prj = Prj_symm_nullable in
+    let into = prj_symm parent_flow ~prj in
+    flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
-let prj_tuple ~sub:(r_sub, r_sub_prj) ~super idx =
-  let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
-  let prj = Prj_symm_tuple idx in
-  let into = prj_symm parent_flow ~prj in
-  flow ~from:r_sub_prj ~into ~kind:Flow_prj
+  let prj_tuple ~sub:(r_sub, r_sub_prj) ~super idx =
+    let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
+    let prj = Prj_symm_tuple idx in
+    let into = prj_symm parent_flow ~prj in
+    flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
-let prj_shape ~sub:(r_sub, r_sub_prj) ~super lbl ~kind_sub ~kind_super =
-  let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
-  let prj = Prj_symm_shape (lbl, kind_sub, kind_super) in
-  let into = prj_symm parent_flow ~prj in
-  flow ~from:r_sub_prj ~into ~kind:Flow_prj
+  let prj_shape ~sub:(r_sub, r_sub_prj) ~super lbl ~kind_sub ~kind_super =
+    let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
+    let prj = Prj_symm_shape (lbl, kind_sub, kind_super) in
+    let into = prj_symm parent_flow ~prj in
+    flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
-let prj_fn_param ~super:(r_super, r_super_prj) ~sub ~idx_sub ~idx_super =
-  let parent_flow = flow ~from:r_super ~into:(reverse sub) ~kind:Flow_subtype in
-  let prj = Prj_symm_fn_param (idx_super, idx_sub) in
-  let into = prj_symm parent_flow ~prj in
-  flow ~from:r_super_prj ~into ~kind:Flow_prj
+  let prj_fn_param ~super:(r_super, r_super_prj) ~sub ~idx_sub ~idx_super =
+    let parent_flow =
+      flow ~from:r_super ~into:(reverse sub) ~kind:Flow_subtype
+    in
+    let prj = Prj_symm_fn_param (idx_super, idx_sub) in
+    let into = prj_symm parent_flow ~prj in
+    flow ~from:r_super_prj ~into ~kind:Flow_prj
 
-let prj_fn_param_inout_co ~sub:(r_sub, r_sub_prj) ~super ~idx_sub ~idx_super =
-  let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
-  let prj = Prj_symm_fn_param_inout (idx_sub, idx_super, Co) in
-  let into = prj_symm parent_flow ~prj in
-  flow ~from:r_sub_prj ~into ~kind:Flow_prj
+  let prj_fn_param_inout_co ~sub:(r_sub, r_sub_prj) ~super ~idx_sub ~idx_super =
+    let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
+    let prj = Prj_symm_fn_param_inout (idx_sub, idx_super, Co) in
+    let into = prj_symm parent_flow ~prj in
+    flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
-let prj_fn_param_inout_contra
-    ~super:(r_super, r_super_prj) ~sub ~idx_sub ~idx_super =
-  let parent_flow = flow ~from:r_super ~into:(reverse sub) ~kind:Flow_subtype in
-  let prj = Prj_symm_fn_param_inout (idx_super, idx_sub, Contra) in
-  let into = prj_symm parent_flow ~prj in
-  flow ~from:r_super_prj ~into ~kind:Flow_prj
+  let prj_fn_param_inout_contra
+      ~super:(r_super, r_super_prj) ~sub ~idx_sub ~idx_super =
+    let parent_flow =
+      flow ~from:r_super ~into:(reverse sub) ~kind:Flow_subtype
+    in
+    let prj = Prj_symm_fn_param_inout (idx_super, idx_sub, Contra) in
+    let into = prj_symm parent_flow ~prj in
+    flow ~from:r_super_prj ~into ~kind:Flow_prj
 
-let prj_fn_ret ~sub:(r_sub, r_sub_prj) ~super =
-  let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
-  let prj = Prj_symm_fn_ret in
-  let into = prj_symm parent_flow ~prj in
-  flow ~from:r_sub_prj ~into ~kind:Flow_prj
+  let prj_fn_ret ~sub:(r_sub, r_sub_prj) ~super =
+    let parent_flow = flow ~from:r_sub ~into:super ~kind:Flow_subtype in
+    let prj = Prj_symm_fn_ret in
+    let into = prj_symm parent_flow ~prj in
+    flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
-(* -- Asymmetric projections -- *)
-let prj_asymm_sub ~r_sub ~r_sub_prj prj =
-  let into = Prj (Asymm (Sub, prj), r_sub) in
-  flow ~from:r_sub_prj ~into ~kind:Flow_prj
+  (* -- Asymmetric projections -- *)
+  let prj_asymm_sub ~r_sub ~r_sub_prj prj =
+    let into = Prj (Asymm (Sub, prj), r_sub) in
+    flow ~from:r_sub_prj ~into ~kind:Flow_prj
 
-let prj_asymm_super ~r_super ~r_super_prj prj =
-  let from = Prj (Asymm (Super, prj), r_super) in
-  flow ~from ~into:r_super_prj ~kind:Flow_prj
+  let prj_asymm_super ~r_super ~r_super_prj prj =
+    let from = Prj (Asymm (Super, prj), r_super) in
+    flow ~from ~into:r_super_prj ~kind:Flow_prj
 
-let prj_union_sub ~r_sub ~r_sub_prj =
-  prj_asymm_sub ~r_sub ~r_sub_prj Prj_asymm_union
+  let prj_union_sub ~r_sub ~r_sub_prj =
+    prj_asymm_sub ~r_sub ~r_sub_prj Prj_asymm_union
 
-let prj_union_super ~r_super ~r_super_prj =
-  prj_asymm_super ~r_super ~r_super_prj Prj_asymm_union
+  let prj_union_super ~r_super ~r_super_prj =
+    prj_asymm_super ~r_super ~r_super_prj Prj_asymm_union
 
-let prj_inter_sub ~r_sub ~r_sub_prj =
-  prj_asymm_sub ~r_sub ~r_sub_prj Prj_asymm_inter
+  let prj_inter_sub ~r_sub ~r_sub_prj =
+    prj_asymm_sub ~r_sub ~r_sub_prj Prj_asymm_inter
 
-let prj_inter_super ~r_super ~r_super_prj =
-  prj_asymm_super ~r_super ~r_super_prj Prj_asymm_inter
+  let prj_inter_super ~r_super ~r_super_prj =
+    prj_asymm_super ~r_super ~r_super_prj Prj_asymm_inter
 
-let prj_neg_sub ~r_sub ~r_sub_prj =
-  prj_asymm_sub ~r_sub ~r_sub_prj Prj_asymm_neg
+  let prj_neg_sub ~r_sub ~r_sub_prj =
+    prj_asymm_sub ~r_sub ~r_sub_prj Prj_asymm_neg
 
-let prj_neg_super ~r_super ~r_super_prj =
-  prj_asymm_super ~r_super ~r_super_prj Prj_asymm_neg
+  let prj_neg_super ~r_super ~r_super_prj =
+    prj_asymm_super ~r_super ~r_super_prj Prj_asymm_neg
 
-let prj_nullable_sub ~r_sub ~r_sub_prj =
-  prj_asymm_sub ~r_sub ~r_sub_prj Prj_asymm_nullable
+  let prj_nullable_sub ~r_sub ~r_sub_prj =
+    prj_asymm_sub ~r_sub ~r_sub_prj Prj_asymm_nullable
 
-let prj_nullable_super ~r_super ~r_super_prj =
-  prj_asymm_super ~r_super ~r_super_prj Prj_asymm_nullable
+  let prj_nullable_super ~r_super ~r_super_prj =
+    prj_asymm_super ~r_super ~r_super_prj Prj_asymm_nullable
 
-let missing_field = Missing_field
+  let missing_field = Missing_field
 
-let pessimised_this p = from_witness_decl @@ Pessimised_this p
+  let pessimised_this p = from_witness_decl @@ Pessimised_this p
+end
+
+include Constructors
 
 (* -- Visitor --------------------------------------------------------------- *)
 module Visitor = struct

@@ -324,6 +324,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     bool resourcePoolDisabledGflag{false};
 
     bool checkComplete{false};
+    bool isProcessorFactoryThriftGenerated{false};
 
     std::string explain() const;
   };

@@ -365,6 +365,10 @@ ThriftServer::~ThriftServer() {
 
 void ThriftServer::setInterface(std::shared_ptr<AsyncProcessorFactory> iface) {
   CHECK(configMutable());
+  if (iface) {
+    runtimeServerActions_.isProcessorFactoryThriftGenerated =
+        iface->isThriftGenerated();
+  }
   cpp2Pfac_ = iface;
   applicationServerInterface_ = nullptr;
   for (auto* serviceHandler : cpp2Pfac_->getServiceHandlers()) {

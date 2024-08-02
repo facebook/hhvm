@@ -46,7 +46,7 @@ struct BaseEventData {
 
   void populate(DynamicEvent& event) const {
     std::chrono::duration<int64_t, std::nano> elapsed_time =
-        start_time - std::chrono::system_clock::now();
+        std::chrono::system_clock::now() - start_time;
     event.addInt(
         "start_time", std::chrono::system_clock::to_time_t(start_time));
     event.addInt(

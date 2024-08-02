@@ -627,4 +627,14 @@ TEST(AsyncProcessorMethodResolutionTest, MultipleService) {
       monitoringClient->semifuture_childMethod2().get(), "hello from Monitor");
 }
 
+TEST(AsyncProcessorFactoryTest, ThriftGenerated) {
+  std::shared_ptr<ServiceHandler<Parent>> generated =
+      std::make_shared<ServiceHandler<Parent>>();
+  ThriftServerAsyncProcessorFactory<ServiceHandler<Parent>> notGenerated =
+      ThriftServerAsyncProcessorFactory<ServiceHandler<Parent>>(generated);
+  // TODO: Update generated AsyncProcessorFactorys to return true
+  EXPECT_FALSE(generated->isThriftGenerated());
+  EXPECT_FALSE(notGenerated.isThriftGenerated());
+}
+
 } // namespace apache::thrift::test

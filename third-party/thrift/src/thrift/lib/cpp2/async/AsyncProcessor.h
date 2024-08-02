@@ -353,6 +353,8 @@ class AsyncProcessorFactory {
   }
 
   virtual ~AsyncProcessorFactory() = default;
+
+  virtual bool isThriftGenerated() const { return false; }
 };
 
 class AsyncProcessor;

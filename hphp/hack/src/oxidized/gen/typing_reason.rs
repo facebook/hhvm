@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e3fcd186585378e72d97aba80e30c25f>>
+// @generated SignedSource<<fd2220543f96634a053abad920e5599c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -664,31 +664,6 @@ pub enum T_ {
     #[rust_to_ocaml(name = "Opaque_type_from_module")]
     OpaqueTypeFromModule(pos_or_decl::PosOrDecl, String, Box<T_>),
 }
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(u8)]
-pub enum Direction {
-    Fwd,
-    Bwd,
-}
-impl TrivialDrop for Direction {}
-arena_deserializer::impl_deserialize_in_arena!(Direction);
 
 pub type Reason = T_;
 

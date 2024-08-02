@@ -140,14 +140,6 @@ let variance_dir_to_json = function
   | Co -> Hh_json.(JSON_Object [("Co", JSON_Array [])])
   | Contra -> Hh_json.(JSON_Object [("Contr", JSON_Array [])])
 
-let variance_dir_is_contra = function
-  | Contra -> true
-  | Co -> false
-
-let explain_variance_dir = function
-  | Contra -> "contravariant"
-  | Co -> "covariant"
-
 (** When recording the decomposition of a type during inference we want to keep
     track of variance so we can give intuition about the direction of 'flow'.
     In the case of invariant type paramters, we record both the fact that it was
@@ -156,11 +148,6 @@ type cstr_variance =
   | Dir of variance_dir
   | Inv of variance_dir
 [@@deriving hash]
-
-let cstr_variance_is_contra = function
-  | Dir dir
-  | Inv dir ->
-    variance_dir_is_contra dir
 
 let cstr_variance_to_json = function
   | Dir dir ->
@@ -180,11 +167,6 @@ let field_kind_to_json = function
   | Optional -> Hh_json.(JSON_Object [("Optional", JSON_Array [])])
   | Required -> Hh_json.(JSON_Object [("Required", JSON_Array [])])
 
-let explain_field_kind = function
-  | Required -> "required"
-  | Optional -> "optional"
-  | Absent -> "non-existent"
-
 type ctor_kind =
   | Ctor_class
   | Ctor_newtype
@@ -193,10 +175,6 @@ type ctor_kind =
 let ctor_kind_to_json = function
   | Ctor_class -> Hh_json.string_ "Ctor_class"
   | Ctor_newtype -> Hh_json.string_ "Ctor_newtype"
-
-let explain_ctor_kind = function
-  | Ctor_class -> "this class"
-  | Ctor_newtype -> "this newtype"
 
 (** Symmetric projections are those in which the same decomposition is applied
     to both sub- and supertype during inference *)
@@ -218,19 +196,6 @@ let reverse_prj_symm = function
   | Prj_symm_fn_param_inout (idx_sub, idx_sup, var) ->
     Prj_symm_fn_param_inout (idx_sup, idx_sub, var)
   | t -> t
-
-let prj_symm_is_contra = function
-  | Prj_symm_ctor (_, _, _, var) -> cstr_variance_is_contra var
-  | Prj_symm_fn_param _
-  | Prj_symm_fn_param_inout (_, _, Contra) ->
-    true
-  | Prj_symm_fn_param_inout (_, _, Co)
-  | Prj_symm_fn_ret
-  | Prj_symm_neg
-  | Prj_symm_nullable
-  | Prj_symm_tuple _
-  | Prj_symm_shape _ ->
-    false
 
 let prj_symm_to_json = function
   | Prj_symm_neg -> Hh_json.JSON_String "Prj_symm_neg"
@@ -287,70 +252,6 @@ let prj_symm_to_json = function
         ])
   | Prj_symm_fn_ret -> Hh_json.JSON_String "Prj_symm_fn_ret"
 
-let int_to_ordinal =
-  let sfxs = [| "th"; "st"; "nd"; "rd"; "th" |] in
-  fun n ->
-    let sfx =
-      if n >= 10 && n <= 20 then
-        "th"
-      else
-        sfxs.(min 4 (n mod 10))
-    in
-    Format.sprintf "%d%s" n sfx
-
-let explain_symm_prj prj ~side =
-  match prj with
-  | Prj_symm_neg -> "as the inner type of a negation"
-  | Prj_symm_nullable -> "as the non-null part of a nullable type"
-  | Prj_symm_ctor (ctor_kind, nm, idx, Inv dir) ->
-    Format.sprintf
-      "as the invariant, %s type parameter of the %s `%s`, when typing as %s"
-      (int_to_ordinal (idx + 1))
-      (explain_ctor_kind ctor_kind)
-      nm
-      (explain_variance_dir dir)
-  | Prj_symm_ctor (ctor_kind, nm, idx, Dir dir) ->
-    Format.sprintf
-      "as the %s, %s type parameter of the %s `%s`"
-      (explain_variance_dir dir)
-      (int_to_ordinal (idx + 1))
-      (explain_ctor_kind ctor_kind)
-      nm
-  | Prj_symm_tuple idx ->
-    Format.sprintf "as the %s element of the tuple" (int_to_ordinal idx)
-  | Prj_symm_shape (fld_nm, fld_kind_lhs, fld_kind_rhs) ->
-    let fld_kind =
-      match side with
-      | `Lhs -> fld_kind_lhs
-      | `Rhs -> fld_kind_rhs
-    in
-    (match fld_kind with
-    | Absent ->
-      Format.sprintf "since the shape field `'%s'` is not defined" fld_nm
-    | _ ->
-      Format.sprintf
-        "as the %s shape field `'%s'`"
-        (explain_field_kind fld_kind)
-        fld_nm)
-  | Prj_symm_fn_param (idx_lhs, idx_rhs) ->
-    let idx =
-      match side with
-      | `Lhs -> idx_lhs
-      | `Rhs -> idx_rhs
-    in
-    Format.sprintf "as the %s function parameter" (int_to_ordinal (idx + 1))
-  | Prj_symm_fn_param_inout (idx_lhs, idx_rhs, dir) ->
-    let idx =
-      match side with
-      | `Lhs -> idx_lhs
-      | `Rhs -> idx_rhs
-    in
-    Format.sprintf
-      "as the invariant, %s `inout` function parameter, when typing as %s"
-      (int_to_ordinal (idx + 1))
-      (explain_variance_dir dir)
-  | Prj_symm_fn_ret -> "as the function return type"
-
 (** Asymmetric projections are those in which the same decomposition is applied
     to only one of the sub- or supertype during inference *)
 type prj_asymm =
@@ -365,13 +266,6 @@ let prj_asymm_to_json = function
   | Prj_asymm_inter -> Hh_json.JSON_String "Prj_asymm_inter"
   | Prj_asymm_neg -> Hh_json.JSON_String "Prj_asymm_neg"
   | Prj_asymm_nullable -> Hh_json.JSON_String "Prj_asymm_nullable"
-
-let explain_asymm_prj prj =
-  match prj with
-  | Prj_asymm_union -> "as an element of the union type"
-  | Prj_asymm_inter -> "as an element of the intersection type"
-  | Prj_asymm_neg -> "as the inner type of a negation"
-  | Prj_asymm_nullable -> "as the non-null part of a nullable type"
 
 (** For asymmetric projections we need to track which of the sub- or supertype
     was decomposed  *)
@@ -401,18 +295,6 @@ let prj_to_json = function
     Hh_json.(
       JSON_Object
         [("Asymm", JSON_Array [side_to_json side; prj_asymm_to_json prj_asymm])])
-
-let prj_is_contra = function
-  | Asymm _ -> false
-  | Symm prj_symm -> prj_symm_is_contra prj_symm
-
-let explain_prj_left = function
-  | Symm prj -> explain_symm_prj prj ~side:`Lhs
-  | Asymm (_, prj) -> explain_asymm_prj prj
-
-let explain_prj_right = function
-  | Symm prj -> explain_symm_prj prj ~side:`Rhs
-  | Asymm (_, prj) -> explain_asymm_prj prj
 
 (* ~~ Flow kinds ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
@@ -446,38 +328,6 @@ let flow_kind_to_json = function
   | Flow_return_expr -> Hh_json.string_ "Flow_return_expr"
   | Flow_upper_bound -> Hh_json.string_ "Flow_upper_bound"
   | Flow_lower_bound -> Hh_json.string_ "Flow_lower_bound"
-
-let explain_flow_kind_fwd = function
-  | Flow_assign -> "because of an assignment"
-  | Flow_local -> "because the local variable has this type"
-  | Flow_solved -> "because of inference"
-  | Flow_subtype
-  | Flow_subtype_toplevel ->
-    "because they are required to be subtypes"
-  | Flow_prj -> "because the type was decomposed"
-  | Flow_extends -> "because they are subclass and superclass"
-  | Flow_transitive -> "because of transitivity"
-  | Flow_fun_return -> "because of the functions return type"
-  | Flow_param_hint -> "because it is a parameter hint"
-  | Flow_return_expr -> "because the expression is in return position"
-  | Flow_upper_bound -> "becuase it is the upper bound"
-  | Flow_lower_bound -> "because it is the lower bound"
-
-let explain_flow_kind_bwd = function
-  | Flow_assign -> "because of an assignment"
-  | Flow_local -> "because the local variable has this type"
-  | Flow_solved -> "because of inference"
-  | Flow_subtype
-  | Flow_subtype_toplevel ->
-    "because they are required to be subtypes"
-  | Flow_prj -> "because the type was decomposed"
-  | Flow_extends -> "because they are subclass and superclass"
-  | Flow_transitive -> "because of transitivity"
-  | Flow_fun_return -> "because of the functions return type"
-  | Flow_param_hint -> "because it is a parameter hint"
-  | Flow_return_expr -> "because the expression is in return position"
-  | Flow_upper_bound -> "becuase it is the upper bound"
-  | Flow_lower_bound -> "because it is the lower bound"
 
 (* ~~ Witnesses ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
@@ -2893,318 +2743,17 @@ module Predicates = struct
     | _ -> None
 end
 
-(* ~~ Path ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-
-type direction =
-  | Fwd
-  | Bwd
-
-let direction_to_json = function
-  | Fwd -> Hh_json.string_ "Fwd"
-  | Bwd -> Hh_json.string_ "Bwd"
-
-let flip = function
-  | Fwd -> Bwd
-  | Bwd -> Fwd
-
-type path_elem =
-  | Edge of {
-      out_of: prj option;
-      dir: direction;
-      kind: flow_kind;
-      in_to: prj option;
-    }
-  | Node of locl_phase t_
-
-let path_elem_to_json = function
-  | Edge { out_of; dir; in_to; kind } ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Edge",
-            JSON_Object
-              (List.filter_opt
-                 [
-                   Some ("dir", direction_to_json dir);
-                   Some ("kind", flow_kind_to_json kind);
-                   Option.map out_of ~f:(fun prj -> ("out_of", prj_to_json prj));
-                   Option.map in_to ~f:(fun prj -> ("in_to", prj_to_json prj));
-                 ]) );
-        ])
-  | Node witness -> to_json witness
-
-let edge out_of dir kind in_to = Edge { out_of; dir; kind; in_to }
-
-type stats = {
-  max_depth: int;
-  length: int;
-  reversals: int;
-}
-
-let stats_to_json { max_depth; length; reversals } =
-  Hh_json.(
-    JSON_Object
-      [
-        ("max_depth", int_ max_depth);
-        ("length", int_ length);
-        ("reversals", int_ reversals);
-      ])
-
-let explain_reversals n =
-  if n = 1 then
-    "1 reversal"
-  else
-    Format.sprintf "%d reversals" n
-
-let explain_stats { max_depth; length; reversals } =
-  Format.sprintf
-    "This error has %d steps, a maximum depth of %d and contains %s."
-    length
-    max_depth
-    (explain_reversals reversals)
-
-let empty_stats = { max_depth = 0; length = 0; reversals = 0 }
-
-let append_stats
-    { max_depth = d1; length = l1; reversals = r1 }
-    { max_depth = d2; length = l2; reversals = r2 } =
-  { max_depth = max d1 d2; length = l1 + l2; reversals = r1 + r2 }
-
-let incr_stats_length t = { t with length = t.length + 1 }
-
-type path = {
-  path_elems: path_elem list;
-  stats: stats;
-}
-
-let path_to_json { stats; path_elems } =
-  Hh_json.(
-    JSON_Object
-      [
-        ("stats", stats_to_json stats);
-        ("path_elems", array_ path_elem_to_json path_elems);
-      ])
-
-let bracket prj =
-  match prj with
-  | Symm _ -> (Some prj, Some prj)
-  | Asymm (Sub, _) -> (Some prj, None)
-  | Asymm (Super, _) -> (None, Some prj)
-
-(** Convert a normalized [locl_phase t_] into a [path]  *)
-let to_path t =
-  let rec aux t ~dir ~cur_depth =
-    match t with
-    | Rev _ -> failwith "unnormalized reason"
-    | Flow (l, kind, r) ->
-      let (prj_ll_opt, elem_l, prj_lr_opt, stats_l, depth_l) =
-        aux l ~dir ~cur_depth
-      and (prj_rl_opt, elem_r, prj_rr_opt, stats_r, depth_r) =
-        aux r ~dir ~cur_depth
-      in
-      let stats = incr_stats_length @@ append_stats stats_l stats_r in
-      ( prj_ll_opt,
-        elem_l @ (edge prj_lr_opt dir kind prj_rl_opt :: elem_r),
-        prj_rr_opt,
-        stats,
-        max depth_l depth_r )
-    | Prj (prj, t) ->
-      let (dir, flipped) =
-        if prj_is_contra prj then
-          (flip dir, true)
-        else
-          (dir, false)
-      in
-      let cur_depth = cur_depth + 1 in
-      let (prj_l_inner, elem, prj_r_inner, stats, max_depth) =
-        aux t ~dir ~cur_depth
-      in
-      let (prj_l_opt, prj_r_opt) = bracket prj in
-      let stats =
-        if flipped then
-          { stats with reversals = stats.reversals + 1 }
-        else
-          stats
-      in
-      let prj_l_opt =
-        match (prj_l_inner, prj_l_opt) with
-        | (Some l, None)
-        | (None, Some l) ->
-          Some l
-        | (None, None) -> None
-        | _ -> failwith "ill-formed path"
-      and prj_r_opt =
-        match (prj_r_inner, prj_r_opt) with
-        | (Some r, None)
-        | (None, Some r) ->
-          Some r
-        | (None, None) -> None
-        | _ -> failwith "ill-formed path"
-      in
-      (prj_l_opt, elem, prj_r_opt, stats, max_depth)
-    | witness -> (None, [Node witness], None, empty_stats, cur_depth)
-  in
-  match aux t ~dir:Fwd ~cur_depth:0 with
-  | (None, path_elems, None, stats, max_depth) ->
-    let stats = { stats with max_depth } in
-    { path_elems; stats }
-  | _ -> failwith "ill-formed path"
-
-(* TODO(mjt) refactor so that extended reasons use a separate type for witnesses
-   and ensure we handle all cases statically *)
-let rec explain_witness = function
-  | Def (_pos_or_decl, r) -> explain_witness r
-  | Missing_field -> (Pos_or_decl.none, "no type")
-  | Idx (pos, _) -> (Pos_or_decl.of_raw_pos pos, "this index expression")
-  | Lambda_param (pos, _) ->
-    (Pos_or_decl.of_raw_pos pos, "this lambda parameter")
-  | Typeconst (_, (pos, _), _, _) -> (pos, "this type constant")
-  | Type_access (r, _) -> explain_witness r
-  | Expr_dep_type (r, _, _) -> explain_witness r
-  | From_witness_locl witness ->
-    (match witness with
-    | Is_refinement pos -> (Pos_or_decl.of_raw_pos pos, "this `is` expression")
-    | Witness pos -> (Pos_or_decl.of_raw_pos pos, "this expression")
-    | Type_variable pos -> (Pos_or_decl.of_raw_pos pos, "this type variable")
-    | Type_variable_generics (pos, x, y) ->
-      (Pos_or_decl.of_raw_pos pos, Format.sprintf "the generic `%s` on `%s`" x y)
-    | Unpack_param (pos, _, _) ->
-      (Pos_or_decl.of_raw_pos pos, "this unpacked parameter")
-    | Bitwise pos -> (Pos_or_decl.of_raw_pos pos, "this expression")
-    | Arith pos -> (Pos_or_decl.of_raw_pos pos, "this arithmetic expression")
-    | Idx_vector pos -> (Pos_or_decl.of_raw_pos pos, "this index expression")
-    | Splice pos -> (Pos_or_decl.of_raw_pos pos, "this splice expression")
-    | No_return pos -> (Pos_or_decl.of_raw_pos pos, "this declaration")
-    | Shape_literal pos -> (Pos_or_decl.of_raw_pos pos, "this shape literal")
-    | Destructure pos ->
-      (Pos_or_decl.of_raw_pos pos, "this destructure expression")
-    | _ ->
-      ( witness_locl_to_raw_pos witness,
-        Format.sprintf
-          "this thing (`%s`)"
-          (constructor_string_of_witness_locl witness) ))
-  | From_witness_decl witness ->
-    (match witness with
-    | Hint pos -> (pos, "this hint")
-    | Witness_from_decl pos -> (pos, "this declaration")
-    | Support_dynamic_type pos -> (pos, "this function or method ")
-    | Pessimised_return pos -> (pos, "this return hint")
-    | Var_param_from_decl pos -> (pos, "this variadic parameter declaration")
-    | Cstr_on_generics (pos, _) ->
-      (pos, "the constraint on the generic parameter")
-    | Implicit_upper_bound (pos, nm) ->
-      ( pos,
-        Format.sprintf
-          "the implicit upper bound (`%s`) on the generic parameter"
-          nm )
-    | _ ->
-      ( witness_decl_to_raw_pos witness,
-        Format.sprintf
-          "this thing (`%s`)"
-          (constructor_string_of_witness_decl witness) ))
-  | r ->
-    (to_raw_pos r, Format.sprintf "this thing (`%s`)" (to_constructor_string r))
-
-let explain_step (edge, node) ~prefix =
-  match (edge, node) with
-  | ((None, Fwd, None, kind), rhs) ->
-    let (pos, expl) = explain_witness rhs in
-    let kind_expl = explain_flow_kind_fwd kind in
-    (pos, Format.sprintf "%sflows into %s %s" prefix expl kind_expl)
-  | ((None, Bwd, None, kind), rhs) ->
-    let (pos, expl) = explain_witness rhs in
-    let kind_expl = explain_flow_kind_bwd kind in
-    (pos, Format.sprintf "%sflows from %s %s" prefix expl kind_expl)
-  (* For projections the flow kind is always `Flow_prj` so there is no need for further explanation *)
-  | ((Some out_of, Fwd, None, _), rhs) ->
-    let prj_expl = explain_prj_right out_of in
-    let (pos, expl) = explain_witness rhs in
-    (pos, Format.sprintf "%sflows down into %s %s" prefix expl prj_expl)
-  | ((Some out_of, Bwd, None, _), rhs) ->
-    let prj_expl = explain_prj_right out_of in
-    let (pos, expl) = explain_witness rhs in
-    (pos, Format.sprintf "%sflows down from %s %s" prefix expl prj_expl)
-  | ((None, Fwd, Some in_to, _), rhs) ->
-    let prj_expl = explain_prj_left in_to in
-    let (pos, expl) = explain_witness rhs in
-    (pos, Format.sprintf "%sflows up into %s %s" prefix expl prj_expl)
-  | ((None, Bwd, Some in_to, _), rhs) ->
-    let prj_expl = explain_prj_left in_to in
-    let (pos, expl) = explain_witness rhs in
-    (pos, Format.sprintf "%sflows up from %s %s" prefix expl prj_expl)
-  | _ -> failwith "ill-formed path"
-
-let is_supportdyn_hint r =
-  match r with
-  | From_witness_decl (Hint pos) ->
-    String.equal
-      (Relative_path.suffix @@ Pos_or_decl.filename pos)
-      "supportdynamic.hhi"
-  | _ -> false
-
-(** For reporting purposed, drop expansion of `supportdyn` newtype *)
-let suppress_supportdyn = function
-  | (Edge { dir = Fwd; _ } as edge) :: Node rhs :: Edge _ :: path_elems
-    when is_supportdyn_hint rhs ->
-    edge :: path_elems
-  | Edge { dir = Bwd; _ } :: Node rhs :: path_elems when is_supportdyn_hint rhs
-    ->
-    path_elems
-  | path_elems -> path_elems
-
-let explain_path { path_elems; stats } =
-  let rec aux path_elems acc =
-    match suppress_supportdyn path_elems with
-    | Edge { out_of; dir; in_to; kind } :: Node rhs :: path_elems ->
-      let expl =
-        explain_step ~prefix:"which itself " ((out_of, dir, in_to, kind), rhs)
-      in
-      aux path_elems (expl :: acc)
-    | [] -> List.rev acc
-    | _ -> failwith "ill-formed path"
-  in
-
-  (* Handle supportdyn at the start of the path *)
-  let path_elems =
-    match path_elems with
-    | (Node _ as head) :: rest -> head :: suppress_supportdyn rest
-    | _ -> failwith "ill-formed path"
-  in
-  match path_elems with
-  | Node lhs :: Edge { out_of; dir; in_to; kind } :: Node rhs :: path_elems ->
-    let (lhs_pos, lhs_expl) = explain_witness lhs in
-    let lhs_expl =
-      Format.sprintf "%s\n\nHere's why: %s" (explain_stats stats) lhs_expl
-    in
-    let (rhs_pos, rhs_expl) =
-      explain_step ~prefix:"" ((out_of, dir, in_to, kind), rhs)
-    in
-    aux path_elems [(rhs_pos, rhs_expl); (lhs_pos, lhs_expl)]
-  | _ -> failwith "ill-formed path"
-
 (* ~~ Extended reasons rendering ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
-let explain t ~complexity:_ = explain_path @@ to_path @@ normalize t
+let explain _ ~complexity:_ = []
 
 let debug t =
-  let t_norm = normalize t in
-  let path = to_path t_norm in
-
-  explain_path path
-  @ [
-      ( Pos_or_decl.none,
-        Format.sprintf "Raw:\n%s"
-        @@ Hh_json.json_to_string ~pretty:true
-        @@ to_json t );
-      ( Pos_or_decl.none,
-        Format.sprintf "Normalised:\n%s"
-        @@ Hh_json.json_to_string ~pretty:true
-        @@ to_json t_norm );
-      ( Pos_or_decl.none,
-        Format.sprintf "Path:\n%s"
-        @@ Hh_json.json_to_string ~pretty:true
-        @@ path_to_json path );
-    ]
+  [
+    ( Pos_or_decl.none,
+      Format.sprintf "Reason:\n%s"
+      @@ Hh_json.json_to_string ~pretty:true
+      @@ to_json t );
+  ]
 
 (* ~~ Aliases ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 type t = locl_phase t_

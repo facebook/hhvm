@@ -22,113 +22,6 @@ But got `A`
 
 File "refinment_is.php", line 7, character 19 - line 7, character 19:
 
-This error has 9 steps, a maximum depth of 2 and contains 0 reversals.
-
-Here's why: this hint
-
- 7 | function inter_is(»A« $a, C $c): C {
- 8 |   if($a is I) {
- 9 |     $z = $a;
-
-File "refinment_is.php", line 7, character 19 - line 7, character 19:
-
-flows into this expression because it is a parameter hint
-
- 7 | function inter_is(A »$a«, C $c): C {
- 8 |   if($a is I) {
- 9 |     $z = $a;
-
-File "refinment_is.php", line 7, character 21 - line 7, character 22:
-
-which itself flows into this expression because the local variable has this type
-
- 7 | function inter_is(A $a, C $c): C {
- 8 |   if(»$a« is I) {
- 9 |     $z = $a;
-10 |   } else {
-11 |     $z = $c;
-12 |   }
-13 |   return $z;
-14 | }
-
-File "refinment_is.php", line 8, character 6 - line 8, character 7:
-
-which itself flows up into this `is` expression as an element of the intersection type
-
- 7 | function inter_is(A $a, C $c): C {
- 8 |   if(»$a is I«) {
- 9 |     $z = $a;
-10 |   } else {
-11 |     $z = $c;
-12 |   }
-13 |   return $z;
-14 | }
-
-File "refinment_is.php", line 8, character 6 - line 8, character 12:
-
-which itself flows into this expression because the local variable has this type
-
- 7 | function inter_is(A $a, C $c): C {
- 8 |   if($a is I) {
- 9 |     $z = »$a«;
-10 |   } else {
-11 |     $z = $c;
-12 |   }
-13 |   return $z;
-14 | }
-
-File "refinment_is.php", line 9, character 10 - line 9, character 11:
-
-which itself flows into this expression because of an assignment
-
- 7 | function inter_is(A $a, C $c): C {
- 8 |   if($a is I) {
- 9 |     »$z« = $a;
-10 |   } else {
-11 |     $z = $c;
-12 |   }
-13 |   return $z;
-14 | }
-
-File "refinment_is.php", line 9, character 5 - line 9, character 6:
-
-which itself flows up into this expression as an element of the union type
-
-  7 | function inter_is(A $a, C $c): C {
-  8 |   »if($a is I) {
-  9 |     $z = $a;
- 10 |   } else {
- 11 |     $z = $c;
- 12 |   }«
- 13 |   return $z;
- 14 | }
-
-File "refinment_is.php", line 8, character 3 - line 12, character 3:
-
-which itself flows into this expression because the local variable has this type
-
- 12 |   }
- 13 |   return »$z«;
- 14 | }
-
-File "refinment_is.php", line 13, character 10 - line 13, character 11:
-
-which itself flows into this expression because the expression is in return position
-
- 12 |   }
- 13 |   »return $z;«
- 14 | }
-
-File "refinment_is.php", line 13, character 3 - line 13, character 12:
-
-which itself flows into this hint because they are required to be subtypes
-
- 7 | function inter_is(A $a, C $c): »C« {
- 8 |   if($a is I) {
- 9 |     $z = $a;
-
-File "refinment_is.php", line 7, character 32 - line 7, character 32:
-
 error: Typing[4110] Invalid return type
 
  12 |   }
@@ -142,6 +35,7 @@ Expected `C`
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
@@ -151,90 +45,8 @@ But got `(A & I)` from this `is` expression test
  8 |   if(»$a is I«) {
  9 |     $z = $a;
 10 |   } else {
-11 |     $z = $c;
-12 |   }
-13 |   return $z;
-14 | }
 
 File "refinment_is.php", line 8, character 6 - line 8, character 12:
-
-This error has 6 steps, a maximum depth of 1 and contains 0 reversals.
-
-Here's why: this `is` expression
-
- 7 | function inter_is(A $a, C $c): C {
- 8 |   if(»$a is I«) {
- 9 |     $z = $a;
-10 |   } else {
-11 |     $z = $c;
-12 |   }
-13 |   return $z;
-14 | }
-
-File "refinment_is.php", line 8, character 6 - line 8, character 12:
-
-flows into this expression because the local variable has this type
-
- 7 | function inter_is(A $a, C $c): C {
- 8 |   if($a is I) {
- 9 |     $z = »$a«;
-10 |   } else {
-11 |     $z = $c;
-12 |   }
-13 |   return $z;
-14 | }
-
-File "refinment_is.php", line 9, character 10 - line 9, character 11:
-
-which itself flows into this expression because of an assignment
-
- 7 | function inter_is(A $a, C $c): C {
- 8 |   if($a is I) {
- 9 |     »$z« = $a;
-10 |   } else {
-11 |     $z = $c;
-12 |   }
-13 |   return $z;
-14 | }
-
-File "refinment_is.php", line 9, character 5 - line 9, character 6:
-
-which itself flows up into this expression as an element of the union type
-
-  7 | function inter_is(A $a, C $c): C {
-  8 |   »if($a is I) {
-  9 |     $z = $a;
- 10 |   } else {
- 11 |     $z = $c;
- 12 |   }«
- 13 |   return $z;
- 14 | }
-
-File "refinment_is.php", line 8, character 3 - line 12, character 3:
-
-which itself flows into this expression because the local variable has this type
-
- 12 |   }
- 13 |   return »$z«;
- 14 | }
-
-File "refinment_is.php", line 13, character 10 - line 13, character 11:
-
-which itself flows into this expression because the expression is in return position
-
- 12 |   }
- 13 |   »return $z;«
- 14 | }
-
-File "refinment_is.php", line 13, character 3 - line 13, character 12:
-
-which itself flows into this hint because they are required to be subtypes
-
- 7 | function inter_is(A $a, C $c): »C« {
- 8 |   if($a is I) {
- 9 |     $z = $a;
-
-File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
 error: Typing[4110] Invalid return type
 
@@ -249,6 +61,7 @@ Expected `C`
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
@@ -258,102 +71,7 @@ But got `I`
  8 |   if($a is »I«) {
  9 |     $z = $a;
 10 |   } else {
-11 |     $z = $c;
-12 |   }
-13 |   return $z;
-14 | }
 
 File "refinment_is.php", line 8, character 12 - line 8, character 12:
-
-This error has 7 steps, a maximum depth of 2 and contains 0 reversals.
-
-Here's why: this hint
-
- 7 | function inter_is(A $a, C $c): C {
- 8 |   if($a is »I«) {
- 9 |     $z = $a;
-10 |   } else {
-11 |     $z = $c;
-12 |   }
-13 |   return $z;
-14 | }
-
-File "refinment_is.php", line 8, character 12 - line 8, character 12:
-
-flows up into this `is` expression as an element of the intersection type
-
- 7 | function inter_is(A $a, C $c): C {
- 8 |   if(»$a is I«) {
- 9 |     $z = $a;
-10 |   } else {
-11 |     $z = $c;
-12 |   }
-13 |   return $z;
-14 | }
-
-File "refinment_is.php", line 8, character 6 - line 8, character 12:
-
-which itself flows into this expression because the local variable has this type
-
- 7 | function inter_is(A $a, C $c): C {
- 8 |   if($a is I) {
- 9 |     $z = »$a«;
-10 |   } else {
-11 |     $z = $c;
-12 |   }
-13 |   return $z;
-14 | }
-
-File "refinment_is.php", line 9, character 10 - line 9, character 11:
-
-which itself flows into this expression because of an assignment
-
- 7 | function inter_is(A $a, C $c): C {
- 8 |   if($a is I) {
- 9 |     »$z« = $a;
-10 |   } else {
-11 |     $z = $c;
-12 |   }
-13 |   return $z;
-14 | }
-
-File "refinment_is.php", line 9, character 5 - line 9, character 6:
-
-which itself flows up into this expression as an element of the union type
-
-  7 | function inter_is(A $a, C $c): C {
-  8 |   »if($a is I) {
-  9 |     $z = $a;
- 10 |   } else {
- 11 |     $z = $c;
- 12 |   }«
- 13 |   return $z;
- 14 | }
-
-File "refinment_is.php", line 8, character 3 - line 12, character 3:
-
-which itself flows into this expression because the local variable has this type
-
- 12 |   }
- 13 |   return »$z«;
- 14 | }
-
-File "refinment_is.php", line 13, character 10 - line 13, character 11:
-
-which itself flows into this expression because the expression is in return position
-
- 12 |   }
- 13 |   »return $z;«
- 14 | }
-
-File "refinment_is.php", line 13, character 3 - line 13, character 12:
-
-which itself flows into this hint because they are required to be subtypes
-
- 7 | function inter_is(A $a, C $c): »C« {
- 8 |   if($a is I) {
- 9 |     $z = $a;
-
-File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
 3 errors found.

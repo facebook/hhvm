@@ -1306,25 +1306,12 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
 
     /// Loads the static singleton for a class.
     fn load_static_class(&mut self, cid: ClassName) -> Result<textual::Sid> {
-        match *self.func_info {
-            FuncInfo::Method(MethodInfo {
-                class, is_static, ..
-            }) if class.name == cid => {
-                // If we're already in a member of the class then use '$this'.
-                match is_static {
-                    IsStatic::Static => self.load_this(),
-                    IsStatic::NonStatic => {
-                        let this = self.load_this()?;
-                        hack::call_builtin(self.fb, hack::Builtin::GetStaticClass, [this])
-                    }
-                }
-            }
-            _ => {
-                let cname = TypeName::Class(cid);
-                let ty = textual::Ty::Type(cname);
-                self.fb.lazy_class_initialize(&ty)
-            }
-        }
+        // this used to go via $this when within the same class, but that doesn't play
+        // well with infer's modular analysis, so we now call lazy_class_initialize
+        // unconditionally
+        let cname = TypeName::Class(cid);
+        let ty = textual::Ty::Type(cname);
+        self.fb.lazy_class_initialize(&ty)
     }
 
     pub(crate) fn load_mixed(&mut self, src: impl Into<textual::Expr>) -> Result<Sid> {

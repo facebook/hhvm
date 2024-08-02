@@ -1,7 +1,10 @@
 <?hh
 
-function f1(): void {
-  var_dump(TestContext::getContext());
+function f1()[leak_safe]: void {
+  HH\Coeffects\fb\backdoor_from_leak_safe__DO_NOT_USE(
+    ()[defaults] ==> var_dump(TestContext::getContext()),
+    'Testing memoization',
+  );
 }
 
 function f2(): void {

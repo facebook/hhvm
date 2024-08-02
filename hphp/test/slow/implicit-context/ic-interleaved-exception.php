@@ -12,9 +12,9 @@ function printMSIC(): void {
   }
 }
 
-function printMAIC(): void {
+function printMAIC()[leak_safe]: void {
   try {
-    var_dump(MemoAgnosticIntCtx::getContext());
+    echo (MemoAgnosticIntCtx::getContext())."\n";
   } catch (InvalidOperationException $e) {
     echo $e->getMessage()."\n";
   }

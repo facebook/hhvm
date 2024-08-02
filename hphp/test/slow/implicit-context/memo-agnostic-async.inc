@@ -14,7 +14,7 @@ class D extends Base {}
 abstract final class TestAsyncContext extends HH\ImplicitContext {
   const type T = mixed;
   const bool IS_MEMO_SENSITIVE = false;
-  const ctx CRun = [defaults];
+  const ctx CRun = [leak_safe];
   public static async function genRunWith(mixed $context, (function (): mixed) $f) {
     return await parent::runWithAsync($context, $f);
   }

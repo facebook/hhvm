@@ -90,7 +90,7 @@ final class ImplicitContextData {}
  * Returns the implicit context keyed by $key or null if such doesn't exist
  */
 <<__Native>>
-function get_implicit_context(string $key)[zoned]: mixed;
+function get_implicit_context(string $key)[leak_safe]: mixed;
 
 <<__Native>>
 function get_whole_implicit_context()[zoned]: ImplicitContextData;
@@ -102,7 +102,7 @@ function get_whole_implicit_context()[zoned]: ImplicitContextData;
  * Does not affect the state of the IC
  */
 <<__Native>>
-function has_key(string $key)[zoned]: bool;
+function has_key(string $key)[leak_safe]: bool;
 
 /**
  * Creates implicit context $context keyed by $key.
@@ -112,7 +112,7 @@ function create_implicit_context(
   string $key,
   mixed $context,
   bool $memo_sensitive,
-)[zoned]: ImplicitContextData;
+)[leak_safe]: ImplicitContextData;
 
 /*
  * Returns the currently implicit context hash or empty string if
@@ -134,7 +134,7 @@ function get_implicit_context_debug_info()[]: vec<string>;
 abstract class ImplicitContext {
   abstract const type T as nonnull;
   abstract const bool IS_MEMO_SENSITIVE;
-  abstract const ctx CRun;
+  abstract const ctx CRun as [leak_safe];
 
   protected static async function runWithAsync<Tout>(
     this::T $context,

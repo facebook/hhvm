@@ -38,7 +38,7 @@ namespace HH {
   abstract class ImplicitContext {
     abstract const type T as nonnull;
     abstract const bool IS_MEMO_SENSITIVE;
-    abstract const ctx CRun;
+    abstract const ctx CRun as [leak_safe];
 
     protected static async function runWithAsync<Tout>(
       this::T $context,

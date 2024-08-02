@@ -1,5 +1,9 @@
 error: Typing[4110] Invalid return type
 
+  8 |   } else{
+  9 |     $z = $y;
+ 10 |   }
+ 11 | 
  12 |   return »$z«;
  13 | }
 
@@ -7,6 +11,10 @@ File "union_join_point.php", line 12, character 10 - line 12, character 11:
 
 Expected `A`
 
+ 1 | <?hh
+ 2 | class A {}
+ 3 | class B {}
+ 4 | 
  5 | function foo(bool  $p, A $x, B $y): »A« {
  6 |   if($p){
  7 |     $z = $x;
@@ -15,10 +23,153 @@ File "union_join_point.php", line 5, character 37 - line 5, character 37:
 
 But got `B`
 
+ 1 | <?hh
+ 2 | class A {}
+ 3 | class B {}
+ 4 | 
  5 | function foo(bool  $p, A $x, »B« $y): A {
  6 |   if($p){
  7 |     $z = $x;
 
 File "union_join_point.php", line 5, character 30 - line 5, character 30:
+
+Step 1 of 2
+
+I started by checking this subtype relationship.
+
+The subtype comes from this expression
+
+ 5 | function foo(bool  $p, A $x, B $y): A {
+ 6 |   »if($p){
+ 7 |     $z = $x;
+ 8 |   } else{
+ 9 |     $z = $y;
+10 |   }«
+11 | 
+12 |   return $z;
+
+File "union_join_point.php", line 6, character 3 - line 10, character 3:
+
+and flows into this expression as the type of the local variable
+
+  8 |   } else{
+  9 |     $z = $y;
+ 10 |   }
+ 11 | 
+ 12 |   return »$z«;
+ 13 | }
+
+File "union_join_point.php", line 12, character 10 - line 12, character 11:
+
+which itself flows into this expression because it is used in a return position
+
+  8 |   } else{
+  9 |     $z = $y;
+ 10 |   }
+ 11 | 
+ 12 |   »return $z;«
+ 13 | }
+
+File "union_join_point.php", line 12, character 3 - line 12, character 12:
+
+The supertype comes from this hint
+
+ 1 | <?hh
+ 2 | class A {}
+ 3 | class B {}
+ 4 | 
+ 5 | function foo(bool  $p, A $x, B $y): »A« {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 5, character 37 - line 5, character 37:
+
+which is defined here
+
+ 1 | <?hh
+ 2 | class »A« {}
+ 3 | class B {}
+ 4 | 
+ 5 | function foo(bool  $p, A $x, B $y): A {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 2, character 7 - line 2, character 7:
+
+Step 2 of 2
+
+The subtype is a union type so next I checked each element of it was a subtype of the supertype.
+
+This step is the cause of the error.
+
+The subtype comes from this hint
+
+ 1 | <?hh
+ 2 | class A {}
+ 3 | class B {}
+ 4 | 
+ 5 | function foo(bool  $p, A $x, »B« $y): A {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 5, character 30 - line 5, character 30:
+
+which is defined here
+
+ 1 | <?hh
+ 2 | class A {}
+ 3 | class »B« {}
+ 4 | 
+ 5 | function foo(bool  $p, A $x, B $y): A {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 3, character 7 - line 3, character 7:
+
+and flows into this expression as the parameter hint
+
+ 1 | <?hh
+ 2 | class A {}
+ 3 | class B {}
+ 4 | 
+ 5 | function foo(bool  $p, A $x, B »$y«): A {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 5, character 32 - line 5, character 33:
+
+which itself flows into this expression as the type of the local variable
+
+ 8 |   } else{
+ 9 |     $z = »$y«;
+10 |   }
+11 | 
+12 |   return $z;
+13 | }
+
+File "union_join_point.php", line 9, character 10 - line 9, character 11:
+
+which itself flows into this expression via an assignment
+
+ 8 |   } else{
+ 9 |     »$z« = $y;
+10 |   }
+11 | 
+12 |   return $z;
+13 | }
+
+File "union_join_point.php", line 9, character 5 - line 9, character 6:
+
+The supertype is the same as before.
+
+ 1 | <?hh
+ 2 | class A {}
+ 3 | class B {}
+ 4 | 
+ 5 | function foo(bool  $p, A $x, B $y): »A« {
+ 6 |   if($p){
+ 7 |     $z = $x;
+
+File "union_join_point.php", line 5, character 37 - line 5, character 37:
 
 1 error found.

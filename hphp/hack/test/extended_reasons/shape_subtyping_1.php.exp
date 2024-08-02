@@ -27,4 +27,95 @@ But got `bool`
 
 File "shape_subtyping_1.php", line 9, character 16 - line 9, character 19:
 
+Step 1 of 3
+
+I started by checking this subtype relationship.
+
+The subtype comes from this function or method declaration
+
+ 3 | function »expects_required_a_at_int«(
+ 4 |   shape('a' => int) $s,
+ 5 | ): void {
+ 6 | }
+
+File "shape_subtyping_1.php", line 3, character 10 - line 3, character 34:
+
+The supertype comes from this expression
+
+  8 | function passes_required_a_at_bool(
+  9 |   shape('a' => bool) $s,
+ 10 | ): void {
+ 11 |   »expects_required_a_at_int($s)«;
+ 12 | }
+
+File "shape_subtyping_1.php", line 11, character 3 - line 11, character 31:
+
+Step 2 of 3
+
+These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+
+The subtype comes from this hint
+
+ 8 | function passes_required_a_at_bool(
+ 9 |   »shape('a' => bool)« $s,
+10 | ): void {
+11 |   expects_required_a_at_int($s);
+12 | }
+
+File "shape_subtyping_1.php", line 9, character 3 - line 9, character 20:
+
+and flows into this expression as the parameter hint
+
+ 8 | function passes_required_a_at_bool(
+ 9 |   shape('a' => bool) »$s«,
+10 | ): void {
+11 |   expects_required_a_at_int($s);
+12 | }
+
+File "shape_subtyping_1.php", line 9, character 22 - line 9, character 23:
+
+which itself flows into this expression as the type of the local variable
+
+  8 | function passes_required_a_at_bool(
+  9 |   shape('a' => bool) $s,
+ 10 | ): void {
+ 11 |   expects_required_a_at_int(»$s«);
+ 12 | }
+
+File "shape_subtyping_1.php", line 11, character 29 - line 11, character 30:
+
+The supertype comes from this hint
+
+ 3 | function expects_required_a_at_int(
+ 4 |   »shape('a' => int)« $s,
+ 5 | ): void {
+ 6 | }
+
+File "shape_subtyping_1.php", line 4, character 3 - line 4, character 19:
+
+Step 3 of 3
+
+These are shape types so next I checked the required `a` fields were subtypes.
+
+This step is the cause of the error.
+
+The subtype comes from this hint
+
+ 8 | function passes_required_a_at_bool(
+ 9 |   shape('a' => »bool«) $s,
+10 | ): void {
+11 |   expects_required_a_at_int($s);
+12 | }
+
+File "shape_subtyping_1.php", line 9, character 16 - line 9, character 19:
+
+The supertype comes from this hint
+
+ 3 | function expects_required_a_at_int(
+ 4 |   shape('a' => »int«) $s,
+ 5 | ): void {
+ 6 | }
+
+File "shape_subtyping_1.php", line 4, character 16 - line 4, character 18:
+
 1 error found.

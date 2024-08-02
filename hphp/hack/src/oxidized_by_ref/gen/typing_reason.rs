@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0961def086268b6cd7d8f871e048a328>>
+// @generated SignedSource<<6250bb1a289c065a7b21471b0cd99725>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -185,8 +185,45 @@ pub enum PrjSymm<'a> {
 impl<'a> TrivialDrop for PrjSymm<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(PrjSymm<'arena>);
 
-pub use oxidized::typing_reason::FlowKind;
 pub use oxidized::typing_reason::PrjAsymm;
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (hash, show)")]
+#[repr(C, u8)]
+pub enum FlowKind<'a> {
+    #[rust_to_ocaml(name = "Flow_assign")]
+    FlowAssign,
+    #[rust_to_ocaml(name = "Flow_call")]
+    FlowCall,
+    #[rust_to_ocaml(name = "Flow_local")]
+    FlowLocal,
+    #[rust_to_ocaml(name = "Flow_fun_return")]
+    FlowFunReturn,
+    #[rust_to_ocaml(name = "Flow_param_hint")]
+    FlowParamHint,
+    #[rust_to_ocaml(name = "Flow_return_expr")]
+    FlowReturnExpr,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Flow_instantiate")]
+    FlowInstantiate(&'a str),
+}
+impl<'a> TrivialDrop for FlowKind<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(FlowKind<'arena>);
 
 /// Witness the reason for a type during typing using the position of a hint or
 /// expression
@@ -534,7 +571,7 @@ pub enum T_<'a> {
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         from: &'a T_<'a>,
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-        kind: &'a oxidized::typing_reason::FlowKind,
+        kind: FlowKind<'a>,
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         into: &'a T_<'a>,
     },

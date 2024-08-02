@@ -28,4 +28,162 @@ But got `Super`
 
 File "class_subtyping_contravariant.php", line 11, character 30 - line 11, character 34:
 
+Step 1 of 4
+
+I started by checking this subtype relationship.
+
+The subtype comes from this function or method declaration
+
+ 11 | function »takes_my_a«(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 11, character 10 - line 11, character 19:
+
+The supertype comes from this expression
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+ 14 |   »takes_my_a($x)«;
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 14, character 3 - line 14, character 16:
+
+Step 2 of 4
+
+These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+
+The subtype comes from this hint
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(»MyB<Sub, Super>« $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 13, character 36 - line 13, character 50:
+
+which is defined here
+
+ 3 | class MyA<+Tco, -Tcontra, Tinv> {}
+ 4 | 
+ 5 | class »MyB«<-T1, T2> extends MyA<Sub, T1, T2> {}
+ 6 | 
+ 7 | class Super {}
+
+File "class_subtyping_contravariant.php", line 5, character 7 - line 5, character 9:
+
+and flows into this expression as the parameter hint
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<Sub, Super> »$x«): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 13, character 52 - line 13, character 53:
+
+which itself flows into this expression as the type of the local variable
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+ 14 |   takes_my_a(»$x«);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 14, character 14 - line 14, character 15:
+
+The supertype comes from this hint
+
+ 11 | function takes_my_a(»MyA<Sub, Super, Super>« $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 11, character 21 - line 11, character 42:
+
+which is defined here
+
+ 3 | class »MyA«<+Tco, -Tcontra, Tinv> {}
+ 4 | 
+ 5 | class MyB<-T1, T2> extends MyA<Sub, T1, T2> {}
+ 6 | 
+ 7 | class Super {}
+
+File "class_subtyping_contravariant.php", line 3, character 7 - line 3, character 9:
+
+Step 3 of 4
+
+The subtype extends or implements a class or interface so next I checked that was a subtype of the supertype.
+
+The subtype comes from this hint
+
+ 3 | class MyA<+Tco, -Tcontra, Tinv> {}
+ 4 | 
+ 5 | class MyB<-T1, T2> extends »MyA<Sub, T1, T2>« {}
+ 6 | 
+ 7 | class Super {}
+
+File "class_subtyping_contravariant.php", line 5, character 28 - line 5, character 43:
+
+The supertype is the same as before.
+
+ 11 | function takes_my_a(»MyA<Sub, Super, Super>« $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 11, character 21 - line 11, character 42:
+
+Step 4 of 4
+
+`\MyA` is a class or interface so next I checked the 2nd type arguments are subtypes.
+
+This step is the cause of the error.
+
+The subtype comes from this hint
+
+ 11 | function takes_my_a(MyA<Sub, »Super«, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 11, character 30 - line 11, character 34:
+
+which is defined here
+
+ 7 | class »Super« {}
+ 8 | 
+ 9 | class Sub extends Super {}
+10 | 
+11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+
+File "class_subtyping_contravariant.php", line 7, character 7 - line 7, character 11:
+
+The supertype comes from this hint
+
+ 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_contravariant(MyB<»Sub«, Super> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+File "class_subtyping_contravariant.php", line 13, character 40 - line 13, character 42:
+
+which is defined here
+
+ 7 | class Super {}
+ 8 | 
+ 9 | class »Sub« extends Super {}
+10 | 
+11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+
+File "class_subtyping_contravariant.php", line 9, character 7 - line 9, character 9:
+
 1 error found.

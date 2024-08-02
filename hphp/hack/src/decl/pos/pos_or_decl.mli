@@ -20,6 +20,8 @@ type t [@@deriving eq, ord, show]
 
 module Map : WrappedMap.S with type key = t
 
+module Set : Set.S with type elt = t
+
 (** The decl and file of a position. *)
 type ctx = {
   decl: Decl_reference.t option;

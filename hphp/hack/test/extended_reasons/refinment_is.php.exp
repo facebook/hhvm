@@ -8,6 +8,10 @@ File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
 Expected `C`
 
+ 3 | interface I {}
+ 4 | class A {}
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
@@ -16,11 +20,194 @@ File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
 But got `A`
 
+ 3 | interface I {}
+ 4 | class A {}
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_is(»A« $a, C $c): C {
  8 |   if($a is I) {
  9 |     $z = $a;
 
 File "refinment_is.php", line 7, character 19 - line 7, character 19:
+
+Step 1 of 3
+
+I started by checking this subtype relationship.
+
+The subtype comes from this expression
+
+  7 | function inter_is(A $a, C $c): C {
+  8 |   »if($a is I) {
+  9 |     $z = $a;
+ 10 |   } else {
+ 11 |     $z = $c;
+ 12 |   }«
+ 13 |   return $z;
+ 14 | }
+
+File "refinment_is.php", line 8, character 3 - line 12, character 3:
+
+and flows into this expression as the type of the local variable
+
+ 12 |   }
+ 13 |   return »$z«;
+ 14 | }
+
+File "refinment_is.php", line 13, character 10 - line 13, character 11:
+
+which itself flows into this expression because it is used in a return position
+
+ 12 |   }
+ 13 |   »return $z;«
+ 14 | }
+
+File "refinment_is.php", line 13, character 3 - line 13, character 12:
+
+The supertype comes from this hint
+
+ 3 | interface I {}
+ 4 | class A {}
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_is(A $a, C $c): »C« {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 7, character 32 - line 7, character 32:
+
+which is defined here
+
+ 3 | interface I {}
+ 4 | class A {}
+ 5 | class »C« extends A {}
+ 6 | 
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 5, character 7 - line 5, character 7:
+
+Step 2 of 3
+
+The subtype is a union type so next I checked each element of it was a subtype of the supertype.
+
+The subtype comes from this `is` expression
+
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if(»$a is I«) {
+ 9 |     $z = $a;
+10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
+
+File "refinment_is.php", line 8, character 6 - line 8, character 12:
+
+and flows into this expression as the type of the local variable
+
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if($a is I) {
+ 9 |     $z = »$a«;
+10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
+
+File "refinment_is.php", line 9, character 10 - line 9, character 11:
+
+which itself flows into this expression via an assignment
+
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if($a is I) {
+ 9 |     »$z« = $a;
+10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
+
+File "refinment_is.php", line 9, character 5 - line 9, character 6:
+
+The supertype is the same as before.
+
+ 3 | interface I {}
+ 4 | class A {}
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_is(A $a, C $c): »C« {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 7, character 32 - line 7, character 32:
+
+Step 3 of 3
+
+The subtype is an intersection type so next I checked at least one element of it was a subtype of the supertype.
+
+This step is the cause of the error.
+
+The subtype comes from this hint
+
+ 3 | interface I {}
+ 4 | class A {}
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_is(»A« $a, C $c): C {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 7, character 19 - line 7, character 19:
+
+which is defined here
+
+ 3 | interface I {}
+ 4 | class »A« {}
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 4, character 7 - line 4, character 7:
+
+and flows into this expression as the parameter hint
+
+ 3 | interface I {}
+ 4 | class A {}
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_is(A »$a«, C $c): C {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 7, character 21 - line 7, character 22:
+
+which itself flows into this expression as the type of the local variable
+
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if(»$a« is I) {
+ 9 |     $z = $a;
+10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
+
+File "refinment_is.php", line 8, character 6 - line 8, character 7:
+
+The supertype is the same as before.
+
+ 3 | interface I {}
+ 4 | class A {}
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_is(A $a, C $c): »C« {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
 error: Typing[4110] Invalid return type
 
@@ -32,10 +219,12 @@ File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
 Expected `C`
 
+ 4 | class A {}
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
-10 |   } else {
 
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
@@ -45,8 +234,123 @@ But got `(A & I)` from this `is` expression test
  8 |   if(»$a is I«) {
  9 |     $z = $a;
 10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
 
 File "refinment_is.php", line 8, character 6 - line 8, character 12:
+
+Step 1 of 2
+
+I started by checking this subtype relationship.
+
+The subtype comes from this expression
+
+  7 | function inter_is(A $a, C $c): C {
+  8 |   »if($a is I) {
+  9 |     $z = $a;
+ 10 |   } else {
+ 11 |     $z = $c;
+ 12 |   }«
+ 13 |   return $z;
+ 14 | }
+
+File "refinment_is.php", line 8, character 3 - line 12, character 3:
+
+and flows into this expression as the type of the local variable
+
+ 12 |   }
+ 13 |   return »$z«;
+ 14 | }
+
+File "refinment_is.php", line 13, character 10 - line 13, character 11:
+
+which itself flows into this expression because it is used in a return position
+
+ 12 |   }
+ 13 |   »return $z;«
+ 14 | }
+
+File "refinment_is.php", line 13, character 3 - line 13, character 12:
+
+The supertype comes from this hint
+
+ 4 | class A {}
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_is(A $a, C $c): »C« {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 7, character 32 - line 7, character 32:
+
+which is defined here
+
+ 4 | class A {}
+ 5 | class »C« extends A {}
+ 6 | 
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 5, character 7 - line 5, character 7:
+
+Step 2 of 2
+
+The subtype is a union type so next I checked each element of it was a subtype of the supertype.
+
+This step is the cause of the error.
+
+The subtype comes from this `is` expression
+
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if(»$a is I«) {
+ 9 |     $z = $a;
+10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
+
+File "refinment_is.php", line 8, character 6 - line 8, character 12:
+
+and flows into this expression as the type of the local variable
+
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if($a is I) {
+ 9 |     $z = »$a«;
+10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
+
+File "refinment_is.php", line 9, character 10 - line 9, character 11:
+
+which itself flows into this expression via an assignment
+
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if($a is I) {
+ 9 |     »$z« = $a;
+10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
+
+File "refinment_is.php", line 9, character 5 - line 9, character 6:
+
+The supertype is the same as before.
+
+ 4 | class A {}
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_is(A $a, C $c): »C« {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
 error: Typing[4110] Invalid return type
 
@@ -58,10 +362,12 @@ File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
 Expected `C`
 
+ 4 | class A {}
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
-10 |   } else {
 
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
@@ -71,7 +377,158 @@ But got `I`
  8 |   if($a is »I«) {
  9 |     $z = $a;
 10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
 
 File "refinment_is.php", line 8, character 12 - line 8, character 12:
+
+Step 1 of 3
+
+I started by checking this subtype relationship.
+
+The subtype comes from this expression
+
+  7 | function inter_is(A $a, C $c): C {
+  8 |   »if($a is I) {
+  9 |     $z = $a;
+ 10 |   } else {
+ 11 |     $z = $c;
+ 12 |   }«
+ 13 |   return $z;
+ 14 | }
+
+File "refinment_is.php", line 8, character 3 - line 12, character 3:
+
+and flows into this expression as the type of the local variable
+
+ 12 |   }
+ 13 |   return »$z«;
+ 14 | }
+
+File "refinment_is.php", line 13, character 10 - line 13, character 11:
+
+which itself flows into this expression because it is used in a return position
+
+ 12 |   }
+ 13 |   »return $z;«
+ 14 | }
+
+File "refinment_is.php", line 13, character 3 - line 13, character 12:
+
+The supertype comes from this hint
+
+ 4 | class A {}
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_is(A $a, C $c): »C« {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 7, character 32 - line 7, character 32:
+
+which is defined here
+
+ 4 | class A {}
+ 5 | class »C« extends A {}
+ 6 | 
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 5, character 7 - line 5, character 7:
+
+Step 2 of 3
+
+The subtype is a union type so next I checked each element of it was a subtype of the supertype.
+
+The subtype comes from this `is` expression
+
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if(»$a is I«) {
+ 9 |     $z = $a;
+10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
+
+File "refinment_is.php", line 8, character 6 - line 8, character 12:
+
+and flows into this expression as the type of the local variable
+
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if($a is I) {
+ 9 |     $z = »$a«;
+10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
+
+File "refinment_is.php", line 9, character 10 - line 9, character 11:
+
+which itself flows into this expression via an assignment
+
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if($a is I) {
+ 9 |     »$z« = $a;
+10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
+
+File "refinment_is.php", line 9, character 5 - line 9, character 6:
+
+The supertype is the same as before.
+
+ 4 | class A {}
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_is(A $a, C $c): »C« {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 7, character 32 - line 7, character 32:
+
+Step 3 of 3
+
+The subtype is an intersection type so next I checked at least one element of it was a subtype of the supertype.
+
+This step is the cause of the error.
+
+The subtype comes from this hint
+
+ 7 | function inter_is(A $a, C $c): C {
+ 8 |   if($a is »I«) {
+ 9 |     $z = $a;
+10 |   } else {
+11 |     $z = $c;
+12 |   }
+13 |   return $z;
+14 | }
+
+File "refinment_is.php", line 8, character 12 - line 8, character 12:
+
+which is defined here
+
+ 3 | interface »I« {}
+ 4 | class A {}
+ 5 | class C extends A {}
+
+File "refinment_is.php", line 3, character 11 - line 3, character 11:
+
+The supertype is the same as before.
+
+ 4 | class A {}
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_is(A $a, C $c): »C« {
+ 8 |   if($a is I) {
+ 9 |     $z = $a;
+
+File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
 3 errors found.

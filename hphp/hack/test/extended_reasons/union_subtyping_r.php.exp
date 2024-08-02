@@ -1,5 +1,7 @@
 error: Typing[4110] Invalid return type
 
+ 3 | class B {}
+ 4 | class C {}
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
  7 |   return »$c«;
@@ -9,6 +11,8 @@ File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
 
 Expected `(A | B)`
 
+ 3 | class B {}
+ 4 | class C {}
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): »(A|B)« {
  7 |   return $c;
@@ -18,6 +22,8 @@ File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
 
 But got `C`
 
+ 3 | class B {}
+ 4 | class C {}
  5 | <<__NoAutoLikes>>
  6 | function union_r(»C« $c): (A|B) {
  7 |   return $c;
@@ -25,8 +31,82 @@ But got `C`
 
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
+Step 1 of 1
+
+I started by checking this subtype relationship.
+
+This step is the cause of the error.
+
+The subtype comes from this hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(»C« $c): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+
+which is defined here
+
+ 3 | class B {}
+ 4 | class »C« {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C $c): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 4, character 7 - line 4, character 7:
+
+and flows into this expression as the parameter hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C »$c«): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
+
+which itself flows into this expression as the type of the local variable
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C $c): (A|B) {
+ 7 |   return »$c«;
+ 8 | }
+
+File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
+
+which itself flows into this expression because it is used in a return position
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C $c): (A|B) {
+ 7 |   »return $c;«
+ 8 | }
+
+File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
+
+The supertype comes from this hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C $c): »(A|B)« {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
+
 error: Typing[4110] Invalid return type
 
+ 3 | class B {}
+ 4 | class C {}
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
  7 |   return »$c«;
@@ -36,6 +116,8 @@ File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
 
 Expected `A`
 
+ 3 | class B {}
+ 4 | class C {}
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (»A«|B) {
  7 |   return $c;
@@ -45,6 +127,8 @@ File "union_subtyping_r.php", line 6, character 26 - line 6, character 26:
 
 But got `C`
 
+ 3 | class B {}
+ 4 | class C {}
  5 | <<__NoAutoLikes>>
  6 | function union_r(»C« $c): (A|B) {
  7 |   return $c;
@@ -52,8 +136,117 @@ But got `C`
 
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
+Step 1 of 2
+
+I started by checking this subtype relationship.
+
+The subtype comes from this hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(»C« $c): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+
+which is defined here
+
+ 3 | class B {}
+ 4 | class »C« {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C $c): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 4, character 7 - line 4, character 7:
+
+and flows into this expression as the parameter hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C »$c«): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
+
+which itself flows into this expression as the type of the local variable
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C $c): (A|B) {
+ 7 |   return »$c«;
+ 8 | }
+
+File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
+
+which itself flows into this expression because it is used in a return position
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C $c): (A|B) {
+ 7 |   »return $c;«
+ 8 | }
+
+File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
+
+The supertype comes from this hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C $c): »(A|B)« {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
+
+Step 2 of 2
+
+The supertype is a union type so next I checked at least one element of it was a supertype of the subtype.
+
+This step is the cause of the error.
+
+The subtype is the same as before.
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(»C« $c): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+
+The supertype comes from this hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C $c): (»A«|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 26 - line 6, character 26:
+
+which is defined here
+
+ 1 | <?hh
+ 2 | class »A« {}
+ 3 | class B {}
+ 4 | class C {}
+
+File "union_subtyping_r.php", line 2, character 7 - line 2, character 7:
+
 error: Typing[4110] Invalid return type
 
+ 3 | class B {}
+ 4 | class C {}
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
  7 |   return »$c«;
@@ -63,6 +256,8 @@ File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
 
 Expected `B`
 
+ 3 | class B {}
+ 4 | class C {}
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|»B«) {
  7 |   return $c;
@@ -72,11 +267,120 @@ File "union_subtyping_r.php", line 6, character 28 - line 6, character 28:
 
 But got `C`
 
+ 3 | class B {}
+ 4 | class C {}
  5 | <<__NoAutoLikes>>
  6 | function union_r(»C« $c): (A|B) {
  7 |   return $c;
  8 | }
 
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+
+Step 1 of 2
+
+I started by checking this subtype relationship.
+
+The subtype comes from this hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(»C« $c): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+
+which is defined here
+
+ 3 | class B {}
+ 4 | class »C« {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C $c): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 4, character 7 - line 4, character 7:
+
+and flows into this expression as the parameter hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C »$c«): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
+
+which itself flows into this expression as the type of the local variable
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C $c): (A|B) {
+ 7 |   return »$c«;
+ 8 | }
+
+File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
+
+which itself flows into this expression because it is used in a return position
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C $c): (A|B) {
+ 7 |   »return $c;«
+ 8 | }
+
+File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
+
+The supertype comes from this hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C $c): »(A|B)« {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
+
+Step 2 of 2
+
+The supertype is a union type so next I checked at least one element of it was a supertype of the subtype.
+
+This step is the cause of the error.
+
+The subtype is the same as before.
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(»C« $c): (A|B) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+
+The supertype comes from this hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+ 6 | function union_r(C $c): (A|»B«) {
+ 7 |   return $c;
+ 8 | }
+
+File "union_subtyping_r.php", line 6, character 28 - line 6, character 28:
+
+which is defined here
+
+ 2 | class A {}
+ 3 | class »B« {}
+ 4 | class C {}
+ 5 | <<__NoAutoLikes>>
+
+File "union_subtyping_r.php", line 3, character 7 - line 3, character 7:
 
 3 errors found.

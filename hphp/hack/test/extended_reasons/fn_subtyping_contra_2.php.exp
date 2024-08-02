@@ -25,4 +25,182 @@ But got `Super`
 
 File "fn_subtyping_contra_2.php", line 7, character 36 - line 7, character 40:
 
+Step 1 of 6
+
+I started by checking this subtype relationship.
+
+The subtype comes from this function or method declaration
+
+ 6 | function »foo_2«((function((function(Sub): void)): void) $_): void {}
+ 7 | function bar_2((function((function(Super): void)): void) $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 6, character 10 - line 6, character 14:
+
+The supertype comes from this expression
+
+ 6 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 7 | function bar_2((function((function(Super): void)): void) $f): void {
+ 8 |   »foo_2($f)«;
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 8, character 3 - line 8, character 11:
+
+Step 2 of 6
+
+These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+
+The subtype comes from this hint
+
+ 6 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 7 | function bar_2(»(function((function(Super): void)): void)« $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 7, character 16 - line 7, character 56:
+
+which is defined here
+
+ 5 | namespace HH {
+ 6 |   newtype »supportdyn«<+T> as T = (T & dynamic);
+ 7 | }
+
+File "/tmp/dvgcdeVqB/supportdynamic.hhi", line 6, character 11 - line 6, character 20:
+
+and flows into this expression as the parameter hint
+
+ 6 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 7 | function bar_2((function((function(Super): void)): void) »$f«): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 7, character 58 - line 7, character 59:
+
+which itself flows into this expression as the type of the local variable
+
+ 6 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 7 | function bar_2((function((function(Super): void)): void) $f): void {
+ 8 |   foo_2(»$f«);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 8, character 9 - line 8, character 10:
+
+The supertype comes from this hint
+
+ 6 | function foo_2(»(function((function(Sub): void)): void)« $_): void {}
+ 7 | function bar_2((function((function(Super): void)): void) $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 6, character 16 - line 6, character 54:
+
+Step 3 of 6
+
+These are `supportdyn` types so next I checked the non-dynamic parts were subtypes.
+
+The subtype comes from this hint
+
+ 6 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 7 | function bar_2(»(function((function(Super): void)): void)« $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 7, character 16 - line 7, character 56:
+
+The supertype comes from this declaration
+
+ 6 | function foo_2(»(function((function(Sub): void)): void)« $_): void {}
+ 7 | function bar_2((function((function(Super): void)): void) $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 6, character 16 - line 6, character 54:
+
+Step 4 of 6
+
+These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+
+The subtype comes from this hint
+
+ 6 | function foo_2((function(»(function(Sub): void)«): void) $_): void {}
+ 7 | function bar_2((function((function(Super): void)): void) $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 6, character 26 - line 6, character 46:
+
+The supertype comes from this hint
+
+ 6 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 7 | function bar_2((function(»(function(Super): void)«): void) $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 7, character 26 - line 7, character 48:
+
+Step 5 of 6
+
+These are `supportdyn` types so next I checked the non-dynamic parts were subtypes.
+
+The subtype comes from this declaration
+
+ 6 | function foo_2((function(»(function(Sub): void)«): void) $_): void {}
+ 7 | function bar_2((function((function(Super): void)): void) $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 6, character 26 - line 6, character 46:
+
+The supertype comes from this hint
+
+ 6 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 7 | function bar_2((function(»(function(Super): void)«): void) $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 7, character 26 - line 7, character 48:
+
+Step 6 of 6
+
+These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+
+This step is the cause of the error.
+
+The subtype comes from this hint
+
+ 6 | function foo_2((function((function(Sub): void)): void) $_): void {}
+ 7 | function bar_2((function((function(»Super«): void)): void) $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 7, character 36 - line 7, character 40:
+
+which is defined here
+
+ 3 | class »Super« {}
+ 4 | class Sub extends Super {}
+ 5 | 
+ 6 | function foo_2((function((function(Sub): void)): void) $_): void {}
+
+File "fn_subtyping_contra_2.php", line 3, character 7 - line 3, character 11:
+
+The supertype comes from this hint
+
+ 6 | function foo_2((function((function(»Sub«): void)): void) $_): void {}
+ 7 | function bar_2((function((function(Super): void)): void) $f): void {
+ 8 |   foo_2($f);
+ 9 | }
+
+File "fn_subtyping_contra_2.php", line 6, character 36 - line 6, character 38:
+
+which is defined here
+
+ 3 | class Super {}
+ 4 | class »Sub« extends Super {}
+ 5 | 
+ 6 | function foo_2((function((function(Sub): void)): void) $_): void {}
+
+File "fn_subtyping_contra_2.php", line 4, character 7 - line 4, character 9:
+
 1 error found.

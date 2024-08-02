@@ -58,6 +58,7 @@ let module_blacklist =
     "sexplib::std";
     "string_utils";
     "utils";
+    "pos::set";
   ]
 
 (* HACK: These submodules are defined inline in another module. We don't convert

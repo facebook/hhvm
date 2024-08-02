@@ -9,6 +9,7 @@
 type t = Pos.t [@@deriving eq, ord, show]
 
 module Map = Pos.Map
+module Set = Pos.Set
 
 (** The decl and file of a position. *)
 type ctx = {

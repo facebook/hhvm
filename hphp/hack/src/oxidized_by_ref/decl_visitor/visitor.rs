@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1630d7980f8c7f2015a411b9a11bacbe>>
+// @generated SignedSource<<48e1cc0269dfec9e10bd7764dae3b7e5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -180,6 +180,9 @@ pub trait Visitor<'a> {
     fn visit_prj_symm(&mut self, p: &'a PrjSymm<'a>) {
         p.recurse(self.object())
     }
+    fn visit_flow_kind(&mut self, p: &'a FlowKind<'a>) {
+        p.recurse(self.object())
+    }
     fn visit_witness_locl(&mut self, p: &'a WitnessLocl<'a>) {
         p.recurse(self.object())
     }
@@ -241,9 +244,6 @@ pub trait Visitor<'a> {
         p.recurse(self.object())
     }
     fn visit_prj_asymm(&mut self, p: &'a PrjAsymm) {
-        p.recurse(self.object())
-    }
-    fn visit_flow_kind(&mut self, p: &'a FlowKind) {
         p.recurse(self.object())
     }
     fn visit_axiom(&mut self, p: &'a Axiom) {

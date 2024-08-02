@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4cedb22d5cca20b0ce6b642812cee17b>>
+// @generated SignedSource<<5574d31202f0506019f0c1586569a556>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -198,7 +198,7 @@ pub enum CstrVariance {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving hash")]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
 #[repr(u8)]
 pub enum FieldKind {
     Absent,
@@ -312,13 +312,11 @@ arena_deserializer::impl_deserialize_in_arena!(PrjAsymm);
 
 #[derive(
     Clone,
-    Copy,
     Debug,
     Deserialize,
     Eq,
     EqModuloPos,
     FromOcamlRep,
-    FromOcamlRepIn,
     Hash,
     NoPosHash,
     Ord,
@@ -328,7 +326,7 @@ arena_deserializer::impl_deserialize_in_arena!(PrjAsymm);
     ToOcamlRep
 )]
 #[rust_to_ocaml(attr = "deriving (hash, show)")]
-#[repr(u8)]
+#[repr(C, u8)]
 pub enum FlowKind {
     #[rust_to_ocaml(name = "Flow_assign")]
     FlowAssign,
@@ -342,9 +340,9 @@ pub enum FlowKind {
     FlowParamHint,
     #[rust_to_ocaml(name = "Flow_return_expr")]
     FlowReturnExpr,
+    #[rust_to_ocaml(name = "Flow_instantiate")]
+    FlowInstantiate(String),
 }
-impl TrivialDrop for FlowKind {}
-arena_deserializer::impl_deserialize_in_arena!(FlowKind);
 
 /// Witness the reason for a type during typing using the position of a hint or
 /// expression

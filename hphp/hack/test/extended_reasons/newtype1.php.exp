@@ -20,4 +20,86 @@ But got `int`
 
 File "newtype1.php--file1.php", line 3, character 18 - line 3, character 20:
 
+Step 1 of 3
+
+I started by checking this subtype relationship.
+
+The subtype comes from this function or method declaration
+
+ 3 | function »expect_bool«(bool $x): bool {
+ 4 |   return $x;
+ 5 | }
+
+File "newtype1.php--file2.php", line 3, character 10 - line 3, character 20:
+
+The supertype comes from this expression
+
+ 7 | function pass_my_int(myint $y) : bool {
+ 8 |   return »expect_bool($y)«;
+ 9 | }
+
+File "newtype1.php--file2.php", line 8, character 10 - line 8, character 24:
+
+Step 2 of 3
+
+These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+
+The subtype comes from this hint
+
+ 7 | function pass_my_int(»myint« $y) : bool {
+ 8 |   return expect_bool($y);
+ 9 | }
+
+File "newtype1.php--file2.php", line 7, character 22 - line 7, character 26:
+
+which is defined here
+
+ 3 | newtype »myint« as int = int;
+
+File "newtype1.php--file1.php", line 3, character 9 - line 3, character 13:
+
+and flows into this expression as the parameter hint
+
+ 7 | function pass_my_int(myint »$y«) : bool {
+ 8 |   return expect_bool($y);
+ 9 | }
+
+File "newtype1.php--file2.php", line 7, character 28 - line 7, character 29:
+
+which itself flows into this expression as the type of the local variable
+
+ 7 | function pass_my_int(myint $y) : bool {
+ 8 |   return expect_bool(»$y«);
+ 9 | }
+
+File "newtype1.php--file2.php", line 8, character 22 - line 8, character 23:
+
+The supertype comes from this hint
+
+ 3 | function expect_bool(»bool« $x): bool {
+ 4 |   return $x;
+ 5 | }
+
+File "newtype1.php--file2.php", line 3, character 22 - line 3, character 25:
+
+Step 3 of 3
+
+The subtype declares an upper bound so next I checked that was a subtype of the supertype.
+
+This step is the cause of the error.
+
+The subtype comes from this hint
+
+ 3 | newtype myint as »int« = int;
+
+File "newtype1.php--file1.php", line 3, character 18 - line 3, character 20:
+
+The supertype is the same as before.
+
+ 3 | function expect_bool(»bool« $x): bool {
+ 4 |   return $x;
+ 5 | }
+
+File "newtype1.php--file2.php", line 3, character 22 - line 3, character 25:
+
 1 error found.

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ae60dc8cb0ede7f3003af20add5421d5>>
+// @generated SignedSource<<2f6fc47130d035de2da4d46588a279fe>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1114,6 +1114,22 @@ impl<'a> Node<'a> for PrjSymm<'a> {
         }
     }
 }
+impl<'a> Node<'a> for FlowKind<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_flow_kind(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            FlowKind::FlowAssign => {}
+            FlowKind::FlowCall => {}
+            FlowKind::FlowLocal => {}
+            FlowKind::FlowFunReturn => {}
+            FlowKind::FlowParamHint => {}
+            FlowKind::FlowReturnExpr => {}
+            FlowKind::FlowInstantiate(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
 impl<'a> Node<'a> for WitnessLocl<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_witness_locl(self)
@@ -1550,21 +1566,6 @@ impl<'a> Node<'a> for PrjAsymm {
             PrjAsymm::PrjAsymmInter => {}
             PrjAsymm::PrjAsymmNeg => {}
             PrjAsymm::PrjAsymmNullable => {}
-        }
-    }
-}
-impl<'a> Node<'a> for FlowKind {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_flow_kind(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            FlowKind::FlowAssign => {}
-            FlowKind::FlowCall => {}
-            FlowKind::FlowLocal => {}
-            FlowKind::FlowFunReturn => {}
-            FlowKind::FlowParamHint => {}
-            FlowKind::FlowReturnExpr => {}
         }
     }
 }

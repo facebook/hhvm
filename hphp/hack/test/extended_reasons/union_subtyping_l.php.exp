@@ -1,5 +1,8 @@
 error: Typing[4110] Invalid return type
 
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
  6 | function union_l((A | B) $ab): C {
  7 |   return »$ab«;
  8 | }
@@ -8,6 +11,9 @@ File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
 
 Expected `C`
 
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
  6 | function union_l((A | B) $ab): »C« {
  7 |   return $ab;
  8 | }
@@ -16,14 +22,127 @@ File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
 
 But got `A`
 
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
  6 | function union_l((»A« | B) $ab): C {
  7 |   return $ab;
  8 | }
 
 File "union_subtyping_l.php", line 6, character 19 - line 6, character 19:
 
+Step 1 of 2
+
+I started by checking this subtype relationship.
+
+The subtype comes from this hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
+ 6 | function union_l(»(A | B)« $ab): C {
+ 7 |   return $ab;
+ 8 | }
+
+File "union_subtyping_l.php", line 6, character 18 - line 6, character 24:
+
+and flows into this expression as the parameter hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
+ 6 | function union_l((A | B) »$ab«): C {
+ 7 |   return $ab;
+ 8 | }
+
+File "union_subtyping_l.php", line 6, character 26 - line 6, character 28:
+
+which itself flows into this expression as the type of the local variable
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
+ 6 | function union_l((A | B) $ab): C {
+ 7 |   return »$ab«;
+ 8 | }
+
+File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
+
+which itself flows into this expression because it is used in a return position
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
+ 6 | function union_l((A | B) $ab): C {
+ 7 |   »return $ab;«
+ 8 | }
+
+File "union_subtyping_l.php", line 7, character 3 - line 7, character 13:
+
+The supertype comes from this hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
+ 6 | function union_l((A | B) $ab): »C« {
+ 7 |   return $ab;
+ 8 | }
+
+File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
+
+which is defined here
+
+ 3 | class B {}
+ 4 | class »C« {}
+ 5 | 
+ 6 | function union_l((A | B) $ab): C {
+ 7 |   return $ab;
+ 8 | }
+
+File "union_subtyping_l.php", line 4, character 7 - line 4, character 7:
+
+Step 2 of 2
+
+The subtype is a union type so next I checked each element of it was a subtype of the supertype.
+
+This step is the cause of the error.
+
+The subtype comes from this hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
+ 6 | function union_l((»A« | B) $ab): C {
+ 7 |   return $ab;
+ 8 | }
+
+File "union_subtyping_l.php", line 6, character 19 - line 6, character 19:
+
+which is defined here
+
+ 1 | <?hh
+ 2 | class »A« {}
+ 3 | class B {}
+ 4 | class C {}
+
+File "union_subtyping_l.php", line 2, character 7 - line 2, character 7:
+
+The supertype is the same as before.
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
+ 6 | function union_l((A | B) $ab): »C« {
+ 7 |   return $ab;
+ 8 | }
+
+File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
+
 error: Typing[4110] Invalid return type
 
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
  6 | function union_l((A | B) $ab): C {
  7 |   return »$ab«;
  8 | }
@@ -32,6 +151,9 @@ File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
 
 Expected `C`
 
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
  6 | function union_l((A | B) $ab): »C« {
  7 |   return $ab;
  8 | }
@@ -40,10 +162,119 @@ File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
 
 But got `B`
 
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
  6 | function union_l((A | »B«) $ab): C {
  7 |   return $ab;
  8 | }
 
 File "union_subtyping_l.php", line 6, character 23 - line 6, character 23:
+
+Step 1 of 2
+
+I started by checking this subtype relationship.
+
+The subtype comes from this hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
+ 6 | function union_l(»(A | B)« $ab): C {
+ 7 |   return $ab;
+ 8 | }
+
+File "union_subtyping_l.php", line 6, character 18 - line 6, character 24:
+
+and flows into this expression as the parameter hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
+ 6 | function union_l((A | B) »$ab«): C {
+ 7 |   return $ab;
+ 8 | }
+
+File "union_subtyping_l.php", line 6, character 26 - line 6, character 28:
+
+which itself flows into this expression as the type of the local variable
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
+ 6 | function union_l((A | B) $ab): C {
+ 7 |   return »$ab«;
+ 8 | }
+
+File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
+
+which itself flows into this expression because it is used in a return position
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
+ 6 | function union_l((A | B) $ab): C {
+ 7 |   »return $ab;«
+ 8 | }
+
+File "union_subtyping_l.php", line 7, character 3 - line 7, character 13:
+
+The supertype comes from this hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
+ 6 | function union_l((A | B) $ab): »C« {
+ 7 |   return $ab;
+ 8 | }
+
+File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
+
+which is defined here
+
+ 3 | class B {}
+ 4 | class »C« {}
+ 5 | 
+ 6 | function union_l((A | B) $ab): C {
+ 7 |   return $ab;
+ 8 | }
+
+File "union_subtyping_l.php", line 4, character 7 - line 4, character 7:
+
+Step 2 of 2
+
+The subtype is a union type so next I checked each element of it was a subtype of the supertype.
+
+This step is the cause of the error.
+
+The subtype comes from this hint
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
+ 6 | function union_l((A | »B«) $ab): C {
+ 7 |   return $ab;
+ 8 | }
+
+File "union_subtyping_l.php", line 6, character 23 - line 6, character 23:
+
+which is defined here
+
+ 2 | class A {}
+ 3 | class »B« {}
+ 4 | class C {}
+
+File "union_subtyping_l.php", line 3, character 7 - line 3, character 7:
+
+The supertype is the same as before.
+
+ 3 | class B {}
+ 4 | class C {}
+ 5 | 
+ 6 | function union_l((A | B) $ab): »C« {
+ 7 |   return $ab;
+ 8 | }
+
+File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
 
 2 errors found.

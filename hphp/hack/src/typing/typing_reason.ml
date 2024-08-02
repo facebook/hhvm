@@ -160,7 +160,7 @@ type field_kind =
   | Absent
   | Optional
   | Required
-[@@deriving hash]
+[@@deriving eq, hash]
 
 let field_kind_to_json = function
   | Absent -> Hh_json.(JSON_Object [("Absent", JSON_Array [])])
@@ -270,6 +270,7 @@ type flow_kind =
   | Flow_fun_return
   | Flow_param_hint
   | Flow_return_expr
+  | Flow_instantiate of string
 [@@deriving hash, show]
 
 let flow_kind_to_json = function
@@ -279,6 +280,8 @@ let flow_kind_to_json = function
   | Flow_fun_return -> Hh_json.string_ "Flow_fun_return"
   | Flow_param_hint -> Hh_json.string_ "Flow_param_hint"
   | Flow_return_expr -> Hh_json.string_ "Flow_return_expr"
+  | Flow_instantiate str ->
+    Hh_json.(JSON_Object [("Flow_instantiate", string_ str)])
 (* ~~ Witnesses ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
 (** Witness the reason for a type during typing using the position of a hint or
@@ -2798,6 +2801,8 @@ module Derivation = struct
     val using_axiom_super : axiom -> t
 
     val to_json : t -> Hh_json.json
+
+    val explain : t -> string
   end = struct
     type t =
       | Using_prj of prj_symm
@@ -2827,6 +2832,171 @@ module Derivation = struct
         Hh_json.(JSON_Object [("Using axiom_sub", axiom_to_json axiom)])
       | Using_axiom_super axiom ->
         Hh_json.(JSON_Object [("Using axiom_super", axiom_to_json axiom)])
+
+    let int_to_ordinal =
+      let sfxs = [| "th"; "st"; "nd"; "rd"; "th" |] in
+      fun n ->
+        let sfx =
+          if n >= 10 && n <= 20 then
+            "th"
+          else
+            sfxs.(min 4 (n mod 10))
+        in
+        Format.sprintf "%d%s" n sfx
+
+    let explain_axiom axiom ~sub =
+      let (subject, other) =
+        if sub then
+          ("subtype", "supertype")
+        else
+          ("supertype", "subtype")
+      in
+      match axiom with
+      | Extends ->
+        Format.sprintf
+          "The %s extends or implements a class or interface so next I checked that was a %s of the %s."
+          subject
+          subject
+          other
+      | Upper_bound ->
+        Format.sprintf
+          "The %s declares an upper bound so next I checked that was a %s of the %s."
+          subject
+          subject
+          other
+      | Lower_bound ->
+        Format.sprintf
+          "The %s declares a lower bound so next I checked that was a %s of the %s."
+          subject
+          subject
+          other
+
+    let explain_ctor_kind = function
+      | Ctor_class -> "class or interface"
+      | Ctor_newtype -> "newtype"
+
+    let explain_field_kind = function
+      | Absent -> "missing"
+      | Required -> "required"
+      | Optional -> "optional"
+
+    let explain_prj = function
+      | Prj_symm_neg ->
+        "These are negated types so I checked the inner type were subtypes."
+      | Prj_symm_nullable ->
+        "These are nullable types so next I checked the non-null parts were subtypes."
+      | Prj_symm_supportdyn ->
+        "These are `supportdyn` types so next I checked the non-dynamic parts were subtypes."
+      | Prj_symm_fn_ret ->
+        "These are function types so next I checked function return types were subtypes."
+      | Prj_symm_tuple idx ->
+        Format.sprintf
+          "These are tuple types so next I checked %s elements were subtypes."
+          (int_to_ordinal @@ (idx + 1))
+      | Prj_symm_fn_param (idx_sub, idx_sup) when Int.equal idx_sub idx_sup ->
+        Format.sprintf
+          "These are function types so next I checked the %s function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed)."
+          (int_to_ordinal @@ (idx_sub + 1))
+      | Prj_symm_fn_param (idx_sub, idx_sup) ->
+        Format.sprintf
+          "These are function types so next I checked the %s function parameter of the supertype and the %s parameter of the subtype were subtypes (functions are contravariant in their parameters the direction of the subtype relationship is reversed)."
+          (int_to_ordinal @@ (idx_sub + 1))
+          (int_to_ordinal @@ (idx_sup + 1))
+      | Prj_symm_fn_param_inout (idx_sub, idx_sup, Co)
+        when Int.equal idx_sub idx_sup ->
+        Format.sprintf
+          "These are function types so next I checked the %s function parameters. This is an `inout` parameter so they are invariant so the subtype relation must hold in both directions. Here I checked the covariant direction."
+          (int_to_ordinal @@ (idx_sub + 1))
+      | Prj_symm_fn_param_inout (idx_sub, idx_sup, Co) ->
+        Format.sprintf
+          "These are function types so next I checked the %s function parameter of the subtype and the %s parameter of the supertype. This is an `inout` paramter so they are invariant so the subtype relation must hold in both directions. Here I checked the covariant direction."
+          (int_to_ordinal @@ (idx_sub + 1))
+          (int_to_ordinal @@ (idx_sup + 1))
+      | Prj_symm_fn_param_inout (idx_sub, idx_sup, Contra)
+        when Int.equal idx_sub idx_sup ->
+        Format.sprintf
+          "These are function types so next I checked the %s function parameters. This is an `inout` parameter so they are invariant so the subtype relation must hold in both directions. Here I checked the contravariant case so the direction of the subtype relationship is reversed."
+          (int_to_ordinal @@ (idx_sub + 1))
+      | Prj_symm_fn_param_inout (idx_sub, idx_sup, Contra) ->
+        Format.sprintf
+          "These are function types so next I checked the %s function parameter of the supertype and the %s parameter of the subtype. This is an `inout` parameter so they are invariant so the subtype relation must hold in both directions. Here I checked the contravariant case so the direction of the subtype relationship is reversed."
+          (int_to_ordinal @@ (idx_sup + 1))
+          (int_to_ordinal @@ (idx_sub + 1))
+      | Prj_symm_ctor (ctor_kind, nm, idx, Dir Co) ->
+        Format.sprintf
+          "`%s` is a %s so next I checked the %s type arguments are subtypes."
+          nm
+          (explain_ctor_kind ctor_kind)
+          (int_to_ordinal @@ (idx + 1))
+      | Prj_symm_ctor (ctor_kind, nm, idx, Dir Contra) ->
+        Format.sprintf
+          "`%s` is a %s so next I checked the %s type arguments. The type parameter is contravariant so he direction of the subtype relationship is reversed."
+          nm
+          (explain_ctor_kind ctor_kind)
+          (int_to_ordinal @@ (idx + 1))
+      | Prj_symm_ctor (ctor_kind, nm, idx, Inv Co) ->
+        Format.sprintf
+          "`%s` is a %s so next I checked the %s type arguments are subtypes. The type parameter is invariant so the subtype relationship must hold in both directions. Here I check the covariant case."
+          nm
+          (explain_ctor_kind ctor_kind)
+          (int_to_ordinal @@ (idx + 1))
+      | Prj_symm_ctor (ctor_kind, nm, idx, Inv Contra) ->
+        Format.sprintf
+          "`%s` is a %s so next I checked the %s type arguments are subtypes. The type parameter is invariant so the subtype relationship must hold in both directions. Here I check the contravariant case so the direction of the subtype relationship is reversed."
+          nm
+          (explain_ctor_kind ctor_kind)
+          (int_to_ordinal @@ (idx + 1))
+      | Prj_symm_shape (nm, Absent, fld_kind_sup) ->
+        Format.sprintf
+          "These are shape types so next I tried to check the `%s` fields are subtypes. The field is %s in the supertype but missing in the subtype."
+          nm
+          (explain_field_kind fld_kind_sup)
+      | Prj_symm_shape (nm, fld_kind_sub, Absent) ->
+        Format.sprintf
+          "These are shape types so next I tried to check the type of `%s` fields are subtypes. The field is %s in the subtype but missing in the supertype."
+          nm
+          (explain_field_kind fld_kind_sub)
+      | Prj_symm_shape (nm, fld_kind_sub, fld_kind_sup)
+        when equal_field_kind fld_kind_sub fld_kind_sup ->
+        Format.sprintf
+          "These are shape types so next I checked the %s `%s` fields were subtypes."
+          (explain_field_kind fld_kind_sub)
+          nm
+      | Prj_symm_shape (nm, fld_kind_sub, fld_kind_sup) ->
+        Format.sprintf
+          "These are shape types so next I checked the `%s` fields were subtypes. The field was %s in the subtype and %s in the supertype."
+          nm
+          (explain_field_kind fld_kind_sub)
+          (explain_field_kind fld_kind_sup)
+
+    let explain_prj_asymm_sub prj =
+      match prj with
+      | Prj_asymm_union ->
+        "The subtype is a union type so next I checked each element of it was a subtype of the supertype."
+      | Prj_asymm_inter ->
+        "The subtype is an intersection type so next I checked at least one element of it was a subtype of the supertype."
+      | Prj_asymm_nullable ->
+        "The subtype is a nullable type so next I checked the non-null part was a subtype of the supertype."
+      | Prj_asymm_neg ->
+        "The subtype is a negated type so next I checked the inner type was a subtype of the supertype."
+
+    let explain_prj_asymm_super prj =
+      match prj with
+      | Prj_asymm_union ->
+        "The supertype is a union type so next I checked at least one element of it was a supertype of the subtype."
+      | Prj_asymm_inter ->
+        "The supertype is an intersection type so next I checked each element of it was was a supertype of the subtype."
+      | Prj_asymm_nullable ->
+        "The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype."
+      | Prj_asymm_neg ->
+        "The supertype is a negated type so I checked the inner type was a supertype of the subtype."
+
+    let explain = function
+      | Using_prj prj -> explain_prj prj
+      | Using_prj_sub prj -> explain_prj_asymm_sub prj
+      | Using_prj_super prj -> explain_prj_asymm_super prj
+      | Using_axiom_sub axiom -> explain_axiom axiom ~sub:true
+      | Using_axiom_super axiom -> explain_axiom axiom ~sub:false
   end
 
   module Subtype_step : sig
@@ -2960,6 +3130,7 @@ module Derivation = struct
     in
     aux t
 
+  (* ~~ Construct a derviation from a reason ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
   let rec push_solutions t ~solutions =
     match t with
     | From_witness_locl (Type_variable (_, id))
@@ -3186,9 +3357,486 @@ module Derivation = struct
     in
 
     aux (sub, super) ~deriv:[] ~solutions:Tvid.Map.empty
+
+  (* ~~ Human-readable explanation of full derivation ~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+  module Explain = struct
+    type should_render = Once
+
+    module State = struct
+      type t = { defs_seen: Pos_or_decl.Set.t }
+
+      let empty = { defs_seen = Pos_or_decl.Set.empty }
+
+      let seen_def { defs_seen } pos = Pos_or_decl.Set.mem pos defs_seen
+
+      let def_seen { defs_seen } pos =
+        { defs_seen = Pos_or_decl.Set.add pos defs_seen }
+    end
+
+    module Config = struct
+      type t = { should_render_defs: should_render }
+
+      let default = { should_render_defs = Once }
+    end
+
+    module Context = struct
+      type path_elem =
+        | Main
+        | Upper
+        | Lower
+        | Solution
+
+      let path_elem_to_string = function
+        | Main -> "Main"
+        | Upper -> "Upper"
+        | Lower -> "Lower"
+        | Solution -> "Solution"
+
+      type t = {
+        derivation_depth: int;
+        derivation_path: path_elem list;
+        in_flow: bool;
+      }
+
+      let empty =
+        { derivation_depth = 0; derivation_path = []; in_flow = false }
+
+      let deepen ({ derivation_depth = d; _ } as t) =
+        { t with derivation_depth = d + 1 }
+
+      let enter ({ derivation_path = d; _ } as t) elem =
+        { t with derivation_path = elem :: d; in_flow = false }
+
+      let enter_main t = enter t Main
+
+      let enter_upper t = enter t Upper
+
+      let enter_lower t = enter t Lower
+
+      let enter_solution t = enter t Solution
+
+      let set_in_flow t = { t with in_flow = true }
+
+      let in_flow { in_flow; _ } = in_flow
+
+      let explain_path { derivation_path; _ } =
+        List.fold_left derivation_path ~init:None ~f:(fun acc path_elem ->
+            let part = path_elem_to_string path_elem in
+            Some
+              (Option.value_map
+                 ~default:part
+                 ~f:(Format.sprintf "%s / %s" part)
+                 acc))
+
+      let is_toplevel { derivation_path; _ } =
+        match derivation_path with
+        | []
+        | [Main] ->
+          true
+        | _ -> false
+    end
+
+    let with_prefix ls ~prefix ~sep =
+      match ls with
+      | [] -> [(Pos_or_decl.none, prefix)]
+      | (pos, expl) :: rest ->
+        (pos, Format.sprintf "%s%s%s" prefix sep expl) :: rest
+
+    let with_suffix ls ~suffix ~sep =
+      match ls with
+      | [] -> [(Pos_or_decl.none, suffix)]
+      | (pos, expl) :: rest ->
+        (pos, Format.sprintf "%s%s%s" expl sep suffix) :: rest
+
+    let suppress_derivation ~st:_ ~cfg:_ ~ctxt:_ = false
+
+    let suppress_def pos ~st ~cfg ~ctxt:_ =
+      match cfg.Config.should_render_defs with
+      | Once -> State.seen_def st pos
+
+    let explain_flow_kind = function
+      | Flow_assign -> "via an assignment"
+      | Flow_call -> "because of a function call"
+      | Flow_local -> "as the type of the local variable"
+      | Flow_fun_return -> "as the return hint"
+      | Flow_param_hint -> "as the parameter hint"
+      | Flow_return_expr -> "because it is used in a return position"
+      | Flow_instantiate nm -> Format.sprintf "via the generic `%s`" nm
+
+    let rec explain t ~st ~cfg ~ctxt =
+      match t with
+      | _ when suppress_derivation ~st ~cfg ~ctxt -> ([], st)
+      | Derivation steps ->
+        let (expl, st) = explain_steps steps ~st ~cfg ~ctxt in
+        let expl =
+          Option.value_map ~default:expl ~f:(fun prefix ->
+              with_prefix expl ~prefix ~sep:"\n\n")
+          @@ Context.explain_path ctxt
+        in
+        (expl, st)
+      | Transitive { lower; upper; in_; on_ } ->
+        let (expl_main, st) =
+          explain in_ ~st ~cfg ~ctxt:(Context.enter_main ctxt)
+        in
+        let ctxt = Context.deepen ctxt in
+        let (expl_lower, st) =
+          explain lower ~st ~cfg ~ctxt:(Context.enter_lower ctxt)
+        in
+        let (expl_upper, st) =
+          explain upper ~st ~cfg ~ctxt:(Context.enter_upper ctxt)
+        in
+
+        let prefix_main =
+          let x =
+            match explain_reason on_ ~st ~cfg ~ctxt with
+            | ((_, x) :: _, _) -> x
+            | _ -> "an inferred type"
+          in
+          Format.sprintf
+            "I checked the subtype constraint in [%s] because it was implied by transitivity from the constraints on the %s in [%s] and [%s]"
+            Context.(Option.value_exn @@ explain_path @@ enter_main ctxt)
+            x
+            Context.(Option.value_exn @@ explain_path @@ enter_lower ctxt)
+            Context.(Option.value_exn @@ explain_path @@ enter_upper ctxt)
+        in
+        let expl =
+          with_prefix expl_main ~prefix:prefix_main ~sep:"\n\n"
+          @ expl_lower
+          @ expl_upper
+        in
+        (expl, st)
+      | Lower { bound; in_ } ->
+        let (expl_main, st) =
+          explain in_ ~st ~cfg ~ctxt:(Context.enter_main ctxt)
+        in
+        let ctxt = Context.deepen ctxt in
+        let (expl_lower, st) =
+          explain bound ~st ~cfg ~ctxt:(Context.enter_lower ctxt)
+        in
+        let prefix_main =
+          Format.sprintf
+            "I checked the subtype constraint in [%s] because it was implied by transitivity from the constraint in [%s]"
+            Context.(Option.value_exn @@ explain_path @@ enter_main ctxt)
+            Context.(Option.value_exn @@ explain_path @@ enter_lower ctxt)
+        in
+        let expl =
+          with_prefix expl_main ~prefix:prefix_main ~sep:"\n\n" @ expl_lower
+        in
+        (expl, st)
+      | Upper { bound; in_ } ->
+        let (expl_main, st) =
+          explain in_ ~st ~cfg ~ctxt:(Context.enter_main ctxt)
+        in
+        let ctxt = Context.deepen ctxt in
+        let (expl_upper, st) =
+          explain bound ~st ~cfg ~ctxt:(Context.enter_upper ctxt)
+        in
+
+        let prefix_main =
+          Format.sprintf
+            "I checked the subtype constraint in [%s] because it was implied by transitivity from the constraint in [%s]"
+            Context.(Option.value_exn @@ explain_path @@ enter_main ctxt)
+            Context.(Option.value_exn @@ explain_path @@ enter_upper ctxt)
+        in
+        let expl =
+          with_prefix expl_main ~prefix:prefix_main ~sep:"\n\n" @ expl_upper
+        in
+        (expl, st)
+
+    and explain_steps steps ~st ~cfg ~ctxt =
+      let n_steps = List.length steps in
+      let path = Context.explain_path ctxt in
+      let pfx =
+        Option.value_map path ~default:"Step" ~f:(Format.sprintf "[%s] Step")
+      in
+      let toplevel = Context.is_toplevel ctxt in
+      let (_, st, acc) =
+        List.fold_left
+          ~f:(fun (idx, st, acc) step ->
+            let (expl, st) =
+              explain_step step (idx, n_steps, pfx, toplevel) ~st ~cfg ~ctxt
+            in
+            (idx + 1, st, expl :: acc))
+          ~init:(0, st, [])
+          steps
+      in
+      (List.fold_right acc ~init:[] ~f:(fun xs ys -> List.append ys xs), st)
+
+    and explain_step step (idx, n_steps, pfx, toplevel) ~st ~cfg ~ctxt =
+      let (sub, super, rule_opt, arg_opt) =
+        match step with
+        | Subtype_step.Begin { sub; super } -> (sub, super, None, None)
+        | Subtype_step.Step { sub; super; rule; on_ } ->
+          (sub, super, Some rule, Some on_)
+      in
+
+      let (expl_sub, st) =
+        match (arg_opt, sub) with
+        | (Some Subtype_step.Supertype, _) ->
+          let pos = to_pos sub in
+          ([(pos, "The subtype is the same as before.")], st)
+        | (_, Missing_field) ->
+          ( [
+              ( Pos_or_decl.none,
+                "The subtype didn't exist because the field was missing." );
+            ],
+            st )
+        | _ ->
+          let (expl_sub, st) = explain_reason sub ~st ~cfg ~ctxt in
+          ( with_prefix expl_sub ~prefix:"The subtype comes from this" ~sep:" ",
+            st )
+      in
+      let (expl_super, st) =
+        match (arg_opt, super) with
+        | (Some Subtype_step.Subtype, _) ->
+          let pos = to_pos super in
+          ([(pos, "The supertype is the same as before.")], st)
+        | (_, Missing_field) ->
+          ( [
+              ( Pos_or_decl.none,
+                "The supertype didn't exist because the field was missing." );
+            ],
+            st )
+        | _ ->
+          let (expl_super, st) = explain_reason super ~st ~cfg ~ctxt in
+          ( with_prefix
+              expl_super
+              ~prefix:"The supertype comes from this"
+              ~sep:" ",
+            st )
+      in
+
+      let prefix =
+        match (rule_opt, toplevel && idx = n_steps - 1) with
+        | (Some rule, true) ->
+          Format.sprintf
+            "%s %d of %d\n\n%s\n\nThis step is the cause of the error."
+            pfx
+            (idx + 1)
+            n_steps
+            (Subtype_rule.explain rule)
+        | (Some rule, false) ->
+          Format.sprintf
+            "%s %d of %d\n\n%s"
+            pfx
+            (idx + 1)
+            n_steps
+            (Subtype_rule.explain rule)
+        | (None, true) ->
+          Format.sprintf
+            "%s %d of %d\n\nI started by checking this subtype relationship.\n\nThis step is the cause of the error."
+            pfx
+            (idx + 1)
+            n_steps
+        | (None, false) ->
+          Format.sprintf
+            "%s %d of %d\n\nI started by checking this subtype relationship."
+            pfx
+            (idx + 1)
+            n_steps
+      in
+      let expl_sub = with_prefix expl_sub ~prefix ~sep:"\n\n" in
+      (expl_sub @ expl_super, st)
+
+    and explain_reason reason ~st ~cfg ~ctxt =
+      match reason with
+      (* -- Expected 'atoms' in a derivation step -- *)
+      | From_witness_locl witness -> ([explain_witness_locl witness], st)
+      | From_witness_decl witness -> ([explain_witness_decl witness], st)
+      | Def (pos, r) -> explain_def (pos, r) ~st ~cfg ~ctxt
+      | Flow { from; into; kind } ->
+        explain_flow (from, into, kind) ~st ~cfg ~ctxt
+      | Solved { solution; in_; _ } ->
+        explain_solved ~solution ~in_ ~st ~cfg ~ctxt
+      | Missing_field ->
+        (* This needs to be special cased in [explain_step] *)
+        ([(Pos_or_decl.none, "missing field")], st)
+      (* Special handling of legacy structured reasons
+         TODO(mjt) translate to flow?
+      *)
+      | Instantiate (r1, nm, r2) ->
+        explain_instantiate (r1, nm, r2) ~st ~cfg ~ctxt
+      | Idx (pos, r) -> explain_idx (pos, r) ~st ~cfg ~ctxt
+      | Arith_ret_float (pos, r, arg_pos) ->
+        explain_arith_ret_float (pos, r, arg_pos) ~st ~cfg ~ctxt
+      | Arith_ret_num (pos, r, arg_pos) ->
+        explain_arith_ret_num (pos, r, arg_pos) ~st ~cfg ~ctxt
+      | Lost_info (nm, r, blame) ->
+        explain_lost_info (nm, r, blame) ~st ~cfg ~ctxt
+      | Format (pos, nm, r) -> explain_format (pos, nm, r) ~st ~cfg ~ctxt
+      | Typeconst (r1, rs, str, r2) ->
+        explain_typeconst (r1, rs, str, r2) ~st ~cfg ~ctxt
+      | Type_access (r, rs) -> explain_type_access (r, rs) ~st ~cfg ~ctxt
+      | Expr_dep_type (r, pos, expr_dep_type_reason) ->
+        explain_expr_dep_type (r, pos, expr_dep_type_reason) ~st ~cfg ~ctxt
+      | Contravariant_generic (r, nm) ->
+        explain_contravariant_generic (r, nm) ~st ~cfg ~ctxt
+      | Invariant_generic (r, nm) ->
+        explain_invariant_generic (r, nm) ~st ~cfg ~ctxt
+      | Lambda_param (pos, r) -> explain_lambda_param (pos, r) ~st ~cfg ~ctxt
+      | Dynamic_coercion r -> explain_dynamic_coercion r ~st ~cfg ~ctxt
+      | Dynamic_partial_enforcement (pos, nm, r) ->
+        explain_dynamic_partial_enforcement (pos, nm, r) ~st ~cfg ~ctxt
+      | Rigid_tvar_escape (pos, str1, str2, r) ->
+        explain_rigid_tvar_escape (pos, str1, str2, r) ~st ~cfg ~ctxt
+      | Opaque_type_from_module (pos, str, r) ->
+        explain_opaque_type_from_module (pos, str, r) ~st ~cfg ~ctxt
+      (* Its possible that one of the following remains in the derivation
+          since we can have `Prj_one` in both subtype and supertype or
+         `Prj_both` as subtype and `Prj_one` in supertype and we will always
+         follow `Prj_one` before moving into `Prj_both` *)
+      | Lower_bound { of_; _ }
+      | Upper_bound { of_; _ } ->
+        explain_reason of_ ~st ~cfg ~ctxt
+      | Prj_both { sub_prj; _ } -> explain_reason sub_prj ~st ~cfg ~ctxt
+      | Prj_one { part; _ } -> explain_reason part ~st ~cfg ~ctxt
+      | Axiom { next; _ } -> explain_reason next ~st ~cfg ~ctxt
+      (* We have no provenance information  *)
+      | No_reason
+      | Invalid ->
+        ([(Pos_or_decl.none, "this element")], st)
+
+    and explain_witness_locl witness =
+      match witness with
+      | Is_refinement pos -> (Pos_or_decl.of_raw_pos pos, "`is` expression")
+      | Witness pos -> (Pos_or_decl.of_raw_pos pos, "expression")
+      | Type_variable (pos, _id) -> (Pos_or_decl.of_raw_pos pos, "type variable")
+      | Type_variable_generics (pos, x, y, _id) ->
+        ( Pos_or_decl.of_raw_pos pos,
+          Format.sprintf "generic parameter `%s` of `%s`" x y )
+      | Unpack_param (pos, _, _) ->
+        (Pos_or_decl.of_raw_pos pos, "unpacked parameter")
+      | Bitwise pos -> (Pos_or_decl.of_raw_pos pos, "expression")
+      | Arith pos -> (Pos_or_decl.of_raw_pos pos, "arithmetic expression")
+      | Idx_vector pos -> (Pos_or_decl.of_raw_pos pos, "index expression")
+      | Splice pos -> (Pos_or_decl.of_raw_pos pos, "splice expression")
+      | No_return pos -> (Pos_or_decl.of_raw_pos pos, "declaration")
+      | Shape_literal pos -> (Pos_or_decl.of_raw_pos pos, "shape literal")
+      | Destructure pos -> (Pos_or_decl.of_raw_pos pos, "destructure expression")
+      | _ ->
+        ( witness_locl_to_raw_pos witness,
+          Format.sprintf
+            "element (`%s`)"
+            (constructor_string_of_witness_locl witness) )
+
+    and explain_witness_decl witness =
+      match witness with
+      | Hint pos -> (pos, "hint")
+      | Witness_from_decl pos -> (pos, "declaration")
+      | Support_dynamic_type pos -> (pos, "function or method declaration")
+      | Pessimised_return pos -> (pos, "return hint")
+      | Var_param_from_decl pos -> (pos, "variadic parameter declaration")
+      | Cstr_on_generics (pos, _) -> (pos, "constraint on the generic parameter")
+      | Implicit_upper_bound (pos, nm) ->
+        ( pos,
+          Format.sprintf
+            "implicit upper bound (`%s`) on the generic parameter"
+            nm )
+      | Class_class (pos, nm) ->
+        ( pos,
+          Format.sprintf
+            "implicitly defined constant `::class` of class `%s`"
+            nm )
+      | _ ->
+        ( witness_decl_to_raw_pos witness,
+          Format.sprintf
+            "element (`%s`)"
+            (constructor_string_of_witness_decl witness) )
+
+    and explain_def (pos, reason) ~st ~cfg ~ctxt =
+      let (expl_reason, st) = explain_reason reason ~st ~cfg ~ctxt in
+      if suppress_def pos ~st ~cfg ~ctxt then
+        (expl_reason, st)
+      else
+        let st = State.def_seen st pos in
+        (expl_reason @ [(pos, "which is defined here")], st)
+
+    and explain_flow (from, into, kind) ~st ~cfg ~ctxt =
+      let (expl_from, st) = explain_reason from ~st ~cfg ~ctxt in
+      let (expl_into, st) =
+        explain_reason into ~st ~cfg ~ctxt:(Context.set_in_flow ctxt)
+      in
+      let suffix = explain_flow_kind kind
+      and prefix =
+        if Context.in_flow ctxt then
+          "which itself flows into this"
+        else
+          "and flows into this"
+      in
+      let expl_into =
+        with_suffix (with_prefix expl_into ~prefix ~sep:" ") ~suffix ~sep:" "
+      in
+      (expl_from @ expl_into, st)
+
+    and explain_solved ~solution ~in_ ~st ~cfg ~ctxt =
+      let (expl_in, st) = explain_reason in_ ~st ~cfg ~ctxt in
+      let (expl_solution, st) =
+        explain_reason solution ~st ~cfg ~ctxt:Context.(enter_solution ctxt)
+      in
+      let prefix = "which I solved to this" in
+      let expl_solution = with_prefix expl_solution ~prefix ~sep:" " in
+      (expl_in @ expl_solution, st)
+
+    and explain_instantiate (r1, nm, r2) ~st ~cfg ~ctxt =
+      explain_flow (r2, r1, Flow_instantiate nm) ~st ~cfg ~ctxt
+
+    and explain_idx (pos, _r) ~st ~cfg:_ ~ctxt:_ =
+      ([(Pos_or_decl.of_raw_pos pos, "index expression")], st)
+
+    and explain_arith_ret_float (pos, _r, _arg_pos) ~st ~cfg:_ ~ctxt:_ =
+      ([(Pos_or_decl.of_raw_pos pos, "arithmetic expression")], st)
+
+    and explain_arith_ret_num (pos, _r, _arg_pos) ~st ~cfg:_ ~ctxt:_ =
+      ([(Pos_or_decl.of_raw_pos pos, "arithmetic expression")], st)
+
+    and explain_lost_info (_nm, r, _blame) ~st ~cfg ~ctxt =
+      explain_reason r ~st ~cfg ~ctxt
+
+    and explain_format (pos, _nm, _r) ~st ~cfg:_ ~ctxt:_ =
+      ([(Pos_or_decl.of_raw_pos pos, "format expression")], st)
+
+    and explain_typeconst (_r1, (pos, _), _str, _t2) ~st ~cfg:_ ~ctxt:_ =
+      ([(pos, "this type constant")], st)
+
+    and explain_type_access (r, _rs) ~st ~cfg ~ctxt =
+      explain_reason r ~st ~cfg ~ctxt
+
+    and explain_expr_dep_type (r, _pos, _expr_dep_type_reason) ~st ~cfg ~ctxt =
+      explain_reason r ~st ~cfg ~ctxt
+
+    and explain_contravariant_generic (r, _nm) ~st ~cfg ~ctxt =
+      explain_reason r ~st ~cfg ~ctxt
+
+    and explain_invariant_generic (r, _nm) ~st ~cfg ~ctxt =
+      explain_reason r ~st ~cfg ~ctxt
+
+    and explain_lambda_param (pos, _r) ~st ~cfg:_ ~ctxt:_ =
+      ([(Pos_or_decl.of_raw_pos pos, "lambda parameter")], st)
+
+    and explain_dynamic_coercion r ~st ~cfg ~ctxt =
+      explain_reason r ~st ~cfg ~ctxt
+
+    and explain_dynamic_partial_enforcement (_pos, _nm, r) ~st ~cfg ~ctxt =
+      explain_reason r ~st ~cfg ~ctxt
+
+    and explain_rigid_tvar_escape (_pos, _str1, _str2, r) ~st ~cfg ~ctxt =
+      explain_reason r ~st ~cfg ~ctxt
+
+    and explain_opaque_type_from_module (_pos, _str, r) ~st ~cfg ~ctxt =
+      explain_reason r ~st ~cfg ~ctxt
+  end
+
+  let explain t =
+    let st = Explain.State.empty
+    and cfg = Explain.Config.default
+    and ctxt = Explain.Context.empty in
+    let (expl, _) = Explain.explain t ~st ~cfg ~ctxt in
+    expl
 end
 
-let explain ~sub:_ ~super:_ ~complexity:_ = []
+let explain ~sub ~super ~complexity:_ =
+  Derivation.(explain @@ of_reason ~sub ~super)
 
 let debug ~sub ~super =
   let json_repr =

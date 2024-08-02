@@ -22,4 +22,88 @@ But got `int`
 
 File "fn_ret.php", line 3, character 17 - line 3, character 19:
 
-1 error found.
+Step 1 of 1
+
+I started by checking this subtype relationship.
+
+This step is the cause of the error.
+
+The subtype comes from this hint
+
+ 3 | function foo(): »int« {
+ 4 |   return 1;
+ 5 | }
+
+File "fn_ret.php", line 3, character 17 - line 3, character 19:
+
+The supertype comes from this hint
+
+ 7 | function bar(): »bool« {
+ 8 |   return foo();
+ 9 | }
+
+File "fn_ret.php", line 7, character 17 - line 7, character 20:
+
+error: Typing[4110] Invalid return type
+
+ 7 | function bar(): bool {
+ 8 |   return »foo()«;
+ 9 | }
+
+File "fn_ret.php", line 8, character 10 - line 8, character 14:
+
+Expected `bool`
+
+ 7 | function bar(): »bool« {
+ 8 |   return foo();
+ 9 | }
+
+File "fn_ret.php", line 7, character 17 - line 7, character 20:
+
+But got `int`
+
+ 3 | function foo(): »int« {
+ 4 |   return 1;
+ 5 | }
+
+File "fn_ret.php", line 3, character 17 - line 3, character 19:
+
+Step 1 of 1
+
+I started by checking this subtype relationship.
+
+This step is the cause of the error.
+
+The subtype comes from this hint
+
+ 3 | function foo(): »int« {
+ 4 |   return 1;
+ 5 | }
+
+File "fn_ret.php", line 3, character 17 - line 3, character 19:
+
+and flows into this expression because of a function call
+
+ 7 | function bar(): bool {
+ 8 |   return »foo()«;
+ 9 | }
+
+File "fn_ret.php", line 8, character 10 - line 8, character 14:
+
+which itself flows into this expression because it is used in a return position
+
+ 7 | function bar(): bool {
+ 8 |   »return foo();«
+ 9 | }
+
+File "fn_ret.php", line 8, character 3 - line 8, character 15:
+
+The supertype comes from this hint
+
+ 7 | function bar(): »bool« {
+ 8 |   return foo();
+ 9 | }
+
+File "fn_ret.php", line 7, character 17 - line 7, character 20:
+
+2 errors found.

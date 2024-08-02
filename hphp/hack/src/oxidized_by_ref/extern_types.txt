@@ -109,7 +109,6 @@ oxidized::typing_reason::BlameSource
 oxidized::typing_reason::CtorKind
 oxidized::typing_reason::Direction
 oxidized::typing_reason::FieldKind
-oxidized::typing_reason::FlowKind
 oxidized::typing_reason::PathElem
 oxidized::typing_reason::PrjAsymm
 oxidized::typing_reason::Side

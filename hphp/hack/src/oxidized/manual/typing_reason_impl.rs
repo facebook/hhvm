@@ -102,16 +102,6 @@ impl WitnessDecl {
 }
 
 impl Reason {
-    pub fn rev_pos(&self) -> Option<&Pos> {
-        match self {
-            T_::Flow(r, _, _) => r.rev_pos(),
-            T_::Prj(_, r) => r.rev_pos(),
-            T_::Def(_, r) => r.rev_pos(),
-            T_::Rev(r) => r.pos(),
-            _ => self.pos(),
-        }
-    }
-
     pub fn pos(&self) -> Option<&Pos> {
         use T_::*;
         match self {
@@ -129,10 +119,7 @@ impl Reason {
             | RigidTvarEscape(pos, _, _, _) => Some(pos),
             DynamicPartialEnforcement(pos_or_decl, _, _)
             | OpaqueTypeFromModule(pos_or_decl, _, _) => Some(pos_or_decl),
-            Flow(t, _, _)
-            | Prj(_, t)
-            | Def(_, t)
-            | LostInfo(_, t, _)
+            LostInfo(_, t, _)
             | TypeAccess(t, _)
             | InvariantGeneric(t, _)
             | ContravariantGeneric(t, _)
@@ -140,7 +127,13 @@ impl Reason {
             | ExprDepType(t, _, _)
             | Typeconst(t, _, _, _)
             | Instantiate(_, _, t) => t.pos(),
-            Rev(t) => t.rev_pos(),
+            UpperBound { .. }
+            | LowerBound { .. }
+            | Flow { .. }
+            | PrjBoth { .. }
+            | PrjOne { .. }
+            | Axiom { .. }
+            | Def(_, _) => None,
         }
     }
 }

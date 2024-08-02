@@ -1026,7 +1026,7 @@ end = struct
         ~update_reason:
           Typing_env.(
             update_reason ~f:(fun r_sub_prj ->
-                Typing_reason.prj_union_sub ~r_sub ~r_sub_prj))
+                Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
         (sub_supportdyn, tyl)
         rhs
         env
@@ -1089,7 +1089,7 @@ end = struct
           ~update_reason:
             Typing_env.(
               update_reason ~f:(fun r_sub_prj ->
-                  Typing_reason.prj_inter_sub ~r_sub ~r_sub_prj))
+                  Typing_reason.prj_inter_sub ~sub:r_sub ~sub_prj:r_sub_prj))
           (sub_supportdyn, tyl)
           rhs
           env)
@@ -1405,8 +1405,11 @@ end = struct
           let ty_super =
             Typing_env.(
               update_reason env ty_super ~f:(fun r_super_prj ->
-                  Typing_reason.prj_union_super ~r_super ~r_super_prj))
+                  Typing_reason.prj_union_super
+                    ~super:r_super
+                    ~super_prj:r_super_prj))
           in
+
           let (env, prop) =
             simplify
               ~subtype_env
@@ -1440,7 +1443,8 @@ end = struct
         let ty_super =
           Typing_env.update_reason env ty_super ~f:(fun r_super_prj ->
               Typing_reason.prj_fn_param
-                ~super:(r_super, r_super_prj)
+                ~super:r_super
+                ~super_prj:r_super_prj
                 ~sub:r_sub
                 ~idx_sub
                 ~idx_super)
@@ -1519,7 +1523,8 @@ end = struct
           Typing_env.(
             update_reason env ty_super ~f:(fun r_super_prj ->
                 Typing_reason.prj_fn_param
-                  ~super:(r_super, r_super_prj)
+                  ~super:r_super
+                  ~super_prj:r_super_prj
                   ~sub:r_sub
                   ~idx_sub
                   ~idx_super))
@@ -1966,13 +1971,15 @@ end = struct
             Typing_env.update_reason env ty_super ~f:(fun r_super_prj ->
                 if is_inout then
                   Typing_reason.prj_fn_param_inout_contra
-                    ~super:(r_super, r_super_prj)
+                    ~super:r_super
+                    ~super_prj:r_super_prj
                     ~sub:r_sub
                     ~idx_sub
                     ~idx_super
                 else
                   Typing_reason.prj_fn_param
-                    ~super:(r_super, r_super_prj)
+                    ~super:r_super
+                    ~super_prj:r_super_prj
                     ~sub:r_sub
                     ~idx_sub
                     ~idx_super)
@@ -2000,7 +2007,8 @@ end = struct
             let ty_sub =
               Typing_env.update_reason env ty_sub ~f:(fun r_sub_prj ->
                   Typing_reason.prj_fn_param_inout_co
-                    ~sub:(r_sub, r_sub_prj)
+                    ~sub:r_sub
+                    ~sub_prj:r_sub_prj
                     ~super:r_super
                     ~idx_sub
                     ~idx_super)
@@ -2088,7 +2096,10 @@ end = struct
          iii) Record the flow from the subtype into that return type *)
       let ty_sub =
         Typing_env.update_reason env ft_sub.ft_ret ~f:(fun r_sub_prj ->
-            Typing_reason.prj_fn_ret ~sub:(r_sub, r_sub_prj) ~super:r_super)
+            Typing_reason.prj_fn_ret
+              ~sub:r_sub
+              ~sub_prj:r_sub_prj
+              ~super:r_super)
       in
       simplify
         ~subtype_env
@@ -2162,7 +2173,8 @@ end = struct
           let ty_sub =
             Typing_env.update_reason env child ~f:(fun r_sub_prj ->
                 Typing_reason.prj_ctor_co
-                  ~sub:(r_sub, r_sub_prj)
+                  ~sub:r_sub
+                  ~sub_prj:r_sub_prj
                   ~super:r_super
                   ctor_kind
                   nm
@@ -2180,7 +2192,8 @@ end = struct
               map_reason super ~f:(fun r_super_prj ->
                   Typing_reason.prj_ctor_contra
                     ~sub:r_sub
-                    ~super:(r_super, r_super_prj)
+                    ~super:r_super
+                    ~super_prj:r_super_prj
                     ctor_kind
                     nm
                     idx
@@ -2201,7 +2214,8 @@ end = struct
             let ty_sub =
               Typing_env.update_reason env child ~f:(fun r_sub_prj ->
                   Typing_reason.prj_ctor_co
-                    ~sub:(r_sub, r_sub_prj)
+                    ~sub:r_sub
+                    ~sub_prj:r_sub_prj
                     ~super:r_super
                     ctor_kind
                     nm
@@ -2214,7 +2228,8 @@ end = struct
               if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
                 Typing_reason.prj_ctor_contra
                   ~sub:r_sub
-                  ~super:(r_super, r_super_prj)
+                  ~super:r_super
+                  ~super_prj:r_super_prj
                   ctor_kind
                   nm
                   idx
@@ -2380,9 +2395,10 @@ end = struct
             Phase.localize ~ety_env env up_obj
           in
           let up_obj =
-            Typing_env.update_reason env up_obj ~f:(fun from ->
-                Typing_reason.(flow ~from ~into:r_sub ~kind:Flow_extends))
+            Typing_env.update_reason env up_obj ~f:(fun ancestor ->
+                Typing_reason.axiom_extends ~child:r_sub ~ancestor)
           in
+
           (match deref up_obj with
           | (r_sub, Tclass (class_id_sub, exact_sub, tyl_sub)) ->
             let subtype_env =
@@ -2655,7 +2671,8 @@ end = struct
           @@ Typing_env.update_reason env ty_sub ~f:(fun r_sub_prj ->
                  Typing_reason.(
                    prj_shape
-                     ~sub:(r_sub, r_sub_prj)
+                     ~sub:r_sub
+                     ~sub_prj:r_sub_prj
                      ~super:r_super
                      printable_name
                      ~kind_sub:Required
@@ -2684,7 +2701,8 @@ end = struct
           @@ Typing_env.update_reason env ty_sub ~f:(fun r_sub_prj ->
                  Typing_reason.(
                    prj_shape
-                     ~sub:(r_sub, r_sub_prj)
+                     ~sub:r_sub
+                     ~sub_prj:r_sub_prj
                      ~super:r_super
                      printable_name
                      ~kind_sub:Optional
@@ -2714,7 +2732,8 @@ end = struct
           @@ Typing_env.update_reason env ty_sub ~f:(fun r_sub_prj ->
                  Typing_reason.(
                    prj_shape
-                     ~sub:(r_sub, r_sub_prj)
+                     ~sub:r_sub
+                     ~sub_prj:r_sub_prj
                      ~super:r_super
                      printable_name
                      ~kind_sub:Optional
@@ -2759,7 +2778,8 @@ end = struct
           let r_sub_prj = Typing_reason.missing_field in
           if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
             Typing_reason.prj_shape
-              ~sub:(r_sub, r_sub_prj)
+              ~sub:r_sub
+              ~sub_prj:r_sub_prj
               ~super:r_super
               printable_name
               ~kind_sub:Typing_reason.Absent
@@ -2799,7 +2819,8 @@ end = struct
       let ty_sub =
         Typing_env.update_reason env ty_sub ~f:(fun r_sub_prj ->
             Typing_reason.prj_shape
-              ~sub:(r_sub, r_sub_prj)
+              ~sub:r_sub
+              ~sub_prj:r_sub_prj
               ~super:r_super
               printable_name
               ~kind_sub
@@ -2931,7 +2952,7 @@ end = struct
         let ty_null = MakeType.null r in
         let t =
           Typing_env.update_reason env t ~f:(fun r_sub_prj ->
-              Typing_reason.prj_nullable_sub ~r_sub:r ~r_sub_prj)
+              Typing_reason.prj_nullable_sub ~sub:r ~sub_prj:r_sub_prj)
         in
         simplify
           ~subtype_env
@@ -3007,11 +3028,11 @@ end = struct
         ~mk_prop
         ~update_reason:
           (Typing_env.update_reason ~f:(fun r_sub_prj ->
-               Typing_reason.prj_union_sub ~r_sub ~r_sub_prj))
+               Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
         (sub_supportdyn, ty_subs)
         rhs
         env
-    | ( ( _,
+    | ( ( _r_sub,
           ( Tany _ | Tnonnull | Toption _ | Tdynamic | Tprim _ | Tvar _ | Tfun _
           | Ttuple _ | Tshape _ | Tgeneric _ | Tintersection _ | Tvec_or_dict _
           | Taccess _ | Tnewtype _ | Tunapplied_alias _ | Tdependent _
@@ -3024,7 +3045,9 @@ end = struct
       List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_super ->
           let ty_super =
             Typing_env.update_reason env ty_super ~f:(fun r_super_prj ->
-                Typing_reason.prj_inter_super ~r_super ~r_super_prj)
+                Typing_reason.prj_inter_super
+                  ~super:r_super
+                  ~super_prj:r_super_prj)
           in
           res
           &&& simplify
@@ -3045,11 +3068,11 @@ end = struct
         ~mk_prop
         ~update_reason:
           (Typing_env.update_reason ~f:(fun r_sub_prj ->
-               Typing_reason.prj_union_sub ~r_sub ~r_sub_prj))
+               Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
         (sub_supportdyn, tyl)
         rhs
         env
-    | ((r_sub, Tintersection tyl), (_, Tunion [])) ->
+    | ((r_sub, Tintersection tyl), (_r_super, Tunion [])) ->
       let mk_prop ~subtype_env ~this_ty:_ ~lhs ~rhs env =
         simplify ~subtype_env ~this_ty:None ~lhs ~rhs env
       in
@@ -3061,7 +3084,7 @@ end = struct
         ~mk_prop
         ~update_reason:
           (Typing_env.update_reason ~f:(fun r_sub_prj ->
-               Typing_reason.prj_inter_sub ~r_sub ~r_sub_prj))
+               Typing_reason.prj_inter_sub ~sub:r_sub ~sub_prj:r_sub_prj))
         (sub_supportdyn, tyl)
         rhs
         env
@@ -3069,6 +3092,7 @@ end = struct
       let mk_prop ~subtype_env ~this_ty ~lhs ~rhs env =
         simplify ~subtype_env ~this_ty ~lhs ~rhs env
       in
+
       Common.simplify_newtype_l
         ~subtype_env
         ~this_ty
@@ -3197,7 +3221,7 @@ end = struct
           ~mk_prop
           ~update_reason:
             (Typing_env.update_reason ~f:(fun r_sub_prj ->
-                 Typing_reason.prj_union_sub ~r_sub ~r_sub_prj))
+                 Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -3285,7 +3309,7 @@ end = struct
         in
         let ty =
           Typing_env.update_reason env ty ~f:(fun r_sub_prj ->
-              Typing_reason.prj_nullable_sub ~r_sub:r ~r_sub_prj)
+              Typing_reason.prj_nullable_sub ~sub:r ~sub_prj:r_sub_prj)
         in
         prop_null env
         &&& simplify
@@ -3426,12 +3450,15 @@ end = struct
      *)
     | ((r, Tnewtype (name, [tyarg1], _)), (r_super, Toption lty_inner))
       when String.equal name SN.Classes.cSupportDyn ->
+      (* TODO(mjt) add 'rewrite' reason including both r & r_super? *)
       let (env, ty_sub') =
         Inter.intersect env ~r:r_super tyarg1 (MakeType.nonnull r_super)
       in
       let lty_inner =
         Typing_env.update_reason env lty_inner ~f:(fun r_super_prj ->
-            Typing_reason.prj_nullable_super ~r_super ~r_super_prj)
+            Typing_reason.prj_nullable_super
+              ~super:r_super
+              ~super_prj:r_super_prj)
       in
       simplify
         ~subtype_env
@@ -3450,7 +3477,7 @@ end = struct
     | ((r_sub, Toption ty_sub'), (r_super, Toption lty_inner)) ->
       let ty_sub' =
         Typing_env.update_reason env ty_sub' ~f:(fun r_sub_prj ->
-            Typing_reason.prj_nullable_sub ~r_sub ~r_sub_prj)
+            Typing_reason.prj_nullable_sub ~sub:r_sub ~sub_prj:r_sub_prj)
       in
       simplify
         ~subtype_env
@@ -3466,7 +3493,7 @@ end = struct
     (* Rewrite _ & ...  & _ <: ?t => _ & .. & _ & nonnull <: t
        but only when the intersection does not contain any type with an exact
        negation (we apply a rewrite in the other direction for those cases) *)
-    | ((_, Tintersection ty_subs), (r_super, Toption ty_inner_super))
+    | ((_r_sub, Tintersection ty_subs), (r_super, Toption ty_inner_super))
       when expands_to_var_or_intersection ty_inner_super ~env
            &&
            let (_, non_ty_opt, _) =
@@ -3478,7 +3505,9 @@ end = struct
       in
       let ty_inner_super =
         Typing_env.update_reason env ty_inner_super ~f:(fun r_super_prj ->
-            Typing_reason.prj_nullable_super ~r_super ~r_super_prj)
+            Typing_reason.prj_nullable_super
+              ~super:r_super
+              ~super_prj:r_super_prj)
       in
       let lhs = { lhs with ty_sub }
       and rhs =
@@ -3487,11 +3516,13 @@ end = struct
       simplify ~subtype_env ~this_ty ~lhs ~rhs env
     (* If the type on the left is disjoint from null, then the Toption on the right is not
        doing anything helpful. *)
-    | ((_, (Tintersection _ | Tunion _)), (r_super, Toption lty_inner))
+    | ((_r_sub, (Tintersection _ | Tunion _)), (r_super, Toption lty_inner))
       when TUtils.is_type_disjoint env ty_sub (MakeType.null Reason.none) ->
       let lty_inner =
         Typing_env.update_reason env lty_inner ~f:(fun r_super_prj ->
-            Typing_reason.prj_nullable_super ~r_super ~r_super_prj)
+            Typing_reason.prj_nullable_super
+              ~super:r_super
+              ~super_prj:r_super_prj)
       in
       simplify
         ~subtype_env
@@ -3537,11 +3568,13 @@ end = struct
      * In the case where it's easy to determine that null isn't in t1,
      * we need only check t1 <: t2.
      *)
-    | ( (_, (Tnewtype _ | Tdependent _ | Tgeneric _ | Tprim Nast.Tvoid)),
+    | ( (_r_sub, (Tnewtype _ | Tdependent _ | Tgeneric _ | Tprim Nast.Tvoid)),
         (r_super, Toption lty_inner) ) ->
       let lty_inner =
         Typing_env.update_reason env lty_inner ~f:(fun r_super_prj ->
-            Typing_reason.prj_nullable_super ~r_super ~r_super_prj)
+            Typing_reason.prj_nullable_super
+              ~super:r_super
+              ~super_prj:r_super_prj)
       in
       (* TODO(T69551141) handle type arguments? *)
       if null_not_subtype ty_sub then
@@ -3564,12 +3597,7 @@ end = struct
               ~this_ty
               ~fail
               ~lhs:{ sub_supportdyn; ty_sub }
-              ~rhs:
-                {
-                  super_like;
-                  super_supportdyn = false;
-                  ty_super = mk (r_super, Toption lty_inner);
-                }
+              ~rhs:{ super_like; super_supportdyn = false; ty_super }
     (* If ty_sub <: ?ty_super' and ty_sub does not contain null then we
      * must also have ty_sub <: ty_super'.  The converse follows by
      * widening and transitivity.  Therefore, this step preserves the set
@@ -3577,13 +3605,15 @@ end = struct
      *)
     | ((_, Tunapplied_alias _), (_, Toption _)) ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-    | ( ( _,
+    | ( ( _r_sub,
           ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
           | Tclass _ | Tvec_or_dict _ | Tany _ | Taccess _ | Tlabel _ ) ),
         (r_super, Toption lty_inner) ) ->
       let lty_inner =
         Typing_env.update_reason env lty_inner ~f:(fun r_super_prj ->
-            Typing_reason.prj_nullable_super ~r_super ~r_super_prj)
+            Typing_reason.prj_nullable_super
+              ~super:r_super
+              ~super_prj:r_super_prj)
       in
       simplify
         ~subtype_env
@@ -3595,10 +3625,12 @@ end = struct
        t <: t1 | t2 to (t <: t1) || (t <: t2) reduction
        TODO(T120921930): Don't do this if require_completeness is set.
     *)
-    | ((_, Tneg _), (r_super, Toption lty_inner)) ->
+    | ((_r_sub, Tneg _), (r_super, Toption lty_inner)) ->
       let lty_inner =
         Typing_env.update_reason env lty_inner ~f:(fun r_super_prj ->
-            Typing_reason.prj_nullable_super ~r_super ~r_super_prj)
+            Typing_reason.prj_nullable_super
+              ~super:r_super
+              ~super_prj:r_super_prj)
       in
       simplify
         ~subtype_env
@@ -3729,7 +3761,7 @@ end = struct
         env
         (LoclType ty_sub)
         (LoclType ty_super)
-    | ( ( _,
+    | ( ( _r_sub,
           ( Tany _ | Toption _ | Tnonnull | Tdynamic | Tprim _ | Tfun _
           | Ttuple _ | Tshape _ | Tintersection _ | Tunapplied_alias _
           | Tvec_or_dict _ | Taccess _ | Tnewtype _ | Tdependent _ | Tclass _
@@ -3754,8 +3786,8 @@ end = struct
         (* Collect all the lower bounds ("super" constraints) on the
          * generic parameter, and check ty_sub against each of them in turn
          * until one of them succeeds *)
-        let rec aux ty_supers ~env ~errs ~props =
-          match ty_supers with
+        let rec aux lower_bounds ~env ~errs ~props =
+          match lower_bounds with
           | [] ->
             let (env, prop) =
               default_subtype
@@ -3776,18 +3808,22 @@ end = struct
               in
               let err = Typing_error.intersect_opt @@ List.filter_opt errs in
               (env, TL.Disj (err, props))
-          | ty_super :: ty_supers ->
-            let ty_super =
-              Typing_env.update_reason env ty_super ~f:(fun from ->
-                  Typing_reason.(
-                    flow ~from ~into:r_super ~kind:Flow_lower_bound))
+          | lower_bound :: lower_bounds ->
+            let lower_bound =
+              Typing_env.update_reason env lower_bound ~f:(fun bound ->
+                  Typing_reason.axiom_lower_bound ~bound ~of_:r_super)
             in
             let (env, prop) =
               simplify
                 ~subtype_env
                 ~this_ty
                 ~lhs:{ sub_supportdyn; ty_sub }
-                ~rhs:{ super_like; super_supportdyn = false; ty_super }
+                ~rhs:
+                  {
+                    super_like;
+                    super_supportdyn = false;
+                    ty_super = lower_bound;
+                  }
                 env
             in
             if TL.is_valid prop then
@@ -3798,12 +3834,12 @@ end = struct
                 | Some err -> (err :: errs, props)
                 | _ -> (errs, prop :: props)
               in
-              aux ty_supers ~env ~errs ~props
+              aux lower_bounds ~env ~errs ~props
         in
 
         (* Turn error into a generic error about the type parameter *)
-        let bounds = Typing_set.elements other_lower_bounds in
-        aux bounds ~env ~errs:[fail] ~props:[])
+        let lower_bounds = Typing_set.elements other_lower_bounds in
+        aux lower_bounds ~env ~errs:[fail] ~props:[])
     | ( ( _,
           ( Tprim
               Ast_defs.(
@@ -3814,12 +3850,12 @@ end = struct
         (_, Tnonnull) ) ->
       valid env
     (* supportdyn<t> <: nonnull iff t <: nonnull *)
-    | ((r, Tnewtype (name, [tyarg], _)), (r_nonnull, Tnonnull))
+    | ((r, Tnewtype (name, [upper_bound], _)), (r_nonnull, Tnonnull))
       when String.equal name SN.Classes.cSupportDyn ->
       (* TODO(mjt) update to be an asymm projection *)
       let ty_sub =
-        Typing_env.update_reason env tyarg ~f:(fun into ->
-            Typing_reason.(flow ~from:r ~into ~kind:Flow_prj))
+        Typing_env.update_reason env upper_bound ~f:(fun bound ->
+            Typing_reason.axiom_upper_bound ~bound ~of_:r)
       in
       env
       |> simplify
@@ -3905,7 +3941,7 @@ end = struct
           | _ ->
             let ty =
               Typing_env.update_reason env ty ~f:(fun r_sub_prj ->
-                  Typing_reason.prj_nullable_sub ~r_sub ~r_sub_prj)
+                  Typing_reason.prj_nullable_sub ~sub:r_sub ~sub_prj:r_sub_prj)
             in
             simplify
               ~subtype_env
@@ -3959,7 +3995,8 @@ end = struct
               let ty_sub =
                 Typing_env.update_reason env ft_sub.ft_ret ~f:(fun r_sub_prj ->
                     Typing_reason.prj_fn_ret
-                      ~sub:(r_sub, r_sub_prj)
+                      ~sub:r_sub
+                      ~sub_prj:r_sub_prj
                       ~super:r_dynamic)
               in
               simplify
@@ -4223,10 +4260,10 @@ end = struct
       when Aast.equal_tprim prim_sub prim_sup ->
       valid env
     | ((_, Tprim _), (_, Tprim _)) -> invalid env ~fail
-    | ((r_sub, Toption arg_ty_sub), (_, Tprim Nast.Tnull)) ->
+    | ((r_sub, Toption arg_ty_sub), (_r_super, Tprim Nast.Tnull)) ->
       let arg_ty_sub =
         Typing_env.update_reason env arg_ty_sub ~f:(fun r_sub_prj ->
-            Typing_reason.prj_nullable_sub ~r_sub ~r_sub_prj)
+            Typing_reason.prj_nullable_sub ~sub:r_sub ~sub_prj:r_sub_prj)
       in
       simplify
         ~subtype_env
@@ -4313,7 +4350,7 @@ end = struct
         ~rhs:{ super_supportdyn; super_like; ty_super }
         env
     (* -- C-Shape-R --------------------------------------------------------- *)
-    | ((r_sub, Tnewtype (name_sub, _, ty_bound_sub)), (_, Tshape _)) ->
+    | ((r_sub, Tnewtype (name_sub, _, ty_bound_sub)), (_r_super, Tshape _)) ->
       Common.simplify_newtype_l
         ~subtype_env
         ~this_ty
@@ -4461,14 +4498,13 @@ end = struct
       match deref ty_sub with
       | (r, Tnewtype (name_sub, [tyarg_sub], _))
         when String.equal name_sub SN.Classes.cSupportDyn ->
-        (* TODO(mjt): update this to be a symmetric projection *)
         let ty_sub =
-          Typing_env.update_reason env tyarg_sub ~f:(fun into ->
-              Typing_reason.(flow ~from:r ~into ~kind:Flow_prj))
-        and ty_super =
-          Typing_env.update_reason env lty_inner ~f:(fun into ->
-              Typing_reason.(flow ~from:r_supportdyn ~into ~kind:Flow_prj))
-        in
+          Typing_env.update_reason env tyarg_sub ~f:(fun r_sub_prj ->
+              Typing_reason.prj_supportdyn
+                ~sub:r
+                ~sub_prj:r_sub_prj
+                ~super:r_supportdyn)
+        and ty_super = lty_inner in
         simplify
           ~subtype_env
           ~this_ty
@@ -4579,7 +4615,7 @@ end = struct
         in
         let ty_sub =
           Typing_env.update_reason env ty_sub ~f:(fun r_sub_prj ->
-              Typing_reason.prj_nullable_sub ~r_sub:r ~r_sub_prj)
+              Typing_reason.prj_nullable_sub ~sub:r ~sub_prj:r_sub_prj)
         in
         prop_null env
         &&& simplify
@@ -4728,7 +4764,7 @@ end = struct
           ~mk_prop:simplify
           ~update_reason:
             (Typing_env.update_reason ~f:(fun r_sub_prj ->
-                 Typing_reason.prj_union_sub ~r_sub ~r_sub_prj))
+                 Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -5209,7 +5245,7 @@ end = struct
             let ty_from =
               Typing_env.update_reason env ty_from ~f:(fun sub_prj ->
                   Typing_reason.(
-                    prj_tuple ~sub:(reason_tuple, sub_prj) ~super:r_super n))
+                    prj_tuple ~sub:reason_tuple ~sub_prj ~super:r_super n))
             in
             ( (res
               &&& Subtype.(
@@ -5243,7 +5279,7 @@ end = struct
             let ty_from =
               Typing_env.update_reason env ty_from ~f:(fun sub_prj ->
                   Typing_reason.(
-                    prj_tuple ~sub:(reason_tuple, sub_prj) ~super:r_super n))
+                    prj_tuple ~sub:reason_tuple ~sub_prj ~super:r_super n))
             in
             ( (res
               &&& Subtype.(
@@ -5270,8 +5306,10 @@ end = struct
                     Typing_env.update_reason env ty_from ~f:(fun sub_prj ->
                         Typing_reason.(
                           prj_tuple
-                            ~sub:(reason_tuple, sub_prj)
+                            ~sub:reason_tuple
+                            ~sub_prj
                             ~super:r_super
+                            (* TODO(mjt) allow different indices here *)
                             (n + 1)))
                   in
                   simplify
@@ -5355,7 +5393,7 @@ end = struct
           ~mk_prop:simplify
           ~update_reason:
             (Typing_env.update_reason ~f:(fun r_sub_prj ->
-                 Typing_reason.prj_union_sub ~r_sub ~r_sub_prj))
+                 Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -5394,7 +5432,7 @@ end = struct
             ~mk_prop:simplify
             ~update_reason:
               (Typing_env.update_reason ~f:(fun r_sub_prj ->
-                   Typing_reason.prj_inter_sub ~r_sub ~r_sub_prj))
+                   Typing_reason.prj_inter_sub ~sub:r_sub ~sub_prj:r_sub_prj))
             (sub_supportdyn, ty_subs)
             rhs
             env)
@@ -5633,7 +5671,7 @@ end = struct
           ~mk_prop
           ~update_reason:
             (Typing_env.update_reason ~f:(fun r_sub_prj ->
-                 Typing_reason.prj_union_sub ~r_sub ~r_sub_prj))
+                 Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -5687,7 +5725,7 @@ end = struct
             ~mk_prop
             ~update_reason:
               (Typing_env.update_reason ~f:(fun r_sub_prj ->
-                   Typing_reason.prj_inter_sub ~r_sub ~r_sub_prj))
+                   Typing_reason.prj_inter_sub ~sub:r_sub ~sub_prj:r_sub_prj))
             (sub_supportdyn, ty_subs)
             rhs
             env)
@@ -5920,7 +5958,7 @@ end = struct
         ~mk_prop:simplify
         ~update_reason:
           (Typing_env.update_reason ~f:(fun r_sub_prj ->
-               Typing_reason.prj_union_sub ~r_sub ~r_sub_prj))
+               Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -5932,7 +5970,7 @@ end = struct
         ~mk_prop:simplify
         ~update_reason:
           (Typing_env.update_reason ~f:(fun r_sub_prj ->
-               Typing_reason.prj_union_sub ~r_sub ~r_sub_prj))
+               Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -6137,7 +6175,7 @@ end = struct
         ~mk_prop:simplify
         ~update_reason:
           (Typing_env.update_reason ~f:(fun r_sub_prj ->
-               Typing_reason.prj_union_sub ~r_sub ~r_sub_prj))
+               Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -6392,7 +6430,7 @@ end = struct
         ~mk_prop:simplify
         ~update_reason:
           (Typing_env.update_reason ~f:(fun r_sub_prj ->
-               Typing_reason.prj_union_sub ~r_sub ~r_sub_prj))
+               Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -6427,7 +6465,7 @@ end = struct
           ~mk_prop:simplify
           ~update_reason:
             (Typing_env.update_reason ~f:(fun r_sub_prj ->
-                 Typing_reason.prj_inter_sub ~r_sub ~r_sub_prj))
+                 Typing_reason.prj_inter_sub ~sub:r_sub ~sub_prj:r_sub_prj))
           (sub_supportdyn, ty_subs)
           rhs
           env)
@@ -6519,7 +6557,7 @@ end = struct
           ~mk_prop:simplify
           ~update_reason:
             (Typing_env.update_reason ~f:(fun r_sub_prj ->
-                 Typing_reason.prj_union_sub ~r_sub ~r_sub_prj))
+                 Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
           (sub_supportdyn, ty_subs)
           rhs
           env
@@ -6857,10 +6895,6 @@ end = struct
             this_ty
         in
 
-        let update_reason from =
-          (* TODO(mjt): is this the right direction? *)
-          Typing_reason.(flow ~from ~into:reason_generic ~kind:Flow_upper_bound)
-        in
         (* Otherwise, we collect all the upper bounds ("as" constraints) on
            the generic parameter, and check each of these in turn against
            ty_super until one of them succeeds
@@ -6873,15 +6907,18 @@ end = struct
             | Some err -> Error (err :: errs, props)
             | None -> Error (errs, prop :: props)
         in
-        let rec aux ty_subs ~env ~errs ~props =
-          match ty_subs with
+        let rec aux upper_bounds ~env ~errs ~props =
+          match upper_bounds with
           | [] ->
             let err =
               Typing_error.intersect_opt @@ List.filter_opt @@ List.rev errs
             in
             (env, TL.Disj (err, List.rev props))
-          | ty_sub :: ty_subs ->
-            let ty_sub = Typing_env.update_reason env ty_sub ~f:update_reason in
+          | upper_bound :: upper_bounds ->
+            let ty_sub =
+              Typing_env.update_reason env upper_bound ~f:(fun bound ->
+                  Typing_reason.axiom_upper_bound ~bound ~of_:reason_generic)
+            in
             let (env, prop) =
               mk_prop
                 ~subtype_env
@@ -6892,16 +6929,16 @@ end = struct
             in
             (match accumulate prop ~errs ~props with
             | Ok prop -> (env, prop)
-            | Error (errs, props) -> aux ty_subs ~env ~errs ~props)
+            | Error (errs, props) -> aux upper_bounds ~env ~errs ~props)
         in
 
-        let bounds =
+        let upper_bounds =
           Typing_set.elements
             (Env.get_upper_bounds env generic_nm generic_ty_args)
         in
         (* TODO(mjt) We reverse bounds here to match the evaluation order
            of older code; not doing so triggers errors due to incompleteness *)
-        match List.rev bounds with
+        match List.rev upper_bounds with
         | [] ->
           (* Try an implicit mixed = ?nonnull bound before giving up.
              This can be useful when checking T <: t, where type t is
@@ -6911,7 +6948,10 @@ end = struct
           *)
           let r = Reason.implicit_upper_bound (get_pos lty_sub, "mixed") in
           let tmixed = MakeType.mixed r in
-          let ty_sub = Typing_env.update_reason env tmixed ~f:update_reason in
+          let ty_sub =
+            Typing_env.update_reason env tmixed ~f:(fun bound ->
+                Typing_reason.axiom_upper_bound ~bound ~of_:reason_generic)
+          in
           let (env, prop) =
             mk_prop
               ~subtype_env
@@ -6931,7 +6971,7 @@ end = struct
               | _ -> (fail, [prop])
             in
             (env, TL.Disj (err, props))
-        | bounds -> aux bounds ~env ~errs:[fail] ~props:[]
+        | upper_bounds -> aux upper_bounds ~env ~errs:[fail] ~props:[]
       in
       (env, prop)
     end
@@ -6953,9 +6993,10 @@ end = struct
       | _ -> sub_supportdyn
     in
     let ty_sub =
-      Typing_env.update_reason env newtype_ty ~f:(fun into ->
-          Typing_reason.(flow ~from:reason_newtype ~into ~kind:Flow_upper_bound))
+      Typing_env.update_reason env newtype_ty ~f:(fun bound ->
+          Typing_reason.axiom_upper_bound ~bound ~of_:reason_newtype)
     in
+
     mk_prop ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs env
 
   let simplify_dependent_l
@@ -6990,7 +7031,7 @@ end = struct
       let ty_null = MakeType.null r in
       let ty =
         Typing_env.update_reason env ty ~f:(fun r_sub_prj ->
-            Typing_reason.prj_nullable_sub ~r_sub:r ~r_sub_prj)
+            Typing_reason.prj_nullable_sub ~sub:r ~sub_prj:r_sub_prj)
       in
       let prop env =
         simplify_disj_r
@@ -7035,7 +7076,7 @@ end = struct
         ~mk_prop:mk_prop_intersection
         ~update_reason:
           (Typing_env.update_reason ~f:(fun r_sub_prj ->
-               Typing_reason.prj_inter_sub ~r_sub ~r_sub_prj))
+               Typing_reason.prj_inter_sub ~sub:r_sub ~sub_prj:r_sub_prj))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -7058,7 +7099,7 @@ end = struct
         ~mk_prop:mk_prop_union
         ~update_reason:
           (Typing_env.update_reason ~f:(fun r_sub_prj ->
-               Typing_reason.prj_union_sub ~r_sub ~r_sub_prj))
+               Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
         (sub_supportdyn, ty_subs)
         rhs
         env
@@ -7512,6 +7553,10 @@ end = struct
       (r_sub, var_sub)
       cty_super
       (on_error : Typing_error.Reasons_callback.t option) =
+    let cty_super =
+      Typing_env.update_cty_reason env cty_super ~f:(fun bound ->
+          Typing_reason.trans_upper_bound ~bound ~of_:r_sub)
+    in
     let ty_super = ConstraintType cty_super in
     let upper_bounds_before = Env.get_tyvar_upper_bounds env var_sub in
     let env =
@@ -7545,13 +7590,6 @@ end = struct
     let (env, prop) =
       ITySet.fold
         (fun upper_bound (env, prop) ->
-          (* We're adding an upper bound to our type variable so record a flow
-             from the variable and into the bound *)
-          let upper_bound =
-            Typing_env.update_ity_reason env upper_bound ~f:(fun r_super ->
-                Typing_reason.(
-                  flow ~from:r_sub ~into:r_super ~kind:Flow_transitive))
-          in
           let (env, ty_err_opt) =
             Typing_subtype_tconst.make_all_type_consts_equal
               env
@@ -7600,6 +7638,10 @@ end = struct
       ty_super
       (on_error : Typing_error.Reasons_callback.t option) =
     let ty_super = Sd.transform_dynamic_upper_bound ~coerce env ty_super in
+    let ty_super =
+      Typing_env.update_reason env ty_super ~f:(fun bound ->
+          Typing_reason.trans_upper_bound ~bound ~of_:r_sub)
+    in
     let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
     let env =
       Env.add_tyvar_upper_bound_and_update_variances
@@ -7611,15 +7653,7 @@ end = struct
     let upper_bounds_after = Env.get_tyvar_upper_bounds env var in
     let added_upper_bounds =
       List.filter_map ~f:(function
-          | LoclType ty ->
-            (* We're adding an upper bound to our type variable so record a flow
-               from the variable and into the bound *)
-            let ty =
-              Typing_env.update_reason env ty ~f:(fun r_super ->
-                  Typing_reason.(
-                    flow ~from:r_sub ~into:r_super ~kind:Flow_transitive))
-            in
-            Some ty
+          | LoclType ty -> Some ty
           | _ -> failwith "constraint_type in added upperbounds")
       @@ ITySet.elements
       @@ ITySet.diff upper_bounds_after upper_bounds_before
@@ -7689,6 +7723,10 @@ end = struct
       (r_sup, var)
       ty_sub
       (on_error : Typing_error.Reasons_callback.t option) =
+    let ty_sub =
+      Typing_env.update_reason env ty_sub ~f:(fun bound ->
+          Typing_reason.trans_lower_bound ~bound ~of_:r_sup)
+    in
     let lower_bounds_before = Env.get_tyvar_lower_bounds env var in
     let env =
       Env.add_tyvar_lower_bound_and_update_variances
@@ -7702,15 +7740,7 @@ end = struct
        and this is always a [LoclType] *)
     let added_lower_bounds =
       List.filter_map ~f:(function
-          | LoclType ty ->
-            (* We're adding a lower bound to our type variable so record a flow
-               from the bound and into the variable *)
-            let ty =
-              Typing_env.update_reason env ty ~f:(fun r_sub ->
-                  Typing_reason.(
-                    flow ~from:r_sub ~into:r_sup ~kind:Flow_transitive))
-            in
-            Some ty
+          | LoclType ty -> Some ty
           | _ -> failwith "constraint_type in added lowerbounds")
       @@ ITySet.elements
       @@ ITySet.diff lower_bounds_after lower_bounds_before

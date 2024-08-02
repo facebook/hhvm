@@ -10,11 +10,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `_PIRANHA_SANDBOX_QUEUED_` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `_PIRANHA_SANDBOX_QUEUED_` is defined
 
@@ -37,11 +37,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `async_bulkapi_factor` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `async_bulkapi_factor` is defined
 
@@ -64,11 +64,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `devserver` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `devserver` is defined
 
@@ -91,11 +91,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `earlyreturn` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `earlyreturn` is defined
 
@@ -118,11 +118,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `execute_after` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `execute_after` is defined
 
@@ -145,11 +145,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `execute_before` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `execute_before` is defined
 
@@ -172,11 +172,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `execution_push_phase` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `execution_push_phase` is defined
 
@@ -199,11 +199,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `expire_after` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `expire_after` is defined
 
@@ -226,11 +226,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `fifo_dedup_key` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `fifo_dedup_key` is defined
 
@@ -253,11 +253,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `fifo_ordering_key` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `fifo_ordering_key` is defined
 
@@ -280,11 +280,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `region` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `region` is defined
 
@@ -307,11 +307,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `resource_requirement` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `resource_requirement` is defined
 
@@ -334,11 +334,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `retry_attempt` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `retry_attempt` is defined
 
@@ -361,11 +361,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `scheduling_uid` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `scheduling_uid` is defined
 
@@ -388,11 +388,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `send_schedule_cats` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `send_schedule_cats` is defined
 
@@ -414,11 +414,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `serialization_format` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `serialization_format` is defined
 
@@ -441,11 +441,11 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
 The field `tag` is missing
 
  88 |   public static async function genAsyncJob(
- 89 |     »?AsyncTierJobOptions« $options = null,
+ 89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
 The field `tag` is defined
 

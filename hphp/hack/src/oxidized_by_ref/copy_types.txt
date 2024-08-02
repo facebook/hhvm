@@ -248,6 +248,7 @@ typing_inference_env::Tvenv
 typing_mutability_env::MutabilityEnv
 typing_mutability_env::MutType
 typing_reason::ArgPosition
+typing_reason::Axiom
 typing_reason::Blame
 typing_reason::BlameSource
 typing_reason::CtorKind

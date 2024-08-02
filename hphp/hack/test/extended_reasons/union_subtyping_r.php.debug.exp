@@ -26,34 +26,63 @@ But got `C`
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
 Reason:
-[
-  {
-    "Def":[
-      {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
-      [
-        {
-          "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+{
+  "Subtype":{
+    "sub":[
+      {
+        "Flow":{
+          "from":[
+            {
+              "Flow":{
+                "from":[
+                  {
+                    "Flow":{
+                      "from":[
+                        {
+                          "Def":[
+                            {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
+                            [
+                              {
+                                "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                              }
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "kind":"Flow_local",
+                "into":[
+                  {
+                    "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+                  }
+                ]
+              }
+            }
+          ],
+          "kind":"Flow_return_expr",
+          "into":[
+            {
+              "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+            }
+          ]
         }
-      ]
+      }
+    ],
+    "super":[
+      {
+        "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+      }
     ]
-  },
-  "Flow_param_hint",
-  {
-    "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
-  },
-  "Flow_local",
-  {
-    "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
-  },
-  "Flow_return_expr",
-  {
-    "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
-  },
-  "Flow_subtype_toplevel",
-  {
-    "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
   }
-]
+}
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -86,52 +115,82 @@ But got `C`
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
 Reason:
-[
-  {
-    "Def":[
-      {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
-      [
-        {
-          "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+{
+  "Subtype":{
+    "sub":[
+      {
+        "Flow":{
+          "from":[
+            {
+              "Flow":{
+                "from":[
+                  {
+                    "Flow":{
+                      "from":[
+                        {
+                          "Def":[
+                            {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
+                            [
+                              {
+                                "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                              }
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "kind":"Flow_local",
+                "into":[
+                  {
+                    "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+                  }
+                ]
+              }
+            }
+          ],
+          "kind":"Flow_return_expr",
+          "into":[
+            {
+              "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+            }
+          ]
         }
-      ]
-    ]
-  },
-  "Flow_param_hint",
-  {
-    "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
-  },
-  "Flow_local",
-  {
-    "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
-  },
-  "Flow_return_expr",
-  {
-    "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
-  },
-  "Flow_subtype_toplevel",
-  {
-    "Prj":[
-      {"Asymm":["Super","Prj_asymm_union"]},
-      [
-        {
-          "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+      }
+    ],
+    "super":[
+      {
+        "Prj_one":{
+          "part":[
+            {
+              "Def":[
+                {"filename":"union_subtyping_r.php","line":2,"char_start":7,"char_end":7},
+                [
+                  {
+                    "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":26,"char_end":26}]
+                  }
+                ]
+              ]
+            }
+          ],
+          "prj":"Prj_asymm_union",
+          "whole":[
+            {
+              "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+            }
+          ]
         }
-      ]
-    ]
-  },
-  "Flow_prj",
-  {
-    "Def":[
-      {"filename":"union_subtyping_r.php","line":2,"char_start":7,"char_end":7},
-      [
-        {
-          "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":26,"char_end":26}]
-        }
-      ]
+      }
     ]
   }
-]
+}
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -164,52 +223,82 @@ But got `C`
 File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
 Reason:
-[
-  {
-    "Def":[
-      {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
-      [
-        {
-          "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+{
+  "Subtype":{
+    "sub":[
+      {
+        "Flow":{
+          "from":[
+            {
+              "Flow":{
+                "from":[
+                  {
+                    "Flow":{
+                      "from":[
+                        {
+                          "Def":[
+                            {"filename":"union_subtyping_r.php","line":4,"char_start":7,"char_end":7},
+                            [
+                              {
+                                "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":18,"char_end":18}]
+                              }
+                            ]
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "kind":"Flow_local",
+                "into":[
+                  {
+                    "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
+                  }
+                ]
+              }
+            }
+          ],
+          "kind":"Flow_return_expr",
+          "into":[
+            {
+              "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
+            }
+          ]
         }
-      ]
-    ]
-  },
-  "Flow_param_hint",
-  {
-    "Witness":[{"filename":"union_subtyping_r.php","line":6,"char_start":20,"char_end":21}]
-  },
-  "Flow_local",
-  {
-    "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":10,"char_end":11}]
-  },
-  "Flow_return_expr",
-  {
-    "Witness":[{"filename":"union_subtyping_r.php","line":7,"char_start":3,"char_end":12}]
-  },
-  "Flow_subtype_toplevel",
-  {
-    "Prj":[
-      {"Asymm":["Super","Prj_asymm_union"]},
-      [
-        {
-          "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+      }
+    ],
+    "super":[
+      {
+        "Prj_one":{
+          "part":[
+            {
+              "Def":[
+                {"filename":"union_subtyping_r.php","line":3,"char_start":7,"char_end":7},
+                [
+                  {
+                    "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":28,"char_end":28}]
+                  }
+                ]
+              ]
+            }
+          ],
+          "prj":"Prj_asymm_union",
+          "whole":[
+            {
+              "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":25,"char_end":29}]
+            }
+          ]
         }
-      ]
-    ]
-  },
-  "Flow_prj",
-  {
-    "Def":[
-      {"filename":"union_subtyping_r.php","line":3,"char_start":7,"char_end":7},
-      [
-        {
-          "Hint":[{"filename":"union_subtyping_r.php","line":6,"char_start":28,"char_end":28}]
-        }
-      ]
+      }
     ]
   }
-]
+}
 
 
 File "", line 0, character 0 - line 0, character -1:

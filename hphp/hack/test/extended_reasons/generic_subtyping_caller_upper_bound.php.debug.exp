@@ -29,121 +29,146 @@ But got `A`
 File "generic_subtyping_caller_upper_bound.php", line 9, character 45 - line 9, character 45:
 
 Reason:
-[
-  {
-    "Def":[
+{
+  "Subtype":{
+    "sub":[
       {
-        "filename":"generic_subtyping_caller_upper_bound.php",
-        "line":4,
-        "char_start":7,
-        "char_end":7
-      },
-      [
-        {
-          "Hint":[
+        "Axiom":{
+          "prev":[
             {
-              "filename":"generic_subtyping_caller_upper_bound.php",
-              "line":9,
-              "char_start":45,
-              "char_end":45
-            }
-          ]
-        }
-      ]
-    ]
-  },
-  "Flow_upper_bound",
-  {
-    "Hint":[
-      {
-        "filename":"generic_subtyping_caller_upper_bound.php",
-        "line":9,
-        "char_start":48,
-        "char_end":48
-      }
-    ]
-  },
-  "Flow_param_hint",
-  {
-    "Witness":[
-      {
-        "filename":"generic_subtyping_caller_upper_bound.php",
-        "line":9,
-        "char_start":50,
-        "char_end":51
-      }
-    ]
-  },
-  "Flow_local",
-  {
-    "Witness":[
-      {
-        "filename":"generic_subtyping_caller_upper_bound.php",
-        "line":10,
-        "char_start":17,
-        "char_end":18
-      }
-    ]
-  },
-  "Flow_prj",
-  {
-    "Prj":[
-      {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-      [
-        {
-          "Witness":[
-            {
-              "filename":"generic_subtyping_caller_upper_bound.php",
-              "line":10,
-              "char_start":3,
-              "char_end":19
-            }
-          ]
-        },
-        "Flow_subtype",
-        {
-          "Rev":[
-            [
-              {
-                "Support_dynamic_type":[
+              "Prj_both":{
+                "sub_prj":[
                   {
-                    "filename":"generic_subtyping_caller_upper_bound.php",
-                    "line":7,
-                    "char_start":10,
-                    "char_end":22
+                    "Flow":{
+                      "from":[
+                        {
+                          "Flow":{
+                            "from":[
+                              {
+                                "Hint":[
+                                  {
+                                    "filename":"generic_subtyping_caller_upper_bound.php",
+                                    "line":9,
+                                    "char_start":48,
+                                    "char_end":48
+                                  }
+                                ]
+                              }
+                            ],
+                            "kind":"Flow_param_hint",
+                            "into":[
+                              {
+                                "Witness":[
+                                  {
+                                    "filename":"generic_subtyping_caller_upper_bound.php",
+                                    "line":9,
+                                    "char_start":50,
+                                    "char_end":51
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "kind":"Flow_local",
+                      "into":[
+                        {
+                          "Witness":[
+                            {
+                              "filename":"generic_subtyping_caller_upper_bound.php",
+                              "line":10,
+                              "char_start":17,
+                              "char_end":18
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "prj":{"Prj_symm_fn_param":[0,0]},
+                "sub":[
+                  {
+                    "Support_dynamic_type":[
+                      {
+                        "filename":"generic_subtyping_caller_upper_bound.php",
+                        "line":7,
+                        "char_start":10,
+                        "char_end":22
+                      }
+                    ]
+                  }
+                ],
+                "super":[
+                  {
+                    "Witness":[
+                      {
+                        "filename":"generic_subtyping_caller_upper_bound.php",
+                        "line":10,
+                        "char_start":3,
+                        "char_end":19
+                      }
+                    ]
                   }
                 ]
               }
-            ]
-          ]
-        }
-      ]
-    ]
-  },
-  "Flow_subtype_toplevel",
-  {
-    "Def":[
-      {
-        "filename":"generic_subtyping_caller_upper_bound.php",
-        "line":5,
-        "char_start":7,
-        "char_end":7
-      },
-      [
-        {
-          "Hint":[
+            }
+          ],
+          "axiom":"Upper_bound",
+          "next":[
             {
-              "filename":"generic_subtyping_caller_upper_bound.php",
-              "line":7,
-              "char_start":24,
-              "char_end":24
+              "Def":[
+                {
+                  "filename":"generic_subtyping_caller_upper_bound.php",
+                  "line":4,
+                  "char_start":7,
+                  "char_end":7
+                },
+                [
+                  {
+                    "Hint":[
+                      {
+                        "filename":"generic_subtyping_caller_upper_bound.php",
+                        "line":9,
+                        "char_start":45,
+                        "char_end":45
+                      }
+                    ]
+                  }
+                ]
+              ]
             }
           ]
         }
-      ]
+      }
+    ],
+    "super":[
+      {
+        "Def":[
+          {
+            "filename":"generic_subtyping_caller_upper_bound.php",
+            "line":5,
+            "char_start":7,
+            "char_end":7
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"generic_subtyping_caller_upper_bound.php",
+                  "line":7,
+                  "char_start":24,
+                  "char_end":24
+                }
+              ]
+            }
+          ]
+        ]
+      }
     ]
   }
-]
+}
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -179,98 +204,115 @@ But got `T as A`
 File "generic_subtyping_caller_upper_bound.php", line 9, character 48 - line 9, character 48:
 
 Reason:
-[
-  {
-    "Hint":[
+{
+  "Subtype":{
+    "sub":[
       {
-        "filename":"generic_subtyping_caller_upper_bound.php",
-        "line":9,
-        "char_start":48,
-        "char_end":48
-      }
-    ]
-  },
-  "Flow_param_hint",
-  {
-    "Witness":[
-      {
-        "filename":"generic_subtyping_caller_upper_bound.php",
-        "line":9,
-        "char_start":50,
-        "char_end":51
-      }
-    ]
-  },
-  "Flow_local",
-  {
-    "Witness":[
-      {
-        "filename":"generic_subtyping_caller_upper_bound.php",
-        "line":10,
-        "char_start":17,
-        "char_end":18
-      }
-    ]
-  },
-  "Flow_prj",
-  {
-    "Prj":[
-      {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-      [
-        {
-          "Witness":[
+        "Prj_both":{
+          "sub_prj":[
             {
-              "filename":"generic_subtyping_caller_upper_bound.php",
-              "line":10,
-              "char_start":3,
-              "char_end":19
-            }
-          ]
-        },
-        "Flow_subtype",
-        {
-          "Rev":[
-            [
-              {
-                "Support_dynamic_type":[
+              "Flow":{
+                "from":[
                   {
-                    "filename":"generic_subtyping_caller_upper_bound.php",
-                    "line":7,
-                    "char_start":10,
-                    "char_end":22
+                    "Flow":{
+                      "from":[
+                        {
+                          "Hint":[
+                            {
+                              "filename":"generic_subtyping_caller_upper_bound.php",
+                              "line":9,
+                              "char_start":48,
+                              "char_end":48
+                            }
+                          ]
+                        }
+                      ],
+                      "kind":"Flow_param_hint",
+                      "into":[
+                        {
+                          "Witness":[
+                            {
+                              "filename":"generic_subtyping_caller_upper_bound.php",
+                              "line":9,
+                              "char_start":50,
+                              "char_end":51
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "kind":"Flow_local",
+                "into":[
+                  {
+                    "Witness":[
+                      {
+                        "filename":"generic_subtyping_caller_upper_bound.php",
+                        "line":10,
+                        "char_start":17,
+                        "char_end":18
+                      }
+                    ]
                   }
                 ]
               }
-            ]
-          ]
-        }
-      ]
-    ]
-  },
-  "Flow_subtype_toplevel",
-  {
-    "Def":[
-      {
-        "filename":"generic_subtyping_caller_upper_bound.php",
-        "line":5,
-        "char_start":7,
-        "char_end":7
-      },
-      [
-        {
-          "Hint":[
+            }
+          ],
+          "prj":{"Prj_symm_fn_param":[0,0]},
+          "sub":[
             {
-              "filename":"generic_subtyping_caller_upper_bound.php",
-              "line":7,
-              "char_start":24,
-              "char_end":24
+              "Support_dynamic_type":[
+                {
+                  "filename":"generic_subtyping_caller_upper_bound.php",
+                  "line":7,
+                  "char_start":10,
+                  "char_end":22
+                }
+              ]
+            }
+          ],
+          "super":[
+            {
+              "Witness":[
+                {
+                  "filename":"generic_subtyping_caller_upper_bound.php",
+                  "line":10,
+                  "char_start":3,
+                  "char_end":19
+                }
+              ]
             }
           ]
         }
-      ]
+      }
+    ],
+    "super":[
+      {
+        "Def":[
+          {
+            "filename":"generic_subtyping_caller_upper_bound.php",
+            "line":5,
+            "char_start":7,
+            "char_end":7
+          },
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"generic_subtyping_caller_upper_bound.php",
+                  "line":7,
+                  "char_start":24,
+                  "char_end":24
+                }
+              ]
+            }
+          ]
+        ]
+      }
     ]
   }
-]
+}
 
 
 File "", line 0, character 0 - line 0, character -1:

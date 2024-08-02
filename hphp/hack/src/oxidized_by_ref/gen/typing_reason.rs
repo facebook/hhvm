@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<eff4ad74001bce45e0aa1ae63b82f67f>>
+// @generated SignedSource<<80212615c33c3277be45651ceda8b342>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -179,49 +179,17 @@ pub enum PrjSymm<'a> {
     PrjSymmFnParamInout(&'a (isize, isize, &'a oxidized::typing_reason::VarianceDir)),
     #[rust_to_ocaml(name = "Prj_symm_fn_ret")]
     PrjSymmFnRet,
+    #[rust_to_ocaml(name = "Prj_symm_supportdyn")]
+    PrjSymmSupportdyn,
 }
 impl<'a> TrivialDrop for PrjSymm<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(PrjSymm<'arena>);
 
-pub use oxidized::typing_reason::PrjAsymm;
-pub use oxidized::typing_reason::Side;
-
-/// Top-level projections
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving hash")]
-#[repr(C, u8)]
-pub enum Prj<'a> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Symm(&'a PrjSymm<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Asymm(
-        &'a (
-            &'a oxidized::typing_reason::Side,
-            &'a oxidized::typing_reason::PrjAsymm,
-        ),
-    ),
-}
-impl<'a> TrivialDrop for Prj<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(Prj<'arena>);
-
 pub use oxidized::typing_reason::FlowKind;
+pub use oxidized::typing_reason::PrjAsymm;
 
+/// Witness the reason for a type during typing using the position of a hint or
+/// expression
 #[derive(
     Clone,
     Copy,
@@ -403,6 +371,7 @@ pub enum WitnessLocl<'a> {
 impl<'a> TrivialDrop for WitnessLocl<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(WitnessLocl<'arena>);
 
+/// Witness the reason for a type during decling using the position of a hint
 #[derive(
     Clone,
     Copy,
@@ -505,6 +474,8 @@ pub enum WitnessDecl<'a> {
 impl<'a> TrivialDrop for WitnessDecl<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(WitnessDecl<'arena>);
 
+pub use oxidized::typing_reason::Axiom;
+
 /// The reason why something is expected to have a certain type
 #[derive(
     Clone,
@@ -524,6 +495,7 @@ arena_deserializer::impl_deserialize_in_arena!(WitnessDecl<'arena>);
 #[rust_to_ocaml(attr = "deriving hash")]
 #[repr(C, u8)]
 pub enum T_<'a> {
+    /// Lift a decl-time witness into a reason
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "From_witness_decl")]
     FromWitnessDecl(&'a WitnessDecl<'a>),
@@ -532,17 +504,79 @@ pub enum T_<'a> {
     Instantiate(&'a (T_<'a>, &'a str, T_<'a>)),
     #[rust_to_ocaml(name = "No_reason")]
     NoReason,
+    /// Lift a typing-time witness into a reason
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "From_witness_locl")]
     FromWitnessLocl(&'a WitnessLocl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Flow(&'a (T_<'a>, &'a oxidized::typing_reason::FlowKind, T_<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Prj(&'a (Prj<'a>, T_<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Rev(&'a T_<'a>),
+    /// Records that a type with reason [bound] acted as an upper bound
+    /// for the type with reason [of_]
+    #[rust_to_ocaml(name = "Upper_bound")]
+    UpperBound {
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        bound: &'a T_<'a>,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        of__: &'a T_<'a>,
+    },
+    /// Records that a type with reason [bound] acted as a lower bound
+    /// for the type with reason [of_]
+    #[rust_to_ocaml(name = "Lower_bound")]
+    LowerBound {
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        bound: &'a T_<'a>,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        of__: &'a T_<'a>,
+    },
+    /// Records the flow of a type from an expression or hint into an
+    /// expression during typing
+    Flow {
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        from: &'a T_<'a>,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        kind: &'a oxidized::typing_reason::FlowKind,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        into: &'a T_<'a>,
+    },
+    /// Represents the projection of the sub- and supertype during subtype
+    /// constraints simplifiction. [sub_prj] is the subtype resulting from the
+    /// projection whilst [sub] and [super] and the reasons for the parent
+    /// types
+    #[rust_to_ocaml(name = "Prj_both")]
+    PrjBoth {
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        sub_prj: &'a T_<'a>,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        prj: PrjSymm<'a>,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        sub: &'a T_<'a>,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        super_: &'a T_<'a>,
+    },
+    /// Represents the projection of the sub- or supertype during subtype
+    /// constraints simplifiction. [part] is the sub/supertype resulting from
+    /// the projection whilst [whole] is the reason for the parent type.
+    #[rust_to_ocaml(name = "Prj_one")]
+    PrjOne {
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        part: &'a T_<'a>,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        whole: &'a T_<'a>,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        prj: &'a oxidized::typing_reason::PrjAsymm,
+    },
+    /// Represents the use of a user-defined axiom about either the
+    /// subtype or supertype during subtype constraints simplifiction.
+    /// [next] is the sub/supertype resulting from the application of the
+    /// axiom whilst [prev] is reason for original type.
+    Axiom {
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        next: &'a T_<'a>,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        prev: &'a T_<'a>,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        axiom: &'a oxidized::typing_reason::Axiom,
+    },
+    /// Records the definition site of type alongside the reason recording its
+    /// use.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Def(&'a (&'a pos_or_decl::PosOrDecl<'a>, T_<'a>)),

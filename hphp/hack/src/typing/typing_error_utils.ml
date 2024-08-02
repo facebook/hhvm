@@ -5832,9 +5832,7 @@ end = struct
            (ty_super_descr, ty_sub_descr)
        in
        let left =
-         Typing_reason.to_string
-           ("Expected " ^ ty_super_descr)
-           (Typing_reason.reverse r_super)
+         Typing_reason.to_string ("Expected " ^ ty_super_descr) r_super
        in
        let right = Typing_reason.to_string ("But got " ^ ty_sub_descr) r_sub in
        let reasons = left @ right in
@@ -5843,14 +5841,9 @@ end = struct
            ~default:[]
            ~f:(function
              | GlobalOptions.Extended complexity ->
-               Typing_reason.(
-                 explain
-                   (flow ~from:r_sub ~into:r_super ~kind:Flow_subtype_toplevel)
-                   ~complexity)
+               Typing_reason.(explain ~sub:r_sub ~super:r_super ~complexity)
              | GlobalOptions.Debug ->
-               Typing_reason.(
-                 debug
-                   (flow ~from:r_sub ~into:r_super ~kind:Flow_subtype_toplevel)))
+               Typing_reason.(debug ~sub:r_sub ~super:r_super))
            (TypecheckerOptions.tco_extended_reasons
               Typing_env_types.(env.genv.tcopt))
        in
@@ -5966,19 +5959,9 @@ end = struct
              ~f:(function
                | GlobalOptions.Extended complexity ->
                  Typing_reason.(
-                   explain
-                     (flow
-                        ~from:reason_sub
-                        ~into:reason_super
-                        ~kind:Flow_subtype_toplevel)
-                     ~complexity)
+                   explain ~sub:reason_sub ~super:reason_super ~complexity)
                | GlobalOptions.Debug ->
-                 Typing_reason.(
-                   debug
-                     (flow
-                        ~from:reason_sub
-                        ~into:reason_super
-                        ~kind:Flow_subtype_toplevel)))
+                 Typing_reason.(debug ~sub:reason_sub ~super:reason_super))
              (TypecheckerOptions.tco_extended_reasons
                 Typing_env_types.(env.genv.tcopt)))
     in
@@ -6121,19 +6104,9 @@ end = struct
              ~f:(function
                | GlobalOptions.Extended complexity ->
                  Typing_reason.(
-                   explain
-                     (flow
-                        ~from:reason_sub
-                        ~into:reason_super
-                        ~kind:Flow_subtype_toplevel)
-                     ~complexity)
+                   explain ~sub:reason_sub ~super:reason_super ~complexity)
                | GlobalOptions.Debug ->
-                 Typing_reason.(
-                   debug
-                     (flow
-                        ~from:reason_sub
-                        ~into:reason_super
-                        ~kind:Flow_subtype_toplevel)))
+                 Typing_reason.(debug ~sub:reason_sub ~super:reason_super))
              (TypecheckerOptions.tco_extended_reasons
                 Typing_env_types.(env.genv.tcopt)))
     in

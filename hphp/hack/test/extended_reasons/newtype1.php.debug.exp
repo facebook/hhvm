@@ -16,62 +16,85 @@ File "newtype1.php--file2.php", line 3, character 22 - line 3, character 25:
 
 But got `int`
 
- 7 | function pass_my_int(»myint« $y) : bool {
- 8 |   return expect_bool($y);
- 9 | }
+ 3 | newtype myint as »int« = int;
 
-File "newtype1.php--file2.php", line 7, character 22 - line 7, character 26:
+File "newtype1.php--file1.php", line 3, character 18 - line 3, character 20:
 
 Reason:
-[
-  {
-    "Def":[
-      {"filename":"newtype1.php--file1.php","line":3,"char_start":9,"char_end":13},
-      [
-        {
-          "Hint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
-        }
-      ]
-    ]
-  },
-  "Flow_param_hint",
-  {
-    "Witness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
-  },
-  "Flow_local",
-  {
-    "Witness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
-  },
-  "Flow_prj",
-  {
-    "Prj":[
-      {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-      [
-        {
-          "Witness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":10,"char_end":24}]
-        },
-        "Flow_subtype",
-        {
-          "Rev":[
-            [
-              {
-                "Support_dynamic_type":[{"filename":"newtype1.php--file2.php","line":3,"char_start":10,"char_end":20}]
+{
+  "Subtype":{
+    "sub":[
+      {
+        "Axiom":{
+          "prev":[
+            {
+              "Prj_both":{
+                "sub_prj":[
+                  {
+                    "Flow":{
+                      "from":[
+                        {
+                          "Flow":{
+                            "from":[
+                              {
+                                "Def":[
+                                  {"filename":"newtype1.php--file1.php","line":3,"char_start":9,"char_end":13},
+                                  [
+                                    {
+                                      "Hint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
+                                    }
+                                  ]
+                                ]
+                              }
+                            ],
+                            "kind":"Flow_param_hint",
+                            "into":[
+                              {
+                                "Witness":[{"filename":"newtype1.php--file2.php","line":7,"char_start":28,"char_end":29}]
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "kind":"Flow_local",
+                      "into":[
+                        {
+                          "Witness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":22,"char_end":23}]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "prj":{"Prj_symm_fn_param":[0,0]},
+                "sub":[
+                  {
+                    "Support_dynamic_type":[{"filename":"newtype1.php--file2.php","line":3,"char_start":10,"char_end":20}]
+                  }
+                ],
+                "super":[
+                  {
+                    "Witness":[{"filename":"newtype1.php--file2.php","line":8,"char_start":10,"char_end":24}]
+                  }
+                ]
               }
-            ]
+            }
+          ],
+          "axiom":"Upper_bound",
+          "next":[
+            {
+              "Hint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":18,"char_end":20}]
+            }
           ]
         }
-      ]
+      }
+    ],
+    "super":[
+      {
+        "Hint":[{"filename":"newtype1.php--file2.php","line":3,"char_start":22,"char_end":25}]
+      }
     ]
-  },
-  "Flow_upper_bound",
-  {
-    "Hint":[{"filename":"newtype1.php--file1.php","line":3,"char_start":18,"char_end":20}]
-  },
-  "Flow_subtype_toplevel",
-  {
-    "Hint":[{"filename":"newtype1.php--file2.php","line":3,"char_start":22,"char_end":25}]
   }
-]
+}
 
 
 File "", line 0, character 0 - line 0, character -1:

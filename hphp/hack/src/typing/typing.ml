@@ -3987,12 +3987,6 @@ end = struct
       (* We typecheck Obj_get by checking whether it is a subtype of
          Thas_member(m, #1) where #1 is a fresh type variable. *)
       let (env, mem_ty) = Env.fresh_type env p in
-      let mem_ty =
-        Typing_env.(
-          update_reason env mem_ty ~f:(fun into ->
-              let from = get_reason ty1 in
-              Typing_reason.(flow ~from ~into ~kind:Flow_solved)))
-      in
       let (_, p1, _) = e1 in
       let r = Reason.witness p1 in
       let has_member_ty =
@@ -6394,8 +6388,9 @@ end = struct
               let r_sup = Typing_reason.witness expr_pos in
               let update_reason r_sup_prj =
                 Typing_reason.prj_fn_param
-                  ~super:(r_sup, r_sup_prj)
                   ~sub:(get_reason fty)
+                  ~super:r_sup
+                  ~super_prj:r_sup_prj
                   ~idx_sub:param_idx
                   ~idx_super:arg_idx
               in
@@ -6433,8 +6428,9 @@ end = struct
               let r_sup = Typing_reason.witness expr_pos in
               let update_reason r_sup_prj =
                 Typing_reason.prj_fn_param
-                  ~super:(r_sup, r_sup_prj)
                   ~sub:(get_reason fty)
+                  ~super:r_sup
+                  ~super_prj:r_sup_prj
                   ~idx_sub:param_idx
                   ~idx_super:arg_idx
               in
@@ -6749,9 +6745,9 @@ end = struct
           in
           let ret =
             Typing_env.(
-              update_reason env ret ~f:(fun from ->
+              update_reason env ret ~f:(fun r_sub ->
                   Typing_reason.(
-                    flow ~from ~into:(witness expr_pos) ~kind:Flow_subtype)))
+                    flow ~from:r_sub ~into:(witness expr_pos) ~kind:Flow_call)))
           in
           (env, (tel, typed_unpack_element, ret, should_forget_fakes))
         | (r, Tnewtype (name, [ty], _))

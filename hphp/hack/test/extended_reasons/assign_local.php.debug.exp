@@ -25,66 +25,99 @@ But got `Super`
 File "assign_local.php", line 9, character 14 - line 9, character 18:
 
 Reason:
-[
-  {
-    "Def":[
-      {"filename":"assign_local.php","line":3,"char_start":7,"char_end":11},
-      [
-        {
-          "Hint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
-        }
-      ]
-    ]
-  },
-  "Flow_param_hint",
-  {
-    "Witness":[{"filename":"assign_local.php","line":9,"char_start":20,"char_end":21}]
-  },
-  "Flow_local",
-  {
-    "Witness":[{"filename":"assign_local.php","line":10,"char_start":8,"char_end":9}]
-  },
-  "Flow_assign",
-  {
-    "Witness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":4}]
-  },
-  "Flow_local",
-  {
-    "Witness":[{"filename":"assign_local.php","line":11,"char_start":7,"char_end":8}]
-  },
-  "Flow_prj",
-  {
-    "Prj":[
-      {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-      [
-        {
-          "Witness":[{"filename":"assign_local.php","line":11,"char_start":3,"char_end":9}]
-        },
-        "Flow_subtype",
-        {
-          "Rev":[
-            [
-              {
-                "Support_dynamic_type":[{"filename":"assign_local.php","line":7,"char_start":10,"char_end":12}]
+{
+  "Subtype":{
+    "sub":[
+      {
+        "Prj_both":{
+          "sub_prj":[
+            {
+              "Flow":{
+                "from":[
+                  {
+                    "Flow":{
+                      "from":[
+                        {
+                          "Flow":{
+                            "from":[
+                              {
+                                "Flow":{
+                                  "from":[
+                                    {
+                                      "Def":[
+                                        {"filename":"assign_local.php","line":3,"char_start":7,"char_end":11},
+                                        [
+                                          {
+                                            "Hint":[{"filename":"assign_local.php","line":9,"char_start":14,"char_end":18}]
+                                          }
+                                        ]
+                                      ]
+                                    }
+                                  ],
+                                  "kind":"Flow_param_hint",
+                                  "into":[
+                                    {
+                                      "Witness":[{"filename":"assign_local.php","line":9,"char_start":20,"char_end":21}]
+                                    }
+                                  ]
+                                }
+                              }
+                            ],
+                            "kind":"Flow_local",
+                            "into":[
+                              {
+                                "Witness":[{"filename":"assign_local.php","line":10,"char_start":8,"char_end":9}]
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "kind":"Flow_assign",
+                      "into":[
+                        {
+                          "Witness":[{"filename":"assign_local.php","line":10,"char_start":3,"char_end":4}]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "kind":"Flow_local",
+                "into":[
+                  {
+                    "Witness":[{"filename":"assign_local.php","line":11,"char_start":7,"char_end":8}]
+                  }
+                ]
               }
-            ]
+            }
+          ],
+          "prj":{"Prj_symm_fn_param":[0,0]},
+          "sub":[
+            {
+              "Support_dynamic_type":[{"filename":"assign_local.php","line":7,"char_start":10,"char_end":12}]
+            }
+          ],
+          "super":[
+            {
+              "Witness":[{"filename":"assign_local.php","line":11,"char_start":3,"char_end":9}]
+            }
           ]
         }
-      ]
-    ]
-  },
-  "Flow_subtype_toplevel",
-  {
-    "Def":[
-      {"filename":"assign_local.php","line":4,"char_start":7,"char_end":9},
-      [
-        {
-          "Hint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
-        }
-      ]
+      }
+    ],
+    "super":[
+      {
+        "Def":[
+          {"filename":"assign_local.php","line":4,"char_start":7,"char_end":9},
+          [
+            {
+              "Hint":[{"filename":"assign_local.php","line":7,"char_start":14,"char_end":16}]
+            }
+          ]
+        ]
+      }
     ]
   }
-]
+}
 
 
 File "", line 0, character 0 - line 0, character -1:

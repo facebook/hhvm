@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<964ff8a7388f539cb71e6529168b6d2b>>
+// @generated SignedSource<<5d160f40baba5624a608e0f3ba5d01d8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1110,17 +1110,7 @@ impl<'a> Node<'a> for PrjSymm<'a> {
             PrjSymm::PrjSymmFnParam(ref __binding_0) => __binding_0.accept(v),
             PrjSymm::PrjSymmFnParamInout(ref __binding_0) => __binding_0.accept(v),
             PrjSymm::PrjSymmFnRet => {}
-        }
-    }
-}
-impl<'a> Node<'a> for Prj<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_prj(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Prj::Symm(ref __binding_0) => __binding_0.accept(v),
-            Prj::Asymm(ref __binding_0) => __binding_0.accept(v),
+            PrjSymm::PrjSymmSupportdyn => {}
         }
     }
 }
@@ -1233,9 +1223,80 @@ impl<'a> Node<'a> for T_<'a> {
             T_::Instantiate(ref __binding_0) => __binding_0.accept(v),
             T_::NoReason => {}
             T_::FromWitnessLocl(ref __binding_0) => __binding_0.accept(v),
-            T_::Flow(ref __binding_0) => __binding_0.accept(v),
-            T_::Prj(ref __binding_0) => __binding_0.accept(v),
-            T_::Rev(ref __binding_0) => __binding_0.accept(v),
+            T_::UpperBound {
+                bound: ref __binding_0,
+                of__: ref __binding_1,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+            T_::LowerBound {
+                bound: ref __binding_0,
+                of__: ref __binding_1,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+            T_::Flow {
+                from: ref __binding_0,
+                kind: ref __binding_1,
+                into: ref __binding_2,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
+            }
+            T_::PrjBoth {
+                sub_prj: ref __binding_0,
+                prj: ref __binding_1,
+                sub: ref __binding_2,
+                super_: ref __binding_3,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                {
+                    __binding_2.accept(v)
+                }
+                { __binding_3.accept(v) }
+            }
+            T_::PrjOne {
+                part: ref __binding_0,
+                whole: ref __binding_1,
+                prj: ref __binding_2,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
+            }
+            T_::Axiom {
+                next: ref __binding_0,
+                prev: ref __binding_1,
+                axiom: ref __binding_2,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
+            }
             T_::Def(ref __binding_0) => __binding_0.accept(v),
             T_::Invalid => {}
             T_::MissingField => {}
@@ -1479,17 +1540,6 @@ impl<'a> Node<'a> for PrjAsymm {
         }
     }
 }
-impl<'a> Node<'a> for Side {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_side(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Side::Sub => {}
-            Side::Super => {}
-        }
-    }
-}
 impl<'a> Node<'a> for FlowKind {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_flow_kind(self)
@@ -1497,18 +1547,24 @@ impl<'a> Node<'a> for FlowKind {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             FlowKind::FlowAssign => {}
+            FlowKind::FlowCall => {}
             FlowKind::FlowLocal => {}
             FlowKind::FlowSolved => {}
-            FlowKind::FlowSubtype => {}
-            FlowKind::FlowSubtypeToplevel => {}
-            FlowKind::FlowPrj => {}
-            FlowKind::FlowExtends => {}
-            FlowKind::FlowTransitive => {}
             FlowKind::FlowFunReturn => {}
             FlowKind::FlowParamHint => {}
             FlowKind::FlowReturnExpr => {}
-            FlowKind::FlowUpperBound => {}
-            FlowKind::FlowLowerBound => {}
+        }
+    }
+}
+impl<'a> Node<'a> for Axiom {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_axiom(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Axiom::Extends => {}
+            Axiom::UpperBound => {}
+            Axiom::LowerBound => {}
         }
     }
 }

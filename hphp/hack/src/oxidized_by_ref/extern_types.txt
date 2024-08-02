@@ -104,6 +104,7 @@ oxidized::typing_defs_core::ParamMode
 oxidized::typing_defs_core::ShapeKind
 oxidized::typing_defs_core::ValKind
 oxidized::typing_reason::ArgPosition
+oxidized::typing_reason::Axiom
 oxidized::typing_reason::BlameSource
 oxidized::typing_reason::CtorKind
 oxidized::typing_reason::Direction

@@ -25,73 +25,92 @@ But got `bool`
 File "shape_subtyping_4.php", line 4, character 40 - line 4, character 43:
 
 Reason:
-[
-  {
-    "Hint":[{"filename":"shape_subtyping_4.php","line":4,"char_start":40,"char_end":43}]
-  },
-  "Flow_prj",
-  {
-    "Prj":[
-      {"Symm":[{" Prj_symm_shape":["a",{"Required":[]},{"Required":[]}]}]},
-      [
-        {
-          "Def":[
-            {"filename":"shape_subtyping_4.php","line":4,"char_start":6,"char_end":23},
-            [
-              {
-                "Hint":[{"filename":"shape_subtyping_4.php","line":12,"char_start":3,"char_end":20}]
-              }
-            ]
-          ]
-        },
-        "Flow_param_hint",
-        {
-          "Witness":[{"filename":"shape_subtyping_4.php","line":12,"char_start":22,"char_end":23}]
-        },
-        "Flow_local",
-        {
-          "Witness":[{"filename":"shape_subtyping_4.php","line":14,"char_start":35,"char_end":36}]
-        },
-        "Flow_prj",
-        {
-          "Prj":[
-            {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-            [
-              {
-                "Witness":[{"filename":"shape_subtyping_4.php","line":14,"char_start":3,"char_end":37}]
-              },
-              "Flow_subtype",
-              {
-                "Rev":[
-                  [
-                    {
-                      "Support_dynamic_type":[{"filename":"shape_subtyping_4.php","line":6,"char_start":10,"char_end":40}]
+{
+  "Subtype":{
+    "sub":[
+      {
+        "Prj_both":{
+          "sub_prj":[
+            {
+              "Hint":[{"filename":"shape_subtyping_4.php","line":4,"char_start":40,"char_end":43}]
+            }
+          ],
+          "prj":{" Prj_symm_shape":["a",{"Required":[]},{"Required":[]}]},
+          "sub":[
+            {
+              "Prj_both":{
+                "sub_prj":[
+                  {
+                    "Flow":{
+                      "from":[
+                        {
+                          "Flow":{
+                            "from":[
+                              {
+                                "Def":[
+                                  {"filename":"shape_subtyping_4.php","line":4,"char_start":6,"char_end":23},
+                                  [
+                                    {
+                                      "Hint":[{"filename":"shape_subtyping_4.php","line":12,"char_start":3,"char_end":20}]
+                                    }
+                                  ]
+                                ]
+                              }
+                            ],
+                            "kind":"Flow_param_hint",
+                            "into":[
+                              {
+                                "Witness":[{"filename":"shape_subtyping_4.php","line":12,"char_start":22,"char_end":23}]
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "kind":"Flow_local",
+                      "into":[
+                        {
+                          "Witness":[{"filename":"shape_subtyping_4.php","line":14,"char_start":35,"char_end":36}]
+                        }
+                      ]
                     }
-                  ]
+                  }
+                ],
+                "prj":{"Prj_symm_fn_param":[0,0]},
+                "sub":[
+                  {
+                    "Support_dynamic_type":[{"filename":"shape_subtyping_4.php","line":6,"char_start":10,"char_end":40}]
+                  }
+                ],
+                "super":[
+                  {
+                    "Witness":[{"filename":"shape_subtyping_4.php","line":14,"char_start":3,"char_end":37}]
+                  }
                 ]
               }
-            ]
-          ]
-        },
-        "Flow_subtype",
-        {
-          "Def":[
-            {"filename":"shape_subtyping_4.php","line":3,"char_start":6,"char_end":22},
-            [
-              {
-                "Hint":[{"filename":"shape_subtyping_4.php","line":7,"char_start":2,"char_end":18}]
-              }
-            ]
+            }
+          ],
+          "super":[
+            {
+              "Def":[
+                {"filename":"shape_subtyping_4.php","line":3,"char_start":6,"char_end":22},
+                [
+                  {
+                    "Hint":[{"filename":"shape_subtyping_4.php","line":7,"char_start":2,"char_end":18}]
+                  }
+                ]
+              ]
+            }
           ]
         }
-      ]
+      }
+    ],
+    "super":[
+      {
+        "Hint":[{"filename":"shape_subtyping_4.php","line":3,"char_start":39,"char_end":41}]
+      }
     ]
-  },
-  "Flow_subtype_toplevel",
-  {
-    "Hint":[{"filename":"shape_subtyping_4.php","line":3,"char_start":39,"char_end":41}]
   }
-]
+}
 
 
 File "", line 0, character 0 - line 0, character -1:

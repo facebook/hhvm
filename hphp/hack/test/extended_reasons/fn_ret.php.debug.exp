@@ -23,15 +23,30 @@ But got `int`
 File "fn_ret.php", line 3, character 17 - line 3, character 19:
 
 Reason:
-[
-  {"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
-  "Flow_subtype",
-  {"Witness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]},
-  "Flow_return_expr",
-  {"Witness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]},
-  "Flow_subtype_toplevel",
-  {"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
-]
+{
+  "Subtype":{
+    "sub":[
+      {
+        "Flow":{
+          "from":[
+            {
+              "Flow":{
+                "from":[{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}],
+                "kind":"Flow_call",
+                "into":[
+                  {"Witness":[{"filename":"fn_ret.php","line":8,"char_start":10,"char_end":14}]}
+                ]
+              }
+            }
+          ],
+          "kind":"Flow_return_expr",
+          "into":[{"Witness":[{"filename":"fn_ret.php","line":8,"char_start":3,"char_end":15}]}]
+        }
+      }
+    ],
+    "super":[{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}]
+  }
+}
 
 
 File "", line 0, character 0 - line 0, character -1:
@@ -61,11 +76,12 @@ But got `int`
 File "fn_ret.php", line 3, character 17 - line 3, character 19:
 
 Reason:
-[
-  {"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]},
-  "Flow_subtype_toplevel",
-  {"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}
-]
+{
+  "Subtype":{
+    "sub":[{"Hint":[{"filename":"fn_ret.php","line":3,"char_start":17,"char_end":19}]}],
+    "super":[{"Hint":[{"filename":"fn_ret.php","line":7,"char_start":17,"char_end":20}]}]
+  }
+}
 
 
 File "", line 0, character 0 - line 0, character -1:

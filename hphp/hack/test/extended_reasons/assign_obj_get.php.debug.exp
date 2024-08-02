@@ -24,62 +24,87 @@ But got `Super`
 File "assign_obj_get.php", line 7, character 26 - line 7, character 30:
 
 Reason:
-[
-  {
-    "Def":[
-      {"filename":"assign_obj_get.php","line":3,"char_start":7,"char_end":11},
-      [
-        {
-          "Hint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
-        }
-      ]
-    ]
-  },
-  "Flow_subtype",
-  {
-    "Witness":[{"filename":"assign_obj_get.php","line":15,"char_start":8,"char_end":16}]
-  },
-  "Flow_assign",
-  {
-    "Witness":[{"filename":"assign_obj_get.php","line":15,"char_start":3,"char_end":4}]
-  },
-  "Flow_local",
-  {
-    "Witness":[{"filename":"assign_obj_get.php","line":16,"char_start":7,"char_end":8}]
-  },
-  "Flow_prj",
-  {
-    "Prj":[
-      {"Symm":[{"Prj_symm_fn_param":[0,0]}]},
-      [
-        {
-          "Witness":[{"filename":"assign_obj_get.php","line":16,"char_start":3,"char_end":9}]
-        },
-        "Flow_subtype",
-        {
-          "Rev":[
-            [
-              {
-                "Support_dynamic_type":[{"filename":"assign_obj_get.php","line":12,"char_start":10,"char_end":12}]
+{
+  "Subtype":{
+    "sub":[
+      {
+        "Prj_both":{
+          "sub_prj":[
+            {
+              "Flow":{
+                "from":[
+                  {
+                    "Flow":{
+                      "from":[
+                        {
+                          "Flow":{
+                            "from":[
+                              {
+                                "Def":[
+                                  {"filename":"assign_obj_get.php","line":3,"char_start":7,"char_end":11},
+                                  [
+                                    {
+                                      "Hint":[{"filename":"assign_obj_get.php","line":7,"char_start":26,"char_end":30}]
+                                    }
+                                  ]
+                                ]
+                              }
+                            ],
+                            "kind":"Flow_call",
+                            "into":[
+                              {
+                                "Witness":[{"filename":"assign_obj_get.php","line":15,"char_start":8,"char_end":16}]
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "kind":"Flow_assign",
+                      "into":[
+                        {
+                          "Witness":[{"filename":"assign_obj_get.php","line":15,"char_start":3,"char_end":4}]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "kind":"Flow_local",
+                "into":[
+                  {
+                    "Witness":[{"filename":"assign_obj_get.php","line":16,"char_start":7,"char_end":8}]
+                  }
+                ]
               }
-            ]
+            }
+          ],
+          "prj":{"Prj_symm_fn_param":[0,0]},
+          "sub":[
+            {
+              "Support_dynamic_type":[{"filename":"assign_obj_get.php","line":12,"char_start":10,"char_end":12}]
+            }
+          ],
+          "super":[
+            {
+              "Witness":[{"filename":"assign_obj_get.php","line":16,"char_start":3,"char_end":9}]
+            }
           ]
         }
-      ]
-    ]
-  },
-  "Flow_subtype_toplevel",
-  {
-    "Def":[
-      {"filename":"assign_obj_get.php","line":4,"char_start":7,"char_end":9},
-      [
-        {
-          "Hint":[{"filename":"assign_obj_get.php","line":12,"char_start":14,"char_end":16}]
-        }
-      ]
+      }
+    ],
+    "super":[
+      {
+        "Def":[
+          {"filename":"assign_obj_get.php","line":4,"char_start":7,"char_end":9},
+          [
+            {
+              "Hint":[{"filename":"assign_obj_get.php","line":12,"char_start":14,"char_end":16}]
+            }
+          ]
+        ]
+      }
     ]
   }
-]
+}
 
 
 File "", line 0, character 0 - line 0, character -1:

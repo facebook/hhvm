@@ -112,16 +112,6 @@ impl<'a> Reason<'a> {
         Reason::Instantiate(args)
     }
 
-    pub fn rev_pos(&self) -> Option<&'a Pos<'a>> {
-        match self {
-            T_::Flow((r, _, _)) => r.rev_pos(),
-            T_::Prj((_, r)) => r.rev_pos(),
-            T_::Def((_, r)) => r.rev_pos(),
-            T_::Rev(r) => r.pos(),
-            _ => self.pos(),
-        }
-    }
-
     pub fn pos(&self) -> Option<&'a Pos<'a>> {
         use T_::*;
         match self {
@@ -145,10 +135,7 @@ impl<'a> Reason<'a> {
             | ExprDepType((r, _, _))
             | Typeconst((r, _, _, _))
             | Instantiate((_, _, r)) => r.pos(),
-            Flow(r) => r.0.pos(),
-            Prj(r) => r.1.pos(),
-            Def(r) => r.1.pos(),
-            Rev(r) => r.rev_pos(),
+            _ => None,
         }
     }
 }
@@ -204,10 +191,13 @@ impl<'a> std::fmt::Debug for T_<'a> {
                 .finish(),
             DynamicCoercion(p) => f.debug_tuple("RdynamicCoercion").field(p).finish(),
             Invalid => f.debug_tuple("Rinvalid").finish(),
-            Flow(p) => f.debug_tuple("Rflow").field(p).finish(),
-            Rev(p) => f.debug_tuple("Rrev").field(p).finish(),
-            Prj(p) => f.debug_tuple("Rprj").field(p).finish(),
-            Def(p) => f.debug_tuple("Rdef").field(p).finish(),
+            UpperBound { .. }
+            | LowerBound { .. }
+            | Flow { .. }
+            | PrjBoth { .. }
+            | PrjOne { .. }
+            | Axiom { .. }
+            | Def(_) => Ok(()),
         }
     }
 }

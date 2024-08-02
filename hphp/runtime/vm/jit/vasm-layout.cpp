@@ -611,9 +611,7 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit) {
 
   if (!Cfg::Jit::PGOLayoutSplitHotCold) {
     for (auto b : labels) {
-      if (unit.blocks[b].area_idx == AreaIndex::Cold) {
-        unit.blocks[b].area_idx = AreaIndex::Main;
-      }
+      unit.blocks[b].area_idx = AreaIndex::Main;
     }
   }
 

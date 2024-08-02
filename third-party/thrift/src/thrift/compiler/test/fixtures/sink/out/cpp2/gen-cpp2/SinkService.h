@@ -43,6 +43,7 @@ class ServiceHandler<::cpp2::SinkService> : public apache::thrift::ServerInterfa
   typedef ::cpp2::SinkServiceAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
   CreateMethodMetadataResult createMethodMetadata() override;
+  bool isThriftGenerated() const override final { return true; }
  private:
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:

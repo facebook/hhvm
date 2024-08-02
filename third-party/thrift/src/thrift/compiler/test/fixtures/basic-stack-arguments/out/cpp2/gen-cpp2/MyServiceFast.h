@@ -42,6 +42,7 @@ class ServiceHandler<::cpp2::MyServiceFast> : public apache::thrift::ServerInter
   typedef ::cpp2::MyServiceFastAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
   CreateMethodMetadataResult createMethodMetadata() override;
+  bool isThriftGenerated() const override final { return true; }
  private:
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:

@@ -46,6 +46,7 @@ class ServiceHandler<::cpp2::PrimitivesService> : public apache::thrift::ServerI
   #if defined(THRIFT_SCHEMA_AVAILABLE)
   std::optional<std::vector<apache::thrift::type::Schema>> getServiceMetadataV1() override;
   #endif
+  bool isThriftGenerated() const override final { return true; }
  private:
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:

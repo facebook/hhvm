@@ -632,8 +632,7 @@ TEST(AsyncProcessorFactoryTest, ThriftGenerated) {
       std::make_shared<ServiceHandler<Parent>>();
   ThriftServerAsyncProcessorFactory<ServiceHandler<Parent>> notGenerated =
       ThriftServerAsyncProcessorFactory<ServiceHandler<Parent>>(generated);
-  // TODO: Update generated AsyncProcessorFactorys to return true
-  EXPECT_FALSE(generated->isThriftGenerated());
+  EXPECT_TRUE(generated->isThriftGenerated());
   EXPECT_FALSE(notGenerated.isThriftGenerated());
 }
 

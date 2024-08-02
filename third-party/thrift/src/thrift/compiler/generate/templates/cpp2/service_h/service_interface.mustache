@@ -45,6 +45,9 @@ class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual p
   std::optional<std::vector<apache::thrift::type::Schema>> getServiceMetadataV1() override;
   #endif
   {{/service:has_service_schema}}
+  {{^service:extends}}
+  bool isThriftGenerated() const override final { return true; }
+  {{/service:extends}}
  private:
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:

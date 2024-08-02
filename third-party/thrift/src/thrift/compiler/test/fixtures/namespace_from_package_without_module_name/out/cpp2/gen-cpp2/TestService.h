@@ -46,6 +46,7 @@ class ServiceHandler<::test::namespace_from_package_without_module_name::TestSer
   typedef ::test::namespace_from_package_without_module_name::TestServiceAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
   CreateMethodMetadataResult createMethodMetadata() override;
+  bool isThriftGenerated() const override final { return true; }
  private:
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:

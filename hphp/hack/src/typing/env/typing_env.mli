@@ -64,7 +64,11 @@ val fresh_type : env -> Pos.t -> env * locl_ty
 (** Generate a fresh type variable type with optional variance and
     the given reason information *)
 val fresh_type_reason :
-  ?variance:Ast_defs.variance -> env -> Pos.t -> Reason.t -> env * locl_ty
+  ?variance:Ast_defs.variance ->
+  env ->
+  Pos.t ->
+  (Tvid.t -> Reason.t) ->
+  env * locl_ty
 
 (** Generate a fresh type variable type that is assumed to be invariant, so
     it won't be solved automatically at the end of the scope *)

@@ -50,9 +50,9 @@ impl WitnessLocl {
             | Self::IdxSetElement(pos)
             | Self::UnsetField(pos, _)
             | Self::Regex(pos)
-            | Self::TypeVariable(pos)
-            | Self::TypeVariableGenerics(pos, _, _)
-            | Self::TypeVariableError(pos)
+            | Self::TypeVariable(pos, _)
+            | Self::TypeVariableGenerics(pos, _, _, _)
+            | Self::TypeVariableError(pos, _)
             | Self::Shape(pos, _)
             | Self::ShapeLiteral(pos)
             | Self::Destructure(pos)
@@ -133,7 +133,8 @@ impl Reason {
             | PrjBoth { .. }
             | PrjOne { .. }
             | Axiom { .. }
-            | Def(_, _) => None,
+            | Def(_, _)
+            | Solved { .. } => None,
         }
     }
 }

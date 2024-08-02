@@ -52,9 +52,9 @@ impl<'a> WitnessLocl<'a> {
             | WitnessLocl::ArithRetInt(p)
             | WitnessLocl::BitwiseDynamic(p)
             | WitnessLocl::IncdecDynamic(p)
-            | WitnessLocl::TypeVariable(p)
-            | WitnessLocl::TypeVariableGenerics((p, _, _))
-            | WitnessLocl::TypeVariableError(p)
+            | WitnessLocl::TypeVariable((p, _))
+            | WitnessLocl::TypeVariableGenerics((p, _, _, _))
+            | WitnessLocl::TypeVariableError((p, _))
             | WitnessLocl::Shape((p, _))
             | WitnessLocl::ShapeLiteral(p)
             | WitnessLocl::Destructure(p)
@@ -197,6 +197,7 @@ impl<'a> std::fmt::Debug for T_<'a> {
             | PrjBoth { .. }
             | PrjOne { .. }
             | Axiom { .. }
+            | Solved { .. }
             | Def(_) => Ok(()),
         }
     }

@@ -60,7 +60,6 @@ type flow_kind =
   | Flow_assign
   | Flow_call
   | Flow_local
-  | Flow_solved
   | Flow_fun_return
   | Flow_param_hint
   | Flow_return_expr
@@ -292,11 +291,11 @@ val regex : Pos.t -> t
 
 val implicit_upper_bound : Pos_or_decl.t * string -> 'phase t_
 
-val type_variable : Pos.t -> t
+val type_variable : Pos.t -> Tvid.t -> t
 
-val type_variable_generics : Pos.t * string * string -> t
+val type_variable_generics : Pos.t * string * string -> Tvid.t -> t
 
-val type_variable_error : Pos.t -> t
+val type_variable_error : Pos.t -> Tvid.t -> t
 
 val global_type_variable_generics : Pos_or_decl.t * string * string -> 'phase t_
 
@@ -365,6 +364,9 @@ val flow :
 
 val axiom_extends :
   child:locl_phase t_ -> ancestor:locl_phase t_ -> locl_phase t_
+
+val solved :
+  Tvid.t -> solution:locl_phase t_ -> in_:locl_phase t_ -> locl_phase t_
 
 val axiom_upper_bound :
   bound:locl_phase t_ -> of_:locl_phase t_ -> locl_phase t_

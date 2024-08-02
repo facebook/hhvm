@@ -2972,17 +2972,11 @@ end = struct
             | Set
             | ImmSet ->
               ( arraykey_value p class_name true,
-                Some
-                  (MakeType.arraykey
-                     (Reason.type_variable_generics
-                        (p, "Tk", strip_ns class_name))),
+                Some (MakeType.arraykey (Reason.witness p)),
                 true )
             | Keyset ->
               ( arraykey_value p class_name true,
-                Some
-                  (MakeType.arraykey
-                     (Reason.type_variable_generics
-                        (p, "Tk", strip_ns class_name))),
+                Some (MakeType.arraykey (Reason.witness p)),
                 false )
             | Vector
             | ImmVector ->
@@ -3096,7 +3090,7 @@ end = struct
           ~explicit:(Option.is_some th)
           ~use_pos:p
           ~reason:(Reason.URkey name)
-          ~bound:(Some (MakeType.arraykey r))
+          ~bound:(Some (MakeType.arraykey (Reason.witness p)))
           ~can_pessimise:pessimisable_builtin
           r
           env

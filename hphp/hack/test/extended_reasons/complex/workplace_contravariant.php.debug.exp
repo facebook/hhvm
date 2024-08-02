@@ -125,7 +125,8 @@ Reason:
                   "char_end":40
                 },
                 "TB",
-                "TestServiceBase"
+                "TestServiceBase",
+                "1"
               ]
             }
           ]
@@ -160,15 +161,16 @@ Reason:
                         "char_end":40
                       },
                       "TB",
-                      "TestServiceBase"
+                      "TestServiceBase",
+                      "1"
                     ]
                   }
                 ],
                 "prj":"Prj_asymm_nullable",
                 "whole":[
                   {
-                    "Flow":{
-                      "from":[
+                    "Solved":{
+                      "solution":[
                         {
                           "Hint":[
                             {
@@ -180,8 +182,8 @@ Reason:
                           ]
                         }
                       ],
-                      "kind":"Flow_solved",
-                      "into":[
+                      "of_":"2",
+                      "in_":[
                         {
                           "Prj_both":{
                             "sub_prj":[

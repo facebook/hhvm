@@ -5,4 +5,4 @@ Invalid argument (Typing[4110])
   File "explicit_type_collection_passing_keyset1.php", line 3, characters 21-23:
   Expected `int`
   File "explicit_type_collection_passing_keyset1.php", line 5, characters 8-25:
-  But got `arraykey` because type parameter `Tk` of `HH\keyset` could not be determined. Please add explicit type parameters to the invocation of `HH\keyset`
+  But got `arraykey`

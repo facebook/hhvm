@@ -55,8 +55,8 @@ Reason:
   "Subtype":{
     "sub":[
       {
-        "Flow":{
-          "from":[
+        "Solved":{
+          "solution":[
             {
               "Lower_bound":{
                 "bound":[
@@ -74,15 +74,16 @@ Reason:
                 "of":[
                   {
                     "Type_variable":[
-                      {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
+                      {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26},
+                      "1"
                     ]
                   }
                 ]
               }
             }
           ],
-          "kind":"Flow_solved",
-          "into":[
+          "of_":"1",
+          "in_":[
             {
               "Prj_both":{
                 "sub_prj":[
@@ -91,7 +92,8 @@ Reason:
                       "from":[
                         {
                           "Type_variable":[
-                            {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26}
+                            {"filename":"workplace_non_exact.php","line":12,"char_start":18,"char_end":26},
+                            "1"
                           ]
                         }
                       ],

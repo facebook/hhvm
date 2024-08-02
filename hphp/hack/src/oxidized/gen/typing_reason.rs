@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fb0ccd175f1865e5e00152fa8e1b7ac1>>
+// @generated SignedSource<<4cedb22d5cca20b0ce6b642812cee17b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -336,8 +336,6 @@ pub enum FlowKind {
     FlowCall,
     #[rust_to_ocaml(name = "Flow_local")]
     FlowLocal,
-    #[rust_to_ocaml(name = "Flow_solved")]
-    FlowSolved,
     #[rust_to_ocaml(name = "Flow_fun_return")]
     FlowFunReturn,
     #[rust_to_ocaml(name = "Flow_param_hint")]
@@ -439,11 +437,11 @@ pub enum WitnessLocl {
     UnsetField(pos::Pos, String),
     Regex(pos::Pos),
     #[rust_to_ocaml(name = "Type_variable")]
-    TypeVariable(pos::Pos),
+    TypeVariable(pos::Pos, isize),
     #[rust_to_ocaml(name = "Type_variable_generics")]
-    TypeVariableGenerics(pos::Pos, String, String),
+    TypeVariableGenerics(pos::Pos, String, String, isize),
     #[rust_to_ocaml(name = "Type_variable_error")]
-    TypeVariableError(pos::Pos),
+    TypeVariableError(pos::Pos, isize),
     Shape(pos::Pos, String),
     #[rust_to_ocaml(name = "Shape_literal")]
     ShapeLiteral(pos::Pos),
@@ -648,6 +646,11 @@ pub enum T_ {
     /// Records the definition site of type alongside the reason recording its
     /// use.
     Def(pos_or_decl::PosOrDecl, Box<T_>),
+    Solved {
+        solution: Box<T_>,
+        of__: isize,
+        in__: Box<T_>,
+    },
     Invalid,
     #[rust_to_ocaml(name = "Missing_field")]
     MissingField,

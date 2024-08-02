@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5d160f40baba5624a608e0f3ba5d01d8>>
+// @generated SignedSource<<ae60dc8cb0ede7f3003af20add5421d5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1298,6 +1298,19 @@ impl<'a> Node<'a> for T_<'a> {
                 { __binding_2.accept(v) }
             }
             T_::Def(ref __binding_0) => __binding_0.accept(v),
+            T_::Solved {
+                solution: ref __binding_0,
+                of__: ref __binding_1,
+                in__: ref __binding_2,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
+            }
             T_::Invalid => {}
             T_::MissingField => {}
             T_::Idx(ref __binding_0) => __binding_0.accept(v),
@@ -1549,7 +1562,6 @@ impl<'a> Node<'a> for FlowKind {
             FlowKind::FlowAssign => {}
             FlowKind::FlowCall => {}
             FlowKind::FlowLocal => {}
-            FlowKind::FlowSolved => {}
             FlowKind::FlowFunReturn => {}
             FlowKind::FlowParamHint => {}
             FlowKind::FlowReturnExpr => {}

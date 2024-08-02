@@ -38,7 +38,7 @@ val fresh_type_reason :
   t ->
   Tvid.provider ->
   Pos.t ->
-  Reason.t ->
+  (Tvid.t -> Reason.t) ->
   t * locl_ty
 
 val fresh_type_invariant : t -> Tvid.provider -> Pos.t -> t * locl_ty

@@ -267,7 +267,6 @@ type flow_kind =
   | Flow_assign
   | Flow_call
   | Flow_local
-  | Flow_solved
   | Flow_fun_return
   | Flow_param_hint
   | Flow_return_expr
@@ -277,7 +276,6 @@ let flow_kind_to_json = function
   | Flow_assign -> Hh_json.string_ "Flow_assign"
   | Flow_call -> Hh_json.string_ "Flow_call"
   | Flow_local -> Hh_json.string_ "Flow_local"
-  | Flow_solved -> Hh_json.string_ "Flow_solved"
   | Flow_fun_return -> Hh_json.string_ "Flow_fun_return"
   | Flow_param_hint -> Hh_json.string_ "Flow_param_hint"
   | Flow_return_expr -> Hh_json.string_ "Flow_return_expr"
@@ -327,9 +325,9 @@ type witness_locl =
   | Idx_set_element of Pos.t
   | Unset_field of Pos.t * string
   | Regex of Pos.t
-  | Type_variable of Pos.t
-  | Type_variable_generics of Pos.t * string * string
-  | Type_variable_error of Pos.t
+  | Type_variable of Pos.t * Tvid.t
+  | Type_variable_generics of Pos.t * string * string * Tvid.t
+  | Type_variable_error of Pos.t * Tvid.t
   | Shape of Pos.t * string
   | Shape_literal of Pos.t
   | Destructure of Pos.t
@@ -386,9 +384,9 @@ let witness_locl_to_raw_pos = function
   | Idx_set_element pos
   | Unset_field (pos, _)
   | Regex pos
-  | Type_variable pos
-  | Type_variable_generics (pos, _, _)
-  | Type_variable_error pos
+  | Type_variable (pos, _)
+  | Type_variable_generics (pos, _, _, _)
+  | Type_variable_error (pos, _)
   | Shape (pos, _)
   | Shape_literal pos
   | Destructure pos
@@ -451,9 +449,10 @@ let map_pos_witness_locl pos pos_or_decl w =
   | Idx_set_element p -> Idx_set_element (pos p)
   | Unset_field (p, n) -> Unset_field (pos p, n)
   | Regex p -> Regex (pos p)
-  | Type_variable p -> Type_variable (pos p)
-  | Type_variable_generics (p, t, s) -> Type_variable_generics (pos p, t, s)
-  | Type_variable_error p -> Type_variable_error (pos p)
+  | Type_variable (p, tvid) -> Type_variable (pos p, tvid)
+  | Type_variable_generics (p, t, s, tvid) ->
+    Type_variable_generics (pos p, t, s, tvid)
+  | Type_variable_error (p, tvid) -> Type_variable_error (pos p, tvid)
   | Shape (p, fun_name) -> Shape (pos p, fun_name)
   | Shape_literal p -> Shape_literal (pos p)
   | Destructure p -> Destructure (pos p)
@@ -537,7 +536,7 @@ let pp_witness_locl fmt witness =
       comma ();
       Ast_defs.pp_fun_kind fmt fk;
       ()
-    | Type_variable_generics (p, s1, s2) ->
+    | Type_variable_generics (p, s1, s2, _) ->
       Pos.pp fmt p;
       comma ();
       Format.pp_print_string fmt s1;
@@ -580,8 +579,8 @@ let pp_witness_locl fmt witness =
     | Arith_ret_int p
     | Bitwise_dynamic p
     | Incdec_dynamic p
-    | Type_variable p
-    | Type_variable_error p
+    | Type_variable (p, _)
+    | Type_variable_error (p, _)
     | Shape_literal p
     | Destructure p
     | Key_value_collection_key p
@@ -713,18 +712,33 @@ let witness_locl_to_json witness =
       JSON_Object
         [("Unset_field", JSON_Array [pos_to_json pos; JSON_String str])])
   | Regex pos -> Hh_json.(JSON_Object [("Regex", JSON_Array [pos_to_json pos])])
-  | Type_variable pos ->
-    Hh_json.(JSON_Object [("Type_variable", JSON_Array [pos_to_json pos])])
-  | Type_variable_generics (pos, str1, str2) ->
+  | Type_variable (pos, tvid) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Type_variable",
+            JSON_Array [pos_to_json pos; string_ (Tvid.show tvid)] );
+        ])
+  | Type_variable_generics (pos, str1, str2, tvid) ->
     Hh_json.(
       JSON_Object
         [
           ( "Type_variable_generics",
-            JSON_Array [pos_to_json pos; JSON_String str1; JSON_String str2] );
+            JSON_Array
+              [
+                pos_to_json pos;
+                JSON_String str1;
+                JSON_String str2;
+                string_ (Tvid.show tvid);
+              ] );
         ])
-  | Type_variable_error pos ->
+  | Type_variable_error (pos, tvid) ->
     Hh_json.(
-      JSON_Object [("Type_variable_error", JSON_Array [pos_to_json pos])])
+      JSON_Object
+        [
+          ( "Type_variable_error",
+            JSON_Array [pos_to_json pos; string_ (Tvid.show tvid)] );
+        ])
   | Shape (pos, str) ->
     Hh_json.(
       JSON_Object [("Shape", JSON_Array [pos_to_json pos; JSON_String str])])
@@ -891,10 +905,10 @@ let witness_locl_to_string prefix witness =
       ^ " was unset here" )
   | Regex pos ->
     (Pos_or_decl.of_raw_pos pos, prefix ^ " resulting from this regex pattern")
-  | Type_variable pos ->
+  | Type_variable (pos, _) ->
     ( Pos_or_decl.of_raw_pos pos,
       prefix ^ " because a type could not be determined here" )
-  | Type_variable_generics (pos, tp_name, s) ->
+  | Type_variable_generics (pos, tp_name, s, _) ->
     ( Pos_or_decl.of_raw_pos pos,
       prefix
       ^ " because type parameter "
@@ -903,7 +917,7 @@ let witness_locl_to_string prefix witness =
       ^ Markdown_lite.md_codify s
       ^ " could not be determined. Please add explicit type parameters to the invocation of "
       ^ Markdown_lite.md_codify s )
-  | Type_variable_error pos ->
+  | Type_variable_error (pos, _) ->
     (Pos_or_decl.of_raw_pos pos, prefix ^ " because there was another error")
   | Shape (pos, fun_name) ->
     ( Pos_or_decl.of_raw_pos pos,
@@ -1414,6 +1428,12 @@ type _ t_ =
   | Def : (Pos_or_decl.t[@hash.ignore]) * locl_phase t_ -> locl_phase t_
       (** Records the definition site of type alongside the reason recording its
           use. *)
+  | Solved : {
+      solution: locl_phase t_;
+      of_: Tvid.t;
+      in_: locl_phase t_;
+    }
+      -> locl_phase t_
   (* -- Invalid markers -- *)
   | Invalid : 'phase t_
   | Missing_field : locl_phase t_
@@ -1482,6 +1502,7 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Axiom { next = t; _ }
   | Prj_both { sub_prj = t; _ }
   | Prj_one { part = t; _ }
+  | Solved { solution = t; _ }
   | Def (_, t)
   | Lost_info (_, t, _)
   | Type_access (t, _)
@@ -1595,6 +1616,13 @@ let rec map_pos :
         part = map_pos pos pos_or_decl part;
       }
   | Def (def, of_) -> Def (pos_or_decl def, map_pos pos pos_or_decl of_)
+  | Solved { solution; of_; in_ } ->
+    Solved
+      {
+        solution = map_pos pos pos_or_decl solution;
+        of_;
+        in_ = map_pos pos pos_or_decl in_;
+      }
 
 let to_constructor_string : type ph. ph t_ -> string = function
   | No_reason -> "Rnone"
@@ -1609,6 +1637,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Prj_both _ -> "Rprj_both"
   | Prj_one _ -> "Rprj_one"
   | Def _ -> "Rdef"
+  | Solved _ -> "Rsolved"
   | Idx _ -> "Ridx"
   | Arith_ret_float _ -> "Rarith_ret_float"
   | Arith_ret_num _ -> "Rarith_ret_num"
@@ -1741,7 +1770,8 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
     | Lower_bound { bound; _ } -> pp_t_ fmt bound
     | Prj_both { sub_prj; _ } -> pp_t_ fmt sub_prj
     | Prj_one { part; _ } -> pp_t_ fmt part
-    | Def (_, t) -> pp_t_ fmt t);
+    | Def (_, t) -> pp_t_ fmt t
+    | Solved { solution; _ } -> pp_t_ fmt solution);
     Format.fprintf fmt "@])"
 
 and show_t_ : type ph. ph t_ -> string = (fun r -> Format.asprintf "%a" pp_t_ r)
@@ -1918,6 +1948,19 @@ let rec to_json_help : type a. a t_ -> Hh_json.json list -> Hh_json.json list =
             JSON_Object [("bound", to_json bound); ("of", to_json of_)] );
         ])
     :: acc
+  | Solved { solution; of_; in_ } ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Solved",
+            JSON_Object
+              [
+                ("solution", to_json solution);
+                ("of_", string_ (Tvid.show of_));
+                ("in_", to_json in_);
+              ] );
+        ])
+    :: acc
   | Axiom { prev; axiom; next } ->
     Hh_json.(
       JSON_Object
@@ -1991,7 +2034,8 @@ let rec to_string : type a. string -> a t_ -> (Pos_or_decl.t * string) list =
   | Axiom { next = r; _ }
   | Def (_, r)
   | Prj_both { sub_prj = r; _ }
-  | Prj_one { part = r; _ } ->
+  | Prj_one { part = r; _ }
+  | Solved { solution = r; _ } ->
     to_string prefix r
   | Idx (_, r2) ->
     [(p, prefix)]
@@ -2296,12 +2340,13 @@ module Constructors = struct
   let implicit_upper_bound (p, s) =
     from_witness_decl @@ Implicit_upper_bound (p, s)
 
-  let type_variable p = from_witness_locl @@ Type_variable p
+  let type_variable p tvid = from_witness_locl @@ Type_variable (p, tvid)
 
-  let type_variable_generics (p, n1, n2) =
-    from_witness_locl @@ Type_variable_generics (p, n1, n2)
+  let type_variable_generics (p, n1, n2) tvid =
+    from_witness_locl @@ Type_variable_generics (p, n1, n2, tvid)
 
-  let type_variable_error p = from_witness_locl @@ Type_variable_error p
+  let type_variable_error p tvid =
+    from_witness_locl @@ Type_variable_error (p, tvid)
 
   let global_type_variable_generics (p, n1, n2) =
     from_witness_decl @@ Global_type_variable_generics (p, n1, n2)
@@ -2367,6 +2412,8 @@ module Constructors = struct
   let pattern p = from_witness_locl @@ Pattern p
 
   let flow ~from ~into ~kind = Flow { from; kind; into }
+
+  let solved of_ ~solution ~in_ = Solved { solution; of_; in_ }
 
   let axiom_extends ~child ~ancestor =
     Axiom { axiom = Extends; prev = child; next = ancestor }
@@ -2525,6 +2572,13 @@ module Visitor = struct
           Upper_bound { bound = this#on_reason bound; of_ = this#on_reason of_ }
         | Lower_bound { bound; of_ } ->
           Lower_bound { bound = this#on_reason bound; of_ = this#on_reason of_ }
+        | Solved { solution; of_; in_ } ->
+          Solved
+            {
+              solution = this#on_reason solution;
+              of_;
+              in_ = this#on_reason in_;
+            }
         | Def (def, t) -> Def (def, this#on_reason t)
         | Prj_both { sub_prj; prj; sub; super } ->
           Prj_both

@@ -348,8 +348,9 @@ let add_current_tyvar ?variance ?is_error env p v =
     { env with tyvars_stack = (expr_pos, v :: tyvars) :: rest }
   | _ -> env
 
-let fresh_type_reason ?variance ?is_error env id_provider p r =
+let fresh_type_reason ?variance ?is_error env id_provider p mk_reason =
   let v = Tvid.make id_provider in
+  let r = mk_reason v in
   let env = add_current_tyvar ?variance ?is_error env p v in
   (env, mk (r, Tvar v))
 

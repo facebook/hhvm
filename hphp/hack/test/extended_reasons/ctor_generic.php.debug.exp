@@ -85,7 +85,8 @@ Reason:
               "Type_variable_generics":[
                 {"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40},
                 "TB",
-                "TestServiceBase"
+                "TestServiceBase",
+                "1"
               ]
             }
           ]
@@ -108,21 +109,22 @@ Reason:
                     "Type_variable_generics":[
                       {"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40},
                       "TB",
-                      "TestServiceBase"
+                      "TestServiceBase",
+                      "1"
                     ]
                   }
                 ],
                 "prj":"Prj_asymm_nullable",
                 "whole":[
                   {
-                    "Flow":{
-                      "from":[
+                    "Solved":{
+                      "solution":[
                         {
                           "Hint":[{"filename":"ctor_generic.php","line":15,"char_start":17,"char_end":19}]
                         }
                       ],
-                      "kind":"Flow_solved",
-                      "into":[
+                      "of_":"2",
+                      "in_":[
                         {
                           "Prj_both":{
                             "sub_prj":[

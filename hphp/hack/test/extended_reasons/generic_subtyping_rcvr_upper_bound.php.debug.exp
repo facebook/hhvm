@@ -160,7 +160,8 @@ Reason:
                   "char_end":18
                 },
                 "T",
-                "rcvr_upper_bound"
+                "rcvr_upper_bound",
+                "0"
               ]
             }
           ]

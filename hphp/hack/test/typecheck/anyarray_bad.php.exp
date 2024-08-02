@@ -33,7 +33,7 @@ Invalid argument (Typing[4110])
 ERROR: File "anyarray_bad.php", line 35, characters 18-21:
 Invalid argument (Typing[4110])
   File "anyarray_bad.php", line 29, characters 10-15:
-  Expected `arraykey` because type parameter `Tk` of `HH\Set` could not be determined. Please add explicit type parameters to the invocation of `HH\Set`
+  Expected `arraykey`
   File "anyarray_bad.php", line 31, characters 10-24:
   But got `mixed` from the argument to this \HH\is_any_array test
   File "hackarray.hhi", line 22, characters 35-36:

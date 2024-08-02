@@ -179,7 +179,8 @@ Reason:
                   "char_end":18
                 },
                 "T",
-                "rcvr_both_bounds"
+                "rcvr_both_bounds",
+                "0"
               ]
             }
           ]
@@ -342,7 +343,8 @@ Reason:
                   "char_end":18
                 },
                 "T",
-                "rcvr_both_bounds"
+                "rcvr_both_bounds",
+                "0"
               ]
             }
           ]

@@ -29,8 +29,8 @@ Reason:
   "Subtype":{
     "sub":[
       {
-        "Flow":{
-          "from":[
+        "Solved":{
+          "solution":[
             {
               "Lower_bound":{
                 "bound":[
@@ -121,7 +121,7 @@ Reason:
                       "kind":"Flow_assign",
                       "into":[
                         {
-                          "Type_variable":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13}]
+                          "Type_variable":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13},"1"]
                         }
                       ]
                     }
@@ -130,8 +130,8 @@ Reason:
               }
             }
           ],
-          "kind":"Flow_solved",
-          "into":[
+          "of_":"1",
+          "in_":[
             {
               "Prj_both":{
                 "sub_prj":[
@@ -175,7 +175,7 @@ Reason:
                                   "kind":"Flow_assign",
                                   "into":[
                                     {
-                                      "Type_variable":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13}]
+                                      "Type_variable":[{"filename":"assign_list.php","line":9,"char_start":12,"char_end":13},"1"]
                                     }
                                   ]
                                 }

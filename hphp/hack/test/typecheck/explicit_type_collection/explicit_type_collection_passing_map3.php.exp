@@ -7,4 +7,4 @@ Invalid argument (Typing[4110])
   File "explicit_type_collection_passing_map3.php", line 3, characters 21-26:
   This type argument to `Map` must match exactly (it is invariant)
   File "explicit_type_collection_passing_map3.php", line 5, characters 8-52:
-  But got `arraykey` because type parameter `Tk` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
+  But got `arraykey`

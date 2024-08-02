@@ -82,7 +82,7 @@ File "fn_ret.php", line 3, character 17 - line 3, character 19:
  4 |   return 1;
  5 | }
 
-and flows into this expression because of a function call
+and flows into this expression as the return type of the function call
 
 File "fn_ret.php", line 8, character 10 - line 8, character 14:
 

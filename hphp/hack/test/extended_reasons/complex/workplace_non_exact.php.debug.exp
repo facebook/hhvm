@@ -101,7 +101,7 @@ Derivation:
                   }
                 }
               ],
-              "kind":"Flow_fun_return",
+              "kind":"Flow_call",
               "into":[
                 {
                   "Witness":[
@@ -180,7 +180,7 @@ Reason:
                           ]
                         }
                       ],
-                      "kind":"Flow_fun_return",
+                      "kind":"Flow_call",
                       "into":[
                         {
                           "Witness":[

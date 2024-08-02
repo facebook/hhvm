@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5574d31202f0506019f0c1586569a556>>
+// @generated SignedSource<<1c2a85705b91f2083ae81691e44d8a15>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -325,7 +325,7 @@ arena_deserializer::impl_deserialize_in_arena!(PrjAsymm);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (hash, show)")]
+#[rust_to_ocaml(attr = "deriving hash")]
 #[repr(C, u8)]
 pub enum FlowKind {
     #[rust_to_ocaml(name = "Flow_assign")]

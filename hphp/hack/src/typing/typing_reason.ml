@@ -271,7 +271,7 @@ type flow_kind =
   | Flow_param_hint
   | Flow_return_expr
   | Flow_instantiate of string
-[@@deriving hash, show]
+[@@deriving hash]
 
 let flow_kind_to_json = function
   | Flow_assign -> Hh_json.string_ "Flow_assign"
@@ -2420,6 +2420,21 @@ module Constructors = struct
       Flow { from; into = flow ~from:into_l ~into ~kind; kind = kind_l }
     | _ -> Flow { from; kind; into }
 
+  let flow_assign ~rhs ~lval = flow ~from:rhs ~into:lval ~kind:Flow_assign
+
+  let flow_local ~def ~use = flow ~from:def ~into:use ~kind:Flow_local
+
+  let flow_call ~def ~use = flow ~from:def ~into:use ~kind:Flow_call
+
+  let flow_return_expr ~expr ~ret =
+    flow ~from:expr ~into:ret ~kind:Flow_return_expr
+
+  let flow_return_hint ~hint ~use =
+    flow ~from:hint ~into:use ~kind:Flow_fun_return
+
+  let flow_param_hint ~hint ~param =
+    flow ~from:hint ~into:param ~kind:Flow_param_hint
+
   let solved of_ ~solution ~in_ = Solved { solution; of_; in_ }
 
   let axiom_extends ~child ~ancestor =
@@ -3457,7 +3472,7 @@ module Derivation = struct
 
     let explain_flow_kind = function
       | Flow_assign -> "via an assignment"
-      | Flow_call -> "because of a function call"
+      | Flow_call -> "as the return type of the function call"
       | Flow_local -> "as the type of the local variable"
       | Flow_fun_return -> "as the return hint"
       | Flow_param_hint -> "as the parameter hint"

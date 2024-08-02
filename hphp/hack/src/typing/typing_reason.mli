@@ -56,16 +56,6 @@ type field_kind =
   | Required
 [@@deriving hash]
 
-type flow_kind =
-  | Flow_assign
-  | Flow_call
-  | Flow_local
-  | Flow_fun_return
-  | Flow_param_hint
-  | Flow_return_expr
-  | Flow_instantiate of string
-[@@deriving hash, show]
-
 type ctor_kind =
   | Ctor_class
   | Ctor_newtype
@@ -358,13 +348,20 @@ val unsafe_cast : Pos.t -> t
 
 val pattern : Pos.t -> t
 
-(** Reasons record a linear path through the program, so we have a constructor
-   to concatenate two paths *)
-val flow :
-  from:locl_phase t_ -> into:locl_phase t_ -> kind:flow_kind -> locl_phase t_
-
 val axiom_extends :
   child:locl_phase t_ -> ancestor:locl_phase t_ -> locl_phase t_
+
+val flow_assign : rhs:locl_phase t_ -> lval:locl_phase t_ -> locl_phase t_
+
+val flow_local : def:locl_phase t_ -> use:locl_phase t_ -> locl_phase t_
+
+val flow_call : def:locl_phase t_ -> use:locl_phase t_ -> locl_phase t_
+
+val flow_return_expr : expr:locl_phase t_ -> ret:locl_phase t_ -> locl_phase t_
+
+val flow_return_hint : hint:locl_phase t_ -> use:locl_phase t_ -> locl_phase t_
+
+val flow_param_hint : hint:locl_phase t_ -> param:locl_phase t_ -> locl_phase t_
 
 val solved :
   Tvid.t -> solution:locl_phase t_ -> in_:locl_phase t_ -> locl_phase t_

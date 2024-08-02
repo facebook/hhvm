@@ -289,9 +289,11 @@ UniquePyObjectPtr getDefaultValueForField(
   return std::move(value);
 }
 
-const char* getIssetFlags(const void* objectPtr) {
-  PyObject* isset =
-      *toPyObjectPtr(static_cast<const char*>(objectPtr) + kHeadOffset);
+/**
+ * Returns the first element of "struct tuple" which is an array of isset flags.
+ */
+const char* getIssetFlags(const PyObject* structTuple) {
+  PyObject* isset = PyTuple_GET_ITEM(structTuple, 0);
   const char* issetFlags = PyBytes_AsString(isset);
   if (issetFlags == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
@@ -431,7 +433,7 @@ void* setUnion(void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
 }
 
 bool getIsset(const void* objectPtr, ptrdiff_t offset) {
-  const char* flags = getIssetFlags(objectPtr);
+  const char* flags = getIssetFlags(static_cast<const PyObject*>(objectPtr));
   return flags[offset];
 }
 

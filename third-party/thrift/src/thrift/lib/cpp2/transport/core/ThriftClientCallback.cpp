@@ -73,7 +73,8 @@ ThriftClientCallback::ThriftClientCallback(
       oneWay_(oneWay),
       cb_(std::move(cb)),
       active_(cb_),
-      timeout_(timeout) {}
+      timeout_(timeout),
+      timeBeginSend_(clock::now()) {}
 
 ThriftClientCallback::~ThriftClientCallback() {
   active_ = false;
@@ -83,6 +84,8 @@ ThriftClientCallback::~ThriftClientCallback() {
 void ThriftClientCallback::onThriftRequestSent() {
   DCHECK(!evb_ || evb_->isInEventBaseThread());
   if (active_) {
+    timeEndSend_ = clock::now();
+
     if (oneWay_) {
       cb_.release()->onResponse({});
     }
@@ -98,6 +101,10 @@ void ThriftClientCallback::onThriftResponse(
   DCHECK(!evb_ || evb_->isInEventBaseThread());
   cancelTimeout();
   if (active_) {
+    RpcTransportStats stats;
+    stats.requestLatency = timeEndSend_ - timeBeginSend_;
+    stats.responseLatency = clock::now() - timeEndSend_;
+
     active_ = false;
     auto tHeader = std::make_unique<transport::THeader>();
     tHeader->setClientType(THRIFT_HTTP2_CLIENT_TYPE);
@@ -105,7 +112,7 @@ void ThriftClientCallback::onThriftResponse(
     apache::thrift::detail::fillTHeaderFromResponseRpcMetadata(
         metadata, *tHeader);
     cb_.release()->onResponse(ClientReceiveState(
-        -1, std::move(payload), std::move(tHeader), nullptr));
+        -1, std::move(payload), std::move(tHeader), nullptr, stats));
   }
 }
 

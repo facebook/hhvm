@@ -522,7 +522,7 @@ RegionDescPtr form_region(Env& env) {
 
     try {
       translateInstr(env.irgs, env.inst);
-    } catch (const FailedIRGen& exn) {
+    } catch (DEBUG_ONLY const FailedIRGen& exn) {
       FTRACE(1, "ir generation for {} failed with {}\n",
              env.inst.toString(), exn.what());
       always_assert_flog(

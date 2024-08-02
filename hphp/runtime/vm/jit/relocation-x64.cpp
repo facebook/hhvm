@@ -388,7 +388,7 @@ size_t relocate(RelocationInfo& rel,
     try {
       return relocateImpl(rel, destBlock, start, end, srcBlock,
                           fixups, exitAddr, wideJmps, codeArea);
-    } catch (JmpOutOfRange& j) {
+    } catch (JmpOutOfRange&) {
     }
   }
 }

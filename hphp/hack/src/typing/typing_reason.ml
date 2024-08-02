@@ -266,6 +266,7 @@ let prj_asymm_to_json = function
 type flow_kind =
   | Flow_assign
   | Flow_call
+  | Flow_prop_access
   | Flow_local
   | Flow_fun_return
   | Flow_param_hint
@@ -276,6 +277,7 @@ type flow_kind =
 let flow_kind_to_json = function
   | Flow_assign -> Hh_json.string_ "Flow_assign"
   | Flow_call -> Hh_json.string_ "Flow_call"
+  | Flow_prop_access -> Hh_json.string_ "Flow_prop_access"
   | Flow_local -> Hh_json.string_ "Flow_local"
   | Flow_fun_return -> Hh_json.string_ "Flow_fun_return"
   | Flow_param_hint -> Hh_json.string_ "Flow_param_hint"
@@ -2426,6 +2428,9 @@ module Constructors = struct
 
   let flow_call ~def ~use = flow ~from:def ~into:use ~kind:Flow_call
 
+  let flow_prop_access ~def ~use =
+    flow ~from:def ~into:use ~kind:Flow_prop_access
+
   let flow_return_expr ~expr ~ret =
     flow ~from:expr ~into:ret ~kind:Flow_return_expr
 
@@ -3473,6 +3478,7 @@ module Derivation = struct
     let explain_flow_kind = function
       | Flow_assign -> "via an assignment"
       | Flow_call -> "as the return type of the function call"
+      | Flow_prop_access -> "as the type of property"
       | Flow_local -> "as the type of the local variable"
       | Flow_fun_return -> "as the return hint"
       | Flow_param_hint -> "as the parameter hint"

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2f6fc47130d035de2da4d46588a279fe>>
+// @generated SignedSource<<a8091937293b1dbd263b7e48682b9266>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1122,6 +1122,7 @@ impl<'a> Node<'a> for FlowKind<'a> {
         match self {
             FlowKind::FlowAssign => {}
             FlowKind::FlowCall => {}
+            FlowKind::FlowPropAccess => {}
             FlowKind::FlowLocal => {}
             FlowKind::FlowFunReturn => {}
             FlowKind::FlowParamHint => {}

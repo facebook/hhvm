@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1c2a85705b91f2083ae81691e44d8a15>>
+// @generated SignedSource<<e398435d02fdf88844ddfd0befe182c1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -332,6 +332,8 @@ pub enum FlowKind {
     FlowAssign,
     #[rust_to_ocaml(name = "Flow_call")]
     FlowCall,
+    #[rust_to_ocaml(name = "Flow_prop_access")]
+    FlowPropAccess,
     #[rust_to_ocaml(name = "Flow_local")]
     FlowLocal,
     #[rust_to_ocaml(name = "Flow_fun_return")]

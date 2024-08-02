@@ -357,6 +357,8 @@ val flow_local : def:locl_phase t_ -> use:locl_phase t_ -> locl_phase t_
 
 val flow_call : def:locl_phase t_ -> use:locl_phase t_ -> locl_phase t_
 
+val flow_prop_access : def:locl_phase t_ -> use:locl_phase t_ -> locl_phase t_
+
 val flow_return_expr : expr:locl_phase t_ -> ret:locl_phase t_ -> locl_phase t_
 
 val flow_return_hint : hint:locl_phase t_ -> use:locl_phase t_ -> locl_phase t_

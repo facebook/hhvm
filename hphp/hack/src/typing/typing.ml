@@ -4042,7 +4042,7 @@ end = struct
       let result_ty =
         Typing_env.(
           update_reason env result_ty ~f:(fun def ->
-              Typing_reason.(flow_call ~def ~use:(witness p))))
+              Typing_reason.(flow_prop_access ~def ~use:(witness p))))
       in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       let (env, inner_te) =

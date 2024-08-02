@@ -892,19 +892,19 @@ string t_py_generator::render_includes() {
  * Renders all the imports necessary to use fastproto.
  */
 string t_py_generator::render_fastproto_includes() {
-  return "import pprint\n"
-         "import warnings\n"
-         "from thrift import Thrift\n"
-         "from thrift.transport import TTransport\n"
-         "from thrift.protocol import TBinaryProtocol\n"
-         "from thrift.protocol import TCompactProtocol\n"
-         "from thrift.protocol import THeaderProtocol\n"
-         "fastproto = None\n"
-         "try:\n"
-         "  from thrift.protocol import fastproto\n"
-         "except ImportError:\n"
-         "  pass\n"
-         "\n"
+  return R"(import pprint
+import warnings
+from thrift import Thrift
+from thrift.transport import TTransport
+from thrift.protocol import TBinaryProtocol
+from thrift.protocol import TCompactProtocol
+from thrift.protocol import THeaderProtocol
+fastproto = None
+try:
+  from thrift.protocol import fastproto
+except ImportError:
+  pass
+)"
          /*
     Given a sparse thrift_spec generate a full thrift_spec as expected by
     fastproto. The old form is a tuple where every position is the same as the
@@ -913,23 +913,27 @@ string t_py_generator::render_fastproto_includes() {
     python 3.10 that causes large tuples to use more memory and generate larger
     .pyc than <=3.9. See: https://github.com/python/cpython/issues/109036
           */
-         "def __EXPAND_THRIFT_SPEC(spec):\n"
-         "    next_id = 0\n"
-         "    for item in spec:\n"
-         "        if next_id >= 0 and item[0] < 0:\n"
-         "            next_id = item[0]\n"
-         "        if item[0] != next_id:\n"
-         "            for _ in range(next_id, item[0]):\n"
-         "                yield None\n"
-         "        yield item\n"
-         "        next_id = item[0] + 1\n\n"
-         "class ThriftEnumWrapper(int):\n"
-         "  def __new__(cls, enum_class, value):\n"
-         "    return super().__new__(cls, value)\n"
-         "  def __init__(self, enum_class, value):"
-         "    self.enum_class = enum_class\n"
-         "  def __repr__(self):\n"
-         "    return self.enum_class.__name__ + '.' + self.enum_class._VALUES_TO_NAMES[self]\n\n";
+         R"(
+def __EXPAND_THRIFT_SPEC(spec):
+    next_id = 0
+    for item in spec:
+        item_id = item[0]
+        if next_id >= 0 and item_id < 0:
+            next_id = item_id
+        if item_id != next_id:
+            for _ in range(next_id, item_id):
+                yield None
+        yield item
+        next_id = item_id + 1
+
+class ThriftEnumWrapper(int):
+  def __new__(cls, enum_class, value):
+    return super().__new__(cls, value)
+  def __init__(self, enum_class, value):    self.enum_class = enum_class
+  def __repr__(self):
+    return self.enum_class.__name__ + '.' + self.enum_class._VALUES_TO_NAMES[self]
+
+)";
 }
 
 /**

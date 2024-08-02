@@ -29,13 +29,14 @@ except ImportError:
 def __EXPAND_THRIFT_SPEC(spec):
     next_id = 0
     for item in spec:
-        if next_id >= 0 and item[0] < 0:
-            next_id = item[0]
-        if item[0] != next_id:
-            for _ in range(next_id, item[0]):
+        item_id = item[0]
+        if next_id >= 0 and item_id < 0:
+            next_id = item_id
+        if item_id != next_id:
+            for _ in range(next_id, item_id):
                 yield None
         yield item
-        next_id = item[0] + 1
+        next_id = item_id + 1
 
 class ThriftEnumWrapper(int):
   def __new__(cls, enum_class, value):

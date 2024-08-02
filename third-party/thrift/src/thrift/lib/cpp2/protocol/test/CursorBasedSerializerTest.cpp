@@ -135,6 +135,68 @@ TEST(CursorSerializer, ManagedStringViewRead) {
   wrapper.endRead(std::move(reader));
 }
 
+TEST(CursorSerializer, StructWithOptionalRead) {
+  {
+    StructWithOptional obj;
+    obj.optional_string() = "foo";
+
+    CursorSerializationWrapper<StructWithOptional> wrapper(obj);
+    auto reader = wrapper.beginRead();
+    std::string str;
+
+    EXPECT_TRUE(reader.read<ident::optional_string>(str));
+    EXPECT_EQ(str, "foo");
+
+    auto listReader = reader.beginRead<ident::optional_list>();
+    EXPECT_FALSE(listReader.has_value());
+
+    auto map = reader.read<ident::optional_map>();
+    EXPECT_FALSE(map.has_value());
+
+    auto innieReader = reader.beginRead<ident::optional_containers>();
+    EXPECT_FALSE(innieReader.has_value());
+    wrapper.endRead(std::move(reader));
+  }
+
+  {
+    StructWithOptional obj;
+    obj.optional_string() = "foo";
+    obj.optional_list() = {1, 2, 3};
+    obj.optional_map() = {{1, 2}, {3, 4}};
+    Containers containers;
+    containers.list_of_string() = {"foo", "bar"};
+    obj.optional_containers() = containers;
+
+    CursorSerializationWrapper<StructWithOptional> wrapper(obj);
+    auto reader = wrapper.beginRead();
+    std::string str;
+
+    EXPECT_TRUE(reader.read<ident::optional_string>(str));
+    EXPECT_EQ(str, "foo");
+
+    auto listReader = reader.beginRead<ident::optional_list>();
+    EXPECT_TRUE(listReader.has_value());
+    EXPECT_EQ(listReader->size(), 3);
+    std::vector<int32_t> numbers(listReader->begin(), listReader->end());
+    EXPECT_THAT(numbers, ElementsAreArray({1, 2, 3}));
+    reader.endRead(std::move(listReader.value()));
+
+    auto map = reader.read<ident::optional_map>();
+    EXPECT_TRUE(map.has_value());
+    EXPECT_EQ(map->size(), 2);
+    EXPECT_EQ(map->at(1), 2);
+    EXPECT_EQ(map->at(3), 4);
+
+    auto innerReader = reader.beginRead<ident::optional_containers>();
+    EXPECT_TRUE(innerReader.has_value());
+    auto string_list = innerReader->read<ident::list_of_string>();
+    EXPECT_EQ(string_list.size(), 2);
+    EXPECT_TRUE(string_list[0] == "foo" && string_list[1] == "bar");
+    reader.endRead(std::move(innerReader.value()));
+    wrapper.endRead(std::move(reader));
+  }
+}
+
 TEST(CursorSerializer, NumericRead) {
   Numerics obj;
   obj.int16() = 1;
@@ -432,6 +494,51 @@ TEST(CursorSerializer, ManagedStringViewWrite) {
   auto obj = wrapper.deserialize();
   EXPECT_EQ(obj.someId(), 14u);
   EXPECT_EQ(obj.someName()->str(), "foobar");
+}
+
+TEST(CursorSerializer, StructWithOptionalWrite) {
+  {
+    CursorSerializationWrapper<StructWithOptional> wrapper;
+    auto writer = wrapper.beginWrite();
+    writer.write<ident::optional_string>("baz");
+    wrapper.endWrite(std::move(writer));
+
+    auto obj = wrapper.deserialize();
+    EXPECT_EQ(obj.optional_string(), "baz");
+    EXPECT_FALSE(obj.optional_list().has_value());
+    EXPECT_FALSE(obj.optional_map().has_value());
+    EXPECT_FALSE(obj.optional_containers().has_value());
+  }
+
+  {
+    CursorSerializationWrapper<StructWithOptional> wrapper;
+    auto writer = wrapper.beginWrite();
+    writer.write<ident::optional_string>("baz");
+    auto list_writer = writer.beginWrite<ident::optional_list>();
+    list_writer.write(1);
+    list_writer.write(2);
+    list_writer.write(3);
+    writer.endWrite(std::move(list_writer));
+
+    auto map = std::unordered_map<int, int>{{1, 2}, {3, 4}};
+    writer.write<ident::optional_map>(map);
+
+    auto container_writer = writer.beginWrite<ident::optional_containers>();
+    auto string_list = {"foo", "bar"};
+    container_writer.write<ident::list_of_string>(string_list);
+    writer.endWrite(std::move(container_writer));
+
+    wrapper.endWrite(std::move(writer));
+
+    auto obj = wrapper.deserialize();
+    EXPECT_EQ(obj.optional_string(), "baz");
+    EXPECT_TRUE(obj.optional_list().has_value());
+    EXPECT_TRUE(obj.optional_list()->size() == 3);
+    EXPECT_TRUE(obj.optional_map().has_value());
+    EXPECT_TRUE(obj.optional_map()->size() == 2);
+    EXPECT_TRUE(obj.optional_containers().has_value());
+    EXPECT_EQ(obj.optional_containers()->list_of_string()->size(), 2);
+  }
 }
 
 TEST(CursorSerializer, NumericWrite) {

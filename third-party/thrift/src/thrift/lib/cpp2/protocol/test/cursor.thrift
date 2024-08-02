@@ -77,6 +77,13 @@ struct StructWithCppType {
   2: ManagedStringViewField someName;
 }
 
+struct StructWithOptional {
+  1: optional string optional_string;
+  2: optional list<i64> optional_list;
+  3: optional map<i32, i32> optional_map;
+  4: optional Containers optional_containers;
+}
+
 enum E {
   UNKNOWN = 0,
   A = 1,

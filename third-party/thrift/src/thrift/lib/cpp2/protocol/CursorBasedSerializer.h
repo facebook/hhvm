@@ -473,18 +473,14 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
 };
 
 /**
- * Allows iterating over containers without materializing them.
+ * Allows iterating over containers (set, list) without materializing them.
  * Behaves like a standard collection, ex:
  *  StructuredCursorReader<Struct> reader;
  *  auto listReader = reader.beginRead<ident::unqualified_list>();
  *  for (auto& val : listReader) { use(val); }
- *  reader.endRead(listReader);
+ *  reader.endRead(std::move(listReader));
  *
- *  auto mapReader = reader.beginRead<ident::unqualified_map>();
- *  std::unordered_map<K, V> map;
- *  map.reserve(mapReader.size());
- *  map.insert(mapReader.begin(), mapReader.end());
- *  reader.endRead(mapReader);
+ *  Note: ContainerCursorReader does not support map types.
  */
 template <typename ProtocolReader, typename Tag, bool Contiguous>
 class ContainerCursorReader : detail::BaseCursorReader<ProtocolReader> {
@@ -835,7 +831,8 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
         [&] { op::encode<type_tag<Ident>>(*protocol_, value); }, value);
   }
 
-  /** Allows writing containers whose size isn't known until afterwards.
+  /**
+   * Allows writing containers whose size isn't known until afterwards.
    * Less efficient than using write().
    * See the ContainerCursorWriter docblock for example usage.
    *
@@ -979,7 +976,7 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
 };
 
 /**
- * Allows writing containers whose size is not known in advance.
+ * Allows writing containers (list, set) whose size is not known in advance.
  * Ex:
  *  StructuredCursorWriter writer;
  *  auto child = writer.beginWrite<ident::list_field>();
@@ -988,6 +985,7 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
  *    child.write(*val);
  *  }
  *  writer.endWrite(std::move(child));
+ * Note: ContainerCursorWriter does not support map type.
  */
 template <typename Tag>
 class ContainerCursorWriter : detail::DelayedSizeCursorWriter {

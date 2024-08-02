@@ -1,21 +1,23 @@
 error: Typing[4110] Invalid argument
 
+File "shape_subtyping_4.php", line 14, character 35 - line 14, character 36:
+
  11 | function passes_required_a_at_bool_alias(
  12 |   required_a_at_bool $s,
  13 | ): void {
  14 |   expects_required_a_at_int_alias(»$s«);
  15 | }
 
-File "shape_subtyping_4.php", line 14, character 35 - line 14, character 36:
-
 Expected `int`
+
+File "shape_subtyping_4.php", line 3, character 39 - line 3, character 41:
 
  3 | type required_a_at_int = shape('a' => »int«);
  4 | type required_a_at_bool = shape('a' => bool);
 
-File "shape_subtyping_4.php", line 3, character 39 - line 3, character 41:
-
 But got `bool`
+
+File "shape_subtyping_4.php", line 4, character 40 - line 4, character 43:
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type required_a_at_bool = shape('a' => »bool«);
@@ -25,13 +27,13 @@ But got `bool`
  8 | ): void {
  9 | }
 
-File "shape_subtyping_4.php", line 4, character 40 - line 4, character 43:
-
 Step 1 of 3
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
+
+File "shape_subtyping_4.php", line 6, character 10 - line 6, character 40:
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type required_a_at_bool = shape('a' => bool);
@@ -41,9 +43,9 @@ The subtype comes from this function or method declaration
  8 | ): void {
  9 | }
 
-File "shape_subtyping_4.php", line 6, character 10 - line 6, character 40:
-
 The supertype comes from this expression
+
+File "shape_subtyping_4.php", line 14, character 3 - line 14, character 37:
 
  11 | function passes_required_a_at_bool_alias(
  12 |   required_a_at_bool $s,
@@ -51,13 +53,13 @@ The supertype comes from this expression
  14 |   »expects_required_a_at_int_alias($s)«;
  15 | }
 
-File "shape_subtyping_4.php", line 14, character 3 - line 14, character 37:
-
 Step 2 of 3
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "shape_subtyping_4.php", line 12, character 3 - line 12, character 20:
 
  11 | function passes_required_a_at_bool_alias(
  12 |   »required_a_at_bool« $s,
@@ -65,9 +67,9 @@ The subtype comes from this hint
  14 |   expects_required_a_at_int_alias($s);
  15 | }
 
-File "shape_subtyping_4.php", line 12, character 3 - line 12, character 20:
-
 which is defined here
+
+File "shape_subtyping_4.php", line 4, character 6 - line 4, character 23:
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type »required_a_at_bool« = shape('a' => bool);
@@ -77,9 +79,9 @@ which is defined here
  8 | ): void {
  9 | }
 
-File "shape_subtyping_4.php", line 4, character 6 - line 4, character 23:
-
 and flows into this expression as the parameter hint
+
+File "shape_subtyping_4.php", line 12, character 22 - line 12, character 23:
 
  11 | function passes_required_a_at_bool_alias(
  12 |   required_a_at_bool »$s«,
@@ -87,9 +89,9 @@ and flows into this expression as the parameter hint
  14 |   expects_required_a_at_int_alias($s);
  15 | }
 
-File "shape_subtyping_4.php", line 12, character 22 - line 12, character 23:
-
 which itself flows into this expression as the type of the local variable
+
+File "shape_subtyping_4.php", line 14, character 35 - line 14, character 36:
 
  11 | function passes_required_a_at_bool_alias(
  12 |   required_a_at_bool $s,
@@ -97,9 +99,9 @@ which itself flows into this expression as the type of the local variable
  14 |   expects_required_a_at_int_alias(»$s«);
  15 | }
 
-File "shape_subtyping_4.php", line 14, character 35 - line 14, character 36:
-
 The supertype comes from this hint
+
+File "shape_subtyping_4.php", line 7, character 2 - line 7, character 18:
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type required_a_at_bool = shape('a' => bool);
@@ -109,14 +111,12 @@ The supertype comes from this hint
  8 | ): void {
  9 | }
 
-File "shape_subtyping_4.php", line 7, character 2 - line 7, character 18:
-
 which is defined here
+
+File "shape_subtyping_4.php", line 3, character 6 - line 3, character 22:
 
  3 | type »required_a_at_int« = shape('a' => int);
  4 | type required_a_at_bool = shape('a' => bool);
-
-File "shape_subtyping_4.php", line 3, character 6 - line 3, character 22:
 
 Step 3 of 3
 
@@ -126,6 +126,8 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "shape_subtyping_4.php", line 4, character 40 - line 4, character 43:
+
  3 | type required_a_at_int = shape('a' => int);
  4 | type required_a_at_bool = shape('a' => »bool«);
  5 | 
@@ -134,13 +136,11 @@ The subtype comes from this hint
  8 | ): void {
  9 | }
 
-File "shape_subtyping_4.php", line 4, character 40 - line 4, character 43:
-
 The supertype comes from this hint
+
+File "shape_subtyping_4.php", line 3, character 39 - line 3, character 41:
 
  3 | type required_a_at_int = shape('a' => »int«);
  4 | type required_a_at_bool = shape('a' => bool);
-
-File "shape_subtyping_4.php", line 3, character 39 - line 3, character 41:
 
 1 error found.

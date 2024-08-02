@@ -1,29 +1,29 @@
 error: Typing[4057] Invalid argument
 
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
+
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `_PIRANHA_SANDBOX_QUEUED_` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `_PIRANHA_SANDBOX_QUEUED_` is defined
+
+File "workplace_shape_mismatch.php", line 15, character 4 - line 15, character 29:
 
  14 |   ?'earlyreturn' => int,
  15 |   ?»'_PIRANHA_SANDBOX_QUEUED_'« => bool,
  16 |   ?'resource_requirement' => int,
  17 |   ?'execution_push_phase' => string,
-
-File "workplace_shape_mismatch.php", line 15, character 4 - line 15, character 29:
 
 Derivation:
 {
@@ -283,8 +283,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -448,35 +448,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `async_bulkapi_factor` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `async_bulkapi_factor` is defined
+
+File "workplace_shape_mismatch.php", line 18, character 4 - line 18, character 25:
 
  17 |   ?'execution_push_phase' => string,
  18 |   ?»'async_bulkapi_factor'« => float,
  19 |   ?'devserver' => string,
  20 |   ?'fifo_ordering_key' => string,
-
-File "workplace_shape_mismatch.php", line 18, character 4 - line 18, character 25:
 
 Derivation:
 {
@@ -736,8 +736,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -901,35 +901,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `devserver` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `devserver` is defined
+
+File "workplace_shape_mismatch.php", line 19, character 4 - line 19, character 14:
 
  18 |   ?'async_bulkapi_factor' => float,
  19 |   ?»'devserver'« => string,
  20 |   ?'fifo_ordering_key' => string,
  21 |   ?'fifo_dedup_key' => string,
-
-File "workplace_shape_mismatch.php", line 19, character 4 - line 19, character 14:
 
 Derivation:
 {
@@ -1187,8 +1187,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -1352,35 +1352,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `earlyreturn` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `earlyreturn` is defined
+
+File "workplace_shape_mismatch.php", line 14, character 4 - line 14, character 16:
 
  13 |   ?'retry_attempt' => int,
  14 |   ?»'earlyreturn'« => int,
  15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
  16 |   ?'resource_requirement' => int,
-
-File "workplace_shape_mismatch.php", line 14, character 4 - line 14, character 16:
 
 Derivation:
 {
@@ -1638,8 +1638,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -1803,35 +1803,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `execute_after` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `execute_after` is defined
+
+File "workplace_shape_mismatch.php", line 7, character 4 - line 7, character 18:
 
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?»'execute_after'« => int,
  8 |   ?'execute_before' => int,
  9 |   ?'expire_after' => int,
-
-File "workplace_shape_mismatch.php", line 7, character 4 - line 7, character 18:
 
 Derivation:
 {
@@ -2091,8 +2091,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -2256,35 +2256,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `execute_before` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `execute_before` is defined
+
+File "workplace_shape_mismatch.php", line 8, character 4 - line 8, character 19:
 
  7 |   ?'execute_after' => int,
  8 |   ?»'execute_before'« => int,
  9 |   ?'expire_after' => int,
 10 |   ?'region' => string,
-
-File "workplace_shape_mismatch.php", line 8, character 4 - line 8, character 19:
 
 Derivation:
 {
@@ -2544,8 +2544,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -2709,35 +2709,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `execution_push_phase` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `execution_push_phase` is defined
+
+File "workplace_shape_mismatch.php", line 17, character 4 - line 17, character 25:
 
  16 |   ?'resource_requirement' => int,
  17 |   ?»'execution_push_phase'« => string,
  18 |   ?'async_bulkapi_factor' => float,
  19 |   ?'devserver' => string,
-
-File "workplace_shape_mismatch.php", line 17, character 4 - line 17, character 25:
 
 Derivation:
 {
@@ -2997,8 +2997,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -3162,35 +3162,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `expire_after` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `expire_after` is defined
+
+File "workplace_shape_mismatch.php", line 9, character 4 - line 9, character 17:
 
  8 |   ?'execute_before' => int,
  9 |   ?»'expire_after'« => int,
 10 |   ?'region' => string,
 11 |   ?'scheduling_uid' => int,
-
-File "workplace_shape_mismatch.php", line 9, character 4 - line 9, character 17:
 
 Derivation:
 {
@@ -3450,8 +3450,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -3615,35 +3615,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `fifo_dedup_key` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `fifo_dedup_key` is defined
+
+File "workplace_shape_mismatch.php", line 21, character 4 - line 21, character 19:
 
  20 |   ?'fifo_ordering_key' => string,
  21 |   ?»'fifo_dedup_key'« => string,
  22 |   ?'send_schedule_cats' => bool,
  23 | );
-
-File "workplace_shape_mismatch.php", line 21, character 4 - line 21, character 19:
 
 Derivation:
 {
@@ -3903,8 +3903,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -4068,35 +4068,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `fifo_ordering_key` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `fifo_ordering_key` is defined
+
+File "workplace_shape_mismatch.php", line 20, character 4 - line 20, character 22:
 
  19 |   ?'devserver' => string,
  20 |   ?»'fifo_ordering_key'« => string,
  21 |   ?'fifo_dedup_key' => string,
  22 |   ?'send_schedule_cats' => bool,
-
-File "workplace_shape_mismatch.php", line 20, character 4 - line 20, character 22:
 
 Derivation:
 {
@@ -4356,8 +4356,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -4521,35 +4521,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `region` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `region` is defined
+
+File "workplace_shape_mismatch.php", line 10, character 4 - line 10, character 11:
 
  9 |   ?'expire_after' => int,
 10 |   ?»'region'« => string,
 11 |   ?'scheduling_uid' => int,
 12 |   ?'tag' => string,
-
-File "workplace_shape_mismatch.php", line 10, character 4 - line 10, character 11:
 
 Derivation:
 {
@@ -4807,8 +4807,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -4972,35 +4972,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `resource_requirement` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `resource_requirement` is defined
+
+File "workplace_shape_mismatch.php", line 16, character 4 - line 16, character 25:
 
  15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
  16 |   ?»'resource_requirement'« => int,
  17 |   ?'execution_push_phase' => string,
  18 |   ?'async_bulkapi_factor' => float,
-
-File "workplace_shape_mismatch.php", line 16, character 4 - line 16, character 25:
 
 Derivation:
 {
@@ -5260,8 +5260,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -5425,35 +5425,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `retry_attempt` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `retry_attempt` is defined
+
+File "workplace_shape_mismatch.php", line 13, character 4 - line 13, character 18:
 
  12 |   ?'tag' => string,
  13 |   ?»'retry_attempt'« => int,
  14 |   ?'earlyreturn' => int,
  15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
-
-File "workplace_shape_mismatch.php", line 13, character 4 - line 13, character 18:
 
 Derivation:
 {
@@ -5713,8 +5713,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -5878,35 +5878,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `scheduling_uid` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `scheduling_uid` is defined
+
+File "workplace_shape_mismatch.php", line 11, character 4 - line 11, character 19:
 
  10 |   ?'region' => string,
  11 |   ?»'scheduling_uid'« => int,
  12 |   ?'tag' => string,
  13 |   ?'retry_attempt' => int,
-
-File "workplace_shape_mismatch.php", line 11, character 4 - line 11, character 19:
 
 Derivation:
 {
@@ -6166,8 +6166,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -6331,34 +6331,34 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `send_schedule_cats` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `send_schedule_cats` is defined
+
+File "workplace_shape_mismatch.php", line 22, character 4 - line 22, character 23:
 
  21 |   ?'fifo_dedup_key' => string,
  22 |   ?»'send_schedule_cats'« => bool,
  23 | );
-
-File "workplace_shape_mismatch.php", line 22, character 4 - line 22, character 23:
 
 Derivation:
 {
@@ -6618,8 +6618,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -6783,35 +6783,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `serialization_format` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `serialization_format` is defined
+
+File "workplace_shape_mismatch.php", line 6, character 4 - line 6, character 25:
 
  5 | type AsyncJobOptions = shape(
  6 |   ?»'serialization_format'« => SerializationFormat,
  7 |   ?'execute_after' => int,
  8 |   ?'execute_before' => int,
-
-File "workplace_shape_mismatch.php", line 6, character 4 - line 6, character 25:
 
 Derivation:
 {
@@ -7083,8 +7083,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -7260,35 +7260,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  96 |   ): Awaitable<string> {
  97 |     return await self::genAsyncJob(»$options«);
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `tag` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  88 |   public static async function genAsyncJob(
  89 |     ?»AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `tag` is defined
+
+File "workplace_shape_mismatch.php", line 12, character 4 - line 12, character 8:
 
  11 |   ?'scheduling_uid' => int,
  12 |   ?»'tag'« => string,
  13 |   ?'retry_attempt' => int,
  14 |   ?'earlyreturn' => int,
-
-File "workplace_shape_mismatch.php", line 12, character 4 - line 12, character 8:
 
 Derivation:
 {
@@ -7546,8 +7546,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -7711,7 +7711,7 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 17 errors found.

@@ -1,5 +1,7 @@
 error: Typing[4057] Invalid argument
 
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
+
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
  96 |   ): Awaitable<string> {
@@ -7,9 +9,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `_PIRANHA_SANDBOX_QUEUED_` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -17,16 +19,14 @@ The field `_PIRANHA_SANDBOX_QUEUED_` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `_PIRANHA_SANDBOX_QUEUED_` is defined
+
+File "workplace_shape_mismatch.php", line 15, character 4 - line 15, character 29:
 
  14 |   ?'earlyreturn' => int,
  15 |   ?»'_PIRANHA_SANDBOX_QUEUED_'« => bool,
  16 |   ?'resource_requirement' => int,
  17 |   ?'execution_push_phase' => string,
-
-File "workplace_shape_mismatch.php", line 15, character 4 - line 15, character 29:
 
 Step 1 of 4
 
@@ -34,15 +34,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
+
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
  89 |     ?AsyncTierJobOptions $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -51,13 +53,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -66,17 +68,17 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -85,9 +87,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -96,9 +98,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -106,13 +108,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -121,9 +123,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -131,15 +133,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -149,19 +149,21 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 15, character 34 - line 15, character 37:
+
  14 |   ?'earlyreturn' => int,
  15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => »bool«,
  16 |   ?'resource_requirement' => int,
  17 |   ?'execution_push_phase' => string,
 
-File "workplace_shape_mismatch.php", line 15, character 34 - line 15, character 37:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -170,9 +172,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `async_bulkapi_factor` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -180,16 +182,14 @@ The field `async_bulkapi_factor` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `async_bulkapi_factor` is defined
+
+File "workplace_shape_mismatch.php", line 18, character 4 - line 18, character 25:
 
  17 |   ?'execution_push_phase' => string,
  18 |   ?»'async_bulkapi_factor'« => float,
  19 |   ?'devserver' => string,
  20 |   ?'fifo_ordering_key' => string,
-
-File "workplace_shape_mismatch.php", line 18, character 4 - line 18, character 25:
 
 Step 1 of 4
 
@@ -197,15 +197,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
+
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
  89 |     ?AsyncTierJobOptions $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -214,13 +216,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -229,17 +231,17 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -248,9 +250,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -259,9 +261,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -269,13 +271,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -284,9 +286,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -294,15 +296,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -312,19 +312,21 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 18, character 30 - line 18, character 34:
+
  17 |   ?'execution_push_phase' => string,
  18 |   ?'async_bulkapi_factor' => »float«,
  19 |   ?'devserver' => string,
  20 |   ?'fifo_ordering_key' => string,
 
-File "workplace_shape_mismatch.php", line 18, character 30 - line 18, character 34:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -333,9 +335,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `devserver` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -343,16 +345,14 @@ The field `devserver` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `devserver` is defined
+
+File "workplace_shape_mismatch.php", line 19, character 4 - line 19, character 14:
 
  18 |   ?'async_bulkapi_factor' => float,
  19 |   ?»'devserver'« => string,
  20 |   ?'fifo_ordering_key' => string,
  21 |   ?'fifo_dedup_key' => string,
-
-File "workplace_shape_mismatch.php", line 19, character 4 - line 19, character 14:
 
 Step 1 of 4
 
@@ -360,15 +360,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
+
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
  89 |     ?AsyncTierJobOptions $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -377,13 +379,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -392,17 +394,17 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -411,9 +413,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -422,9 +424,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -432,13 +434,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -447,9 +449,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -457,15 +459,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -475,19 +475,21 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 19, character 19 - line 19, character 24:
+
  18 |   ?'async_bulkapi_factor' => float,
  19 |   ?'devserver' => »string«,
  20 |   ?'fifo_ordering_key' => string,
  21 |   ?'fifo_dedup_key' => string,
 
-File "workplace_shape_mismatch.php", line 19, character 19 - line 19, character 24:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -496,9 +498,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `earlyreturn` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -506,16 +508,14 @@ The field `earlyreturn` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `earlyreturn` is defined
+
+File "workplace_shape_mismatch.php", line 14, character 4 - line 14, character 16:
 
  13 |   ?'retry_attempt' => int,
  14 |   ?»'earlyreturn'« => int,
  15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
  16 |   ?'resource_requirement' => int,
-
-File "workplace_shape_mismatch.php", line 14, character 4 - line 14, character 16:
 
 Step 1 of 4
 
@@ -523,15 +523,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
+
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
  89 |     ?AsyncTierJobOptions $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -540,13 +542,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -555,17 +557,17 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -574,9 +576,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -585,9 +587,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -595,13 +597,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -610,9 +612,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -620,15 +622,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -638,19 +638,21 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 14, character 21 - line 14, character 23:
+
  13 |   ?'retry_attempt' => int,
  14 |   ?'earlyreturn' => »int«,
  15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
  16 |   ?'resource_requirement' => int,
 
-File "workplace_shape_mismatch.php", line 14, character 21 - line 14, character 23:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -659,9 +661,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `execute_after` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -669,9 +671,9 @@ The field `execute_after` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `execute_after` is defined
+
+File "workplace_shape_mismatch.php", line 7, character 4 - line 7, character 18:
 
  5 | type AsyncJobOptions = shape(
  6 |   ?'serialization_format' => SerializationFormat,
@@ -679,13 +681,13 @@ The field `execute_after` is defined
  8 |   ?'execute_before' => int,
  9 |   ?'expire_after' => int,
 
-File "workplace_shape_mismatch.php", line 7, character 4 - line 7, character 18:
-
 Step 1 of 4
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
+
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
 
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
@@ -693,9 +695,9 @@ The subtype comes from this function or method declaration
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -704,13 +706,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -719,9 +721,9 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
@@ -729,9 +731,9 @@ which is defined here
  8 |   ?'execute_before' => int,
  9 |   ?'expire_after' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -740,9 +742,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -751,9 +753,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -761,13 +763,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -776,9 +778,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -786,15 +788,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -804,20 +804,22 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 7, character 23 - line 7, character 25:
+
  5 | type AsyncJobOptions = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => »int«,
  8 |   ?'execute_before' => int,
  9 |   ?'expire_after' => int,
 
-File "workplace_shape_mismatch.php", line 7, character 23 - line 7, character 25:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -826,9 +828,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `execute_before` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -836,9 +838,9 @@ The field `execute_before` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `execute_before` is defined
+
+File "workplace_shape_mismatch.php", line 8, character 4 - line 8, character 19:
 
  5 | type AsyncJobOptions = shape(
  6 |   ?'serialization_format' => SerializationFormat,
@@ -847,13 +849,13 @@ The field `execute_before` is defined
  9 |   ?'expire_after' => int,
 10 |   ?'region' => string,
 
-File "workplace_shape_mismatch.php", line 8, character 4 - line 8, character 19:
-
 Step 1 of 4
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
+
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
 
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
@@ -861,9 +863,9 @@ The subtype comes from this function or method declaration
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -872,13 +874,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -887,9 +889,9 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
@@ -898,9 +900,9 @@ which is defined here
  9 |   ?'expire_after' => int,
 10 |   ?'region' => string,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -909,9 +911,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -920,9 +922,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -930,13 +932,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -945,9 +947,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -955,15 +957,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -973,6 +973,8 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 8, character 24 - line 8, character 26:
+
  5 | type AsyncJobOptions = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
@@ -980,14 +982,14 @@ The subtype comes from this hint
  9 |   ?'expire_after' => int,
 10 |   ?'region' => string,
 
-File "workplace_shape_mismatch.php", line 8, character 24 - line 8, character 26:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -996,9 +998,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `execution_push_phase` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1006,16 +1008,14 @@ The field `execution_push_phase` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `execution_push_phase` is defined
+
+File "workplace_shape_mismatch.php", line 17, character 4 - line 17, character 25:
 
  16 |   ?'resource_requirement' => int,
  17 |   ?»'execution_push_phase'« => string,
  18 |   ?'async_bulkapi_factor' => float,
  19 |   ?'devserver' => string,
-
-File "workplace_shape_mismatch.php", line 17, character 4 - line 17, character 25:
 
 Step 1 of 4
 
@@ -1023,15 +1023,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
+
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
  89 |     ?AsyncTierJobOptions $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1040,13 +1042,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1055,17 +1057,17 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -1074,9 +1076,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1085,9 +1087,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1095,13 +1097,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1110,9 +1112,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1120,15 +1122,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -1138,19 +1138,21 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 17, character 30 - line 17, character 35:
+
  16 |   ?'resource_requirement' => int,
  17 |   ?'execution_push_phase' => »string«,
  18 |   ?'async_bulkapi_factor' => float,
  19 |   ?'devserver' => string,
 
-File "workplace_shape_mismatch.php", line 17, character 30 - line 17, character 35:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1159,9 +1161,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `expire_after` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1169,16 +1171,14 @@ The field `expire_after` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `expire_after` is defined
+
+File "workplace_shape_mismatch.php", line 9, character 4 - line 9, character 17:
 
  8 |   ?'execute_before' => int,
  9 |   ?»'expire_after'« => int,
 10 |   ?'region' => string,
 11 |   ?'scheduling_uid' => int,
-
-File "workplace_shape_mismatch.php", line 9, character 4 - line 9, character 17:
 
 Step 1 of 4
 
@@ -1186,15 +1186,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
+
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
  89 |     ?AsyncTierJobOptions $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1203,13 +1205,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1218,17 +1220,17 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -1237,9 +1239,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1248,9 +1250,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1258,13 +1260,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1273,9 +1275,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1283,15 +1285,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -1301,19 +1301,21 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 9, character 22 - line 9, character 24:
+
  8 |   ?'execute_before' => int,
  9 |   ?'expire_after' => »int«,
 10 |   ?'region' => string,
 11 |   ?'scheduling_uid' => int,
 
-File "workplace_shape_mismatch.php", line 9, character 22 - line 9, character 24:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1322,9 +1324,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `fifo_dedup_key` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1332,16 +1334,14 @@ The field `fifo_dedup_key` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `fifo_dedup_key` is defined
+
+File "workplace_shape_mismatch.php", line 21, character 4 - line 21, character 19:
 
  20 |   ?'fifo_ordering_key' => string,
  21 |   ?»'fifo_dedup_key'« => string,
  22 |   ?'send_schedule_cats' => bool,
  23 | );
-
-File "workplace_shape_mismatch.php", line 21, character 4 - line 21, character 19:
 
 Step 1 of 4
 
@@ -1349,15 +1349,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
+
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
  89 |     ?AsyncTierJobOptions $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1366,13 +1368,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1381,17 +1383,17 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -1400,9 +1402,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1411,9 +1413,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1421,13 +1423,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1436,9 +1438,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1446,15 +1448,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -1464,19 +1464,21 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 21, character 24 - line 21, character 29:
+
  20 |   ?'fifo_ordering_key' => string,
  21 |   ?'fifo_dedup_key' => »string«,
  22 |   ?'send_schedule_cats' => bool,
  23 | );
 
-File "workplace_shape_mismatch.php", line 21, character 24 - line 21, character 29:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1485,9 +1487,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `fifo_ordering_key` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1495,16 +1497,14 @@ The field `fifo_ordering_key` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `fifo_ordering_key` is defined
+
+File "workplace_shape_mismatch.php", line 20, character 4 - line 20, character 22:
 
  19 |   ?'devserver' => string,
  20 |   ?»'fifo_ordering_key'« => string,
  21 |   ?'fifo_dedup_key' => string,
  22 |   ?'send_schedule_cats' => bool,
-
-File "workplace_shape_mismatch.php", line 20, character 4 - line 20, character 22:
 
 Step 1 of 4
 
@@ -1512,15 +1512,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
+
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
  89 |     ?AsyncTierJobOptions $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1529,13 +1531,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1544,17 +1546,17 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -1563,9 +1565,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1574,9 +1576,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1584,13 +1586,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1599,9 +1601,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1609,15 +1611,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -1627,19 +1627,21 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 20, character 27 - line 20, character 32:
+
  19 |   ?'devserver' => string,
  20 |   ?'fifo_ordering_key' => »string«,
  21 |   ?'fifo_dedup_key' => string,
  22 |   ?'send_schedule_cats' => bool,
 
-File "workplace_shape_mismatch.php", line 20, character 27 - line 20, character 32:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1648,9 +1650,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `region` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1658,16 +1660,14 @@ The field `region` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `region` is defined
+
+File "workplace_shape_mismatch.php", line 10, character 4 - line 10, character 11:
 
  9 |   ?'expire_after' => int,
 10 |   ?»'region'« => string,
 11 |   ?'scheduling_uid' => int,
 12 |   ?'tag' => string,
-
-File "workplace_shape_mismatch.php", line 10, character 4 - line 10, character 11:
 
 Step 1 of 4
 
@@ -1675,15 +1675,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
+
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
  89 |     ?AsyncTierJobOptions $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1692,13 +1694,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1707,17 +1709,17 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -1726,9 +1728,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1737,9 +1739,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1747,13 +1749,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1762,9 +1764,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1772,15 +1774,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -1790,19 +1790,21 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 10, character 16 - line 10, character 21:
+
  9 |   ?'expire_after' => int,
 10 |   ?'region' => »string«,
 11 |   ?'scheduling_uid' => int,
 12 |   ?'tag' => string,
 
-File "workplace_shape_mismatch.php", line 10, character 16 - line 10, character 21:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1811,9 +1813,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `resource_requirement` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1821,16 +1823,14 @@ The field `resource_requirement` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `resource_requirement` is defined
+
+File "workplace_shape_mismatch.php", line 16, character 4 - line 16, character 25:
 
  15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
  16 |   ?»'resource_requirement'« => int,
  17 |   ?'execution_push_phase' => string,
  18 |   ?'async_bulkapi_factor' => float,
-
-File "workplace_shape_mismatch.php", line 16, character 4 - line 16, character 25:
 
 Step 1 of 4
 
@@ -1838,15 +1838,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
+
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
  89 |     ?AsyncTierJobOptions $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1855,13 +1857,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1870,17 +1872,17 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -1889,9 +1891,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1900,9 +1902,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1910,13 +1912,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -1925,9 +1927,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1935,15 +1937,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -1953,19 +1953,21 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 16, character 30 - line 16, character 32:
+
  15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
  16 |   ?'resource_requirement' => »int«,
  17 |   ?'execution_push_phase' => string,
  18 |   ?'async_bulkapi_factor' => float,
 
-File "workplace_shape_mismatch.php", line 16, character 30 - line 16, character 32:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -1974,9 +1976,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `retry_attempt` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -1984,16 +1986,14 @@ The field `retry_attempt` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `retry_attempt` is defined
+
+File "workplace_shape_mismatch.php", line 13, character 4 - line 13, character 18:
 
  12 |   ?'tag' => string,
  13 |   ?»'retry_attempt'« => int,
  14 |   ?'earlyreturn' => int,
  15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
-
-File "workplace_shape_mismatch.php", line 13, character 4 - line 13, character 18:
 
 Step 1 of 4
 
@@ -2001,15 +2001,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
+
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
  89 |     ?AsyncTierJobOptions $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -2018,13 +2020,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -2033,17 +2035,17 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -2052,9 +2054,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -2063,9 +2065,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2073,13 +2075,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -2088,9 +2090,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2098,15 +2100,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -2116,19 +2116,21 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 13, character 23 - line 13, character 25:
+
  12 |   ?'tag' => string,
  13 |   ?'retry_attempt' => »int«,
  14 |   ?'earlyreturn' => int,
  15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
 
-File "workplace_shape_mismatch.php", line 13, character 23 - line 13, character 25:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -2137,9 +2139,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `scheduling_uid` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2147,16 +2149,14 @@ The field `scheduling_uid` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `scheduling_uid` is defined
+
+File "workplace_shape_mismatch.php", line 11, character 4 - line 11, character 19:
 
  10 |   ?'region' => string,
  11 |   ?»'scheduling_uid'« => int,
  12 |   ?'tag' => string,
  13 |   ?'retry_attempt' => int,
-
-File "workplace_shape_mismatch.php", line 11, character 4 - line 11, character 19:
 
 Step 1 of 4
 
@@ -2164,15 +2164,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
+
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
  89 |     ?AsyncTierJobOptions $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -2181,13 +2183,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -2196,17 +2198,17 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -2215,9 +2217,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -2226,9 +2228,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2236,13 +2238,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -2251,9 +2253,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2261,15 +2263,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -2279,19 +2279,21 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 11, character 24 - line 11, character 26:
+
  10 |   ?'region' => string,
  11 |   ?'scheduling_uid' => »int«,
  12 |   ?'tag' => string,
  13 |   ?'retry_attempt' => int,
 
-File "workplace_shape_mismatch.php", line 11, character 24 - line 11, character 26:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -2300,9 +2302,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `send_schedule_cats` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2310,15 +2312,13 @@ The field `send_schedule_cats` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `send_schedule_cats` is defined
+
+File "workplace_shape_mismatch.php", line 22, character 4 - line 22, character 23:
 
  21 |   ?'fifo_dedup_key' => string,
  22 |   ?»'send_schedule_cats'« => bool,
  23 | );
-
-File "workplace_shape_mismatch.php", line 22, character 4 - line 22, character 23:
 
 Step 1 of 4
 
@@ -2326,15 +2326,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
+
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
  89 |     ?AsyncTierJobOptions $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -2343,13 +2345,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -2358,17 +2360,17 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -2377,9 +2379,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -2388,9 +2390,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2398,13 +2400,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -2413,9 +2415,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2423,15 +2425,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -2441,18 +2441,20 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 22, character 28 - line 22, character 31:
+
  21 |   ?'fifo_dedup_key' => string,
  22 |   ?'send_schedule_cats' => »bool«,
  23 | );
 
-File "workplace_shape_mismatch.php", line 22, character 28 - line 22, character 31:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -2461,9 +2463,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `serialization_format` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2471,9 +2473,9 @@ The field `serialization_format` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `serialization_format` is defined
+
+File "workplace_shape_mismatch.php", line 6, character 4 - line 6, character 25:
 
  3 | class SerializationFormat {}
  4 | 
@@ -2482,13 +2484,13 @@ The field `serialization_format` is defined
  7 |   ?'execute_after' => int,
  8 |   ?'execute_before' => int,
 
-File "workplace_shape_mismatch.php", line 6, character 4 - line 6, character 25:
-
 Step 1 of 4
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
+
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
 
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
@@ -2496,9 +2498,9 @@ The subtype comes from this function or method declaration
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -2507,13 +2509,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -2522,9 +2524,9 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  3 | class SerializationFormat {}
  4 | 
@@ -2533,9 +2535,9 @@ which is defined here
  7 |   ?'execute_after' => int,
  8 |   ?'execute_before' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -2544,9 +2546,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -2555,9 +2557,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2565,13 +2567,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -2580,9 +2582,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2590,15 +2592,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -2608,6 +2608,8 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 6, character 30 - line 6, character 48:
+
  3 | class SerializationFormat {}
  4 | 
  5 | type AsyncJobOptions = shape(
@@ -2615,9 +2617,9 @@ The subtype comes from this hint
  7 |   ?'execute_after' => int,
  8 |   ?'execute_before' => int,
 
-File "workplace_shape_mismatch.php", line 6, character 30 - line 6, character 48:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 3, character 7 - line 3, character 25:
 
  3 | class »SerializationFormat« {}
  4 | 
@@ -2626,14 +2628,14 @@ which is defined here
  7 |   ?'execute_after' => int,
  8 |   ?'execute_before' => int,
 
-File "workplace_shape_mismatch.php", line 3, character 7 - line 3, character 25:
-
 The supertype didn't exist because the field was missing.
-
 
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4057] Invalid argument
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -2642,9 +2644,9 @@ error: Typing[4057] Invalid argument
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The field `tag` is missing
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2652,16 +2654,14 @@ The field `tag` is missing
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 The field `tag` is defined
+
+File "workplace_shape_mismatch.php", line 12, character 4 - line 12, character 8:
 
  11 |   ?'scheduling_uid' => int,
  12 |   ?»'tag'« => string,
  13 |   ?'retry_attempt' => int,
  14 |   ?'earlyreturn' => int,
-
-File "workplace_shape_mismatch.php", line 12, character 4 - line 12, character 8:
 
 Step 1 of 4
 
@@ -2669,15 +2669,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
+
  87 | class Stuff {
  88 |   public static async function »genAsyncJob«(
  89 |     ?AsyncTierJobOptions $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 88, character 32 - line 88, character 42:
-
 The supertype comes from this expression
+
+File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -2686,13 +2688,13 @@ The supertype comes from this expression
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 44:
-
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -2701,17 +2703,17 @@ The subtype comes from this hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
 
  5 | type »AsyncJobOptions« = shape(
  6 |   ?'serialization_format' => SerializationFormat,
  7 |   ?'execute_after' => int,
 
-File "workplace_shape_mismatch.php", line 5, character 6 - line 5, character 20:
-
 and flows into this expression as the parameter hint
+
+File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions »$options« = shape(),
@@ -2720,9 +2722,9 @@ and flows into this expression as the parameter hint
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
-
 which itself flows into this expression as the type of the local variable
+
+File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
  94 |   public static final async function genScheduleTestable(
  95 |     AsyncJobOptions $options = shape(),
@@ -2731,9 +2733,9 @@ which itself flows into this expression as the type of the local variable
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2741,13 +2743,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
-
 Step 3 of 4
 
 The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
 
 The subtype is the same as before.
+
+File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
 
  94 |   public static final async function genScheduleTestable(
  95 |     »AsyncJobOptions« $options = shape(),
@@ -2756,9 +2758,9 @@ The subtype is the same as before.
  98 |   }
  99 | }
 
-File "workplace_shape_mismatch.php", line 95, character 5 - line 95, character 19:
-
 The supertype comes from this hint
+
+File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
 
  87 | class Stuff {
  88 |   public static async function genAsyncJob(
@@ -2766,15 +2768,13 @@ The supertype comes from this hint
  90 |   ): Awaitable<string> {
  91 |     return "";
 
-File "workplace_shape_mismatch.php", line 89, character 6 - line 89, character 24:
-
 which is defined here
+
+File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
  74 | type »AsyncTierJobOptions« = shape(
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
-
-File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 24:
 
 Step 4 of 4
 
@@ -2784,16 +2784,16 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_shape_mismatch.php", line 12, character 13 - line 12, character 18:
+
  11 |   ?'scheduling_uid' => int,
  12 |   ?'tag' => »string«,
  13 |   ?'retry_attempt' => int,
  14 |   ?'earlyreturn' => int,
 
-File "workplace_shape_mismatch.php", line 12, character 13 - line 12, character 18:
-
 The supertype didn't exist because the field was missing.
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 17 errors found.

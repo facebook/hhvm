@@ -1,14 +1,16 @@
 error: Typing[4110] Invalid argument
 
+File "generic_subtyping_upper_bound_2.php", line 12, character 20 - line 12, character 21:
+
   9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
  10 | 
  11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
  12 |   rcvr_both_bounds(»$x«);
  13 | }
 
-File "generic_subtyping_upper_bound_2.php", line 12, character 20 - line 12, character 21:
-
 Expected `D`
+
+File "generic_subtyping_upper_bound_2.php", line 9, character 32 - line 9, character 32:
 
  9 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
 10 | 
@@ -16,17 +18,15 @@ Expected `D`
 12 |   rcvr_both_bounds($x);
 13 | }
 
-File "generic_subtyping_upper_bound_2.php", line 9, character 32 - line 9, character 32:
-
 But got `A`
+
+File "generic_subtyping_upper_bound_2.php", line 11, character 49 - line 11, character 49:
 
   9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
  10 | 
  11 | function call_both_bounds_with_upper_bound<T as »A«>(T $x): void {
  12 |   rcvr_both_bounds($x);
  13 | }
-
-File "generic_subtyping_upper_bound_2.php", line 11, character 49 - line 11, character 49:
 
 Derivation:
 {
@@ -244,8 +244,8 @@ Derivation:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -409,10 +409,12 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4110] Invalid argument
+
+File "generic_subtyping_upper_bound_2.php", line 12, character 20 - line 12, character 21:
 
   9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
  10 | 
@@ -420,9 +422,9 @@ error: Typing[4110] Invalid argument
  12 |   rcvr_both_bounds(»$x«);
  13 | }
 
-File "generic_subtyping_upper_bound_2.php", line 12, character 20 - line 12, character 21:
-
 Expected `D`
+
+File "generic_subtyping_upper_bound_2.php", line 9, character 32 - line 9, character 32:
 
  9 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
 10 | 
@@ -430,17 +432,15 @@ Expected `D`
 12 |   rcvr_both_bounds($x);
 13 | }
 
-File "generic_subtyping_upper_bound_2.php", line 9, character 32 - line 9, character 32:
-
 But got `T as A`
+
+File "generic_subtyping_upper_bound_2.php", line 11, character 52 - line 11, character 52:
 
   9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
  10 | 
  11 | function call_both_bounds_with_upper_bound<T as A>(»T« $x): void {
  12 |   rcvr_both_bounds($x);
  13 | }
-
-File "generic_subtyping_upper_bound_2.php", line 11, character 52 - line 11, character 52:
 
 Derivation:
 {
@@ -605,8 +605,8 @@ Derivation:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -739,7 +739,7 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 2 errors found.

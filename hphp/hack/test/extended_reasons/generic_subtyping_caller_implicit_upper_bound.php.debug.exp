@@ -1,14 +1,16 @@
 error: Typing[4110] Invalid argument
 
+File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 17 - line 10, character 18:
+
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
 10 |   rcvr_concrete(»$x«);
 11 | }
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 17 - line 10, character 18:
-
 Expected `B`
+
+File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 - line 7, character 24:
 
  7 | function rcvr_concrete(»B« $x): void {}
  8 | 
@@ -16,17 +18,15 @@ Expected `B`
 10 |   rcvr_concrete($x);
 11 | }
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 - line 7, character 24:
-
 But got `mixed`
+
+File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 50 - line 9, character 50:
 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<»T«>(T $x): void {
 10 |   rcvr_concrete($x);
 11 | }
-
-File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 50 - line 9, character 50:
 
 Derivation:
 {
@@ -147,7 +147,7 @@ Derivation:
           {
             "Def":[
               {
-                "filename":"/tmp/cvDgblj1sg/supportdynamic.hhi",
+                "filename":"/tmp/jl8NA3iBSp/supportdynamic.hhi",
                 "line":6,
                 "char_start":11,
                 "char_end":20
@@ -201,7 +201,7 @@ Derivation:
           {
             "Def":[
               {
-                "filename":"/tmp/cvDgblj1sg/supportdynamic.hhi",
+                "filename":"/tmp/jl8NA3iBSp/supportdynamic.hhi",
                 "line":6,
                 "char_start":11,
                 "char_end":20
@@ -250,8 +250,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -348,7 +348,7 @@ Reason:
                   {
                     "Def":[
                       {
-                        "filename":"/tmp/cvDgblj1sg/supportdynamic.hhi",
+                        "filename":"/tmp/jl8NA3iBSp/supportdynamic.hhi",
                         "line":6,
                         "char_start":11,
                         "char_end":20
@@ -376,7 +376,7 @@ Reason:
             {
               "Def":[
                 {
-                  "filename":"/tmp/cvDgblj1sg/supportdynamic.hhi",
+                  "filename":"/tmp/jl8NA3iBSp/supportdynamic.hhi",
                   "line":6,
                   "char_start":11,
                   "char_end":20
@@ -426,10 +426,12 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4110] Invalid argument
+
+File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 17 - line 10, character 18:
 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
@@ -437,9 +439,9 @@ error: Typing[4110] Invalid argument
 10 |   rcvr_concrete(»$x«);
 11 | }
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 17 - line 10, character 18:
-
 Expected `B`
+
+File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 - line 7, character 24:
 
  7 | function rcvr_concrete(»B« $x): void {}
  8 | 
@@ -447,17 +449,15 @@ Expected `B`
 10 |   rcvr_concrete($x);
 11 | }
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 - line 7, character 24:
-
 But got `T`
+
+File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 53 - line 9, character 53:
 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(»T« $x): void {
 10 |   rcvr_concrete($x);
 11 | }
-
-File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 53 - line 9, character 53:
 
 Derivation:
 {
@@ -573,8 +573,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -687,7 +687,7 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 2 errors found.

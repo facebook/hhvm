@@ -1,14 +1,16 @@
 error: Typing[4110] Invalid argument
 
+File "ctor_generic.php", line 21, character 33 - line 21, character 39:
+
  19 | final class TestServiceWA extends TestServiceBase<int, string> {
  20 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
  21 |     parent::__construct($a, $b, »$sender«);
  22 |   }
  23 | }
 
-File "ctor_generic.php", line 21, character 33 - line 21, character 39:
-
 Expected `null`
+
+File "ctor_generic.php", line 20, character 63 - line 20, character 66:
 
  19 | final class TestServiceWA extends TestServiceBase<int, string> {
  20 |   public function __construct(int $a, string $b, ISender<int, »null«> $sender) {
@@ -16,17 +18,15 @@ Expected `null`
  22 |   }
  23 | }
 
-File "ctor_generic.php", line 20, character 63 - line 20, character 66:
-
 But got `string`
+
+File "ctor_generic.php", line 20, character 39 - line 20, character 44:
 
  19 | final class TestServiceWA extends TestServiceBase<int, string> {
  20 |   public function __construct(int $a, »string« $b, ISender<int, null> $sender) {
  21 |     parent::__construct($a, $b, $sender);
  22 |   }
  23 | }
-
-File "ctor_generic.php", line 20, character 39 - line 20, character 44:
 
 Derivation:
 {
@@ -276,8 +276,8 @@ Derivation:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -464,7 +464,7 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 1 error found.

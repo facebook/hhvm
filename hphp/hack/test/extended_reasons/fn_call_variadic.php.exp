@@ -1,14 +1,16 @@
 error: Typing[4110] Invalid argument
 
+File "fn_call_variadic.php", line 6, character 15 - line 6, character 16:
+
  3 | function foo(arraykey... $_): void {}
  4 | 
  5 | function bar(int $x, string $y, bool $z): void{
  6 |   foo($x, $y, »$z«);
  7 | }
 
-File "fn_call_variadic.php", line 6, character 15 - line 6, character 16:
-
 Expected `arraykey` (variadic argument)
+
+File "fn_call_variadic.php", line 3, character 26 - line 3, character 27:
 
  3 | function foo(arraykey... »$_«): void {}
  4 | 
@@ -16,9 +18,9 @@ Expected `arraykey` (variadic argument)
  6 |   foo($x, $y, $z);
  7 | }
 
-File "fn_call_variadic.php", line 3, character 26 - line 3, character 27:
-
 But got `bool`
+
+File "fn_call_variadic.php", line 5, character 33 - line 5, character 36:
 
  3 | function foo(arraykey... $_): void {}
  4 | 
@@ -26,13 +28,13 @@ But got `bool`
  6 |   foo($x, $y, $z);
  7 | }
 
-File "fn_call_variadic.php", line 5, character 33 - line 5, character 36:
-
 Step 1 of 2
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
+
+File "fn_call_variadic.php", line 3, character 10 - line 3, character 12:
 
  3 | function »foo«(arraykey... $_): void {}
  4 | 
@@ -40,17 +42,15 @@ The subtype comes from this function or method declaration
  6 |   foo($x, $y, $z);
  7 | }
 
-File "fn_call_variadic.php", line 3, character 10 - line 3, character 12:
-
 The supertype comes from this expression
+
+File "fn_call_variadic.php", line 6, character 3 - line 6, character 17:
 
  3 | function foo(arraykey... $_): void {}
  4 | 
  5 | function bar(int $x, string $y, bool $z): void{
  6 |   »foo($x, $y, $z)«;
  7 | }
-
-File "fn_call_variadic.php", line 6, character 3 - line 6, character 17:
 
 Step 2 of 2
 
@@ -60,15 +60,17 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "fn_call_variadic.php", line 5, character 33 - line 5, character 36:
+
  3 | function foo(arraykey... $_): void {}
  4 | 
  5 | function bar(int $x, string $y, »bool« $z): void{
  6 |   foo($x, $y, $z);
  7 | }
 
-File "fn_call_variadic.php", line 5, character 33 - line 5, character 36:
-
 and flows into this expression as the parameter hint
+
+File "fn_call_variadic.php", line 5, character 38 - line 5, character 39:
 
  3 | function foo(arraykey... $_): void {}
  4 | 
@@ -76,9 +78,9 @@ and flows into this expression as the parameter hint
  6 |   foo($x, $y, $z);
  7 | }
 
-File "fn_call_variadic.php", line 5, character 38 - line 5, character 39:
-
 which itself flows into this expression as the type of the local variable
+
+File "fn_call_variadic.php", line 6, character 15 - line 6, character 16:
 
  3 | function foo(arraykey... $_): void {}
  4 | 
@@ -86,16 +88,14 @@ which itself flows into this expression as the type of the local variable
  6 |   foo($x, $y, »$z«);
  7 | }
 
-File "fn_call_variadic.php", line 6, character 15 - line 6, character 16:
-
 The supertype comes from this variadic parameter declaration
+
+File "fn_call_variadic.php", line 3, character 26 - line 3, character 27:
 
  3 | function foo(arraykey... »$_«): void {}
  4 | 
  5 | function bar(int $x, string $y, bool $z): void{
  6 |   foo($x, $y, $z);
  7 | }
-
-File "fn_call_variadic.php", line 3, character 26 - line 3, character 27:
 
 1 error found.

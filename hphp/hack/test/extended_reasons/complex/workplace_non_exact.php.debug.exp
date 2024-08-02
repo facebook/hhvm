@@ -1,11 +1,13 @@
 error: NastCheck[3030] Lacking `__construct`, class `Test` does not initialize its private member(s): `c1`
 
+File "workplace_non_exact.php", line 8, character 16 - line 8, character 19:
+
  8 | abstract class »Test« {
  9 |   private C1 $c1;
 
-File "workplace_non_exact.php", line 8, character 16 - line 8, character 19:
-
 error: Typing[4110] Invalid argument
+
+File "workplace_non_exact.php", line 12, character 18 - line 12, character 26:
 
   8 | abstract class Test {
   9 |   private C1 $c1;
@@ -15,18 +17,18 @@ error: Typing[4110] Invalid argument
  13 |     $c1 = $this->c1;
  14 |     $c1->f($c1);
 
-File "workplace_non_exact.php", line 12, character 18 - line 12, character 26:
-
 Expected `<expr#3> as C1`
+
+File "workplace_non_exact.php", line 4, character 21 - line 4, character 24:
 
  3 | abstract class C1 {
  4 |   public function f(»this« $_): void {
  5 |   }
  6 | }
 
-File "workplace_non_exact.php", line 4, character 21 - line 4, character 24:
-
   where `<expr#3>` is a reference to this expression
+
+File "workplace_non_exact.php", line 12, character 5 - line 12, character 13:
 
   8 | abstract class Test {
   9 |   private C1 $c1;
@@ -36,9 +38,9 @@ File "workplace_non_exact.php", line 4, character 21 - line 4, character 24:
  13 |     $c1 = $this->c1;
  14 |     $c1->f($c1);
 
-File "workplace_non_exact.php", line 12, character 5 - line 12, character 13:
-
 But got `C1`
+
+File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
 
  8 | abstract class Test {
  9 |   private »C1« $c1;
@@ -47,8 +49,6 @@ But got `C1`
 12 |     $this->c1->f($this->c1);
 13 |     $c1 = $this->c1;
 14 |     $c1->f($c1);
-
-File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
 
 Derivation:
 {
@@ -130,8 +130,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -224,11 +224,13 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Since `C1` is not final
 
+File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
+
  8 | abstract class Test {
  9 |   private »C1« $c1;
 10 | 
@@ -236,11 +238,11 @@ Since `C1` is not final
 12 |     $this->c1->f($this->c1);
 13 |     $c1 = $this->c1;
 14 |     $c1->f($c1);
-
-File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
 
 this might not be a `C1`
 
+File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
+
  8 | abstract class Test {
  9 |   private »C1« $c1;
 10 | 
@@ -248,7 +250,5 @@ this might not be a `C1`
 12 |     $this->c1->f($this->c1);
 13 |     $c1 = $this->c1;
 14 |     $c1->f($c1);
-
-File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
 
 2 errors found.

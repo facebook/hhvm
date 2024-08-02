@@ -1,26 +1,26 @@
 error: Typing[4110] Invalid return type
 
+File "fn_ret.php", line 8, character 10 - line 8, character 14:
+
  7 | function bar(): bool {
  8 |   return »foo()«;
  9 | }
 
-File "fn_ret.php", line 8, character 10 - line 8, character 14:
-
 Expected `bool`
+
+File "fn_ret.php", line 7, character 17 - line 7, character 20:
 
  7 | function bar(): »bool« {
  8 |   return foo();
  9 | }
 
-File "fn_ret.php", line 7, character 17 - line 7, character 20:
-
 But got `int`
+
+File "fn_ret.php", line 3, character 17 - line 3, character 19:
 
  3 | function foo(): »int« {
  4 |   return 1;
  5 | }
-
-File "fn_ret.php", line 3, character 17 - line 3, character 19:
 
 Derivation:
 {
@@ -52,8 +52,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -81,32 +81,32 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4110] Invalid return type
+
+File "fn_ret.php", line 8, character 10 - line 8, character 14:
 
  7 | function bar(): bool {
  8 |   return »foo()«;
  9 | }
 
-File "fn_ret.php", line 8, character 10 - line 8, character 14:
-
 Expected `bool`
+
+File "fn_ret.php", line 7, character 17 - line 7, character 20:
 
  7 | function bar(): »bool« {
  8 |   return foo();
  9 | }
 
-File "fn_ret.php", line 7, character 17 - line 7, character 20:
-
 But got `int`
+
+File "fn_ret.php", line 3, character 17 - line 3, character 19:
 
  3 | function foo(): »int« {
  4 |   return 1;
  5 | }
-
-File "fn_ret.php", line 3, character 17 - line 3, character 19:
 
 Derivation:
 {
@@ -120,8 +120,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -131,7 +131,7 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 2 errors found.

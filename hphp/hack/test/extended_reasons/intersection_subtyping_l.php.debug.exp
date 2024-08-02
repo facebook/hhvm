@@ -1,29 +1,29 @@
 error: Typing[4110] Invalid return type
 
+File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
+
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
  9 |   return »$c«;
 10 | }
 
-File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
-
 Expected `C`
+
+File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
 
  7 | function inter_l((A & I) $ai): »C« {
  8 |   $c = $ai;
  9 |   return $c;
 10 | }
 
-File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
-
 But got `(A & I)`
+
+File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
 
  7 | function inter_l(»(A & I)« $ai): C {
  8 |   $c = $ai;
  9 |   return $c;
 10 | }
-
-File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
 
 Derivation:
 {
@@ -166,8 +166,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -306,35 +306,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4110] Invalid return type
+
+File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
  9 |   return »$c«;
 10 | }
 
-File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
-
 Expected `C`
+
+File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
 
  7 | function inter_l((A & I) $ai): »C« {
  8 |   $c = $ai;
  9 |   return $c;
 10 | }
 
-File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
-
 But got `A`
+
+File "intersection_subtyping_l.php", line 7, character 19 - line 7, character 19:
 
  7 | function inter_l((»A« & I) $ai): C {
  8 |   $c = $ai;
  9 |   return $c;
 10 | }
-
-File "intersection_subtyping_l.php", line 7, character 19 - line 7, character 19:
 
 Derivation:
 {
@@ -531,8 +531,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -702,35 +702,35 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4110] Invalid return type
+
+File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
  9 |   return »$c«;
 10 | }
 
-File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
-
 Expected `C`
+
+File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
 
  7 | function inter_l((A & I) $ai): »C« {
  8 |   $c = $ai;
  9 |   return $c;
 10 | }
 
-File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
-
 But got `I`
+
+File "intersection_subtyping_l.php", line 7, character 23 - line 7, character 23:
 
  7 | function inter_l((A & »I«) $ai): C {
  8 |   $c = $ai;
  9 |   return $c;
 10 | }
-
-File "intersection_subtyping_l.php", line 7, character 23 - line 7, character 23:
 
 Derivation:
 {
@@ -927,8 +927,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -1098,7 +1098,7 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 3 errors found.

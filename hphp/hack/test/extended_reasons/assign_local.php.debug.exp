@@ -1,28 +1,28 @@
 error: Typing[4110] Invalid argument
 
+File "assign_local.php", line 11, character 7 - line 11, character 8:
+
   9 | function bar(Super $f): void {
  10 |   $g = $f;
  11 |   foo(»$g«);
  12 | }
 
-File "assign_local.php", line 11, character 7 - line 11, character 8:
-
 Expected `Sub`
+
+File "assign_local.php", line 7, character 14 - line 7, character 16:
 
  7 | function foo(»Sub« $_): void {}
  8 | 
  9 | function bar(Super $f): void {
 
-File "assign_local.php", line 7, character 14 - line 7, character 16:
-
 But got `Super`
+
+File "assign_local.php", line 9, character 14 - line 9, character 18:
 
  9 | function bar(»Super« $f): void {
 10 |   $g = $f;
 11 |   foo($g);
 12 | }
-
-File "assign_local.php", line 9, character 14 - line 9, character 18:
 
 Derivation:
 {
@@ -122,8 +122,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -220,7 +220,7 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 1 error found.

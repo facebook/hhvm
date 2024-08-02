@@ -1,26 +1,26 @@
 error: Typing[4110] Invalid return type
 
+File "workplace_invariant.php", line 16, character 12 - line 16, character 21:
+
  15 | function getClass<Tu as num>(): classname<bar<Tu>> {
  16 |     return »foo::class«;
  17 | }
 
-File "workplace_invariant.php", line 16, character 12 - line 16, character 21:
-
 Expected `int`
+
+File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
 
  8 | final class foo implements bar<»int«> {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
-
 But got `num`
+
+File "workplace_invariant.php", line 15, character 25 - line 15, character 27:
 
  15 | function getClass<Tu as »num«>(): classname<bar<Tu>> {
  16 |     return foo::class;
  17 | }
-
-File "workplace_invariant.php", line 15, character 25 - line 15, character 27:
 
 Step 1 of 5
 
@@ -28,36 +28,36 @@ I started by checking this subtype relationship.
 
 The subtype comes from this implicitly defined constant `::class` of class `\foo`
 
+File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
+
  8 | final class »foo« implements bar<int> {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
-
 which is defined here
+
+File "/tmp/YFjs8IG871/classname.hhi", line 19, character 11 - line 19, character 19:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype »classname«<+T> as typename<T> = typename<T>;
  20 | 
  21 |   /**
 
-File "/tmp/jfPcQQJICx/classname.hhi", line 19, character 11 - line 19, character 19:
-
 and flows into this expression because it is used in a return position
+
+File "workplace_invariant.php", line 16, character 5 - line 16, character 22:
 
  15 | function getClass<Tu as num>(): classname<bar<Tu>> {
  16 |     »return foo::class;«
  17 | }
 
-File "workplace_invariant.php", line 16, character 5 - line 16, character 22:
-
 The supertype comes from this hint
+
+File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
  15 | function getClass<Tu as num>(): »classname<bar<Tu>>« {
  16 |     return foo::class;
  17 | }
-
-File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
 Step 2 of 5
 
@@ -65,35 +65,35 @@ Step 2 of 5
 
 The subtype comes from this implicitly defined constant `::class` of class `\foo`
 
+File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
+
  8 | final class »foo« implements bar<int> {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
-
 and flows into this expression via the generic `this`
+
+File "workplace_invariant.php", line 16, character 12 - line 16, character 14:
 
  15 | function getClass<Tu as num>(): classname<bar<Tu>> {
  16 |     return »foo«::class;
  17 | }
 
-File "workplace_invariant.php", line 16, character 12 - line 16, character 14:
-
 The supertype comes from this hint
+
+File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
 
  15 | function getClass<Tu as num>(): classname<»bar<Tu>«> {
  16 |     return foo::class;
  17 | }
 
-File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
-
 which is defined here
+
+File "workplace_invariant.php", line 3, character 11 - line 3, character 13:
 
  3 | interface »bar«<T as num> {
  4 |   public function get(): T;
  5 | }
-
-File "workplace_invariant.php", line 3, character 11 - line 3, character 13:
 
 Step 3 of 5
 
@@ -101,19 +101,19 @@ The subtype extends or implements a class or interface so next I checked that wa
 
 The subtype comes from this hint
 
+File "workplace_invariant.php", line 8, character 28 - line 8, character 35:
+
  8 | final class foo implements »bar<int>« {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 28 - line 8, character 35:
-
 The supertype is the same as before.
+
+File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
 
  15 | function getClass<Tu as num>(): classname<»bar<Tu>«> {
  16 |     return foo::class;
  17 | }
-
-File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
 
 Step 4 of 5
 
@@ -121,19 +121,19 @@ Step 4 of 5
 
 The subtype comes from this hint
 
+File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
+
  15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
  16 |     return foo::class;
  17 | }
 
-File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
-
 The supertype comes from this hint
+
+File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
 
  8 | final class foo implements bar<»int«> {
  9 |   public function get(): int {
 10 |     return 1;
-
-File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
 
 Step 5 of 5
 
@@ -143,43 +143,43 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_invariant.php", line 15, character 25 - line 15, character 27:
+
  15 | function getClass<Tu as »num«>(): classname<bar<Tu>> {
  16 |     return foo::class;
  17 | }
 
-File "workplace_invariant.php", line 15, character 25 - line 15, character 27:
-
 The supertype is the same as before.
+
+File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
 
  8 | final class foo implements bar<»int«> {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
-
 error: Typing[4110] Invalid return type
+
+File "workplace_invariant.php", line 16, character 12 - line 16, character 21:
 
  15 | function getClass<Tu as num>(): classname<bar<Tu>> {
  16 |     return »foo::class«;
  17 | }
-
-File "workplace_invariant.php", line 16, character 12 - line 16, character 21:
 
 Expected `int`
 
+File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
+
  8 | final class foo implements bar<»int«> {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
-
 But got `Tu as num`
+
+File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
 
  15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
  16 |     return foo::class;
  17 | }
-
-File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
 
 Step 1 of 4
 
@@ -187,36 +187,36 @@ I started by checking this subtype relationship.
 
 The subtype comes from this implicitly defined constant `::class` of class `\foo`
 
+File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
+
  8 | final class »foo« implements bar<int> {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
-
 which is defined here
+
+File "/tmp/YFjs8IG871/classname.hhi", line 19, character 11 - line 19, character 19:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype »classname«<+T> as typename<T> = typename<T>;
  20 | 
  21 |   /**
 
-File "/tmp/jfPcQQJICx/classname.hhi", line 19, character 11 - line 19, character 19:
-
 and flows into this expression because it is used in a return position
+
+File "workplace_invariant.php", line 16, character 5 - line 16, character 22:
 
  15 | function getClass<Tu as num>(): classname<bar<Tu>> {
  16 |     »return foo::class;«
  17 | }
 
-File "workplace_invariant.php", line 16, character 5 - line 16, character 22:
-
 The supertype comes from this hint
+
+File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
  15 | function getClass<Tu as num>(): »classname<bar<Tu>>« {
  16 |     return foo::class;
  17 | }
-
-File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
 Step 2 of 4
 
@@ -224,35 +224,35 @@ Step 2 of 4
 
 The subtype comes from this implicitly defined constant `::class` of class `\foo`
 
+File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
+
  8 | final class »foo« implements bar<int> {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
-
 and flows into this expression via the generic `this`
+
+File "workplace_invariant.php", line 16, character 12 - line 16, character 14:
 
  15 | function getClass<Tu as num>(): classname<bar<Tu>> {
  16 |     return »foo«::class;
  17 | }
 
-File "workplace_invariant.php", line 16, character 12 - line 16, character 14:
-
 The supertype comes from this hint
+
+File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
 
  15 | function getClass<Tu as num>(): classname<»bar<Tu>«> {
  16 |     return foo::class;
  17 | }
 
-File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
-
 which is defined here
+
+File "workplace_invariant.php", line 3, character 11 - line 3, character 13:
 
  3 | interface »bar«<T as num> {
  4 |   public function get(): T;
  5 | }
-
-File "workplace_invariant.php", line 3, character 11 - line 3, character 13:
 
 Step 3 of 4
 
@@ -260,19 +260,19 @@ The subtype extends or implements a class or interface so next I checked that wa
 
 The subtype comes from this hint
 
+File "workplace_invariant.php", line 8, character 28 - line 8, character 35:
+
  8 | final class foo implements »bar<int>« {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 28 - line 8, character 35:
-
 The supertype is the same as before.
+
+File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
 
  15 | function getClass<Tu as num>(): classname<»bar<Tu>«> {
  16 |     return foo::class;
  17 | }
-
-File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
 
 Step 4 of 4
 
@@ -282,43 +282,43 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
+
  15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
  16 |     return foo::class;
  17 | }
 
-File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
-
 The supertype comes from this hint
+
+File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
 
  8 | final class foo implements bar<»int«> {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
-
 error: Typing[4110] Invalid return type
+
+File "workplace_invariant.php", line 16, character 12 - line 16, character 21:
 
  15 | function getClass<Tu as num>(): classname<bar<Tu>> {
  16 |     return »foo::class«;
  17 | }
 
-File "workplace_invariant.php", line 16, character 12 - line 16, character 21:
-
 Expected `Tu`
+
+File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
 
  15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
  16 |     return foo::class;
  17 | }
 
-File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
-
 But got `int`
+
+File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
 
  8 | final class foo implements bar<»int«> {
  9 |   public function get(): int {
 10 |     return 1;
-
-File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
 
 Step 1 of 4
 
@@ -326,36 +326,36 @@ I started by checking this subtype relationship.
 
 The subtype comes from this implicitly defined constant `::class` of class `\foo`
 
+File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
+
  8 | final class »foo« implements bar<int> {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
-
 which is defined here
+
+File "/tmp/YFjs8IG871/classname.hhi", line 19, character 11 - line 19, character 19:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype »classname«<+T> as typename<T> = typename<T>;
  20 | 
  21 |   /**
 
-File "/tmp/jfPcQQJICx/classname.hhi", line 19, character 11 - line 19, character 19:
-
 and flows into this expression because it is used in a return position
+
+File "workplace_invariant.php", line 16, character 5 - line 16, character 22:
 
  15 | function getClass<Tu as num>(): classname<bar<Tu>> {
  16 |     »return foo::class;«
  17 | }
 
-File "workplace_invariant.php", line 16, character 5 - line 16, character 22:
-
 The supertype comes from this hint
+
+File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
  15 | function getClass<Tu as num>(): »classname<bar<Tu>>« {
  16 |     return foo::class;
  17 | }
-
-File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
 Step 2 of 4
 
@@ -363,35 +363,35 @@ Step 2 of 4
 
 The subtype comes from this implicitly defined constant `::class` of class `\foo`
 
+File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
+
  8 | final class »foo« implements bar<int> {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
-
 and flows into this expression via the generic `this`
+
+File "workplace_invariant.php", line 16, character 12 - line 16, character 14:
 
  15 | function getClass<Tu as num>(): classname<bar<Tu>> {
  16 |     return »foo«::class;
  17 | }
 
-File "workplace_invariant.php", line 16, character 12 - line 16, character 14:
-
 The supertype comes from this hint
+
+File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
 
  15 | function getClass<Tu as num>(): classname<»bar<Tu>«> {
  16 |     return foo::class;
  17 | }
 
-File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
-
 which is defined here
+
+File "workplace_invariant.php", line 3, character 11 - line 3, character 13:
 
  3 | interface »bar«<T as num> {
  4 |   public function get(): T;
  5 | }
-
-File "workplace_invariant.php", line 3, character 11 - line 3, character 13:
 
 Step 3 of 4
 
@@ -399,19 +399,19 @@ The subtype extends or implements a class or interface so next I checked that wa
 
 The subtype comes from this hint
 
+File "workplace_invariant.php", line 8, character 28 - line 8, character 35:
+
  8 | final class foo implements »bar<int>« {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 28 - line 8, character 35:
-
 The supertype is the same as before.
+
+File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
 
  15 | function getClass<Tu as num>(): classname<»bar<Tu>«> {
  16 |     return foo::class;
  17 | }
-
-File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
 
 Step 4 of 4
 
@@ -421,18 +421,18 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
+
  8 | final class foo implements bar<»int«> {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
-
 The supertype comes from this hint
+
+File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
 
  15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
  16 |     return foo::class;
  17 | }
-
-File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
 
 3 errors found.

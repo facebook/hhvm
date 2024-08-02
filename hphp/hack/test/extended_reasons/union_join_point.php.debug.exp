@@ -1,25 +1,25 @@
 error: Typing[4110] Invalid return type
 
+File "union_join_point.php", line 12, character 10 - line 12, character 11:
+
  12 |   return »$z«;
  13 | }
 
-File "union_join_point.php", line 12, character 10 - line 12, character 11:
-
 Expected `A`
+
+File "union_join_point.php", line 5, character 37 - line 5, character 37:
 
  5 | function foo(bool  $p, A $x, B $y): »A« {
  6 |   if($p){
  7 |     $z = $x;
 
-File "union_join_point.php", line 5, character 37 - line 5, character 37:
-
 But got `B`
+
+File "union_join_point.php", line 5, character 30 - line 5, character 30:
 
  5 | function foo(bool  $p, A $x, »B« $y): A {
  6 |   if($p){
  7 |     $z = $x;
-
-File "union_join_point.php", line 5, character 30 - line 5, character 30:
 
 Derivation:
 {
@@ -138,8 +138,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -243,7 +243,7 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 1 error found.

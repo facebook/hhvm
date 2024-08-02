@@ -1,21 +1,23 @@
 error: Typing[4110] Invalid argument
 
+File "assign_obj_get.php", line 16, character 7 - line 16, character 8:
+
  14 | function bar(SuperBox $f): void {
  15 |   $g = $f->get();
  16 |   foo(»$g«);
  17 | }
 
-File "assign_obj_get.php", line 16, character 7 - line 16, character 8:
-
 Expected `Sub`
+
+File "assign_obj_get.php", line 12, character 14 - line 12, character 16:
 
  12 | function foo(»Sub« $_): void {}
  13 |
  14 | function bar(SuperBox $f): void {
 
-File "assign_obj_get.php", line 12, character 14 - line 12, character 16:
-
 But got `Super`
+
+File "assign_obj_get.php", line 7, character 26 - line 7, character 30:
 
  3 | class Super {}
  4 | class Sub extends Super {}
@@ -25,28 +27,26 @@ But got `Super`
  8 |     return $this->item;
  9 |   }
 
-File "assign_obj_get.php", line 7, character 26 - line 7, character 30:
-
 Step 1 of 2
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "assign_obj_get.php", line 12, character 10 - line 12, character 12:
+
  12 | function »foo«(Sub $_): void {}
  13 |
  14 | function bar(SuperBox $f): void {
 
-File "assign_obj_get.php", line 12, character 10 - line 12, character 12:
-
 The supertype comes from this expression
+
+File "assign_obj_get.php", line 16, character 3 - line 16, character 9:
 
  14 | function bar(SuperBox $f): void {
  15 |   $g = $f->get();
  16 |   »foo($g)«;
  17 | }
-
-File "assign_obj_get.php", line 16, character 3 - line 16, character 9:
 
 Step 2 of 2
 
@@ -56,6 +56,8 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "assign_obj_get.php", line 7, character 26 - line 7, character 30:
+
  3 | class Super {}
  4 | class Sub extends Super {}
  5 | class SuperBox {
@@ -64,52 +66,52 @@ The subtype comes from this hint
  8 |     return $this->item;
  9 |   }
 
-File "assign_obj_get.php", line 7, character 26 - line 7, character 30:
-
 which is defined here
+
+File "assign_obj_get.php", line 3, character 7 - line 3, character 11:
 
  3 | class »Super« {}
  4 | class Sub extends Super {}
  5 | class SuperBox {
 
-File "assign_obj_get.php", line 3, character 7 - line 3, character 11:
-
 and flows into this expression because of a function call
+
+File "assign_obj_get.php", line 15, character 8 - line 15, character 16:
 
  14 | function bar(SuperBox $f): void {
  15 |   $g = »$f->get()«;
  16 |   foo($g);
  17 | }
 
-File "assign_obj_get.php", line 15, character 8 - line 15, character 16:
-
 which itself flows into this expression via an assignment
+
+File "assign_obj_get.php", line 15, character 3 - line 15, character 4:
 
  14 | function bar(SuperBox $f): void {
  15 |   »$g« = $f->get();
  16 |   foo($g);
  17 | }
 
-File "assign_obj_get.php", line 15, character 3 - line 15, character 4:
-
 which itself flows into this expression as the type of the local variable
+
+File "assign_obj_get.php", line 16, character 7 - line 16, character 8:
 
  14 | function bar(SuperBox $f): void {
  15 |   $g = $f->get();
  16 |   foo(»$g«);
  17 | }
 
-File "assign_obj_get.php", line 16, character 7 - line 16, character 8:
-
 The supertype comes from this hint
+
+File "assign_obj_get.php", line 12, character 14 - line 12, character 16:
 
  12 | function foo(»Sub« $_): void {}
  13 |
  14 | function bar(SuperBox $f): void {
 
-File "assign_obj_get.php", line 12, character 14 - line 12, character 16:
-
 which is defined here
+
+File "assign_obj_get.php", line 4, character 7 - line 4, character 9:
 
  3 | class Super {}
  4 | class »Sub« extends Super {}
@@ -118,7 +120,5 @@ which is defined here
  7 |   public function get(): Super {
  8 |     return $this->item;
  9 |   }
-
-File "assign_obj_get.php", line 4, character 7 - line 4, character 9:
 
 1 error found.

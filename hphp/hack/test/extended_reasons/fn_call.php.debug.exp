@@ -1,14 +1,16 @@
 error: Typing[4110] Invalid argument
 
+File "fn_call.php", line 6, character 7 - line 6, character 8:
+
  3 | function foo(string $_): void {}
  4 | 
  5 | function bar(int $y ): void{
  6 |   foo(»$y«);
  7 | }
 
-File "fn_call.php", line 6, character 7 - line 6, character 8:
-
 Expected `string`
+
+File "fn_call.php", line 3, character 14 - line 3, character 19:
 
  3 | function foo(»string« $_): void {}
  4 | 
@@ -16,17 +18,15 @@ Expected `string`
  6 |   foo($y);
  7 | }
 
-File "fn_call.php", line 3, character 14 - line 3, character 19:
-
 But got `int`
+
+File "fn_call.php", line 5, character 14 - line 5, character 16:
 
  3 | function foo(string $_): void {}
  4 | 
  5 | function bar(»int« $y ): void{
  6 |   foo($y);
  7 | }
-
-File "fn_call.php", line 5, character 14 - line 5, character 16:
 
 Derivation:
 {
@@ -70,8 +70,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -112,7 +112,7 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 1 error found.

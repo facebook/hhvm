@@ -1,14 +1,16 @@
 error: Typing[4163] Invalid argument
 
+File "shape_subtyping_5.php", line 14, character 35 - line 14, character 36:
+
  11 | function passes_optional_a_at_int_alias(
  12 |   optional_a_at_int $s,
  13 | ): void {
  14 |   expects_required_a_at_int_alias(»$s«);
  15 | }
 
-File "shape_subtyping_5.php", line 14, character 35 - line 14, character 36:
-
 The field `a` is **optional**
+
+File "shape_subtyping_5.php", line 12, character 3 - line 12, character 19:
 
  11 | function passes_optional_a_at_int_alias(
  12 |   »optional_a_at_int« $s,
@@ -16,23 +18,21 @@ The field `a` is **optional**
  14 |   expects_required_a_at_int_alias($s);
  15 | }
 
-File "shape_subtyping_5.php", line 12, character 3 - line 12, character 19:
-
 The field `a` is defined as **required**
+
+File "shape_subtyping_5.php", line 7, character 1 - line 7, character 17:
 
  6 | function expects_required_a_at_int_alias(
  7 | »required_a_at_int« $s,
  8 | ): void {
  9 | }
 
-File "shape_subtyping_5.php", line 7, character 1 - line 7, character 17:
-
 `a` is defined here
+
+File "shape_subtyping_5.php", line 3, character 39 - line 3, character 41:
 
  3 | type required_a_at_int = shape('a' => »int«);
  4 | type optional_a_at_int = shape(?'a' => int);
-
-File "shape_subtyping_5.php", line 3, character 39 - line 3, character 41:
 
 Derivation:
 {
@@ -124,8 +124,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -215,7 +215,7 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 1 error found.

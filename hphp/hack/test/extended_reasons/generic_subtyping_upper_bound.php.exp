@@ -1,14 +1,16 @@
 error: Typing[4110] Invalid argument
 
+File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, character 21:
+
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
 10 |   rcvr_upper_bound(»$x«);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, character 21:
-
 Expected `B`
+
+File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
 
  7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
  8 | 
@@ -16,17 +18,15 @@ Expected `B`
 10 |   rcvr_upper_bound($x);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
-
 But got `A`
+
+File "generic_subtyping_upper_bound.php", line 9, character 49 - line 9, character 49:
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as »A«>(T $x): void {
 10 |   rcvr_upper_bound($x);
 11 | }
-
-File "generic_subtyping_upper_bound.php", line 9, character 49 - line 9, character 49:
 
 I checked the subtype constraint in [Main] because it was implied by transitivity from the constraint in [Upper]
 
@@ -38,15 +38,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "generic_subtyping_upper_bound.php", line 7, character 10 - line 7, character 25:
+
  7 | function »rcvr_upper_bound«<T as B>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
 10 |   rcvr_upper_bound($x);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 7, character 10 - line 7, character 25:
-
 The supertype comes from this expression
+
+File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, character 22:
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
@@ -54,13 +56,13 @@ The supertype comes from this expression
 10 |   »rcvr_upper_bound($x)«;
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, character 22:
-
 [Main] Step 2 of 3
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
 The subtype comes from this hint
+
+File "generic_subtyping_upper_bound.php", line 9, character 52 - line 9, character 52:
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
@@ -68,9 +70,9 @@ The subtype comes from this hint
 10 |   rcvr_upper_bound($x);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 9, character 52 - line 9, character 52:
-
 and flows into this expression as the parameter hint
+
+File "generic_subtyping_upper_bound.php", line 9, character 54 - line 9, character 55:
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
@@ -78,9 +80,9 @@ and flows into this expression as the parameter hint
 10 |   rcvr_upper_bound($x);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 9, character 54 - line 9, character 55:
-
 which itself flows into this expression as the type of the local variable
+
+File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, character 21:
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
@@ -88,17 +90,15 @@ which itself flows into this expression as the type of the local variable
 10 |   rcvr_upper_bound(»$x«);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, character 21:
-
 The supertype comes from this constraint on the generic parameter
+
+File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
 
  7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
 10 |   rcvr_upper_bound($x);
 11 | }
-
-File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
 
 [Main] Step 3 of 3
 
@@ -108,30 +108,30 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "generic_subtyping_upper_bound.php", line 9, character 49 - line 9, character 49:
+
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as »A«>(T $x): void {
 10 |   rcvr_upper_bound($x);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 9, character 49 - line 9, character 49:
-
 which is defined here
+
+File "generic_subtyping_upper_bound.php", line 4, character 7 - line 4, character 7:
 
  4 | class »A« {}
  5 | class B extends A {}
 
-File "generic_subtyping_upper_bound.php", line 4, character 7 - line 4, character 7:
-
 The supertype is the same as before.
+
+File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
 
  7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
 10 |   rcvr_upper_bound($x);
 11 | }
-
-File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
 
 Upper
 
@@ -141,15 +141,17 @@ I started by checking this subtype relationship.
 
 The subtype comes from this generic parameter `T` of `rcvr_upper_bound`
 
+File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, character 18:
+
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
 10 |   »rcvr_upper_bound«($x);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, character 18:
-
 The supertype comes from this constraint on the generic parameter
+
+File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
 
  7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
  8 | 
@@ -157,9 +159,9 @@ The supertype comes from this constraint on the generic parameter
 10 |   rcvr_upper_bound($x);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
-
 error: Typing[4110] Invalid argument
+
+File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, character 21:
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
@@ -167,9 +169,9 @@ error: Typing[4110] Invalid argument
 10 |   rcvr_upper_bound(»$x«);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, character 21:
-
 Expected `B`
+
+File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
 
  7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
  8 | 
@@ -177,17 +179,15 @@ Expected `B`
 10 |   rcvr_upper_bound($x);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
-
 But got `T as A`
+
+File "generic_subtyping_upper_bound.php", line 9, character 52 - line 9, character 52:
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(»T« $x): void {
 10 |   rcvr_upper_bound($x);
 11 | }
-
-File "generic_subtyping_upper_bound.php", line 9, character 52 - line 9, character 52:
 
 I checked the subtype constraint in [Main] because it was implied by transitivity from the constraint in [Upper]
 
@@ -199,23 +199,23 @@ I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "generic_subtyping_upper_bound.php", line 7, character 10 - line 7, character 25:
+
  7 | function »rcvr_upper_bound«<T as B>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
 10 |   rcvr_upper_bound($x);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 7, character 10 - line 7, character 25:
-
 The supertype comes from this expression
+
+File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, character 22:
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
 10 |   »rcvr_upper_bound($x)«;
 11 | }
-
-File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, character 22:
 
 [Main] Step 2 of 2
 
@@ -225,15 +225,17 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "generic_subtyping_upper_bound.php", line 9, character 52 - line 9, character 52:
+
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(»T« $x): void {
 10 |   rcvr_upper_bound($x);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 9, character 52 - line 9, character 52:
-
 and flows into this expression as the parameter hint
+
+File "generic_subtyping_upper_bound.php", line 9, character 54 - line 9, character 55:
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
@@ -241,9 +243,9 @@ and flows into this expression as the parameter hint
 10 |   rcvr_upper_bound($x);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 9, character 54 - line 9, character 55:
-
 which itself flows into this expression as the type of the local variable
+
+File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, character 21:
 
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
@@ -251,17 +253,15 @@ which itself flows into this expression as the type of the local variable
 10 |   rcvr_upper_bound(»$x«);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, character 21:
-
 The supertype comes from this constraint on the generic parameter
+
+File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
 
  7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
 10 |   rcvr_upper_bound($x);
 11 | }
-
-File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
 
 Upper
 
@@ -271,22 +271,22 @@ I started by checking this subtype relationship.
 
 The subtype comes from this generic parameter `T` of `rcvr_upper_bound`
 
+File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, character 18:
+
  7 | function rcvr_upper_bound<T as B>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
 10 |   »rcvr_upper_bound«($x);
 11 | }
 
-File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, character 18:
-
 The supertype comes from this constraint on the generic parameter
+
+File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
 
  7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
 10 |   rcvr_upper_bound($x);
 11 | }
-
-File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
 
 2 errors found.

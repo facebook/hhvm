@@ -1,5 +1,7 @@
 error: Typing[4110] Invalid return type
 
+File "union_join_point.php", line 12, character 10 - line 12, character 11:
+
   8 |   } else{
   9 |     $z = $y;
  10 |   }
@@ -7,9 +9,9 @@ error: Typing[4110] Invalid return type
  12 |   return »$z«;
  13 | }
 
-File "union_join_point.php", line 12, character 10 - line 12, character 11:
-
 Expected `A`
+
+File "union_join_point.php", line 5, character 37 - line 5, character 37:
 
  1 | <?hh
  2 | class A {}
@@ -19,9 +21,9 @@ Expected `A`
  6 |   if($p){
  7 |     $z = $x;
 
-File "union_join_point.php", line 5, character 37 - line 5, character 37:
-
 But got `B`
+
+File "union_join_point.php", line 5, character 30 - line 5, character 30:
 
  1 | <?hh
  2 | class A {}
@@ -31,13 +33,13 @@ But got `B`
  6 |   if($p){
  7 |     $z = $x;
 
-File "union_join_point.php", line 5, character 30 - line 5, character 30:
-
 Step 1 of 2
 
 I started by checking this subtype relationship.
 
 The subtype comes from this expression
+
+File "union_join_point.php", line 6, character 3 - line 10, character 3:
 
  5 | function foo(bool  $p, A $x, B $y): A {
  6 |   »if($p){
@@ -48,9 +50,9 @@ The subtype comes from this expression
 11 | 
 12 |   return $z;
 
-File "union_join_point.php", line 6, character 3 - line 10, character 3:
-
 and flows into this expression as the type of the local variable
+
+File "union_join_point.php", line 12, character 10 - line 12, character 11:
 
   8 |   } else{
   9 |     $z = $y;
@@ -59,9 +61,9 @@ and flows into this expression as the type of the local variable
  12 |   return »$z«;
  13 | }
 
-File "union_join_point.php", line 12, character 10 - line 12, character 11:
-
 which itself flows into this expression because it is used in a return position
+
+File "union_join_point.php", line 12, character 3 - line 12, character 12:
 
   8 |   } else{
   9 |     $z = $y;
@@ -70,9 +72,9 @@ which itself flows into this expression because it is used in a return position
  12 |   »return $z;«
  13 | }
 
-File "union_join_point.php", line 12, character 3 - line 12, character 12:
-
 The supertype comes from this hint
+
+File "union_join_point.php", line 5, character 37 - line 5, character 37:
 
  1 | <?hh
  2 | class A {}
@@ -82,9 +84,9 @@ The supertype comes from this hint
  6 |   if($p){
  7 |     $z = $x;
 
-File "union_join_point.php", line 5, character 37 - line 5, character 37:
-
 which is defined here
+
+File "union_join_point.php", line 2, character 7 - line 2, character 7:
 
  1 | <?hh
  2 | class »A« {}
@@ -94,8 +96,6 @@ which is defined here
  6 |   if($p){
  7 |     $z = $x;
 
-File "union_join_point.php", line 2, character 7 - line 2, character 7:
-
 Step 2 of 2
 
 The subtype is a union type so next I checked each element of it was a subtype of the supertype.
@@ -103,6 +103,8 @@ The subtype is a union type so next I checked each element of it was a subtype o
 This step is the cause of the error.
 
 The subtype comes from this hint
+
+File "union_join_point.php", line 5, character 30 - line 5, character 30:
 
  1 | <?hh
  2 | class A {}
@@ -112,9 +114,9 @@ The subtype comes from this hint
  6 |   if($p){
  7 |     $z = $x;
 
-File "union_join_point.php", line 5, character 30 - line 5, character 30:
-
 which is defined here
+
+File "union_join_point.php", line 3, character 7 - line 3, character 7:
 
  1 | <?hh
  2 | class A {}
@@ -124,9 +126,9 @@ which is defined here
  6 |   if($p){
  7 |     $z = $x;
 
-File "union_join_point.php", line 3, character 7 - line 3, character 7:
-
 and flows into this expression as the parameter hint
+
+File "union_join_point.php", line 5, character 32 - line 5, character 33:
 
  1 | <?hh
  2 | class A {}
@@ -136,9 +138,9 @@ and flows into this expression as the parameter hint
  6 |   if($p){
  7 |     $z = $x;
 
-File "union_join_point.php", line 5, character 32 - line 5, character 33:
-
 which itself flows into this expression as the type of the local variable
+
+File "union_join_point.php", line 9, character 10 - line 9, character 11:
 
  8 |   } else{
  9 |     $z = »$y«;
@@ -147,9 +149,9 @@ which itself flows into this expression as the type of the local variable
 12 |   return $z;
 13 | }
 
-File "union_join_point.php", line 9, character 10 - line 9, character 11:
-
 which itself flows into this expression via an assignment
+
+File "union_join_point.php", line 9, character 5 - line 9, character 6:
 
  8 |   } else{
  9 |     »$z« = $y;
@@ -158,9 +160,9 @@ which itself flows into this expression via an assignment
 12 |   return $z;
 13 | }
 
-File "union_join_point.php", line 9, character 5 - line 9, character 6:
-
 The supertype is the same as before.
+
+File "union_join_point.php", line 5, character 37 - line 5, character 37:
 
  1 | <?hh
  2 | class A {}
@@ -169,7 +171,5 @@ The supertype is the same as before.
  5 | function foo(bool  $p, A $x, B $y): »A« {
  6 |   if($p){
  7 |     $z = $x;
-
-File "union_join_point.php", line 5, character 37 - line 5, character 37:
 
 1 error found.

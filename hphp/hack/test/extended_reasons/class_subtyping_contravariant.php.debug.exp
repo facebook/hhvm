@@ -1,14 +1,16 @@
 error: Typing[4110] Invalid argument
 
+File "class_subtyping_contravariant.php", line 14, character 14 - line 14, character 15:
+
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
  13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
  14 |   takes_my_a(»$x«);
  15 | }
 
-File "class_subtyping_contravariant.php", line 14, character 14 - line 14, character 15:
-
 Expected `Sub`
+
+File "class_subtyping_contravariant.php", line 13, character 40 - line 13, character 42:
 
  11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
  12 | 
@@ -16,17 +18,15 @@ Expected `Sub`
  14 |   takes_my_a($x);
  15 | }
 
-File "class_subtyping_contravariant.php", line 13, character 40 - line 13, character 42:
-
 But got `Super`
+
+File "class_subtyping_contravariant.php", line 11, character 30 - line 11, character 34:
 
  11 | function takes_my_a(MyA<Sub, »Super«, Super> $_): void {}
  12 | 
  13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
  14 |   takes_my_a($x);
  15 | }
-
-File "class_subtyping_contravariant.php", line 11, character 30 - line 11, character 34:
 
 Derivation:
 {
@@ -262,8 +262,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -474,7 +474,7 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 1 error found.

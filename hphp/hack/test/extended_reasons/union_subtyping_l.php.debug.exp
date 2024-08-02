@@ -1,26 +1,26 @@
 error: Typing[4110] Invalid return type
 
+File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
+
  6 | function union_l((A | B) $ab): C {
  7 |   return »$ab«;
  8 | }
 
-File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
-
 Expected `C`
+
+File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
 
  6 | function union_l((A | B) $ab): »C« {
  7 |   return $ab;
  8 | }
 
-File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
-
 But got `A`
+
+File "union_subtyping_l.php", line 6, character 19 - line 6, character 19:
 
  6 | function union_l((»A« | B) $ab): C {
  7 |   return $ab;
  8 | }
-
-File "union_subtyping_l.php", line 6, character 19 - line 6, character 19:
 
 Derivation:
 {
@@ -115,8 +115,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -196,32 +196,32 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4110] Invalid return type
+
+File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
 
  6 | function union_l((A | B) $ab): C {
  7 |   return »$ab«;
  8 | }
 
-File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
-
 Expected `C`
+
+File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
 
  6 | function union_l((A | B) $ab): »C« {
  7 |   return $ab;
  8 | }
 
-File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
-
 But got `B`
+
+File "union_subtyping_l.php", line 6, character 23 - line 6, character 23:
 
  6 | function union_l((A | »B«) $ab): C {
  7 |   return $ab;
  8 | }
-
-File "union_subtyping_l.php", line 6, character 23 - line 6, character 23:
 
 Derivation:
 {
@@ -316,8 +316,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -397,7 +397,7 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 2 errors found.

@@ -1,27 +1,27 @@
 error: Typing[4110] Invalid argument
 
+File "assign_obj_get.php", line 16, character 7 - line 16, character 8:
+
  15 |   $g = $f->get();
  16 |   foo(»$g«);
  17 | }
 
-File "assign_obj_get.php", line 16, character 7 - line 16, character 8:
-
 Expected `Sub`
+
+File "assign_obj_get.php", line 12, character 14 - line 12, character 16:
 
  12 | function foo(»Sub« $_): void {}
  13 | 
  14 | function bar(SuperBox $f): void {
 
-File "assign_obj_get.php", line 12, character 14 - line 12, character 16:
-
 But got `Super`
+
+File "assign_obj_get.php", line 7, character 26 - line 7, character 30:
 
  6 |   public function __construct(private Super $item) {}
  7 |   public function get(): »Super« {
  8 |     return $this->item;
  9 |   }
-
-File "assign_obj_get.php", line 7, character 26 - line 7, character 30:
 
 Derivation:
 {
@@ -109,8 +109,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -195,7 +195,7 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 1 error found.

@@ -1,11 +1,13 @@
 error: NastCheck[3030] Lacking `__construct`, class `Test` does not initialize its private member(s): `c1`
 
+File "workplace_non_exact.php", line 8, character 16 - line 8, character 19:
+
  8 | abstract class »Test« {
  9 |   private C1 $c1;
 
-File "workplace_non_exact.php", line 8, character 16 - line 8, character 19:
-
 error: Typing[4110] Invalid argument
+
+File "workplace_non_exact.php", line 12, character 18 - line 12, character 26:
 
   8 | abstract class Test {
   9 |   private C1 $c1;
@@ -15,18 +17,18 @@ error: Typing[4110] Invalid argument
  13 |     $c1 = $this->c1;
  14 |     $c1->f($c1);
 
-File "workplace_non_exact.php", line 12, character 18 - line 12, character 26:
-
 Expected `<expr#3> as C1`
+
+File "workplace_non_exact.php", line 4, character 21 - line 4, character 24:
 
  3 | abstract class C1 {
  4 |   public function f(»this« $_): void {
  5 |   }
  6 | }
 
-File "workplace_non_exact.php", line 4, character 21 - line 4, character 24:
-
   where `<expr#3>` is a reference to this expression
+
+File "workplace_non_exact.php", line 12, character 5 - line 12, character 13:
 
   8 | abstract class Test {
   9 |   private C1 $c1;
@@ -36,9 +38,9 @@ File "workplace_non_exact.php", line 4, character 21 - line 4, character 24:
  13 |     $c1 = $this->c1;
  14 |     $c1->f($c1);
 
-File "workplace_non_exact.php", line 12, character 5 - line 12, character 13:
-
 But got `C1`
+
+File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
 
  8 | abstract class Test {
  9 |   private »C1« $c1;
@@ -48,22 +50,22 @@ But got `C1`
 13 |     $c1 = $this->c1;
 14 |     $c1->f($c1);
 
-File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
-
 Step 1 of 2
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
+File "workplace_non_exact.php", line 4, character 19 - line 4, character 19:
+
  3 | abstract class C1 {
  4 |   public function »f«(this $_): void {
  5 |   }
  6 | }
 
-File "workplace_non_exact.php", line 4, character 19 - line 4, character 19:
-
 The supertype comes from this expression
+
+File "workplace_non_exact.php", line 12, character 5 - line 12, character 27:
 
   8 | abstract class Test {
   9 |   private C1 $c1;
@@ -73,8 +75,6 @@ The supertype comes from this expression
  13 |     $c1 = $this->c1;
  14 |     $c1->f($c1);
 
-File "workplace_non_exact.php", line 12, character 5 - line 12, character 27:
-
 Step 2 of 2
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
@@ -83,6 +83,8 @@ This step is the cause of the error.
 
 The subtype comes from this type variable
 
+File "workplace_non_exact.php", line 12, character 18 - line 12, character 26:
+
   8 | abstract class Test {
   9 |   private C1 $c1;
  10 | 
@@ -91,9 +93,9 @@ The subtype comes from this type variable
  13 |     $c1 = $this->c1;
  14 |     $c1->f($c1);
 
-File "workplace_non_exact.php", line 12, character 18 - line 12, character 26:
-
 which I solved to this hint
+
+File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
 
  8 | abstract class Test {
  9 |   private »C1« $c1;
@@ -103,18 +105,18 @@ which I solved to this hint
 13 |     $c1 = $this->c1;
 14 |     $c1->f($c1);
 
-File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
-
 which is defined here
+
+File "workplace_non_exact.php", line 3, character 16 - line 3, character 17:
 
  3 | abstract class »C1« {
  4 |   public function f(this $_): void {
  5 |   }
  6 | }
 
-File "workplace_non_exact.php", line 3, character 16 - line 3, character 17:
-
 and flows into this expression as the return hint
+
+File "workplace_non_exact.php", line 12, character 18 - line 12, character 26:
 
   8 | abstract class Test {
   9 |   private C1 $c1;
@@ -124,18 +126,18 @@ and flows into this expression as the return hint
  13 |     $c1 = $this->c1;
  14 |     $c1->f($c1);
 
-File "workplace_non_exact.php", line 12, character 18 - line 12, character 26:
-
 The supertype comes from this hint
+
+File "workplace_non_exact.php", line 4, character 21 - line 4, character 24:
 
  3 | abstract class C1 {
  4 |   public function f(»this« $_): void {
  5 |   }
  6 | }
 
-File "workplace_non_exact.php", line 4, character 21 - line 4, character 24:
-
 Since `C1` is not final
+
+File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
 
  8 | abstract class Test {
  9 |   private »C1« $c1;
@@ -144,11 +146,11 @@ Since `C1` is not final
 12 |     $this->c1->f($this->c1);
 13 |     $c1 = $this->c1;
 14 |     $c1->f($c1);
-
-File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
 
 this might not be a `C1`
 
+File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
+
  8 | abstract class Test {
  9 |   private »C1« $c1;
 10 | 
@@ -156,7 +158,5 @@ this might not be a `C1`
 12 |     $this->c1->f($this->c1);
 13 |     $c1 = $this->c1;
 14 |     $c1->f($c1);
-
-File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
 
 2 errors found.

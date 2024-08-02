@@ -1,26 +1,26 @@
 error: Typing[4110] Invalid return type
 
+File "workplace_invariant.php", line 16, character 12 - line 16, character 21:
+
  15 | function getClass<Tu as num>(): classname<bar<Tu>> {
  16 |     return »foo::class«;
  17 | }
 
-File "workplace_invariant.php", line 16, character 12 - line 16, character 21:
-
 Expected `int`
+
+File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
 
  8 | final class foo implements bar<»int«> {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
-
 But got `num`
+
+File "workplace_invariant.php", line 15, character 25 - line 15, character 27:
 
  15 | function getClass<Tu as »num«>(): classname<bar<Tu>> {
  16 |     return foo::class;
  17 | }
-
-File "workplace_invariant.php", line 15, character 25 - line 15, character 27:
 
 Derivation:
 {
@@ -34,7 +34,7 @@ Derivation:
                 {
                   "Def":[
                     {
-                      "filename":"/tmp/KIneb0ywY1/classname.hhi",
+                      "filename":"/tmp/mB6iHUBuFJ/classname.hhi",
                       "line":19,
                       "char_start":11,
                       "char_end":19
@@ -63,7 +63,7 @@ Derivation:
           {
             "Def":[
               {
-                "filename":"/tmp/KIneb0ywY1/classname.hhi",
+                "filename":"/tmp/mB6iHUBuFJ/classname.hhi",
                 "line":19,
                 "char_start":11,
                 "char_end":19
@@ -195,8 +195,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -251,7 +251,7 @@ Reason:
                                     {
                                       "Def":[
                                         {
-                                          "filename":"/tmp/KIneb0ywY1/classname.hhi",
+                                          "filename":"/tmp/mB6iHUBuFJ/classname.hhi",
                                           "line":19,
                                           "char_start":11,
                                           "char_end":19
@@ -280,7 +280,7 @@ Reason:
                               {
                                 "Def":[
                                   {
-                                    "filename":"/tmp/KIneb0ywY1/classname.hhi",
+                                    "filename":"/tmp/mB6iHUBuFJ/classname.hhi",
                                     "line":19,
                                     "char_start":11,
                                     "char_end":19
@@ -350,32 +350,32 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4110] Invalid return type
+
+File "workplace_invariant.php", line 16, character 12 - line 16, character 21:
 
  15 | function getClass<Tu as num>(): classname<bar<Tu>> {
  16 |     return »foo::class«;
  17 | }
 
-File "workplace_invariant.php", line 16, character 12 - line 16, character 21:
-
 Expected `int`
+
+File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
 
  8 | final class foo implements bar<»int«> {
  9 |   public function get(): int {
 10 |     return 1;
 
-File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
-
 But got `Tu as num`
+
+File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
 
  15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
  16 |     return foo::class;
  17 | }
-
-File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
 
 Derivation:
 {
@@ -389,7 +389,7 @@ Derivation:
                 {
                   "Def":[
                     {
-                      "filename":"/tmp/KIneb0ywY1/classname.hhi",
+                      "filename":"/tmp/mB6iHUBuFJ/classname.hhi",
                       "line":19,
                       "char_start":11,
                       "char_end":19
@@ -418,7 +418,7 @@ Derivation:
           {
             "Def":[
               {
-                "filename":"/tmp/KIneb0ywY1/classname.hhi",
+                "filename":"/tmp/mB6iHUBuFJ/classname.hhi",
                 "line":19,
                 "char_start":11,
                 "char_end":19
@@ -532,8 +532,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -585,7 +585,7 @@ Reason:
                               {
                                 "Def":[
                                   {
-                                    "filename":"/tmp/KIneb0ywY1/classname.hhi",
+                                    "filename":"/tmp/mB6iHUBuFJ/classname.hhi",
                                     "line":19,
                                     "char_start":11,
                                     "char_end":19
@@ -614,7 +614,7 @@ Reason:
                         {
                           "Def":[
                             {
-                              "filename":"/tmp/KIneb0ywY1/classname.hhi",
+                              "filename":"/tmp/mB6iHUBuFJ/classname.hhi",
                               "line":19,
                               "char_start":11,
                               "char_end":19
@@ -673,32 +673,32 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
 
+
 error: Typing[4110] Invalid return type
+
+File "workplace_invariant.php", line 16, character 12 - line 16, character 21:
 
  15 | function getClass<Tu as num>(): classname<bar<Tu>> {
  16 |     return »foo::class«;
  17 | }
 
-File "workplace_invariant.php", line 16, character 12 - line 16, character 21:
-
 Expected `Tu`
+
+File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
 
  15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
  16 |     return foo::class;
  17 | }
 
-File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
-
 But got `int`
+
+File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
 
  8 | final class foo implements bar<»int«> {
  9 |   public function get(): int {
 10 |     return 1;
-
-File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
 
 Derivation:
 {
@@ -712,7 +712,7 @@ Derivation:
                 {
                   "Def":[
                     {
-                      "filename":"/tmp/KIneb0ywY1/classname.hhi",
+                      "filename":"/tmp/mB6iHUBuFJ/classname.hhi",
                       "line":19,
                       "char_start":11,
                       "char_end":19
@@ -741,7 +741,7 @@ Derivation:
           {
             "Def":[
               {
-                "filename":"/tmp/KIneb0ywY1/classname.hhi",
+                "filename":"/tmp/mB6iHUBuFJ/classname.hhi",
                 "line":19,
                 "char_start":11,
                 "char_end":19
@@ -855,8 +855,8 @@ Derivation:
   ]
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 Reason:
 {
@@ -906,7 +906,7 @@ Reason:
                               {
                                 "Def":[
                                   {
-                                    "filename":"/tmp/KIneb0ywY1/classname.hhi",
+                                    "filename":"/tmp/mB6iHUBuFJ/classname.hhi",
                                     "line":19,
                                     "char_start":11,
                                     "char_end":19
@@ -935,7 +935,7 @@ Reason:
                         {
                           "Def":[
                             {
-                              "filename":"/tmp/KIneb0ywY1/classname.hhi",
+                              "filename":"/tmp/mB6iHUBuFJ/classname.hhi",
                               "line":19,
                               "char_start":11,
                               "char_end":19
@@ -996,7 +996,7 @@ Reason:
   }
 }
 
-
 File "", line 0, character 0 - line 0, character -1:
+
 
 3 errors found.

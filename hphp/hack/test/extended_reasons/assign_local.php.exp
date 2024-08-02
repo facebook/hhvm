@@ -1,13 +1,15 @@
 error: Typing[4110] Invalid argument
 
+File "assign_local.php", line 11, character 7 - line 11, character 8:
+
   9 | function bar(Super $f): void {
  10 |   $g = $f;
  11 |   foo(»$g«);
  12 | }
 
-File "assign_local.php", line 11, character 7 - line 11, character 8:
-
 Expected `Sub`
+
+File "assign_local.php", line 7, character 14 - line 7, character 16:
 
  3 | class Super {}
  4 | class Sub extends Super {}
@@ -17,22 +19,22 @@ Expected `Sub`
  8 |
  9 | function bar(Super $f): void {
 
-File "assign_local.php", line 7, character 14 - line 7, character 16:
-
 But got `Super`
+
+File "assign_local.php", line 9, character 14 - line 9, character 18:
 
  9 | function bar(»Super« $f): void {
 10 |   $g = $f;
 11 |   foo($g);
 12 | }
 
-File "assign_local.php", line 9, character 14 - line 9, character 18:
-
 Step 1 of 2
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
+
+File "assign_local.php", line 7, character 10 - line 7, character 12:
 
  3 | class Super {}
  4 | class Sub extends Super {}
@@ -42,16 +44,14 @@ The subtype comes from this function or method declaration
  8 |
  9 | function bar(Super $f): void {
 
-File "assign_local.php", line 7, character 10 - line 7, character 12:
-
 The supertype comes from this expression
+
+File "assign_local.php", line 11, character 3 - line 11, character 9:
 
   9 | function bar(Super $f): void {
  10 |   $g = $f;
  11 |   »foo($g)«;
  12 | }
-
-File "assign_local.php", line 11, character 3 - line 11, character 9:
 
 Step 2 of 2
 
@@ -61,57 +61,59 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "assign_local.php", line 9, character 14 - line 9, character 18:
+
  9 | function bar(»Super« $f): void {
 10 |   $g = $f;
 11 |   foo($g);
 12 | }
 
-File "assign_local.php", line 9, character 14 - line 9, character 18:
-
 which is defined here
+
+File "assign_local.php", line 3, character 7 - line 3, character 11:
 
  3 | class »Super« {}
  4 | class Sub extends Super {}
 
-File "assign_local.php", line 3, character 7 - line 3, character 11:
-
 and flows into this expression as the parameter hint
+
+File "assign_local.php", line 9, character 20 - line 9, character 21:
 
  9 | function bar(Super »$f«): void {
 10 |   $g = $f;
 11 |   foo($g);
 12 | }
 
-File "assign_local.php", line 9, character 20 - line 9, character 21:
-
 which itself flows into this expression as the type of the local variable
+
+File "assign_local.php", line 10, character 8 - line 10, character 9:
 
  9 | function bar(Super $f): void {
 10 |   $g = »$f«;
 11 |   foo($g);
 12 | }
 
-File "assign_local.php", line 10, character 8 - line 10, character 9:
-
 which itself flows into this expression via an assignment
+
+File "assign_local.php", line 10, character 3 - line 10, character 4:
 
  9 | function bar(Super $f): void {
 10 |   »$g« = $f;
 11 |   foo($g);
 12 | }
 
-File "assign_local.php", line 10, character 3 - line 10, character 4:
-
 which itself flows into this expression as the type of the local variable
+
+File "assign_local.php", line 11, character 7 - line 11, character 8:
 
   9 | function bar(Super $f): void {
  10 |   $g = $f;
  11 |   foo(»$g«);
  12 | }
 
-File "assign_local.php", line 11, character 7 - line 11, character 8:
-
 The supertype comes from this hint
+
+File "assign_local.php", line 7, character 14 - line 7, character 16:
 
  3 | class Super {}
  4 | class Sub extends Super {}
@@ -121,9 +123,9 @@ The supertype comes from this hint
  8 |
  9 | function bar(Super $f): void {
 
-File "assign_local.php", line 7, character 14 - line 7, character 16:
-
 which is defined here
+
+File "assign_local.php", line 4, character 7 - line 4, character 9:
 
  3 | class Super {}
  4 | class »Sub« extends Super {}
@@ -132,7 +134,5 @@ which is defined here
  7 | function foo(Sub $_): void {}
  8 |
  9 | function bar(Super $f): void {
-
-File "assign_local.php", line 4, character 7 - line 4, character 9:
 
 1 error found.

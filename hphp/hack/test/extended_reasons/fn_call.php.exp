@@ -1,14 +1,16 @@
 error: Typing[4110] Invalid argument
 
+File "fn_call.php", line 6, character 7 - line 6, character 8:
+
  3 | function foo(string $_): void {}
  4 | 
  5 | function bar(int $y ): void{
  6 |   foo(»$y«);
  7 | }
 
-File "fn_call.php", line 6, character 7 - line 6, character 8:
-
 Expected `string`
+
+File "fn_call.php", line 3, character 14 - line 3, character 19:
 
  3 | function foo(»string« $_): void {}
  4 | 
@@ -16,9 +18,9 @@ Expected `string`
  6 |   foo($y);
  7 | }
 
-File "fn_call.php", line 3, character 14 - line 3, character 19:
-
 But got `int`
+
+File "fn_call.php", line 5, character 14 - line 5, character 16:
 
  3 | function foo(string $_): void {}
  4 | 
@@ -26,13 +28,13 @@ But got `int`
  6 |   foo($y);
  7 | }
 
-File "fn_call.php", line 5, character 14 - line 5, character 16:
-
 Step 1 of 2
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
+
+File "fn_call.php", line 3, character 10 - line 3, character 12:
 
  3 | function »foo«(string $_): void {}
  4 | 
@@ -40,17 +42,15 @@ The subtype comes from this function or method declaration
  6 |   foo($y);
  7 | }
 
-File "fn_call.php", line 3, character 10 - line 3, character 12:
-
 The supertype comes from this expression
+
+File "fn_call.php", line 6, character 3 - line 6, character 9:
 
  3 | function foo(string $_): void {}
  4 | 
  5 | function bar(int $y ): void{
  6 |   »foo($y)«;
  7 | }
-
-File "fn_call.php", line 6, character 3 - line 6, character 9:
 
 Step 2 of 2
 
@@ -60,15 +60,17 @@ This step is the cause of the error.
 
 The subtype comes from this hint
 
+File "fn_call.php", line 5, character 14 - line 5, character 16:
+
  3 | function foo(string $_): void {}
  4 | 
  5 | function bar(»int« $y ): void{
  6 |   foo($y);
  7 | }
 
-File "fn_call.php", line 5, character 14 - line 5, character 16:
-
 and flows into this expression as the parameter hint
+
+File "fn_call.php", line 5, character 18 - line 5, character 19:
 
  3 | function foo(string $_): void {}
  4 | 
@@ -76,9 +78,9 @@ and flows into this expression as the parameter hint
  6 |   foo($y);
  7 | }
 
-File "fn_call.php", line 5, character 18 - line 5, character 19:
-
 which itself flows into this expression as the type of the local variable
+
+File "fn_call.php", line 6, character 7 - line 6, character 8:
 
  3 | function foo(string $_): void {}
  4 | 
@@ -86,16 +88,14 @@ which itself flows into this expression as the type of the local variable
  6 |   foo(»$y«);
  7 | }
 
-File "fn_call.php", line 6, character 7 - line 6, character 8:
-
 The supertype comes from this hint
+
+File "fn_call.php", line 3, character 14 - line 3, character 19:
 
  3 | function foo(»string« $_): void {}
  4 | 
  5 | function bar(int $y ): void{
  6 |   foo($y);
  7 | }
-
-File "fn_call.php", line 3, character 14 - line 3, character 19:
 
 1 error found.

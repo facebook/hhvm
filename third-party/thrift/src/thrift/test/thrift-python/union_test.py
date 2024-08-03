@@ -86,7 +86,11 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
 
         # Attempts to initialize an instance with an invalid type raise an error.
         with self.assertRaisesRegex(
-            TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
+            TypeError,
+            (
+                "error initializing Thrift union with field 'int_field': value hello! "
+                "is not a <class 'int'>, is actually of type <class 'str'>"
+            ),
         ):
             TestUnionImmutable(int_field="hello!")
 
@@ -309,7 +313,11 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         self.assertIsNone(u1.value)
 
         with self.assertRaisesRegex(
-            AttributeError, "'int' object has no attribute 'timestamp'"
+            AttributeError,
+            (
+                "error initializing Thrift union with field 'adapted_i32_to_datetime': "
+                "'int' object has no attribute 'timestamp'"
+            ),
         ):
             TestUnionAdaptedTypesImmutable(adapted_i32_to_datetime=123)
 

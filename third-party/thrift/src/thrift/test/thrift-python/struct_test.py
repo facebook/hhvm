@@ -121,6 +121,36 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         w3 = w()
         self.assertIs(w, w3)
 
+        # Call operator with invalid type
+        with self.assertRaisesRegex(
+            TypeError,
+            (
+                "error updating Thrift struct field 'unqualified_string': Cannot create "
+                "internal string data representation. Expected type <class 'str'>, got: "
+                "<class 'int'>."
+            ),
+        ):
+            w(unqualified_string=42)
+
+    def test_call_with_None(self) -> None:
+        w = TestStructImmutable(unqualified_string="hello", optional_string="world")
+
+        # TEST: Updating a value with "None" means resetting to its default value.
+        self.assertEqual(
+            w(unqualified_string=None),
+            TestStructImmutable(unqualified_string="", optional_string="world"),
+        )
+        w1 = w(optional_string=None)
+        self.assertIsNone(w1.optional_string)
+        self.assertEqual(w1, TestStructImmutable(unqualified_string="hello"))
+        self.assertEqual(
+            w1, TestStructImmutable(unqualified_string="hello", optional_string=None)
+        )
+
+        w2 = w(unqualified_string=None, optional_string=None)
+        self.assertEqual(w2, TestStructImmutable())
+        self.assertIsNone(w2.optional_string)
+
     def test_default_values(self) -> None:
         # Custom default values:
         # Newly created instance has custom default values for non-optional
@@ -152,8 +182,9 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError,
             (
-                "Cannot create internal string data representation. Expected "
-                "type <class 'str'>, got: <class 'int'>."
+                "error initializing Thrift struct field 'unqualified_string': Cannot "
+                "create internal string data representation. Expected type <class 'str'>, "
+                "got: <class 'int'>"
             ),
         ):
             TestStructImmutable(unqualified_string=42)
@@ -285,7 +316,12 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         self.assertEqual(s.unqualified_adapted_i32_to_datetime, new_date)
 
         with self.assertRaisesRegex(
-            AttributeError, "'int' object has no attribute 'timestamp'"
+            AttributeError,
+            (
+                "error updating Thrift struct field "
+                "'unqualified_adapted_i32_to_datetime': 'int' object has no attribute "
+                "'timestamp'"
+            ),
         ):
             # Thrift simply passes the value to the adapter class. All type
             # checking is performed within the adapter class.

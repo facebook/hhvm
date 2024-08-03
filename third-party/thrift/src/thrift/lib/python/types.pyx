@@ -1002,6 +1002,7 @@ cdef class Struct(StructOrUnion):
         cdef Struct new_inst = tp.__new__(tp)
         not_found = object()
         isset_flags = self._fbthrift_data[0]
+
         for field_name, field_index in struct_info.name_to_index.items():
             value = kwargs.pop(field_name, not_found)
             if value is None:  # reset to default value, no change needed
@@ -1012,21 +1013,32 @@ cdef class Struct(StructOrUnion):
                     continue
                 value_to_copy = self._fbthrift_data[field_index + 1]
             else:  # new assigned value
-                field_spec = struct_info.fields[field_index]
-                adapter_info = field_spec.adapter_info
-                if adapter_info:
-                    adapter_class, transitive_annotation = adapter_info
-                    field_id = field_spec.id
-                    value = adapter_class.to_thrift_field(
-                        value,
-                        field_id,
-                        self,
-                        transitive_annotation=transitive_annotation(),
-                    )
-                value_to_copy = (<TypeInfoBase>struct_info.type_infos[field_index]).to_internal_data(value)
+                try:
+                    field_spec = struct_info.fields[field_index]
+                    adapter_info = field_spec.adapter_info
+                    if adapter_info:
+                        adapter_class, transitive_annotation = adapter_info
+                        field_id = field_spec.id
+                        value = adapter_class.to_thrift_field(
+                            value,
+                            field_id,
+                            self,
+                            transitive_annotation=transitive_annotation(),
+                        )
+                    value_to_copy = (
+                        <TypeInfoBase>struct_info.type_infos[field_index]
+                    ).to_internal_data(value)
+                except Exception as exc:
+                    raise type(exc)(
+                        f"{type(self)}: error updating Thrift struct field "
+                        f"'{field_spec.py_name}': {exc}"
+                    ) from exc
             set_struct_field(new_inst._fbthrift_data, field_index, value_to_copy)
         if kwargs:
-            raise TypeError(f"__call__() got an expected keyword argument '{kwargs.keys()[0]}'")
+            raise TypeError(
+                f"{type(self)}: error updating copy with unknown field: "
+                f"'{kwargs.keys()[0]}'"
+            )
         new_inst._fbthrift_populate_primitive_fields()
         return new_inst
 
@@ -1146,40 +1158,57 @@ cdef class Struct(StructOrUnion):
 
         # If no keyword arguments are provided, initialize the Struct with default values.
         if not kwargs:
-            self._fbthrift_data = createImmutableStructTupleWithDefaultValues(struct_info.cpp_obj.get().getStructInfo())
+            self._fbthrift_data = createImmutableStructTupleWithDefaultValues(
+                struct_info.cpp_obj.get().getStructInfo()
+            )
             return
 
         # Instantiate a tuple with 'None' values, then assign the provided keyword arguments
         # to the respective fields.
-        self._fbthrift_data = createStructTupleWithNones(struct_info.cpp_obj.get().getStructInfo())
+        self._fbthrift_data = createStructTupleWithNones(
+            struct_info.cpp_obj.get().getStructInfo()
+        )
         for name, value in kwargs.items():
             field_index = struct_info.name_to_index.get(name)
             if field_index is None:
-                raise TypeError(f"__init__() got an unexpected keyword argument '{name}'")
+                raise TypeError(
+                    f"{type(self)} initialization error: unknown keyword argument "
+                    f"'{name}'."
+                )
+
             if value is None:
                 continue
 
             field_spec = struct_info.fields[field_index]
 
-            # Handle field w/ adapter
-            adapter_info = field_spec.adapter_info
-            if adapter_info is not None:
-                adapter_class, transitive_annotation = adapter_info
-                field_id = field_spec.id
-                value = adapter_class.to_thrift_field(
-                            value,
-                            field_id,
-                            self,
-                            transitive_annotation=transitive_annotation(),
-                        )
+            try:
+                # Handle field w/ adapter
+                adapter_info = field_spec.adapter_info
+                if adapter_info is not None:
+                    adapter_class, transitive_annotation = adapter_info
+                    field_id = field_spec.id
+                    value = adapter_class.to_thrift_field(
+                                value,
+                                field_id,
+                                self,
+                                transitive_annotation=transitive_annotation(),
+                            )
 
-            set_struct_field(
-                self._fbthrift_data,
-                field_index,
-                (<TypeInfoBase>struct_info.type_infos[field_index]).to_internal_data(value),
-            )
+                set_struct_field(
+                    self._fbthrift_data,
+                    field_index,
+                    (
+                        <TypeInfoBase>struct_info.type_infos[field_index]
+                    ).to_internal_data(value),
+                )
+            except Exception as exc:
+                raise type(exc)(
+                    f"{type(self)}: error initializing Thrift struct field "
+                    f"'{field_spec.py_name}': {exc}"
+                ) from exc
 
-        # If any fields remain unset, initialize them with their respective default values.
+        # If any fields remain unset, initialize them with their respective default
+        # values.
         populateImmutableStructTupleUnsetFieldsWithDefaultValues(
                 self._fbthrift_data,
                 struct_info.cpp_obj.get().getStructInfo()
@@ -1296,10 +1325,16 @@ cdef class Union(StructOrUnion):
             self._fbthrift_update_current_field_attributes()
             return
 
-        self._fbthrift_set_union_value(
-            field_id,
-            self._fbthrift_to_internal_data(field_id, field_python_value),
-        )
+        try:
+            self._fbthrift_set_union_value(
+                field_id,
+                self._fbthrift_to_internal_data(field_id, field_python_value),
+            )
+        except Exception as exc:
+            raise type(exc)(
+                f"{type(self)}: error initializing Thrift union with field "
+                f"'{field_enum.name}': {exc}"
+            ) from exc
 
     @classmethod
     def _fbthrift_create(cls, data):

@@ -183,16 +183,23 @@ cdef class MutableStruct(MutableStructOrUnion):
         # If no keyword arguments are provided, initialize the Struct with
         # default values.
         if not kwargs:
-            self._fbthrift_data = createMutableStructTupleWithDefaultValues(mutable_struct_info.cpp_obj.get().getStructInfo())
+            self._fbthrift_data = createMutableStructTupleWithDefaultValues(
+                mutable_struct_info.cpp_obj.get().getStructInfo()
+            )
             return
 
         # Instantiate a tuple with 'None' values, then assign the provided
         # keyword arguments to the respective fields.
-        self._fbthrift_data = createStructTupleWithNones(mutable_struct_info.cpp_obj.get().getStructInfo())
+        self._fbthrift_data = createStructTupleWithNones(
+            mutable_struct_info.cpp_obj.get().getStructInfo()
+        )
         for name, value in kwargs.items():
             field_index = mutable_struct_info.name_to_index.get(name)
             if field_index is None:
-                raise TypeError(f"{self.__class__.__name__}.__init__() got an unexpected keyword argument '{name}'")
+                raise TypeError(
+                    f"{type(self)} initialization error: unknown keyword argument "
+                    f"'{name}'."
+                )
 
             self._fbthrift_set_field_value(field_index, value)
 
@@ -207,20 +214,29 @@ cdef class MutableStruct(MutableStructOrUnion):
         cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info
         cdef FieldInfo field_info = mutable_struct_info.fields[index]
 
-        if field_info.adapter_info is not None:
-            adapter_class, transitive_annotation = field_info.adapter_info
-            value = adapter_class.to_thrift_field(
-                value,
-                field_info.id,
-                self,
-                transitive_annotation=transitive_annotation(),
-            )
+        try:
+            if field_info.adapter_info is not None:
+                adapter_class, transitive_annotation = field_info.adapter_info
+                value = adapter_class.to_thrift_field(
+                    value,
+                    field_info.id,
+                    self,
+                    transitive_annotation=transitive_annotation(),
+                )
 
-        set_struct_field(
-            self._fbthrift_data,
-            index,
-            (<TypeInfoBase>mutable_struct_info.type_infos[index]).to_internal_data(value),
-        )
+            set_struct_field(
+                self._fbthrift_data,
+                index,
+                (
+                    <TypeInfoBase>mutable_struct_info.type_infos[index]
+                ).to_internal_data(value),
+            )
+        except Exception as exc:
+            raise type(exc)(
+                f"{type(self)}: error setting Thrift struct field "
+                f"'{field_info.py_name}': {exc}"
+            ) from exc
+
 
     cdef _fbthrift_get_field_value(self, int16_t index):
         cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info
@@ -613,23 +629,29 @@ cdef class MutableUnion(MutableStructOrUnion):
                 opposed to "internal data", see `TypeInfoBase`). If `field_id` is 0,
                 this must be `None`. If field is adapted, should be in the adapted type.
         """
-        field_internal_value = (
-            self._fbthrift_convert_field_python_value_to_internal_data(
-                field_id, field_python_value
+        try:
+            field_internal_value = (
+                self._fbthrift_convert_field_python_value_to_internal_data(
+                    field_id, field_python_value
+                )
             )
-        )
 
-        Py_INCREF(field_id)
-        old_field_id = self._fbthrift_data[0]
-        PyTuple_SET_ITEM(self._fbthrift_data, 0, field_id)
-        Py_DECREF(old_field_id)
+            Py_INCREF(field_id)
+            old_field_id = self._fbthrift_data[0]
+            PyTuple_SET_ITEM(self._fbthrift_data, 0, field_id)
+            Py_DECREF(old_field_id)
 
-        old_value = self._fbthrift_data[1]
-        Py_INCREF(field_internal_value)
-        PyTuple_SET_ITEM(self._fbthrift_data, 1, field_internal_value)
-        Py_DECREF(old_value)
+            old_value = self._fbthrift_data[1]
+            Py_INCREF(field_internal_value)
+            PyTuple_SET_ITEM(self._fbthrift_data, 1, field_internal_value)
+            Py_DECREF(old_value)
 
-        self._fbthrift_update_current_field_attributes()
+            self._fbthrift_update_current_field_attributes()
+        except Exception as exc:
+            raise type(exc)(
+                f"{type(self)}: error setting Thrift union field with id {field_id}: "
+                f"{exc}"
+            ) from exc
 
     cdef object _fbthrift_convert_field_python_value_to_internal_data(
         self, int field_id, object field_python_value

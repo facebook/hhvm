@@ -201,6 +201,9 @@ cdef class MutableStruct(MutableStructOrUnion):
                     f"'{name}'."
                 )
 
+            if value is None:
+                continue
+
             self._fbthrift_set_field_value(field_index, value)
 
         # If any fields remain unset, initialize them with their respective

@@ -40,11 +40,11 @@ to be converted from unicode to binary representation.
   }}make_shared[{{> types/cython_cpp_type}}]({{field:py_name}})){{!
 }}{{/type:struct?}}{{!
 }}{{#type:list?}}{{!
-  }}{{> types/container_from_cpp}}({{field:py_name}}){{
-!}}{{/type:list?}}{{!
+  }}{{> types/container_from_cpp}}({{field:py_name}}){{!
+}}{{/type:list?}}{{!
 }}{{#type:container?}}{{^type:list?}}{{!
   }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
-  }}make_shared[{{> types/cython_cpp_type}}]({{field:py_name}})){{
-!}}{{/type:list?}}{{/type:container?}}{{!
+  }}make_shared[{{> types/cython_cpp_type}}]({{field:py_name}})){{!
+}}{{/type:list?}}{{/type:container?}}{{!
 }}{{#type:enum?}}{{> types/cython_python_type}}(<int> {{field:py_name}}){{/type:enum?}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

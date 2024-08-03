@@ -109,7 +109,7 @@ class type_resolver {
 
   const std::string& get_underlying_namespaced_name(const t_type& node);
 
-  const std::string& get_underlying_name(const t_type& node);
+  static const std::string& get_underlying_name(const t_type& node);
 
   const std::string* get_extra_namespace(const t_type& node);
 

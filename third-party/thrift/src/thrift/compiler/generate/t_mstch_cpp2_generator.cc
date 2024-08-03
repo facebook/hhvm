@@ -1298,7 +1298,7 @@ class cpp_mstch_struct : public mstch_struct {
     return cpp_context_->resolver().get_underlying_namespaced_name(*struct_);
   }
   mstch::node cpp_underlying_name() {
-    return cpp_context_->resolver().get_underlying_name(*struct_);
+    return gen::cpp::type_resolver::get_underlying_name(*struct_);
   }
   mstch::node cpp_underlying_type() {
     return cpp_context_->resolver().get_underlying_type_name(*struct_);

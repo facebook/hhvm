@@ -476,7 +476,7 @@ std::string type_resolver::gen_adapted_type(
                 *adapter,
                 std::to_string(field_id),
                 standard_type,
-                namespace_resolver::get_cpp_name(parent),
+                get_underlying_name(parent),
             });
 }
 

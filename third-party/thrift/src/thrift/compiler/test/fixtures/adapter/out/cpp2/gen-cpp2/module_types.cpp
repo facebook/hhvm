@@ -4180,7 +4180,7 @@ Renamed& Renamed::operator=(const Renamed& other) {
 }
 
 
-Renamed::Renamed(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::FieldAdapter, 1, ::std::int32_t, RenamedStructWithStructAdapterAndFieldAdapter> field__arg) :
+Renamed::Renamed(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::FieldAdapter, 1, ::std::int32_t, Renamed> field__arg) :
     __fbthrift_field_field(std::move(field__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::FieldAdapter, 1>(__fbthrift_field_field, *this);
   __isset.set(folly::index_constant<0>(), true);

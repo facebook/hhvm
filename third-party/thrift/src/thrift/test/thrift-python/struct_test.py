@@ -104,6 +104,19 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         w_new = TestStructImmutable(unqualified_string="hello, world!")
         self.assertEqual(w_new.unqualified_string, "hello, world!")
 
+    def test_creation_with_None(self) -> None:
+        self.assertEqual(
+            TestStructImmutable(),
+            TestStructImmutable(unqualified_string=None, optional_string=None),
+        )
+
+        self.assertEqual(
+            TestStructImmutable(unqualified_string="hello, world!"),
+            TestStructImmutable(
+                unqualified_string="hello, world!", optional_string=None
+            ),
+        )
+
     def test_call(self) -> None:
         w = TestStructImmutable(unqualified_string="hello, world!")
 
@@ -375,6 +388,41 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(w2.unqualified_string, "hello")
         w2.unqualified_string += ", world!"
         self.assertEqual(w2.unqualified_string, "hello, world!")
+
+    def test_creation_with_None(self) -> None:
+        # DO_BEFORE(aristidis,20240811)): Note the inconsistency between the (current)
+        # mutable implementation and the immutable version: specifying 'None' for an
+        # unqualified field is an error for the former, but not the latter. Figure out
+        # the desired behavior and update accordingly.
+        with self.assertRaisesRegex(
+            TypeError,
+            (
+                "error setting Thrift struct field 'unqualified_string': Cannot create "
+                "internal string data representation. Expected type <class 'str'>, "
+                "got: <class 'NoneType'>"
+            ),
+        ):
+            self.assertEqual(
+                TestStructMutable(),
+                TestStructMutable(unqualified_string=None, optional_string=None),
+            )
+
+        # DO_BEFORE(aristidis,20240812)): Specifying None for an optional field should
+        # not raise an error.
+        with self.assertRaisesRegex(
+            TypeError,
+            (
+                "error setting Thrift struct field 'optional_string': Cannot create "
+                "internal string data representation. Expected type <class 'str'>, "
+                "got: <class 'NoneType'>."
+            ),
+        ):
+            self.assertEqual(
+                TestStructMutable(unqualified_string="hello, world!"),
+                TestStructMutable(
+                    unqualified_string="hello, world!", optional_string=None
+                ),
+            )
 
     def test_call(self) -> None:
         # DO_BEFORE(aristidis,20240520): Support call operator for mutable types

@@ -993,6 +993,18 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_string),
         },
     ),
+    metadata.NewThriftStruct().
+    SetName("module.RenamedStructWithStructAdapterAndFieldAdapter").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("field").
+    SetIsOptional(false).
+    SetType(premadeThriftType_i32),
+        },
+    ),
 }
 
 var exceptionMetadatas = []*metadata.ThriftException{

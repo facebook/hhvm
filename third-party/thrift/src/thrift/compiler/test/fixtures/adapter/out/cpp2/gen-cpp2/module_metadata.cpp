@@ -770,6 +770,30 @@ StructMetadata<::facebook::thrift::test::Person2>::gen(ThriftMetadata& metadata)
   }
   return res.first->second;
 }
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::facebook::thrift::test::Renamed>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.RenamedStructWithStructAdapterAndFieldAdapter", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_RenamedStructWithStructAdapterAndFieldAdapter = res.first->second;
+  module_RenamedStructWithStructAdapterAndFieldAdapter.name() = "module.RenamedStructWithStructAdapterAndFieldAdapter";
+  module_RenamedStructWithStructAdapterAndFieldAdapter.is_union() = false;
+  static const auto* const
+  module_RenamedStructWithStructAdapterAndFieldAdapter_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::FieldAdapter") } }).cv_struct_ref(), }},  }};
+  for (const auto& f : *module_RenamedStructWithStructAdapterAndFieldAdapter_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_RenamedStructWithStructAdapterAndFieldAdapter.fields()->push_back(std::move(field));
+  }
+  module_RenamedStructWithStructAdapterAndFieldAdapter.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::StructAdapter") }, {"underlyingName", cvString("Renamed") } }).cv_struct_ref());
+  return res.first->second;
+}
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::gen_func([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;

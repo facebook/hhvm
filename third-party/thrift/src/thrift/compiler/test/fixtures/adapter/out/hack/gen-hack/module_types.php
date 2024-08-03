@@ -8285,3 +8285,134 @@ class Person2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
 
 }
 
+/**
+ * Original thrift struct:-
+ * RenamedStructWithStructAdapterAndFieldAdapter
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/RenamedStructWithStructAdapterAndFieldAdapter'))>>
+class RenamedStructWithStructAdapterAndFieldAdapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'field',
+      'type' => \TType::I32,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'field' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'field' => ?int,
+  );
+
+  const type TShape = shape(
+    'field' => int,
+  );
+  const int STRUCTURAL_ID = 7035499037608086885;
+  /**
+   * Original thrift field:-
+   * 1: i32 field
+   */
+  public int $field;
+
+  public function __construct(?int $field = null)[] {
+    $this->field = $field ?? 0;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'field'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RenamedStructWithStructAdapterAndFieldAdapter';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RenamedStructWithStructAdapterAndFieldAdapter",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                )
+              ),
+              "name" => "field",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::test::StructAdapter",
+            "underlyingName" => "Renamed",
+          )
+        ),
+      ],
+      'fields' => dict[
+        'field' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::FieldAdapter",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['field'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'field' => $this->field,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'field') !== null) {
+      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['field']);
+      if ($_tmp0 > 0x7fffffff) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->field = (int)$_tmp0;
+      }
+    }
+  }
+
+}
+

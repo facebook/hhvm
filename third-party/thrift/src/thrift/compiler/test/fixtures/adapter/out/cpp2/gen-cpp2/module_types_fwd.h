@@ -55,6 +55,7 @@ class TransitiveAdapted;
 class CountingStruct;
 class Person;
 class Person2;
+class Renamed;
 } // namespace facebook::thrift::test
 // END forward_declare
 

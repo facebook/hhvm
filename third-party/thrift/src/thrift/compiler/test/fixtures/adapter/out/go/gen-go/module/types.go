@@ -9690,6 +9690,134 @@ func (x *Person2) String() string {
     return sb.String()
 }
 
+type RenamedStructWithStructAdapterAndFieldAdapter struct {
+    Field int32 `thrift:"field,1" json:"field" db:"field"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*RenamedStructWithStructAdapterAndFieldAdapter)(nil)
+
+func NewRenamedStructWithStructAdapterAndFieldAdapter() *RenamedStructWithStructAdapterAndFieldAdapter {
+    return (&RenamedStructWithStructAdapterAndFieldAdapter{}).
+        SetFieldNonCompat(0)
+}
+
+func (x *RenamedStructWithStructAdapterAndFieldAdapter) GetField() int32 {
+    return x.Field
+}
+
+func (x *RenamedStructWithStructAdapterAndFieldAdapter) SetFieldNonCompat(value int32) *RenamedStructWithStructAdapterAndFieldAdapter {
+    x.Field = value
+    return x
+}
+
+func (x *RenamedStructWithStructAdapterAndFieldAdapter) SetField(value int32) *RenamedStructWithStructAdapterAndFieldAdapter {
+    x.Field = value
+    return x
+}
+
+func (x *RenamedStructWithStructAdapterAndFieldAdapter) writeField1(p thrift.Encoder) error {  // Field
+    if err := p.WriteFieldBegin("field", thrift.I32, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.Field
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *RenamedStructWithStructAdapterAndFieldAdapter) readField1(p thrift.Decoder) error {  // Field
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.Field = result
+    return nil
+}
+
+func (x *RenamedStructWithStructAdapterAndFieldAdapter) toString1() string {  // Field
+    return fmt.Sprintf("%v", x.Field)
+}
+
+
+
+func (x *RenamedStructWithStructAdapterAndFieldAdapter) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("RenamedStructWithStructAdapterAndFieldAdapter"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *RenamedStructWithStructAdapterAndFieldAdapter) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // field
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *RenamedStructWithStructAdapterAndFieldAdapter) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("RenamedStructWithStructAdapterAndFieldAdapter({")
+    sb.WriteString(fmt.Sprintf("Field:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
@@ -9727,6 +9855,7 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/test/CountingStruct", func() any { return NewCountingStruct() })
     registry.RegisterType("facebook.com/thrift/test/Person", func() any { return NewPerson() })
     registry.RegisterType("facebook.com/thrift/test/Person2", func() any { return NewPerson2() })
+    registry.RegisterType("facebook.com/thrift/test/RenamedStructWithStructAdapterAndFieldAdapter", func() any { return NewRenamedStructWithStructAdapterAndFieldAdapter() })
 
     registry.RegisterType("facebook.com/thrift/test/Color", func() any { return Color(0) })
     registry.RegisterType("facebook.com/thrift/test/ThriftAdaptedEnum", func() any { return ThriftAdaptedEnum(0) })

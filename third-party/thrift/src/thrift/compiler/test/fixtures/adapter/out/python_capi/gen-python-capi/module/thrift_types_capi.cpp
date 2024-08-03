@@ -2621,6 +2621,89 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
+ExtractorResult<::facebook::thrift::test::Renamed>
+Extractor<::facebook::thrift::test::Renamed>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::facebook::thrift::test::Renamed>(
+      "Module facebook.thrift.test.module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__facebook__thrift__test__module__RenamedStructWithStructAdapterAndFieldAdapter(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::facebook::thrift::test::Renamed>(
+        "Thrift serialize error: RenamedStructWithStructAdapterAndFieldAdapter");
+  }
+  return detail::deserialize_iobuf_to_adapted<
+      ::facebook::thrift::test::Renamed, ::apache::thrift::test::StructAdapter
+    >(std::move(val));
+}
+
+
+ExtractorResult<::facebook::thrift::test::Renamed>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::facebook::thrift::test::Renamed>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::facebook::thrift::test::Renamed>(
+      "Module facebook.thrift.test.module import error");
+  }
+  auto obj = StrongRef(init__facebook__thrift__test__module__RenamedStructWithStructAdapterAndFieldAdapter(fbthrift_data));
+  if (!obj) {
+      return extractorError<::facebook::thrift::test::Renamed>(
+          "Init from fbthrift error: RenamedStructWithStructAdapterAndFieldAdapter");
+  }
+  return Extractor<::facebook::thrift::test::Renamed>{}(*obj);
+}
+
+int Extractor<::facebook::thrift::test::Renamed>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module facebook.thrift.test.module import error");
+  }
+  int result =
+      can_extract__facebook__thrift__test__module__RenamedStructWithStructAdapterAndFieldAdapter(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: RenamedStructWithStructAdapterAndFieldAdapter");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::facebook::thrift::test::Renamed>::operator()(
+    const ::facebook::thrift::test::Renamed& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_adapted_to_iobuf<::apache::thrift::test::StructAdapter>(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__facebook__thrift__test__module__RenamedStructWithStructAdapterAndFieldAdapter(std::move(serialized));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::Renamed>>::operator()(
+    const ::facebook::thrift::test::Renamed& val) {
+  auto obj = StrongRef(Constructor<::facebook::thrift::test::Renamed>{}(val));
+  if (!obj) {
+    return nullptr;
+  }
+  return getThriftData(*obj);
+}
+
 ExtractorResult<::facebook::thrift::test::Color>
 Extractor<::facebook::thrift::test::Color>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);

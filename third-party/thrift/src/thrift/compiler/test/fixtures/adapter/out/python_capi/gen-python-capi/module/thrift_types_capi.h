@@ -1042,6 +1042,37 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::facebook::thrift::test::Renamed>
+    : public BaseExtractor<::facebook::thrift::test::Renamed> {
+  static const bool kUsingMarshal = false;
+  ExtractorResult<::facebook::thrift::test::Renamed> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::Renamed>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::Renamed>> {
+  ExtractorResult<::facebook::thrift::test::Renamed> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::facebook::thrift::test::Renamed>
+    : public BaseConstructor<::facebook::thrift::test::Renamed> {
+  static const bool kUsingMarshal = false;
+  PyObject* operator()(const ::facebook::thrift::test::Renamed& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::Renamed>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::Renamed>> {
+  PyObject* operator()(const ::facebook::thrift::test::Renamed& val);
+};
+
+template <>
 struct Extractor<::facebook::thrift::test::Color>
     : public BaseExtractor<::facebook::thrift::test::Color> {
   ExtractorResult<::facebook::thrift::test::Color> operator()(PyObject* obj);

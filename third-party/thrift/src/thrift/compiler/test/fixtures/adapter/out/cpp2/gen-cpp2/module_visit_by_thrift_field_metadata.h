@@ -557,6 +557,19 @@ struct VisitByFieldId<::facebook::thrift::test::Person2> {
     }
   }
 };
+
+template <>
+struct VisitByFieldId<::facebook::thrift::test::Renamed> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).field_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::Renamed");
+    }
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

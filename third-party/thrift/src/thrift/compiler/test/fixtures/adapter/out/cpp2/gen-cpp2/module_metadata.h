@@ -203,6 +203,11 @@ class StructMetadata<::facebook::thrift::test::Person2> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::facebook::thrift::test::Renamed> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>> {
  public:
   static void gen(ThriftServiceMetadataResponse& response);

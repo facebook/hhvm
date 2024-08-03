@@ -2817,6 +2817,38 @@
           "column" : 2
         }
       }
+    },
+    "RenamedStructWithStructAdapterAndFieldAdapter" : {
+      "lineno" : 515,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "field" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 520,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 521,
+              "column" : 16
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 515,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 522,
+          "column" : 2
+        }
+      }
     }
   },
   "services" : {

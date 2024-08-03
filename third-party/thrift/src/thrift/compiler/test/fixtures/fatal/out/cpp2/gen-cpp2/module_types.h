@@ -835,6 +835,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(field);
 // BEGIN declare_enums
 namespace test_cpp2::cpp_reflection {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "enum1", "kind": "enum" } */
 enum class enum1 {
   field0 = 0,
   field1 = 1,
@@ -843,6 +844,7 @@ enum class enum1 {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "enum2", "kind": "enum" } */
 enum class enum2 {
   field0_2 = 0,
   field1_2 = 1,
@@ -851,6 +853,7 @@ enum class enum2 {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "enum3", "kind": "enum" } */
 enum class enum3 {
   field0_3 = 0,
   field1_3 = 1,
@@ -858,6 +861,7 @@ enum class enum3 {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "enum_with_special_names", "kind": "enum" } */
 enum class enum_with_special_names {
   get = 0,
   getter = 1,
@@ -1038,13 +1042,20 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "my_structA", "kind": "typedef" } */
 typedef test_cpp_reflection::custom_structA my_structA;
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "FakeI32", "kind": "typedef" } */
 typedef CppFakeI32 FakeI32;
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "HasANumber", "kind": "typedef" } */
 typedef CppHasANumber HasANumber;
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "HasAResult", "kind": "typedef" } */
 typedef CppHasAResult HasAResult;
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "HasAPhrase", "kind": "typedef" } */
 typedef CppHasAPhrase HasAPhrase;
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "I32", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter1, ::std::int32_t> I32;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "union1", "kind": "union" } */
 class union1 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1441,6 +1452,7 @@ unsigned long union1::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "union2", "kind": "union" } */
 class union2 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1837,6 +1849,7 @@ unsigned long union2::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "union3", "kind": "union" } */
 class union3 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2233,6 +2246,7 @@ unsigned long union3::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "structA", "kind": "struct" } */
 class structA final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2444,6 +2458,7 @@ unsigned long structA::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "unionA", "kind": "union" } */
 class unionA final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2917,6 +2932,7 @@ unsigned long unionA::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "structB", "kind": "struct" } */
 class structB final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3123,6 +3139,7 @@ unsigned long structB::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "structC", "kind": "struct" } */
 class structC final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4822,6 +4839,7 @@ unsigned long structC::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "struct1", "kind": "struct" } */
 class struct1 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5250,6 +5268,7 @@ unsigned long struct1::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "struct2", "kind": "struct" } */
 class struct2 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5728,6 +5747,7 @@ unsigned long struct2::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "struct3", "kind": "struct" } */
 class struct3 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -6789,6 +6809,7 @@ unsigned long struct3::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "struct4", "kind": "struct" } */
 class struct4 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7097,6 +7118,7 @@ unsigned long struct4::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "struct5", "kind": "struct" } */
 class struct5 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7469,6 +7491,7 @@ unsigned long struct5::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "struct_binary", "kind": "struct" } */
 class struct_binary final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7626,6 +7649,7 @@ unsigned long struct_binary::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "dep_A_struct", "kind": "struct" } */
 class dep_A_struct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7883,6 +7907,7 @@ unsigned long dep_A_struct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "dep_B_struct", "kind": "struct" } */
 class dep_B_struct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -8140,6 +8165,7 @@ unsigned long dep_B_struct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "annotated", "kind": "struct" } */
 class annotated final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -8291,6 +8317,7 @@ unsigned long annotated::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "union_with_special_names", "kind": "union" } */
 class union_with_special_names final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -10131,6 +10158,7 @@ unsigned long union_with_special_names::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "struct_with_special_names", "kind": "struct" } */
 class struct_with_special_names final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -11767,6 +11795,7 @@ unsigned long struct_with_special_names::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "struct_with_indirections", "kind": "struct" } */
 class struct_with_indirections final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -12141,6 +12170,7 @@ unsigned long struct_with_indirections::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "StructWithFieldAdapter", "kind": "struct" } */
 class StructWithFieldAdapter final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -12281,6 +12311,7 @@ unsigned long StructWithFieldAdapter::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "name": "UnionWithTypedefFieldAdapter", "kind": "union" } */
 class UnionWithTypedefFieldAdapter final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

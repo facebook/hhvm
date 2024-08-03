@@ -142,6 +142,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(fieldX);
 // BEGIN declare_enums
 namespace cpp2 {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/templated-deserialize/src/module.thrift", "name": "MyEnumA", "kind": "enum" } */
 enum class MyEnumA {
   fieldA = 1,
   fieldB = 2,
@@ -206,10 +207,14 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/templated-deserialize/src/module.thrift", "name": "IndirectionA", "kind": "typedef" } */
 typedef Foo IndirectionA;
+/** Glean {"file": "thrift/compiler/test/fixtures/templated-deserialize/src/module.thrift", "name": "IndirectionC", "kind": "typedef" } */
 typedef Baz IndirectionC;
+/** Glean {"file": "thrift/compiler/test/fixtures/templated-deserialize/src/module.thrift", "name": "IndirectionB", "kind": "typedef" } */
 typedef Bar IndirectionB;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/templated-deserialize/src/module.thrift", "name": "SmallStruct", "kind": "struct" } */
 class SmallStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -416,6 +421,7 @@ unsigned long SmallStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/templated-deserialize/src/module.thrift", "name": "containerStruct", "kind": "struct" } */
 class containerStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

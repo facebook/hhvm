@@ -307,6 +307,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(shared_string_ref);
 // BEGIN declare_enums
 namespace cpp2 {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
   Zero = 0,
   One = 1,
@@ -314,6 +315,7 @@ enum class MyEnum {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "TypedEnum", "kind": "enum" } */
 enum class TypedEnum : ::std::int16_t {
   VAL1 = 0,
   VAL2 = 1,
@@ -452,6 +454,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "MyUnion", "kind": "union" } */
 class MyUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -738,6 +741,7 @@ unsigned long MyUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "NonTriviallyDestructibleUnion", "kind": "union" } */
 class NonTriviallyDestructibleUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -940,6 +944,7 @@ unsigned long NonTriviallyDestructibleUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "MyField", "kind": "struct" } */
 class MyField final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1422,6 +1427,7 @@ unsigned long MyField::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1646,6 +1652,7 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "StructWithUnion", "kind": "struct" } */
 class StructWithUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1882,6 +1889,7 @@ unsigned long StructWithUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "RecursiveStruct", "kind": "struct" } */
 class RecursiveStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2034,6 +2042,7 @@ unsigned long RecursiveStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "StructWithContainers", "kind": "struct" } */
 class StructWithContainers final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2387,6 +2396,7 @@ unsigned long StructWithContainers::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "StructWithSharedConst", "kind": "struct" } */
 class StructWithSharedConst final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2612,6 +2622,7 @@ unsigned long StructWithSharedConst::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "Empty", "kind": "struct" } */
 class Empty final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2706,6 +2717,7 @@ unsigned long Empty::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "StructWithRef", "kind": "struct" } */
 class StructWithRef final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2930,6 +2942,7 @@ unsigned long StructWithRef::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "StructWithBox", "kind": "struct" } */
 class StructWithBox final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3158,6 +3171,7 @@ unsigned long StructWithBox::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "StructWithInternBox", "kind": "struct" } */
 class StructWithInternBox final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3344,6 +3358,7 @@ unsigned long StructWithInternBox::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "StructWithTerseInternBox", "kind": "struct" } */
 class StructWithTerseInternBox final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3528,6 +3543,7 @@ unsigned long StructWithTerseInternBox::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "AdaptedStructWithInternBox", "kind": "struct" } */
 class AdaptedStructWithInternBox final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3713,6 +3729,7 @@ unsigned long AdaptedStructWithInternBox::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "AdaptedStructWithTerseInternBox", "kind": "struct" } */
 class AdaptedStructWithTerseInternBox final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3896,6 +3913,7 @@ unsigned long AdaptedStructWithTerseInternBox::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "StructWithRefTypeUnique", "kind": "struct" } */
 class StructWithRefTypeUnique final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4120,6 +4138,7 @@ unsigned long StructWithRefTypeUnique::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "StructWithRefTypeShared", "kind": "struct" } */
 class StructWithRefTypeShared final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4345,6 +4364,7 @@ unsigned long StructWithRefTypeShared::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "StructWithRefTypeSharedConst", "kind": "struct" } */
 class StructWithRefTypeSharedConst final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4570,6 +4590,7 @@ unsigned long StructWithRefTypeSharedConst::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "StructWithRefAndAnnotCppNoexceptMoveCtor", "kind": "struct" } */
 class StructWithRefAndAnnotCppNoexceptMoveCtor final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4708,6 +4729,7 @@ unsigned long StructWithRefAndAnnotCppNoexceptMoveCtor::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "StructWithString", "kind": "struct" } */
 class StructWithString final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

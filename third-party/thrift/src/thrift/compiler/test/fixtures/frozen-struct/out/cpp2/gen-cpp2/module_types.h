@@ -94,6 +94,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(boxed_field);
 // BEGIN declare_enums
 namespace some::ns {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/frozen-struct/src/module.thrift", "name": "EnumB", "kind": "enum" } */
 enum class EnumB {
   EMPTY = 1,
 };
@@ -167,6 +168,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/frozen-struct/src/module.thrift", "name": "ModuleA", "kind": "struct" } */
 class ModuleA final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -590,6 +592,7 @@ unsigned long ModuleA::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/frozen-struct/src/module.thrift", "name": "ModuleB", "kind": "struct" } */
 class ModuleB final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -797,6 +800,7 @@ unsigned long ModuleB::read(Protocol_* iprot) {
 
 
 namespace detail {
+/** Glean {"file": "thrift/compiler/test/fixtures/frozen-struct/src/module.thrift", "name": "DirectlyAdapted", "kind": "struct" } */
 class DirectlyAdapted final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -951,6 +955,7 @@ unsigned long DirectlyAdapted::read(Protocol_* iprot) {
 using DirectlyAdapted = ::apache::thrift::adapt_detail::adapted_t<::my::Adapter, ::some::ns::detail::DirectlyAdapted>;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/frozen-struct/src/module.thrift", "name": "CppRef", "kind": "struct" } */
 class CppRef final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

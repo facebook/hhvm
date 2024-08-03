@@ -32,6 +32,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(MyStringField);
 // BEGIN declare_enums
 namespace cpp2 {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
   MyValue1 = 0,
   MyValue2 = 1,
@@ -95,6 +96,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

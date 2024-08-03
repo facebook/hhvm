@@ -82,6 +82,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(password);
 // BEGIN declare_enums
 namespace cpp2 {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourEnum", "kind": "enum" } */
 enum class YourEnum {
   MyValue1 = 0,
   MyValue2 = 1,
@@ -157,6 +158,7 @@ using ::apache::thrift::detail::operator>=;
 
 
 namespace detail {
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourUnion", "kind": "union" } */
 class YourUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -291,9 +293,11 @@ unsigned long YourUnion::read(Protocol_* iprot) {
 
 using YourUnion = ::apache::thrift::adapt_detail::adapted_t<::StaticCast, ::cpp2::detail::YourUnion>;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "list_string_6884", "kind": "typedef" } */
 typedef std::deque<std::string> list_string_6884;
 
 namespace detail {
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct" } */
 class YourStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -894,9 +898,12 @@ unsigned long YourStruct::read(Protocol_* iprot) {
 
 using YourStruct = ::apache::thrift::adapt_detail::adapted_t<::StaticCast, ::cpp2::detail::YourStruct>;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "AwesomeStruct", "kind": "typedef" } */
 typedef ::cpp2::YourStruct AwesomeStruct;
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "FantasticStruct", "kind": "typedef" } */
 typedef ::cpp2::YourStruct FantasticStruct;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "MyStructNestedAnnotation", "kind": "struct" } */
 class MyStructNestedAnnotation final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1055,6 +1062,7 @@ unsigned long MyStructNestedAnnotation::read(Protocol_* iprot) {
 
 
 namespace detail {
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourException", "kind": "exception" } */
 class FOLLY_EXPORT YourException : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1164,6 +1172,7 @@ unsigned long YourException::read(Protocol_* iprot) {
 using YourException = ::apache::thrift::adapt_detail::adapted_t<::StaticCast, ::cpp2::detail::YourException>;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct" } */
 class SecretStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

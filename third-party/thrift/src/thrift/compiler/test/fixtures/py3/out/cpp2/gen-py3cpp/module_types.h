@@ -152,6 +152,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(u);
 // BEGIN declare_enums
 namespace py3::simple {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AnEnum", "kind": "enum" } */
 enum class AnEnum {
   None = 0,
   ONE = 1,
@@ -162,6 +163,7 @@ enum class AnEnum {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AnEnumRenamed", "kind": "enum" } */
 enum class AnEnumRenamed {
   name = 0,
   value = 1,
@@ -170,6 +172,7 @@ enum class AnEnumRenamed {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "Flags", "kind": "enum" } */
 enum class Flags {
   flag_A = 1,
   flag_B = 2,
@@ -292,9 +295,12 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "IOBufPtr", "kind": "typedef" } */
 typedef std::unique_ptr<folly::IOBuf> IOBufPtr;
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "IOBuf", "kind": "typedef" } */
 typedef folly::IOBuf IOBuf;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "SimpleStruct", "kind": "struct" } */
 class SimpleStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -829,10 +835,13 @@ unsigned long SimpleStruct::read(Protocol_* iprot) {
   return iprot->getCursorPosition() - _xferStart;
 }
 
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AdaptedTypeDef", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<Adapter, ::py3::simple::SimpleStruct> AdaptedTypeDef;
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "HiddenTypeDef", "kind": "typedef" } */
 typedef ::py3::simple::SimpleStruct HiddenTypeDef;
 
 namespace detail {
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AdaptedUnion", "kind": "union" } */
 class AdaptedUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1028,9 +1037,12 @@ unsigned long AdaptedUnion::read(Protocol_* iprot) {
 
 using AdaptedUnion = ::apache::thrift::adapt_detail::adapted_t<Adapter, ::py3::simple::detail::AdaptedUnion>;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "ImplicitlyHiddenTypeDef", "kind": "typedef" } */
 typedef ::py3::simple::AdaptedUnion ImplicitlyHiddenTypeDef;
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "foo_bar", "kind": "typedef" } */
 typedef foo::Bar foo_bar;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "SimpleException", "kind": "exception" } */
 class FOLLY_EXPORT SimpleException : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1193,6 +1205,7 @@ unsigned long SimpleException::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "OptionalRefStruct", "kind": "struct" } */
 class OptionalRefStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1350,6 +1363,7 @@ unsigned long OptionalRefStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "HiddenTypeFieldsStruct", "kind": "struct" } */
 class HiddenTypeFieldsStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1597,6 +1611,7 @@ unsigned long HiddenTypeFieldsStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "HiddenException", "kind": "exception" } */
 class FOLLY_EXPORT HiddenException : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1759,6 +1774,7 @@ unsigned long HiddenException::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "ComplexStruct", "kind": "struct" } */
 class ComplexStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2366,6 +2382,7 @@ unsigned long ComplexStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "BinaryUnion", "kind": "union" } */
 class BinaryUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2576,6 +2593,7 @@ unsigned long BinaryUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "BinaryUnionStruct", "kind": "struct" } */
 class BinaryUnionStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

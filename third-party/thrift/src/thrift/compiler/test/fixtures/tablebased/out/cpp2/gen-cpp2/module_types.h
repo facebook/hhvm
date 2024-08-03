@@ -97,6 +97,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(fieldB);
 // BEGIN declare_enums
 namespace test::fixtures::tablebased {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/tablebased/src/module.thrift", "name": "ExampleEnum", "kind": "enum" } */
 enum class ExampleEnum {
   ZERO = 0,
   NONZERO = 123,
@@ -161,8 +162,10 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/tablebased/src/module.thrift", "name": "IOBufPtr", "kind": "typedef" } */
 typedef std::unique_ptr<folly::IOBuf> IOBufPtr;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/tablebased/src/module.thrift", "name": "TrivialTypesStruct", "kind": "struct" } */
 class TrivialTypesStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -555,6 +558,7 @@ unsigned long TrivialTypesStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/tablebased/src/module.thrift", "name": "ContainerStruct", "kind": "struct" } */
 class ContainerStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1079,6 +1083,7 @@ unsigned long ContainerStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/tablebased/src/module.thrift", "name": "ExampleUnion", "kind": "union" } */
 class ExampleUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

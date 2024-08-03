@@ -32,11 +32,13 @@ APACHE_THRIFT_DEFINE_ACCESSOR(myBigEnum);
 // BEGIN declare_enums
 namespace test::fixtures::enumstrict {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-enum/src/module.thrift", "name": "EmptyEnum", "kind": "enum" } */
 enum class EmptyEnum {
 };
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-enum/src/module.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
   ONE = 1,
   TWO = 2,
@@ -44,6 +46,7 @@ enum class MyEnum {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-enum/src/module.thrift", "name": "MyBigEnum", "kind": "enum" } */
 enum class MyBigEnum {
   UNKNOWN = 0,
   ONE = 1,
@@ -171,6 +174,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-enum/src/module.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

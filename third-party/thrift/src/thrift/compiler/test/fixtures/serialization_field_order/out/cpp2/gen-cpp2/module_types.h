@@ -73,6 +73,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/serialization_field_order/src/module.thrift", "name": "Foo", "kind": "struct" } */
 class Foo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -334,6 +335,7 @@ unsigned long Foo::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/serialization_field_order/src/module.thrift", "name": "Foo2", "kind": "struct" } */
 class Foo2 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

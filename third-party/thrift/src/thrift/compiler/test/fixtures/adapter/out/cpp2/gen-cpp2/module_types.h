@@ -483,6 +483,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(field);
 // BEGIN declare_enums
 namespace facebook::thrift::test {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "Color", "kind": "enum" } */
 enum class Color {
   UNKNOWN = 0,
   RED = 1,
@@ -492,6 +493,7 @@ enum class Color {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "ThriftAdaptedEnum", "kind": "enum" } */
 enum class ThriftAdaptedEnum {
   Zero = 0,
   One = 1,
@@ -631,18 +633,30 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "SetWithAdapter", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter2, ::std::set<::std::string>> SetWithAdapter;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "StringWithAdapter", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter1, ::std::string> StringWithAdapter;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "ListWithElemAdapter", "kind": "typedef" } */
 typedef ::std::vector<::facebook::thrift::test::StringWithAdapter> ListWithElemAdapter;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "ListWithElemAdapter_withAdapter", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter2, ::facebook::thrift::test::ListWithElemAdapter> ListWithElemAdapter_withAdapter;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "MyI64", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter1, ::std::int64_t> MyI64;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "DoubleTypedefI64", "kind": "typedef" } */
 typedef ::facebook::thrift::test::MyI64 DoubleTypedefI64;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "MyI32", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter1, ::std::int32_t> MyI32;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "ListWithElemAdapter_withAdapter_2312", "kind": "typedef" } */
 typedef ::facebook::thrift::test::ListWithElemAdapter_withAdapter ListWithElemAdapter_withAdapter_2312;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "binary_5673", "kind": "typedef" } */
 typedef ::std::string binary_5673;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "i32_5137", "kind": "typedef" } */
 typedef ::std::int32_t i32_5137;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "map_string_ListWithElemAdapter_withAdapter_8454", "kind": "typedef" } */
 typedef ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312> map_string_ListWithElemAdapter_withAdapter_8454;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "Foo", "kind": "struct" } */
 class Foo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1224,8 +1238,10 @@ unsigned long Foo::read(Protocol_* iprot) {
   return iprot->getCursorPosition() - _xferStart;
 }
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "FooWithAdapter", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter1, ::facebook::thrift::test::Foo> FooWithAdapter;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "Baz", "kind": "union" } */
 class Baz final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1717,6 +1733,7 @@ unsigned long Baz::read(Protocol_* iprot) {
 
 
 namespace detail {
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "DirectlyAdapted", "kind": "struct" } */
 class DirectlyAdapted final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1871,11 +1888,16 @@ unsigned long DirectlyAdapted::read(Protocol_* iprot) {
 
 using DirectlyAdapted = ::apache::thrift::adapt_detail::adapted_t<::my::Adapter, ::facebook::thrift::test::detail::DirectlyAdapted>;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "FooWithAdapter_9317", "kind": "typedef" } */
 typedef ::facebook::thrift::test::FooWithAdapter FooWithAdapter_9317;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "Baz_7352", "kind": "typedef" } */
 typedef ::facebook::thrift::test::Baz Baz_7352;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "Foo_3943", "kind": "typedef" } */
 typedef ::facebook::thrift::test::Foo Foo_3943;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "Foo_6868", "kind": "typedef" } */
 typedef ::facebook::thrift::test::Foo Foo_6868;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "Bar", "kind": "struct" } */
 class Bar final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2300,9 +2322,12 @@ unsigned long Bar::read(Protocol_* iprot) {
   return iprot->getCursorPosition() - _xferStart;
 }
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "StructWithAdapter", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter2, ::facebook::thrift::test::Bar> StructWithAdapter;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "UnionWithAdapter", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter2, ::facebook::thrift::test::Baz> UnionWithAdapter;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "A", "kind": "struct" } */
 class A final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2397,21 +2422,36 @@ unsigned long A::read(Protocol_* iprot) {
   return iprot->getCursorPosition() - _xferStart;
 }
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "AdaptedA", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter, ::facebook::thrift::test::A> AdaptedA;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "DurationMs", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::AdaptTestMsAdapter, ::std::int64_t> DurationMs;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "AdaptedBool", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::TemplatedTestAdapter, bool> AdaptedBool;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "AdaptedByte", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::TemplatedTestAdapter, ::std::int8_t> AdaptedByte;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "AdaptedShort", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::TemplatedTestAdapter, ::std::int16_t> AdaptedShort;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "AdaptedInteger", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::TemplatedTestAdapter, ::std::int32_t> AdaptedInteger;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "AdaptedLong", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::TemplatedTestAdapter, ::std::int64_t> AdaptedLong;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "AdaptedDouble", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::TemplatedTestAdapter, double> AdaptedDouble;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "AdaptedString", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::TemplatedTestAdapter, ::std::string> AdaptedString;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "DoubleTypedefBool", "kind": "typedef" } */
 typedef ::facebook::thrift::test::AdaptedBool DoubleTypedefBool;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "IOBuf", "kind": "typedef" } */
 typedef ::folly::IOBuf IOBuf;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "CustomProtocolType", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::CustomProtocolAdapter, ::facebook::thrift::test::IOBuf> CustomProtocolType;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "IndirectionString", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>, ::std::string> IndirectionString;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "AdaptedEnum", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>, ::facebook::thrift::test::ThriftAdaptedEnum> AdaptedEnum;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "ThriftAdaptedStruct", "kind": "struct" } */
 class ThriftAdaptedStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2563,9 +2603,11 @@ unsigned long ThriftAdaptedStruct::read(Protocol_* iprot) {
   return iprot->getCursorPosition() - _xferStart;
 }
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "AdaptedTypedef", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::TemplatedTestAdapter, ::facebook::thrift::test::ThriftAdaptedStruct> AdaptedTypedef;
 
 namespace detail {
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "DirectlyAdaptedStruct", "kind": "struct" } */
 class DirectlyAdaptedStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2720,12 +2762,18 @@ unsigned long DirectlyAdaptedStruct::read(Protocol_* iprot) {
 
 using DirectlyAdaptedStruct = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::TemplatedTestAdapter, ::facebook::thrift::test::detail::DirectlyAdaptedStruct>;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "TypedefOfDirect", "kind": "typedef" } */
 typedef ::facebook::thrift::test::DirectlyAdaptedStruct TypedefOfDirect;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "AdaptedCircularAdaptee", "kind": "typedef" } */
 typedef ::apache::thrift::test::TaggedWrapper<CircularAdaptee, CircularStruct> AdaptedCircularAdaptee;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "CountingInt", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::CountingAdapter<true, int>, ::std::int64_t> CountingInt;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "MyI32_4873", "kind": "typedef" } */
 typedef ::facebook::thrift::test::MyI32 MyI32_4873;
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "StringWithAdapter_7208", "kind": "typedef" } */
 typedef ::facebook::thrift::test::StringWithAdapter StringWithAdapter_7208;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "MyAnnotation", "kind": "struct" } */
 class MyAnnotation final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2939,6 +2987,7 @@ unsigned long MyAnnotation::read(Protocol_* iprot) {
 
 
 namespace detail {
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "IndependentDirectlyAdapted", "kind": "struct" } */
 class IndependentDirectlyAdapted final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3092,6 +3141,7 @@ unsigned long IndependentDirectlyAdapted::read(Protocol_* iprot) {
 } // namespace detail
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "StructWithFieldAdapter", "kind": "struct" } */
 class StructWithFieldAdapter final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3364,6 +3414,7 @@ unsigned long StructWithFieldAdapter::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "TerseAdaptedFields", "kind": "struct" } */
 class TerseAdaptedFields final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3592,6 +3643,7 @@ unsigned long TerseAdaptedFields::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "B", "kind": "struct" } */
 class B final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3732,6 +3784,7 @@ unsigned long B::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "Config", "kind": "struct" } */
 class Config final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3890,6 +3943,7 @@ unsigned long Config::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4086,6 +4140,7 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "AdaptTestStruct", "kind": "struct" } */
 class AdaptTestStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4639,6 +4694,7 @@ unsigned long AdaptTestStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "AdaptTemplatedTestStruct", "kind": "struct" } */
 class AdaptTemplatedTestStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5705,6 +5761,7 @@ unsigned long AdaptTemplatedTestStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "AdaptTemplatedNestedTestStruct", "kind": "struct" } */
 class AdaptTemplatedNestedTestStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5854,6 +5911,7 @@ unsigned long AdaptTemplatedNestedTestStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "ThriftAdaptTestUnion", "kind": "union" } */
 class ThriftAdaptTestUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -6129,6 +6187,7 @@ unsigned long ThriftAdaptTestUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "StructFieldAdaptedStruct", "kind": "struct" } */
 class StructFieldAdaptedStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -6404,6 +6463,7 @@ unsigned long StructFieldAdaptedStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "CircularStruct", "kind": "struct" } */
 class CircularStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -6543,6 +6603,7 @@ unsigned long CircularStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "CircularAdaptee", "kind": "struct" } */
 class CircularAdaptee final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -6693,6 +6754,7 @@ unsigned long CircularAdaptee::read(Protocol_* iprot) {
 
 
 namespace detail {
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "DeclaredAfterStruct", "kind": "struct" } */
 class DeclaredAfterStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -6791,6 +6853,7 @@ unsigned long DeclaredAfterStruct::read(Protocol_* iprot) {
 using DeclaredAfterStruct = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, ::facebook::thrift::test::detail::DeclaredAfterStruct>;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "ReorderedStruct", "kind": "struct" } */
 class ReorderedStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -6930,6 +6993,7 @@ unsigned long ReorderedStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "UnderlyingRenamedStruct", "kind": "struct" } */
 class UnderlyingRenamedStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7084,6 +7148,7 @@ unsigned long UnderlyingRenamedStruct::read(Protocol_* iprot) {
 using RenamedStruct = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::TemplatedTestAdapter, ::facebook::thrift::test::UnderlyingRenamedStruct>;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "UnderlyingSameNamespaceStruct", "kind": "struct" } */
 class UnderlyingSameNamespaceStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7239,6 +7304,7 @@ using SameNamespaceStruct = ::apache::thrift::adapt_detail::adapted_t<::apache::
 
 
 namespace detail {
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "HeapAllocated", "kind": "struct" } */
 class HeapAllocated final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7337,6 +7403,7 @@ unsigned long HeapAllocated::read(Protocol_* iprot) {
 using HeapAllocated = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::MoveOnlyAdapter, ::facebook::thrift::test::detail::HeapAllocated>;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "MoveOnly", "kind": "struct" } */
 class MoveOnly final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7477,6 +7544,7 @@ unsigned long MoveOnly::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "AlsoMoveOnly", "kind": "struct" } */
 class AlsoMoveOnly final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7618,6 +7686,7 @@ unsigned long AlsoMoveOnly::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "ApplyAdapter", "kind": "struct" } */
 class ApplyAdapter final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7714,6 +7783,7 @@ unsigned long ApplyAdapter::read(Protocol_* iprot) {
 
 
 namespace detail {
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "TransitiveAdapted", "kind": "struct" } */
 class TransitiveAdapted final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7812,6 +7882,7 @@ unsigned long TransitiveAdapted::read(Protocol_* iprot) {
 using TransitiveAdapted = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::TemplatedTestAdapter, ::facebook::thrift::test::detail::TransitiveAdapted>;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "CountingStruct", "kind": "struct" } */
 class CountingStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -8042,6 +8113,7 @@ unsigned long CountingStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "Person", "kind": "struct" } */
 class Person final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -8200,6 +8272,7 @@ unsigned long Person::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "Person2", "kind": "struct" } */
 class Person2 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

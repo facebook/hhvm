@@ -27,12 +27,14 @@ APACHE_THRIFT_DEFINE_ACCESSOR(fieldA);
 // BEGIN declare_enums
 namespace facebook::ns::qwerty {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/enums.thrift", "name": "AnEnumA", "kind": "enum" } */
 enum class AnEnumA {
   FIELDA = 0,
 };
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/enums.thrift", "name": "AnEnumB", "kind": "enum" } */
 enum class AnEnumB {
   FIELDA = 0,
   FIELDB = 2,
@@ -40,18 +42,21 @@ enum class AnEnumB {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/enums.thrift", "name": "AnEnumC", "kind": "enum" } */
 enum class AnEnumC {
   FIELDC = 0,
 };
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/enums.thrift", "name": "AnEnumD", "kind": "enum" } */
 enum class AnEnumD {
   FIELDD = 0,
 };
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/enums.thrift", "name": "AnEnumE", "kind": "enum" } */
 enum class AnEnumE {
   FIELDA = 0,
 };
@@ -210,6 +215,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/enums.thrift", "name": "SomeStruct", "kind": "struct" } */
 class SomeStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

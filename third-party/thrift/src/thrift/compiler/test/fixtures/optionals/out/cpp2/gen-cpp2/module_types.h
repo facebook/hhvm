@@ -117,6 +117,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(vehicles);
 // BEGIN declare_enums
 namespace cpp2 {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/optionals/src/module.thrift", "name": "Animal", "kind": "enum" } */
 enum class Animal {
   DOG = 1,
   CAT = 2,
@@ -182,8 +183,10 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/optionals/src/module.thrift", "name": "PersonID", "kind": "typedef" } */
 typedef ::std::int64_t PersonID;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/optionals/src/module.thrift", "name": "Color", "kind": "struct" } */
 class Color final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -500,6 +503,7 @@ unsigned long Color::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/optionals/src/module.thrift", "name": "Vehicle", "kind": "struct" } */
 class Vehicle final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -890,6 +894,7 @@ unsigned long Vehicle::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/optionals/src/module.thrift", "name": "Person", "kind": "struct" } */
 class Person final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

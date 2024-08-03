@@ -87,6 +87,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(map_field);
 // BEGIN declare_enums
 namespace apache::thrift::test {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/deprecated-clear/src/module.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
   ME0 = 0,
   ME1 = 1,
@@ -150,6 +151,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/deprecated-clear/src/module.thrift", "name": "StructWithDefaultStruct", "kind": "struct" } */
 class StructWithDefaultStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

@@ -109,6 +109,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/default_values/src/module.thrift", "name": "TrivialStruct", "kind": "struct" } */
 class TrivialStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -261,6 +262,7 @@ unsigned long TrivialStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/default_values/src/module.thrift", "name": "StructWithNoCustomDefaultValues", "kind": "struct" } */
 class StructWithNoCustomDefaultValues final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -688,6 +690,7 @@ unsigned long StructWithNoCustomDefaultValues::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/default_values/src/module.thrift", "name": "StructWithCustomDefaultValues", "kind": "struct" } */
 class StructWithCustomDefaultValues final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

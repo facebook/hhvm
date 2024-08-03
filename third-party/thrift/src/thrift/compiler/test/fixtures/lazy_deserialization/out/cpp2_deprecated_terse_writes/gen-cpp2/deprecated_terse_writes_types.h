@@ -125,6 +125,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/lazy_deserialization/src/deprecated_terse_writes.thrift", "name": "TerseFoo", "kind": "struct" } */
 class TerseFoo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -435,6 +436,7 @@ unsigned long TerseFoo::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/lazy_deserialization/src/deprecated_terse_writes.thrift", "name": "TerseLazyFoo", "kind": "struct" } */
 class TerseLazyFoo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -749,6 +751,7 @@ unsigned long TerseLazyFoo::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/lazy_deserialization/src/deprecated_terse_writes.thrift", "name": "TerseOptionalFoo", "kind": "struct" } */
 class TerseOptionalFoo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1063,6 +1066,7 @@ unsigned long TerseOptionalFoo::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/lazy_deserialization/src/deprecated_terse_writes.thrift", "name": "TerseOptionalLazyFoo", "kind": "struct" } */
 class TerseOptionalLazyFoo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

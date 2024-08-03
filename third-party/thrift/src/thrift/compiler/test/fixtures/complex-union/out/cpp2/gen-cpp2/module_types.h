@@ -143,8 +143,10 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "containerTypedef", "kind": "typedef" } */
 typedef ::std::map<::std::int16_t, ::std::string> containerTypedef;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "ComplexUnion", "kind": "union" } */
 class ComplexUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -734,6 +736,7 @@ unsigned long ComplexUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "ListUnion", "kind": "union" } */
 class ListUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1023,6 +1026,7 @@ unsigned long ListUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "DataUnion", "kind": "union" } */
 class DataUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1314,6 +1318,7 @@ unsigned long DataUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct" } */
 class Val final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1578,6 +1583,7 @@ unsigned long Val::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "ValUnion", "kind": "union" } */
 class ValUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1867,6 +1873,7 @@ unsigned long ValUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "VirtualComplexUnion", "kind": "union" } */
 class VirtualComplexUnion  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2158,6 +2165,7 @@ unsigned long VirtualComplexUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "NonCopyableStruct", "kind": "struct" } */
 class NonCopyableStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2305,6 +2313,7 @@ unsigned long NonCopyableStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "NonCopyableUnion", "kind": "union" } */
 class NonCopyableUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

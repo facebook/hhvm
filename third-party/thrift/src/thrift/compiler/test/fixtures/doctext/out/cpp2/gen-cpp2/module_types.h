@@ -42,6 +42,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(message);
 // BEGIN declare_enums
 namespace cpp2 {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "name": "B", "kind": "enum" } */
 enum class B {
   HELLO = 0,
 };
@@ -105,9 +106,12 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "name": "lanyard", "kind": "typedef" } */
 typedef ::std::string lanyard;
+/** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "name": "number", "kind": "typedef" } */
 typedef ::std::int32_t number;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "name": "A", "kind": "struct" } */
 class A final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -259,6 +263,7 @@ unsigned long A::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "name": "U", "kind": "union" } */
 class U final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -533,6 +538,7 @@ unsigned long U::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "name": "Bang", "kind": "exception" } */
 class FOLLY_EXPORT Bang : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

@@ -98,6 +98,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "name": "Fiery", "kind": "exception" } */
 class FOLLY_EXPORT Fiery : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -264,6 +265,7 @@ unsigned long Fiery::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "name": "Serious", "kind": "exception" } */
 class FOLLY_EXPORT Serious : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -433,6 +435,7 @@ unsigned long Serious::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "name": "ComplexFieldNames", "kind": "exception" } */
 class FOLLY_EXPORT ComplexFieldNames : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -660,6 +663,7 @@ unsigned long ComplexFieldNames::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "name": "CustomFieldNames", "kind": "exception" } */
 class FOLLY_EXPORT CustomFieldNames : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -887,6 +891,7 @@ unsigned long CustomFieldNames::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "name": "ExceptionWithPrimitiveField", "kind": "exception" } */
 class FOLLY_EXPORT ExceptionWithPrimitiveField : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1109,6 +1114,7 @@ unsigned long ExceptionWithPrimitiveField::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "name": "ExceptionWithStructuredAnnotation", "kind": "exception" } */
 class FOLLY_EXPORT ExceptionWithStructuredAnnotation : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1331,6 +1337,7 @@ unsigned long ExceptionWithStructuredAnnotation::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "name": "Banal", "kind": "exception" } */
 class FOLLY_EXPORT Banal : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

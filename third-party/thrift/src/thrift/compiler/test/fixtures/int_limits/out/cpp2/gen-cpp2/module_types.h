@@ -82,6 +82,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct" } */
 class Limits final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

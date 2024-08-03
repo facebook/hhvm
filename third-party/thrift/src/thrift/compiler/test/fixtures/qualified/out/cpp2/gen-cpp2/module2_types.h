@@ -65,6 +65,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/qualified/src/module2.thrift", "name": "Struct", "kind": "struct" } */
 class Struct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -266,6 +267,7 @@ unsigned long Struct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/qualified/src/module2.thrift", "name": "BigStruct", "kind": "struct" } */
 class BigStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

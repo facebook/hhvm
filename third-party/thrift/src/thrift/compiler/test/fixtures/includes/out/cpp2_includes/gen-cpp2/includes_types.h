@@ -52,9 +52,12 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/includes/src/includes.thrift", "name": "IncludedInt64", "kind": "typedef" } */
 typedef ::std::int64_t IncludedInt64;
+/** Glean {"file": "thrift/compiler/test/fixtures/includes/src/includes.thrift", "name": "TransitiveFoo", "kind": "typedef" } */
 typedef ::cpp2::Foo TransitiveFoo;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/includes/src/includes.thrift", "name": "Included", "kind": "struct" } */
 class Included final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

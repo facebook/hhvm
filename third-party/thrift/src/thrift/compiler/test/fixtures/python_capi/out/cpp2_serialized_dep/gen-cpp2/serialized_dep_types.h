@@ -137,6 +137,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct" } */
 class SerializedStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -468,6 +469,7 @@ unsigned long SerializedStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedUnion", "kind": "union" } */
 class SerializedUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -743,6 +745,7 @@ unsigned long SerializedUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception" } */
 class FOLLY_EXPORT SerializedError : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1030,6 +1033,7 @@ unsigned long SerializedError::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct" } */
 class MarshalStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1361,6 +1365,7 @@ unsigned long MarshalStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalUnion", "kind": "union" } */
 class MarshalUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1636,6 +1641,7 @@ unsigned long MarshalUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception" } */
 class FOLLY_EXPORT MarshalError : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

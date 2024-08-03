@@ -108,6 +108,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "name": "containerStruct2", "kind": "struct" } */
 class containerStruct2 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

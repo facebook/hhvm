@@ -47,6 +47,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/deprecated-public-required-fields/src/module.thrift", "name": "Foo", "kind": "struct" } */
 class Foo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

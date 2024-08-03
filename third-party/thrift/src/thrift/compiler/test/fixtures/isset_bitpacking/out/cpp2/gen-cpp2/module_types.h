@@ -125,6 +125,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/isset_bitpacking/src/module.thrift", "name": "Default", "kind": "struct" } */
 class Default final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -460,6 +461,7 @@ unsigned long Default::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/isset_bitpacking/src/module.thrift", "name": "NonAtomic", "kind": "struct" } */
 class NonAtomic final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -795,6 +797,7 @@ unsigned long NonAtomic::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/isset_bitpacking/src/module.thrift", "name": "Atomic", "kind": "struct" } */
 class Atomic final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1130,6 +1133,7 @@ unsigned long Atomic::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/isset_bitpacking/src/module.thrift", "name": "AtomicFoo", "kind": "struct" } */
 class AtomicFoo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

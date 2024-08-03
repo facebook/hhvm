@@ -43,6 +43,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/empty-struct/src/module.thrift", "name": "Empty", "kind": "struct" } */
 class Empty final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -137,6 +138,7 @@ unsigned long Empty::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/empty-struct/src/module.thrift", "name": "Nada", "kind": "union" } */
 class Nada final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

@@ -175,15 +175,24 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "IOBuf", "kind": "typedef" } */
 typedef folly::IOBuf IOBuf;
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "small_vector_iobuf", "kind": "typedef" } */
 typedef folly::small_vector<::test::fixtures::python_capi::IOBuf> small_vector_iobuf;
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "fbvector_string", "kind": "typedef" } */
 typedef folly::fbvector<::std::string> fbvector_string;
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "fbvector_fbvector_string", "kind": "typedef" } */
 typedef folly::fbvector<::test::fixtures::python_capi::fbvector_string> fbvector_fbvector_string;
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "CppWrapper", "kind": "typedef" } */
 typedef ::thrift::test::python_capi::CppWrapperT CppWrapper;
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "ListOfWrapped", "kind": "typedef" } */
 typedef ::std::vector<::test::fixtures::python_capi::TWrapped> ListOfWrapped;
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "VecOfWrapped", "kind": "typedef" } */
 typedef std::vector<::test::fixtures::python_capi::TWrapped> VecOfWrapped;
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "ListOfWrappedAlias", "kind": "typedef" } */
 typedef ::test::fixtures::python_capi::ListOfWrapped ListOfWrappedAlias;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "TemplateLists", "kind": "struct" } */
 class TemplateLists final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -546,6 +555,7 @@ unsigned long TemplateLists::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "TemplateSets", "kind": "struct" } */
 class TemplateSets final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1016,6 +1026,7 @@ unsigned long TemplateSets::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "TemplateMaps", "kind": "struct" } */
 class TemplateMaps final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1486,6 +1497,7 @@ unsigned long TemplateMaps::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "TWrapped", "kind": "struct" } */
 class TWrapped final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1703,6 +1715,7 @@ unsigned long TWrapped::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "IndirectionA", "kind": "struct" } */
 class IndirectionA final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1855,6 +1868,7 @@ unsigned long IndirectionA::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "IndirectionB", "kind": "struct" } */
 class IndirectionB final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2007,6 +2021,7 @@ unsigned long IndirectionB::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "IndirectionC", "kind": "struct" } */
 class IndirectionC final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

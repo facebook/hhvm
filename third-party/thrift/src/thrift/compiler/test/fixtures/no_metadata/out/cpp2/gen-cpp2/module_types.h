@@ -57,6 +57,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(myDataItem);
 // BEGIN declare_enums
 namespace cpp2 {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/no_metadata/src/module.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
   MyValue1 = 0,
   MyValue2 = 1,
@@ -122,6 +123,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/no_metadata/src/module.thrift", "name": "MyDataItem", "kind": "struct" } */
 class MyDataItem final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -216,6 +218,7 @@ unsigned long MyDataItem::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/no_metadata/src/module.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -534,6 +537,7 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/no_metadata/src/module.thrift", "name": "MyUnion", "kind": "union" } */
 class MyUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

@@ -104,6 +104,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(second);
 // BEGIN declare_enums
 namespace test::fixtures::basic-structured-annotations {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
   UNKNOWN = 0,
   ONE = 1,
@@ -178,10 +179,14 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "annotated_with_default_string", "kind": "typedef" } */
 typedef ::std::string annotated_with_default_string;
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "annotated_inline_string", "kind": "typedef" } */
 typedef ::std::string annotated_inline_string;
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "annotated_inline_i64", "kind": "typedef" } */
 typedef ::std::int64_t annotated_inline_i64;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "runtime_annotation", "kind": "struct" } */
 class runtime_annotation final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -277,6 +282,7 @@ unsigned long runtime_annotation::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "structured_annotation_inline", "kind": "struct" } */
 class structured_annotation_inline final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -489,6 +495,7 @@ unsigned long structured_annotation_inline::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "structured_annotation_with_default", "kind": "struct" } */
 class structured_annotation_with_default final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -647,6 +654,7 @@ unsigned long structured_annotation_with_default::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "structured_annotation_forward", "kind": "struct" } */
 class structured_annotation_forward final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -799,6 +807,7 @@ unsigned long structured_annotation_forward::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "structured_annotation_recursive", "kind": "struct" } */
 class structured_annotation_recursive final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1052,6 +1061,7 @@ unsigned long structured_annotation_recursive::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "structured_annotation_nested", "kind": "struct" } */
 class structured_annotation_nested final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1263,6 +1273,7 @@ unsigned long structured_annotation_nested::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1588,6 +1599,7 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "MyException", "kind": "exception" } */
 class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1756,6 +1768,7 @@ unsigned long MyException::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "MyUnion", "kind": "union" } */
 class MyUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

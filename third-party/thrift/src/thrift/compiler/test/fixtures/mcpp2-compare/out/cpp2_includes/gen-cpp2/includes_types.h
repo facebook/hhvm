@@ -33,6 +33,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(FieldA);
 // BEGIN declare_enums
 namespace a::different::ns {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AnEnum", "kind": "enum" } */
 enum class AnEnum {
   FIELDA = 2,
   FIELDB = 4,
@@ -96,8 +97,10 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "IncludedInt64", "kind": "typedef" } */
 typedef ::std::int64_t IncludedInt64;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStruct", "kind": "struct" } */
 class AStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -249,6 +252,7 @@ unsigned long AStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStructB", "kind": "struct" } */
 class AStructB final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

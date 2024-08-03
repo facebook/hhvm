@@ -62,6 +62,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct" } */
 class BasicTypes final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

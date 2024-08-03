@@ -152,6 +152,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(reserved_field);
 // BEGIN declare_enums
 namespace test::fixtures::basic {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
   MyValue1 = 0,
   MyValue2 = 1,
@@ -159,6 +160,7 @@ enum class MyEnum {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "name": "HackEnum", "kind": "enum" } */
 enum class HackEnum {
   Value1 = 0,
   Value2 = 1,
@@ -252,9 +254,12 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "name": "MyEnumAlias", "kind": "typedef" } */
 typedef ::test::fixtures::basic::MyEnum MyEnumAlias;
+/** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "name": "MyDataItemAlias", "kind": "typedef" } */
 typedef ::test::fixtures::basic::MyDataItem MyDataItemAlias;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "name": "MyDataItem", "kind": "struct" } */
 class MyDataItem final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -350,6 +355,7 @@ unsigned long MyDataItem::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -943,6 +949,7 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "name": "Containers", "kind": "struct" } */
 class Containers final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1201,6 +1208,7 @@ unsigned long Containers::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "name": "MyUnion", "kind": "union" } */
 class MyUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1629,6 +1637,7 @@ unsigned long MyUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "name": "MyException", "kind": "exception" } */
 class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1957,6 +1966,7 @@ unsigned long MyException::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "name": "MyExceptionWithMessage", "kind": "exception" } */
 class FOLLY_EXPORT MyExceptionWithMessage : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2286,6 +2296,7 @@ unsigned long MyExceptionWithMessage::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "name": "ReservedKeyword", "kind": "struct" } */
 class ReservedKeyword final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2438,6 +2449,7 @@ unsigned long ReservedKeyword::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "name": "UnionToBeRenamed", "kind": "union" } */
 class UnionToBeRenamed final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

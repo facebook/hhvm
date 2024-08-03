@@ -244,6 +244,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/lazy_deserialization/src/simple.thrift", "name": "Foo", "kind": "struct" } */
 class Foo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -554,6 +555,7 @@ unsigned long Foo::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/lazy_deserialization/src/simple.thrift", "name": "LazyFoo", "kind": "struct" } */
 class LazyFoo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -868,6 +870,7 @@ unsigned long LazyFoo::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/lazy_deserialization/src/simple.thrift", "name": "OptionalFoo", "kind": "struct" } */
 class OptionalFoo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1182,6 +1185,7 @@ unsigned long OptionalFoo::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/lazy_deserialization/src/simple.thrift", "name": "OptionalLazyFoo", "kind": "struct" } */
 class OptionalLazyFoo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1498,6 +1502,7 @@ unsigned long OptionalLazyFoo::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/lazy_deserialization/src/simple.thrift", "name": "OptionalBoxedLazyFoo", "kind": "struct" } */
 class OptionalBoxedLazyFoo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1792,6 +1797,7 @@ unsigned long OptionalBoxedLazyFoo::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/lazy_deserialization/src/simple.thrift", "name": "LazyCppRef", "kind": "struct" } */
 class LazyCppRef final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2094,6 +2100,7 @@ unsigned long LazyCppRef::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/lazy_deserialization/src/simple.thrift", "name": "IndexedFoo", "kind": "struct" } */
 class IndexedFoo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2511,6 +2518,7 @@ unsigned long IndexedFoo::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/lazy_deserialization/src/simple.thrift", "name": "OptionalIndexedFoo", "kind": "struct" } */
 class OptionalIndexedFoo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2932,6 +2940,7 @@ unsigned long OptionalIndexedFoo::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/lazy_deserialization/src/simple.thrift", "name": "Empty", "kind": "struct" } */
 class Empty final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

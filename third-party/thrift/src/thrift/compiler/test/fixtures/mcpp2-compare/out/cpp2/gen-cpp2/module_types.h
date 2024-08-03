@@ -824,6 +824,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(intField);
 // BEGIN declare_enums
 namespace some::valid::ns {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "MyEnumA", "kind": "enum" } */
 enum class MyEnumA {
   fieldA = 1,
   fieldB = 2,
@@ -832,6 +833,7 @@ enum class MyEnumA {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "AnnotatedEnum", "kind": "enum" } */
 enum class AnnotatedEnum : ::std::uint32_t {
   FIELDA = 2,
   FIELDB = 4,
@@ -871,6 +873,7 @@ inline constexpr AnnotatedEnum operator~(AnnotatedEnum a) {
   return static_cast<E>(~static_cast<U>(a));
 }
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "AnnotatedEnum2", "kind": "enum" } */
 enum class AnnotatedEnum2 : ::std::int16_t {
   FIELDA = 2,
   FIELDB = 4,
@@ -910,6 +913,7 @@ inline constexpr AnnotatedEnum2 operator~(AnnotatedEnum2 a) {
   return static_cast<E>(~static_cast<U>(a));
 }
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "MyEnumB", "kind": "enum" } */
 enum class MyEnumB {
   AField = 0,
 };
@@ -1085,32 +1089,58 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "AStruct", "kind": "typedef" } */
 typedef ::a::different::ns::AStruct AStruct;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "IOBuf", "kind": "typedef" } */
 typedef folly::IOBuf IOBuf;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "CustomProtocolType", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::CustomProtocolAdapter, ::some::valid::ns::IOBuf> CustomProtocolType;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "simpleTypeDef", "kind": "typedef" } */
 typedef ::std::int32_t simpleTypeDef;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "containerTypeDef", "kind": "typedef" } */
 typedef ::std::map<::std::int16_t, ::std::string> containerTypeDef;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "complexContainerTypeDef", "kind": "typedef" } */
 typedef ::std::vector<::std::map<::std::int16_t, ::std::string>> complexContainerTypeDef;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "unionTypeDef", "kind": "typedef" } */
 typedef ::std::set<::some::valid::ns::SimpleUnion> unionTypeDef;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "structTypeDef", "kind": "typedef" } */
 typedef ::std::vector<::some::valid::ns::MyStruct> structTypeDef;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "complexStructTypeDef", "kind": "typedef" } */
 typedef ::std::vector<::std::map<::some::valid::ns::Empty, ::some::valid::ns::MyStruct>> complexStructTypeDef;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "mostComplexTypeDef", "kind": "typedef" } */
 typedef ::std::vector<::some::valid::ns::complexStructTypeDef> mostComplexTypeDef;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "IndirectionA", "kind": "typedef" } */
 typedef Foo IndirectionA;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "IndirectionC", "kind": "typedef" } */
 typedef Baz IndirectionC;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "IndirectionB", "kind": "typedef" } */
 typedef Bar IndirectionB;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "IndirectionD", "kind": "typedef" } */
 typedef FooBar IndirectionD;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "HashedTypedef", "kind": "typedef" } */
 typedef ::std::map<::some::valid::ns::MyEnumA, ::std::string> HashedTypedef;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "CppFakeI32", "kind": "typedef" } */
 typedef CppFakeI32 CppFakeI32;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "FollySmallVectorI64", "kind": "typedef" } */
 typedef folly::small_vector<int64_t, 8 /* maxInline */> FollySmallVectorI64;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "SortedVectorSetString", "kind": "typedef" } */
 typedef folly::sorted_vector_set<std::string> SortedVectorSetString;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "FakeMap", "kind": "typedef" } */
 typedef FakeMap FakeMap;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "UnorderedMapStruct", "kind": "typedef" } */
 typedef std::unordered_map<std::string, containerStruct> UnorderedMapStruct;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "std_list", "kind": "typedef" } */
 typedef std::list<::std::int32_t> std_list;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "std_deque", "kind": "typedef" } */
 typedef std::deque<::std::string> std_deque;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "folly_set", "kind": "typedef" } */
 typedef folly::sorted_vector_set<::std::string> folly_set;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "folly_map", "kind": "typedef" } */
 typedef folly::sorted_vector_map<::std::int64_t, ::std::string> folly_map;
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "IOBufPtr", "kind": "typedef" } */
 typedef std::unique_ptr<folly::IOBuf> IOBufPtr;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "Empty", "kind": "struct" } */
 class Empty final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1205,6 +1235,7 @@ unsigned long Empty::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "ASimpleStruct", "kind": "struct" } */
 class ASimpleStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1356,6 +1387,7 @@ unsigned long ASimpleStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "ASimpleStructNoexcept", "kind": "struct" } */
 class ASimpleStructNoexcept final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1507,6 +1539,7 @@ unsigned long ASimpleStructNoexcept::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2202,6 +2235,7 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "SimpleUnion", "kind": "union" } */
 class SimpleUnion  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2476,6 +2510,7 @@ unsigned long SimpleUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "AnException", "kind": "exception" } */
 class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3482,6 +3517,7 @@ unsigned long AnException::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "ComplexUnion", "kind": "union" } */
 class ComplexUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5636,6 +5672,7 @@ unsigned long ComplexUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "AnotherException", "kind": "exception" } */
 class FOLLY_EXPORT AnotherException : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5911,6 +5948,7 @@ unsigned long AnotherException::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "containerStruct", "kind": "struct" } */
 class containerStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7583,6 +7621,7 @@ unsigned long containerStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "MyIncludedStruct", "kind": "struct" } */
 class MyIncludedStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7883,6 +7922,7 @@ unsigned long MyIncludedStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "AnnotatedStruct", "kind": "struct" } */
 class AnnotatedStruct  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -9146,6 +9186,7 @@ unsigned long AnnotatedStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "ComplexContainerStruct", "kind": "struct" } */
 class ComplexContainerStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -9349,6 +9390,7 @@ unsigned long ComplexContainerStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "FloatStruct", "kind": "struct" } */
 class FloatStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -9555,6 +9597,7 @@ unsigned long FloatStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "FloatUnion", "kind": "union" } */
 class FloatUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -9809,6 +9852,7 @@ unsigned long FloatUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "AllRequiredNoExceptMoveCtrStruct", "kind": "struct" } */
 class AllRequiredNoExceptMoveCtrStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

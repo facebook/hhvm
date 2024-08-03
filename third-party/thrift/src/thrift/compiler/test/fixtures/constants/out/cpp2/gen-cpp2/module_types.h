@@ -147,11 +147,13 @@ APACHE_THRIFT_DEFINE_ACCESSOR(u);
 // BEGIN declare_enums
 namespace cpp2 {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "EmptyEnum", "kind": "enum" } */
 enum class EmptyEnum {
 };
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "City", "kind": "enum" } */
 enum class City {
   NYC = 0,
   MPK = 1,
@@ -161,6 +163,7 @@ enum class City {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "Company", "kind": "enum" } */
 enum class Company {
   FACEBOOK = 0,
   WHATSAPP = 1,
@@ -278,11 +281,16 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "MyCompany", "kind": "typedef" } */
 typedef ::cpp2::Company MyCompany;
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "MyStringIdentifier", "kind": "typedef" } */
 typedef ::std::string MyStringIdentifier;
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "MyIntIdentifier", "kind": "typedef" } */
 typedef ::std::int32_t MyIntIdentifier;
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "MyMapIdentifier", "kind": "typedef" } */
 typedef ::std::map<::std::string, ::std::string> MyMapIdentifier;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "Internship", "kind": "struct" } */
 class Internship final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -672,6 +680,7 @@ unsigned long Internship::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "Range", "kind": "struct" } */
 class Range final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -876,6 +885,7 @@ unsigned long Range::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "struct1", "kind": "struct" } */
 class struct1 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1087,6 +1097,7 @@ unsigned long struct1::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "struct2", "kind": "struct" } */
 class struct2 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1404,6 +1415,7 @@ unsigned long struct2::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "struct3", "kind": "struct" } */
 class struct3 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1668,6 +1680,7 @@ unsigned long struct3::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "struct4", "kind": "struct" } */
 class struct4 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1938,6 +1951,7 @@ unsigned long struct4::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "union1", "kind": "union" } */
 class union1 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2192,6 +2206,7 @@ unsigned long union1::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "union2", "kind": "union" } */
 class union2 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

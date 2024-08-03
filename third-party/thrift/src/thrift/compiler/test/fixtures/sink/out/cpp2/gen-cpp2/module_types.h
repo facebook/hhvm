@@ -83,6 +83,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "name": "InitialResponse", "kind": "struct" } */
 class InitialResponse final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -240,6 +241,7 @@ unsigned long InitialResponse::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "name": "FinalResponse", "kind": "struct" } */
 class FinalResponse final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -397,6 +399,7 @@ unsigned long FinalResponse::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "name": "SinkPayload", "kind": "struct" } */
 class SinkPayload final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -554,6 +557,7 @@ unsigned long SinkPayload::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "name": "CompatibleWithKeywordSink", "kind": "struct" } */
 class CompatibleWithKeywordSink final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -711,6 +715,7 @@ unsigned long CompatibleWithKeywordSink::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "name": "InitialException", "kind": "exception" } */
 class FOLLY_EXPORT InitialException : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -878,6 +883,7 @@ unsigned long InitialException::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "name": "SinkException1", "kind": "exception" } */
 class FOLLY_EXPORT SinkException1 : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1045,6 +1051,7 @@ unsigned long SinkException1::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "name": "SinkException2", "kind": "exception" } */
 class FOLLY_EXPORT SinkException2 : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

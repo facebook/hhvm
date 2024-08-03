@@ -101,6 +101,7 @@ using ::apache::thrift::detail::operator>=;
 
 {{#program:structs_and_typedefs}}
 {{^is_struct?}}
+{{ > common/typedef_docblock }}
 typedef {{typedef:cpp_type}} {{typedef:name}};
 {{/is_struct?}}
 {{#is_struct?}}
@@ -108,6 +109,7 @@ typedef {{typedef:cpp_type}} {{typedef:name}};
 {{#struct:extra_namespace}}
 namespace {{struct:extra_namespace}} {
 {{/struct:extra_namespace}}
+{{ > common/class_docblock }}
 class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_underlying_name}} {{!
 }}{{^struct:exception?}}{{^struct:virtual}}final {{/struct:virtual}}{{/struct:exception?}}{{!
 }}{{#struct:exception?}}: public virtual apache::thrift::TException{{/struct:exception?}} {

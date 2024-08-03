@@ -47,6 +47,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "name": "CustomException", "kind": "exception" } */
 class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

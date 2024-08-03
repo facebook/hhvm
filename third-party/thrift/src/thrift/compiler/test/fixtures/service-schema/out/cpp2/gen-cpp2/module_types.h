@@ -33,6 +33,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(result);
 // BEGIN declare_enums
 namespace cpp2 {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "Result", "kind": "enum" } */
 enum class Result {
   OK = 0,
   SO_SO = 1,
@@ -97,6 +98,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception" } */
 class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

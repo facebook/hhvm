@@ -102,6 +102,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(adapted_list_field);
 // BEGIN declare_enums
 namespace facebook::thrift::test {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Enum", "kind": "enum" } */
 enum class Enum {
   first = 1,
   second = 2,
@@ -170,6 +171,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Foo", "kind": "struct" } */
 class Foo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -321,8 +323,10 @@ unsigned long Foo::read(Protocol_* iprot) {
   return iprot->getCursorPosition() - _xferStart;
 }
 
+/** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "AdaptedFoo", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::TemplatedTestAdapter, ::facebook::thrift::test::Foo> AdaptedFoo;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Bar", "kind": "struct" } */
 class Bar final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -475,6 +479,7 @@ unsigned long Bar::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct" } */
 class Baz final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -680,6 +685,7 @@ unsigned long Baz::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct" } */
 class OpEncodeStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

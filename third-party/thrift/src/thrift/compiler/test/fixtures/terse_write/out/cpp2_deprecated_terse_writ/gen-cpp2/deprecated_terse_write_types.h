@@ -232,6 +232,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(struct_field);
 // BEGIN declare_enums
 namespace facebook::thrift::test::terse_write::deprecated {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/deprecated_terse_write.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
   ME0 = 0,
   ME1 = 1,
@@ -297,6 +298,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/deprecated_terse_write.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -392,6 +394,7 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/deprecated_terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct" } */
 class StructLevelTerseStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1251,6 +1254,7 @@ unsigned long StructLevelTerseStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/deprecated_terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct" } */
 class FieldLevelTerseStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

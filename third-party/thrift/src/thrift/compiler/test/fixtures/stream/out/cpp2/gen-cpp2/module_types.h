@@ -44,6 +44,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "name": "FooStreamEx", "kind": "exception" } */
 class FOLLY_EXPORT FooStreamEx : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -150,6 +151,7 @@ unsigned long FooStreamEx::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "name": "FooEx", "kind": "exception" } */
 class FOLLY_EXPORT FooEx : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -256,6 +258,7 @@ unsigned long FooEx::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "name": "FooEx2", "kind": "exception" } */
 class FOLLY_EXPORT FooEx2 : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

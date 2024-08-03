@@ -162,6 +162,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(struct_field);
 // BEGIN declare_enums
 namespace apache::thrift::test {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/emptiable/src/simple_deprecated_terse_writes.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
   ME0 = 0,
   ME1 = 1,
@@ -227,6 +228,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/emptiable/src/simple_deprecated_terse_writes.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -321,6 +323,7 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/emptiable/src/simple_deprecated_terse_writes.thrift", "name": "EmptiableStruct", "kind": "struct" } */
 class EmptiableStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1182,6 +1185,7 @@ unsigned long EmptiableStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/emptiable/src/simple_deprecated_terse_writes.thrift", "name": "NotEmptiableStruct", "kind": "struct" } */
 class NotEmptiableStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

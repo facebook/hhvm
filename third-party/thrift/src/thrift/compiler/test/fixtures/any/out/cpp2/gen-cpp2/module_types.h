@@ -62,6 +62,7 @@ using ::apache::thrift::detail::operator>=;
 
 
 namespace detail {
+/** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -223,6 +224,7 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 using MyStruct = ::apache::thrift::adapt_detail::adapted_t<::my::Adapter1, ::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyUnion", "kind": "union" } */
 class MyUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -437,6 +439,7 @@ unsigned long MyUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyException", "kind": "exception" } */
 class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

@@ -53,6 +53,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "B", "kind": "struct" } */
 class B final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -209,6 +210,7 @@ unsigned long B::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "A", "kind": "struct" } */
 class A final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

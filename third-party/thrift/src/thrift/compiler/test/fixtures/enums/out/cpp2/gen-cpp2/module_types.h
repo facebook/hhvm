@@ -62,6 +62,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(me1_t2);
 // BEGIN declare_enums
 namespace test::fixtures::enums {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "Metasyntactic", "kind": "enum" } */
 enum class Metasyntactic {
   FOO = 1,
   BAR = 2,
@@ -71,6 +72,7 @@ enum class Metasyntactic {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "MyEnum1", "kind": "enum" } */
 enum class MyEnum1 {
   ME1_0 = 0,
   ME1_1 = 1,
@@ -82,6 +84,7 @@ enum class MyEnum1 {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "MyEnum2", "kind": "enum" } */
 enum class MyEnum2 {
   ME2_0 = 0,
   ME2_1 = 1,
@@ -90,6 +93,7 @@ enum class MyEnum2 {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "MyEnum3", "kind": "enum" } */
 enum class MyEnum3 {
   ME3_0 = 0,
   ME3_1 = 1,
@@ -101,6 +105,7 @@ enum class MyEnum3 {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "MyEnum4", "kind": "enum" } */
 enum class MyEnum4 {
   ME4_A = 2147483645,
   ME4_B = 2147483646,
@@ -110,6 +115,7 @@ enum class MyEnum4 {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "MyBitmaskEnum1", "kind": "enum" } */
 enum class MyBitmaskEnum1 {
   ONE = 1,
   TWO = 2,
@@ -149,6 +155,7 @@ inline constexpr MyBitmaskEnum1 operator~(MyBitmaskEnum1 a) {
   return static_cast<E>(~static_cast<U>(a));
 }
 
+/** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "MyBitmaskEnum2", "kind": "enum" } */
 enum class MyBitmaskEnum2 {
   ONE = 1,
   TWO = 2,
@@ -389,6 +396,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "SomeStruct", "kind": "struct" } */
 class SomeStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -703,6 +711,7 @@ unsigned long SomeStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

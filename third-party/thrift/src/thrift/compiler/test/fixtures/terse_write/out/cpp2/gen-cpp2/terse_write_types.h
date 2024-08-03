@@ -417,6 +417,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(msg);
 // BEGIN declare_enums
 namespace facebook::thrift::test::terse_write {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
   ME0 = 0,
   ME1 = 1,
@@ -487,8 +488,10 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyInteger", "kind": "typedef" } */
 typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter, ::std::int32_t> MyInteger;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -584,6 +587,7 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyUnion", "kind": "union" } */
 class MyUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1672,6 +1676,7 @@ unsigned long MyUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyStructWithCustomDefault", "kind": "struct" } */
 class MyStructWithCustomDefault final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1824,6 +1829,7 @@ unsigned long MyStructWithCustomDefault::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct" } */
 class StructLevelTerseStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2736,6 +2742,7 @@ unsigned long StructLevelTerseStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct" } */
 class FieldLevelTerseStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4465,6 +4472,7 @@ unsigned long FieldLevelTerseStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct" } */
 class TerseStructWithCustomDefault final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5324,6 +5332,7 @@ unsigned long TerseStructWithCustomDefault::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct" } */
 class AdaptedFields final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5555,6 +5564,7 @@ unsigned long AdaptedFields::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "WrappedFields", "kind": "struct" } */
 class WrappedFields final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5705,6 +5715,7 @@ unsigned long WrappedFields::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseException", "kind": "exception" } */
 class FOLLY_EXPORT TerseException : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

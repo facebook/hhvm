@@ -32,7 +32,9 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "name": "IncludesIncluded", "kind": "typedef" } */
 typedef ::cpp2::Included IncludesIncluded;
+/** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "name": "IncludesTransitiveFoo", "kind": "typedef" } */
 typedef ::cpp2::TransitiveFoo IncludesTransitiveFoo;
 
 } // namespace cpp2

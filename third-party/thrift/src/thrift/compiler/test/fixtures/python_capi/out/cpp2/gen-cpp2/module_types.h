@@ -415,6 +415,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(adapted_int);
 // BEGIN declare_enums
 namespace test::fixtures::python_capi {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
   MyValue1 = 0,
   MyValue2 = 1,
@@ -422,6 +423,7 @@ enum class MyEnum {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "NormalDecentEnum", "kind": "enum" } */
 enum class NormalDecentEnum {
   l0O1 = 1,
   FuBaR = 2,
@@ -534,13 +536,20 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "uint64", "kind": "typedef" } */
 typedef uint64_t uint64;
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "ui64", "kind": "typedef" } */
 typedef ::test::fixtures::python_capi::uint64 ui64;
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "signed_byte", "kind": "typedef" } */
 typedef ::std::int8_t signed_byte;
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "IOBuf", "kind": "typedef" } */
 typedef folly::IOBuf IOBuf;
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "IOBufPtr", "kind": "typedef" } */
 typedef std::unique_ptr<folly::IOBuf> IOBufPtr;
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "ListAlias", "kind": "typedef" } */
 typedef ::test::fixtures::python_capi::ListStruct ListAlias;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "MyDataItem", "kind": "struct" } */
 class MyDataItem final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -699,6 +708,7 @@ unsigned long MyDataItem::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1231,6 +1241,7 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "TransitiveDoubler", "kind": "struct" } */
 class TransitiveDoubler final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1327,6 +1338,7 @@ unsigned long TransitiveDoubler::read(Protocol_* iprot) {
 
 
 namespace detail {
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "DoubledPair", "kind": "struct" } */
 class DoubledPair final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1542,6 +1554,7 @@ unsigned long DoubledPair::read(Protocol_* iprot) {
 using DoubledPair = ::apache::thrift::adapt_detail::adapted_t<::thrift::test::lib::StructDoubler, ::test::fixtures::python_capi::detail::DoubledPair>;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "StringPair", "kind": "struct" } */
 class StringPair final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1743,6 +1756,7 @@ unsigned long StringPair::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "VapidStruct", "kind": "struct" } */
 class VapidStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1838,6 +1852,7 @@ unsigned long VapidStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "PrimitiveStruct", "kind": "struct" } */
 class PrimitiveStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2790,6 +2805,7 @@ unsigned long PrimitiveStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "AdaptedFields", "kind": "struct" } */
 class AdaptedFields final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3082,6 +3098,7 @@ unsigned long AdaptedFields::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "ListStruct", "kind": "struct" } */
 class ListStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3647,6 +3664,7 @@ unsigned long ListStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "SetStruct", "kind": "struct" } */
 class SetStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4109,6 +4127,7 @@ unsigned long SetStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "MapStruct", "kind": "struct" } */
 class MapStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4729,6 +4748,7 @@ unsigned long MapStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "ComposeStruct", "kind": "struct" } */
 class ComposeStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5348,6 +5368,7 @@ unsigned long ComposeStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "Shallot", "kind": "union" } */
 class Shallot final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

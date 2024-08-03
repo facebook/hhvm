@@ -52,6 +52,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/frozen-struct/src/include1.thrift", "name": "IncludedA", "kind": "struct" } */
 class IncludedA final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

@@ -79,8 +79,10 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mixin/src/module.thrift", "name": "Mixin3", "kind": "typedef" } */
 typedef ::cpp2::Mixin3Base Mixin3;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mixin/src/module.thrift", "name": "Mixin1", "kind": "struct" } */
 class Mixin1 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -238,6 +240,7 @@ unsigned long Mixin1::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mixin/src/module.thrift", "name": "Mixin2", "kind": "struct" } */
 class Mixin2 final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -457,6 +460,7 @@ unsigned long Mixin2::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mixin/src/module.thrift", "name": "Mixin3Base", "kind": "struct" } */
 class Mixin3Base final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -614,6 +618,7 @@ unsigned long Mixin3Base::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/mixin/src/module.thrift", "name": "Foo", "kind": "struct" } */
 class Foo final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

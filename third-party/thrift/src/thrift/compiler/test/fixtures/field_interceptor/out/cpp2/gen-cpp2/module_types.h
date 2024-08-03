@@ -78,6 +78,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/field_interceptor/src/module.thrift", "name": "InterceptedFields", "kind": "struct" } */
 class InterceptedFields final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

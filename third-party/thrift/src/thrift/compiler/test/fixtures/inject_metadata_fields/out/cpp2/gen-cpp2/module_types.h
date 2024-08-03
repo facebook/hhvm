@@ -90,6 +90,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "Fields", "kind": "struct" } */
 class Fields final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -247,6 +248,7 @@ unsigned long Fields::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToEmptyStruct", "kind": "struct" } */
 class FieldsInjectedToEmptyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -404,6 +406,7 @@ unsigned long FieldsInjectedToEmptyStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct" } */
 class FieldsInjectedToStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -620,6 +623,7 @@ unsigned long FieldsInjectedToStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct" } */
 class FieldsInjectedWithIncludedStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

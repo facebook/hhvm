@@ -567,6 +567,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(lsMap);
 // BEGIN declare_enums
 namespace cpp2 {
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
   MyValue1 = 0,
   MyValue2 = 1,
@@ -646,17 +647,28 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "stringTypedef", "kind": "typedef" } */
 typedef ::std::string stringTypedef;
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "longTypeDef", "kind": "typedef" } */
 typedef ::std::int64_t longTypeDef;
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "mapTypedef", "kind": "typedef" } */
 typedef ::std::map<::std::int16_t, ::std::string> mapTypedef;
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "listTypedef", "kind": "typedef" } */
 typedef ::std::vector<double> listTypedef;
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "floatTypedef", "kind": "typedef" } */
 typedef float floatTypedef;
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "FMap", "kind": "typedef" } */
 typedef ::std::map<::std::int32_t, ::std::int64_t> FMap;
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "binary_4918", "kind": "typedef" } */
 typedef ::std::string binary_4918;
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "i32_1194", "kind": "typedef" } */
 typedef ::std::int32_t i32_1194;
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "map_i32_FMap_6797", "kind": "typedef" } */
 typedef ::std::map<::std::int32_t, ::cpp2::FMap> map_i32_FMap_6797;
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "map_i64_string_5732", "kind": "typedef" } */
 typedef ::std::map<::std::int64_t, ::std::string> map_i64_string_5732;
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "MyStructFloatFieldThrowExp", "kind": "struct" } */
 class MyStructFloatFieldThrowExp final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -976,6 +988,7 @@ unsigned long MyStructFloatFieldThrowExp::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "MyStructMapFloatThrowExp", "kind": "struct" } */
 class MyStructMapFloatThrowExp final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1181,6 +1194,7 @@ unsigned long MyStructMapFloatThrowExp::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "MyDataItem", "kind": "struct" } */
 class MyDataItem final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1275,6 +1289,7 @@ unsigned long MyDataItem::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2870,6 +2885,7 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "SimpleStruct", "kind": "struct" } */
 class SimpleStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3081,6 +3097,7 @@ unsigned long SimpleStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "ComplexNestedStruct", "kind": "struct" } */
 class ComplexNestedStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4133,6 +4150,7 @@ unsigned long ComplexNestedStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "MyUnion", "kind": "union" } */
 class MyUnion final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4682,6 +4700,7 @@ unsigned long MyUnion::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "defaultStruct", "kind": "struct" } */
 class defaultStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5967,6 +5986,7 @@ unsigned long defaultStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "MyStructTypeDef", "kind": "struct" } */
 class MyStructTypeDef final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -6556,6 +6576,7 @@ unsigned long MyStructTypeDef::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "MyUnionFloatFieldThrowExp", "kind": "union" } */
 class MyUnionFloatFieldThrowExp final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -6983,6 +7004,7 @@ unsigned long MyUnionFloatFieldThrowExp::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "TypeRemapped", "kind": "struct" } */
 class TypeRemapped final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7300,6 +7322,7 @@ unsigned long TypeRemapped::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "emptyXcep", "kind": "exception" } */
 class FOLLY_EXPORT emptyXcep : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7406,6 +7429,7 @@ unsigned long emptyXcep::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "reqXcep", "kind": "exception" } */
 class FOLLY_EXPORT reqXcep : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7625,6 +7649,7 @@ unsigned long reqXcep::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "optXcep", "kind": "exception" } */
 class FOLLY_EXPORT optXcep : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7852,6 +7877,7 @@ unsigned long optXcep::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift", "name": "complexException", "kind": "exception" } */
 class FOLLY_EXPORT complexException : public virtual apache::thrift::TException {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

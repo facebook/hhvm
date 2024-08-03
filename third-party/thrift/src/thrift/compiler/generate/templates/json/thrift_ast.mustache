@@ -16,15 +16,15 @@
 
 }}
 {
-  "__fbthrift": "@{{%!%}}generated",
-  "thrift_module" : "{{program:name}}",{{%!
-  %}}{{#program:includes?}}
+  "__fbthrift": "@{{!}}generated",
+  "thrift_module" : "{{program:name}}",{{!
+  }}{{#program:includes?}}
   "includes": {
     {{#program:includes}}
     "{{name}}": "{{path}}"{{^last?}},{{/last?}}
     {{/program:includes}}
-  },{{/program:includes?}}{{%!
-  %}}{{#program:namespaces?}}
+  },{{/program:includes?}}{{!
+  }}{{#program:namespaces?}}
   "namespaces": {
     {{#program:namespaces}}
     "{{key}}": "{{value}}"{{^last?}},{{/last?}}
@@ -37,8 +37,8 @@
     {{/program:package}}
   },{{/program:package?}}
   {{#program:docstring?}}
-  "global_docstring": {{program:docstring}},{{/program:docstring?}}{{%!
-  %}}{{#program:typedefs?}}
+  "global_docstring": {{program:docstring}},{{/program:docstring?}}{{!
+  }}{{#program:typedefs?}}
   "typedefs": {
     {{#program:typedefs}}
       "{{typedef:name}}": {
@@ -48,22 +48,22 @@
         "lineno": {{typedef:lineno}}
       }{{^last?}},{{/last?}}
     {{/program:typedefs}}
-  },{{/program:typedefs?}}{{%!
-  %}}{{#program:constants?}}
+  },{{/program:typedefs?}}{{!
+  }}{{#program:constants?}}
   "constants": {
       {{#program:constants}}
       {{#constant:type}}{{#constant:value}}
       "{{constant:name}}": {
         "name": "{{constant:name}}",
         "type": "{{value:type_name}}",
-        "value": {{value:string_value_any}},{{%!
-        %}}{{#value:docstring?}}
+        "value": {{value:string_value_any}},{{!
+        }}{{#value:docstring?}}
         "docstring": {{value:docstring}},{{/value:docstring?}}
         "lineno": {{value:lineno}}
       }{{/constant:value}}{{/constant:type}}{{^last?}},{{/last?}}
       {{/program:constants}}
-  },{{/program:constants?}}{{%!
-  %}}{{#program:enums?}}
+  },{{/program:constants?}}{{!
+  }}{{#program:enums?}}
   "enumerations" :
   {
     {{> enums}}

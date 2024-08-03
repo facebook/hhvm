@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/ClientChannel.h>
 
 #ifdef __linux__

@@ -96,6 +96,7 @@ let get_virtual_expr_from_et et =
     | _ -> None
   in
   match et.et_runtime_expr with
+  | (_, _, Await (_, _, Call { func = e; _ }))
   | (_, _, Call { func = e; _ }) ->
     (match get_return_from_fun e with
     | Some e -> get_body_helper e
@@ -116,7 +117,9 @@ let get_splices_from_fun e =
 
 let get_splices_from_et et =
   match et.et_runtime_expr with
-  | (_, _, Call { func = e; _ }) -> get_splices_from_fun e
+  | (_, _, Await (_, _, Call { func = e; _ }))
+  | (_, _, Call { func = e; _ }) ->
+    get_splices_from_fun e
   | _ -> []
 
 let get_virtual_expr expr =

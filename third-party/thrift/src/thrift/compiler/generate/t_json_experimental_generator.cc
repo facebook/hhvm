@@ -91,8 +91,8 @@ class json_experimental_program : public mstch_program {
 
     // To allow rendering a brace not surrounded by whitespace, without
     // interfering with the `{{` `}}` used by the mustache syntax.
-    register_cached_method("'{'", [] { return mstch::node("{"); });
-    register_cached_method("'}'", [] { return mstch::node("}"); });
+    register_cached_method("open_object", [] { return mstch::node("{"); });
+    register_cached_method("close_object", [] { return mstch::node("}"); });
   }
 
   mstch::node get_py_namespace() { return program_->get_namespace("py"); }

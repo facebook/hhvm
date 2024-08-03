@@ -469,6 +469,9 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # Even though their contents are the same, the mutable and immutable
         # instance are not "equal":
         self.assertEqual(w_mutable.unqualified_string, w_immutable.unqualified_string)
+        # Remember: set(<struct>) returns a set of (field name, value) tuples - see
+        # test_iteration() above.
+        self.assertSetEqual(set(w_mutable), set(w_immutable))
         self.assertNotEqual(w_mutable, w_immutable)
 
         # The newly obtained immutable object however is equal to a new

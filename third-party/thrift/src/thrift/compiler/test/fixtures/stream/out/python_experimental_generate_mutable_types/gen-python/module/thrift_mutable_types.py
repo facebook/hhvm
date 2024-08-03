@@ -36,10 +36,15 @@ class FooStreamEx(metaclass=_fbthrift_python_mutable_exceptions.MutableGenerated
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.FooStreamEx(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.FooStreamEx, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class FooEx(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -58,10 +63,15 @@ class FooEx(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorM
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.FooEx(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.FooEx, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class FooEx2(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -80,10 +90,15 @@ class FooEx2(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedError
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.FooEx2(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.FooEx2, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 _fbthrift_all_enums = [

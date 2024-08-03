@@ -312,6 +312,17 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
     def test_adapter_serialization_round_trip(self, struct) -> None:
         _thrift_serialization_round_trip(self, immutable_serializer, struct)
 
+    def test_to_immutable_python(self) -> None:
+        w = TestStructImmutable(unqualified_string="hello, world!")
+        self.assertIs(w, w._to_python())
+
+    def test_to_mutable_python(self) -> None:
+        w = TestStructImmutable(unqualified_string="hello, world!")
+        with self.assertRaisesRegex(
+            AttributeError, "'TestStruct' object has no attribute '_to_mutable_python'"
+        ):
+            w._to_mutable_python()
+
 
 class ThriftPython_MutableStruct_Test(unittest.TestCase):
     def setUp(self) -> None:
@@ -450,41 +461,28 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # include type hints directly
         self.assertEqual(typing.get_type_hints(TestStructMutable), {})
 
-    def test_to_immutable(self) -> None:
-        # DO_BEFORE(aristidis,20240521): Fix _to_immutable() support
-        with self.assertRaises(TypeError):
-            w_mutable = TestStructMutable(unqualified_string="hello")
-            w_immutable = w_mutable._to_immutable()
-            self.assertIsNot(w_mutable, w_immutable)
+    def test_to_immutable_python(self) -> None:
+        w_mutable = TestStructMutable(unqualified_string="hello")
+        w_immutable = w_mutable._to_python()
+        self.assertIsNot(w_mutable, w_immutable)
 
-            # Even though their contents are the same, the mutable and immutable
-            # instance are not "equal":
-            self.assertEqual(
-                w_mutable.unqualified_string, w_immutable.unqualified_string
-            )
-            self.assertNotEqual(w_mutable, w_immutable)
+        # Even though their contents are the same, the mutable and immutable
+        # instance are not "equal":
+        self.assertEqual(w_mutable.unqualified_string, w_immutable.unqualified_string)
+        self.assertNotEqual(w_mutable, w_immutable)
 
-            # The newly obtained immutable object however is equal to a new
-            # TestStructImmutable instance (with the same contents)
-            self.assertEqual(
-                w_immutable, TestStructImmutable(unqualified_string="hello")
-            )
+        # The newly obtained immutable object however is equal to a new
+        # TestStructImmutable instance (with the same contents)
+        self.assertEqual(w_immutable, TestStructImmutable(unqualified_string="hello"))
 
-            w_mutable.unqualified_string = "hello, world!"
-            self.assertNotEqual(
-                w_mutable.unqualified_string, w_immutable.unqualified_string
-            )
+        w_mutable.unqualified_string = "hello, world!"
+        self.assertNotEqual(
+            w_mutable.unqualified_string, w_immutable.unqualified_string
+        )
 
-            # Check that converting to immutable validates field types
-            w_mutable.unqualified_string = 42
-            with self.assertRaisesRegex(
-                TypeError,
-                (
-                    "TypeError: Cannot create internal string data representation. "
-                    "Expected type <class 'str'>, got: <class 'int'>."
-                ),
-            ):
-                w_mutable._to_immutable()
+    def test_to_mutable_python(self) -> None:
+        w_mutable = TestStructMutable(unqualified_string="hello")
+        self.assertIs(w_mutable, w_mutable._to_mutable_python())
 
     def _assert_field_behavior(
         self,

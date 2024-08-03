@@ -135,10 +135,15 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
-        return immutable_types.MyStruct(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.MyStruct, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class Containers(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -190,10 +195,15 @@ class Containers(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
-        return immutable_types.Containers(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.Containers, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -212,10 +222,15 @@ class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
-        return immutable_types.MyDataItem(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.MyDataItem, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
@@ -278,10 +293,15 @@ class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
-        return immutable_types.MyUnion(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.MyUnion, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class MyException(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -344,10 +364,15 @@ class MyException(metaclass=_fbthrift_python_mutable_exceptions.MutableGenerated
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
-        return immutable_types.MyException(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.MyException, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class MyExceptionWithMessage(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -416,10 +441,15 @@ class MyExceptionWithMessage(metaclass=_fbthrift_python_mutable_exceptions.Mutab
             return str(field)
         return field
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
-        return immutable_types.MyExceptionWithMessage(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.MyExceptionWithMessage, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class ReservedKeyword(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -449,10 +479,15 @@ class ReservedKeyword(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
-        return immutable_types.ReservedKeyword(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.ReservedKeyword, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class UnionToBeRenamed(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
@@ -482,10 +517,15 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
-        return immutable_types.UnionToBeRenamed(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.UnionToBeRenamed, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class MyEnum(_fbthrift_python_types.Enum, int):

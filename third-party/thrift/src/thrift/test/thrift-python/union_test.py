@@ -360,6 +360,17 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         self.assertIs(u3.value, u3.non_adapted_i32)
         self.assertEqual(u3.non_adapted_i32, 1718728839)
 
+    def test_to_immutable_python(self) -> None:
+        union_immutable = TestUnionImmutable(string_field="hello")
+        self.assertIs(union_immutable, union_immutable._to_python())
+
+    def test_to_mutable_python(self) -> None:
+        union_immutable = TestUnionImmutable(string_field="hello")
+        with self.assertRaisesRegex(
+            AttributeError, "'TestUnion' object has no attribute '_to_mutable_python'"
+        ):
+            union_immutable._to_mutable_python()
+
 
 class ThriftPython_MutableUnion_Test(unittest.TestCase):
     def setUp(self) -> None:
@@ -666,3 +677,23 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         self.assertLess(TestUnionMutable(), TestUnionMutable(string_field=""))
         self.assertLessEqual(TestUnionMutable(), TestUnionMutable())
         self.assertGreaterEqual(TestUnionMutable(), TestUnionMutable())
+
+    def test_to_immutable_python(self) -> None:
+        union_mutable = TestUnionMutable(string_field="hello")
+        union_immutable = union_mutable._to_python()
+
+        # TEST: The immutable instance is not the same, but has the same contents:
+        self.assertIsNot(union_mutable, union_immutable)
+        self.assertEqual(union_immutable, TestUnionImmutable(string_field="hello"))
+
+        # TEST: changing the mutable instance does not affect the immutable one
+        union_mutable.int_field = 42
+        self.assertEqual(union_immutable, TestUnionImmutable(string_field="hello"))
+
+        self.assertEqual(
+            hash(union_immutable), hash(TestUnionImmutable(string_field="hello"))
+        )
+
+    def test_to_mutable_python(self) -> None:
+        union_mutable = TestUnionMutable(string_field="hello")
+        self.assertIs(union_mutable, union_mutable._to_mutable_python())

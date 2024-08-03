@@ -36,10 +36,15 @@ class empty_struct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.empty_struct(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.empty_struct, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class decorated_struct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -69,10 +74,15 @@ class decorated_struct(metaclass=_fbthrift_python_mutable_types.MutableStructMet
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.decorated_struct(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.decorated_struct, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class ContainerStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -179,10 +189,15 @@ class ContainerStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.ContainerStruct(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.ContainerStruct, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class CppTypeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -212,10 +227,15 @@ class CppTypeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.CppTypeStruct(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.CppTypeStruct, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class VirtualStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -245,10 +265,15 @@ class VirtualStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.VirtualStruct(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.VirtualStruct, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class MyStructWithForwardRefEnum(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -289,10 +314,15 @@ class MyStructWithForwardRefEnum(metaclass=_fbthrift_python_mutable_types.Mutabl
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.MyStructWithForwardRefEnum(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.MyStructWithForwardRefEnum, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class TrivialNumeric(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -333,10 +363,15 @@ class TrivialNumeric(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.TrivialNumeric(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.TrivialNumeric, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class TrivialNestedWithDefault(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -377,10 +412,15 @@ class TrivialNestedWithDefault(metaclass=_fbthrift_python_mutable_types.MutableS
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.TrivialNestedWithDefault(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.TrivialNestedWithDefault, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class ComplexString(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -421,10 +461,15 @@ class ComplexString(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.ComplexString(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.ComplexString, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class ComplexNestedWithDefault(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -465,10 +510,15 @@ class ComplexNestedWithDefault(metaclass=_fbthrift_python_mutable_types.MutableS
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.ComplexNestedWithDefault(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.ComplexNestedWithDefault, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class MinPadding(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -542,10 +592,15 @@ class MinPadding(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.MinPadding(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.MinPadding, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class MinPaddingWithCustomType(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -619,10 +674,15 @@ class MinPaddingWithCustomType(metaclass=_fbthrift_python_mutable_types.MutableS
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.MinPaddingWithCustomType(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.MinPaddingWithCustomType, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -685,10 +745,15 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.MyStruct(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.MyStruct, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -707,10 +772,15 @@ class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.MyDataItem(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.MyDataItem, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class Renaming(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -740,10 +810,15 @@ class Renaming(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.Renaming(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.Renaming, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class AnnotatedTypes(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -784,10 +859,15 @@ class AnnotatedTypes(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.AnnotatedTypes(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.AnnotatedTypes, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class ForwardUsageRoot(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -828,10 +908,15 @@ class ForwardUsageRoot(metaclass=_fbthrift_python_mutable_types.MutableStructMet
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.ForwardUsageRoot(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.ForwardUsageRoot, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class ForwardUsageStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -861,10 +946,15 @@ class ForwardUsageStruct(metaclass=_fbthrift_python_mutable_types.MutableStructM
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.ForwardUsageStruct(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.ForwardUsageStruct, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class ForwardUsageByRef(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -894,10 +984,15 @@ class ForwardUsageByRef(metaclass=_fbthrift_python_mutable_types.MutableStructMe
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.ForwardUsageByRef(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.ForwardUsageByRef, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class IncompleteMap(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -927,10 +1022,15 @@ class IncompleteMap(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.IncompleteMap(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.IncompleteMap, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class IncompleteMapDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -949,10 +1049,15 @@ class IncompleteMapDep(metaclass=_fbthrift_python_mutable_types.MutableStructMet
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.IncompleteMapDep(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.IncompleteMapDep, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class CompleteMap(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -982,10 +1087,15 @@ class CompleteMap(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.CompleteMap(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.CompleteMap, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class CompleteMapDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1004,10 +1114,15 @@ class CompleteMapDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.CompleteMapDep(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.CompleteMapDep, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class IncompleteList(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1037,10 +1152,15 @@ class IncompleteList(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.IncompleteList(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.IncompleteList, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class IncompleteListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1059,10 +1179,15 @@ class IncompleteListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMe
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.IncompleteListDep(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.IncompleteListDep, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class CompleteList(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1092,10 +1217,15 @@ class CompleteList(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.CompleteList(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.CompleteList, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class CompleteListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1114,10 +1244,15 @@ class CompleteListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.CompleteListDep(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.CompleteListDep, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class AdaptedList(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1147,10 +1282,15 @@ class AdaptedList(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.AdaptedList(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.AdaptedList, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class AdaptedListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1180,10 +1320,15 @@ class AdaptedListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.AdaptedListDep(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.AdaptedListDep, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class DependentAdaptedList(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1213,10 +1358,15 @@ class DependentAdaptedList(metaclass=_fbthrift_python_mutable_types.MutableStruc
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.DependentAdaptedList(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.DependentAdaptedList, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class DependentAdaptedListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1246,10 +1396,15 @@ class DependentAdaptedListDep(metaclass=_fbthrift_python_mutable_types.MutableSt
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.DependentAdaptedListDep(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.DependentAdaptedListDep, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class AllocatorAware(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1345,10 +1500,15 @@ class AllocatorAware(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.AllocatorAware(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.AllocatorAware, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class AllocatorAware2(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1389,10 +1549,15 @@ class AllocatorAware2(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.AllocatorAware2(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.AllocatorAware2, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class TypedefStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1444,10 +1609,15 @@ class TypedefStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.TypedefStruct(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.TypedefStruct, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class StructWithDoubleUnderscores(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1477,10 +1647,15 @@ class StructWithDoubleUnderscores(metaclass=_fbthrift_python_mutable_types.Mutab
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
-        return immutable_types.StructWithDoubleUnderscores(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.StructWithDoubleUnderscores, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class has_bitwise_ops(_fbthrift_python_types.Enum, int):

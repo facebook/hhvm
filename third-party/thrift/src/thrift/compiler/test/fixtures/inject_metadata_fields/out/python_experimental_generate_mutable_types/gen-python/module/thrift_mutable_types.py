@@ -47,10 +47,15 @@ class Fields(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.Fields(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.Fields, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -80,10 +85,15 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_mutable_types.Mutab
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.FieldsInjectedToEmptyStruct(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.FieldsInjectedToEmptyStruct, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class FieldsInjectedToStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -124,10 +134,15 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_mutable_types.MutableStr
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.FieldsInjectedToStruct(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.FieldsInjectedToStruct, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -190,10 +205,15 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_mutable_types.
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.FieldsInjectedWithIncludedStruct(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.FieldsInjectedWithIncludedStruct, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 _fbthrift_all_enums = [

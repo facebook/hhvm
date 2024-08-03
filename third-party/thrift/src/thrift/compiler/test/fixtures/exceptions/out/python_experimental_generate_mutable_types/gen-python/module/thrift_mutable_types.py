@@ -53,10 +53,15 @@ class Fiery(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorM
             return str(field)
         return field
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.Fiery(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.Fiery, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class Serious(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -92,10 +97,15 @@ class Serious(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErro
             return str(field)
         return field
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.Serious(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.Serious, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class ComplexFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -142,10 +152,15 @@ class ComplexFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGen
             return str(field)
         return field
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.ComplexFieldNames(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.ComplexFieldNames, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class CustomFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -192,10 +207,15 @@ class CustomFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
             return str(field)
         return field
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.CustomFieldNames(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.CustomFieldNames, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -242,10 +262,15 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_mutable_exceptions.
             return str(field)
         return field
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.ExceptionWithPrimitiveField(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.ExceptionWithPrimitiveField, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -292,10 +317,15 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_mutable_excep
             return str(field)
         return field
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.ExceptionWithStructuredAnnotation(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.ExceptionWithStructuredAnnotation, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class Banal(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -314,10 +344,15 @@ class Banal(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorM
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.Banal(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.Banal, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 _fbthrift_all_enums = [

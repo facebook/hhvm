@@ -102,10 +102,15 @@ class ComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.ComplexUnion(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.ComplexUnion, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class ListUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
@@ -146,10 +151,15 @@ class ListUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.ListUnion(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.ListUnion, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class DataUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
@@ -190,10 +200,15 @@ class DataUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.DataUnion(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.DataUnion, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class Val(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -245,10 +260,15 @@ class Val(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.Val(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.Val, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class ValUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
@@ -289,10 +309,15 @@ class ValUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.ValUnion(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.ValUnion, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class VirtualComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
@@ -333,10 +358,15 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionM
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.VirtualComplexUnion(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.VirtualComplexUnion, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class NonCopyableStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -366,10 +396,15 @@ class NonCopyableStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMe
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.NonCopyableStruct(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.NonCopyableStruct, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class NonCopyableUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
@@ -399,10 +434,15 @@ class NonCopyableUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.NonCopyableUnion(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.NonCopyableUnion, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 _fbthrift_all_enums = [

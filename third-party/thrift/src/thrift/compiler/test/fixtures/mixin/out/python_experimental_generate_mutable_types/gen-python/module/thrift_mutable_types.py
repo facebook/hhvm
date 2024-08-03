@@ -47,10 +47,15 @@ class Mixin1(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.Mixin1(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.Mixin1, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class Mixin2(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -91,10 +96,15 @@ class Mixin2(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.Mixin2(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.Mixin2, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class Mixin3Base(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -124,10 +134,15 @@ class Mixin3Base(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.Mixin3Base(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.Mixin3Base, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 class Foo(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -179,10 +194,15 @@ class Foo(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def _to_immutable(self):
+    def _to_python(self):
+        import thrift.python.converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return immutable_types.Foo(**dataclasses.asdict(self))
+        return thrift.python.converter.to_python_struct(immutable_types.Foo, self)
+
+    def _to_mutable_python(self):
+        return self
+
 
 
 _fbthrift_all_enums = [

@@ -43,7 +43,7 @@ let rec strip_ty ty =
             Typing_defs.make_fp_flags
               ~mode:(get_fp_mode fp)
               ~accept_disposable:false
-              ~has_default:false
+              ~is_optional:false
               ~readonly:false
               ~ignore_readonly_error:false;
           (* Dummy values: these aren't currently serialized. *)

@@ -642,7 +642,7 @@ let default_fun_param ~readonly ?(pos = Pos_or_decl.none) ty : 'a fun_param =
       make_fp_flags
         ~mode:FPnormal
         ~accept_disposable:false
-        ~has_default:false
+        ~is_optional:false
         ~readonly
         ~ignore_readonly_error:false;
     fp_def_value = None;

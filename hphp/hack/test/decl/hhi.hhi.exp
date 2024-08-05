@@ -22,7 +22,7 @@
                  fp_type = (Rhint ([7:12-18]), (Tprim Tstring));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false;
+                   inout = false; is_optional = false; readonly = false;
                    ignore_readonly_error = false };
                  fp_def_value = None }
                 ];
@@ -62,7 +62,7 @@
                     (Rhint ([10:21-22]), (Tapply (([10:21-22], "\\X"), [])));
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
-                      inout = false; has_default = false; readonly = false;
+                      inout = false; is_optional = false; readonly = false;
                       ignore_readonly_error = false };
                     fp_def_value = None }
                    ];

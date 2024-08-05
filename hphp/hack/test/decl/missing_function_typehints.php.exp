@@ -11,7 +11,7 @@
                 fp_type = (Rwitness_from_decl ([3:12-14]), Tany);
                 fp_flags =
                 { Typing_defs_flags.FunParam.accept_disposable = false;
-                  inout = false; has_default = false; readonly = false;
+                  inout = false; is_optional = false; readonly = false;
                   ignore_readonly_error = false };
                 fp_def_value = None }
                ];

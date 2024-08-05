@@ -26,7 +26,7 @@
                        (Rhint ([5:30-35]), (Tprim Tfloat))]));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false;
+                   inout = false; is_optional = false; readonly = false;
                    ignore_readonly_error = false };
                  fp_def_value = None }
                 ];
@@ -58,7 +58,7 @@
                   (Tapply (([9:24-34], "\\Coordinate"), [])));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false;
+                   inout = false; is_optional = false; readonly = false;
                    ignore_readonly_error = false };
                  fp_def_value = None }
                 ];
@@ -101,7 +101,7 @@
                        (Rhint ([13:31-32]), (Tgeneric ("T", [])))]));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false;
+                   inout = false; is_optional = false; readonly = false;
                    ignore_readonly_error = false };
                  fp_def_value = None }
                 ];

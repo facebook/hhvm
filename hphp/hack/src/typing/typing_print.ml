@@ -386,7 +386,7 @@ module Full = struct
     let {
       Typing_defs_flags.FunParam.accept_disposable;
       inout;
-      has_default;
+      is_optional;
       readonly;
       ignore_readonly_error = _;
     } =
@@ -411,7 +411,7 @@ module Full = struct
             text "<<__AcceptDisposable>>" ^^ Space
           else
             Nothing);
-          (if has_default then
+          (if is_optional then
             text "optional" ^^ Space
           else
             Nothing);
@@ -1855,7 +1855,7 @@ module Json = struct
         obj
         @@ callconv (get_fp_mode fp)
         @ readonly_param (get_fp_readonly fp)
-        @ optional_param (get_fp_has_default fp)
+        @ optional_param (get_fp_is_optional fp)
         @ typ fp.fp_type
       in
       let readonly_this ro =
@@ -2184,7 +2184,7 @@ module Json = struct
                       make_fp_flags
                         ~mode:callconv
                         ~accept_disposable:false
-                        ~has_default:optional
+                        ~is_optional:optional
                         ~readonly:false
                         ~ignore_readonly_error:false;
                     (* Dummy values: these aren't currently serialized. *)

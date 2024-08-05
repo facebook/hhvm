@@ -1533,7 +1533,7 @@ let split_remaining_params_required_optional ft remaining_params =
   in
   let min_arity =
     List.count
-      ~f:(fun fp -> not (Typing_defs.get_fp_has_default fp))
+      ~f:(fun fp -> not (Typing_defs.get_fp_is_optional fp))
       original_params
   in
   let consumed = List.length original_params - List.length remaining_params in

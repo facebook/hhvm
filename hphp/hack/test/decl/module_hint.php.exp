@@ -36,7 +36,7 @@ File root|module_hint.php--here.php
                    fp_type = (Rhint ([7:23-28]), Tmixed);
                    fp_flags =
                    { Typing_defs_flags.FunParam.accept_disposable = false;
-                     inout = false; has_default = false; readonly = false;
+                     inout = false; is_optional = false; readonly = false;
                      ignore_readonly_error = false };
                    fp_def_value = None }
                   ];
@@ -147,7 +147,7 @@ File root|module_hint.php--everywhere.php
                  (Toption (Rhint ([3:21-22]), (Tgeneric ("T", [])))));
                 fp_flags =
                 { Typing_defs_flags.FunParam.accept_disposable = false;
-                  inout = false; has_default = false; readonly = false;
+                  inout = false; is_optional = false; readonly = false;
                   ignore_readonly_error = false };
                 fp_def_value = None }
                ];

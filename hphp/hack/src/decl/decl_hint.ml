@@ -136,7 +136,7 @@ and hint_ p env = function
         hf_is_readonly_return = readonly_ret;
       } ->
     let make_param ((p, _) as x) param_info =
-      let (has_default, readonly, kind) =
+      let (is_optional, readonly, kind) =
         match param_info with
         | Some p ->
           let readonly =
@@ -144,13 +144,13 @@ and hint_ p env = function
             | Some Ast_defs.Readonly -> true
             | _ -> false
           in
-          let has_default =
+          let is_optional =
             match p.hfparam_optional with
             | Some Ast_defs.Optional -> true
             | _ -> false
           in
           let param_kind = get_param_mode p.hfparam_kind in
-          (has_default, readonly, param_kind)
+          (is_optional, readonly, param_kind)
         | None -> (false, false, FPnormal)
       in
       {
@@ -161,7 +161,7 @@ and hint_ p env = function
           make_fp_flags
             ~mode:kind
             ~accept_disposable:false
-            ~has_default
+            ~is_optional
             ~readonly
             ~ignore_readonly_error:false;
         fp_def_value = None;

@@ -46,7 +46,7 @@
                         [(Rhint ([9:34-37]), (Tprim Tint))])));
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
-                      inout = false; has_default = false; readonly = false;
+                      inout = false; is_optional = false; readonly = false;
                       ignore_readonly_error = false };
                     fp_def_value = None };
                    { fp_pos = [9:51-54]; fp_name = (Some "$a2");
@@ -56,7 +56,7 @@
                          [(Rhint ([9:46-49]), (Tprim Tint))])));
                      fp_flags =
                      { Typing_defs_flags.FunParam.accept_disposable = false;
-                       inout = false; has_default = false; readonly = false;
+                       inout = false; is_optional = false; readonly = false;
                        ignore_readonly_error = false };
                      fp_def_value = None }
                    ];
@@ -105,7 +105,7 @@
                         [(Rhint ([17:25-28]), (Tprim Tint))])));
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
-                      inout = false; has_default = false; readonly = false;
+                      inout = false; is_optional = false; readonly = false;
                       ignore_readonly_error = false };
                     fp_def_value = None }
                    ];
@@ -138,7 +138,7 @@
                          [(Rhint ([20:25-28]), (Tprim Tint))])));
                      fp_flags =
                      { Typing_defs_flags.FunParam.accept_disposable = false;
-                       inout = false; has_default = false; readonly = false;
+                       inout = false; is_optional = false; readonly = false;
                        ignore_readonly_error = false };
                      fp_def_value = None }
                     ];

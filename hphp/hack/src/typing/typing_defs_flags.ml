@@ -154,7 +154,7 @@ module FunParam = struct
   type record = {
     accept_disposable: bool;
     inout: bool;
-    has_default: bool;
+    is_optional: bool;
     readonly: bool;
     ignore_readonly_error: bool;
   }
@@ -164,7 +164,7 @@ module FunParam = struct
 
   let inout_mask = 1 lsl 1
 
-  let has_default_mask = 1 lsl 2
+  let is_optional_mask = 1 lsl 2
 
   let readonly_mask = 1 lsl 8
 
@@ -174,7 +174,7 @@ module FunParam = struct
 
   let inout = is_set inout_mask
 
-  let has_default = is_set has_default_mask
+  let is_optional = is_set is_optional_mask
 
   let readonly = is_set readonly_mask
 
@@ -184,18 +184,18 @@ module FunParam = struct
 
   let set_inout = set_bit inout_mask
 
-  let set_has_default = set_bit has_default_mask
+  let set_is_optional = set_bit is_optional_mask
 
   let set_readonly = set_bit readonly_mask
 
   let set_ignore_readonly_error = set_bit ignore_readonly_error_mask
 
   let make
-      ~inout ~accept_disposable ~has_default ~readonly ~ignore_readonly_error =
+      ~inout ~accept_disposable ~is_optional ~readonly ~ignore_readonly_error =
     0x0
     |> set_inout inout
     |> set_accept_disposable accept_disposable
-    |> set_has_default has_default
+    |> set_is_optional is_optional
     |> set_readonly readonly
     |> set_ignore_readonly_error ignore_readonly_error
 
@@ -203,7 +203,7 @@ module FunParam = struct
     {
       accept_disposable = accept_disposable t;
       inout = inout t;
-      has_default = has_default t;
+      is_optional = is_optional t;
       readonly = readonly t;
       ignore_readonly_error = ignore_readonly_error t;
     }

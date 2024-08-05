@@ -64,7 +64,7 @@ let make_param_ty env param =
         ~mode
         ~accept_disposable:
           (has_accept_disposable_attribute param.param_user_attributes)
-        ~has_default:(Option.is_some (Aast_utils.get_param_default param))
+        ~is_optional:(Option.is_some (Aast_utils.get_param_default param))
         ~readonly:(Option.is_some param.param_readonly)
         ~ignore_readonly_error:
           (has_ignore_readonly_error_attribute param.param_user_attributes);

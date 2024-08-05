@@ -236,4 +236,20 @@ class WebTransport {
       folly::Optional<uint32_t> error = folly::none) = 0;
 };
 
+// WebTransportHandler is a virtual interface for handling events that come
+// from web transport that are not tied to an existing stream
+//
+//  * New streams
+//  * Datagrams
+//  * The end of of session
+class WebTransportHandler {
+ public:
+  virtual ~WebTransportHandler() = default;
+
+  virtual void onNewUniStream(WebTransport::StreamReadHandle* readHandle) = 0;
+  virtual void onNewBidiStream(WebTransport::BidiStreamHandle bidiHandle) = 0;
+  virtual void onDatagram(std::unique_ptr<folly::IOBuf> datagram) = 0;
+  virtual void onSessionEnd(folly::Optional<uint32_t> error) = 0;
+};
+
 } // namespace proxygen

@@ -57,6 +57,12 @@ THRIFT_DETAIL_REGISTER_SERVER_EXTENSION_DEFAULT(
 
 #undef THRIFT_DETAIL_REGISTER_SERVER_EXTENSION_DEFAULT
 
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    std::unique_ptr<apache::thrift::rocket::SetupFrameInterceptor>,
+    createSecuritySetupFrameInterceptor,
+    apache::thrift::ThriftServer&) {
+  return {};
+}
 } // namespace detail
 
 RocketRoutingHandler::RocketRoutingHandler(ThriftServer& server)
@@ -70,6 +76,13 @@ RocketRoutingHandler::RocketRoutingHandler(ThriftServer& server)
   addSetupFramehandler(detail::createRocketDebugSetupFrameHandler);
   addSetupFramehandler(detail::createRocketMonitoringSetupFrameHandler);
   addSetupFramehandler(detail::createRocketProfilingSetupFrameHandler);
+
+  auto addSetupFrameInterceptor = [&](auto&& handlerFactory) {
+    if (auto handler = handlerFactory(server)) {
+      setupFrameInterceptors_.push_back(std::move(handler));
+    }
+  };
+  addSetupFrameInterceptor(detail::createSecuritySetupFrameInterceptor);
 }
 
 RocketRoutingHandler::~RocketRoutingHandler() {
@@ -147,7 +160,11 @@ void RocketRoutingHandler::handleConnection(
   auto* const connection = new rocket::RocketServerConnection(
       std::move(sock),
       std::make_unique<rocket::ThriftRocketServerHandler>(
-          worker, *address, sockPtr, setupFrameHandlers_),
+          worker,
+          *address,
+          sockPtr,
+          setupFrameHandlers_,
+          setupFrameInterceptors_),
       worker->getIngressMemoryTracker(),
       worker->getEgressMemoryTracker(),
       streamMetricCallback_,

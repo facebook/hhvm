@@ -30,6 +30,7 @@
 #include <thrift/lib/cpp2/server/RequestsRegistry.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/SetupFrameHandler.h>
+#include <thrift/lib/cpp2/transport/rocket/server/SetupFrameInterceptor.h>
 
 namespace folly {
 class AsyncTransport;
@@ -70,7 +71,8 @@ class ThriftRocketServerHandler : public RocketServerHandler {
       std::shared_ptr<Cpp2Worker> worker,
       const folly::SocketAddress& clientAddress,
       folly::AsyncTransport* transport,
-      const std::vector<std::unique_ptr<SetupFrameHandler>>& handlers);
+      const std::vector<std::unique_ptr<SetupFrameHandler>>& handlers,
+      const std::vector<std::unique_ptr<SetupFrameInterceptor>>& interceptors);
 
   ~ThriftRocketServerHandler() override;
 
@@ -110,6 +112,8 @@ class ThriftRocketServerHandler : public RocketServerHandler {
       transport_; // connContext_ exposes this only as `const`
   Cpp2ConnContext connContext_;
   const std::vector<std::unique_ptr<SetupFrameHandler>>& setupFrameHandlers_;
+  const std::vector<std::unique_ptr<SetupFrameInterceptor>>&
+      setupFrameInterceptors_;
   AsyncProcessorFactory* processorFactory_ = nullptr;
   std::shared_ptr<AsyncProcessorFactory> processorFactoryStorage_;
   Cpp2Worker::PerServiceMetadata* serviceMetadata_ = nullptr;

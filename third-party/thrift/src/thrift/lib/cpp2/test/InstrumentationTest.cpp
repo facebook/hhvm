@@ -251,6 +251,32 @@ class DebuggingFrameHandler : public rocket::SetupFrameHandler {
   apache::thrift::ResourcePoolSet resourcePoolSet_;
 };
 
+class RejectingFrameInterceptor : public rocket::SetupFrameInterceptor {
+ public:
+  /*
+   * Blocks requests if the metadata has security mech as plaintext. This is for
+   * testing purposes, and is not a real use case.
+   */
+  folly::Expected<folly::Unit, std::runtime_error> acceptSetup(
+      const RequestSetupMetadata& meta,
+      const ConnectionLoggingContext&) override {
+    const auto& clientMeta = meta.clientMetadata_ref();
+    if (!clientMeta) {
+      return folly::Unit();
+    }
+    const auto& otherMeta = clientMeta->otherMetadata_ref();
+    if (!otherMeta) {
+      return folly::Unit();
+    }
+    if (auto* value = folly::get_ptr(*otherMeta, "security_mech")) {
+      if (*value == "plaintext") {
+        return folly::makeUnexpected(std::runtime_error("Failed"));
+      }
+    }
+    return folly::Unit();
+  }
+};
+
 namespace {
 static std::atomic<uint64_t> currentTick = 0;
 std::set<std::string> excludeFromRecentRequestsCount;
@@ -264,6 +290,13 @@ THRIFT_PLUGGABLE_FUNC_SET(
     createRocketDebugSetupFrameHandler,
     apache::thrift::ThriftServer& thriftServer) {
   return std::make_unique<DebuggingFrameHandler>(thriftServer);
+}
+
+THRIFT_PLUGGABLE_FUNC_SET(
+    std::unique_ptr<apache::thrift::rocket::SetupFrameInterceptor>,
+    createSecuritySetupFrameInterceptor,
+    apache::thrift::ThriftServer&) {
+  return std::make_unique<RejectingFrameInterceptor>();
 }
 
 THRIFT_PLUGGABLE_FUNC_SET(uint64_t, getCurrentServerTick) {
@@ -415,6 +448,20 @@ TEST_F(RequestInstrumentationTest, simpleRocketRequestTest) {
     EXPECT_TRUE(
         methodName == "sendRequest" || methodName == "sendStreamingRequest");
   }
+}
+
+TEST_F(RequestInstrumentationTest, requestInterceptedTest) {
+  apache::thrift::RequestSetupMetadata meta;
+  meta.clientMetadata().ensure().otherMetadata().ensure()["security_mech"] =
+      "plaintext";
+  auto client = server().newClient<InstrumentationTestServiceAsyncClient>(
+      nullptr, [meta = std::move(meta)](auto socket) mutable {
+        return apache::thrift::RocketClientChannel::newChannelWithMetadata(
+            std::move(socket), std::move(meta));
+      });
+  EXPECT_THROW(
+      client->sync_sendRequest(),
+      apache::thrift::transport::TTransportException);
 }
 
 TEST_F(RequestInstrumentationTest, threadSnapshot) {

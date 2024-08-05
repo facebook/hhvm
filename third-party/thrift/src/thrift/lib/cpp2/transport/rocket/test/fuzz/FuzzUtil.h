@@ -122,6 +122,7 @@ void testServerOneInput(const uint8_t* Data, size_t Size) {
   server.setInterface(std::make_shared<FakeProcessorFactory>());
   auto worker = apache::thrift::Cpp2Worker::create(&server, &evb);
   std::vector<std::unique_ptr<apache::thrift::rocket::SetupFrameHandler>> v;
+  std::vector<std::unique_ptr<apache::thrift::rocket::SetupFrameInterceptor>> i;
   folly::SocketAddress address;
   MemoryTracker memoryTracker;
   NoopStreamMetricCallback streamMetricCallback;
@@ -129,7 +130,7 @@ void testServerOneInput(const uint8_t* Data, size_t Size) {
   auto connection = new apache::thrift::rocket::RocketServerConnection(
       std::move(sock),
       std::make_unique<apache::thrift::rocket::ThriftRocketServerHandler>(
-          worker, address, sockPtr, v),
+          worker, address, sockPtr, v, i),
       memoryTracker, // (ingress)
       memoryTracker, // (egress)
       streamMetricCallback);

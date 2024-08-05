@@ -62,6 +62,7 @@ THRIFT_FLAG_DEFINE_int64(rocket_server_max_version, kRocketServerMaxVersion);
 
 namespace apache {
 namespace thrift {
+
 namespace rocket {
 
 thread_local uint32_t ThriftRocketServerHandler::sample_{0};
@@ -89,7 +90,8 @@ ThriftRocketServerHandler::ThriftRocketServerHandler(
     std::shared_ptr<Cpp2Worker> worker,
     const folly::SocketAddress& clientAddress,
     folly::AsyncTransport* transport,
-    const std::vector<std::unique_ptr<SetupFrameHandler>>& handlers)
+    const std::vector<std::unique_ptr<SetupFrameHandler>>& handlers,
+    const std::vector<std::unique_ptr<SetupFrameInterceptor>>& interceptors)
     : worker_(std::move(worker)),
       connectionGuard_(worker_->getActiveRequestsGuard()),
       transport_(transport),
@@ -104,6 +106,7 @@ ThriftRocketServerHandler::ThriftRocketServerHandler(
               *worker_->getServer())
               .size()),
       setupFrameHandlers_(handlers),
+      setupFrameInterceptors_(interceptors),
       version_(static_cast<int32_t>(std::min(
           kRocketServerMaxVersion, THRIFT_FLAG(rocket_server_max_version)))),
       maxResponseWriteTime_(worker_->getServer()
@@ -247,6 +250,14 @@ void ThriftRocketServerHandler::handleSetupFrame(
 
     eventBase_ = connContext_.getTransport()->getEventBase();
     serverConfigs_ = worker_->getServer();
+
+    for (const auto& i : setupFrameInterceptors_) {
+      auto frameAccepted = i->acceptSetup(meta, connContext_);
+      if (frameAccepted.hasError()) {
+        return connection.close(folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID_SETUP, frameAccepted.error().what()));
+      }
+    }
 
     for (const auto& h : setupFrameHandlers_) {
       auto processorInfo = h->tryHandle(meta);

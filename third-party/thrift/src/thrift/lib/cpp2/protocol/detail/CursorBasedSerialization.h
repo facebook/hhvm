@@ -27,11 +27,11 @@
 
 namespace apache::thrift {
 
-template <typename ProtocolReader, typename T, bool Contiguous>
+template <typename T, typename ProtocolReader, bool Contiguous>
 class StructuredCursorReader;
-template <typename ProtocolReader, typename Tag, bool Contiguous>
+template <typename Tag, typename ProtocolReader, bool Contiguous>
 class ContainerCursorReader;
-template <typename ProtocolReader, typename Tag, bool Contiguous>
+template <typename Tag, typename ProtocolReader, bool Contiguous>
 class ContainerCursorIterator;
 
 template <typename T>
@@ -335,7 +335,7 @@ std::string_view readStringView(ProtocolReader& protocol) {
   return std::string_view(reinterpret_cast<const char*>(c.data()), size);
 }
 
-template <typename ProtocolReader, typename Tag, typename T>
+template <typename Tag, typename ProtocolReader, typename T>
 void decodeTo(ProtocolReader& protocol, T& t) {
   if constexpr (
       std::is_same_v<T, std::string_view> &&

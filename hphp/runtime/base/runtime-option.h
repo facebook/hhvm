@@ -1000,6 +1000,7 @@ public:
   // ThriftFBServer
   static int ThriftFBServerWorkerThreads;
   static int ThriftFBServerPoolThreads;
+  static std::set<std::string> ThriftFBServerHighPriorityEndPoints;
 
   // fb303 server
   static bool EnableFb303Server;

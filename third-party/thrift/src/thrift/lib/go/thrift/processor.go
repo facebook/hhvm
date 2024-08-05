@@ -55,6 +55,37 @@ func errorType(err error) string {
 	return et[len(et)-1]
 }
 
+func getProcessorFunction(processor Processor, messageType MessageType, name string) (ProcessorFunction, ApplicationException) {
+	if messageType != CALL && messageType != ONEWAY {
+		// case one: invalid message type
+		return nil, NewApplicationException(UNKNOWN_METHOD, fmt.Sprintf("unexpected message type: %d", messageType))
+	}
+	if pf := processor.GetProcessorFunction(name); pf != nil {
+		return pf, nil
+	}
+	return nil, NewApplicationException(UNKNOWN_METHOD, fmt.Sprintf("no such function: %q", name))
+}
+
+func skipMessage(protocol Protocol) error {
+	if err := protocol.Skip(STRUCT); err != nil {
+		return err
+	}
+	return protocol.ReadMessageEnd()
+}
+
+func setRequestHeadersForErrors(protocol Protocol, result WritableStruct, err error) {
+	if err != nil {
+		protocol.SetRequestHeader("uex", errorType(err))
+		protocol.SetRequestHeader("uexw", err.Error())
+	}
+	if rr, ok := result.(WritableResult); ok && rr.Exception() != nil {
+		// If we got a structured exception back, write metadata about it into headers
+		terr := rr.Exception()
+		protocol.SetRequestHeader("uex", errorType(terr))
+		protocol.SetRequestHeader("uexw", terr.Error())
+	}
+}
+
 // processContext is a utility function to take a processor and a protocol,
 // and fully process a message. It understands the thrift protocol.
 // A framework could be written outside of the thrift library but would need to
@@ -65,32 +96,15 @@ func processContext(ctx context.Context, processor Processor, prot Protocol) (ex
 		return rerr
 	}
 	ctx = WithHeaders(ctx, prot.GetResponseHeaders())
-	var err ApplicationException
-	var pfunc ProcessorFunction
-	if messageType != CALL && messageType != ONEWAY {
-		// case one: invalid message type
-		err = NewApplicationException(UNKNOWN_METHOD, fmt.Sprintf("unexpected message type: %d", messageType))
-		// error should be sent, connection should stay open if successful
-	}
-	if err == nil {
-		pf := processor.GetProcessorFunction(name)
-		if pf == nil {
-			err = NewApplicationException(UNKNOWN_METHOD, fmt.Sprintf("no such function: %q", name))
-		} else {
-			pfunc = pf
-		}
-	}
-
-	// if there was an error before we could find the Processor function, attempt to skip the
-	// rest of the invalid message but keep the connection open.
+	pfunc, err := getProcessorFunction(processor, messageType, name)
 	if err != nil {
-		if e2 := prot.Skip(STRUCT); e2 != nil {
-			return e2
-		} else if e2 := prot.ReadMessageEnd(); e2 != nil {
+		// attempt to skip the rest of the invalid message but keep the connection open.
+		if e2 := skipMessage(prot); e2 != nil {
 			return e2
 		}
 		// for ONEWAY, we have no way to report that the processing failed.
 		if messageType != ONEWAY {
+			// error should be sent, connection should stay open if successful.
 			if e2 := sendException(prot, name, seqID, err); e2 != nil {
 				return e2
 			}
@@ -98,46 +112,32 @@ func processContext(ctx context.Context, processor Processor, prot Protocol) (ex
 		return nil
 	}
 
-	if pfunc == nil {
-		panic("logic error in thrift.Process() handler.  processor function may not be nil")
-	}
-
 	argStruct, e2 := pfunc.Read(prot)
 	if e2 != nil {
 		// close connection on read failure
 		return e2
 	}
-	var result WritableStruct
-	result, err = pfunc.RunContext(ctx, argStruct)
-
-	// for ONEWAY messages, never send a response
-	if messageType == CALL {
-		// protect message writing
-		if err != nil {
-			prot.SetRequestHeader("uex", errorType(err))
-			prot.SetRequestHeader("uexw", err.Error())
-			// it's an application generated error, so serialize it
-			// to the client
-			result = err
-		}
-
-		// If we got a structured exception back, write metadata about it into headers
-		if rr, ok := result.(WritableResult); ok && rr.Exception() != nil {
-			terr := rr.Exception()
-			prot.SetRequestHeader("uex", errorType(terr))
-			prot.SetRequestHeader("uexw", terr.Error())
-		}
-
+	result, err := pfunc.RunContext(ctx, argStruct)
+	if messageType == ONEWAY {
+		// for ONEWAY messages, never send a response
+		return nil
+	}
+	if result == nil && err == nil {
 		// if result was nil, call was oneway
 		// often times oneway calls do not even have msgType ONEWAY
-		if result != nil {
-			if e2 := pfunc.Write(seqID, result, prot); e2 != nil {
-				// close connection on write failure
-				return err
-			}
-		}
+		return nil
 	}
+	if err != nil {
+		// it's an application generated error, so serialize it
+		// to the client
+		result = err
+	}
+	setRequestHeadersForErrors(prot, result, err)
 
+	if e2 := pfunc.Write(seqID, result, prot); e2 != nil {
+		// close connection on write failure
+		return err
+	}
 	// keep the connection open and ignore errors
 	// if type was CALL, error has already been serialized to client
 	// if type was ONEWAY, no exception is to be thrown

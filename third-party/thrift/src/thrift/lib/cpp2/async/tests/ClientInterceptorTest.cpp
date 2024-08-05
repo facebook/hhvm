@@ -18,6 +18,8 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
+#include <fmt/core.h>
+
 #include <thrift/lib/cpp2/async/ClientInterceptor.h>
 #include <thrift/lib/cpp2/async/HTTPClientChannel.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
@@ -329,4 +331,33 @@ INSTANTIATE_TEST_SUITE_P(
     Combine(
         Values(
             TransportType::HEADER, TransportType::ROCKET, TransportType::HTTP2),
-        Values(ClientCallbackKind::CORO, ClientCallbackKind::SYNC)));
+        Values(ClientCallbackKind::CORO, ClientCallbackKind::SYNC)),
+    [](const TestParamInfo<ClientInterceptorTestP::ParamType>& info) {
+      const auto transportType = [](TransportType value) -> std::string_view {
+        switch (value) {
+          case TransportType::HEADER:
+            return "HEADER";
+          case TransportType::ROCKET:
+            return "ROCKET";
+          case TransportType::HTTP2:
+            return "HTTP2";
+          default:
+            throw std::logic_error{"Unreachable!"};
+        }
+      };
+      const auto clientCallbackType =
+          [](ClientCallbackKind value) -> std::string_view {
+        switch (value) {
+          case ClientCallbackKind::CORO:
+            return "CORO";
+          case ClientCallbackKind::SYNC:
+            return "SYNC";
+          default:
+            throw std::logic_error{"Unreachable!"};
+        }
+      };
+      return fmt::format(
+          "{}___{}",
+          transportType(std::get<0>(info.param)),
+          clientCallbackType(std::get<1>(info.param)));
+    });

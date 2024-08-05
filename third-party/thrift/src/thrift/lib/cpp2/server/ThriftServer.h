@@ -1330,6 +1330,9 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   /** Set maximum number of milliseconds we'll wait for data (0 = infinity).
    *  Note: existing connections are unaffected by this call.
    *
+   * WARNING: Idle timeout will not work for Rocket connections unless the
+   * rocket_set_idle_connection_timeout Thrift Flag is set to true.
+   *
    *  @param timeout number of milliseconds, or 0 to disable timeouts.
    */
   void setIdleTimeout(

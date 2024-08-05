@@ -20,6 +20,11 @@
 #include <algorithm>
 #include <cstring>
 
+#if defined(__linux__)
+#include <unistd.h>
+#include <sys/mman.h>
+#endif
+
 namespace HPHP {
 
 TEST(HashTest, Case) {
@@ -151,5 +156,25 @@ TEST(HashTest, CaseInsensitiveUnsafeEquivalence) {
   unsigned int base = hash_string_i(base_ascii, strlen(base_ascii));
   EXPECT_EQ(base, hash_string_i_unsafe(base_ascii, strlen(base_ascii)));
 }
+
+#if defined(__linux__)
+TEST(HashTest, PageBoundaryCheck) {
+  int ps_ = getpagesize();
+  ASSERT_GT(ps_, 0);
+  const uint32_t ps = static_cast<uint32_t>(ps_);
+  void *addr_ = mmap(nullptr, (ps * 2), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+  ASSERT_NE(addr_, MAP_FAILED);
+  ASSERT_NE(addr_, nullptr);
+  char *addr = static_cast<char *>(addr_);
+  char *s = addr + ps - 8;
+  memcpy(s, "aBcDeFgH", 8);
+  int r = mprotect(addr + ps, ps, PROT_NONE);
+  ASSERT_EQ(r, 0);
+  EXPECT_EQ(hash_string_i("aBcDeFgH", 8), hash_string_i(s, 8));
+  EXPECT_EQ(hash_string_i("aBcDeFgH", 8), hash_string_i_unsafe(s, 8));
+  EXPECT_EQ(hash_string_cs("aBcDeFgH", 8), hash_string_cs(s, 8));
+  EXPECT_EQ(hash_string_cs("aBcDeFgH", 8), hash_string_cs_unsafe(s, 8));
+}
+#endif
 
 } // namespace HPHP

@@ -6852,7 +6852,6 @@ end = struct
       make_a_local_of ~include_this:true env (Tast.to_nast_expr ivar)
     in
     let* locl = locl_opt in
-
     let env = Env.open_tyvars env p in
     let (env, ty_true) = Env.fresh_type env p in
     let (env, ty_false) = Env.fresh_type env p in
@@ -6877,7 +6876,14 @@ end = struct
     let (env, ty_err) = Typing_solver.close_tyvars_and_solve env in
     let errs = Option.merge errs ty_err ~f:Typing_error.both in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) errs;
-    return (env, locl, ty_true, ty_false)
+    let refine_local ty env =
+      let (_, local_id) = locl in
+      let bound_ty =
+        (Typing_env.get_local env local_id).Typing_local_types.bound_ty
+      in
+      (set_local ~is_defined:true ~bound_ty env locl ty, { pkgs = SSet.empty })
+    in
+    return (env, refine_local ty_true, refine_local ty_false)
 
   (** [tparamet] = false means the expression is negated. *)
   and condition env tparamet te =
@@ -6934,20 +6940,8 @@ end = struct
                   Typing_shapes.shapes_idx_not_null env shape_ty field),
               { pkgs = SSet.empty } ) )
       | _ ->
-        (match type_switch env ~p ~ivar ~errs ~reason ~predicate with
-        | Some (env, locl_ivar, ty_true, ty_false) ->
-          let (_, local_id) = locl_ivar in
-          let bound_ty =
-            (Typing_env.get_local env local_id).Typing_local_types.bound_ty
-          in
-          ( env,
-            (fun env ->
-              ( set_local ~is_defined:true ~bound_ty env locl_ivar ty_true,
-                { pkgs = SSet.empty } )),
-            fun env ->
-              ( set_local ~is_defined:true ~bound_ty env locl_ivar ty_false,
-                { pkgs = SSet.empty } ) )
-        | None -> default_branch env)
+        Option.value_or_thunk ~default:(fun () -> default_branch env)
+        @@ type_switch env ~p ~ivar ~errs ~reason ~predicate
     in
     match e with
     | Aast.Binop { bop = Ast_defs.Ampamp; lhs = e1; rhs = e2 } ->

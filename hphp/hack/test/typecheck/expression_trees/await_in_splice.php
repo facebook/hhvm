@@ -11,8 +11,20 @@ async function myTestFunction2(
   return ExampleDsl`1`;
 }
 
+class :xhp {
+  public function __construct(
+    dict<string, mixed> $attrs,
+    vec<mixed> $children,
+    string $file,
+    int $line,
+  ) {}
+
+  attribute ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> x;
+}
+
 <<__EntryPoint>>
 async function myTestFunction(): Awaitable<void> {
   ExampleDsl`${await myTestFunction2()}`;
   ExampleDsl`1 + ${await myTestFunction2()} + ${myTestFunction1()}`;
+  <xhp x = {ExampleDsl`${await myTestFunction2()}`}/>;
 }

@@ -1172,17 +1172,28 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.uses_readonly = true;
     }
 
-    fn check_can_use_feature(&mut self, node: S<'a>, feature: &FeatureName) {
+    fn check_can_use_feature_errors(
+        &self,
+        errors: &mut Vec<SyntaxError>,
+        node: S<'a>,
+        feature: &FeatureName,
+    ) {
         if !feature.can_use(
             &self.env.parser_options,
             &self.env.mode,
             &self.env.context.active_experimental_features,
         ) {
-            self.errors.push(make_error_from_node(
+            errors.push(make_error_from_node(
                 node,
                 errors::cannot_use_feature(feature.into()),
             ))
         }
+    }
+
+    fn check_can_use_feature(&mut self, node: S<'a>, feature: &FeatureName) {
+        let mut errors = std::mem::take(&mut self.errors);
+        self.check_can_use_feature_errors(&mut errors, node, feature);
+        self.errors = errors;
     }
 
     fn attr_name(&self, node: S<'a>) -> Option<&'a str> {
@@ -2726,6 +2737,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn await_as_an_expression_errors(&mut self, await_node: S<'a>) {
         let mut prev = None;
         let mut node = await_node;
+
+        // true if we are in an expression tree, false if we are in a splice or not in an expression tree at all
+        // Start at false because actual await expressions are forbidden in expression trees
+        let mut in_expr_tree = false;
         for n in self.parents.iter().rev() {
             if let Some(prev) = prev {
                 node = prev;
@@ -2753,8 +2768,21 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
                 LambdaExpression(x) if std::ptr::eq(node, &x.body) => break,
                 ETSpliceExpression(_) => {
-                    self.check_can_use_feature(node, &FeatureName::AwaitInSplice);
-                    break;
+                    let mut errors = std::mem::take(&mut self.errors);
+                    self.check_can_use_feature_errors(
+                        &mut errors,
+                        node,
+                        &FeatureName::AwaitInSplice,
+                    );
+                    self.errors = errors;
+                    // if we were in a splice, the parent must be in an expression tree, because splices can only occur in expression trees
+                    in_expr_tree = true;
+                    continue;
+                }
+                PrefixedCodeExpression(_) => {
+                    // if we were in an expression tree, the parent must not be, since expression trees can't directly nest
+                    in_expr_tree = false;
+                    continue;
                 }
                 PrefixUnaryExpression(x) if token_kind(&x.operator) == Some(TokenKind::Await) => {
                     let (feature, enabled) = self.is_pipe_await_enabled();
@@ -2861,6 +2889,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 | XHPSpreadAttribute(_)
                 | SyntaxList(_)
                 | ListItem(_) => continue,
+                _ if in_expr_tree => {
+                    // don't error if we are in an expression tree, since any conditional execution is client side
+                    continue;
+                }
                 // otherwise report error and bail out
                 _ => {
                     self.errors.push(make_error_from_node(

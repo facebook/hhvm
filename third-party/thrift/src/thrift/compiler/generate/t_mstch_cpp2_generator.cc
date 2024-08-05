@@ -216,11 +216,6 @@ bool has_schema(source_manager& sm, const t_program& program) {
       program.scope_name(schematizer::name_schema(sm, program)));
 }
 
-bool needs_sinit(
-    source_manager& sm, const t_program& program, bool has_option_any) {
-  return has_option_any || has_schema(sm, program);
-}
-
 class cpp2_generator_context {
  public:
   static cpp2_generator_context create() { return cpp2_generator_context(); }
@@ -668,9 +663,7 @@ class cpp_mstch_program : public mstch_program {
 
   mstch::node schema_name() { return schematizer::name_schema(sm_, *program_); }
 
-  mstch::node needs_sinit() {
-    return compiler::needs_sinit(sm_, *program_, has_option("any"));
-  }
+  mstch::node needs_sinit() { return has_option("any"); }
 
  private:
   const std::optional<int32_t> split_id_;
@@ -2342,7 +2335,7 @@ void t_mstch_cpp2_generator::generate_program() {
   const auto* program = get_program();
   set_mstch_factories();
 
-  if (compiler::needs_sinit(source_mgr_, *program, has_option("any"))) {
+  if (has_option("any")) {
     generate_sinit(program);
   }
   if (has_option("reflection")) {

@@ -8431,6 +8431,7 @@ unsigned long Person2::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "Renamed", "kind": "struct" } */
 class Renamed final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;

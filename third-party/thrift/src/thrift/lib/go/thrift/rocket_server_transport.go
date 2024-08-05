@@ -132,7 +132,7 @@ func (r *rocketServerTransport) processRocketRequests(ctx context.Context, conn 
 }
 
 func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protocol Protocol, processor Processor) error {
-	exc := processContext(ctx, processor, protocol)
+	exc := process(ctx, processor, protocol)
 	if isEOF(exc) {
 		return exc
 	}

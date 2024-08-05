@@ -100,7 +100,7 @@ func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 	if err != nil {
 		return mono.Error(err)
 	}
-	if err := processContext(r.ctx, r.proc, protocol); err != nil {
+	if err := process(r.ctx, r.proc, protocol); err != nil {
 		return mono.Error(err)
 	}
 	response, err := encodeResponsePayload(protocol.GetRequestHeaders(), request.Zstd(), protocol.Bytes())
@@ -121,7 +121,7 @@ func (r *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		r.log.Printf("rocketServer fireAndForget error creating protocol: %v", err)
 		return
 	}
-	if err := processContext(r.ctx, r.proc, protocol); err != nil {
+	if err := process(r.ctx, r.proc, protocol); err != nil {
 		r.log.Printf("rocketServer fireAndForget process error: %v", err)
 		return
 	}

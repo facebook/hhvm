@@ -99,7 +99,7 @@ func (p *headerServer) processRequests(ctx context.Context, conn net.Conn) error
 	}()
 	defer protocol.Close()
 	for {
-		exc := processContext(ctx, p.processor, protocol)
+		exc := process(ctx, p.processor, protocol)
 		if isEOF(exc) {
 			break
 		}

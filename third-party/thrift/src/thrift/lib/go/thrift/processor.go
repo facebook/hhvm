@@ -37,7 +37,7 @@ type Processor interface {
 	GetProcessorFunction(name string) ProcessorFunction
 }
 
-// ProcessorFunctionContext is the interface that must be implemented in
+// ProcessorFunction is the interface that must be implemented in
 // order to perform io and message processing
 type ProcessorFunction interface {
 	// Read a serializable message from the protocol.
@@ -95,7 +95,6 @@ func processContext(ctx context.Context, processor Processor, prot Protocol) (ex
 	if rerr != nil {
 		return rerr
 	}
-	ctx = WithHeaders(ctx, prot.GetResponseHeaders())
 	pfunc, err := getProcessorFunction(processor, messageType, name)
 	if err != nil {
 		// attempt to skip the rest of the invalid message but keep the connection open.
@@ -117,6 +116,7 @@ func processContext(ctx context.Context, processor Processor, prot Protocol) (ex
 		// close connection on read failure
 		return e2
 	}
+	ctx = WithHeaders(ctx, prot.GetResponseHeaders())
 	result, err := pfunc.RunContext(ctx, argStruct)
 	if messageType == ONEWAY {
 		// for ONEWAY messages, never send a response

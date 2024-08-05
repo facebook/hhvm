@@ -131,13 +131,6 @@ inline void reset_field<::facebook::thrift::annotation::cpp::MinimizePadding>(
 }
 
 template<>
-inline void reset_field<::facebook::thrift::annotation::cpp::TriviallyRelocatable>(
-    ::facebook::thrift::annotation::cpp::TriviallyRelocatable& obj, uint16_t index) {
-  switch (index) {
-  }
-}
-
-template<>
 inline void reset_field<::facebook::thrift::annotation::cpp::ScopedEnumAsUnionType>(
     ::facebook::thrift::annotation::cpp::ScopedEnumAsUnionType& obj, uint16_t index) {
   switch (index) {
@@ -282,16 +275,6 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::MinimizePadding>::namesmap() {
-  static const folly::Indestructible<NamesMap> map {
-    {
-    }
-  };
-  return *map;
-}
-
-template<>
-inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::annotation::cpp::TriviallyRelocatable>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

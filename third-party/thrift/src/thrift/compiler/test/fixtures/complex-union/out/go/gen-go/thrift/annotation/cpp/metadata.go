@@ -147,9 +147,6 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("cpp.MinimizePadding").
     SetIsUnion(false),
     metadata.NewThriftStruct().
-    SetName("cpp.TriviallyRelocatable").
-    SetIsUnion(false),
-    metadata.NewThriftStruct().
     SetName("cpp.ScopedEnumAsUnionType").
     SetIsUnion(false),
     metadata.NewThriftStruct().

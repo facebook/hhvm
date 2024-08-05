@@ -4892,7 +4892,6 @@ class struct1 final  {
   bool __fbthrift_is_empty() const;
 
  public:
-  using IsRelocatable = std::true_type;
   using __fbthrift_cpp2_type = struct1;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;

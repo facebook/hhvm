@@ -1300,79 +1300,6 @@ func (x *MinimizePadding) String() string {
     return sb.String()
 }
 
-type TriviallyRelocatable struct {
-}
-// Compile time interface enforcer
-var _ thrift.Struct = (*TriviallyRelocatable)(nil)
-
-func NewTriviallyRelocatable() *TriviallyRelocatable {
-    return (&TriviallyRelocatable{})
-}
-
-
-
-func (x *TriviallyRelocatable) Write(p thrift.Encoder) error {
-    if err := p.WriteStructBegin("TriviallyRelocatable"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *TriviallyRelocatable) Read(p thrift.Decoder) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
-    }
-
-    for {
-        _, wireType, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
-        }
-
-        if wireType == thrift.STOP {
-            break;
-        }
-
-        switch {
-        default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
-    }
-
-    return nil
-}
-
-func (x *TriviallyRelocatable) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("TriviallyRelocatable({")
-    sb.WriteString("})")
-
-    return sb.String()
-}
-
 type ScopedEnumAsUnionType struct {
 }
 // Compile time interface enforcer
@@ -2208,7 +2135,6 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/cpp/Adapter", func() any { return NewAdapter() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/PackIsset", func() any { return NewPackIsset() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/MinimizePadding", func() any { return NewMinimizePadding() })
-    registry.RegisterType("facebook.com/thrift/annotation/cpp/TriviallyRelocatable", func() any { return NewTriviallyRelocatable() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/ScopedEnumAsUnionType", func() any { return NewScopedEnumAsUnionType() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/FieldInterceptor", func() any { return NewFieldInterceptor() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/UseOpEncode", func() any { return NewUseOpEncode() })

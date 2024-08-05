@@ -1180,8 +1180,6 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::cpp_declare_equal_to},
             {"struct:cpp_noncopyable", &cpp_mstch_struct::cpp_noncopyable},
             {"struct:cpp_noncomparable", &cpp_mstch_struct::cpp_noncomparable},
-            {"struct:cpp_trivially_relocatable",
-             &cpp_mstch_struct::cpp_trivially_relocatable},
             {"struct:cpp_runtime_annotation?",
              &cpp_mstch_struct::cpp_runtime_annotation},
             {"struct:is_eligible_for_constexpr?",
@@ -1352,11 +1350,6 @@ class cpp_mstch_struct : public mstch_struct {
   }
   mstch::node cpp_noncomparable() {
     return struct_->has_annotation({"cpp.noncomparable", "cpp2.noncomparable"});
-  }
-  mstch::node cpp_trivially_relocatable() {
-    return nullptr !=
-        struct_->find_structured_annotation_or_null(
-            kCppTriviallyRelocatableUri);
   }
   mstch::node cpp_runtime_annotation() {
     return is_runtime_annotation(*struct_);

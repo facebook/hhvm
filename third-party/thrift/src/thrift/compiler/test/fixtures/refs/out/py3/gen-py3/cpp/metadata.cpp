@@ -24,7 +24,6 @@ namespace cpp {
   ::apache::thrift::detail::md::StructMetadata<Adapter>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<PackIsset>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MinimizePadding>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<TriviallyRelocatable>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ScopedEnumAsUnionType>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<FieldInterceptor>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<UseOpEncode>::gen(metadata);

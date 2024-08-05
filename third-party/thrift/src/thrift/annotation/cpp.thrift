@@ -217,9 +217,6 @@ struct PackIsset {
 @scope.Struct
 struct MinimizePadding {}
 
-@scope.Struct
-struct TriviallyRelocatable {}
-
 @scope.Union
 struct ScopedEnumAsUnionType {}
 

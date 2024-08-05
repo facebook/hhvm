@@ -257,7 +257,6 @@ StructMetadata<::test_cpp2::cpp_reflection::struct1>::gen(ThriftMetadata& metada
     field.structured_annotations() = f.structured_annotations;
     module_struct1.fields()->push_back(std::move(field));
   }
-  module_struct1.structured_annotations()->push_back(*cvStruct("cpp.TriviallyRelocatable", {  }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

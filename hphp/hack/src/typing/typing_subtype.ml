@@ -2912,6 +2912,111 @@ end = struct
         (env, ty_sub)
     in
     match (deref ty_sub, deref ty_super) with
+    (* First come all the rewrites.
+       By "rewrite", we mean stuff like A <: ?B ---> A & nonnull <: B *)
+    (* -- Rewrite: x <: Tunion[t] ---> x <: t *)
+    | (_, (_, Tunion [ty_super'])) ->
+      simplify
+        ~subtype_env
+        ~this_ty
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_like; super_supportdyn = false; ty_super = ty_super' }
+        env
+    (* -- Rewrite:
+          t <: #1 | arraykey => t & !arraykey <: #1
+          or t <: #1 | !arraykey => t & arraykey <: #1
+       TODO(mjt) this is awkward because we need to expand and dereference types
+       in a nested position. This would be easier if we didn't have the
+       implmentation abstract within constraint solving and we had a function
+       (or set of functions) for expansion to a given depth *)
+    | (_, (_, Tunion [ty_super1; ty_super2]))
+      when expands_to_var_and_arraykey ty_super1 ty_super2 ~env ->
+      let (env, (tvar_ty, ak_ty)) =
+        var_and_arraykey_exn ty_super1 ty_super2 ~env
+      in
+
+      let (env, neg_ty) =
+        Inter.negate_type
+          env
+          (get_reason (mk ak_ty))
+          ~approx:Inter.Utils.ApproxDown
+          (mk ak_ty)
+      in
+      let (env, inter_ty) =
+        Inter.intersect env ~r:(get_reason lhs.ty_sub) neg_ty lhs.ty_sub
+      in
+      let lhs = { lhs with ty_sub = inter_ty }
+      and rhs =
+        { super_like = false; super_supportdyn = false; ty_super = mk tvar_ty }
+      in
+      simplify ~subtype_env ~this_ty ~lhs ~rhs env
+    (* -- Rewrite: x <: ?supportdyn<t> ---> x <: supportdyn<?t> *)
+    | ( ( _,
+          ( Tany _ | Tnonnull | Toption _ | Tdynamic | Tprim _ | Tfun _
+          | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _
+          | Tunapplied_alias _ | Tgeneric _ | Tnewtype _ | Tdependent _
+          | Tclass _ | Tneg _ | Tunion _ | Tintersection _ | Tvar _ ) ),
+        (r_super, Toption ty_inner) )
+      when expands_to_supportdyn ty_inner ~env ->
+      let (env, ty_inner) = Env.expand_type env ty_inner in
+      (* Since we have guarded on [ty_inner] being a supportdyn new type,
+         the following calls will not generate exceptions *)
+      let (env, (_, tyargs, _)) = newtype_exn ty_inner ~env in
+      let tyarg = List.hd_exn tyargs in
+      let tyarg = MakeType.nullable r_super tyarg in
+      let ty_super = MakeType.supportdyn r_super tyarg in
+      let lhs = { lhs with ty_sub }
+      and rhs =
+        { super_like = rhs.super_like; super_supportdyn = false; ty_super }
+      in
+      simplify ~subtype_env ~this_ty ~lhs ~rhs env
+    (* -- Rewrite:
+          supportdyn<t> <: ?u
+          ---> nonnull & supportdyn<t> <: u
+          ---> supportdyn<nonnull & t> <: u
+    *)
+    | ((r, Tnewtype (name, [tyarg1], _)), (r_super, Toption lty_inner))
+      when String.equal name SN.Classes.cSupportDyn ->
+      (* TODO(mjt) add 'rewrite' reason including both r & r_super? *)
+      let (env, ty_sub') =
+        Inter.intersect env ~r:r_super tyarg1 (MakeType.nonnull r_super)
+      in
+      let lty_inner =
+        Typing_env.update_reason env lty_inner ~f:(fun r_super_prj ->
+            Typing_reason.prj_nullable_super
+              ~super:r_super
+              ~super_prj:r_super_prj)
+      in
+      simplify
+        ~subtype_env
+        ~this_ty:None
+        ~lhs:{ sub_supportdyn = Some r; ty_sub = ty_sub' }
+        ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
+        env
+    (* -- Rewrite: _ & ...  & _ <: ?t ---> _ & .. & _ & nonnull <: t
+       but only when the intersection does not contain any type with an exact
+       negation (we apply a rewrite in the other direction for those cases) *)
+    | ((_, Tintersection ty_subs), (r_super, Toption ty_inner_super))
+      when expands_to_var_or_intersection ty_inner_super ~env
+           &&
+           let (_, non_ty_opt, _) =
+             Subtype_negation.find_type_with_exact_negation env ty_subs
+           in
+           Option.is_none non_ty_opt ->
+      let (env, ty_sub) =
+        Inter.intersect env ~r:r_super ty_sub (MakeType.nonnull r_super)
+      in
+      let ty_inner_super =
+        Typing_env.update_reason env ty_inner_super ~f:(fun r_super_prj ->
+            Typing_reason.prj_nullable_super
+              ~super:r_super
+              ~super_prj:r_super_prj)
+      in
+      let lhs = { lhs with ty_sub }
+      and rhs =
+        { rhs with super_supportdyn = false; ty_super = ty_inner_super }
+      in
+      simplify ~subtype_env ~this_ty ~lhs ~rhs env
     (* -- C-Var-R ----------------------------------------------------------- *)
     | ((_, Tunion _), (_, Tvar _)) ->
       default_subtype
@@ -3174,41 +3279,6 @@ end = struct
         (_, Tunion []) ) ->
       invalid env ~fail
     (* -- C-Union-R --------------------------------------------------------- *)
-    | (_, (_, Tunion [ty_super'])) ->
-      simplify
-        ~subtype_env
-        ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub }
-        ~rhs:{ super_like; super_supportdyn = false; ty_super = ty_super' }
-        env
-    (* Rewrite
-         t <: #1 | arraykey => t & !arraykey <: #1
-       or t <: #1 | !arraykey => t & arraykey <: #1
-       TODO(mjt) this is awkward because we need to expand and dereference types
-       in a nested position. This would be easier if we didn't have the
-       implmentation abstract within constraint solving and we had a function
-       (or set of functions) for expansion to a given depth *)
-    | (_, (_, Tunion [ty_super1; ty_super2]))
-      when expands_to_var_and_arraykey ty_super1 ty_super2 ~env ->
-      let (env, (tvar_ty, ak_ty)) =
-        var_and_arraykey_exn ty_super1 ty_super2 ~env
-      in
-
-      let (env, neg_ty) =
-        Inter.negate_type
-          env
-          (get_reason (mk ak_ty))
-          ~approx:Inter.Utils.ApproxDown
-          (mk ak_ty)
-      in
-      let (env, inter_ty) =
-        Inter.intersect env ~r:(get_reason lhs.ty_sub) neg_ty lhs.ty_sub
-      in
-      let lhs = { lhs with ty_sub = inter_ty }
-      and rhs =
-        { super_like = false; super_supportdyn = false; ty_super = mk tvar_ty }
-      in
-      simplify ~subtype_env ~this_ty ~lhs ~rhs env
     | (_, (r_super, Tunion lty_supers)) -> begin
       match deref ty_sub with
       | (r_sub, Tunion ty_subs) ->
@@ -3234,13 +3304,13 @@ end = struct
           (LoclType ty_super)
       | (_, Tvar id) ->
         (* For subtyping queries of the form
-           *
-           *   Tvar #id <: (Tvar #id | ...)
-           *
-           * `remove_tyvar_from_upper_bound` simplifies the union to
-           * `mixed`. This indicates that the query is discharged. If we find
-           * any other upper bound, we leave the subtyping query as it is.
-        *)
+         *
+         *   Tvar #id <: (Tvar #id | ...)
+         *
+         * `remove_tyvar_from_upper_bound` simplifies the union to
+         * `mixed`. This indicates that the query is discharged. If we find
+         * any other upper bound, we leave the subtyping query as it is.
+         *)
         let (env, simplified_super_ty) =
           Typing_solver_utils.remove_tyvar_from_upper_bound
             env
@@ -3424,48 +3494,6 @@ end = struct
       when expands_to_nonnull ty_inner ~env ->
       valid env
     (* -- C-Option-R -------------------------------------------------------- *)
-    (* ?supportdyn<t> is equivalent to supportdyn<?t> *)
-    | ( ( _,
-          ( Tany _ | Tnonnull | Toption _ | Tdynamic | Tprim _ | Tfun _
-          | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _
-          | Tunapplied_alias _ | Tgeneric _ | Tnewtype _ | Tdependent _
-          | Tclass _ | Tneg _ | Tunion _ | Tintersection _ | Tvar _ ) ),
-        (r_super, Toption ty_inner) )
-      when expands_to_supportdyn ty_inner ~env ->
-      let (env, ty_inner) = Env.expand_type env ty_inner in
-      (* Since we have guarded on [ty_inner] being a supportdyn new type,
-         the following calls will not generate exceptions *)
-      let (env, (_, tyargs, _)) = newtype_exn ty_inner ~env in
-      let tyarg = List.hd_exn tyargs in
-      let tyarg = MakeType.nullable r_super tyarg in
-      let ty_super = MakeType.supportdyn r_super tyarg in
-      let lhs = { lhs with ty_sub }
-      and rhs =
-        { super_like = rhs.super_like; super_supportdyn = false; ty_super }
-      in
-      simplify ~subtype_env ~this_ty ~lhs ~rhs env
-    (*   supportdyn<t> <: ?u   iff
-     *   nonnull & supportdyn<t> <: u   iff
-     *   supportdyn<nonnull & t> <: u
-     *)
-    | ((r, Tnewtype (name, [tyarg1], _)), (r_super, Toption lty_inner))
-      when String.equal name SN.Classes.cSupportDyn ->
-      (* TODO(mjt) add 'rewrite' reason including both r & r_super? *)
-      let (env, ty_sub') =
-        Inter.intersect env ~r:r_super tyarg1 (MakeType.nonnull r_super)
-      in
-      let lty_inner =
-        Typing_env.update_reason env lty_inner ~f:(fun r_super_prj ->
-            Typing_reason.prj_nullable_super
-              ~super:r_super
-              ~super_prj:r_super_prj)
-      in
-      simplify
-        ~subtype_env
-        ~this_ty:None
-        ~lhs:{ sub_supportdyn = Some r; ty_sub = ty_sub' }
-        ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
-        env
     (* null is the type of null and is a subtype of any option type. *)
     | ((_, Tprim Nast.Tnull), (_, Toption _)) -> valid env
     (* ?ty_sub' <: ?ty_super' iff ty_sub' <: ?ty_super'. Reasoning:
@@ -3490,33 +3518,12 @@ end = struct
             ty_super = mk (r_super, Toption lty_inner);
           }
         env
-    (* Rewrite _ & ...  & _ <: ?t => _ & .. & _ & nonnull <: t
-       but only when the intersection does not contain any type with an exact
-       negation (we apply a rewrite in the other direction for those cases) *)
-    | ((_r_sub, Tintersection ty_subs), (r_super, Toption ty_inner_super))
-      when expands_to_var_or_intersection ty_inner_super ~env
-           &&
-           let (_, non_ty_opt, _) =
-             Subtype_negation.find_type_with_exact_negation env ty_subs
-           in
-           Option.is_none non_ty_opt ->
-      let (env, ty_sub) =
-        Inter.intersect env ~r:r_super ty_sub (MakeType.nonnull r_super)
-      in
-      let ty_inner_super =
-        Typing_env.update_reason env ty_inner_super ~f:(fun r_super_prj ->
-            Typing_reason.prj_nullable_super
-              ~super:r_super
-              ~super_prj:r_super_prj)
-      in
-      let lhs = { lhs with ty_sub }
-      and rhs =
-        { rhs with super_supportdyn = false; ty_super = ty_inner_super }
-      in
-      simplify ~subtype_env ~this_ty ~lhs ~rhs env
-    (* If the type on the left is disjoint from null, then the Toption on the right is not
-       doing anything helpful. *)
-    | ((_r_sub, (Tintersection _ | Tunion _)), (r_super, Toption lty_inner))
+    (* If ty_sub <: ?ty_super' and ty_sub does not contain null then we
+     * must also have ty_sub <: ty_super'.  The converse follows by
+     * widening and transitivity.  Therefore, this step preserves the set
+     * of solutions.
+     *)
+    | ((_, (Tintersection _ | Tunion _)), (r_super, Toption lty_inner))
       when TUtils.is_type_disjoint env ty_sub (MakeType.null Reason.none) ->
       let lty_inner =
         Typing_env.update_reason env lty_inner ~f:(fun r_super_prj ->
@@ -3530,7 +3537,7 @@ end = struct
         ~lhs:{ sub_supportdyn; ty_sub }
         ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
         env
-      (* We do not want to decompose Toption for these cases *)
+    (* We do not want to decompose Toption for these cases *)
     | ((_, (Tvar _ | Tunion _ | Tintersection _)), (r_super, Toption lty_inner))
       ->
       default_subtype
@@ -3598,11 +3605,6 @@ end = struct
               ~fail
               ~lhs:{ sub_supportdyn; ty_sub }
               ~rhs:{ super_like; super_supportdyn = false; ty_super }
-    (* If ty_sub <: ?ty_super' and ty_sub does not contain null then we
-     * must also have ty_sub <: ty_super'.  The converse follows by
-     * widening and transitivity.  Therefore, this step preserves the set
-     * of solutions.
-     *)
     | ((_, Tunapplied_alias _), (_, Toption _)) ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | ( ( _r_sub,
@@ -4491,11 +4493,12 @@ end = struct
         ~lhs:{ sub_supportdyn; ty_sub }
         ~rhs:{ super_like; super_supportdyn = false; ty_super }
         env
-    (* If t supports dynamic, and t <: u, then t <: supportdyn<u> *)
     (* -- C-Newtype-R ------------------------------------------------------- *)
+    (* x <: supportdyn<u> *)
     | (_, (r_supportdyn, Tnewtype (name_super, [lty_inner], bound_super)))
       when String.equal name_super SN.Classes.cSupportDyn -> begin
       match deref ty_sub with
+      (* supportdyn<t> <: supportdyn<u> *)
       | (r, Tnewtype (name_sub, [tyarg_sub], _))
         when String.equal name_sub SN.Classes.cSupportDyn ->
         let ty_sub =
@@ -4547,6 +4550,7 @@ end = struct
                   ty_super = ty_dyn;
                 }
     end
+    (* #A <: \\HH\\EnumClass\\Label<u, v> *)
     | ((r_sub, Tlabel name), (r_sup, Tnewtype (label_kind, [ty_from; ty_to], _)))
       when String.equal label_kind SN.Classes.cEnumClassLabel ->
       let ty =
@@ -4596,6 +4600,7 @@ end = struct
               (* TODO(hverr): decl_entry propagate *)
               invalid ~fail env
           end
+      (* ?t <: A <=> null <: A && t <: A *)
       | (r, Toption ty_sub) ->
         let ty_null = MakeType.null r in
         (* Errors due to `null` should refer to full option type *)
@@ -4652,6 +4657,7 @@ end = struct
           ~rhs:{ super_like; super_supportdyn = false; ty_super }
           env
       | _ ->
+        (* x <: case_type *)
         (match Env.get_typedef env name_super with
         | Decl_entry.Found
             { td_type = lower; td_vis = Aast.CaseType; td_tparams; _ }
@@ -4735,7 +4741,7 @@ end = struct
             ~rhs:{ super_like; super_supportdyn = false; ty_super }
             env)
     end
-    (* -- C-Vec-or-Dict-R --------------------------------------------------- *)
+    (* -- C-unapplied-alias-R --------------------------------------------------- *)
     | (_, (_, Tunapplied_alias n_sup)) ->
       (match deref ty_sub with
       | (_, Tunapplied_alias n_sub) when String.equal n_sub n_sup -> valid env
@@ -4825,6 +4831,8 @@ end = struct
           env
     end
     (* -- C-Class-R --------------------------------------------------------- *)
+    (* class refinement
+       x <: A with type T = y <=> x <: A && x <: has_type_member(T, y) *)
     | (_, (r_super, Tclass (class_id_super, Nonexact cr_super, tyargs_super)))
       when (not (Class_refinement.is_empty cr_super))
            && (subtype_env.Subtype_env.require_soundness
@@ -4888,6 +4896,7 @@ end = struct
              && is_nonexact exact_super
              && Env.is_enum env enum_name ->
         valid env
+      (* E <: \HH\BuiltinEnum<t> *)
       | (_, Tnewtype (cid, _, _))
         when String.equal class_nm_super SN.Classes.cHH_BuiltinEnum
              && Env.is_enum env cid ->
@@ -4920,10 +4929,12 @@ end = struct
         when Env.is_enum env enum_name
              && String.equal class_nm_super SN.Classes.cXHPChild ->
         valid env
+      (* t_prim <: XHPChild *)
       | (_, Tprim Nast.(Tstring | Tarraykey | Tint | Tfloat | Tnum))
         when String.equal class_nm_super SN.Classes.cXHPChild
              && is_nonexact exact_super ->
         valid env
+      (* string <: Stringish *)
       | (_, Tprim Nast.Tstring)
         when String.equal class_nm_super SN.Classes.cStringish
              && is_nonexact exact_super ->

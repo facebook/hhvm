@@ -31,7 +31,7 @@ type protocolBuffer struct {
 	wbuf        *MemoryBuffer
 	rbuf        *MemoryBuffer
 	name        string
-	typeID      MessageType
+	messageType MessageType
 	seqID       int32
 	reqHeaders  map[string]string
 	respHeaders map[string]string
@@ -64,16 +64,16 @@ func (b *protocolBuffer) Bytes() []byte {
 }
 
 func (b *protocolBuffer) ReadMessageBegin() (string, MessageType, int32, error) {
-	return b.name, b.typeID, 0, nil
+	return b.name, b.messageType, 0, nil
 }
 
 func (b *protocolBuffer) ReadMessageEnd() error {
 	return nil
 }
 
-func (b *protocolBuffer) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
+func (b *protocolBuffer) WriteMessageBegin(name string, messageType MessageType, seqid int32) error {
 	b.name = name
-	b.typeID = typeID
+	b.messageType = messageType
 	b.seqID = seqid
 	return nil
 }
@@ -94,6 +94,6 @@ func (b *protocolBuffer) SetRequestHeader(key, value string) {
 	b.reqHeaders[key] = value
 }
 
-func (b *protocolBuffer) GetRequestHeaders() map[string]string {
+func (b *protocolBuffer) getRequestHeaders() map[string]string {
 	return b.reqHeaders
 }

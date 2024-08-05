@@ -103,7 +103,7 @@ func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 	if err := process(r.ctx, r.proc, protocol); err != nil {
 		return mono.Error(err)
 	}
-	response, err := encodeResponsePayload(protocol.GetRequestHeaders(), request.Zstd(), protocol.Bytes())
+	response, err := encodeResponsePayload(protocol.name, protocol.messageType, protocol.getRequestHeaders(), request.Zstd(), protocol.Bytes())
 	if err != nil {
 		return mono.Error(err)
 	}

@@ -73,17 +73,25 @@ func decodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 	return res, res.Error()
 }
 
-func encodeResponsePayload(headers map[string]string, zstd bool, dataBytes []byte) (payload.Payload, error) {
+func encodeResponsePayload(name string, messageType MessageType, headers map[string]string, zstd bool, dataBytes []byte) (payload.Payload, error) {
 	metadata := NewResponseRpcMetadata()
 	metadata.SetOtherMetadata(headers)
 	if zstd {
 		compression := CompressionAlgorithm_ZSTD
 		metadata.SetCompression(&compression)
 	}
+	if messageType == EXCEPTION {
+		excpetionMetadata := newUnknownPayloadExceptionMetadataBase(name, string(dataBytes))
+		metadata.SetPayloadMetadata(NewPayloadMetadata().SetExceptionMetadata(excpetionMetadata))
+	}
 	metadataBytes, err := serializeCompact(metadata)
 	if err != nil {
 		return nil, err
 	}
+	if messageType == EXCEPTION {
+		return payload.New(nil, metadataBytes), nil
+	}
+
 	if zstd {
 		dataBytes, err = compressZstd(dataBytes)
 		if err != nil {

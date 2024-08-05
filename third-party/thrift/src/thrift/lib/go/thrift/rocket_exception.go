@@ -54,9 +54,9 @@ type rocketException struct {
 	Name          string
 	What          string
 	ExceptionType rocketExceptionType
-	Kind          string
-	Blame         string
-	Safety        string
+	Kind          ErrorKind
+	Blame         ErrorBlame
+	Safety        ErrorSafety
 }
 
 var _ error = (*rocketException)(nil)
@@ -66,9 +66,9 @@ func newRocketException(exception *PayloadExceptionMetadataBase) *rocketExceptio
 		Name:          "unknown",
 		What:          "unknown",
 		ExceptionType: rocketExceptionUnknown,
-		Kind:          "none",
-		Blame:         "none",
-		Safety:        "none",
+		Kind:          ErrorKind_UNSPECIFIED,
+		Blame:         ErrorBlame_UNSPECIFIED,
+		Safety:        ErrorSafety_UNSPECIFIED,
 	}
 	if exception.NameUTF8 != nil {
 		err.Name = *exception.NameUTF8
@@ -95,17 +95,58 @@ func newRocketException(exception *PayloadExceptionMetadataBase) *rocketExceptio
 		}
 		if class != nil {
 			if class.Kind != nil {
-				err.Kind = class.Kind.String()
+				err.Kind = class.GetKind()
 			}
 			if class.Blame != nil {
-				err.Blame = class.Blame.String()
+				err.Blame = class.GetBlame()
 			}
 			if class.Safety != nil {
-				err.Safety = class.Safety.String()
+				err.Safety = class.GetSafety()
 			}
 		}
 	}
 	return err
+}
+
+func newUnknownPayloadExceptionMetadataBase(name string, what string) *PayloadExceptionMetadataBase {
+	return newPayloadExceptionMetadataBase(&rocketException{
+		Name:          name,
+		What:          what,
+		ExceptionType: rocketExceptionUnknown,
+		Safety:        ErrorSafety_SAFE,
+		Kind:          ErrorKind_TRANSIENT,
+		Blame:         ErrorBlame_SERVER,
+	})
+}
+
+func newPayloadExceptionMetadataBase(err *rocketException) *PayloadExceptionMetadataBase {
+	base := NewPayloadExceptionMetadataBase()
+	base.SetNameUTF8(&err.Name)
+	base.SetWhatUTF8(&err.What)
+	class := NewErrorClassification()
+	class.SetKind(&err.Kind)
+	class.SetBlame(&err.Blame)
+	class.SetSafety(&err.Safety)
+	metadata := NewPayloadExceptionMetadata()
+	switch err.ExceptionType {
+	case rocketExceptionDeclared:
+		declared := NewPayloadDeclaredExceptionMetadata()
+		declared.SetErrorClassification(class)
+		metadata.SetDeclaredException(declared)
+	case rocketExceptionAppUnknown:
+		appUnknown := NewPayloadAppUnknownExceptionMetdata()
+		appUnknown.SetErrorClassification(class)
+		metadata.SetAppUnknownException(appUnknown)
+	case rocketExceptionAny:
+		metadata.SetAnyException(NewPayloadAnyExceptionMetadata())
+	case rocketExceptionDeprecatedProxy:
+		metadata.SetDEPRECATEDProxyException(NewPayloadProxyExceptionMetadata())
+	case rocketExceptionUnknown:
+	default:
+		panic("unreachable")
+	}
+	base.SetMetadata(metadata)
+	return base
 }
 
 func (e *rocketException) Error() string {

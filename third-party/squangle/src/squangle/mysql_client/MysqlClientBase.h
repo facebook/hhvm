@@ -19,6 +19,7 @@ namespace facebook::common::mysql_client {
 
 class Connection;
 class ConnectOperation;
+class MysqlHandler;
 
 class MysqlClientBase {
  public:

@@ -11,6 +11,7 @@
 #include <folly/futures/Promise.h>
 
 #include "squangle/mysql_client/AsyncHelpers.h"
+#include "squangle/mysql_client/ConnectOperation.h"
 #include "squangle/mysql_client/DbResult.h"
 #include "squangle/mysql_client/Operation.h"
 #include "squangle/mysql_client/SemiFutureAdapter.h"

@@ -7,7 +7,9 @@
  */
 
 #include "squangle/mysql_client/Connection.h"
+#include "squangle/mysql_client/ChangeUserOperation.h"
 #include "squangle/mysql_client/InternalMysqlConnection.h"
+#include "squangle/mysql_client/ResetOperation.h"
 #include "squangle/mysql_client/SemiFutureAdapter.h"
 
 namespace facebook::common::mysql_client {

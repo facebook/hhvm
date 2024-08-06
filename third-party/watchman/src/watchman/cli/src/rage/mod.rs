@@ -176,7 +176,6 @@ impl WatchmanRage {
 
     fn print_watchman_env(&mut self) -> Result<()> {
         let vars = std::env::vars()
-            .into_iter()
             .filter(|(k, _)| k.starts_with("WATCHMAN_"))
             .collect::<Vec<_>>();
 

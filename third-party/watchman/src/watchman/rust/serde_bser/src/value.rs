@@ -83,7 +83,7 @@ impl TryInto<Value> for usize {
     type Error = &'static str;
 
     fn try_into(self) -> Result<Value, Self::Error> {
-        if self > i64::max_value() as usize {
+        if self > i64::MAX as usize {
             Err("value is too large to represent as i64")
         } else {
             Ok(Value::Integer(self as i64))
@@ -121,7 +121,7 @@ impl<'de> Deserialize<'de> for Value {
             fn visit_u64<E>(self, v: u64) -> Result<Value, E> {
                 // maybe_put_int! doesn't work for u64 because it converts to i64
                 // internally.
-                if v > (i64::max_value() as u64) {
+                if v > (i64::MAX as u64) {
                     Err(serde::de::Error::custom(format!(
                         "value {} is too large to represent as a BSER integer",
                         v

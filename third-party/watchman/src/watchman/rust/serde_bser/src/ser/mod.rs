@@ -56,8 +56,8 @@ pub struct Serializer<W> {
 /// This works for all $val types except for `u64`.
 macro_rules! maybe_put_int {
     ($self:ident, $val:expr, $to:ident, $put:ident) => {
-        let min = $to::min_value() as i64;
-        let max = $to::max_value() as i64;
+        let min = $to::MIN as i64;
+        let max = $to::MAX as i64;
         let val = $val as i64;
         if val >= min && val <= max {
             return $self.$put($val as $to);
@@ -236,7 +236,7 @@ where
     fn serialize_u64(self, v: u64) -> Result<()> {
         // maybe_put_int! doesn't work for u64 because it converts to i64
         // internally.
-        if v > (i64::max_value() as u64) {
+        if v > (i64::MAX as u64) {
             Err(Error::SerU64TooBig { v })
         } else {
             self.serialize_i64(v as i64)

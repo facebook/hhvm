@@ -353,7 +353,7 @@ folly::coro::Task<void> ContextStack::processClientInterceptorsOnResponse() {
   DCHECK(shouldProcessClientInterceptors());
 
   std::vector<ClientInterceptorException::SingleExceptionInfo> exceptions;
-  for (std::size_t i = 0; i < clientInterceptors_->size(); ++i) {
+  for (auto i = std::ptrdiff_t(clientInterceptors_->size()) - 1; i >= 0; --i) {
     const auto& clientInterceptor = (*clientInterceptors_)[i];
     ClientInterceptorBase::ResponseInfo responseInfo{
         getStorageForClientInterceptorOnRequestByIndex(i)};

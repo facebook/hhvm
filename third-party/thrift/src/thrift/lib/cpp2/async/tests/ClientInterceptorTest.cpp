@@ -291,6 +291,51 @@ CO_TEST_P(ClientInterceptorTestP, OnRequestException) {
   EXPECT_EQ(interceptor3->onResponseCount, 0);
 }
 
+CO_TEST_P(ClientInterceptorTestP, IterationOrder) {
+  int seq = 1;
+
+  class ClientInterceptorRecordingExecutionSequence
+      : public NamedClientInterceptor<folly::Unit> {
+   public:
+    using RequestState = folly::Unit;
+
+    ClientInterceptorRecordingExecutionSequence(std::string name, int& seq)
+        : NamedClientInterceptor(std::move(name)), seq_(seq) {}
+
+    folly::coro::Task<std::optional<RequestState>> onRequest(
+        RequestInfo) override {
+      onRequestSeq = seq_++;
+      co_return std::nullopt;
+    }
+
+    folly::coro::Task<void> onResponse(RequestState*, ResponseInfo) override {
+      onResponseSeq = seq_++;
+      co_return;
+    }
+
+    int onRequestSeq = 0;
+    int onResponseSeq = 0;
+
+   private:
+    int& seq_;
+  };
+
+  auto interceptor1 =
+      std::make_shared<ClientInterceptorRecordingExecutionSequence>(
+          "Interceptor1", seq);
+  auto interceptor2 =
+      std::make_shared<ClientInterceptorRecordingExecutionSequence>(
+          "Interceptor2", seq);
+  auto client = makeClient(makeInterceptorsList(interceptor1, interceptor2));
+
+  co_await client->noop();
+
+  EXPECT_EQ(interceptor1->onRequestSeq, 1);
+  EXPECT_EQ(interceptor2->onRequestSeq, 2);
+  EXPECT_EQ(interceptor2->onResponseSeq, 3);
+  EXPECT_EQ(interceptor1->onResponseSeq, 4);
+}
+
 CO_TEST_P(ClientInterceptorTestP, OnResponseException) {
   auto interceptor1 =
       std::make_shared<ClientInterceptorThatThrowsOnResponse>("Interceptor1");
@@ -307,8 +352,8 @@ CO_TEST_P(ClientInterceptorTestP, OnResponseException) {
           co_await client->noop();
         } catch (const ClientInterceptorException& ex) {
           EXPECT_EQ(ex.causes().size(), 2);
-          EXPECT_EQ(ex.causes()[0].sourceInterceptorName, "Interceptor1");
-          EXPECT_EQ(ex.causes()[1].sourceInterceptorName, "Interceptor3");
+          EXPECT_EQ(ex.causes()[0].sourceInterceptorName, "Interceptor3");
+          EXPECT_EQ(ex.causes()[1].sourceInterceptorName, "Interceptor1");
           EXPECT_THAT(ex.what(), HasSubstr("[Interceptor1]"));
           EXPECT_THAT(ex.what(), Not(HasSubstr("Interceptor2")));
           EXPECT_THAT(ex.what(), HasSubstr("[Interceptor3]"));

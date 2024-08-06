@@ -754,7 +754,7 @@ function(t_test NAME)
   )
   target_compile_definitions(${NAME}.t
     PUBLIC WATCHMAN_TEST_SRC_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\")
-  gtest_discover_tests(${NAME}.t)
+  gtest_discover_tests(${NAME}.t DISCOVERY_TIMEOUT 60)
   list(APPEND tests ${NAME}.t)
 endfunction()
 

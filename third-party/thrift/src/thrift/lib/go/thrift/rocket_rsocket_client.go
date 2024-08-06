@@ -31,12 +31,20 @@ type rsocketClient struct {
 	conn   net.Conn
 }
 
-type onServerMetadataPush func(*serverMetadataPayload)
+type onServerMetadataPush func(zstd bool, drain bool)
 
-func newRsocketClient(conn net.Conn, serverMetadataPush onServerMetadataPush) (*rsocketClient, error) {
+func newRsocketClient(conn net.Conn) *rsocketClient {
+	return &rsocketClient{conn: conn}
+}
+
+func (r *rsocketClient) sendSetup(serverMetadataPush onServerMetadataPush) error {
+	if r.client != nil {
+		// already setup
+		return nil
+	}
 	setupPayload, err := newRequestSetupPayloadVersion8()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	clientBuilder := rsocket.Connect()
 	// See T182939211. This copies the keep alives from Java Rocket.
@@ -45,8 +53,9 @@ func newRsocketClient(conn net.Conn, serverMetadataPush onServerMetadataPush) (*
 	clientBuilder = clientBuilder.SetupPayload(setupPayload)
 	clientBuilder = clientBuilder.OnClose(func(error) {})
 	clientStarter := clientBuilder.Acceptor(acceptor(serverMetadataPush))
-	client, err := clientStarter.Transport(transporter(conn)).Start(context.Background())
-	return &rsocketClient{client: client, conn: conn}, err
+	client, err := clientStarter.Transport(transporter(r.conn)).Start(context.Background())
+	r.client = client
+	return nil
 }
 
 func acceptor(onMetadataPush onServerMetadataPush) func(_ context.Context, socket rsocket.RSocket) rsocket.RSocket {
@@ -65,7 +74,7 @@ func metadataPush(onMetadataPush onServerMetadataPush) func(pay payload.Payload)
 		if err != nil {
 			panic(err)
 		}
-		onMetadataPush(metadata)
+		onMetadataPush(metadata.zstd, metadata.drain)
 	}
 }
 
@@ -85,19 +94,23 @@ func (r *rsocketClient) resetDeadline() {
 	r.conn.SetDeadline(time.Time{})
 }
 
-func (r *rsocketClient) requestResponse(ctx context.Context, messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) (*responsePayload, error) {
+func (r *rsocketClient) requestResponse(ctx context.Context, messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) (map[string]string, []byte, error) {
 	r.resetDeadline()
 	request, err := encodeRequestPayload(messageName, protoID, typeID, headers, zstd, dataBytes)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	mono := r.client.RequestResponse(request)
 	val, err := mono.Block(ctx)
 	val = payload.Clone(val)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return decodeResponsePayload(val)
+	response, err := decodeResponsePayload(val)
+	if response != nil {
+		return response.Headers(), response.Data(), err
+	}
+	return nil, nil, err
 }
 
 func (r *rsocketClient) fireAndForget(messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) error {
@@ -111,5 +124,8 @@ func (r *rsocketClient) fireAndForget(messageName string, protoID ProtocolID, ty
 }
 
 func (r *rsocketClient) Close() error {
-	return r.client.Close()
+	if r.client != nil {
+		return r.client.Close()
+	}
+	return nil
 }

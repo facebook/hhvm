@@ -33,8 +33,8 @@ type rocketClient struct {
 	// rsocket client state
 	client *rsocketClient
 
-	resultVal *responsePayload
-	resultErr error
+	resultData []byte
+	resultErr  error
 
 	timeout time.Duration
 
@@ -57,6 +57,7 @@ type rocketClient struct {
 func newRocketClient(conn net.Conn, protoID ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
 	p := &rocketClient{
 		conn:              conn,
+		client:            newRsocketClient(conn),
 		protoID:           protoID,
 		persistentHeaders: persistentHeaders,
 		rbuf:              NewMemoryBuffer(),
@@ -92,11 +93,8 @@ func (p *rocketClient) WriteMessageEnd() error {
 
 func (p *rocketClient) Flush() (err error) {
 	dataBytes := p.wbuf.Bytes()
-	if p.client == nil {
-		p.client, err = newRsocketClient(p.conn, p.serverMetadataPush)
-		if err != nil {
-			return err
-		}
+	if err := p.client.sendSetup(p.serverMetadataPush); err != nil {
+		return err
 	}
 	headers := unionMaps(p.reqHeaders, p.persistentHeaders)
 	if p.writeType == ONEWAY {
@@ -111,7 +109,7 @@ func (p *rocketClient) Flush() (err error) {
 		ctx, cancel = context.WithTimeout(ctx, p.timeout)
 		defer cancel()
 	}
-	p.resultVal, p.resultErr = p.client.requestResponse(ctx, p.messageName, p.protoID, p.writeType, headers, p.zstd, dataBytes)
+	p.respHeaders, p.resultData, p.resultErr = p.client.requestResponse(ctx, p.messageName, p.protoID, p.writeType, headers, p.zstd, dataBytes)
 	clear(p.reqHeaders)
 	return nil
 }
@@ -127,9 +125,9 @@ func unionMaps(dst, src map[string]string) map[string]string {
 	return dst
 }
 
-func (p *rocketClient) serverMetadataPush(metadata *serverMetadataPayload) {
+func (p *rocketClient) serverMetadataPush(zstd bool, drain bool) {
 	// zstd is only supported if both the client and the server support it.
-	p.zstd = p.zstd && metadata.zstd
+	p.zstd = p.zstd && zstd
 }
 
 func (p *rocketClient) ReadMessageBegin() (string, MessageType, int32, error) {
@@ -137,10 +135,8 @@ func (p *rocketClient) ReadMessageBegin() (string, MessageType, int32, error) {
 	if p.resultErr != nil {
 		return name, EXCEPTION, p.seqID, p.resultErr
 	}
-	p.respHeaders = make(map[string]string)
-	maps.Copy(p.respHeaders, p.resultVal.Headers())
 
-	p.rbuf.Init(p.resultVal.Data())
+	p.rbuf.Init(p.resultData)
 	return name, REPLY, p.seqID, nil
 }
 
@@ -161,13 +157,5 @@ func (p *rocketClient) GetResponseHeaders() map[string]string {
 }
 
 func (p *rocketClient) Close() error {
-	if p.client != nil {
-		if err := p.client.Close(); err != nil {
-			return err
-		}
-		p.client = nil
-	} else {
-		p.conn.Close()
-	}
-	return nil
+	return p.client.Close()
 }

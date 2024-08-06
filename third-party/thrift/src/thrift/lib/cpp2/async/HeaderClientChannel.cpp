@@ -31,7 +31,6 @@
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/thrift/gen-cpp2/RocketUpgradeAsyncClient.h>
 
-THRIFT_FLAG_DEFINE_bool(raw_client_rocket_upgrade_enabled_v2, true);
 THRIFT_FLAG_DEFINE_int64(raw_client_rocket_upgrade_timeout_ms, 2000);
 THRIFT_FLAG_DEFINE_bool(client_header_coerce_framed_to_header, true);
 THRIFT_FLAG_DEFINE_bool(client_header_coerce_unframed_to_header, true);
@@ -131,9 +130,7 @@ HeaderClientChannel::Ptr HeaderClientChannel::newChannel(
   auto headerChannel = newChannel(
       WithoutRocketUpgrade(), std::move(transport), std::move(options));
   return Ptr(new RocketUpgradeChannel(
-      std::move(headerChannel),
-      THRIFT_FLAG(raw_client_rocket_upgrade_enabled_v2),
-      std::move(rocketUpgradeSetupMetadata)));
+      std::move(headerChannel), std::move(rocketUpgradeSetupMetadata)));
 }
 
 HeaderClientChannel::Ptr HeaderClientChannel::newChannel(
@@ -146,7 +143,7 @@ HeaderClientChannel::Ptr HeaderClientChannel::newChannel(
   auto headerChannel = newChannel(
       WithoutRocketUpgrade(), std::move(transport), std::move(options));
   return Ptr(new RocketUpgradeChannel(
-      std::move(headerChannel), true, std::move(rocketUpgradeSetupMetadata)));
+      std::move(headerChannel), std::move(rocketUpgradeSetupMetadata)));
 }
 
 void HeaderClientChannel::updateHttpClientConfig(
@@ -497,11 +494,10 @@ class HeaderClientChannel::RocketUpgradeChannel::RocketUpgradeCallback
 
 HeaderClientChannel::RocketUpgradeChannel::RocketUpgradeChannel(
     HeaderClientChannel::LegacyPtr headerChannel,
-    bool enabled,
     std::unique_ptr<RequestSetupMetadata> rocketUpgradeSetupMetadata)
     : headerChannel_(std::move(headerChannel)),
       rocketUpgradeSetupMetadata_(std::move(rocketUpgradeSetupMetadata)),
-      state_(enabled ? State::INIT : State::DONE) {}
+      state_(State::INIT) {}
 
 HeaderClientChannel::RocketUpgradeChannel::~RocketUpgradeChannel() {
   if (rocketChannel_) {

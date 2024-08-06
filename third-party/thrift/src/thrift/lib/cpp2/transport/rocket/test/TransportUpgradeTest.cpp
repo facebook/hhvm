@@ -25,7 +25,6 @@
 #include <thrift/lib/cpp2/transport/rocket/test/util/TestUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/test/util/gen-cpp2/TransportUpgrade.h>
 
-THRIFT_FLAG_DECLARE_bool(raw_client_rocket_upgrade_enabled_v2);
 THRIFT_FLAG_DECLARE_int64(raw_client_rocket_upgrade_timeout_ms);
 
 namespace apache {
@@ -74,9 +73,6 @@ class TransportUpgradeTest : public TestSetup {
 
   void testRawClientRocketUpgradeSync(
       HeaderClientChannel::Options options = HeaderClientChannel::Options()) {
-    // enable raw client transport upgrade to rocket
-    THRIFT_FLAG_SET_MOCK(raw_client_rocket_upgrade_enabled_v2, true);
-
     folly::EventBase evb;
     auto socket = folly::AsyncSocket::newSocket(&evb, "::1", port_);
     auto channel =
@@ -96,9 +92,6 @@ class TransportUpgradeTest : public TestSetup {
 
   void testRawClientRocketUpgradeAsync(
       HeaderClientChannel::Options options = HeaderClientChannel::Options()) {
-    // enable raw client transport upgrade to rocket
-    THRIFT_FLAG_SET_MOCK(raw_client_rocket_upgrade_enabled_v2, true);
-
     folly::EventBase evb;
     std::vector<folly::SemiFuture<folly::Unit>> futures;
 
@@ -174,9 +167,6 @@ TEST_F(
 }
 
 TEST_F(TransportUpgradeTest, RawClientRocketUpgradeOneway) {
-  // enable raw client transport upgrade to rocket
-  THRIFT_FLAG_SET_MOCK(raw_client_rocket_upgrade_enabled_v2, true);
-
   EXPECT_CALL(*handler_.get(), noResponse(_)).Times(1);
 
   folly::EventBase evb;
@@ -198,9 +188,6 @@ TEST_F(TransportUpgradeTest, RawClientRocketUpgradeOneway) {
 }
 
 TEST_F(TransportUpgradeTest, RawClientNoUpgrade) {
-  // enable raw client transport upgrade to rocket
-  THRIFT_FLAG_SET_MOCK(raw_client_rocket_upgrade_enabled_v2, true);
-
   folly::EventBase evb;
   auto socket = folly::AsyncSocket::newSocket(&evb, "::1", port_);
   // specifically request no upgrade
@@ -217,9 +204,6 @@ TEST_F(TransportUpgradeTest, RawClientNoUpgrade) {
 }
 
 TEST_F(TransportUpgradeTest, RawClientRocketUpgradeTimeout) {
-  // enable raw client transport upgrade from header to rocket
-  THRIFT_FLAG_SET_MOCK(raw_client_rocket_upgrade_enabled_v2, true);
-
   folly::EventBase evb;
   auto* slowWritingSocket =
       new SlowWritingSocket(&evb, folly::SocketAddress("::1", port_));
@@ -268,9 +252,6 @@ TEST_F(TransportUpgradeTest, RawClientRocketUpgradeTimeout) {
 }
 
 TEST_F(TransportUpgradeTest, Fibers) {
-  // enable raw client transport upgrade from header to rocket
-  THRIFT_FLAG_SET_MOCK(raw_client_rocket_upgrade_enabled_v2, true);
-
   folly::EventBase evb;
   auto& fm = folly::fibers::getFiberManager(evb);
   EXPECT_EQ(

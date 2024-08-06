@@ -1141,6 +1141,36 @@ void DynamicStructInfo::addFieldInfo(
     const detail::TypeInfo* typeInfo) {
   const std::string& fieldName = fieldNames_.emplace_back(name);
   int16_t idx = fieldNames_.size() - 1;
+
+  // In immutable thrift-python, tuples are used as the internal representation
+  // of structs. The first member of the tuple contains the isset flags, while
+  // the remaining members represent each field. Since PyTupleObject utilizes
+  // C's flexible array member feature, its members are allocated contiguously
+  // at the end of the tuple struct, roughly laid out as follows:
+  //
+  // +-----------------------------------+
+  // |        PyTupleObject              |
+  // +-----------------------------------+ -> 0
+  // |  HEADER                           |
+  // +-----------------------------------+
+  // |  size (number of items)           |
+  // +-----------------------------------+ -> kHeadOffset
+  // |  item[0] (PyObject*)(isset flags) |
+  // +-----------------------------------+
+  // |  item[1] (PyObject*)              |
+  // +-----------------------------------+
+  // |  ...                              |
+  // +-----------------------------------+
+  // |  item[n-1] (PyObject*)            |
+  // +-----------------------------------+
+  //
+  // When passing a PyTupleObject to TableBasedSerializer, fields are expected
+  // to be identified by their offset from the start address of the struct.
+  // The following calculates the offset:
+  //
+  // memberOffset = kHeadOffset + ((field-order + 1) * sizeof(PyObject*))
+  // (+1 accounts for the isset flags at the beginning of the tuple)
+
   tableBasedSerializerStructInfo_->fieldInfos[idx] = detail::FieldInfo{
       /* .id */ id,
       /* .qualifier */ qualifier,

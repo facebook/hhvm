@@ -71,6 +71,39 @@ type::Type toType(const protocol::Value& value) {
   }
 }
 
+Value parseValueFromAny(const type::AnyData& any) {
+  if (any.protocol() == type::StandardProtocol::Binary) {
+    BinaryProtocolReader reader;
+    reader.setInput(&any.data());
+    return parseValue(
+        reader,
+        type::toTType(any.type().baseType()),
+        /* string_to_binary */ true);
+  } else if (any.protocol() == type::StandardProtocol::Compact) {
+    CompactProtocolReader reader;
+    reader.setInput(&any.data());
+    return parseValue(
+        reader,
+        type::toTType(any.type().baseType()),
+        /* string_to_binary */ true);
+  } else {
+    // TODO: Support custom protocols?
+    folly::throw_exception<std::runtime_error>(
+        "Unsupported protocol when parsing Any");
+  }
+}
+
+Value parseValueFromAny(const type::AnyStruct& any) {
+  return parseValueFromAny(type::AnyData(any));
+}
+
+Value parseValueFromAnyObject(const Object& anyObject) {
+  type::AnyStruct any;
+  ProtocolValueToThriftValue<type::infer_tag<type::AnyStruct>>{}(
+      anyObject, any);
+  return parseValueFromAny(type::AnyData(std::move(any)));
+}
+
 } // namespace detail
 } // namespace protocol
 } // namespace thrift

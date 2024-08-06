@@ -969,6 +969,15 @@ type::AnyData toAny(
   return type::AnyData{data};
 }
 
+/**
+ * Schemaless conversion from any -> value contained within
+ * Currently supports only compact/binary protocols
+ */
+Value parseValueFromAny(const type::AnyStruct& any);
+Value parseValueFromAny(const type::AnyData& any);
+// anyObject's schema much match that of AnyStruct
+Value parseValueFromAnyObject(const Object& anyObject);
+
 template <typename Tag>
 struct ProtocolValueToThriftValue;
 

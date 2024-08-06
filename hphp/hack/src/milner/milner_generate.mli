@@ -19,5 +19,5 @@ module Type : sig
 
   val show : t -> string
 
-  val mk : depth:int option -> t * Definition.t list
+  val mk : for_alias:bool -> depth:int option -> t * Definition.t list
 end

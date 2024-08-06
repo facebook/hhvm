@@ -83,13 +83,25 @@ module Kind = struct
     | Classish
     | Alias
     | Newtype
+    | TypeConst
     | Case
     | Enum
     | Tuple
     | Shape
-  [@@deriving enum]
+  [@@deriving enum, eq]
 
-  let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
+  let pick ~for_alias =
+    let kinds =
+      List.range ~start:`inclusive ~stop:`inclusive min max
+      |> List.map ~f:(fun i -> of_enum i |> Option.value_exn)
+    in
+    let kinds =
+      if for_alias then
+        List.filter ~f:(fun k -> not @@ equal k TypeConst) kinds
+      else
+        kinds
+    in
+    select kinds
 
   type classish =
     | Class
@@ -110,10 +122,13 @@ module rec Definition : sig
 
   val function_ : name:string -> ret:Type.t -> ret_expr:string -> t
 
+  val typeconst : name:string -> Type.t -> t
+
   val classish :
     name:string ->
     parent:(Kind.classish * string * Type.generic option) option ->
     generic:Type.generic option ->
+    members:t list ->
     Kind.classish ->
     t
 
@@ -136,10 +151,14 @@ end = struct
       (Type.show ret)
       ret_expr
 
+  let typeconst ~name aliased =
+    Format.sprintf "const type %s = %s;" name (Type.show aliased)
+
   let classish
       ~name
       ~(parent : (Kind.classish * string * Type.generic option) option)
       ~(generic : Type.generic option)
+      ~(members : t list)
       kind =
     let parent =
       match parent with
@@ -172,7 +191,15 @@ end = struct
       | Kind.AbstractClass -> "abstract class"
       | Kind.Interface -> "interface"
     in
-    Format.sprintf "%s %s%s %s{}" kind name generic parent
+    let body =
+      if List.is_empty members then
+        "{}"
+      else
+        Format.sprintf
+          "{\n  %s\n}"
+          (List.map ~f:show members |> String.concat ~sep:"\n  ")
+    in
+    Format.sprintf "%s %s%s %s%s" kind name generic parent body
 
   let alias ~name aliased =
     Format.sprintf "type %s = %s;" name (Type.show aliased)
@@ -200,7 +227,7 @@ and Type : sig
 
   val inhabitant_of : t -> string
 
-  val mk : depth:int option -> t * Definition.t list
+  val mk : for_alias:bool -> depth:int option -> t * Definition.t list
 end = struct
   type field = {
     key: string;
@@ -230,6 +257,10 @@ end = struct
     | Newtype of {
         name: string;
         producer: string;
+      }
+    | TypeConst of {
+        name: string;
+        aliased: t;
       }
     | Case of {
         name: string;
@@ -276,6 +307,7 @@ end = struct
     | Mixed
     | Option _
     | Alias _
+    | TypeConst _
     | Case _ ->
       false
 
@@ -331,6 +363,7 @@ end = struct
        | Option ty -> Primitive Primitive.Null :: subtypes_of ty
        | Classish info -> List.concat_map ~f:subtypes_of info.children
        | Alias info -> subtypes_of info.aliased
+       | TypeConst info -> subtypes_of info.aliased
        | Newtype _ -> []
        | Case info -> List.concat_map ~f:subtypes_of info.disjuncts
        | Enum _ -> []
@@ -395,6 +428,7 @@ end = struct
       Format.sprintf "%s%s" name generic
     | Alias info -> info.name
     | Newtype info -> info.name
+    | TypeConst info -> info.name
     | Case info -> info.name
     | Enum info -> info.name
     | Tuple { conjuncts; open_ } ->
@@ -444,6 +478,7 @@ end = struct
         let+ ty = weaken_for_disjointness ty in
         Option ty
       | Alias info -> weaken_for_disjointness info.aliased
+      | TypeConst info -> weaken_for_disjointness info.aliased
       | Newtype _ -> [Mixed]
       | Case { name; disjuncts } ->
         let open List.Let_syntax in
@@ -532,6 +567,7 @@ end = struct
     | Mixed
     | Option _
     | Alias _
+    | TypeConst _
     | Case _ ->
       None
 
@@ -590,7 +626,7 @@ end = struct
     in
     let (generic, generic_defs) =
       if depth <= max_hierarchy_depth && Random.bool () then
-        let (instantiation, defs) = mk ~depth:(Some depth) in
+        let (instantiation, defs) = mk ~for_alias:false ~depth:(Some depth) in
         let is_reified =
           (not Kind.(equal_classish kind Interface)) && Random.bool ()
         in
@@ -601,13 +637,13 @@ end = struct
     let (children, defs) =
       gen_children ~parent:(Some (kind, name, generic)) num_of_children
     in
-    let def = Definition.classish kind ~name ~parent ~generic in
+    let def = Definition.classish kind ~name ~parent ~generic ~members:[] in
     (Classish { name; kind; children; generic }, def :: (generic_defs @ defs))
 
-  and mk ~(depth : int option) =
+  and mk ~for_alias ~(depth : int option) =
     let depth = Option.value ~default:0 depth in
-    let mk () = mk ~depth:(Some depth) in
-    match Kind.pick () with
+    let mk ?(for_alias = false) () = mk ~for_alias ~depth:(Some depth) in
+    match Kind.pick ~for_alias with
     | Kind.Mixed -> (Mixed, [])
     | Kind.Primitive -> (Primitive (Primitive.pick ()), [])
     | Kind.Option ->
@@ -625,11 +661,11 @@ end = struct
     | Kind.Classish -> mk_classish ~parent:None ~depth
     | Kind.Alias ->
       let name = fresh "A" in
-      let (aliased, defs) = mk () in
+      let (aliased, defs) = mk ~for_alias:true () in
       (Alias { name; aliased }, Definition.alias ~name aliased :: defs)
     | Kind.Newtype ->
       let name = fresh "N" in
-      let (aliased, defs) = mk () in
+      let (aliased, defs) = mk ~for_alias:true () in
       let producer = fresh ("mk" ^ name) in
       let newtype_def = Definition.newtype ~name aliased in
       let aliased_expr = inhabitant_of aliased in
@@ -638,11 +674,26 @@ end = struct
         Definition.function_ ~name:producer ~ret:ty ~ret_expr:aliased_expr
       in
       (ty, newtype_def :: newtype_producer_def :: defs)
+    | Kind.TypeConst ->
+      let tc_name = fresh "TC" in
+      let (aliased, defs) = mk () in
+      let typeconst_def = Definition.typeconst ~name:tc_name aliased in
+      let class_name = fresh "CTC" in
+      let class_def =
+        Definition.classish
+          ~name:class_name
+          ~parent:None
+          ~generic:None
+          ~members:[typeconst_def]
+          Kind.Class
+      in
+      let qualified_name = Format.sprintf "%s::%s" class_name tc_name in
+      (TypeConst { name = qualified_name; aliased }, class_def :: defs)
     | Kind.Case ->
       let name = fresh "CT" in
       let rec add_disjuncts (disjuncts, defs) =
         if Random.bool () then
-          let (disjunct, defs') = mk () in
+          let (disjunct, defs') = mk ~for_alias:true () in
           if List.for_all disjuncts ~f:(are_disjoint disjunct) then
             add_disjuncts @@ (disjunct :: disjuncts, defs' @ defs)
           else
@@ -650,7 +701,7 @@ end = struct
         else
           (disjuncts, defs)
       in
-      let (ty, defs) = mk () in
+      let (ty, defs) = mk ~for_alias:true () in
       let (disjuncts, defs) = add_disjuncts ([ty], defs) in
       let case_type_def = Definition.case_type ~name disjuncts in
       (Case { name; disjuncts }, case_type_def :: defs)

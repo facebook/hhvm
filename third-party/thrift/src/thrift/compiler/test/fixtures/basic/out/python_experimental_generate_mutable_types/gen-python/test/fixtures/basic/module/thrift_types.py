@@ -122,6 +122,12 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.basic.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyStruct, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.basic.module.types")
@@ -188,6 +194,12 @@ class Containers(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.basic.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.Containers, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.basic.module.types")
@@ -223,6 +235,12 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.basic.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyDataItem, self)
 
     def _to_py3(self):
         import importlib
@@ -300,6 +318,12 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.basic.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyUnion, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.basic.module.types")
@@ -375,6 +399,12 @@ class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.basic.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyException, self)
 
     def _to_py3(self):
         import importlib
@@ -459,6 +489,12 @@ class MyExceptionWithMessage(metaclass=_fbthrift_python_exceptions.GeneratedErro
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.basic.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyExceptionWithMessage, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.basic.module.types")
@@ -505,6 +541,12 @@ class ReservedKeyword(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.basic.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.ReservedKeyword, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.basic.module.types")
@@ -550,6 +592,12 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.basic.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.UnionToBeRenamed, self)
 
     def _to_py3(self):
         import importlib

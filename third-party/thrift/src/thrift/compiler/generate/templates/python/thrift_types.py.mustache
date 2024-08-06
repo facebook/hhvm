@@ -95,6 +95,14 @@ class {{> structs/unadapted_name}}(metaclass={{!
     {{#struct:legacy_api?}}
     def _to_python(self):
         return self
+{{#program:generate_to_mutable_python_conversion_methods?}}
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("{{program:module_path}}.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.{{> structs/unadapted_name}}, self)
+{{/program:generate_to_mutable_python_conversion_methods?}}
 
     def _to_py3(self):
     {{^program:py3_auto_migrate?}}

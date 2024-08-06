@@ -92,6 +92,12 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.ComplexUnion, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -148,6 +154,12 @@ class ListUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.ListUnion, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -203,6 +215,12 @@ class DataUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.DataUnion, self)
 
     def _to_py3(self):
         import importlib
@@ -270,6 +288,12 @@ class Val(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.Val, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -325,6 +349,12 @@ class ValUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.ValUnion, self)
 
     def _to_py3(self):
         import importlib
@@ -382,6 +412,12 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.VirtualComplexUnion, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -428,6 +464,12 @@ class NonCopyableStruct(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.NonCopyableStruct, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -473,6 +515,12 @@ class NonCopyableUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.NonCopyableUnion, self)
 
     def _to_py3(self):
         import importlib

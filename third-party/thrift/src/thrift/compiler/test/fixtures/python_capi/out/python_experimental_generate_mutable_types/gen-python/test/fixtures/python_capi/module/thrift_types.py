@@ -120,6 +120,12 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyStruct, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
@@ -166,6 +172,12 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyDataItem, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
@@ -201,6 +213,12 @@ class TransitiveDoubler(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.TransitiveDoubler, self)
 
     def _to_py3(self):
         import importlib
@@ -258,6 +276,12 @@ class DoubledPair(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.DoubledPair, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
@@ -314,6 +338,12 @@ class StringPair(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.StringPair, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
@@ -349,6 +379,12 @@ class EmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.EmptyStruct, self)
 
     def _to_py3(self):
         import importlib
@@ -546,6 +582,12 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.PrimitiveStruct, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
@@ -621,6 +663,12 @@ class AdaptedFields(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.AdaptedFields, self)
 
     def _to_py3(self):
         import importlib
@@ -748,6 +796,12 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.ListStruct, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
@@ -853,6 +907,12 @@ class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.SetStruct, self)
 
     def _to_py3(self):
         import importlib
@@ -990,6 +1050,12 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MapStruct, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
@@ -1126,6 +1192,12 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.ComposeStruct, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
@@ -1231,6 +1303,12 @@ class Onion(metaclass=_fbthrift_python_types.UnionMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.Onion, self)
 
     def _to_py3(self):
         import importlib

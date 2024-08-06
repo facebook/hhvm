@@ -366,11 +366,11 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         self.assertIs(w, w._to_python())
 
     def test_to_mutable_python(self) -> None:
-        w = TestStructImmutable(unqualified_string="hello, world!")
-        with self.assertRaisesRegex(
-            AttributeError, "'TestStruct' object has no attribute '_to_mutable_python'"
-        ):
-            w._to_mutable_python()
+        w_immutable = TestStructImmutable(unqualified_string="hello, world!")
+        w_mutable = w_immutable._to_mutable_python()
+        self.assertIsNot(w_immutable, w_mutable)
+        self.assertNotEqual(w_immutable, w_mutable)
+        self.assertEqual(set(w_immutable), set(w_mutable))
 
 
 class ThriftPython_MutableStruct_Test(unittest.TestCase):

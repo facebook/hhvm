@@ -155,6 +155,9 @@ class python_mstch_program : public mstch_program {
             {"program:is_types_file?", &python_mstch_program::is_types_file},
             {"program:generate_mutable_types",
              &python_mstch_program::generate_mutable_types},
+            {"program:generate_to_mutable_python_conversion_methods?",
+             &python_mstch_program::
+                 generate_to_mutable_python_conversion_methods},
         });
     register_has_option("program:import_static?", "import_static");
     gather_included_program_namespaces();
@@ -210,12 +213,12 @@ class python_mstch_program : public mstch_program {
   }
 
   mstch::node base_library_package() {
-    auto option = get_option("base_library_package");
+    std::string option = get_option("base_library_package");
     return option.empty() ? "thrift.python" : option;
   }
 
   mstch::node root_module_prefix() {
-    auto prefix = get_option("root_module_prefix");
+    std::string prefix = get_option("root_module_prefix");
     return prefix.empty() ? "" : prefix + ".";
   }
 
@@ -227,6 +230,10 @@ class python_mstch_program : public mstch_program {
 
   mstch::node generate_mutable_types() {
     return !get_option("generate_mutable_types").empty();
+  }
+
+  mstch::node generate_to_mutable_python_conversion_methods() {
+    return !get_option("generate_to_mutable_python_conversion_methods").empty();
   }
 
  protected:
@@ -1213,6 +1220,13 @@ void t_mstch_python_generator::generate_file(
 }
 
 void t_mstch_python_generator::generate_types() {
+  const bool experimental_generate_mutable_types =
+      has_option("experimental_generate_mutable_types");
+
+  mstch_context_.set_or_erase_option(
+      experimental_generate_mutable_types,
+      "generate_to_mutable_python_conversion_methods",
+      "true");
   generate_file(
       "thrift_types.py",
       IsTypesFile,
@@ -1223,7 +1237,9 @@ void t_mstch_python_generator::generate_types() {
       IsTypesFile,
       false, // generate_mutable_types
       generate_root_path_);
-  if (has_option("experimental_generate_mutable_types")) {
+  mstch_context_.options.erase("generate_to_mutable_python_conversion_methods");
+
+  if (experimental_generate_mutable_types) {
     generate_file(
         "thrift_mutable_types.py",
         IsTypesFile,

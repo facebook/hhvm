@@ -374,10 +374,9 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
 
     def test_to_mutable_python(self) -> None:
         union_immutable = TestUnionImmutable(string_field="hello")
-        with self.assertRaisesRegex(
-            AttributeError, "'TestUnion' object has no attribute '_to_mutable_python'"
-        ):
-            union_immutable._to_mutable_python()
+        union_mutable = union_immutable._to_mutable_python()
+        self.assertNotEqual(union_immutable, union_mutable)
+        self.assertEqual(union_mutable, TestUnionMutable(string_field="hello"))
 
 
 class ThriftPython_MutableUnion_Test(unittest.TestCase):

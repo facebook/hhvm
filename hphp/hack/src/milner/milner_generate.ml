@@ -197,7 +197,10 @@ end = struct
         disjuncts: t list;
       }
     | Enum of { name: string }
-    | Tuple of t list
+    | Tuple of {
+        conjuncts: t list;
+        open_: bool;
+      }
     | Shape of {
         fields: field list;
         open_: bool;
@@ -227,7 +230,8 @@ end = struct
     end
     | Newtype _ -> true
     | Enum _ -> true
-    | Tuple tyl -> List.for_all tyl ~f:is_immediately_inhabited
+    | Tuple { conjuncts; open_ } ->
+      List.for_all conjuncts ~f:is_immediately_inhabited && not open_
     | Shape { fields; open_ = _ } ->
       List.for_all fields ~f:(fun field -> is_immediately_inhabited field.ty)
     | Mixed
@@ -291,10 +295,20 @@ end = struct
        | Newtype _ -> []
        | Case info -> List.concat_map ~f:subtypes_of info.disjuncts
        | Enum _ -> []
-       | Tuple tyl ->
-         List.map ~f:subtypes_of tyl
-         |> List.Cartesian_product.all
-         |> List.map ~f:(fun tyl -> Tuple tyl)
+       | Tuple { conjuncts; open_ } ->
+         let open List.Let_syntax in
+         let* conjuncts =
+           List.map ~f:subtypes_of conjuncts |> List.Cartesian_product.all
+         in
+         let+ open_ =
+           if open_ then
+             (* Here we should be adding new conjuncts, but with the current setup
+                that's too expensive. Need memoization to make it more affordable. *)
+             select_or_id ~pick [true; false]
+           else
+             [false]
+         in
+         Tuple { conjuncts; open_ }
        | Shape { fields; open_ } ->
          let open List.Let_syntax in
          let* fields =
@@ -338,9 +352,18 @@ end = struct
     | Newtype info -> info.name
     | Case info -> info.name
     | Enum info -> info.name
-    | Tuple tyl ->
-      let elements = List.map ~f:show tyl |> String.concat ~sep:", " in
-      Format.sprintf "(%s)" elements
+    | Tuple { conjuncts; open_ } ->
+      let is_nullary = List.length conjuncts = 0 in
+      let conjuncts = List.map ~f:show conjuncts |> String.concat ~sep:", " in
+      let open_ =
+        if open_ && is_nullary then
+          "..."
+        else if open_ then
+          ", ..."
+        else
+          ""
+      in
+      Format.sprintf "(%s%s)" conjuncts open_
     | Shape { fields; open_ } ->
       let is_nullary = List.length fields = 0 in
       let fields = permute_nondet fields in
@@ -385,11 +408,7 @@ end = struct
         in
         Case { name; disjuncts }
       | Enum _ -> [Primitive Primitive.Arraykey]
-      | Tuple _ ->
-        let open List.Let_syntax in
-        let+ n = List.init max_tuple_arity ~f:(fun i -> i + 1) in
-        let tyl = List.init n ~f:(fun _ -> Mixed) in
-        Tuple tyl
+      | Tuple _ -> [Tuple { conjuncts = []; open_ = true }]
       | Shape _ -> [Shape { fields = []; open_ = true }]
       | Mixed
       | Primitive _
@@ -441,8 +460,8 @@ end = struct
     end
     | Newtype info -> Some (info.producer ^ "()")
     | Enum info -> Some (info.name ^ "::A")
-    | Tuple tyl ->
-      List.map ~f:expr_of tyl
+    | Tuple { conjuncts; open_ = _ } ->
+      List.map ~f:expr_of conjuncts
       |> Option.all
       |> Option.map ~f:(fun exprl ->
              String.concat ~sep:", " exprl |> Format.sprintf "tuple(%s)")
@@ -582,10 +601,10 @@ end = struct
       (* Sadly, although nullary tuples can be generated with an expression,
          there is no corresponding denotable type. *)
       let n = geometric_between min_tuple_arity max_tuple_arity in
-      let (tyl, defs) =
+      let (conjuncts, defs) =
         List.init n ~f:(fun _ -> mk ()) |> map_and_collect ~f:Fn.id
       in
-      (Tuple tyl, defs)
+      (Tuple { conjuncts; open_ = false }, defs)
     | Kind.Shape ->
       let keys = choose_nondet shape_keys in
       let mk_field key =

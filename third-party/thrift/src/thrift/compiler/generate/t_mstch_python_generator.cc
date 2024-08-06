@@ -954,7 +954,7 @@ class t_mstch_python_generator : public t_mstch_generator {
   bool should_resolve_typedefs() const override { return true; }
   void set_mstch_factories();
   void generate_file(
-      const std::string& file,
+      const std::string& template_name,
       TypesFile is_types_file,
       bool generate_mutable_types,
       const std::filesystem::path& base);
@@ -1192,55 +1192,57 @@ std::filesystem::path t_mstch_python_generator::package_to_path() {
 }
 
 void t_mstch_python_generator::generate_file(
-    const std::string& file,
+    const std::string& template_name,
     TypesFile is_types_file,
     bool generate_mutable_types,
     const std::filesystem::path& base = {}) {
-  auto program = get_program();
-  const auto& name = program->name();
-  if (is_types_file == IsTypesFile) {
-    mstch_context_.options["is_types_file"] = "";
-  } else {
-    mstch_context_.options.erase("is_types_file");
-  }
-  if (generate_mutable_types) {
-    mstch_context_.options["generate_mutable_types"] = "yes";
-  } else {
-    mstch_context_.options.erase("generate_mutable_types");
-  }
-  auto mstch_program = make_mstch_program_cached(program, mstch_context_);
-  render_to_file(mstch_program, file, base / name / file);
+  t_program* program = get_program();
+  const std::string& program_name = program->name();
+  mstch_context_
+      .set_or_erase_option(is_types_file == IsTypesFile, "is_types_file", "")
+      .set_or_erase_option(
+          generate_mutable_types, "generate_mutable_types", "yes");
+
+  std::shared_ptr<mstch_base> mstch_program =
+      make_mstch_program_cached(program, mstch_context_);
+  render_to_file(
+      mstch_program,
+      template_name,
+      base / program_name / template_name // (output) path
+  );
 }
 
 void t_mstch_python_generator::generate_types() {
-  bool generate_mutable_types = false;
   generate_file(
       "thrift_types.py",
       IsTypesFile,
-      generate_mutable_types,
+      false, // generate_mutable_types
       generate_root_path_);
   generate_file(
       "thrift_types.pyi",
       IsTypesFile,
-      generate_mutable_types,
+      false, // generate_mutable_types
       generate_root_path_);
   if (has_option("experimental_generate_mutable_types")) {
-    generate_mutable_types = true;
     generate_file(
         "thrift_mutable_types.py",
         IsTypesFile,
-        generate_mutable_types,
+        true, // generate_mutable_types
         generate_root_path_);
     generate_file(
         "thrift_mutable_types.pyi",
         IsTypesFile,
-        generate_mutable_types,
+        true, // generate_mutable_types
         generate_root_path_);
   }
 }
 
 void t_mstch_python_generator::generate_metadata() {
-  generate_file("thrift_metadata.py", IsTypesFile, false, generate_root_path_);
+  generate_file(
+      "thrift_metadata.py",
+      IsTypesFile,
+      false, // generate_mutable_types
+      generate_root_path_);
 }
 
 void t_mstch_python_generator::generate_clients() {

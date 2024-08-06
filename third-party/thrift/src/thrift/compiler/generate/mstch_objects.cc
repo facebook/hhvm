@@ -686,6 +686,16 @@ mstch::node mstch_program::constants() {
   return a;
 }
 
+mstch_context& mstch_context::set_or_erase_option(
+    bool condition, const std::string& key, const std::string& value) {
+  if (condition) {
+    options[key] = value;
+  } else {
+    options.erase(key);
+  }
+  return *this;
+}
+
 } // namespace compiler
 } // namespace thrift
 } // namespace apache

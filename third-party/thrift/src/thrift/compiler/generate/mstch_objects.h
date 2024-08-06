@@ -234,6 +234,18 @@ struct mstch_context : mstch_factories {
   std::unordered_map<std::string, std::shared_ptr<mstch_base>> struct_cache;
   std::unordered_map<std::string, std::shared_ptr<mstch_base>> service_cache;
   std::unordered_map<std::string, std::shared_ptr<mstch_base>> program_cache;
+
+  /**
+   * Sets or erases the option with the given `key` depending on the
+   * `condition`.
+   *
+   * If `condition` is true, `options[key]` will be set to the given `value`.
+   * Otherwise, the entry for `key` in `options` (if any) is removed.
+   *
+   * @return `this` (for chaining).
+   */
+  mstch_context& set_or_erase_option(
+      bool condition, const std::string& key, const std::string& value);
 };
 
 std::shared_ptr<mstch_base> make_mstch_program_cached(

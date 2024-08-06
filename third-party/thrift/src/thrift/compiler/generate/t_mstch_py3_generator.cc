@@ -1279,7 +1279,7 @@ class t_mstch_py3_generator : public t_mstch_generator {
   void set_mstch_factories();
   void generate_init_files();
   void generate_file(
-      const std::string& file,
+      const std::string& template_name,
       TypesFile is_types_file,
       const std::filesystem::path& base);
   void generate_types();
@@ -1342,18 +1342,22 @@ std::filesystem::path t_mstch_py3_generator::package_to_path() {
 }
 
 void t_mstch_py3_generator::generate_file(
-    const std::string& file,
+    const std::string& template_name,
     TypesFile is_types_file,
     const std::filesystem::path& base = {}) {
-  auto program = get_program();
-  const auto& name = program->name();
-  if (is_types_file == TypesFile::IsTypesFile) {
-    mstch_context_.options["is_types_file"] = "";
-  } else {
-    mstch_context_.options.erase("is_types_file");
-  }
-  auto mstch_program = make_mstch_program_cached(program, mstch_context_);
-  render_to_file(mstch_program, file, base / name / file);
+  t_program* program = get_program();
+  const std::string& program_name = program->name();
+
+  mstch_context_.set_or_erase_option(
+      is_types_file == TypesFile::IsTypesFile, "is_types_file", "");
+
+  std::shared_ptr<mstch_base> mstch_program =
+      make_mstch_program_cached(program, mstch_context_);
+  render_to_file(
+      mstch_program,
+      template_name,
+      base / program_name / template_name // (output) path
+  );
 }
 
 void t_mstch_py3_generator::generate_types() {

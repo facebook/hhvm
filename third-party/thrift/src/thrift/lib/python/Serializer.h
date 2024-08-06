@@ -20,10 +20,6 @@
 
 #include <folly/io/IOBuf.h>
 
-#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
-#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
-#include <thrift/lib/cpp2/protocol/JSONProtocol.h>
-#include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 #include <thrift/lib/python/types.h>
 
 namespace apache {
@@ -56,43 +52,13 @@ using apache::thrift::protocol::PROTOCOL_TYPES;
 std::unique_ptr<folly::IOBuf> serialize(
     const DynamicStructInfo& dynamicStructInfo,
     const PyObject* object,
-    PROTOCOL_TYPES protocol) {
-  switch (protocol) {
-    case PROTOCOL_TYPES::T_COMPACT_PROTOCOL:
-      return serialize<CompactProtocolWriter>(dynamicStructInfo, object);
-    case PROTOCOL_TYPES::T_BINARY_PROTOCOL:
-      return serialize<BinaryProtocolWriter>(dynamicStructInfo, object);
-    case PROTOCOL_TYPES::T_SIMPLE_JSON_PROTOCOL:
-      return serialize<SimpleJSONProtocolWriter>(dynamicStructInfo, object);
-    // Deprecated, remove as soon as thrift-python migration complete
-    case PROTOCOL_TYPES::T_JSON_PROTOCOL:
-      return serialize<JSONProtocolWriter>(dynamicStructInfo, object);
-    default:
-      throw TProtocolException(
-          TProtocolException::NOT_IMPLEMENTED, "protocol not supported yet");
-  }
-}
+    PROTOCOL_TYPES protocol);
 
 size_t deserialize(
     const DynamicStructInfo& dynamicStructInfo,
     const folly::IOBuf* buf,
     PyObject* object,
-    PROTOCOL_TYPES protocol) {
-  switch (protocol) {
-    case PROTOCOL_TYPES::T_COMPACT_PROTOCOL:
-      return deserialize<CompactProtocolReader>(dynamicStructInfo, buf, object);
-    case PROTOCOL_TYPES::T_BINARY_PROTOCOL:
-      return deserialize<BinaryProtocolReader>(dynamicStructInfo, buf, object);
-    case PROTOCOL_TYPES::T_SIMPLE_JSON_PROTOCOL:
-      return deserialize<SimpleJSONProtocolReader>(
-          dynamicStructInfo, buf, object);
-    case PROTOCOL_TYPES::T_JSON_PROTOCOL:
-      return deserialize<JSONProtocolReader>(dynamicStructInfo, buf, object);
-    default:
-      throw TProtocolException(
-          TProtocolException::NOT_IMPLEMENTED, "protocol not supported yet");
-  }
-}
+    PROTOCOL_TYPES protocol);
 
 } // namespace python
 } // namespace thrift

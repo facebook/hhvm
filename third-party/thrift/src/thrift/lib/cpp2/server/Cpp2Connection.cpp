@@ -34,7 +34,6 @@
 #include <thrift/lib/cpp2/transport/core/SendCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketRoutingHandler.h>
 
-THRIFT_FLAG_DEFINE_bool(server_rocket_upgrade_enabled, true);
 THRIFT_FLAG_DEFINE_bool(server_header_reject_http, true);
 THRIFT_FLAG_DEFINE_bool(server_header_reject_framed, true);
 THRIFT_FLAG_DEFINE_bool(server_header_reject_unframed, true);
@@ -464,48 +463,37 @@ void Cpp2Connection::requestReceived(
           "Rocket upgrade attempted but RocketRoutingHandler not found");
       return;
     }
-    if (THRIFT_FLAG(server_rocket_upgrade_enabled)) {
-      ResponsePayload response;
-      switch (protoId) {
-        case apache::thrift::protocol::T_BINARY_PROTOCOL:
-          response = upgradeToRocketReply<apache::thrift::BinaryProtocolWriter>(
-              meta.seqId);
-          break;
-        case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-          response =
-              upgradeToRocketReply<apache::thrift::CompactProtocolWriter>(
-                  meta.seqId);
-          break;
-        default:
-          LOG(DFATAL) << "Unsupported protocol found";
-          // if protocol is neither binary or compact, we want to kill the
-          // request and abort upgrade
-          killRequest(
-              std::move(hreq),
-              TApplicationException::TApplicationExceptionType::
-                  INVALID_PROTOCOL,
-              kUnknownErrorCode,
-              "invalid protocol used");
-          return;
-      }
-
-      hreq->sendReply(
-          std::move(response),
-          new TransportUpgradeSendCallback(
-              transport_,
-              context_.getPeerAddress(),
-              getWorker(),
-              this,
-              channel_.get()));
-      return;
-    } else {
-      killRequest(
-          std::move(hreq),
-          TApplicationException::TApplicationExceptionType::UNKNOWN_METHOD,
-          kMethodUnknownErrorCode,
-          "Rocket upgrade disabled");
-      return;
+    ResponsePayload response;
+    switch (protoId) {
+      case apache::thrift::protocol::T_BINARY_PROTOCOL:
+        response = upgradeToRocketReply<apache::thrift::BinaryProtocolWriter>(
+            meta.seqId);
+        break;
+      case apache::thrift::protocol::T_COMPACT_PROTOCOL:
+        response = upgradeToRocketReply<apache::thrift::CompactProtocolWriter>(
+            meta.seqId);
+        break;
+      default:
+        LOG(DFATAL) << "Unsupported protocol found";
+        // if protocol is neither binary or compact, we want to kill the
+        // request and abort upgrade
+        killRequest(
+            std::move(hreq),
+            TApplicationException::TApplicationExceptionType::INVALID_PROTOCOL,
+            kUnknownErrorCode,
+            "invalid protocol used");
+        return;
     }
+
+    hreq->sendReply(
+        std::move(response),
+        new TransportUpgradeSendCallback(
+            transport_,
+            context_.getPeerAddress(),
+            getWorker(),
+            this,
+            channel_.get()));
+    return;
   }
 
   if ((worker_->getServer()->getLegacyTransport() ==

@@ -99,7 +99,6 @@ using namespace std::literals;
 using folly::test::find_resource;
 using std::string;
 
-THRIFT_FLAG_DECLARE_bool(server_rocket_upgrade_enabled);
 THRIFT_FLAG_DECLARE_string(rocket_frame_parser);
 DECLARE_int32(thrift_cpp2_protocol_reader_string_limit);
 
@@ -250,8 +249,8 @@ TEST(ThriftServer, DefaultCompressionTest) {
 
   // no compression if client does not compress/send preference
   auto socket = folly::AsyncSocket::newSocket(&base, *sst.getAddress());
-  TestServiceAsyncClient client(
-      HeaderClientChannel::newChannel(std::move(socket)));
+  TestServiceAsyncClient client(HeaderClientChannel::newChannel(
+      HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
   client.sendResponse(std::make_unique<Callback>(false, 0), 64);
   base.loop();
 
@@ -275,8 +274,8 @@ TEST(ThriftServer, HeaderTest) {
   folly::EventBase base;
   auto socket = folly::AsyncSocket::newSocket(&base, *sst.getAddress());
 
-  TestServiceAsyncClient client(
-      HeaderClientChannel::newChannel(std::move(socket)));
+  TestServiceAsyncClient client(HeaderClientChannel::newChannel(
+      HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
 
   RpcOptions options;
   // Set it as a header directly so the client channel won't set a
@@ -408,7 +407,8 @@ void doLoadHeaderTest(bool isRocket) {
     if (!isRocket) {
       return runner.template newStickyClient<TestServiceAsyncClient>(
           folly::getGlobalCPUExecutor().get(), [](auto socket) mutable {
-            return HeaderClientChannel::newChannel(std::move(socket));
+            return HeaderClientChannel::newChannel(
+                HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket));
           });
     } else {
       return runner.template newStickyClient<TestServiceAsyncClient>(
@@ -1048,7 +1048,8 @@ class HeaderOrRocketTest : public testing::Test {
   ClientChannel::Ptr makeChannel(folly::AsyncTransport::UniquePtr socket) {
     auto channel = [&]() -> ClientChannel::Ptr {
       if (transport == TransportType::Header) {
-        return HeaderClientChannel::newChannel(std::move(socket));
+        return HeaderClientChannel::newChannel(
+            HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket));
       } else {
         return RocketClientChannel::newChannel(std::move(socket));
       }
@@ -2824,8 +2825,8 @@ TEST(ThriftServer, SSLRequiredRejectsPlaintext) {
 
   folly::EventBase base;
   auto socket = folly::AsyncSocket::newSocket(&base, *sst.getAddress());
-  TestServiceAsyncClient client(
-      HeaderClientChannel::newChannel(std::move(socket)));
+  TestServiceAsyncClient client(HeaderClientChannel::newChannel(
+      HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
 
   std::string response;
   EXPECT_THROW(client.sync_sendResponse(response, 64);, TTransportException);
@@ -2939,8 +2940,8 @@ TEST(ThriftServer, SSLRequiredAllowsLocalPlaintext) {
   auto port = sst.getAddress()->getPort();
   folly::SocketAddress loopback("::1", port);
   auto socket = folly::AsyncSocket::newSocket(&base, loopback);
-  TestServiceAsyncClient client(
-      HeaderClientChannel::newChannel(std::move(socket)));
+  TestServiceAsyncClient client(HeaderClientChannel::newChannel(
+      HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
 
   std::string response;
   client.sync_sendResponse(response, 64);
@@ -2964,8 +2965,8 @@ TEST(ThriftServer, SSLRequiredLoopbackUsesSSL) {
   auto sslSock = TAsyncSSLSocket::newSocket(ctx, &base);
   sslSock->connect(nullptr /* connect callback */, loopback);
 
-  TestServiceAsyncClient client(
-      HeaderClientChannel::newChannel(std::move(sslSock)));
+  TestServiceAsyncClient client(HeaderClientChannel::newChannel(
+      HeaderClientChannel::WithoutRocketUpgrade{}, std::move(sslSock)));
 
   std::string response;
   client.sync_sendResponse(response, 64);
@@ -2983,8 +2984,8 @@ TEST(ThriftServer, SSLPermittedAcceptsPlaintextAndSSL) {
   {
     SCOPED_TRACE("Plaintext");
     auto socket = folly::AsyncSocket::newSocket(&base, *sst.getAddress());
-    TestServiceAsyncClient client(
-        HeaderClientChannel::newChannel(std::move(socket)));
+    TestServiceAsyncClient client(HeaderClientChannel::newChannel(
+        HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
 
     std::string response;
     client.sync_sendResponse(response, 64);
@@ -2998,8 +2999,8 @@ TEST(ThriftServer, SSLPermittedAcceptsPlaintextAndSSL) {
     auto sslSock = TAsyncSSLSocket::newSocket(ctx, &base);
     sslSock->connect(nullptr /* connect callback */, *sst.getAddress());
 
-    TestServiceAsyncClient client(
-        HeaderClientChannel::newChannel(std::move(sslSock)));
+    TestServiceAsyncClient client(HeaderClientChannel::newChannel(
+        HeaderClientChannel::WithoutRocketUpgrade{}, std::move(sslSock)));
 
     std::string response;
     client.sync_sendResponse(response, 64);
@@ -3028,8 +3029,8 @@ TEST(ThriftServer, ClientOnlyTimeouts) {
 
   folly::EventBase base;
   auto socket = folly::AsyncSocket::newSocket(&base, *st.getAddress());
-  TestServiceAsyncClient client(
-      HeaderClientChannel::newChannel(std::move(socket)));
+  TestServiceAsyncClient client(HeaderClientChannel::newChannel(
+      HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
 
   for (bool clientOnly : {false, true}) {
     for (bool shouldTimeOut : {true, false}) {
@@ -3380,8 +3381,6 @@ TEST(ThriftServer, RocketOverSSLNoALPN) {
 }
 
 TEST(ThriftServer, HeaderToRocketUpgradeOverTLS13) {
-  THRIFT_FLAG_SET_MOCK(server_rocket_upgrade_enabled, true);
-
   auto server = TestThriftServerFactory<TestInterface>().create();
   server->setSSLPolicy(SSLPolicy::REQUIRED);
 
@@ -3723,7 +3722,6 @@ TEST(ThriftServer, PerConnectionSocketOptions) {
 }
 
 TEST(ThriftServer, RocketOnly) {
-  THRIFT_FLAG_SET_MOCK(server_rocket_upgrade_enabled, true);
   TestThriftServerFactory<TestInterface> factory;
   auto serv = factory.create();
   ScopedServerThread sst(serv);
@@ -3762,7 +3760,6 @@ TEST(ThriftServer, RocketOnly) {
 }
 
 TEST(ThriftServer, DisableHeaderReject) {
-  THRIFT_FLAG_SET_MOCK(server_rocket_upgrade_enabled, true);
   TestThriftServerFactory<TestInterface> factory;
   auto serv = factory.create();
   ScopedServerThread sst(serv);
@@ -3854,6 +3851,7 @@ TEST(ThriftServer, acceptConnection) {
       std::make_unique<TestServiceAsyncClient>(PooledRequestChannel::newChannel(
           [fd = fds_header[1]](folly::EventBase& evb) {
             return HeaderClientChannel::newChannel(
+                HeaderClientChannel::WithoutRocketUpgrade{},
                 folly::AsyncSocket::newSocket(&evb, fd));
           },
           1));

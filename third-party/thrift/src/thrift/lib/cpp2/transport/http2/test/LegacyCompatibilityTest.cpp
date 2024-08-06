@@ -41,6 +41,8 @@ class LegacyCompatibilityTest : public testing::Test {
     FLAGS_transport = "legacy-http2"; // client's transport
 
     compatibilityTest_ = std::make_unique<TransportCompatibilityTest>();
+    // HTTP transport is not expected to upgrade to Rocket
+    compatibilityTest_->setTransportUpgradeExpected(false);
     compatibilityTest_->addRoutingHandler(
         createHTTP2RoutingHandler(compatibilityTest_->getServer()));
     compatibilityTest_->startServer();

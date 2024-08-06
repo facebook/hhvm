@@ -40,6 +40,8 @@ class RocketCompatibilityTest : public testing::Test {
     FLAGS_transport = "rocket";
 
     compatibilityTest_ = std::make_unique<TransportCompatibilityTest>();
+    // already rocket, no upgrade expected
+    compatibilityTest_->setTransportUpgradeExpected(false);
     compatibilityTest_->startServer();
   }
 

@@ -16,6 +16,8 @@
 
 #include <thrift/lib/cpp2/server/Cpp2Connection.h>
 
+#include <algorithm>
+
 #include <folly/Overload.h>
 
 #include <thrift/lib/cpp/transport/THeader.h>
@@ -445,9 +447,23 @@ void Cpp2Connection::requestReceived(
   const auto& meta = msgBegin.metadata;
 
   // Transport upgrade: check if client requested transport upgrade from header
-  // to rocket. If yes, reply immediately and upgrade the transport after
-  // sending the reply.
+  // to rocket. If yes, check if we support Rocket, then reply immediately and
+  // upgrade the transport after sending the reply.
   if (methodName == "upgradeToRocket") {
+    auto handlers = worker_->getServer()->getRoutingHandlers();
+    bool hasRocketSupport =
+        std::any_of(handlers->begin(), handlers->end(), [](auto& handler) {
+          return dynamic_cast<RocketRoutingHandler*>(handler.get()) != nullptr;
+        });
+    // We check this again in TransportUpgradeSendCallback::messageSent.
+    if (!hasRocketSupport) {
+      killRequest(
+          std::move(hreq),
+          TApplicationException::TApplicationExceptionType::UNKNOWN_METHOD,
+          kMethodUnknownErrorCode,
+          "Rocket upgrade attempted but RocketRoutingHandler not found");
+      return;
+    }
     if (THRIFT_FLAG(server_rocket_upgrade_enabled)) {
       ResponsePayload response;
       switch (protoId) {

@@ -325,6 +325,26 @@ CO_TEST_P(ClientInterceptorTestP, OnResponseException) {
   EXPECT_EQ(interceptor3->onResponseCount, 1);
 }
 
+CO_TEST_P(
+    ClientInterceptorTestP, OnResponseExceptionSwallowsApplicationException) {
+  auto interceptor =
+      std::make_shared<ClientInterceptorThatThrowsOnResponse>("Interceptor1");
+  auto client = makeClient(makeInterceptorsList(interceptor));
+
+  EXPECT_THROW(
+      {
+        try {
+          co_await client->echo("throw");
+        } catch (const apache::thrift::ClientInterceptorException& ex) {
+          EXPECT_THAT(std::string(ex.what()), HasSubstr("[Interceptor1]"));
+          throw;
+        }
+      },
+      apache::thrift::ClientInterceptorException);
+  EXPECT_EQ(interceptor->onRequestCount, 1);
+  EXPECT_EQ(interceptor->onResponseCount, 1);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     ClientInterceptorTestP,
     ClientInterceptorTestP,

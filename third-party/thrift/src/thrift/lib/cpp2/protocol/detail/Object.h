@@ -48,9 +48,6 @@ struct MaskedDecodeResult {
   MaskedProtocolData excluded;
 };
 
-template <class Protocol>
-std::unique_ptr<folly::IOBuf> serializeValue(const Value& val);
-
 namespace detail {
 
 template <typename C, typename T>
@@ -145,6 +142,13 @@ struct ValueHelper<type::map<K, V>> {
 
 template <typename T, typename Tag>
 struct ValueHelper<type::cpp_type<T, Tag>> : ValueHelper<Tag> {};
+
+template <typename TT, typename T = type::native_type<TT>>
+Value asValueStruct(T&& value) {
+  Value result;
+  ValueHelper<TT>::set(result, std::forward<T>(value));
+  return result;
+}
 
 class BaseObjectAdapter {
  public:
@@ -955,6 +959,20 @@ void serializeValue(
   }
 }
 
+template <class Protocol>
+void serializeValue(const Value& val, folly::IOBufQueue& queue) {
+  Protocol prot;
+  prot.setOutput(&queue);
+  serializeValue(prot, val);
+}
+
+template <class Protocol>
+std::unique_ptr<folly::IOBuf> serializeValue(const Value& val) {
+  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
+  serializeValue<Protocol>(val, queue);
+  return queue.move();
+}
+
 type::Type toType(const protocol::Value& value);
 
 template <class ProtocolWriter>
@@ -964,8 +982,7 @@ type::AnyData toAny(
   type::SemiAny data;
   data.type() = toType(value);
   data.protocol() = protocol;
-  data.data() = std::move(
-      *::apache::thrift::protocol::serializeValue<ProtocolWriter>(value));
+  data.data() = std::move(*serializeValue<ProtocolWriter>(value));
   return type::AnyData{data};
 }
 

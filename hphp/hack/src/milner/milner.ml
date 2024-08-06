@@ -36,7 +36,7 @@ let init_table contents placeholder =
 let generate_tables template =
   (* Farm the type placeholders from the template and randomly generate types *)
   let ty_table = init_table template type_regexp in
-  let ty_table = Hashtbl.map ty_table ~f:(fun _ -> Gen.Type.mk ()) in
+  let ty_table = Hashtbl.map ty_table ~f:(fun _ -> Gen.Type.mk ~depth:None) in
 
   (* Generate expressions that conform to the types in the type table.
      If there are expression placeholders without a corresponding type, generate
@@ -44,7 +44,8 @@ let generate_tables template =
   let expr_table = init_table template expr_regexp in
   let gen_expr_from_ty_table ~key ~data:_ =
     let (ty, _) =
-      Hashtbl.find ty_table key |> Option.value_or_thunk ~default:Gen.Type.mk
+      Hashtbl.find ty_table key
+      |> Option.value_or_thunk ~default:(fun () -> Gen.Type.mk ~depth:None)
     in
     Gen.Type.inhabitant_of ty
   in

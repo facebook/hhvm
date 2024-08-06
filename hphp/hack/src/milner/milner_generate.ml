@@ -8,7 +8,7 @@
 
 open Hh_prelude
 
-let max_hierarchy_depth = 3
+let max_hierarchy_depth = 2
 
 let max_branching_factor = 2
 
@@ -111,7 +111,11 @@ module rec Definition : sig
   val function_ : name:string -> ret:Type.t -> ret_expr:string -> t
 
   val classish :
-    name:string -> parent:(Kind.classish * string) option -> Kind.classish -> t
+    name:string ->
+    parent:(Kind.classish * string * Type.t option) option ->
+    has_generic:bool ->
+    Kind.classish ->
+    t
 
   val alias : name:string -> Type.t -> t
 
@@ -132,19 +136,35 @@ end = struct
       (Type.show ret)
       ret_expr
 
-  let classish ~name ~parent kind =
+  let classish ~name ~parent ~has_generic kind =
     let parent =
       match parent with
+      | Some (parent_kind, name, generic) -> begin
+        let generic =
+          match generic with
+          | Some generic -> Format.sprintf "<%s>" (Type.show generic)
+          | None -> ""
+        in
+        match parent_kind with
+        | Kind.Interface when not (Kind.equal_classish kind Kind.Interface) ->
+          Format.sprintf "implements %s%s " name generic
+        | _ -> Format.sprintf "extends %s%s " name generic
+      end
       | None -> ""
-      | Some (Kind.Interface, name)
-        when not (Kind.equal_classish kind Kind.Interface) ->
-        Format.sprintf "implements %s " name
-      | Some (_, name) -> Format.sprintf "extends %s " name
     in
-    match kind with
-    | Kind.Class -> Format.sprintf "class %s %s{}" name parent
-    | Kind.AbstractClass -> Format.sprintf "abstract class %s %s{}" name parent
-    | Kind.Interface -> Format.sprintf "interface %s %s{}" name parent
+    let generic =
+      if has_generic then
+        "<T>"
+      else
+        ""
+    in
+    let kind =
+      match kind with
+      | Kind.Class -> "class"
+      | Kind.AbstractClass -> "abstract class"
+      | Kind.Interface -> "interface"
+    in
+    Format.sprintf "%s %s%s %s{}" kind name generic parent
 
   let alias ~name aliased =
     Format.sprintf "type %s = %s;" name (Type.show aliased)
@@ -167,7 +187,7 @@ and Type : sig
 
   val inhabitant_of : t -> string
 
-  val mk : unit -> t * Definition.t list
+  val mk : depth:int option -> t * Definition.t list
 end = struct
   type field = {
     key: string;
@@ -183,6 +203,7 @@ end = struct
         name: string;
         kind: Kind.classish;
         children: t list;
+        generic: t option;
       }
     | Alias of {
         name: string;
@@ -347,7 +368,13 @@ end = struct
       | Num -> "num"
     end
     | Option ty -> "?" ^ show ty
-    | Classish info -> info.name
+    | Classish { name; generic; children = _; kind = _ } ->
+      let generic =
+        match generic with
+        | Some generic -> Format.sprintf "<%s>" (show generic)
+        | None -> ""
+      in
+      Format.sprintf "%s%s" name generic
     | Alias info -> info.name
     | Newtype info -> info.name
     | Case info -> info.name
@@ -456,7 +483,14 @@ end = struct
       | Kind.AbstractClass
       | Kind.Interface ->
         None
-      | Kind.Class -> Some ("new " ^ info.name ^ "()")
+      | Kind.Class ->
+        let generic =
+          match info.generic with
+          | Some generic when Random.bool () ->
+            Format.sprintf "<%s>" (Type.show generic)
+          | _ -> ""
+        in
+        Some (Format.sprintf "new %s%s()" info.name generic)
     end
     | Newtype info -> Some (info.producer ^ "()")
     | Enum info -> Some (info.name ^ "::A")
@@ -494,22 +528,23 @@ end = struct
            ^ show ty
            ^ " but it is uninhabitaed. This indicates bug in `milner`.")
 
-  let rec mk_classish ~parent ~depth =
+  let rec mk_classish
+      ~(parent : (Kind.classish * string * Type.t option) option) ~(depth : int)
+      =
     let kind =
       if depth > max_hierarchy_depth then
         Kind.Class
       else
         match parent with
-        | Some (Kind.(Class | AbstractClass), _) ->
+        | Some (Kind.(Class | AbstractClass), _, _) ->
           select [Kind.Class; Kind.AbstractClass]
-        | Some (Kind.Interface, _)
+        | Some (Kind.Interface, _, _)
         | None ->
           Kind.pick_classish ()
     in
     let gen_children ~parent n =
       List.init n ~f:(fun _ -> mk_classish ~parent ~depth:(depth + 1))
-      |> List.fold ~init:([], []) ~f:(fun (tys, defss) (ty, defs) ->
-             (ty :: tys, defs @ defss))
+      |> map_and_collect ~f:Fn.id
     in
     let (name, num_of_children) =
       match kind with
@@ -535,13 +570,28 @@ end = struct
         in
         (name, num_of_children)
     in
-    let (children, defs) =
-      gen_children ~parent:(Some (kind, name)) num_of_children
+    let (generic, generic_defs) =
+      if depth <= max_hierarchy_depth && Random.bool () then
+        let (ty, defs) = mk ~depth:(Some depth) in
+        (Some ty, defs)
+      else
+        (None, [])
     in
-    let def = Definition.classish kind ~name ~parent in
-    (Classish { name; kind; children }, def :: defs)
+    let (children, defs) =
+      gen_children ~parent:(Some (kind, name, generic)) num_of_children
+    in
+    let def =
+      Definition.classish
+        kind
+        ~name
+        ~parent
+        ~has_generic:(Option.is_some generic)
+    in
+    (Classish { name; kind; children; generic }, def :: (generic_defs @ defs))
 
-  let rec mk () =
+  and mk ~(depth : int option) =
+    let depth = Option.value ~default:0 depth in
+    let mk () = mk ~depth:(Some depth) in
     match Kind.pick () with
     | Kind.Mixed -> (Mixed, [])
     | Kind.Primitive -> (Primitive (Primitive.pick ()), [])
@@ -557,7 +607,7 @@ end = struct
       in
       let (ty, defs) = candidate () in
       (Option ty, defs)
-    | Kind.Classish -> mk_classish ~parent:None ~depth:0
+    | Kind.Classish -> mk_classish ~parent:None ~depth
     | Kind.Alias ->
       let name = fresh "A" in
       let (aliased, defs) = mk () in

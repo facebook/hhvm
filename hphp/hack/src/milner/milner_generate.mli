@@ -19,5 +19,5 @@ module Type : sig
 
   val show : t -> string
 
-  val mk : unit -> t * Definition.t list
+  val mk : depth:int option -> t * Definition.t list
 end

@@ -111,7 +111,9 @@ std::string ConnectionOptions::getDisplayString() const {
 }
 
 Operation::Operation(ConnectionProxy&& safe_conn)
-    : state_(OperationState::Unstarted),
+    : EventHandler(safe_conn->mysql_client_->getEventBase()),
+      AsyncTimeout(safe_conn->mysql_client_->getEventBase()),
+      state_(OperationState::Unstarted),
       result_(OperationResult::Unknown),
       conn_proxy_(std::move(safe_conn)),
       mysql_errno_(0),
@@ -152,8 +154,8 @@ void Operation::waitForSocketActionable() {
 
   auto leftUs = timeout_ - stopwatch_->elapsed();
   auto leftMs = std::chrono::duration_cast<std::chrono::milliseconds>(leftUs);
-  conn()->socketHandler()->scheduleTimeout(leftMs.count());
-  conn()->socketHandler()->registerHandler(event_mask);
+  scheduleTimeout(leftMs.count());
+  registerHandler(event_mask);
 }
 
 void Operation::cancel() {
@@ -187,6 +189,20 @@ void Operation::cancel() {
           this, &Operation::completeOperation, OperationResult::Cancelled)) {
     // if a strange error happen in EventBase , mark it cancelled now
     completeOperationInner(OperationResult::Cancelled);
+  }
+}
+
+void Operation::handlerReady(uint16_t /*events*/) noexcept {
+  DCHECK(conn()->isInEventBaseThread());
+  CHECK_THROW(
+      state_ != OperationState::Completed &&
+          state_ != OperationState::Unstarted,
+      db::OperationStateException);
+
+  if (state() == OperationState::Cancelling) {
+    cancel();
+  } else {
+    invokeSocketActionable();
   }
 }
 
@@ -247,8 +263,8 @@ void Operation::completeOperationInner(OperationResult result) {
     conn()->close();
   }
 
-  conn()->socketHandler()->unregisterHandler();
-  conn()->socketHandler()->cancelTimeout();
+  unregisterHandler();
+  cancelTimeout();
 
   if (callbacks_.post_operation_callback_) {
     callbacks_.post_operation_callback_(*this);
@@ -568,8 +584,8 @@ void ConnectOperation::attemptFailed(OperationResult result) {
 
   tcp_timeout_handler_.cancelTimeout();
 
-  conn()->socketHandler()->unregisterHandler();
-  conn()->socketHandler()->cancelTimeout();
+  unregisterHandler();
+  cancelTimeout();
   conn()->close();
 
   // Adjust timeout
@@ -619,8 +635,6 @@ void ConnectOperation::specializedRunImpl() {
   if (conn_options_.getCertValidationCallback()) {
     conn()->setCertValidatorCallback(mysqlCertValidator, this);
   }
-
-  conn()->socketHandler()->setOperation(this);
 
   // If the tcp timeout value is not set in conn options, use the default value
   auto timeout = chrono::duration_cast<chrono::milliseconds>(
@@ -689,14 +703,13 @@ void ConnectOperation::socketActionable() {
       attemptFailed(OperationResult::Failed);
     } else if (status == DONE) {
       auto socket = folly::NetworkSocket::fromFd(fd);
-      conn()->socketHandler()->changeHandlerFD(socket);
+      changeHandlerFD(socket);
       conn()->mysqlConnection()->setConnectionContext(connection_context_);
       conn()->mysqlConnection()->connectionOpened();
       logThreadBlockTimeGuard.reset();
       attemptSucceeded(OperationResult::Succeeded);
     } else {
-      conn()->socketHandler()->changeHandlerFD(
-          folly::NetworkSocket::fromFd(fd));
+      changeHandlerFD(folly::NetworkSocket::fromFd(fd));
       waitForSocketActionable();
     }
   }
@@ -1071,6 +1084,9 @@ void FetchOperation::socketActionable() {
   auto& handler = conn()->client()->getMysqlHandler();
   auto& internalConn = conn()->getInternalConnection();
 
+  // Add the socket to the FetchOperation so that we can wait on alerts
+  changeHandlerFD(folly::NetworkSocket::fromFd(conn()->getSocketDescriptor()));
+
   // This loop runs the fetch actions required to successfully execute query,
   // request next results, fetch results, identify errors and complete operation
   // and queries.
@@ -1248,7 +1264,7 @@ void FetchOperation::socketActionable() {
     // It's not necessary to unregister the socket event,  so just cancel the
     // timeout and wait for `resume` to be called.
     if (active_fetch_action_ == FetchAction::WaitForConsumer) {
-      conn()->socketHandler()->cancelTimeout();
+      cancelTimeout();
       break;
     }
   }
@@ -1707,8 +1723,7 @@ void SpecialOperation::specializedTimeoutTriggered() {
 }
 
 SpecialOperation* SpecialOperation::specializedRun() {
-  conn()->socketHandler()->changeHandlerFD(
-      folly::NetworkSocket::fromFd(conn()->getSocketDescriptor()));
+  changeHandlerFD(folly::NetworkSocket::fromFd(conn()->getSocketDescriptor()));
   socketActionable();
   return this;
 }

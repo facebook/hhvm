@@ -116,9 +116,6 @@ func (p *rocketClient) Flush() (err error) {
 func (p *rocketClient) serverMetadataPush(metadata *serverMetadataPayload) {
 	// zstd is only supported if both the client and the server support it.
 	p.zstd = p.zstd && metadata.zstd
-	if metadata.drain {
-		p.Close()
-	}
 }
 
 func (p *rocketClient) ReadMessageBegin() (string, MessageType, int32, error) {

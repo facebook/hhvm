@@ -112,8 +112,8 @@ module rec Definition : sig
 
   val classish :
     name:string ->
-    parent:(Kind.classish * string * Type.t option) option ->
-    has_generic:bool ->
+    parent:(Kind.classish * string * Type.generic option) option ->
+    generic:Type.generic option ->
     Kind.classish ->
     t
 
@@ -136,13 +136,18 @@ end = struct
       (Type.show ret)
       ret_expr
 
-  let classish ~name ~parent ~has_generic kind =
+  let classish
+      ~name
+      ~(parent : (Kind.classish * string * Type.generic option) option)
+      ~(generic : Type.generic option)
+      kind =
     let parent =
       match parent with
       | Some (parent_kind, name, generic) -> begin
         let generic =
           match generic with
-          | Some generic -> Format.sprintf "<%s>" (Type.show generic)
+          | Some generic ->
+            Format.sprintf "<%s>" Type.(show generic.instantiation)
           | None -> ""
         in
         match parent_kind with
@@ -153,10 +158,13 @@ end = struct
       | None -> ""
     in
     let generic =
-      if has_generic then
-        "<T>"
-      else
-        ""
+      match generic with
+      | Some Type.{ is_reified; _ } ->
+        if is_reified then
+          "<reify T>"
+        else
+          "<T>"
+      | None -> ""
     in
     let kind =
       match kind with
@@ -183,6 +191,11 @@ end
 and Type : sig
   type t
 
+  type generic = {
+    instantiation: t;
+    is_reified: bool;
+  }
+
   val show : t -> string
 
   val inhabitant_of : t -> string
@@ -195,6 +208,11 @@ end = struct
     optional: bool;
   }
 
+  and generic = {
+    instantiation: t;
+    is_reified: bool;
+  }
+
   and t =
     | Mixed
     | Primitive of Primitive.t
@@ -203,7 +221,7 @@ end = struct
         name: string;
         kind: Kind.classish;
         children: t list;
-        generic: t option;
+        generic: generic option;
       }
     | Alias of {
         name: string;
@@ -371,7 +389,7 @@ end = struct
     | Classish { name; generic; children = _; kind = _ } ->
       let generic =
         match generic with
-        | Some generic -> Format.sprintf "<%s>" (show generic)
+        | Some generic -> Format.sprintf "<%s>" (show generic.instantiation)
         | None -> ""
       in
       Format.sprintf "%s%s" name generic
@@ -486,8 +504,8 @@ end = struct
       | Kind.Class ->
         let generic =
           match info.generic with
-          | Some generic when Random.bool () ->
-            Format.sprintf "<%s>" (Type.show generic)
+          | Some generic when generic.is_reified || Random.bool () ->
+            Format.sprintf "<%s>" (Type.show generic.instantiation)
           | _ -> ""
         in
         Some (Format.sprintf "new %s%s()" info.name generic)
@@ -529,8 +547,8 @@ end = struct
            ^ " but it is uninhabitaed. This indicates bug in `milner`.")
 
   let rec mk_classish
-      ~(parent : (Kind.classish * string * Type.t option) option) ~(depth : int)
-      =
+      ~(parent : (Kind.classish * string * generic option) option)
+      ~(depth : int) =
     let kind =
       if depth > max_hierarchy_depth then
         Kind.Class
@@ -572,21 +590,18 @@ end = struct
     in
     let (generic, generic_defs) =
       if depth <= max_hierarchy_depth && Random.bool () then
-        let (ty, defs) = mk ~depth:(Some depth) in
-        (Some ty, defs)
+        let (instantiation, defs) = mk ~depth:(Some depth) in
+        let is_reified =
+          (not Kind.(equal_classish kind Interface)) && Random.bool ()
+        in
+        (Some { instantiation; is_reified }, defs)
       else
         (None, [])
     in
     let (children, defs) =
       gen_children ~parent:(Some (kind, name, generic)) num_of_children
     in
-    let def =
-      Definition.classish
-        kind
-        ~name
-        ~parent
-        ~has_generic:(Option.is_some generic)
-    in
+    let def = Definition.classish kind ~name ~parent ~generic in
     (Classish { name; kind; children; generic }, def :: (generic_defs @ defs))
 
   and mk ~(depth : int option) =

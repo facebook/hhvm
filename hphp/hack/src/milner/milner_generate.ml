@@ -16,7 +16,7 @@ let min_tuple_arity = 1
 
 let max_tuple_arity = 3
 
-let shape_keys = ["'a'"; "'b'"]
+let shape_keys = ["'a'"; "'b'"; "'c'"]
 
 let name_ctr = ref 0
 

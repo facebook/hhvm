@@ -347,10 +347,12 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
   | Trefinement (ty, rs) ->
     SMap.fold
       (fun _ { rc_bound; _ } acc ->
+        union acc
+        @@
         match rc_bound with
         | TRexact bnd ->
           let tp = get_typarams bnd in
-          union acc @@ union (flip tp) tp
+          union (flip tp) tp
         | TRloose bnds ->
           (* Lower bounds on type members are contravariant
            * while upper bounds are covariant. Interestingly,

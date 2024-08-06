@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d3cd14ec7d72cb89622cc7b32a926bc5>>
+// @generated SignedSource<<b538b0f0f08084c9055ca3b5ac8aea98>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -546,32 +546,9 @@ pub enum TypePredicate {
     IsNum,
     IsResource,
     IsNull,
+    IsClass(ast_defs::Id_),
     IsTupleOf(Vec<TypePredicate>),
     IsShapeOf(ShapePredicate),
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving (hash, (show { with_path = false }))")]
-#[repr(C, u8)]
-pub enum NegType {
-    #[rust_to_ocaml(name = "Neg_class")]
-    NegClass(PosId),
-    #[rust_to_ocaml(name = "Neg_predicate")]
-    NegPredicate(TypePredicate),
 }
 
 #[derive(
@@ -761,8 +738,8 @@ pub enum Ty_ {
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses
     Tclass(PosId, Exact, Vec<Ty>),
-    /// The negation of the type in neg_type
-    Tneg(NegType),
+    /// The negation of the [type_predicate]
+    Tneg(TypePredicate),
     /// The type of the label expression #ID
     Tlabel(String),
 }

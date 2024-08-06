@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a8091937293b1dbd263b7e48682b9266>>
+// @generated SignedSource<<d11e0ec8c704efa46f7001114f7ce22f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -612,19 +612,9 @@ impl<'a> Node<'a> for TypePredicate<'a> {
             TypePredicate::IsNum => {}
             TypePredicate::IsResource => {}
             TypePredicate::IsNull => {}
+            TypePredicate::IsClass(ref __binding_0) => __binding_0.accept(v),
             TypePredicate::IsTupleOf(ref __binding_0) => __binding_0.accept(v),
             TypePredicate::IsShapeOf(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for NegType<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_neg_type(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            NegType::NegClass(ref __binding_0) => __binding_0.accept(v),
-            NegType::NegPredicate(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

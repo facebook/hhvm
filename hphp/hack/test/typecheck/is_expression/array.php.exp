@@ -7,5 +7,5 @@ File "array.php", line 9, characters 5-15:
 File "array.php", line 11, characters 5-15:
   nothing
 File "array.php", line 13, characters 5-15:
-  (not dict & not vec & vec_or_dict<arraykey, _>)
+  nothing
 No errors

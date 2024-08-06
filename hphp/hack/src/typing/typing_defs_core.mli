@@ -192,21 +192,10 @@ and type_predicate =
   | IsNum
   | IsResource
   | IsNull
+  | IsClass of Ast_defs.id_
   | IsTupleOf of type_predicate list
   | IsShapeOf of shape_predicate
 [@@deriving eq, ord, hash, show]
-
-(** Negation types represent the type of values that fail an `is` test
-    for either a primitive type, or a class-ish type C<_> *)
-type neg_type =
-  | Neg_class of pos_id
-      (** The negation of a class. If we think of types as denoting sets
-       of values, then (Neg_class C) is complement (Union tyl. C<tyl>), that is
-       all values that are not in C<t1, ..., tn> for any application of C to type
-       arguments. *)
-  | Neg_predicate of type_predicate
-      (** The set of all values that do not pass the given predicate *)
-[@@deriving hash, show]
 
 (** Because Tfun is currently used as both a decl and locl ty, without this,
   the HH\Contexts\defaults alias must be stored in shared memory for a
@@ -383,7 +372,7 @@ and _ ty_ =
    * If exact=Nonexact, this also includes subclasses
    *)
   | Tclass : pos_id * exact * locl_ty list -> locl_phase ty_
-  | Tneg : neg_type -> locl_phase ty_
+  | Tneg : type_predicate -> locl_phase ty_
   | Tlabel : string -> locl_phase ty_
       (** The type of the label expression #ID *)
 

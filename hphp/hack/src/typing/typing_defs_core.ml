@@ -251,14 +251,10 @@ and type_predicate =
   | IsNum
   | IsResource
   | IsNull
+  | IsClass of Ast_defs.id_
   | IsTupleOf of type_predicate list
   | IsShapeOf of shape_predicate
 [@@deriving eq, ord, hash, show { with_path = false }]
-
-type neg_type =
-  | Neg_class of pos_id
-  | Neg_predicate of type_predicate
-[@@deriving hash, show { with_path = false }]
 
 (* This is to avoid a compile error with ppx_hash "Unbound value _hash_fold_phase". *)
 let _hash_fold_phase hsv _ = hsv
@@ -412,8 +408,8 @@ and _ ty_ =
        * If exact=Exact, then this represents instances of *exactly* this class
        * If exact=Nonexact, this also includes subclasses
        *)
-  | Tneg : neg_type -> locl_phase ty_
-      (** The negation of the type in neg_type *)
+  | Tneg : type_predicate -> locl_phase ty_
+      (** The negation of the [type_predicate] *)
   | Tlabel : string -> locl_phase ty_
       (** The type of the label expression #ID *)
 
@@ -650,7 +646,7 @@ module Pp = struct
       Format.fprintf fmt "@,))@]"
     | Tneg a0 ->
       Format.fprintf fmt "(@[<2>Tneg@ ";
-      pp_neg_type fmt a0;
+      pp_type_predicate fmt a0;
       Format.fprintf fmt "@])"
     | Tlabel a0 ->
       Format.fprintf fmt "(@[<2>Tlabel@ ";
@@ -764,16 +760,6 @@ module Pp = struct
 end
 
 include Pp
-
-(** Compare two neg_type, ignoring any position information. *)
-let neg_type_compare (neg1 : neg_type) neg2 =
-  match (neg1, neg2) with
-  | (Neg_class c1, Neg_class c2) ->
-    (* We ignore positions here *)
-    String.compare (snd c1) (snd c2)
-  | (Neg_predicate p1, Neg_predicate p2) -> compare_type_predicate p1 p2
-  | (Neg_predicate _, Neg_class _) -> -1
-  | (Neg_class _, Neg_predicate _) -> 1
 
 (* Constructor and deconstructor functions for types and constraint types.
  * Abstracting these lets us change the implementation, e.g. hash cons
@@ -907,7 +893,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       | 0 -> String.compare (snd id1) (snd id2)
       | n -> n
     end
-    | (Tneg neg1, Tneg neg2) -> neg_type_compare neg1 neg2
+    | (Tneg neg1, Tneg neg2) -> compare_type_predicate neg1 neg2
     | (Tnonnull, Tnonnull) -> 0
     | (Tdynamic, Tdynamic) -> 0
     | (Tlabel name1, Tlabel name2) -> String.compare name1 name2

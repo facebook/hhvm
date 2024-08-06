@@ -472,7 +472,7 @@ module DataType = struct
                      default ~reason
                    else
                      List.fold
-                       ~init:(Set.singleton ~reason ObjectData)
+                       ~init:(default ~reason)
                        ~f:(fun acc (_, required_ty) ->
                          match
                            Typing_utils.try_unwrap_class_type required_ty
@@ -501,6 +501,7 @@ module DataType = struct
                        Set.union acc @@ to_datatypes ~trail env whitelist_cls)
                      whitelist
                      Set.empty
+                   |> Set.inter (default ~reason)
                end
                | Cenum
                | Cenum_class _ ->
@@ -529,21 +530,22 @@ module DataType = struct
         (env, to_datatypes ~trail env cls)
   end
 
-  let fromPredicate ~trail (_env : env) (predicate : type_predicate) : 'phase t
-      =
+  let fromPredicate ~trail (env : env) (predicate : type_predicate) :
+      env * 'phase t =
     let open Tag in
     let reason = DataTypeReason.(make NoSubreason trail) in
     match predicate with
-    | IsBool -> Set.singleton ~reason BoolData
-    | IsInt -> Set.singleton ~reason IntData
-    | IsString -> Set.singleton ~reason StringData
-    | IsArraykey -> Set.of_list ~reason [IntData; StringData]
-    | IsFloat -> Set.singleton ~reason FloatData
-    | IsNum -> Set.of_list ~reason [IntData; FloatData]
-    | IsResource -> Set.singleton ~reason ResourceData
-    | IsNull -> Set.singleton ~reason NullData
-    | IsTupleOf _ -> Set.singleton ~reason VecData
-    | IsShapeOf _ -> Set.singleton ~reason DictData
+    | IsBool -> (env, Set.singleton ~reason BoolData)
+    | IsInt -> (env, Set.singleton ~reason IntData)
+    | IsString -> (env, Set.singleton ~reason StringData)
+    | IsArraykey -> (env, Set.of_list ~reason [IntData; StringData])
+    | IsFloat -> (env, Set.singleton ~reason FloatData)
+    | IsNum -> (env, Set.of_list ~reason [IntData; FloatData])
+    | IsResource -> (env, Set.singleton ~reason ResourceData)
+    | IsNull -> (env, Set.singleton ~reason NullData)
+    | IsTupleOf _ -> (env, Set.singleton ~reason VecData)
+    | IsShapeOf _ -> (env, Set.singleton ~reason DictData)
+    | IsClass id -> Class.to_datatypes ~trail env id
 
   let rec fromTy ~trail (env : env) (ty : locl_ty) : env * 'phase t =
     let (env, ty) = Env.expand_type env ty in
@@ -688,12 +690,8 @@ module DataType = struct
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | Tclass ((_, cls), _, _) -> Class.to_datatypes ~trail env cls
-    | Tneg n ->
-      let (env, right) =
-        match n with
-        | Neg_class (_, cls) -> Class.to_datatypes ~trail env cls
-        | Neg_predicate predicate -> (env, fromPredicate ~trail env predicate)
-      in
+    | Tneg predicate ->
+      let (env, right) = fromPredicate ~trail env predicate in
       (env, Set.diff (mixed ~reason) right)
 
   let fromHint env hint =
@@ -882,6 +880,7 @@ module AtomicDataTypes = struct
     | IsNull -> of_ty env (Primitive Aast.Tnull)
     | IsTupleOf _ -> of_ty env Tuple
     | IsShapeOf _ -> of_ty env Shape
+    | IsClass id -> of_ty env (Class id)
 
   let complement dt = DataType.Set.diff mixed dt
 

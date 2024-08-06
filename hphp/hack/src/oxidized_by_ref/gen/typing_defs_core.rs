@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<313730c3ef3445180ccdc8b3bc6a2031>>
+// @generated SignedSource<<302504257d3c42aa40ee07f3e1f05566>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -528,41 +528,14 @@ pub enum TypePredicate<'a> {
     IsResource,
     IsNull,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    IsClass(&'a ast_defs::Id_<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     IsTupleOf(&'a [TypePredicate<'a>]),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     IsShapeOf(&'a ShapePredicate<'a>),
 }
 impl<'a> TrivialDrop for TypePredicate<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TypePredicate<'arena>);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving (hash, (show { with_path = false }))")]
-#[repr(C, u8)]
-pub enum NegType<'a> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Neg_class")]
-    NegClass(&'a PosId<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Neg_predicate")]
-    NegPredicate(&'a TypePredicate<'a>),
-}
-impl<'a> TrivialDrop for NegType<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(NegType<'arena>);
 
 #[derive(
     Clone,
@@ -780,9 +753,9 @@ pub enum Ty_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Tclass(&'a (PosId<'a>, Exact<'a>, &'a [&'a Ty<'a>])),
-    /// The negation of the type in neg_type
+    /// The negation of the [type_predicate]
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Tneg(&'a NegType<'a>),
+    Tneg(&'a TypePredicate<'a>),
     /// The type of the label expression #ID
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tlabel(&'a str),

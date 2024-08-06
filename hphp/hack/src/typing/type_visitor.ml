@@ -227,7 +227,7 @@ class type ['a] locl_type_visitor_type =
 
     method on_taccess : 'a -> Reason.t -> locl_phase taccess_type -> 'a
 
-    method on_neg_type : 'a -> Reason.t -> neg_type -> 'a
+    method on_neg_type : 'a -> Reason.t -> type_predicate -> 'a
 
     method on_tlabel : 'a -> Reason.t -> string -> 'a
   end
@@ -316,8 +316,18 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
 
     method on_neg_type acc r neg_ty =
       match neg_ty with
-      | Neg_class c -> this#on_tclass acc r c nonexact []
-      | Neg_predicate _p -> acc
+      | IsClass c -> this#on_tclass acc r (Reason.to_pos r, c) nonexact []
+      | IsArraykey
+      | IsBool
+      | IsInt
+      | IsString
+      | IsFloat
+      | IsNum
+      | IsResource
+      | IsNull
+      | IsTupleOf _
+      | IsShapeOf _ ->
+        acc
 
     method on_tunapplied_alias acc _ _ = acc
 

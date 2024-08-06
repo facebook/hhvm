@@ -581,10 +581,9 @@ module Subtype_negation = struct
     let neg_ty =
       match get_node ty with
       | Tprim Aast.Tnull -> Some (MakeType.nonnull r)
-      | Tprim Aast.Tarraykey -> Some (MakeType.neg r (Neg_predicate IsArraykey))
-      | Tneg (Neg_predicate IsArraykey) ->
-        Some (MakeType.prim_type r Aast.Tarraykey)
-      | Tneg (Neg_predicate IsNull)
+      | Tprim Aast.Tarraykey -> Some (MakeType.neg r IsArraykey)
+      | Tneg IsArraykey -> Some (MakeType.prim_type r Aast.Tarraykey)
+      | Tneg IsNull
       | Tnonnull ->
         Some (MakeType.null r)
       | _ -> None
@@ -836,8 +835,8 @@ end = struct
     let (env, ty2) = Env.expand_type env ty2 in
     match (deref ty1, deref ty2) with
     | ( ((_, Tvar _) as tv),
-        ((_, (Tprim Aast.Tarraykey | Tneg (Neg_predicate IsArraykey))) as ak) )
-    | ( ((_, (Tprim Aast.Tarraykey | Tneg (Neg_predicate IsArraykey))) as ak),
+        ((_, (Tprim Aast.Tarraykey | Tneg IsArraykey)) as ak) )
+    | ( ((_, (Tprim Aast.Tarraykey | Tneg IsArraykey)) as ak),
         ((_, Tvar _) as tv) ) ->
       (env, Some (tv, ak))
     | _ -> (env, None)
@@ -847,7 +846,7 @@ end = struct
     | (env, Some (tv, ak)) -> (env, (tv, ak))
     | _ ->
       failwith
-        "Expected a pair of types, one of which a [Tvar] and the other [Tprim Tarraykey] or [Tneg (Neg_predicate Tarraykey)]"
+        "Expected a pair of types, one of which a [Tvar] and the other [Tprim Tarraykey] or [Tneg IsArraykey]"
 
   let expands_to_var_and_arraykey ty1 ty2 ~env =
     match var_and_arraykey_opt ty1 ty2 ~env with
@@ -4754,7 +4753,35 @@ end = struct
           ~rhs:{ super_supportdyn; super_like; ty_super }
           env)
     (* -- C-Neg-R ----------------------------------------------------------- *)
-    | (_, (reason_super, Tneg (Neg_predicate predicate))) -> begin
+    | (_, (r_super, Tneg (IsClass c_super))) -> begin
+      match deref ty_sub with
+      | (_, Tneg (IsClass c_sub)) ->
+        if TUtils.is_sub_class_refl env c_super c_sub then
+          valid env
+        else
+          invalid ~fail env
+      | (_, Tclass ((_, c_sub), _, _)) ->
+        if Subtype_negation.is_class_disjoint env c_sub c_super then
+          valid env
+        else
+          invalid ~fail env
+      (* All of these are definitely disjoint from class types *)
+      | (_, (Tfun _ | Ttuple _ | Tshape _ | Tprim _)) -> valid env
+      | _ ->
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:
+            {
+              super_like;
+              super_supportdyn = false;
+              ty_super = mk (r_super, Tneg (IsClass c_super));
+            }
+          env
+    end
+    | (_, (reason_super, Tneg predicate)) -> begin
       match deref ty_sub with
       | (_, Tvar _) ->
         mk_issubtype_prop
@@ -4801,34 +4828,6 @@ end = struct
           (partition.Typing_refinement.left @ partition.Typing_refinement.span)
           ~init:(env, TL.valid)
           ~f:(fun res tyl -> res &&& simplify_subtype tyl nothing)
-    end
-    | (_, (r_super, Tneg (Neg_class (pos_super, c_super)))) -> begin
-      match deref ty_sub with
-      | (_, Tneg (Neg_class (_, c_sub))) ->
-        if TUtils.is_sub_class_refl env c_super c_sub then
-          valid env
-        else
-          invalid ~fail env
-      | (_, Tclass ((_, c_sub), _, _)) ->
-        if Subtype_negation.is_class_disjoint env c_sub c_super then
-          valid env
-        else
-          invalid ~fail env
-      (* All of these are definitely disjoint from class types *)
-      | (_, (Tfun _ | Ttuple _ | Tshape _ | Tprim _)) -> valid env
-      | _ ->
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = mk (r_super, Tneg (Neg_class (pos_super, c_super)));
-            }
-          env
     end
     (* -- C-Class-R --------------------------------------------------------- *)
     (* class refinement
@@ -6687,7 +6686,7 @@ end = struct
           (Typing_refinement.TyPredicate.to_ty reason_super predicate :: tyl)
       in
       let refine_false tyl =
-        let neg = MakeType.neg reason_super (Neg_predicate predicate) in
+        let neg = MakeType.neg reason_super predicate in
         intersect (neg :: tyl)
       in
       let (env, props) =
@@ -8643,18 +8642,8 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
     is_sub_type_for_union_help env ty2 (MakeType.null Reason.none)
   | (_, Tnonnull) ->
     is_sub_type_for_union_help env ty1 (MakeType.null Reason.none)
-  | (Tneg (Neg_predicate pred1), _) ->
-    is_sub_type_for_union_help
-      env
-      ty2
-      (Typing_refinement.TyPredicate.to_ty Reason.none pred1)
-  | (_, Tneg (Neg_predicate pred2)) ->
-    is_sub_type_for_union_help
-      env
-      ty1
-      (Typing_refinement.TyPredicate.to_ty Reason.none pred2)
-  | (Tneg (Neg_class (_, c1)), Tclass ((_, c2), _, _tyl))
-  | (Tclass ((_, c2), _, _tyl), Tneg (Neg_class (_, c1))) ->
+  | (Tneg (IsClass c1), Tclass ((_, c2), _, _tyl))
+  | (Tclass ((_, c2), _, _tyl), Tneg (IsClass c1)) ->
     (* These are disjoint iff for all objects o, o in c2<_tyl> implies that
        o notin (complement (Union tyl'. c1<tyl'>)), which is just that
        c2<_tyl> subset Union tyl'. c1<tyl'>. If c2 is a subclass of c1, then
@@ -8668,9 +8657,16 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
        neg D and C to be disjoint.
     *)
     TUtils.is_sub_class_refl env c2 c1
-  | (Tneg _, _)
-  | (_, Tneg _) ->
-    false
+  | (Tneg pred1, _) ->
+    is_sub_type_for_union_help
+      env
+      ty2
+      (Typing_refinement.TyPredicate.to_ty Reason.none pred1)
+  | (_, Tneg pred2) ->
+    is_sub_type_for_union_help
+      env
+      ty1
+      (Typing_refinement.TyPredicate.to_ty Reason.none pred2)
   | (Tprim tp1, Tprim tp2) -> Subtype_negation.is_tprim_disjoint tp1 tp2
   | (Tclass ((_, cname), ex, _), Tprim (Aast.Tarraykey | Aast.Tstring))
   | (Tprim (Aast.Tarraykey | Aast.Tstring), Tclass ((_, cname), ex, _))

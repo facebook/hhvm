@@ -159,7 +159,7 @@ let rec split_ty
         | Tneg neg -> begin
           match neg with
           (* we'll over-approximate the DataType for IsTupleOf, IsShapeOf *)
-          | Neg_predicate (IsTupleOf _np_predicates) -> begin
+          | IsTupleOf _np_predicates -> begin
             match predicate with
             | IsTupleOf _predicates -> TyPartition.mk_span ty
             | IsBool
@@ -170,10 +170,11 @@ let rec split_ty
             | IsNum
             | IsResource
             | IsNull
-            | IsShapeOf _ ->
+            | IsShapeOf _
+            | IsClass _ ->
               TyPartition.mk_right ty
           end
-          | Neg_predicate (IsShapeOf _) -> begin
+          | IsShapeOf _ -> begin
             match predicate with
             | IsShapeOf _ -> TyPartition.mk_span ty
             | IsBool
@@ -184,15 +185,20 @@ let rec split_ty
             | IsNum
             | IsResource
             | IsNull
-            | IsTupleOf _ ->
+            | IsTupleOf _
+            | IsClass _ ->
               TyPartition.mk_right ty
           end
           (* The DataType for these are precise *)
-          | Neg_predicate
-              ( IsBool | IsInt | IsString | IsArraykey | IsFloat | IsNum
-              | IsResource | IsNull )
-          (* We don't have a class-predicate right now *)
-          | Neg_class _ ->
+          | IsBool
+          | IsInt
+          | IsString
+          | IsArraykey
+          | IsFloat
+          | IsNum
+          | IsResource
+          | IsNull
+          | IsClass _ ->
             TyPartition.mk_right ty
         end
         | _ -> TyPartition.mk_right ty
@@ -232,7 +238,8 @@ let rec split_ty
       | IsFloat
       | IsNum
       | IsResource
-      | IsNull ->
+      | IsNull
+      | IsClass _ ->
         (env, TyPartition.mk_left ty)
     else
       (env, TyPartition.mk_span ty)
@@ -275,11 +282,7 @@ let rec split_ty
     | Tshape _ -> partition_f DataType.(of_ty env Shape)
     | Tlabel _ -> partition_f DataType.(of_ty env Label)
     | Tclass ((_, name), _, _) -> partition_f DataType.(of_ty env @@ Class name)
-    | Tneg (Neg_class (_, name)) ->
-      let (env, dty) = DataType.(of_ty env @@ Class name) in
-      let dty = DataType.complement dty in
-      partition_f (env, dty)
-    | Tneg (Neg_predicate pred) ->
+    | Tneg pred ->
       let (env, dty) = DataType.of_predicate env pred in
       let dty = DataType.complement dty in
       partition_f (env, dty)
@@ -474,6 +477,7 @@ module TyPredicate = struct
     | IsNum -> Typing_make_type.num reason
     | IsResource -> Typing_make_type.resource reason
     | IsNull -> Typing_make_type.null reason
+    | IsClass id -> Typing_make_type.class_type reason id []
     | IsTupleOf predicates ->
       Typing_make_type.tuple reason (List.map predicates ~f:(to_ty reason))
     | IsShapeOf { sp_fields } ->

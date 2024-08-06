@@ -119,7 +119,7 @@ class type ['env] type_mapper_type =
     method on_neg_type :
       'env ->
       Typing_reason.t ->
-      Typing_defs.neg_type ->
+      Typing_defs.type_predicate ->
       'env * Typing_defs.locl_ty
 
     method on_tlabel :

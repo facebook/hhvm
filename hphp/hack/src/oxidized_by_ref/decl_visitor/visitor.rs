@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<48e1cc0269dfec9e10bd7764dae3b7e5>>
+// @generated SignedSource<<5580eba9dbabd6196cc14a5a3885ad55>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -100,9 +100,6 @@ pub trait Visitor<'a> {
         p.recurse(self.object())
     }
     fn visit_type_predicate(&mut self, p: &'a TypePredicate<'a>) {
-        p.recurse(self.object())
-    }
-    fn visit_neg_type(&mut self, p: &'a NegType<'a>) {
         p.recurse(self.object())
     }
     fn visit_ty(&mut self, p: &'a Ty<'a>) {

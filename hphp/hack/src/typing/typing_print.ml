@@ -916,9 +916,7 @@ module Full = struct
         (fuel, Concat [text "?"; d])
     end
     | Tprim x -> (fuel, tprim x)
-    | Tneg (Neg_class c) -> (fuel, Concat [text "not "; to_doc (snd c)])
-    | Tneg (Neg_predicate predicate) ->
-      type_predicate ~fuel ~negate:true predicate
+    | Tneg predicate -> type_predicate ~fuel ~negate:true to_doc predicate
     | Tvar n ->
       let (_, ety) =
         Typing_inference_env.expand_type
@@ -1158,7 +1156,7 @@ module Full = struct
       let label_doc = Concat [text "#"; text name] in
       (fuel, label_doc)
 
-  and type_predicate ~fuel ~negate predicate =
+  and type_predicate ~fuel ~negate to_doc predicate =
     let rec predicate_doc predicate =
       match predicate with
       | IsBool -> text "bool"
@@ -1169,6 +1167,7 @@ module Full = struct
       | IsNum -> text "num"
       | IsResource -> text "resource"
       | IsNull -> text "null"
+      | IsClass s -> to_doc s
       | IsTupleOf predicates ->
         let texts = List.map predicates ~f:predicate_doc in
         Concat
@@ -1247,7 +1246,7 @@ module Full = struct
     | Tcan_traverse ct -> tcan_traverse ~fuel k ct
     | Ttype_switch { predicate; ty_true; ty_false } ->
       let (fuel, predicate_doc) =
-        type_predicate ~fuel ~negate:false predicate
+        type_predicate ~fuel ~negate:false to_doc predicate
       in
       let (fuel, ty_true_doc) = k ~fuel ty_true in
       let (fuel, ty_false_doc) = k ~fuel ty_false in
@@ -1555,8 +1554,7 @@ module ErrorString = struct
       failwith "Tunapplied_alias is not a type"
     | Taccess (_ty, _id) -> (fuel, "a type constant")
     | Tlabel name -> (fuel, Printf.sprintf "a label (#%s)" name)
-    | Tneg (Neg_class (_, c)) -> (fuel, "anything but a " ^ strip_ns c)
-    | Tneg (Neg_predicate predicate) ->
+    | Tneg predicate ->
       let rec str predicate =
         match predicate with
         | IsBool -> "a bool"
@@ -1567,6 +1565,7 @@ module ErrorString = struct
         | IsNum -> "a num"
         | IsResource -> "a resource"
         | IsNull -> "null"
+        | IsClass s -> "a " ^ strip_ns s
         | IsTupleOf predicates ->
           let strings = List.map predicates ~f:str in
           "(" ^ String.concat ~sep:", " strings ^ ")"
@@ -1593,7 +1592,7 @@ module ErrorString = struct
           "shape(" ^ String.concat texts ~sep:", " ^ ")"
         (* TODO: T196048813, dedupe?, optional, open, fuel? *)
       in
-      (fuel, "is not " ^ str predicate)
+      (fuel, "anything but " ^ str predicate)
 
   and dependent dep =
     let x = strip_ns @@ DependentKind.to_string dep in
@@ -1772,8 +1771,7 @@ module Json = struct
     end
     | (p, Tprim tp) ->
       obj @@ kind p "primitive" @ name (Aast_defs.string_of_tprim tp)
-    | (p, Tneg (Neg_class (_, c))) -> obj @@ kind p "negation" @ name c
-    | (p, Tneg (Neg_predicate predicate)) ->
+    | (p, Tneg predicate) ->
       let rec predicate_json predicate =
         match predicate with
         | IsBool -> name "isbool"
@@ -1784,6 +1782,7 @@ module Json = struct
         | IsNum -> name "isnum"
         | IsResource -> name "isresource"
         | IsNull -> name "isnull"
+        | IsClass s -> name s
         | IsTupleOf predicates ->
           let predicates_json =
             List.map predicates ~f:(fun p -> obj @@ predicate_json p)

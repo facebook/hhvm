@@ -36,15 +36,14 @@ let negate_type env r ty ~approx =
     | Tprim Aast.Tnull -> MkType.nonnull r
     | Tprim _ -> begin
       match Result.ok @@ Typing_refinement.TyPredicate.of_ty env ty with
-      | Some predicate -> MkType.neg r (Neg_predicate predicate)
+      | Some predicate -> MkType.neg r predicate
       | None -> approximated (* void, noreturn *)
     end
-    | Tneg (Neg_predicate predicate) ->
-      Typing_refinement.TyPredicate.to_ty r predicate
-    | Tneg (Neg_class (_, c)) when Utils.class_has_no_params env c ->
+    | Tneg (IsClass c) when Utils.class_has_no_params env c ->
       MkType.class_type r c []
+    | Tneg predicate -> Typing_refinement.TyPredicate.to_ty r predicate
     | Tnonnull -> MkType.null r
-    | Tclass (c, Nonexact _, _) -> MkType.neg r (Neg_class c)
+    | Tclass ((_, c), Nonexact _, _) -> MkType.neg r (IsClass c)
     | _ -> approximated
   in
   (env, neg_ty)
@@ -273,8 +272,8 @@ let rec intersect env ~r ty1 ty2 =
             | ((_, Tprim Aast.Tnum), (_, Tprim Aast.Tarraykey))
             | ((_, Tprim Aast.Tarraykey), (_, Tprim Aast.Tnum)) ->
               (env, MkType.int r)
-            | ((neg_reason, Tneg (Neg_predicate predicate)), ty)
-            | (ty, (neg_reason, Tneg (Neg_predicate predicate))) ->
+            | ((neg_reason, Tneg predicate), ty)
+            | (ty, (neg_reason, Tneg predicate)) ->
               let (env, partition) =
                 Typing_refinement.partition_ty env (mk ty) predicate
               in

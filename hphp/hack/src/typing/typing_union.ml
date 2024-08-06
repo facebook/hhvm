@@ -344,12 +344,12 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
       (env, Some (mk (r, Tfun ft)))
     | ((_, Tunapplied_alias _), _) ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-    | ((_, Tneg (Neg_class (_, c1))), (_, Tclass ((_, c2), Exact, [])))
-    | ((_, Tclass ((_, c2), Exact, [])), (_, Tneg (Neg_class (_, c1))))
+    | ((_, Tneg (IsClass c1)), (_, Tclass ((_, c2), Exact, [])))
+    | ((_, Tclass ((_, c2), Exact, [])), (_, Tneg (IsClass c1)))
       when String.equal c1 c2 ->
       (env, Some (MakeType.mixed r))
-    | ((_, Tneg (Neg_class (_, c1))), (_, Tclass ((_, c2), Nonexact _, [])))
-    | ((_, Tclass ((_, c2), Nonexact _, [])), (_, Tneg (Neg_class (_, c1))))
+    | ((_, Tneg (IsClass c1)), (_, Tclass ((_, c2), Nonexact _, [])))
+    | ((_, Tclass ((_, c2), Nonexact _, [])), (_, Tneg (IsClass c1)))
       when Utils.is_sub_class_refl env c1 c2 ->
       (* This union is mixed iff for all objects o,
          o not in complement (union tyl. c1<tyl>) implies o in c2,
@@ -359,8 +359,8 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
          c2 has no type parameters.
       *)
       (env, Some (MakeType.mixed r))
-    | ((_, Tneg (Neg_class (_, c1))), (_, Tclass ((_, c2), Nonexact _, _ :: _)))
-    | ((_, Tclass ((_, c2), Nonexact _, _ :: _)), (_, Tneg (Neg_class (_, c1))))
+    | ((_, Tneg (IsClass c1)), (_, Tclass ((_, c2), Nonexact _, _ :: _)))
+    | ((_, Tclass ((_, c2), Nonexact _, _ :: _)), (_, Tneg (IsClass c1)))
       when approx_cancel_neg && Utils.is_sub_class_refl env c1 c2 ->
       (* Unlike the case where c2 has no parameters, here we can get a situation
          where c1 is a sub-class of c2, but they don't union to mixed. For example,
@@ -368,16 +368,16 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
          we can still approximate up to mixed when it would be both sound and convenient,
          as controlled by the approx_cancel_neg flag. *)
       (env, Some (MakeType.mixed r))
-    | ((_, Tneg (Neg_class (_, c1))), (_, Tclass ((_, c2), Exact, _ :: _)))
-    | ((_, Tclass ((_, c2), Exact, _ :: _)), (_, Tneg (Neg_class (_, c1))))
+    | ((_, Tneg (IsClass c1)), (_, Tclass ((_, c2), Exact, _ :: _)))
+    | ((_, Tclass ((_, c2), Exact, _ :: _)), (_, Tneg (IsClass c1)))
       when approx_cancel_neg && String.equal c1 c2 ->
       (env, Some (MakeType.mixed r))
-    | ((_, Tneg (Neg_predicate IsNum)), (_, Tprim Aast.Tarraykey))
-    | ((_, Tprim Aast.Tarraykey), (_, Tneg (Neg_predicate IsNum))) ->
-      (env, Some (MakeType.neg r (Neg_predicate IsFloat)))
-    | ((_, Tneg (Neg_predicate IsArraykey)), (_, Tprim Aast.Tnum))
-    | ((_, Tprim Aast.Tnum), (_, Tneg (Neg_predicate IsArraykey))) ->
-      (env, Some (MakeType.neg r (Neg_predicate IsString)))
+    | ((_, Tneg IsNum), (_, Tprim Aast.Tarraykey))
+    | ((_, Tprim Aast.Tarraykey), (_, Tneg IsNum)) ->
+      (env, Some (MakeType.neg r IsFloat))
+    | ((_, Tneg IsArraykey), (_, Tprim Aast.Tnum))
+    | ((_, Tprim Aast.Tnum), (_, Tneg IsArraykey)) ->
+      (env, Some (MakeType.neg r IsString))
     | ((r1, Tintersection tyl1), (r2, Tintersection tyl2)) ->
       (match Typing_algebra.factorize_common_types tyl1 tyl2 with
       | ([], _, _) ->
@@ -425,8 +425,8 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
             (env, Some inter_ty)
           | _ -> (env, Some (MakeType.intersection r (union_ty :: common_tyl))))))
     (* TODO with Tclass, union type arguments if covariant *)
-    | (ty, (_, Tneg (Neg_predicate predicate)))
-    | ((_, Tneg (Neg_predicate predicate)), ty) ->
+    | (ty, (_, Tneg predicate))
+    | ((_, Tneg predicate), ty) ->
       (match Result.ok @@ Typing_refinement.TyPredicate.of_ty env (mk ty) with
       | Some other when equal_type_predicate predicate other ->
         (env, Some (MakeType.mixed r))
@@ -439,7 +439,7 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
            * types, etc. - so for now we leave it here.
            * TODO improve that. *)
           | Tnonnull | Tany _ | Tintersection _ | Toption _ | Tunion _
-          | Tlabel _ | Taccess _ | Tneg _ ) ),
+          | Tlabel _ | Taccess _ ) ),
         (_, _) ) ->
       ty_equiv env ty1 ty2 ~are_ty_param:false
   with

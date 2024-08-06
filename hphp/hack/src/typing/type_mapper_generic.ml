@@ -67,7 +67,7 @@ class type ['env] type_mapper_type =
 
     method on_taccess : 'env -> Reason.t -> locl_ty -> pos_id -> 'env * locl_ty
 
-    method on_neg_type : 'env -> Reason.t -> neg_type -> 'env * locl_ty
+    method on_neg_type : 'env -> Reason.t -> type_predicate -> 'env * locl_ty
 
     method on_tlabel : 'env -> Reason.t -> string -> 'env * locl_ty
 

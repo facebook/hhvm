@@ -159,7 +159,8 @@ class type ['a] locl_type_visitor_type =
       Typing_defs.locl_phase Typing_defs.taccess_type ->
       'a
 
-    method on_neg_type : 'a -> Typing_reason.t -> Typing_defs.neg_type -> 'a
+    method on_neg_type :
+      'a -> Typing_reason.t -> Typing_defs.type_predicate -> 'a
 
     method on_tlabel : 'a -> Typing_reason.t -> string -> 'a
   end

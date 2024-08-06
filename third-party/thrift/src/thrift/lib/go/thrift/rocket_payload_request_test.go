@@ -28,7 +28,7 @@ func TestRequestRPCMetadata(t *testing.T) {
 	wantProto := ProtocolIDCompact
 	wantZstd := false
 	wantOther := map[string]string{"header": "1"}
-	data, err := encodeRequestPayload(wantName, wantProto, wantType, wantOther, nil, wantZstd, nil)
+	data, err := encodeRequestPayload(wantName, wantProto, wantType, wantOther, wantZstd, nil)
 	require.NoError(t, err)
 	got, err := decodeRequestPayload(data)
 	require.NoError(t, err)

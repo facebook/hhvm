@@ -30,7 +30,7 @@ type requestPayload struct {
 	protoID  ProtocolID
 }
 
-func encodeRequestPayload(name string, protoID ProtocolID, typeID MessageType, headers map[string]string, persistentHeaders map[string]string, zstd bool, dataBytes []byte) (payload.Payload, error) {
+func encodeRequestPayload(name string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) (payload.Payload, error) {
 	metadata := NewRequestRpcMetadata()
 	metadata.SetName(&name)
 	rpcProtocolID, err := protocolIDToRPCProtocolID(protoID)
@@ -49,7 +49,6 @@ func encodeRequestPayload(name string, protoID ProtocolID, typeID MessageType, h
 	}
 	metadata.OtherMetadata = make(map[string]string)
 	maps.Copy(metadata.OtherMetadata, headers)
-	maps.Copy(metadata.OtherMetadata, persistentHeaders)
 	metadataBytes, err := serializeCompact(metadata)
 	if err != nil {
 		return nil, err

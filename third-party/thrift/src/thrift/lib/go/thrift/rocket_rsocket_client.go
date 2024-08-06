@@ -85,9 +85,9 @@ func (r *rsocketClient) resetDeadline() {
 	r.conn.SetDeadline(time.Time{})
 }
 
-func (r *rsocketClient) requestResponse(ctx context.Context, messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, persistentHeaders map[string]string, zstd bool, dataBytes []byte) (*responsePayload, error) {
+func (r *rsocketClient) requestResponse(ctx context.Context, messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) (*responsePayload, error) {
 	r.resetDeadline()
-	request, err := encodeRequestPayload(messageName, protoID, typeID, headers, persistentHeaders, zstd, dataBytes)
+	request, err := encodeRequestPayload(messageName, protoID, typeID, headers, zstd, dataBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -100,9 +100,9 @@ func (r *rsocketClient) requestResponse(ctx context.Context, messageName string,
 	return decodeResponsePayload(val)
 }
 
-func (r *rsocketClient) fireAndForget(messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, persistentHeaders map[string]string, zstd bool, dataBytes []byte) error {
+func (r *rsocketClient) fireAndForget(messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) error {
 	r.resetDeadline()
-	request, err := encodeRequestPayload(messageName, protoID, typeID, headers, persistentHeaders, zstd, dataBytes)
+	request, err := encodeRequestPayload(messageName, protoID, typeID, headers, zstd, dataBytes)
 	if err != nil {
 		return err
 	}

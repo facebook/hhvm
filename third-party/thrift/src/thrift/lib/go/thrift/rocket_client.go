@@ -62,6 +62,7 @@ func newRocketClient(conn net.Conn, protoID ProtocolID, timeout time.Duration, p
 		rbuf:              NewMemoryBuffer(),
 		wbuf:              NewMemoryBuffer(),
 		timeout:           timeout,
+		reqHeaders:        make(map[string]string),
 		zstd:              false, // zstd adds a performance overhead, so we default to false
 	}
 	switch p.protoID {
@@ -97,8 +98,9 @@ func (p *rocketClient) Flush() (err error) {
 			return err
 		}
 	}
+	headers := unionMaps(p.reqHeaders, p.persistentHeaders)
 	if p.writeType == ONEWAY {
-		return p.client.fireAndForget(p.messageName, p.protoID, p.writeType, p.reqHeaders, p.persistentHeaders, p.zstd, dataBytes)
+		return p.client.fireAndForget(p.messageName, p.protoID, p.writeType, headers, p.zstd, dataBytes)
 	}
 	if p.writeType != CALL {
 		return nil
@@ -109,8 +111,20 @@ func (p *rocketClient) Flush() (err error) {
 		ctx, cancel = context.WithTimeout(ctx, p.timeout)
 		defer cancel()
 	}
-	p.resultVal, p.resultErr = p.client.requestResponse(ctx, p.messageName, p.protoID, p.writeType, p.reqHeaders, p.persistentHeaders, p.zstd, dataBytes)
+	p.resultVal, p.resultErr = p.client.requestResponse(ctx, p.messageName, p.protoID, p.writeType, headers, p.zstd, dataBytes)
+	clear(p.reqHeaders)
 	return nil
+}
+
+func unionMaps(dst, src map[string]string) map[string]string {
+	if dst == nil {
+		return src
+	}
+	if src == nil {
+		return dst
+	}
+	maps.Copy(dst, src)
+	return dst
 }
 
 func (p *rocketClient) serverMetadataPush(metadata *serverMetadataPayload) {
@@ -139,9 +153,6 @@ func (p *rocketClient) Skip(fieldType Type) (err error) {
 }
 
 func (p *rocketClient) SetRequestHeader(key, value string) {
-	if p.reqHeaders == nil {
-		p.reqHeaders = make(map[string]string)
-	}
 	p.reqHeaders[key] = value
 }
 

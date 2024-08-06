@@ -116,18 +116,18 @@ ETCH_LABEL(cchomp_head):
 
 ETCH_ALIGN16
 ETCH_LABEL(caligned):
-        cmp     x1, #8
+        subs    x1, x1, #8
         blt     ETCH_LABEL(cchomp_tail)
 ETCH_LABEL(caligned_loop):
         ldr     x5, [x0], #8
         crc32cx w4, w4, x5
-        sub     x1, x1, #8
-        cmp     x1, #8
+        subs    x1, x1, #8
         bge     ETCH_LABEL(caligned_loop)
 
 ETCH_ALIGN16
 ETCH_LABEL(cchomp_tail):
-        cbz     x1, ETCH_LABEL(cdone)
+        adds    x1, x1, #8
+        beq     ETCH_LABEL(cdone)
         ldr     x5, [x0], #8
         mov     x2, #0
 ETCH_LABEL(cchomp_tail_loop):
@@ -163,18 +163,18 @@ ETCH_NAME(HASH_FUNC_NAME):
         cbz     x1, ETCH_LABEL(cudone)
 
 ETCH_LABEL(cualigned):
-        cmp     x1, #8
+        subs    x1, x1, #8
         blt     ETCH_LABEL(cuchomp_tail)
 ETCH_LABEL(cualigned_loop):
         ldr     x5, [x0], #8
         crc32cx w4, w4, x5
-        sub     x1, x1, #8
-        cmp     x1, #8
+        subs    x1, x1, #8
         bge     ETCH_LABEL(cualigned_loop)
 
 ETCH_ALIGN16
 ETCH_LABEL(cuchomp_tail):
-        cbz     x1, ETCH_LABEL(cudone)
+        adds    x1, x1, #8
+        beq     ETCH_LABEL(cudone)
         ldr     x5, [x0], #8
         mov     x2, #0
 ETCH_LABEL(cuchomp_tail_loop):
@@ -237,19 +237,19 @@ ETCH_LABEL(ichomp_head):
 
 ETCH_ALIGN16
 ETCH_LABEL(ialigned):
-        cmp     x1, #8
+        subs    x1, x1, #8
         blt     ETCH_LABEL(ichomp_tail)
 ETCH_LABEL(ialigned_loop):
         ldr     x5, [x0], #8
         and     x5, x5, x6
         crc32cx w4, w4, x5
-        sub     x1, x1, #8
-        cmp     x1, #8
+        subs    x1, x1, #8
         bge     ETCH_LABEL(ialigned_loop)
 
 ETCH_ALIGN16
 ETCH_LABEL(ichomp_tail):
-        cbz     x1, ETCH_LABEL(idone)
+        adds    x1, x1, #8
+        beq     ETCH_LABEL(idone)
         mov     x2, #0
         ldr     x5, [x0], #8
 ETCH_LABEL(ichomp_tail_loop):
@@ -287,19 +287,19 @@ ETCH_NAME(HASH_FUNC_NAME):
         mov     x6, #0xdfdfdfdfdfdfdfdf
 
 ETCH_LABEL(iualigned):
-        cmp     x1, #8
+        subs    x1, x1, #8
         blt     ETCH_LABEL(iuchomp_tail)
 ETCH_LABEL(iualigned_loop):
         ldr     x5, [x0], #8
         and     x5, x5, x6
         crc32cx w4, w4, x5
-        sub     x1, x1, #8
-        cmp     x1, #8
+        subs    x1, x1, #8
         bge     ETCH_LABEL(iualigned_loop)
 
 ETCH_ALIGN16
 ETCH_LABEL(iuchomp_tail):
-        cbz     x1, ETCH_LABEL(iudone)
+        adds    x1, x1, #8
+        beq     ETCH_LABEL(iudone)
         ldr     x5, [x0], #8
         mov     x2, #0
 ETCH_LABEL(iuchomp_tail_loop):

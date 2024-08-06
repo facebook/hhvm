@@ -11888,6 +11888,7 @@ void flatten_type_mappings(IndexData& index,
                                       | TypeConstraintFlags::UpperBound);
       auto firstEnum = typeMapping->firstEnum;
       auto const isUnion = typeMapping->value.isUnion();
+      FTRACE(4, "Flattening Type Mapping {} \n", typeMapping->name);
       bool anyUnresolved = false;
 
       auto enumMeta = folly::get_ptr(meta.cls, typeMapping->name);
@@ -11898,7 +11899,7 @@ void flatten_type_mappings(IndexData& index,
         const auto type = tc.type();
         const auto value = tc.typeName();
         auto name = value;
-        LSString curEnum;
+        LSString curEnum; // The enum we are currently in
 
         if (type != AnnotType::Unresolved) {
           // If the type-mapping is already resolved, we mainly take it
@@ -11924,13 +11925,17 @@ void flatten_type_mappings(IndexData& index,
           continue;
         }
 
-        std::queue<LSString> queue;
-        queue.push(name);
+        std::queue<std::tuple<LSString, LSString>> queue; // item, curEnum
+        FTRACE(4, "Pushing {} onto queue\n", name);
+        queue.push(std::make_tuple(name, curEnum));
 
         for (size_t rounds = 0;; ++rounds) {
           if (queue.empty()) break;
-          name = normalizeNS(queue.front());
+          auto [name, curEnum] = queue.front();
+          name = normalizeNS(name);
           queue.pop();
+
+          FTRACE(4, "Popping {}\n", name);
 
           if (auto const next = folly::get_ptr(meta.typeMappings, name)) {
             flags |= next->value.flags() & (TypeConstraintFlags::Nullable
@@ -11940,6 +11945,7 @@ void flatten_type_mappings(IndexData& index,
                                             | TypeConstraintFlags::DisplayNullable
                                             | TypeConstraintFlags::UpperBound);
             auto const nextEnum = next->firstEnum;
+            assertx(IMPLIES(next->value.isUnion(), !nextEnum));
             if (!curEnum) curEnum = nextEnum;
             if (!firstEnum && !isUnion) firstEnum = curEnum;
 
@@ -11951,7 +11957,8 @@ void flatten_type_mappings(IndexData& index,
               auto next_type = next_tc.type();
               auto next_value = next_tc.typeName();
               if (next_type == AnnotType::Unresolved) {
-                queue.push(next_value);
+                FTRACE(4, "Pushing {} onto queue\n", next_value);
+                queue.push(std::make_tuple(next_value, curEnum));
                 continue;
               }
               assertx(next_type != AnnotType::SubObject);

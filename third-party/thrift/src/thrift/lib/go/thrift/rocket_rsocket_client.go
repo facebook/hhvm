@@ -26,18 +26,27 @@ import (
 	"github.com/rsocket/rsocket-go/payload"
 )
 
+// RSocketClient is a client that uses a rsocket library.
+type RSocketClient interface {
+	SendSetup(serverMetadataPush OnServerMetadataPush) error
+	FireAndForget(messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) error
+	RequestResponse(ctx context.Context, messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) (map[string]string, []byte, error)
+	Close() error
+}
+
 type rsocketClient struct {
 	client rsocket.Client
 	conn   net.Conn
 }
 
-type onServerMetadataPush func(zstd bool, drain bool)
+// OnServerMetadataPush is called when the server sends a metadata push.
+type OnServerMetadataPush func(zstd bool, drain bool)
 
-func newRsocketClient(conn net.Conn) *rsocketClient {
+func newRSocketClient(conn net.Conn) RSocketClient {
 	return &rsocketClient{conn: conn}
 }
 
-func (r *rsocketClient) sendSetup(serverMetadataPush onServerMetadataPush) error {
+func (r *rsocketClient) SendSetup(serverMetadataPush OnServerMetadataPush) error {
 	if r.client != nil {
 		// already setup
 		return nil
@@ -58,7 +67,7 @@ func (r *rsocketClient) sendSetup(serverMetadataPush onServerMetadataPush) error
 	return nil
 }
 
-func acceptor(onMetadataPush onServerMetadataPush) func(_ context.Context, socket rsocket.RSocket) rsocket.RSocket {
+func acceptor(onMetadataPush OnServerMetadataPush) func(_ context.Context, socket rsocket.RSocket) rsocket.RSocket {
 	return func(_ context.Context, socket rsocket.RSocket) rsocket.RSocket {
 		return rsocket.NewAbstractSocket(
 			rsocket.MetadataPush(
@@ -68,7 +77,7 @@ func acceptor(onMetadataPush onServerMetadataPush) func(_ context.Context, socke
 	}
 }
 
-func metadataPush(onMetadataPush onServerMetadataPush) func(pay payload.Payload) {
+func metadataPush(onMetadataPush OnServerMetadataPush) func(pay payload.Payload) {
 	return func(pay payload.Payload) {
 		metadata, err := decodeServerMetadataPushVersion8(pay)
 		if err != nil {
@@ -94,7 +103,7 @@ func (r *rsocketClient) resetDeadline() {
 	r.conn.SetDeadline(time.Time{})
 }
 
-func (r *rsocketClient) requestResponse(ctx context.Context, messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) (map[string]string, []byte, error) {
+func (r *rsocketClient) RequestResponse(ctx context.Context, messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) (map[string]string, []byte, error) {
 	r.resetDeadline()
 	request, err := encodeRequestPayload(messageName, protoID, typeID, headers, zstd, dataBytes)
 	if err != nil {
@@ -113,7 +122,7 @@ func (r *rsocketClient) requestResponse(ctx context.Context, messageName string,
 	return nil, nil, err
 }
 
-func (r *rsocketClient) fireAndForget(messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) error {
+func (r *rsocketClient) FireAndForget(messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) error {
 	r.resetDeadline()
 	request, err := encodeRequestPayload(messageName, protoID, typeID, headers, zstd, dataBytes)
 	if err != nil {

@@ -28,10 +28,8 @@ type rocketClient struct {
 	Encoder
 	Decoder
 
-	conn net.Conn
-
 	// rsocket client state
-	client *rsocketClient
+	client RSocketClient
 
 	resultData []byte
 	resultErr  error
@@ -53,11 +51,18 @@ type rocketClient struct {
 	wbuf *MemoryBuffer
 }
 
-// newRocketClient creates a RocketClient
+// NewRocketClient creates a new Rocket client given an RSocketClient.
+func NewRocketClient(client RSocketClient, protoID ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
+	return newRocketClientFromRsocket(client, protoID, timeout, persistentHeaders)
+}
+
 func newRocketClient(conn net.Conn, protoID ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
+	return newRocketClientFromRsocket(newRSocketClient(conn), protoID, timeout, persistentHeaders)
+}
+
+func newRocketClientFromRsocket(client RSocketClient, protoID ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
 	p := &rocketClient{
-		conn:              conn,
-		client:            newRsocketClient(conn),
+		client:            client,
 		protoID:           protoID,
 		persistentHeaders: persistentHeaders,
 		rbuf:              NewMemoryBuffer(),
@@ -93,12 +98,12 @@ func (p *rocketClient) WriteMessageEnd() error {
 
 func (p *rocketClient) Flush() (err error) {
 	dataBytes := p.wbuf.Bytes()
-	if err := p.client.sendSetup(p.serverMetadataPush); err != nil {
+	if err := p.client.SendSetup(p.serverMetadataPush); err != nil {
 		return err
 	}
 	headers := unionMaps(p.reqHeaders, p.persistentHeaders)
 	if p.writeType == ONEWAY {
-		return p.client.fireAndForget(p.messageName, p.protoID, p.writeType, headers, p.zstd, dataBytes)
+		return p.client.FireAndForget(p.messageName, p.protoID, p.writeType, headers, p.zstd, dataBytes)
 	}
 	if p.writeType != CALL {
 		return nil
@@ -109,7 +114,7 @@ func (p *rocketClient) Flush() (err error) {
 		ctx, cancel = context.WithTimeout(ctx, p.timeout)
 		defer cancel()
 	}
-	p.respHeaders, p.resultData, p.resultErr = p.client.requestResponse(ctx, p.messageName, p.protoID, p.writeType, headers, p.zstd, dataBytes)
+	p.respHeaders, p.resultData, p.resultErr = p.client.RequestResponse(ctx, p.messageName, p.protoID, p.writeType, headers, p.zstd, dataBytes)
 	clear(p.reqHeaders)
 	return nil
 }

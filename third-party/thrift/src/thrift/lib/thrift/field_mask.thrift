@@ -16,7 +16,9 @@
 
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/lib/thrift/type.thrift"
 cpp_include "folly/container/F14Map.h"
+cpp_include "<thrift/lib/thrift/TypeToMaskAdapter.h>"
 
 @thrift.Experimental
 package "facebook.com/thrift/protocol"
@@ -35,6 +37,27 @@ typedef map<i16, Mask> FieldIdToMask
 typedef map<i64, Mask> MapIdToMask
 @cpp.Type{template = "::folly::F14FastMap"}
 typedef map<string, Mask> MapStringToMask
+
+struct TypeAndMaskEntry {
+  1: type.Type type;
+  2: Mask mask;
+}
+
+/**
+ * Ideally this would've been a map from type to Mask
+ * However, structured keys are not well supported (eg. in Hack),
+ * so we use a list (and adapters in supported languages) as a workaround
+ *
+ * Contract (for unadapted usage): There must be at most one entry for a
+ * given type within the list
+ */
+@cpp.Adapter{
+  name = "::apache::thrift::detail::TypeToMaskAdapter<
+      ::apache::thrift::protocol::TypeAndMaskEntry,
+      ::apache::thrift::protocol::Mask
+    >",
+}
+typedef list<TypeAndMaskEntry> MapTypeToMask
 
 /**
  *  Overview
@@ -96,6 +119,9 @@ union Mask {
   5: MapStringToMask excludes_string_map; // String map fields that will be excluded.
   @cpp.Ref{type = cpp.RefType.Unique}
   6: MapStringToMask includes_string_map; // String map fields that will be included.
+
+  7: MapTypeToMask includes_type; // types to be included for thrift.Any
+  8: MapTypeToMask excludes_type; // types to be excluded for thrift.Any
 }
 
 const Mask allMask = {"excludes": {}}; // Masks all fields.

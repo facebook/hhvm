@@ -78,6 +78,9 @@ class MaskRef {
   // Returns true if the mask is a string map mask.
   bool isStringMapMask() const;
 
+  // Returns true if the mask is a type-map mask (i.e. AnyMask)
+  bool isTypeMask() const;
+
   // Removes masked fields in schemaless Thrift Object (Protocol Object).
   // Throws a runtime exception if the mask and object are incompatible.
   void clear(protocol::Object& t) const;

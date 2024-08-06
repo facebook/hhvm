@@ -56,6 +56,16 @@ Mask reverseMask(Mask mask) {
       mask.includes_string_map_ref() = std::move(tmp);
       return mask;
     }
+    case Mask::Type::includes_type: {
+      auto tmp = std::move(mask.includes_type_ref().value());
+      mask.excludes_type_ref() = std::move(tmp);
+      return mask;
+    }
+    case Mask::Type::excludes_type: {
+      auto tmp = std::move(mask.excludes_type_ref().value());
+      mask.includes_type_ref() = std::move(tmp);
+      return mask;
+    }
     case Mask::Type::__EMPTY__:
       folly::throw_exception<std::runtime_error>("Can not reverse empty masks");
   }
@@ -222,6 +232,11 @@ Mask apply(const Mask& lhs, const Mask& rhs, Func&& func) {
     mask.includes_map_ref() =
         func(toIntegerMapMask(lhs), toIntegerMapMask(rhs));
     return mask;
+  }
+
+  if (lhs.includes_type_ref() || lhs.excludes_type_ref() ||
+      rhs.includes_type_ref() || rhs.excludes_type_ref()) {
+    folly::throw_exception<std::runtime_error>("Anymask not implemented");
   }
 
   mask.includes_ref() = func(*getFieldMask(lhs), *getFieldMask(rhs));

@@ -83,6 +83,14 @@ TEST(FieldMaskTest, ExampleStringMapMask) {
   includes_string_map["3"] = allMask();
 }
 
+TEST(FieldMaskTest, ExampleTypeMask) {
+  // includes_type{foo: allMask(), bar: noneMask()}
+  Mask m;
+  auto& includes_type = m.includes_type_ref().emplace();
+  includes_type[type::infer_tag<Foo>{}] = allMask();
+  includes_type[type::infer_tag<Bar>{}] = noneMask();
+}
+
 TEST(FieldMaskTest, Constant) {
   EXPECT_EQ(allMask().excludes_ref()->size(), 0);
   EXPECT_EQ(noneMask().includes_ref()->size(), 0);
@@ -114,6 +122,12 @@ TEST(FieldMaskTest, IsAllMask) {
     EXPECT_FALSE((MaskRef{m, false}).isAllMask());
     EXPECT_FALSE((MaskRef{m, true}).isAllMask());
   }
+  {
+    Mask m;
+    m.includes_type_ref().emplace()[type::infer_tag<Foo>{}] = allMask();
+    EXPECT_FALSE((MaskRef{m, true}).isAllMask());
+    EXPECT_FALSE((MaskRef{m, false}).isAllMask());
+  }
 }
 
 TEST(FieldMaskTest, IsNoneMask) {
@@ -126,6 +140,12 @@ TEST(FieldMaskTest, IsNoneMask) {
     m.excludes_ref().emplace()[5] = noneMask();
     EXPECT_FALSE((MaskRef{m, false}).isNoneMask());
     EXPECT_FALSE((MaskRef{m, true}).isNoneMask());
+  }
+  {
+    Mask m;
+    m.includes_type_ref().emplace()[type::infer_tag<Foo>{}] = allMask();
+    EXPECT_FALSE((MaskRef{m, true}).isNoneMask());
+    EXPECT_FALSE((MaskRef{m, false}).isNoneMask());
   }
 }
 
@@ -250,6 +270,18 @@ TEST(FieldMaskTest, IsExclusive) {
     EXPECT_TRUE((MaskRef{m, false}).isExclusive());
     EXPECT_FALSE((MaskRef{m, true}).isExclusive());
   }
+  {
+    Mask m;
+    m.includes_type_ref().emplace()[type::infer_tag<Foo>{}] = allMask();
+    EXPECT_FALSE((MaskRef{m, false}).isExclusive());
+    EXPECT_TRUE((MaskRef{m, true}).isExclusive());
+  }
+  {
+    Mask m;
+    m.excludes_type_ref().emplace()[type::infer_tag<Foo>{}] = allMask();
+    EXPECT_TRUE((MaskRef{m, false}).isExclusive());
+    EXPECT_FALSE((MaskRef{m, true}).isExclusive());
+  }
 }
 
 TEST(FieldMaskTest, MaskRefIsMask) {
@@ -257,10 +289,12 @@ TEST(FieldMaskTest, MaskRefIsMask) {
   EXPECT_FALSE((MaskRef{allMask(), false}).isMapMask());
   EXPECT_FALSE((MaskRef{allMask(), false}).isIntegerMapMask());
   EXPECT_FALSE((MaskRef{allMask(), false}).isStringMapMask());
+  EXPECT_FALSE((MaskRef{allMask(), false}).isTypeMask());
   EXPECT_TRUE((MaskRef{noneMask(), true}).isFieldMask());
   EXPECT_FALSE((MaskRef{noneMask(), true}).isMapMask());
   EXPECT_FALSE((MaskRef{noneMask(), true}).isIntegerMapMask());
   EXPECT_FALSE((MaskRef{noneMask(), true}).isStringMapMask());
+  EXPECT_FALSE((MaskRef{noneMask(), false}).isTypeMask());
   {
     Mask m;
     m.includes_ref().emplace()[5] = allMask();
@@ -268,6 +302,7 @@ TEST(FieldMaskTest, MaskRefIsMask) {
     EXPECT_FALSE((MaskRef{m, true}).isMapMask());
     EXPECT_FALSE((MaskRef{m, true}).isIntegerMapMask());
     EXPECT_FALSE((MaskRef{m, true}).isStringMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isTypeMask());
   }
   {
     Mask m;
@@ -276,6 +311,7 @@ TEST(FieldMaskTest, MaskRefIsMask) {
     EXPECT_FALSE((MaskRef{m, true}).isMapMask());
     EXPECT_FALSE((MaskRef{m, true}).isIntegerMapMask());
     EXPECT_FALSE((MaskRef{m, true}).isStringMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isTypeMask());
   }
   {
     Mask m;
@@ -284,6 +320,7 @@ TEST(FieldMaskTest, MaskRefIsMask) {
     EXPECT_TRUE((MaskRef{m, true}).isMapMask());
     EXPECT_TRUE((MaskRef{m, true}).isIntegerMapMask());
     EXPECT_FALSE((MaskRef{m, true}).isStringMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isTypeMask());
   }
   {
     Mask m;
@@ -292,6 +329,7 @@ TEST(FieldMaskTest, MaskRefIsMask) {
     EXPECT_TRUE((MaskRef{m, true}).isMapMask());
     EXPECT_TRUE((MaskRef{m, true}).isIntegerMapMask());
     EXPECT_FALSE((MaskRef{m, true}).isStringMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isTypeMask());
   }
   {
     Mask m;
@@ -300,6 +338,7 @@ TEST(FieldMaskTest, MaskRefIsMask) {
     EXPECT_TRUE((MaskRef{m, true}).isMapMask());
     EXPECT_FALSE((MaskRef{m, true}).isIntegerMapMask());
     EXPECT_TRUE((MaskRef{m, true}).isStringMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isTypeMask());
   }
   {
     Mask m;
@@ -308,6 +347,25 @@ TEST(FieldMaskTest, MaskRefIsMask) {
     EXPECT_TRUE((MaskRef{m, true}).isMapMask());
     EXPECT_FALSE((MaskRef{m, true}).isIntegerMapMask());
     EXPECT_TRUE((MaskRef{m, true}).isStringMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isTypeMask());
+  }
+  {
+    Mask m;
+    m.includes_type_ref().emplace()[type::infer_tag<Foo>{}] = allMask();
+    EXPECT_FALSE((MaskRef{m, false}).isFieldMask());
+    EXPECT_FALSE((MaskRef{m, true}).isMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isIntegerMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isStringMapMask());
+    EXPECT_TRUE((MaskRef{m, true}).isTypeMask());
+  }
+  {
+    Mask m;
+    m.excludes_type_ref().emplace()[type::infer_tag<Foo>{}] = allMask();
+    EXPECT_FALSE((MaskRef{m, false}).isFieldMask());
+    EXPECT_FALSE((MaskRef{m, true}).isMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isIntegerMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isStringMapMask());
+    EXPECT_TRUE((MaskRef{m, true}).isTypeMask());
   }
 }
 

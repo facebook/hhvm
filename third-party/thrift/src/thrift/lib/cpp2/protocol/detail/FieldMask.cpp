@@ -64,6 +64,19 @@ const MapStringToMask* FOLLY_NULLABLE getStringMapMask(const Mask& mask) {
   return nullptr;
 }
 
+[[nodiscard]] const MapTypeToMask* FOLLY_NULLABLE
+getTypeMapMask(const Mask& mask) {
+  if (mask.includes_type_ref()) {
+    return &*mask.includes_type_ref();
+  }
+
+  if (mask.excludes_type_ref()) {
+    return &*mask.excludes_type_ref();
+  }
+
+  return nullptr;
+}
+
 ArrayKey getArrayKeyFromValue(const Value& v) {
   if (v.is_byte() || v.is_i16() || v.is_i32() || v.is_i64()) {
     return ArrayKey::Integer;
@@ -108,9 +121,13 @@ void throwIfContainsMapMask(const Mask& mask) {
       mask.includes_string_map_ref() || mask.excludes_string_map_ref()) {
     folly::throw_exception<std::runtime_error>("map mask is not implemented");
   }
-  const FieldIdToMask& map = mask.includes_ref() ? mask.includes_ref().value()
-                                                 : mask.excludes_ref().value();
-  for (auto& [_, nestedMask] : map) {
+  if (auto* typeMapPtr = getTypeMapMask(mask)) {
+    for (const auto& [_, nestedMask] : *typeMapPtr) {
+      throwIfContainsMapMask(nestedMask);
+    }
+    return;
+  }
+  for (const auto& [_, nestedMask] : *CHECK_NOTNULL(getFieldMask(mask))) {
     throwIfContainsMapMask(nestedMask);
   }
 }

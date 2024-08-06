@@ -43,6 +43,10 @@ bool containsId(const T& t, Id id) {
 // call clear based on the type of the value.
 void clear(MaskRef ref, Value& value) {
   if (value.is_object()) {
+    if (ref.isTypeMask()) {
+      folly::throw_exception<std::runtime_error>(
+          "TODO: Support typeMask clear");
+    }
     ref.clear(value.as_object());
     return;
   }
@@ -221,7 +225,9 @@ bool MaskRef::isExclusive() const {
       (mask.includes_map_ref() && is_exclusion) ||
       (mask.excludes_map_ref() && !is_exclusion) ||
       (mask.includes_string_map_ref() && is_exclusion) ||
-      (mask.excludes_string_map_ref() && !is_exclusion);
+      (mask.excludes_string_map_ref() && !is_exclusion) ||
+      (mask.includes_type_ref() && is_exclusion) ||
+      (mask.excludes_type_ref() && !is_exclusion);
 }
 
 bool MaskRef::isFieldMask() const {
@@ -238,6 +244,10 @@ bool MaskRef::isIntegerMapMask() const {
 
 bool MaskRef::isStringMapMask() const {
   return mask.includes_string_map_ref() || mask.excludes_string_map_ref();
+}
+
+bool MaskRef::isTypeMask() const {
+  return mask.includes_type_ref() || mask.excludes_type_ref();
 }
 
 void MaskRef::clear(protocol::Object& obj) const {
